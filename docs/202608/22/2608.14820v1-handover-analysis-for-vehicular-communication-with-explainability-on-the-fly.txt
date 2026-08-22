@@ -1,0 +1,282 @@
+Title: Handover Analysis for Vehicular Communication with Explainability on the Fly
+
+URL Source: https://arxiv.org/pdf/2608.14820v1
+
+Published Time: Tue, 18 Aug 2026 00:10:20 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Handover Analysis for Vehicular Communication with Explainability on the Fly 
+
+Ali Fuat Sahin ∗, Semiha Tedik Ba¸ saran ∗, Tufan Kumbasar †∗Faculty of Electrical and Electronics Engineering, Istanbul Technical University, Istanbul, Turkiye 
+
+> †
+
+AI and Intelligent Systems Laboratory, Istanbul Technical University, Istanbul, Turkiye Email: {sahinal18, tedik, kumbasart}@itu.edu.tr 
+
+Abstract —Handover (HO) management in vehicular networks requires fast and reliable decision-making under highly dy-namic conditions. While machine learning (ML) approaches can improve HO detection by capturing complex relationships among various key performance indicators (KPIs), their black-box nature limits interpretability and operator trust. To address this, this paper investigates HO detection from an explainability-on-the-fly perspective using inherently interpretable models based on the functional analysis of variance (fANOVA) framework. The proposed models are evaluated using two real-world operator datasets and compared against a Long Short-Term Memory baseline augmented with post-hoc SHAP explanations. Unlike post-hoc approaches, the proposed framework enables immedi-ate interpretation of model decisions without incurring addi-tional computational overhead. This capability is particularly critical for latency-sensitive vehicular networks. The results show that fANOVA-based models achieve competitive detection performance while providing significantly reduced explanation latency compared to conventional post-hoc methods. Further-more, feature ranking and visualization analyses reveal physically meaningful relationships between KPIs and HO occurrences that align with standardized HO mechanisms. These results demonstrate that inherently interpretable models provide an efficient and transparent solution for HO detection in next-generation vehicular networks. 
+
+Index Terms —handover, vehicular communication, explain-ability, explainable artificial intelligence. 
+
+I. I NTRODUCTION 
+
+The evolution of next-generation (NextG) wireless networks is driven by the need to support ultra-reliable, low-latency communication and enhanced data rates for emerging applica-tions such as connected and autonomous vehicles, immersive extended reality (XR), and mission-critical services [1]. These applications impose stringent requirements on network design, particularly in highly dynamic environments. At the same time, increasing network densification, heterogeneous deployments, and dynamic user behavior introduce significant challenges in maintaining consistent quality of service. To address these de-mands, AI-native network design has emerged as a promising paradigm for enabling intelligent and adaptive network control [2]. However, these advancements also introduce complex and highly dynamic operating conditions, particularly under high mobility scenarios. In such environments, rapid fluctuations in radio conditions and frequent transitions between cells significantly complicate mobility management, requiring fast and reliable decision-making under uncertainty. To address the mobility challenges, handover (HO) mecha-nisms serve as a fundamental component of mobility control in cellular networks, ensuring seamless connectivity across coverage areas [3]. As network architectures evolve, HO techniques have been continuously refined to meet stringent performance requirements. Hence, a broad range of HO op-timization approaches, including stochastic modeling, game-theoretic frameworks, fuzzy logic–based, and learning-based techniques have been investigated [4], [5]. In particular, ma-chine learning (ML)-based approaches can capture complex, non-linear relationships among network key performance in-dicators (KPIs), enabling adaptive HO decisions. However, the decision-making process remains largely opaque, offering limited insight into which KPIs drive handover events. This lack of transparency poses a critical challenge for network operators in interpreting and optimizing the mobility behavior. Lastly, beyond prediction performance and interpretability, the heterogeneous and time-varying nature of vehicular networks introduces learning latency as another critical consideration, since frequent model updates and rapid training cycles become necessary to adapt to evolving network conditions. To address the lack of transparency in conventional ML models, Explainable Artificial Intelligence (XAI) has emerged as a promising approach for improving interpretability in data-driven systems [6]. XAI provides human-understandable insights by quantifying the feature contributions and reveal-ing the input-output relationships, hence enhancing trust and accountability [7]. In the context of wireless communications, XAI has been applied to various tasks such as KPI analysis [8] and anomaly detection [9]. However, most existing XAI approaches are applied in a post-hoc manner, generating explanations after model decisions are made. This limits their applicability in real-time operations, particularly in highly dynamic vehicular networks, where rapid and frequent HO decisions require immediate and interpretable insights [10]. Motivated by these challenges, this paper investigates HO detection in vehicular 5G NR networks from an explainability-on-the-fly perspective. We employ inherently interpretable models based on the functional analysis of variance (fANOVA) framework and compare them with a conventional ML model enhanced by post-hoc explanations. The study is conducted using real-world operator measurement data to capture re-alistic HO behavior. Our analysis provides a comprehensive evaluation of the trade-offs between detection performance, arXiv:2608.14820v1 [eess.SP] 14 Aug 2026 Fig. 1: Handover in 5G NR. interpretability, and explanation latency. The results demon-strate that intrinsically interpretable models achieve com-petitive predictive performance while significantly reducing explanation latency compared to post-hoc methods. Moreover, the proposed framework enables direct identification of the most influential KPIs and reveals their underlying relationships with HO occurrence, offering physically meaningful insights into mobility behavior. These findings highlight the potential of on-the-fly explainability to enhance transparency, support operator decision-making, and improve the reliability of mo-bility management in next-generation vehicular networks. II. S YSTEM MODEL 
+
+The considered system model is illustrated in Fig. 1. A 5G NR base station (gNB) serves multiple user equipments (UEs) in the network, while a neighboring gNB and a neighboring LTE base station (eNB) are also present. The 5G Core Network (CN) is responsible for overall network management and control. In particular, the Access and Mobility Management Function (AMF) handles mobility-related procedures such as HO management and paging, whereas the User Plane Function (UPF) manages user connectivity. Communication between the CN functions (AMF/UPF) and the base stations (gNB/eNB) is realized through the Next Generation Application Protocol (NGAP). Specifically, NG-C and NG-U provide the control and user plane functionalities between the base stations and AMF/UPF, respectively. Lastly, the Xn interface enables the exchange of control messages between base stations. The considered scenario focuses on vehicular communications, where UEs experience high mobility and rapidly varying channel characteristics. In such environments, HO procedures become particularly critical, as delayed HO decisions may lead to service interruption and performance degradation. According to 3GPP, HO decisions in 5G NR are governed by predefined measurement events [11]. Radio Access Tech-nology (RAT) refers to the underlying cellular technology, such as 5G NR or 4G LTE. The A-series events support mobility within the same RAT, whereas the B-series events are associated with mobility between different RATs. Among these, events A3, A5, and B2 are commonly considered in practical mobility management [12]. Event A3 is typi-cally used for intra-frequency handovers, event A5 for inter-frequency handovers, and event B2 for inter-RAT handovers from a gNB to an eNB. Their trigger conditions are given as A3 HO: MN C − Hys > M SC + Of f, (1a) A5 HO: MSC + Hys < T 1 ∧ MN C − Hys > T 2, (1b) B2 HO: MSC + Hys < T 1 ∧ MN iRC − Hys > T 2, (1c) where MSC , MN C , and MN iRC denote the measured per-formance metrics of the serving NR cell (SC), neighboring NR cell (NC), and neighboring inter-RAT cell, respectively. Representative metrics include Reference Signal Received Power (RSRP), Received Signal Strength Indicator (RSSI), and Reference Signal Received Quality (RSRQ) [8], which are expressed in either decibels (dB) or decibel-milliwatts (dBm). The predefined thresholds T1 and T2 have the same units as their corresponding metrics, whereas the hysteresis Hys and offset Of f parameters are expressed in dB. III. E XPLAINABLE MODELS & H ANDOVER DATASETS 
+
+This section presents the explainable models and HO datasets considered in the HO analysis. Inherently interpretable models are employed to investigate the underlying behavior of the HO process, while a Long Short-Term Memory (LSTM) classifier is trained as a predictive baseline. Considering the temporal characteristics of HO events,the LSTM classifier for 
+
+P KPIs and a sequence length of T is formulated as 
+
+g(X) = σ wT 
+
+> o
+
+hT (X) + bo
+
+ , X = [ x1, . . . , xT ], (2a) 
+
+(ht, ct) = fLSTM (xt, ht−1, ct−1) , t = 1 , . . . , T, (2b) where X ∈ RP ×T denotes the input sequence matrix, xt ∈ RP
+
+is the feature vector, and ht and ct represent the corresponding hidden and cell states, respectively. Moreover, wo and bo
+
+denote the output-layer weight vector and bias, while σ(·)
+
+is the sigmoid activation function that maps the final hidden state to the predicted HO probability, g(X). SHapley Additive exPlanations (SHAP) is adopted as the representative post-hoc method due to its established use in wireless communications, model-agnostic nature and feature-ranking capability [9], [13]. 
+
+A. Explainable Models 
+
+All built-in explainable models considered in this study fall under the fANOVA framework, which decomposes the response into additive terms of increasing order as 
+
+g(x) = X
+
+> j
+
+gj (xj ) + X 
+
+> j̸=k
+
+gjk (xj , x k) + · · · , (3) where gj (·) denotes the first-order (main effect) contribution of feature xj and gjk (·, ·) represents the second-order inter-action between features (xj ) and xk. Higher-order interaction terms (gjkl (xj , x k, x l), . . . ) can be included with the trade-off between model complexity and interpretability. Accordingly, we implement three representative approaches, namely Gen-eralized Additive Models (GAMs) [14], Explainable Boosting Machines (EBMs) [15], and GAMI-Net [16]. A key advantage of these models is their inherent interpretability, achieved through explicit modeling of main effects and interactions, as well as through feature ranking and selection. TABLE I Dataset Properties               
+
+> Features Dataset Name
+> Beyond Throughput DoNext Number of Samples 2508 152,775 Number of Features 25 28 Number of Handovers (%) 873 (34.81%) 59,472 (38.93%) Cellular Technology 5G NR &LTE 5G NR SC/NC Metrics Yes No (Only SC)
+
+1) GAM: GAMs are one of the simplest fANOVA models, utilizing the flexible smooth terms to capture nonlinearities in the data while retaining interpretability. The mathematical expression of GAMs can be given as 
+
+g E[y] = μ + X
+
+> i
+
+fi(xi), (4) where g(·) is the link, μ the intercept, and fi(·) the smooth function for the ith main effect. The main disadvantage of GAMs is that they can only model main effects and cannot capture higher-order terms [17]. As data complexity grows, this limitation can impact performance, motivating more ad-vanced models. 
+
+2) Explainable Boosting Machines: GAMs with Interac-tions (GA 2Ms) [17] augment GAMs with pairwise interaction terms, using smooth functions to represent both nonlinear main effects and salient interactions with the given expression of 
+
+g E[y] = μ + X
+
+> i
+
+fi
+
+ xi
+
+ + X
+
+> i,j
+
+fij 
+
+ xi, x j
+
+. (5) Here, g(·) is the link, whereas μ is the intercept term. fi(·) is the ith main effect, and fij (·) is the interaction pair for i̸ = j.Building on the GA 2M framework, EBM has been proposed [15]. EBMs are specialized gradient-boosting models that learn spline-like shape functions with smoothness constraints and regularization. EBMs can achieve competitive accuracy while providing one-dimensional plots for main effects and two-dimensional heatmaps for pairwise interactions. 
+
+3) GAMI-Net: While EBMs bring GA 2M structure into a boosted, glass-box model, they do not take advantage of advanced deep-learning methods. GAMI-Net [16] addresses this issue by encoding the fANOVA expression directly into the neural architecture. Explicitly, dedicated sub-networks model each main effect and each selected interaction, and their outputs are combined additively. In addition, GAMI-Net incorporates three interpretability constraints to enhance pre-dictive performance while maintaining transparency: sparsity prunes nonessential features, heredity permits an interaction only when at least one of its parent main effects is included, and marginal clarity promotes orthogonality between main effects and their corresponding interactions. Following these constraints, the formula for GAMI-Net can be given as 
+
+g E[y] = μ + X
+
+> i∈S1
+
+fi
+
+ xi
+
+ + X
+
+> (i,j )∈S2
+
+fij 
+
+ xi, x j
+
+, (6) where only active main effects S1 and interaction pairs S2 are retained. The notation μ, fi(·), and fij (·) is consistent with (5). For further details, see [16]. TABLE II The KPIs for the Handover Analysis                                      
+
+> KPI Description Common Features
+> Cell Index Serving cell identifier.
+> Location (3 Features) Longitude, latitude, and altitude.
+> Velocity & ∆ Velocity Current velocity of the UE (km/h).
+> RSRP & ∆ RSRP Reference Signal Received Power (dBm).
+> RSRQ & ∆ RSRQ Reference Signal Received Quality (dB).
+> RSSI & ∆ RSSI Received Signal Strength Indicator (dBm).
+> SNR & ∆ SNR Signal-to-Noise Ratio (dB).
+> CQI & ∆ CQI Channel Quality Indicator.
+> HandoverFlag Handover Occurrence (1/0).
+> Beyond Throughput Features
+> TimeDifference Time elapsed for consecutive samples (s).
+> Distance Distance moved between samples (m).
+> NRxRSRP & ∆ NRxRSRP Neighboring cell RSRP (dBm).
+> NRxRSRQ & ∆ NRxRSRQ Neighboring cell RSRQ (dB).
+> BitrateDL, BitrateUL Downlink and uplink throughput (kbps).
+> State Download state (I/D).
+> DoNext Features
+> TrackingAreaCode Tracking Area Code for base station.
+> TimingAdvance Timing Advance for the UE (s).
+> Bearing Current bearing angle for the UE ( ◦).
+> Location Accuracy Measurement accuracy by the device.
+> Bearing Accuracy Measurement accuracy by the device.
+> Velocity Accuracy Measurement accuracy by the device.
+> SS-RSRP & ∆ SS-RSRP RSRP of the Synchronization Signal.
+> SS-RSRQ & ∆ SS-RSRQ RSRQ of the Synchronization Signal.
+> SS-SINR & ∆ SS-SINR SINR of the Synchronization Signal.
+
+B. Handover Datasets 
+
+As shown in (1a, 1b, 1c), HO analysis requires radio-link metrics for both the SC and NC simultaneously. However, many datasets in the literature emphasize network-level met-rics rather than radio-link performance, and most HO studies rely on simulation data instead of real-world measurements. To address these limitations, two publicly available datasets are employed [18], [19]. Using these datasets, a windowing approach is applied to obtain samples suitable for HO analysis. For both datasets, the target label is derived from changes in the SC index: it is set to 1 when consecutive samples indicate different SCs, thereby representing the HO events. 
+
+1) Beyond Throughput Dataset: The Beyond Throughput (BT) dataset was collected from a major Irish operator [18]. Unlike datasets with basic performance indicators, the authors gathered a comprehensive set of KPIs to reflect realistic network conditions. The collection procedure covered multiple mobility scenarios and diverse application use cases to ensure robustness and representativeness. In this study, we use only samples from the driving scenario to observe HO events. Table I summarizes the BT dataset. Given the limited sample size and relatively infrequent HOs, the subset comprises 2508 samples with a 34 .81% HO rate (i.e., 873 events). In total, 25 features are included, as detailed in Table II. A notable property of the BT dataset is that it reports performance metrics for the SC/NC, making it well-suited for HO analysis. 
+
+2) DoNext Dataset: The DoNext dataset was collected across Dortmund using fleet and public-order vehicles on geofenced routes for broad spatial coverage, complemented by a dedicated platform for long-duration, rail, and stationary measurements [19]. Together, these campaigns produced an open dataset including mobile, static, and rail scenarios. Be-TABLE III Performance Comparison of Models on Handover Datasets                                                                       
+
+> Method Beyond Throughput Dataset DoNext Dataset Acc. (Train/Test) AUC Prec. Rec. F1-Score Runtime [s] Acc. (Train/Test) AUC Prec. Rec. F1-Score Runtime [s]
+> GAM 0.894 0.837 0.920 0.796 0.742 0.767 110.9 0.813 0.779 0.867 0.733 0.679 0.705 222.5 EBM 0.946 0.835 0.913 0.776 0.738 0.755 5.9 0.866 0.781 0.861 0.757 0.673 0.712 6.3
+> GAMI-Net 0.846 0.826 0.908 0.785 0.715 0.747 327.6 0.788 0.779 0.865 0.724 0.698 0.728 1660.2 LSTM+SHAP 0.944 0.914 0.938 0.879 0.862 0.870 13.8/1915.3 0.842 0.804 0.865 0.792 0.674 0.727 58.2/1932.7 *Highlighted metrics indicate the best ones.
+
+yond basic indicators, DoNext records key radio link quality KPIs and includes active measurements of data rate and latency. In this study, we restrict ourselves to the mobility use case with the associated data to capture HOs. Details are provided in Table I. The dataset includes 59,472 HO events across 152,775 samples, yielding a HO ratio of 38 .93% . The features are listed in Table II. A key limitation is that only SC metrics are available, which could constrain the handover analysis where simultaneous SC/NC information is required. IV. C OMPARATIVE PERFORMANCE ANALYSIS 
+
+This section presents the experimental procedure and eval-uates the classification and interpretability performance 1.
+
+A. Experiment Design 
+
+With the objective of on-the-fly interpretability, we formu-late HO detection as a binary classification task to identify and explain the KPI conditions associated with HO decisions, rather than triggering or predicting future HOs. To solve this task, standard implementations of GAM, EBM, and GAMI-Net were adopted using the configurations reported in [8]. An LSTM with 50 hidden units was also trained using Adam, binary cross-entropy, and early stopping, and its predictions were assessed using SHAP to obtain post-hoc feature con-tributions and global importance scores [13]. A consistent experimental protocol was applied across all models, where the fANOVA models were trained using 10,000 DoNext samples and 2,000 BT samples,selected according to available dataset sizes. LSTM inputs were generated with a sliding window of length nsteps = 10 . An 80/20 train-test split was used, with 20 % of the training set reserved for validation. SHAP was evaluated on a subset of 100 samples. Random sampling was employed without stratification, while consistent sampling and data-splitting procedures were applied across all models. The train, validation, and test sets were kept exclusive to prevent data leakage, and all experiments were repeated over 10 independent random seeds to mitigate sampling variability and obtain robust average performance estimates. Lastly, all experiments were conducted using an NVIDIA RTX 4080 with 16 GB vRAM, Intel Core i9-13980HX, and 32 GB RAM. 
+
+B. Handover Detection Analysis 
+
+For HO detection, the evaluation metrics recommended in [20] are adopted to ensure a consistent comparison across models. Table III summarizes the mean predictive and com-putational performance of the considered models over 10 independent runs. For the BT dataset, EBM achieves the 
+
+> 1https://github.com/afs-code/XAI-in-WirelessCommunications-HAEOTF
+
+highest training accuracy of 0.946 , whereas its test accu-racy decreases to 0.835 , suggesting a degree of overfitting. In contrast, LSTM provides the strongest overall classifica-tion performance, attaining the highest test accuracy (0 .914) ,AUC (0 .938) , precision (0 .879) , recall (0 .862) , and F1-score 
+
+(0 .870) . This improvement can be attributed to its ability to capture the temporal dependencies inherent in the HO process. Regarding computational efficiency, EBM records the lowest runtime of 5.9 s, compared with 110 .9 s for GAM and 327 .6
+
+s for GAMI-Net. EBM’s efficient boosting procedure based on shallow decision trees enables substantially faster model fitting and explanation generation than the remaining models [15]. This result is also consistent with [20], where EBM was reported to provide an order-of-magnitude speedup over more complex neural architectures such as GAMI-Net. Although LSTM training requires only 13 .8 s, the subsequent SHAP analysis incurs an explanation time of 1915 .3 s, demonstrating the considerable computational post-hoc overhead. Similar trends are observed for the DoNext dataset. EBM again achieves the highest training accuracy of 0.866 , although its test accuracy decreases to 0.781 . Among the evaluated models, LSTM attains the highest test accuracy (0 .804) and precision (0 .792) , while GAM provides the highest AUC 
+
+(0 .867) . In contrast, GAMI-Net achieves the highest recall 
+
+(0 .698) and F1-score (0 .728) . Overall, the relatively small differences among the reported metrics indicate more balanced predictive performance across the four models. Regarding runtime, EBM remains the most efficient model at 6.3 s, followed by GAM at 222 .5 s and GAMI-Net at 1660 .2 s. The LSTM requires 58 .2 s for training, whereas the subsequent explanation process of SHAP requires an additional 1932 .7 s. The accuracy-latency trade-off is illustrated in Fig. 2, where bar plots denote AUC and F1-score performances, and line plots indicate explanation latency measured in milliseconds per sample. The fANOVA-based models provide a substantial efficiency advantage for on-the-fly explanations, with EBM consistently achieving the lowest explanation latency. How-ever, this efficiency comes at the cost of reduced predictive performance, particularly for the BT dataset. In contrast, LSTM+SHAP incurs significantly higher latency due to the post-hoc stage, despite its strong HO detection performance. These results highlight the operational trade-off between pre-diction and interpretability in vehicular networks. We further examine the impact of dataset characteristics on model performance. BT achieves higher average AUC and F1-scores ( 0.9198 and 0.7847 ) than DoNext ( 0.8644 and 
+
+0.7180 ), respectively, suggesting the benefit of incorporating NC measurements for reliable HO detection. 10 -1         
+
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5(a) Beyond Throughput Dataset
+> GAM EBM GAMI-Net LSTM + SHAP 00.2 0.4 0.6 0.8 1
+> F1-score AUC Latency
+> 10 -1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> Explanation latency (ms/sample)
+> (b) DoNext Dataset
+> GAM EBM GAMI-Net LSTM + SHAP
+> Score (F1 / AUC)
+> 00.2 0.4 0.6 0.8 1
+
+Fig. 2: Accuracy-latency chart. 
+
+C. Explainability Analysis 
+
+In addition to HO detection performance, we analyze ex-plainability using feature-based ranking and relationship-based visualization. Feature importance is used to rank KPIs based on their contribution to HO decisions. The full set of KPIs is listed in Table II, while the most influential features are reported in Table IV. HO decisions are primarily driven by channel-related metrics, particularly signal strength and quality indicators such as RSRP , RSSI , and RSRQ [3], [11]. While mobility-related features are also considered, broader aspects such as load management are beyond the scope of this study. Table IV presents the top-ranked KPIs identified by each model for the two datasets. Across all results, signal strength-related KPIs (e.g., RSRP , RSRQ , CQI , and their variations) consistently dominate the HO decision process. EBM and GAMI-Net primarily select radio-related KPIs, whereas GAM and LSTM+SHAP occasionally include contextual features (e.g., Cell Index , TrackingAreaCode ). This suggests that EBM and GAMI-Net more consistently capture physically meaning-ful indicators aligned with HO mechanisms. While topology-related KPIs (e.g., distance, identifiers) appear in some cases, their selection is less consistent [3]. Notably, EBM uniquely highlights neighbor cell measurements (e.g., ∆NRxRSRQ ), indicating its ability to capture inter-cell dynamics. Overall, inherently interpretable models provide clearer identification of key radio KPIs than post-hoc approaches. After identifying the most influential KPIs, we next focus on the visualization capability of inherently explainable models, which is largely absent in widely used post-hoc interpretability methods. In this context, we investigate the Distance and 
+
+RSRQ -related KPIs present in the BT dataset from the perspec-tive of both visualization and their underlying mathematical relationships. To motivate this analysis, we first recall the definition of the RSRQ as specified by 3GPP as [8] 
+
+RSRQ = N × RSRP RSSI , (7) where N denotes the number of resource blocks within the measurement bandwidth used for RSSI calculation. The RSRP 
+
+in a 5G network can be expressed as [21] 
+
+RSRP = 1
+
+NRE 
+
+> NRE
+
+X
+
+> n=1
+
+Pi(n), (8) TABLE IV Influential KPIs 
+
+Beyond Throughput DoNext GAM 
+
+Cell Index TrackingAreaCode State SS-RSRP Longitude Bearing RSRP SS-RSRQ BitrateUL RSRQ 
+
+EBM 
+
+∆NRxRSRQ ∆RSRP 
+
+∆RSRP ∆CQI Distance ∆RSRQ 
+
+∆NRxRSRP ∆Velocity 
+
+∆RSRP x ∆NRxRSRP TAC x ∆RSRP 
+
+GAMI-Net 
+
+Distance ∆RSRP RSRQ ∆SINR TimeDifference ∆CQI 
+
+∆RSRQ ∆RSRQ 
+
+∆RSRP ∆Velocity 
+
+LSTM + SHAP 
+
+Cell Index RSRQ RSRQ CQI CQI RSSI BitrateDL ∆RSRQ 
+
+∆CQI SINR 
+
+where NRE is the number of resource elements (REs) carrying the reference signal (RS), and Pi(n) denotes the linear received power of the n-th RS. The received power per resource element can be written as 
+
+Pi = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+|ri[k]|2 , (9) where K is the number of samples and ri[k] is the received signal at the k-th sample. For analytical clarity, small-scale fading effects are omitted in this formulation. Furthermore, the received signal power can be related to the transmitter–receiver distance via the Friis transmission equation [22] 
+
+|ri|2 ∝ Pt
+
+(4 πd )2 , (10) where Pt is the transmit power of the BS and d denotes the distance between the UE and the BS. Here, frequency-dependent terms and antenna gains are omitted for simplicity. Hence, we can obtain the direct analytical association between 
+
+Distance and RSRQ metrics from Equations (7)–(10). Lastly, we take inter-cell dynamics into account, which leads to a cause–and–effect interpretation of the HO event as follows 
+
+d ↑ ⇒ RSRQ SC ↓ ∧ RSRQ NC ↑ ⇒ P(HO ) ↑, (11) where RSRQ SC and RSRQ NC denote the RSRQ values of the SC and the NC, respectively, and P (HO ) defines the HO occurrence probability. The relationship in (11) can be also interpreted geometrically by considering the UE on a two-dimensional plane between the SC and a NC, as shown in Fig. 1. As the UE moves away from the SC, the propagation distance increases, leading to a degradation in RSRQ SC , while the proximity to the NC improves RSRQ NC . This opposing behavior directly supports HO triggering conditions such as the A3 event in (1a), where a HO is initiated once the NC quality exceeds that of the SC. Thus, it increases the likelihood of HO occurrence as the UE continues its movement. 0 0.2 0.4 0.6 0.8 1|Contribution| to P( HO )1234567(a) Distance 0 0.2 0.4 0.6 0.8 1|Contribution| to P( HO )123456 (b) RSRQ 0 0.2 0.4 0.6 0.8 1|Contribution| to P( HO )12345 (c) ∆RSRQ 0 0.2 0.4 0.6 0.8 1|Contribution| to P( HO )0.1 0.2 0.3 0.4 0.5 0.6 (d) NRxRSRQ 
+
+Fig. 3: GAMI-Net visualizations for Distance and RSRQ -related KPIs for the BT dataset. To further validate and visualize this cause–effect relation-ship, Fig. 3 presents the learned contributions of key KPIs using GAMI-Net [16]. The results show that Distance exhibits a monotonic increasing relationship with P (HO ), consistent with signal attenuation models where received power decays with squared distance. Among radio metrics, RSRQ demon-strates a negative relationship with HO probability, indicating that lower signal quality increases the likelihood of HO. In contrast, ∆RSRQ captures sensitivity to temporal variations, where larger changes contribute more to HO decisions. Sim-ilarly, NRxRSRQ shows a positive relationship with P (HO ),confirming that stronger NC quality promotes HO triggering. Together, these results reveal how different system parameter configurations influence the HO process, while remaining consistent with the analytical relationship in (11). V. C ONCLUSION 
+
+This paper investigated HO detection in vehicular 5G NR networks through an explainability-on-the-fly lens by compar-ing inherently interpretable fANOVA models with an LSTM baseline using post-hoc SHAP explanations. While the LSTM achieved strong detection performance, its explainability in-curred significant computational overhead, limiting its suitabil-ity for latency-critical HO scenarios. In contrast, fANOVA-based models provided competitive detection performance with orders-of-magnitude lower explanation latency. Feature ranking analysis confirmed that intrinsically explainable mod-els consistently identify physically meaningful radio link KPIs, such as RSRP , RSRQ , and their temporal variations. Addition-ally, visualization analysis revealed interpretable cause-and-effect relationships that align with the mathematically derived HO decision relationship. Overall, the results demonstrate that fANOVA-based models enable efficient and transparent HO detection in next-generation mobile networks. ACKNOWLEDGMENT 
+
+The authors acknowledge using ChatGPT to refine the grammar and enhance the English language expressions. REFERENCES [1] S. Dang, O. Amin, B. Shihada, and M.-S. Alouini, “What should 6G be?” Nature Elec. , vol. 3, no. 1, pp. 20–29, 2020. [2] J. Hoydis, F. A. Aoudia, A. Valcarce, and H. Viswanathan, “Toward a 6G AI-native air interface,” IEEE Commun. Mag. , vol. 59, no. 5, pp. 76–81, 2021. [3] A. U. Rehman, M. B. Roslee, and T. Jun Jiat, “A survey of handover management in mobile HetNets: Current challenges and future direc-tions,” Applied Sciences , vol. 13, no. 5, p. 3367, 2023. [4] A. Haghrah, M. P. Abdollahi, H. Azarhava, and J. M. Niya, “A survey on the handover management in 5G-NR cellular networks: aspects, approaches and challenges,” EURASIP J. Wireless Commun. Netw. , vol. 2023, no. 1, p. 52, 2023. [5] M. S. Mollel, A. I. Abubakar, M. Ozturk, S. F. Kaijage, M. Kisangiri, S. Hussain, M. A. Imran, and Q. H. Abbasi, “A survey of machine learning applications to handover management in 5G and beyond,” IEEE Access , vol. 9, pp. 45 770–45 802, 2021. [6] A. Rai, “Explainable AI: From black box to glass box,” J. Academy Marketing Science , vol. 48, pp. 137–141, 2020. [7] W. Guo, “Explainable artificial intelligence for 6G: Improving trust between human and machine,” IEEE Commun. Mag. , vol. 58, no. 6, pp. 39–45, 2020. [8] A. F. ¸Sahin, Y. Güven, S. T. Ba¸ saran, and T. Kumbasar, “XAI in wireless communications: A case study on interpretable 5G performance analysis,” in Proc. IEEE 36th Int. Symp. Pers. Indoor Mobile Radio Commun. (PIMRC) , 2025, pp. 1–6. [9] N. Aksu, A. F. Sahin, and S. T. Ba¸ saran, “Explainability boosted anomaly detection framework for O-RAN based NextG networks,” in 
+
+Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , 2026, pp. 1–6. [10] H. Sun, Y. Liu, A. Al-Tahmeesschi, S. Chetty, S. A. R. Zaidi, A. Nag, and H. Ahmadi, “An explainable AI framework for dynamic resource management in vehicular network slicing,” in Proc. IEEE 36th Int. Symp. Pers. Indoor Mobile Radio Commun. (PIMRC) , 2025, pp. 1–6. [11] 3GPP, “NR; Radio Resource Control (RRC),” 3GPP Tech. Rep. TR 38.331 V19.2.0 , Tech. Rep., Mar. 2026. [12] M. Ghoshal, I. Khan, P. Dinh, Z. J. Kong, O. Basit, S. Wang, Y. Feng, Y. C. Hu, and D. Koutsonikolas, “Handover configurations in operational 5G networks: Diversity, evolution, and impact on performance,” arXiv preprint arXiv:2511.03116 , 2025. [13] S. M. Lundberg and S.-I. Lee, “A unified approach to interpreting model predictions,” in Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 30, 2017. [14] T. J. Hastie, “Generalized additive models,” in Statistical Models in S .Chapman and Hall, 2017, pp. 249–307. [15] H. Nori, S. Jenkins, P. Koch, and R. Caruana, “Interpretml: A unified framework for machine learning interpretability,” 2019. [16] Z. Yang, A. Zhang, and A. Sudjianto, “GAMI-Net: An explainable neural network based on generalized additive models with structured interactions,” Pattern Recognition , vol. 120, p. 108192, 2021. [17] Y. Lou, R. Caruana, J. Gehrke, and G. Hooker, “Accurate intelligible models with pairwise interactions,” in Proc. ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining , 2013, pp. 623–631. [18] D. Raca, D. Leahy, C. J. Sreenan, and J. J. Quinlan, “Beyond throughput, the next generation: A 5G dataset with channel and context metrics,” in 
+
+Proc. 11th ACM Multimedia Systems Conf. , 2020, pp. 303–308. [19] H. Schippers, M. Geis, S. Böcker, and C. Wietfeld, “DoNext: An open-access measurement dataset for machine learning-driven 5G mobile network analysis,” IEEE Trans. Mac. Lear. in Commun. Net. , vol. 3, pp. 585–604, 2025. [20] S. Kruschel, N. Hambauer, S. Weinzierl, S. Zilker, M. Kraus, and P. Zschech, “Challenging the performance-interpretability trade-off: an evaluation of interpretable machine learning models,” Business & Infor-mation Systems Engineering , pp. 1–25, 2025. [21] A. F. ¸Sahin, O. Salan, I. Hokelek, and A. Gorcin, “RIS meets O-RAN: A practical demonstration of multi-user RIS optimization through RIC,” in Proc. Joint European Conf. Networks Commun. & 6G Summit (EuCNC/6G Summit) , 2025, pp. 536–541. [22] A. Goldsmith, Wireless Communications . Cambridge University Press, 2005.

@@ -1,0 +1,783 @@
+Title: Integrated Sensing and Communications over Hierarchical Cellular and Cell-Free MIMO Systems
+
+URL Source: https://arxiv.org/pdf/2608.18873v1
+
+Published Time: Thu, 20 Aug 2026 00:50:52 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Integrated Sensing and Communications over Hierarchical Cellular and Cell-Free MIMO Systems 
+
+Wei Jiang 
+
+Intelligent Networking Research Group German Research Center for Artificial Intelligence (DFKI) Kaiserslautern, 67663 Germany 
+
+Hans D. Schotten 
+
+Department of Electrical and Computer Engineering University of Kaiserslautern (RPTU) Kaiserslautern, 67663 Germany 
+
+Abstract —This paper studies integrated sensing and commu-nications (ISAC) over a hybrid system that seamlessly combines legacy cellular base stations with distributed cell-free (CF) access points (APs). We propose a hierarchical ISAC architecture where a central base station (CBS) serves its near users and simultane-ously operates as a monostatic radar for aerial target detection, while distributed APs—many idle under user-centric clustering— act as cost-free bistatic receivers. The CBS jointly handles com-munication processing and multi-static sensing fusion, reducing fronthaul overhead compared to conventional cell-free ISAC. To achieve this, a five-phase time-division duplexing workflow with precise ISAC role assignment is specified. Closed-form expressions for spectral efficiency and multi-static sensing signal-to-noise ratio analytically characterize the communications–sensing Pareto frontier. Numerical results confirm that the proposed hierarchi-cal design simultaneously achieves higher sum throughput and superior sensing accuracy than conventional cell-free ISAC. 
+
+Index Terms —Cell-free massive MIMO, hierarchical architec-ture, ISAC, dual-function radar-communications, UAV sensing, bistatic radar, multi-static sensing, user-centric clustering, 6G. 
+
+I. I NTRODUCTION 
+
+# CELL-FREE (CF) massive multi-input multi-output (MIMO) [1] has emerged as a promising sixth-generation (6G) technology [2], where a large number of distributed access points (APs) jointly serve all users, delivering uniform coverage that conventional cellular networks cannot match [3]. Integrated sensing and communications (ISAC) [4] is another 6G pillar, enabling a single waveform and shared hardware platform to simultaneously perform wireless communication and radar sensing [5]. Deploying ISAC over a CF network (we call it CF-ISAC hereinafter) is therefore a promising direction, as the spatially distributed APs provide not only angular diver-sity for sensing but also enhanced communications coverage. Despite its potential, the CF architecture faces significant practical barriers. Acquiring hundreds of suitable AP sites is costly and often infeasible, and the associated fronthaul network demands labour-intensive civil works such as trench-ing and fibre laying, substantially increasing deployment time and cost [6]. To address this, we proposed a hierarchical cell-free (HCF) architecture in [7], which reuses a legacy cellular base station (BS) at the coverage center alongside a reduced scale of distributed APs, and extended the concept to 
+
+This work was supported by the German Federal Ministry of Education and Research (BMBF) through Open6GHub+ (Grant no. 16KIS2402K ) project. 
+
+wideband scenarios in [8]. A similar hierarchical framework was independently discussed in [9], and recent studies have explored integrating CF massive MIMO into legacy cellular infrastructure through cooperation mechanisms [10]. CF-ISAC has attracted growing research interest. Demirhan and Alkhateeb [11] derived a multi-static sensing signal-to-noise ratio (SNR) and proposed joint sensing and communi-cation beamforming design. Behdad et al. [12] studied power allocation for simultaneous communication and target detec-tion. Liu et al. [13] and Elfiatoure et al. [14] investigated AP mode selection, assigning each node as either a transmitter or a passive echo receiver. Mao et al. [15] characterised the communications–sensing trade-off region, accounting for pilot contamination caused by target reflections. Ren et al. [16] addressed secure CF-ISAC against both communication and sensing eavesdroppers. However, none of these works considers legacy BSs from an existing cellular network or exploits the cooperation between a BS and distributed APs. This paper extends ISAC to hierarchical CF (hereafter called HCF-ISAC) and makes the following contributions.  
+
+> •
+
+We identify three properties that render HCF-ISAC ad-vantageous over CF-ISAC: (i) the BS provides co-located radar antenna aperture with full coherent array gain; (ii) APs that are idle under user-centric (UC) clustering are repurposed as bistatic echo receivers at zero hardware cost; and (iii) the BS simultaneously serves as the com-munications processor and the sensing fusion center.  
+
+> •
+
+A novel HCF-ISAC protocol. We assign ISAC roles to each node type—BS, active AP, and idle AP—and present a five-phase workflow that integrates communications and sensing within a single coherent interval, consistent with the CF-ISAC frameworks of [11], [14].  
+
+> •
+
+We derive spectral efficiency (SE) expressions that include a sensing-interference term, and a multi-static sensing SNR separating the monostatic contribution from the bistatic sum, together yielding a closed-form character-isation of the communications–sensing Pareto frontier. The remainder of this paper is organized as follows. Sec-tion II presents the system model. Section III assigns node roles and specifies the HCF-ISAC protocol. Section IV provides the performance analysis. Section V presents numerical results. Section VI concludes the paper. arXiv:2608.18873v1 [cs.IT] 19 Aug 2026 UAV target CBS     
+
+> BS+CPU+Radar
+> NU
+> NU
+> Active AP
+> Commun.only Idle AP
+> Bistatic Rx only
+> FU
+> Probing/mono Bistatic echo Echo fwd Comm Fronthaul
+
+Fig. 1. Illustration of the HCF-ISAC architecture. 
+
+II. S YSTEM MODEL 
+
+A. Hierarchical Network Topology 
+
+We consider the hierarchical system of [7], where a central BS (CBS) with Nb antennas is located near the center of a coverage area, as illustrated in Fig. 1. A total of M antennas serve K ≪ M user equipments (UEs) in time-division duplex-ing (TDD) mode. CBS also functions as the central processing unit (CPU) of the M − Nb single-antenna distributed APs, which are deployed surrounded the CBS, especially its edge area, and are connected via a fronthaul network. CBS classifies each UE k as a near user (NU) or far user (FU), according to 
+
+K0 = {k : β0 
+
+> k
+
+≥ ¯β0}, (1) where β0 
+
+> k
+
+is the CBS-to-UE k large-scale fading coefficient and ¯β0 is a CBS-specific threshold. For each FU k / ∈ K 0, the CBS forms an UC cluster of APs as Mk = {m : βmk ≥ ¯βk},where βmk denotes the large-scale fading between AP m and UE k, and ¯βk = 1 
+
+> M−Nb
+
+P 
+
+> m
+
+βmk is the per-user threshold from [7], although it can be optimized based on other criteria. The set of active APs is Mact = {m : Km̸ = ∅} , where 
+
+Km = {k : m ∈ M k} denotes the set of users served by AP 
+
+m, and the set of idle APs is Midle = {m : Km = ∅} .
+
+B. Communications Channel Model 
+
+The scalar channel between AP m and UE k is denoted by gmk ∼ CN (0 , β mk ), where βmk embeds COST-Hata path loss and log-normal shadowing [1]. The Nb × 1 channel from the CBS to UE k is hk ∼ CN (0, β 0 
+
+> k
+
+INb ). Linear minimum mean-square-error (MMSE) estimates are ˆhk ∼ CN (0, α 0
+
+> k
+
+INb )
+
+with α0 
+
+> k
+
+= pu(β0  
+
+> k)2
+> puβ0
+> k+σ2
+> n
+
+, and ˆgmk ∼ CN (0 , α mk ) with αmk =
+
+puβ2
+
+> mk
+
+/(puβmk + σ2
+
+> n
+
+), where pu is the UE transmit power and σ2 
+
+> n
+
+is the noise variance. 
+
+C. Sensing Channel Model 
+
+The system detects a single unmanned aerial vehicle (UAV) target located at distance dt, azimuth θt, and elevation ϕt
+
+relative to the CBS. Due to the UAV’s high altitude, all target-related links are modelled as line-of-sight (LoS) [12]. The channel vector from the CBS to the UAV is hbt =√ζbt a(θt, ϕ t), where ζbt is the one-way path loss from the CBS to the UAV, and a(θt, ϕ t) ∈ CNb is the CBS steering vector. Assuming a uniform linear array (ULA) with half-wavelength spacing, 
+
+a(θ, ϕ ) = 1
+
+√Nb
+
+h
+
+1, e jπ sin ϕ cos θ , . . . , e jπ (Nb−1) sin ϕ cos θ iT
+
+.
+
+(2) Each AP m is equipped with a single antenna, so the LoS channel from AP m to the UAV reduces to the scalar hmt =√ζmt ejψ mt , where ζmt is the one-way path loss from the UAV to AP m, and ψmt is the associated LoS phase offset 1.The monostatic CBS → UAV → CBS reflected channel is given by 
+
+Hmono = ξt ej2πf D,bt t hbt hTbt , (3) where ξt ∈ C is the reflection coefficient determined by the UAV’s radar cross section (RCS), and the Doppler shift fD,bt = 
+
+> 2vt
+> λ
+
+cos( φt − θt). Here, vt is the UAV speed, φt is its flying direction, and λ = c/f c is the carrier wavelength. Moverover, the CBS → UAV → AP m bistatic channel is 
+
+cmt = ξt ej2πf D,mt t hmt hTbt ∈ C1×Nb , (4) where fD,mt = vt
+
+> λ
+
+cos( φt − θt) + cos( φt − θmt ) with θmt the angle of departure from AP m to the UAV. III. T HE PROPOSED HCF-ISAC P ROTOCOL 
+
+A. Node Role Assignment 
+
+Inspired by the AP mode-selection concept of [13], [14], we assign ISAC roles implicitly from the UC clustering outcome, eliminating any additional optimization step for role determi-nation 2. As illustrated in Fig. 1,  
+
+> •
+
+CBS—Four Simultaneous Functions :1) Communication hub for NUs : transmits to all k ∈ K 0
+
+using downlink precoding with per-antenna power 
+
+pd.
+
+> 1
+
+The absolute LoS phase ejψ bt is omitted as it is a common scalar across all array elements and is absorbed into ξt without loss of generality. 
+
+> 2
+
+The three-way role split parallels the C-AP / S-AP paradigm of [14], but in HCF no separate optimisation is needed: the network structure determines roles deterministically. Three structural properties set HCF apart from the CF net-works studied in [11]–[16]. Property 1—Co-located monostatic aperture: The CBS provides coherent Nb-element monostatic radar processing; the mono-static sensing SNR scales as N 2 
+
+> b
+
+(two-way array gain), which no individual distributed AP in a uniform CF network can match. Property 2—Free bistatic receivers: Under UC clustering, the fraction of idle APs |M idle |/(M − Nb)
+
+grows as K/M decreases (the typical CF regime). These nodes extend the sensing aperture at zero cost; in conventional CF-ISAC no idle APs exist by current design. Property 3—Unified fusion centre: Because the CBS is already the CPU, sensing fusion and communications detection share the same hardware. The only new fronthaul data are the scalar echo samples from idle APs, whereas [11], [16] require full inter-AP coordination. Algorithm 1 Five-Phase TDD Protocol for HCF-ISAC 
+
+Require: τp pilot symbols, ρ ∈ [0 , 1] , pd, pu, (ˆθ(0)  
+
+> t
+
+, ˆϕ(0)  
+
+> t
+
+)
+
+Ensure: (ˆθ(n) 
+
+> t
+
+, ˆϕ(n) 
+
+> t
+
+, ˆd(n) 
+
+> t
+
+) for each frame n 
+
+> 1:
+
+for n = 1 , 2, . . . do  
+
+> 2:
+
+UL training: UEs transmit τp-length pilots with power 
+
+pu. CBS estimates ˆhk, ∀k; classifies k ∈ K 0 if β0 
+
+> k
+
+≥ ¯β0.AP m estimates ˆgmk ; sets Midle = {m : Km = ∅} . 
+
+> 3:
+
+Beamforming design: CBS forms precoder Wc and radar beam s(n) 
+
+> r
+
+= √Nbpd a(ˆθ(n−1)  
+
+> t
+
+, ˆϕ(n−1)  
+
+> t
+
+); active AP m sets wmk = ˆ g∗
+
+> mk
+
+/pE[|ˆgmk |2]. 
+
+> 4:
+
+DL and sensing probe: CBS sends d = √1 − ρ Wcu +
+
+√ρ s(n) 
+
+> r
+
+; active AP m transmits sm. 
+
+> 5:
+
+Echo reception: CBS collects monostatic echo yb;AP m ∈ M sense collects and forwards rm to CBS.  
+
+> 6:
+
+Parameter estimation: CBS computes zb =
+
+aH (ˆθt, ˆϕt)yb, zbi = P
+
+> m∈M sense
+
+√ξmt e−jψ mt rm,and fuses {zb, z bi } via MUSIC/ESPRIT to obtain 
+
+(ˆθ(n) 
+
+> t
+
+, ˆϕ(n) 
+
+> t
+
+, ˆd(n) 
+
+> t
+
+); updates s(n+1)  
+
+> r
+
+← √pd a(ˆθ(n) 
+
+> t
+
+, ˆϕ(n) 
+
+> t
+
+). 
+
+> 7:
+
+end for 
+
+2) CPU : coordinates active APs for FU communica-tions via fronthaul, exactly as in [7]. 3) Monostatic radar transmitter : emits a dedicated probing beam sr ∈ CNb steered toward the UAV. 4) Sensing fusion centre : processes its own monostatic echo and aggregates bistatic echo scalars from all sensing APs.  
+
+> •
+
+Active APs : An active AP m ∈ M act sends data toward its FU cluster Km during the downlink. In the uplink, it receives FU signals and forwards the scalar statistics 
+
+ˆg∗
+
+> mk
+
+ym, k ∈ K m, to the CBS.  
+
+> •
+
+Idle APs : An idle AP m ∈ M idle has no communications function. In a pure communications system it would be switched off. In HCF-ISAC it is activated in passive receive mode to collect the bistatic echo rm of the CBS probing beam reflected off the UAV. Each idle AP for-wards only the scalar rm to the CBS, incurring negligible additional fronthaul load compared to the multi-symbol statistics exchanged by active APs. 
+
+B. Five-Phase TDD Workflow 
+
+Under block fading, the coherent interval is divided into five phases, as summarized in Algorithm 1. That is: 
+
+1) Uplink Training: All K UEs transmit mutually orthog-onal pilots of length τp ≥ K. The CBS obtains ˆhk for all 
+
+k and each AP m obtains {ˆgmk } via MMSE estimation. The CBS then classifies UEs per (1), constructs clusters {M k}, and identifies Midle . Pilot contamination due to UAV reflections [15] is negligible for τp ≥ K.
+
+2) Beamforming Design: The CBS allocates its total power 
+
+Nbpd between communications and sensing via a power-splitting factor ρ ∈ [0 , 1] . The CBS downlink signal is 
+
+d = p1 − ρ WcuK0 + √ρ sr , (5) where uK0 is the stacked NU data vector with E[uu H ] = I,
+
+sr is the probing vector, and Wc ∈ CNb×|K 0| is the precoding matrix. Applying conjugate beamforming (CBF), we have 3
+
+[Wc]:,k = √ηk ˆh∗
+
+> k
+
+, k ∈ K 0, (6) where ηk ≥ 0 is the power coefficient for user k at the CBS, subject to P 
+
+> k∈K 0
+
+ηk∥ˆhk∥2 ≤ Nbpd. The sensing probing vec-tor is steered toward the current UAV angle estimate (ˆθt, ˆϕt):
+
+sr = pNbpd a(ˆθt, ˆϕt), ∥sr ∥2 = Nbpd. (7) For the first coherent interval, an acquisition sector is used in place of (ˆθt, ˆϕt); thereafter (7) is updated from the tracking output. 
+
+3) Downlink Transmission and UAV Probing: The CBS broadcasts d per (5). Each active AP m ∈ M act simultaneously transmits: 
+
+sm = √pd
+
+X
+
+> k∈K m
+
+√ηmk ˆg∗ 
+
+> mk
+
+uk, (8) where uk is zero-mean unit-variance data symbol for user k,and ηmk denotes power coefficient for user k at AP m. Idle APs do not transmit. The received signal at UE k is 
+
+yk = hTk d + 
+
+> M−Nb
+
+X
+
+> m=1
+
+gmk sm + nk, (9) where nk ∼ CN (0 , σ 2
+
+> n
+
+).
+
+4) Echo Reception: Since the CBS has full knowledge of its own transmitted signal d, the communication component of the reflected echo can be cancelled prior to sensing processing. The residual monostatic echo after self-interference cancellation is 
+
+yb = √ρ ξ t ej2πf D,bt t hbt hTbt sr + necho  
+
+> b
+
+, (10) with necho  
+
+> b
+
+∼ CN (0, σ 2
+
+> n
+
+INb ). Similarly, the bistatic echo at AP m, where m ∈ M sense ≜ Midle is 
+
+rm = √ρ ξ t ej2πf D,mt t hmt hTbt sr + nm, (11) with nm ∼ CN (0 , σ 2
+
+> n
+
+). Each AP forwards rm to the CBS via fronthaul. The fronthaul overhead for sensing is one complex scalar per AP per symbol period, negligible relative to the 
+
+|K m|-dimensional FU detection statistics forwarded by active APs. 
+
+5) Parameter Estimation: The CBS fuses yb and {rm : m ∈Msense }. The CBS applies matched filtering with the known steering vector: 
+
+zb = aH (ˆθt, ˆϕt) yb. (12) As hbt = √ζbt a(θt, ϕ t):
+
+zb = √ρξ t ej2πf D,bt t ζbt Nb
+
+√pd + ˜ nb, (13) 
+
+> 3The proposed hierarchical ISAC framework is precoding-agnostic and accommodates any linear precoding scheme, including zero-forcing (ZF) and MMSE precoding, without altering the sensing or tracking pipeline. CBF is adopted here to keep the notation compact within the page limit.
+
+with ˜nb ∼ CN (0 , σ 2
+
+> n
+
+). The CBS weights the Ms = |M sense |
+
+bistatic scalars by √ζmt e−jψ mt (maximum-ratio combining over large-scale fading) and sums them: 
+
+zbi = X
+
+> m∈M sense
+
+pζmt e−jψ mt rm. (14) The combined statistic z = [ zb, z bi ]T is used for UAV angle, range, and Doppler estimation, following the generalised like-lihood ratio test (GLRT) detection framework of [16]. IV. P ERFORMANCE ANALYSIS 
+
+A. Uplink Spectral Efficiency 
+
+The uplink SE derivation follows Section IV of [7] un-changed; ρ does not affect uplink processing. For NU k ∈ K 0,the CBS applies matched filtering with ˆhk and, using the use-and-then-forget bounding technique of [1], obtains: 
+
+Rul nu ,k = log 2(1 + γul nu ,k ), (15) 
+
+γul nu ,k = ηkNbα0
+
+> k
+
+PKj=1 ηj β0 
+
+> j
+
+− ηkα0 
+
+> k
+
++ σ2
+
+> n
+> pu
+
+. (16) For FU k / ∈ K 0:
+
+γul fu ,k = ηk
+
+ P  
+
+> m∈M k
+
+αmk 
+
+2
+
+P 
+
+> m∈M k
+
+αmk 
+
+PKj=1 ηj βmj + σ2
+
+> n
+> pu
+
+P 
+
+> m∈M k
+
+αmk 
+
+.
+
+(17) The uplink sum SE is Cul = P 
+
+> k∈K 0
+
+Rul nu ,k + P 
+
+> k / ∈K 0
+
+Rul fu ,k .
+
+B. Downlink Spectral Efficiency 
+
+In the downlink, each UE knows only channel statistics. Decomposing (9) for NU k ∈ K 0 into desired signal, channel estimation error, channel uncertainty error, inter-user interfer-ence, sensing interference, and noise terms—following the use-and-then-forget bounding technique of [1], [14]—yields: 
+
+Rdl nu ,k = log 2(1 + γdl nu ,k ), (18) 
+
+γdl nu ,k =
+
+PNb
+
+> n=1
+
+p(1 − ρ)ηk α0
+
+> k
+
+2
+
+D(nu ) 
+
+> k
+
++ I(s)
+
+> k
+
+, (19) where 
+
+D(nu ) 
+
+> k
+
+=
+
+> Nb
+
+X
+
+> n=1
+
+(1 − ρ)β0
+
+> k
+
+X
+
+> j∈K 0
+
+ηj α0
+
+> j
+
++ 
+
+> M−Nb
+
+X
+
+> m=1
+
+βmk 
+
+X
+
+> j∈K m
+
+ηmj αmj + σ2
+
+> n
+
+pd
+
+, (20) 
+
+I(s) 
+
+> k
+
+= ρ N bpd ˆhHk a(ˆθt, ˆϕt) 2 ≈ ρ p d β0 
+
+> k
+
+, (21) where the approximation uses the massive MIMO near-orthogonality property |ˆhHk a|2 ≈ β0 
+
+> k
+
+/N b [11], so that the Nb
+
+factors cancel. The sensing interference I(s) 
+
+> k
+
+is proportional to 
+
+ρ, making the communications–sensing tradeoff explicit at the receiver level. For FU k / ∈ K 0:
+
+γdl fu ,k =
+
+P
+
+> m∈M k
+
+p(1 − ρ)ηmk αmk 
+
+2
+
+D(fu ) 
+
+> k
+
++ I(s)
+
+> k
+
+, (22) where D(fu ) 
+
+> k
+
+is the FU interference-plus-noise denominator from [7]. The downlink sum SE is Cdl = P 
+
+> k∈K 0
+
+Rdl nu ,k +
+
+P 
+
+> k / ∈K 0
+
+Rdl fu ,k .
+
+C. Multi-Static Sensing SNR 
+
+Following the multi-static sensing SNR definition of [11], [16], we define the total sensing SNR at the CBS as the ratio of expected signal power to noise power across all sensing observations. After matched filtering (12), we have 
+
+γsense  
+
+> b
+
+= |ξt|2 ζ2 
+
+> bt
+
+N 2 
+
+> b
+
+ρ p d
+
+σ2
+
+> n
+
+. (23) This scales as N 2 
+
+> b
+
+, reflecting the transmit array gain Nb from the probing beam ∥sr ∥2 = Nbpd and the receive matched-filter gain Nb of the co-located CBS aperture. After MRC combining (14), each sensing AP m ∈ M sense contributes: 
+
+γsense  
+
+> m
+
+= |ξt|2 ζmt ζbt Nb ρ p d
+
+σ2
+
+> n
+
+. (24) This scales as Nb (transmit array gain only), consistent with [11], since each AP receives with a single antenna. Total fused sensing SNR is given by 
+
+γsense = γsense  
+
+> b
+
++ X
+
+> m∈M sense
+
+γsense  
+
+> m
+
+. (25) The monostatic term scales as N 2 
+
+> b
+
+while each bistatic term scales as Nb. Nevertheless, for large |M sense | —as occurs under light user loading K ≪ M —the aggregate bistatic sum may dominate. This confirms the unique value of the idle-AP receiver network, which has no analogue in CF-ISAC. 
+
+D. Communications–Sensing Pareto Frontier 
+
+Equations (19)–(22) show that the downlink SE of each user degrades monotonically in ρ, while (25) shows that the sensing SNR grows monotonically in ρ. The Pareto frontier is therefore traced by sweeping ρ ∈ [0 , 1] with all other system parameters fixed. A key quantitative observation: a small ρ induces a linear sensing SNR gain ( γsense ∝ ρ) while causing a sub-linear SE loss, since the sensing interference I(s) 
+
+> k
+
+≈ ρ p d β0 
+
+> k
+
+is typically small relative to the desired signal power in the massive MIMO regime. This convexity of the SE curve in ρ implies that the attractive operating regime is small ρ (≲ 0.2), consistent with the numerical observations of [11], [15]. 
+
+E. Fronthaul Overhead Analysis 
+
+We extend the fronthaul comparison of [7] to include the sensing echo backhaul. Per symbol period, the number of complex scalars exchanged over the fronthaul is:  
+
+> •
+
+CF : P 
+
+> k∈K
+
+|M k| symbols (with UC clustering Mk).  
+
+> •
+
+HCF : P 
+
+> k / ∈K0
+
+|M k| symbols.  
+
+> •
+
+HCF-ISAC : |M sense | + P 
+
+> k / ∈K0
+
+|M k| symbols. 0 1 2 3 4 5 6 7   
+
+> Per-User SE [bps/Hz]
+> 00.2 0.4 0.6 0.8 1
+> CDF
+> CDF of Per-User DL SE ( ;=0.1)
+> CF-ISAC HCF-ISAC,100m HCF-ISAC,250m HCF-ISAC,500m Fig. 2. CDFs of per-user downlink SE for HCF-ISAC with varying inner radius and CF-ISAC baseline. The power-splitting factor is ρ= 0 .1.
+
+Since |M sense | ≤ M − Nb and each sensing echo is asingle scalar (versus the multi-symbol FU detection statistics), the ISAC overhead increment over HCF communications is modest. HCF-ISAC thus achieves lower total fronthaul load than conventional CF while providing both communications service and sensing capability. V. P ERFORMANCE EVALUATION 
+
+A. Simulation Setup 
+
+We consider a circular coverage area of radius R = 1 km with a total antenna budget M = 256 . The CBS, located at the centre, is equipped with Nb = 128 co-located antennas, while the remaining 128 antennas are deployed as single-antenna APs uniformly distributed in the annular ring [r, R ]. We set K = 16 
+
+single-antenna UEs placed uniformly in the disc. We compare HCF-ISAC against conventional CF-ISAC [11], in which all 
+
+M = 256 antennas are single-antenna APs—each contributing to both communications and sensing—without a co-located CBS. Communications channels follow the three-slope COST-Hata model [1] with carrier frequency fc = 1 .9 GHz, AP/CBS height 15 m, UE height 1.65 m, and log-normal shadowing with standard deviation σsd = 8 dB. The noise power is computed as σ2 
+
+> n
+
+= −174 + 10 log 10 (B) + F in dBm, where bandwidth B = 5 MHz and noise figure F = 9 dB, yielding 
+
+σ2 
+
+> n
+
+≈ − 98 dBm. Per-antenna downlink power is pd = 200 mW and UE uplink power pu = 100 mW. Equal power allocation is used at both the CBS and the APs. User-centric clustering at the APs follows a distance-based threshold: AP m serves FU k if dmk < 0.75 ¯dk, where ¯dk is the mean distance from all APs to user k. Results are averaged over 10 5 independent random network realizations. For the sensing target, a UAV is placed at fixed altitude Ht = 100 m with horizontal distance drawn uniformly from rt ∈ [200 , 800] m. The RCS is set to 
+
+σRCS = 1 m2.
+
+B. Numerical Results 
+
+Fig. 2 shows the cumulative distribution functions (CDFs) of per-user downlink SE with ρ = 0 .1 and r ∈ { 100 , 250 , 500 } m. Across the upper portion of the CDF, every HCF-ISAC curve lies to the right of CF-ISAC. This gain originates from the CBS’s Nb = 128 co-located array, which provides coherent 10 15 20 25 30 35 40 45                            
+
+> Sum Rate [bps/Hz]
+> 00.2 0.4 0.6 0.8 1
+> CDF
+> CDF of Sum Rate ( ;=0.1)
+> CF-ISAC HCF-ISAC,100m HCF-ISAC,250m HCF-ISAC,500m
+> Fig. 3. CDFs of downlink sum rate for HCF-ISAC and CF-ISAC. -180 -170 -160 -150 -140 -130
+> .sense [dB] 00.2 0.4 0.6 0.8 1
+> CDF
+> CDF of Sensing SNR
+> HCF: CBS mono
+> HCF: |M sense |=16 HCF: |M sense |=32 HCF: |M sense |=64 HCF: |M sense |=128 CF: |M sense |=128
+> Fig. 4. CDF of multi-static sensing SNR γsense versus the number of participating APs |M sense |, with r= 100 m and ρ= 0 .1. The CF-ISAC baseline with |M sense |= 128 is also shown.
+
+beamforming gain proportional to Nb for the NUs—an ad-vantage absent in CF-ISAC, where all M = 256 antennas are single-antenna APs. In the lower tail of the CDF (e.g., 5th percentile), the ordering reverses: CF-ISAC outperforms all HCF-ISAC variants. This is expected: CF-ISAC’s fully distributed architecture ensures that every user has nearby APs. There is a deliberate architectural trade-off: HCF-ISAC sacrifices some user fairness in exchange for two structural benefits: (i) the CBS array delivers substantially higher SE to NUs, raising the sum rate, as illustrated by Fig. 3; and (ii) only M − Nb = 128 APs require fronthaul connections— half the M = 256 links needed in CF-ISAC. This halving of the fronthaul network scale is a key practical advantage, as fronthaul cost and complexity are major deployment barriers for cell-free systems. Fig. 4 plots the CDF of the fused sensing SNR γsense defined in (25), evaluated for varying numbers of participating APs 
+
+|M sense |. We set r = 100 m and ρ = 0 .1. Even without any AP participation ( |M sense | = 0 , CBS monostatic only), HCF-ISAC achieves a non-trivial sensing SNR driven by the N 2
+
+> b
+
+monostatic term in (23). The co-located CBS array provides both transmit beamforming gain ( Nb) and coherent receive combining gain ( Nb). As |M sense | increases from 16 to 128 , the CDF shifts progressively to the right. Each doubling of |M sense |
+
+provides an approximately 3 dB gain, consistent with the linear accumulation of bistatic SNR contributions in (25). The CF--164 -162 -160 -158 -156 -154 -152 -150 -148 -146  
+
+> Median Sensing SNR [dB]
+> 18 20 22 24 26 28 30
+> Average Sum Rate [bps/Hz]
+> Pareto Frontier (r=100m)
+> ;=0
+> ;=0.1 ;=0.2
+> ;=0.5
+> ;=1
+
+Fig. 5. Communications–sensing Pareto frontier. 
+
+ISAC baseline with |M sense | = 128 single-antenna APs is also shown. Despite having the same number of receivers, CF-ISAC achieves lower sensing SNR than HCF-ISAC. This is because CF-ISAC lacks the powerful N 2 
+
+> b
+
+monostatic contribution from a co-located array. The results show that even a modest number of idle APs (e.g., |M sense | = 32 ) combined with the CBS monostatic echo can substantially improve sensing coverage. In practical deployments where not all APs are actively serving users at every time slot, HCF-ISAC can opportunistically exploit these idle APs for sensing without any additional infrastructure cost. Fig. 5 shows the Pareto curve of average sum rate versus median sensing SNR as the power-splitting factor ρ varies from 
+
+0 to 1. For ρ ∈ [0 , 0.2] , the sum rate decreases only mildly while the sensing SNR improves substantially. This gentle slope reflects the fact that only the NUs are affected by ρ, and the (1 − ρ) scaling of their signal power causes a logarithmic (hence slowly varying) SE reduction. Beyond ρ ≈ 0.3, the sum rate drops more steeply. At ρ = 0 .5, half of the CBS power is devoted to sensing, reducing NU SEs significantly. At ρ = 1 (all CBS power to sensing, no communications from the CBS), only the FUs contribute to the sum rate via the APs. The “knee” of the Pareto curve lies at ρ ∈ [0 .1, 0.2] , where the system achieves strong sensing capability with only a modest communications cost. This operating region is consistent with the communications–sensing trade-off findings in [15] and confirms that HCF-ISAC can deliver effective dual-function performance with a single, easily tunable parameter. VI. C ONCLUSIONS 
+
+We proposed HCF-ISAC massive MIMO, the first integra-tion of ISAC into the hierarchical cell-free and cellular archi-tecture. For a UAV target, we defined precise node roles, a five-phase ISAC protocol, and closed-form SE and sensing SNR expressions. The sensing SNR decomposes into a monostatic term scaling as N 2 
+
+> b
+
+and a bistatic sum scaling linearly with the number of idle APs. Numerical results confirm that HCF-ISAC simultaneously achieves higher sum throughput than CF-ISAC, superior sensing SNR, under lower fronthaul costs. Future work includes joint beamformer optimization, multi-target extension, rigorous characterisation of pilot contamination from UAV reflections, and sensing-privacy analysis of the CBS probing beam. REFERENCES [1] H. Q. Ngo, A. Ashikhmin, H. Yang, E. G. Larsson, and T. L. Marzetta, “Cell-free massive MIMO versus small cells,” IEEE Trans. Wireless Commun. , vol. 16, no. 3, pp. 1834–1850, Mar. 2017. [2] W. Jiang, B. Han, M. A. Habibi, and H. D. Schotten, “The road towards 6G: A comprehensive survey,” IEEE Open J. Commun. Soc. , vol. 2, pp. 334–366, Feb. 2021. [3] W. Jiang and H. D. Schotten, “Cell-edge performance booster in 6G: Cell-free massive MIMO vs. reconfigurable intelligent surface,” in Proc. IEEE Eur. Conf. Netw. Commun. (EuCNC/6G Summit) , Gothenburg, Sweden, Jun. 2023, pp. 19–23. [4] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, Jun. 2022. [5] H. Hua, J. Xu, and T. X. Han, “Optimal transmit beamforming for integrated sensing and communication,” IEEE Trans. Veh. Technol. ,vol. 72, no. 8, pp. 10 588–10 603, Aug. 2023. [6] T. Kim, H. Kim, S. Choi, and D. Hong, “How will cell-free systems be deployed?” IEEE Commun. Mag. , vol. 60, no. 4, pp. 46–51, Apr. 2022. [7] W. Jiang and H. D. Schotten, “Hierarchical cell-free massive MIMO for high capacity with simple implementation,” in Proc. 2024 IEEE Int. Conf. Commun. (ICC) , Denver, CO, USA, Jun. 2024, pp. 3226–3231. [8] W. Jiang and H. D. Schotten, “Heterogeneous system design for cell-free massive MIMO in wideband communications,” in Proc. 2024 IEEE Global Commun. Conf. (GLOBECOM) , Cape Town, South Africa, Dec. 2024, pp. 4064–4069. [9] Y. Zhang, Q. Hu, M. Peng, Y. Liu, G. Zhang, and T. Jiang, “Inter-dependent cell-free and cellular networks: Thinking the role of cell-free architecture for 6G,” IEEE Network , vol. 38, no. 5, pp. 247–254, Sep. 2024. [10] S. Buzzi, C. D’Andrea, L. Wang, A. H. Gokceoglu, and G. Peters, “Co-existing/cooperating multicell massive MIMO and cell-free massive MIMO deployments: Heuristic designs and performance analysis,” IEEE Open J. Commun. Soc. , vol. 5, pp. 6180–6200, Sep. 2024. [11] U. Demirhan and A. Alkhateeb, “Cell-free ISAC MIMO systems: Joint sensing and communication beamforming,” IEEE Trans. Commun. ,vol. 73, no. 6, pp. 4454–4468, Jun. 2025. [12] Z. Behdad, ¨O. T. Demir, K. W. Sung, E. Bj¨ ornson, and C. Cavdar, “Multi-static target detection and power allocation for integrated sensing and communication in cell-free massive MIMO,” IEEE Trans. Wireless Commun. , vol. 23, no. 9, pp. 11 580–11 596, Sep. 2024. [13] S. Liu, R. Liu, Z. Lu, M. Li, and Q. Liu, “Cooperative cell-free ISAC networks: Joint BS mode selection and beamforming design,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , Dubai, UAE, Apr. 2024, pp. 1–6. [14] M. Elfiatoure, M. Mohammadi, H. Q. Ngo, H. Shin, and M. Matthaiou, “Multiple-target detection in cell-free massive MIMO-assisted ISAC,” 
+
+IEEE Trans. Wireless Commun. , vol. 24, no. 5, pp. 4283–4298, May 2025. [15] W. Mao, Y. Lu, C.-Y. Chi, B. Ai, Z. Zhong, and Z. Ding, “Communication-sensing region for cell-free massive MIMO ISAC sys-tems,” IEEE Trans. Wireless Commun. , vol. 23, no. 9, pp. 12 396–12 411, Sep. 2024. [16] Z. Ren, J. Xu, L. Qiu, and D. W. K. Ng, “Secure cell-free integrated sensing and communication in the presence of information and sensing eavesdroppers,” IEEE J. Sel. Areas Commun. , vol. 42, no. 11, pp. 3217– 3231, Nov. 2024.

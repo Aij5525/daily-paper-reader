@@ -1,0 +1,951 @@
+Title: Channel2World: A Wireless Foundation Model for RF Environment Representation
+
+URL Source: https://arxiv.org/pdf/2608.17544v1
+
+Published Time: Wed, 19 Aug 2026 00:48:45 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# CHANNEL 2W ORLD : A Wireless Foundation Model for RF Environment Representation 
+
+Hyung-Joo Moon, Member, IEEE , Joonkyu Jang, Graduate Student Member, IEEE ,Kwang Soon Kim, Senior Member, IEEE , Seong-Lyun Kim, Senior Member, IEEE ,Robert W. Heath, Jr., Fellow, IEEE , and Chan-Byoung Chae, Fellow, IEEE 
+
+Abstract —Wireless channels are commonly treated as link-specific observations, although their multipath structure is gov-erned by the surrounding radio-frequency (RF) environment. In this paper, we propose Channel2World, a wireless foundation model that learns a reusable environment-level representation from multiple-input multiple-output (MIMO) channel-position observations. The model aggregates channels collected within the same base-station-centered environment into a wireless world embedding using a Transformer-based encoder. The encoder is pretrained through context-query prediction, where context chan-nels condition user equipment (UE) position and relative path-gain prediction for disjoint query channels. After pretraining, the encoder is frozen and used as a task-agnostic environment-conditioning module for downstream wireless models, enabling adaptation to unseen environments without site-specific fine-tuning. To learn an environment-level latent space that gen-eralizes across deployments, we pretrain Channel2World using ray-tracing data from 26,000 environments, with approximately 5,000 channel measurements per environment. Evaluations on UE localization, beam-domain channel state information (CSI) reconstruction, and RF-observable geometry reconstruction show that the learned embeddings provide effective conditioning in unseen environments. For localization and CSI reconstruction tasks, embedding-based conditioning outperforms or remains competitive with site-specific fine-tuning, although fine-tuning requires task-specific labeled data and additional gradient-based adaptation. The embeddings also support the reconstruction of dominant reflector structures, indicating their utility as reusable environmental priors across tasks. 
+
+Index Terms —Wireless foundation model, MIMO channel, localization, ray tracing, environment-aware communications. 
+
+I. I NTRODUCTION 
+
+# MASSIVE multiple-input multiple-output (MIMO) and high-frequency communication systems have expanded the role of wireless channel data. With large antenna arrays, wide bandwidths, and directional propagation, a channel obser-vation contains structured information across the spatial, delay, and frequency domains. The multipath components of a wire-less channel are determined by the base-station (BS) position, the user equipment (UE) position, surrounding reflectors and scatterers, and material-dependent propagation effects [1]. A MIMO channel is therefore not only a communication variable 
+
+H.-J. Moon, J. Jang, and C.-B. Chae are with the School of Inte-grated Technology, Yonsei University, Seoul 03722, South Korea (e-mail: 
+
+{moonhj, joonkyuj, cbchae }@yonsei.ac.kr). K. S. Kim and S.-L. Kim are with the School of Electrical and Electronic Engineering, Yonsei University, Seoul 03722, South Korea (e-mail: {ks.kim, slkim }@yonsei.ac.kr). R. W. Heath, Jr. is with the Department of Electrical and Computer Engineering, University of California, San Diego, La Jolla, CA 92093, USA (e-mail: rwheathjr@ucsd.edu). Corresponding author: Chan-Byoung Chae .
+
+to be estimated for link adaptation or beamforming, but also a partial radio-frequency (RF) observation of the physical propagation environment. This interpretation gives wireless channel data a broader role in artificial intelligence (AI)-native wireless systems. Beyond serving as an input or target for link-level inference, channel-position observations can act as RF sensing measurements of the deployment environment. Existing learning-based wireless techniques have primarily used each channel observation as an individual sample for a specific task, such as channel estimation, channel state information (CSI) feedback, beam prediction, localization, or resource allocation [2]–[4]. Recent wireless foundation models extend this paradigm by pretrain-ing reusable models from large datasets of channels, CSI sequences, channel impulse responses (CIRs), or in-phase and quadrature (I/Q) signals [5]–[10]. In this work, a wireless foundation model refers to a model that is pretrained on large-scale wireless observations and then reused as a common backbone or conditioning module for downstream wireless tasks. This paper considers a complementary form of wireless foundation modeling, in which the representation target is not an individual wireless observation but the RF propagation environment jointly observed through many position-indexed channels. Such an environment-level representation can pro-vide deployment-specific propagation context to downstream models. This context is important because environment dependence is a pervasive challenge in wireless learning. For a given task, the relationship between the available observation and the desired output can vary across environments, as the surround-ing geometry determines reflector structure and path visibility. Existing methods address this dependence in two ways. One strategy is to collect site-specific data and train or fine-tune a task model for each deployment [11], [12]. This strategy can be effective, but it requires task-labeled target-site data and may become unreliable when such samples are scarce. A second strategy is to provide explicit environmental context, such as a map, point cloud, image, radio map, or neural scene representation [13]. Such context can support generalization across environments, but acquiring, calibrating, and updating it can be difficult in practical deployments. In this paper, we infer a deployment-specific environment prior directly from wireless observations. A single channel measured at one UE position provides only a local RF observa-tion of the environment. In contrast, channel-position samples collected across one site provide multiple RF observations arXiv:2608.17544v1 [eess.SP] 18 Aug 2026 2 
+
+> Fig. 1. Multiple BS-collected MIMO channel-position observations from the same RF environment are encoded into a wireless world embedding, which provides environment-level conditioning for downstream wireless and RF-observable inference tasks.
+
+of the same underlying propagation structure. We therefore train an environment encoder that maps these observations to a reusable prior capturing their shared propagation structure. This approach avoids the need for explicit scene information or task-labeled target-site samples. Based on this concept, we propose CHANNEL 2W ORLD , a wireless foundation model that infers a BS-centered RF en-vironment representation from channel-position observations. We refer to this inferred environment-level representation as a wireless world embedding . As illustrated in Fig. 1, multiple BS-collected channel-position samples from the same RF en-vironment are decomposed into path tokens and aggregated by the environment encoder. During pretraining, context channels are used to infer the wireless world embedding, while disjoint query channels from the same environment provide supervi-sion through position and relative path-gain prediction. After pretraining, the environment encoder is frozen and reused for downstream tasks. For a new environment, a modest context set of channel-position observations is used to obtain the wireless world embedding, which then conditions downstream models. 
+
+A. Related Work and Our Contributions 
+
+Deep learning for wireless communications was first devel-oped mainly as a task-specific physical-layer tool. Neural mod-els have been used for CSI feedback [2], channel estimation and signal detection [14], beam prediction and beam man-agement [11], [15], and end-to-end transceiver design [16]. These studies show that wireless channels and signals contain learnable structure that can improve physical-layer processing. At the same time, the trained models are often tied to a particular task, antenna configuration, channel distribution, or deployment site. This limitation affects both task generaliza-tion and environment generalization, since a model trained for one physical-layer objective or one deployment environment may not transfer reliably to another [4], [11]. Wireless foundation models address task dependence by pretraining reusable backbones from large-scale wireless data [17]. Existing models learn channel embeddings from measured or simulated channels [5], perform masked pre-diction over space, time, and frequency [6], use generative pretraining for wireless communication and sensing tasks [7], combine masked reconstruction and contrastive learning for channel representation [8], align CSI and CIR representa-tions [9], or extend pretraining to I/Q streams [10]. WavesFM further demonstrates a shared wireless backbone for sensing, communication, and localization, with task-specific predic-tion heads and parameter-efficient fine-tuning for downstream adaptation [12]. These studies provide an important path toward task-general wireless models. The remaining difficulty is environment dependence, since a change in local geometry, blockage, or reflector visibility can alter the relation between a wireless observation and its target. Existing foundation-model approaches therefore rely on sufficient environmental diversity during pretraining or target-site adaptation, such as parameter-efficient fine-tuning. Thus, many existing wireless foundation models reduce task dependence, while environment adaptation remains a separate site-specific process. A more direct way to address environment dependence is to provide environmental context to wireless models. Channel knowledge maps (CKMs) store or learn location-dependent channel knowledge for environment-aware commu-nications [18], [19], and CKM information has been used for hybrid beamforming design [20]. Multimodal methods use light detection and ranging (LiDAR), vision, semantic information, or multi-sensor datasets for beam selection, beam alignment, and blockage prediction [21]–[25]. Wireless dig-ital twins and neural propagation models further estimate radio maps, electromagnetic fields, or site-specific channel renderers from environmental layouts or measurements [26]– [29]. Recent environment-aware foundation models, including MUSE-FM and WWM, also incorporate explicit environ-mental context such as scene information, point clouds, or multimodal geometric priors into wireless prediction mod-els [13], [30]. These works show that environment priors can support environment generalization by conditioning models on deployment-specific context. However, such priors are typi-cally supplied as an explicit scene, map, sensor observation, radio field, or site-specific neural representation. Acquiring and maintaining such priors can require additional sensing, mapping, and calibration, thereby increasing deployment over-head. 3
+
+CHANNEL 2W ORLD provides environment adaptation by treating BS-collected MIMO channel-position observations as a source of RF-environment sensing and encoding them into a wireless world embedding. The embedding is then used as a compact environment prior alongside task-specific inputs, allowing downstream models to condition their predictions on the deployment environment. For an unseen environment, this prior is inferred from a context set of routinely collected channel-position observations, avoiding explicit scene infor-mation and gradient-based adaptation of either the encoder or the downstream model. The key contributions of this work are summarized as follows:  
+
+> •
+
+We introduce the wireless world embedding as a compact RF environment representation for environment adapta-tion. The embedding is inferred from multiple channel-position observations collected in the same BS-centered environment and captures propagation structure shared across channels.  
+
+> •
+
+We propose CHANNEL 2W ORLD , a Transformer-based architecture for learning wireless world embeddings from MIMO channel observations. The model converts de-composed multipath parameters into path tokens and aggregates a variable-size context set into a fixed-size environment representation.  
+
+> •
+
+We develop a context-query pretraining strategy that trains the environment encoder without task-specific la-bels. Context channels are used to infer the wireless world embedding, while disjoint query channels from the same environment provide embedding-conditioned position and path-gain prediction signals.  
+
+> •
+
+We train and validate CHANNEL 2W ORLD on a ray-tracing dataset with 26000 BS-centered propagation en-vironments generated from randomized building layouts, with approximately 5000 valid channel-position pairs per environment on average.  
+
+> •
+
+We evaluate the pretrained wireless world embedding under a frozen-encoder downstream protocol. The en-coder is used as an environment prior for UE position estimation from a spatial channel matrix, full discrete Fourier transform (DFT) beam-domain CSI reconstruc-tion from sparse beam measurements, and RF-observable environment reconstruction. II. S YSTEM MODEL 
+
+Consider a BS that collects uplink wideband MIMO channel observations from multiple UEs over a short environment-coherence interval, during which the propagation environment is assumed to remain static. Each observation is associated with the corresponding UE position in the BS-centered co-ordinate system. The collected channel-position samples are therefore interpreted as multiple RF observations of the same propagation environment and are used as the measurement source for CHANNEL 2W ORLD .In this section, we first define the BS-centered coordi-nate system and the uplink wideband MIMO channel ten-sor. We then describe the multipath channel representation obtained from signal decomposition, including the angle-of-arrival (AoA), delay, and path gain of each propagation path. Although the original measurement is a wideband MIMO channel tensor, CHANNEL 2W ORLD operates on the decom-posed channel representation and uses path-level physical parameter estimates as its input. This representation sepa-rates the learning architecture from the number of antenna elements, array layout, and channel sounding configuration. Consequently, CHANNEL 2W ORLD can be directly applied to BSs with different antenna configurations. 
+
+A. Uplink Channel Tensor and Multipath Parameters 
+
+Let e ∈ { 1, · · · , E } denote the BS-centered environment index. Each environment corresponds to one fixed propagation scene with a specific BS placement, antenna-array orientation, and blockage configuration, and contains Ne UE channel observations. Let ˜pBS  
+
+> e
+
+∈ R3 denote the global position of the BS antenna array in environment e. The BS-centered coordinate system is attached to this array. The xe-axis is aligned with the horizontal axis of the rectangular array, the 
+
+ye-axis is aligned with the vertical axis of the array, and the ze-axis is the array-normal direction pointing toward the service region. Let be,x , be,y , be,z ∈ R3 denote the orthonormal basis vectors of the BS-centered coordinate system for environment 
+
+e, expressed in the global coordinate system. We define 
+
+Be = [ be,x , be,y , be,z ]. For a UE with global position ˜pUE  
+
+> e,i
+
+,its BS-centered position is given by 
+
+pe,i = BT
+
+> e
+
+ ˜pUE  
+
+> e,i
+
+− ˜pBS 
+
+> e
+
+ . (1) After this transformation, the BS array center is located at the origin, and BT 
+
+> e
+
+maps the global BS-to-UE displacement vector to the BS-centered coordinate system. Throughout this paper, all UE positions and AoAs used by CHANNEL 2W ORLD are expressed in the BS-centered coordinate system. In practice, the UE position associated with a channel observation may contain acquisition error. We denote the observed BS-centered position by 
+
+ˆpe,i = pe,i + εpos  
+
+> e,i
+
+, εpos  
+
+> e,i
+
+∼ N  03, σ 2pos I3
+
+ , (2) where 03 ∈ R3 is the zero vector, I3 ∈ R3×3 is the identity matrix, and σpos denotes the position-error standard deviation per coordinate. The error is assumed independent across UE observations and symmetric across the three BS-centered coordinate axes. The BS in environment e is equipped with a rectangular antenna array of size Nx,e × Ny,e , with element spacings 
+
+dx,e and dy,e along the xe- and ye-axes, respectively, while each UE is assumed to use a single antenna. For a channel path arriving at the BS, let θ denote the angle between the arrival direction and the ze-axis, and let ϕ denote the azimuth angle measured from the xe-axis on the xe-ye plane. The corresponding direction cosines along the two array axes are 
+
+ux(θ, ϕ ) = sin θ cos ϕ, uy (θ, ϕ ) = sin θ sin ϕ. (3) For an Na-element uniform linear array with spacing d and carrier wavelength λ, we define the array response vector 
+
+aNa,d,λ (u) = [1 , e −j2πdu/λ , · · · , e −j2πd (Na−1) u/λ ]T, (4) 4
+
+where u is the direction cosine along the array axis. The BS array response matrix Ae(θ, ϕ ) ∈ CNx,e ×Ny,e is then formulated as 
+
+Ae(θ, ϕ ) = aNx,e ,d x,e ,λ (ux(θ, ϕ )) aT 
+
+> Ny,e ,d y,e ,λ
+
+(uy (θ, ϕ )) .
+
+(5) The BS estimates baseband-equivalent uplink orthogonal fre-quency division multiplexing (OFDM) complex channels over the subcarrier set Nsc ,e = {0, · · · , N sc ,e − 1}, where Nsc ,e 
+
+is the number of subcarriers. The baseband frequency of subcarrier n is 
+
+νe,n =
+
+
+
+n − Nsc ,e − 12
+
+
+
+∆fe, (6) where ∆fe is the subcarrier spacing. Thus, the occupied bandwidth is Bw,e = Nsc ,e ∆fe.For UE channel i in environment e, let Le,i denote the number of multipaths. For subcarrier n ∈ Nsc ,e , let He,i,n ∈
+
+CNx,e ×Ny,e denote the uplink spatial channel matrix across the BS array. Under a far-field finite-path model, the channel matrix is written as 
+
+He,i,n = ejκ e,i 
+
+> Le,i
+
+X
+
+> ℓ=1
+
+10 pe,i,ℓ  
+
+> 20
+
+Ae(θe,i,ℓ , ϕ e,i,ℓ )e−j2πν e,n τe,i,ℓ ,
+
+(7) where κe,i ∈ [0 , 2π) denotes the random phase induced by the RF frontend, pe,i,ℓ denotes the dB-scale gain of path ℓ,
+
+(θe,i,ℓ , ϕ e,i,ℓ ) denotes the BS-centered AoA, and τe,i,ℓ denotes the path delay measured with respect to the receiver timing reference. The uplink wideband MIMO channel from UE i
+
+to the BS is represented as the third-order tensor He,i ∈
+
+CNx,e ×Ny,e ×Nsc ,e , obtained by stacking the subcarrier-domain spatial channel matrices along the frequency mode: 
+
+He,i = [ He,i, 0, He,i, 1, · · · , He,i,N sc ,e −1], (8) where the three modes of He,i correspond to the two BS array dimensions, xe and ye, and the subcarrier dimension. The delay term τe,i,ℓ in (7) consists of the physical propaga-tion delay and a timing bias due to imperfect synchronization. Let dpath  
+
+> e,i,ℓ
+
+denote the traversing distance of path ℓ. The physical propagation delay is τ prop  
+
+> e,i,ℓ
+
+= dpath  
+
+> e,i,ℓ
+
+/c 0, where c0 is the speed of light. The delay under the receiver timing reference is modeled as 
+
+τe,i,ℓ = τ prop  
+
+> e,i,ℓ
+
++ bτe,i , (9) where bτe,i denotes a UE-specific timing bias that is common to all paths in the same channel observation. This bias represents the aggregate effect of receiver timing-reference selection and synchronization residuals. Furthermore, the path gain in (7) is modeled as 
+
+pe,i,ℓ = pphy  
+
+> e,i,ℓ
+
++ ξUE  
+
+> e,i,ℓ
+
++ ζg
+
+> e,i
+
+, (10) where pphy  
+
+> e,i,ℓ
+
+is the dB-scale path gain determined by physical propagation, ξUE  
+
+> e,i,ℓ
+
+is a path-dependent UE-side gain term, and ζg 
+
+> e,i
+
+is a channel-common gain-scale term. The physical propagation term pphy  
+
+> e,i,ℓ
+
+includes distance-dependent pathloss and propagation effects determined by ray interactions, such as reflection, diffraction, scattering, and material-dependent attenuation. The UE-side term ξUE  
+
+> e,i,ℓ
+
+accounts for UE antenna-gain pattern, body or hand blockage, and device orientation. In the simulations, we model this term as an independent zero-mean Gaussian random variable, ξUE  
+
+> e,i,ℓ
+
+∼ N (0 , σ 2 
+
+> ξ
+
+), where σξ
+
+denotes the standard deviation of the UE-side path-gain per-turbation. The gain-scale term ζg 
+
+> e,i
+
+represents transmit-power uncertainty, receiver gain control, and calibration effects, and is common to all paths in the same channel observation. 
+
+B. Channel Decomposition and Parameter Estimation 
+
+Before being processed by CHANNEL 2W ORLD , each up-link wideband MIMO channel tensor is converted into a finite set of multipath parameters. As described in (7), the noiseless channel tensor is represented as a sum of path-induced com-ponents with structured responses along the two spatial modes and the frequency mode. This low-rank multilinear structure supports 3D parameter estimation in the xe-ye-frequency do-main, even in the presence of additive signal noise. Compared with 1D or 2D mixed-signal representations, the joint spatial-frequency observation provides additional separability across propagation paths, thereby significantly improving the iden-tifiability of AoA, delay, and path-gain parameters. Existing tensor-based or subspace-based estimators can exploit this joint spatial-frequency structure to estimate these multipath parameters [31], [32]. We denote the pilot-based estimate of the ground-truth channel tensor He,i by bHe,i ∈ CNx,e ×Ny,e ×Nsc ,e , which can be expressed as 
+
+bHe,i = He,i + We,i , (11) where We,i includes receiver noise and residual modeling errors. Using decomposition-based signal separation, the es-timation of the multipath parameters is feasible from bHe,i , as follows:   ˆτe,i,ℓ , ˆθe,i,ℓ , ˆϕe,i,ℓ , ˆpe,i,ℓ 
+
+ ˆLe,i  
+
+> ℓ=1
+
+, (12) where ˆLe,i is the number of estimated paths, ˆτe,i,ℓ is the estimated delay under the imperfect receiver timing reference, 
+
+(ˆθe,i,ℓ , ˆϕe,i,ℓ ) is the estimated AoA, and ˆpe,i,ℓ is the estimated dB-scale path gain. The raw estimates in (12) contain the channel-common tim-ing bias bτe,i in (9) and the channel-common gain-scale factor 
+
+ζg 
+
+> e,i
+
+in (10), reflecting the practical channel assumptions. These channel-common quantities can be removed by normalizing the estimated delays and gains within each UE channel. For the delay feature, we use the shortest estimated delay as the timing reference, 
+
+ˆℓmin  
+
+> e,i
+
+= argmin   
+
+> ℓ∈{ 1,··· ,ˆLe,i }
+
+ˆτe,i,ℓ . (13) The relative delay is then defined as 
+
+ˆ¯τe,i,ℓ = ˆ τe,i,ℓ − ˆτe,i, ˆℓmin 
+
+> e,i
+
+. (14) This normalization removes the channel-common timing bias, but also discards the absolute delay origin and preserves only the excess-delay information across paths. For the gain feature, we use the strongest estimated path as the gain reference, 
+
+ˆℓmax  
+
+> e,i
+
+= argmax   
+
+> ℓ∈{ 1,··· ,ˆLe,i }
+
+ˆpe,i,ℓ . (15) 5  
+
+> Fig. 2. CHANNEL 2W ORLD architecture. Path tokens from context channel-position pairs are aggregated through attention into wireless world embedding tokens, which condition query-side position and gain prediction heads.
+
+The relative path gain is then defined as 
+
+ˆ¯ge,i,ℓ = ˆ pe,i,ℓ − ˆpe,i, ˆℓmax 
+
+> e,i
+
+. (16) This normalization removes the absolute gain scale and aligns the strongest path gain to 0 dB. After delay and gain normal-ization, the estimated multipath set is represented as 
+
+bPe,i = {(ˆ ¯τe,i,ℓ , ˆθe,i,ℓ , ˆϕe,i,ℓ , ˆ¯ge,i,ℓ )}ˆLe,i  
+
+> ℓ=1
+
+. (17) In particular, the delay estimates are limited by the obser-vation window and resolution imposed by OFDM frequency sampling. The subcarrier spacing ∆fe determines the un-ambiguous delay interval, and the occupied bandwidth Bw,e 
+
+determines the delay resolution [31], [32]. In the considered wideband setup with dense pilot allocation over the subcarrier domain, the unambiguous delay interval is much larger than the physical delay spread of the target environment. For example, ∆fe = 15 kHz yields an unambiguous range of approximately c0/∆fe = 20 km [33]. We therefore do not model integer delay ambiguity and assume that the largest multipath propagation distance is within the unambiguous range. The finite delay resolution and other imperfections in channel decomposition are captured by the parameter-error model described below. For each dominant path identified through multipath signal separation and associated with a ground-truth path component, the estimated parameters are modeled as 
+
+ˆ¯τe,i,ℓ = ¯ τe,i,ℓ + ετe,i,ℓ , ˆθe,i,ℓ = θe,i,ℓ + εθe,i,ℓ ,
+
+ˆϕe,i,ℓ = ϕe,i,ℓ + εϕe,i,ℓ , ˆ¯ge,i,ℓ = ¯ ge,i,ℓ + εge,i,ℓ . (18) The reference parameters in (18) are defined after removing the common delay bias and the absolute gain scale. Specifi-cally, the ideal relative delay ¯τe,i,ℓ and relative dB-scale path gain ¯ge,i,ℓ of path ℓ are given by 
+
+¯τe,i,ℓ = τe,i,ℓ − τe,i,ℓ min  
+
+> e,i
+
+, ℓmin  
+
+> e,i
+
+= argmin  
+
+> q∈{ 1,··· ,L e,i }
+
+τe,i,q ,
+
+¯ge,i,ℓ = pe,i,ℓ − pe,i,ℓ max  
+
+> e,i
+
+, ℓmax  
+
+> e,i
+
+= argmax  
+
+> q∈{ 1,··· ,L e,i }
+
+pe,i,q . (19) Here, ℓmin  
+
+> e,i
+
+denotes the index of the earliest path, and ℓmax 
+
+> e,i
+
+denotes the index of the strongest path. The variables ετe,i,ℓ ,
+
+εθe,i,ℓ , εϕe,i,ℓ , and εge,i,ℓ in (18) denote decomposition-equivalent estimation errors, which capture the aggregate effects of receiver noise, finite bandwidth, finite array aperture, and residual imperfections in multipath signal separation. Since channel decomposition is not the main focus of this paper, 
+
+CHANNEL 2W ORLD is evaluated under controlled parameter-error levels using this decomposition-equivalent error model. Specifically, the error terms are modeled as independent zero-mean Gaussian random variables: ετe,i,ℓ ∼ N (0 , σ 2 
+
+> τ
+
+), εθe,i,ℓ ∼N (0 , σ 2 
+
+> θ
+
+), εϕe,i,ℓ ∼ N (0 , σ 2
+
+> ϕ
+
+), and εge,i,ℓ ∼ N (0 , σ 2 
+
+> g
+
+), where 
+
+στ , σθ , σϕ, and σg denote the standard deviations of the relative-delay, zenith-angle, azimuth-angle, and relative-gain errors, respectively. III. C HANNEL 2W ORLD 
+
+This section presents CHANNEL 2W ORLD , a Transformer-based architecture that infers a wireless world embedding from channel observations collected in the same BS-centered environment. As shown in Fig. 2, the model consists of two 6
+
+parts: an environment encoder and estimation heads. The environment encoder aggregates multiple channel-position ob-servations into latent environment tokens, without depending on the number or ordering of channel samples and multipaths. The estimation heads use the inferred environment tokens to predict target variables from query tokens that are disjoint from the context tokens, thereby providing training signals to the environment encoder. 
+
+A. Environment-Level Data Organization and Token Con-struction 
+
+CHANNEL 2W ORLD uses the multipath parameter-domain representation, obtained from the channel decomposition de-scribed in Section II. Each environment is represented by a set of channel-position pairs, 
+
+De = {(ˆ pe,i , bPe,i )}Ne
+
+> i=1
+
+, (20) where ˆpe,i is the observed BS-centered UE position and bPe,i is the estimated multipath set in (17). Each pretraining instance is constructed within a single environment. CHANNEL 2W ORLD 
+
+samples a context channel-index set Ce and a query channel-index set Qe from {1, · · · , N e} such that Ce ∩ Q e = ∅. The context set provides the channel-position observations used to infer the wireless world embedding, whereas the query set provides disjoint channels for environment-conditioned prediction. For a channel with ˆLe,i estimated paths, we define the path-index set as Le,i = {1, · · · , ˆLe,i }. For a context channel path ℓ ∈ L e,i with i ∈ C e, the context token is defined as 
+
+xctx  
+
+> e,i,ℓ
+
+= [ˆ ¯τe,i,ℓ , sin ˆθe,i,ℓ , cos ˆθe,i,ℓ , sin ˆϕe,i,ℓ , cos ˆϕe,i,ℓ ,
+
+ˆ¯ge,i,ℓ , ˆpT
+
+> e,i
+
+]T, (21) containing the relative delay, BS-centered AoA, relative path gain, and UE position corresponding to the estimated path. In particular, query channels are selected from LoS UE channels. Let ILoS  
+
+> e
+
+⊂ { 1, · · · , N e} denote the set of channel indices corresponding to UEs with an LoS path. Then, Qe ⊆ILoS  
+
+> e
+
+. For these channels, the UE position provides a BS-to-UE range reference, which allows the channel timing reference to be calibrated using the LoS path. After this calibration, a propagation-delay estimate can be assigned to each path in the query channel, including non-line-of-sight (NLoS) paths. This restriction is not severe for pretraining because the query set is used only for supervision and is much smaller than the context set. For a query path ℓ ∈ L e,j with j ∈ Q e, the query token is defined as 
+
+xqry  
+
+> e,j,ℓ
+
+= [ˆ τ prop  
+
+> e,j,ℓ
+
+, sin ˆθe,j,ℓ , cos ˆθe,j,ℓ , sin ˆϕe,j,ℓ , cos ˆϕe,j,ℓ ]T,
+
+(22) where ˆτ prop  
+
+> e,j,ℓ
+
+denotes the calibrated propagation-delay estimate of path ℓ. The input query token does not explicitly include the observed UE position ˆpe,j or the relative path gains 
+
+{ˆ¯ge,j,ℓ }ℓ∈L e,j , which are instead used as supervised targets. The resulting context token set and query token set are 
+
+X ctx  
+
+> e
+
+= {xctx  
+
+> e,i,ℓ
+
+| i ∈ C e, ℓ ∈ L e,i },
+
+X qry  
+
+> e,j
+
+= {xqry  
+
+> e,j,ℓ
+
+| ℓ ∈ L e,j }, j ∈ Q e. (23) This context-query organization encourages the latent environ-ment tokens to encode propagation information shared across channels in the same environment, allowing them to explain disjoint query channel observations that were not used to construct the embedding. 
+
+B. Environment Encoder for Wireless World Embedding 
+
+The encoder maps the context token set into latent en-vironment tokens. It follows the design of attention-based set encoders with latent tokens, where a variable-size input token set is summarized through a fixed number of trainable latent tokens using cross-attention and self-attention [34], [35]. Each context token in X ctx  
+
+> e
+
+is first embedded into a 
+
+Dm-dimensional feature vector by a shared linear projection. 
+
+CHANNEL 2W ORLD then applies self-attention within the path tokens of each context channel to encode intra-channel multi-path structure before aggregating information across different channels. After channel-wise processing, the context path tokens from all channels in Ce form a variable-size set. To map this set into a fixed-size environment representation, CHAN -
+
+> NEL
+
+2W ORLD uses Kz trainable latent tokens as aggregation slots. The input latent-token matrix is defined as 
+
+Z(0) = [ z(0) 1 , z(0) 2 , · · · , z(0)  
+
+> Kz
+
+]T ∈ RKz×Dm , (24) where z(0)  
+
+> k
+
+∈ RDm is the k-th trainable latent token and Kz
+
+is the number of latent tokens. The same input latent-token initialization is shared across all environments and learned jointly with the other trainable model parameters. The global aggregation stage alternates between bidirec-tional cross-attention and self-attention blocks. In each cross-attention block, the latent tokens attend to the processed context path tokens to collect environment information, while the context path tokens attend back to the latent tokens to incorporate information from the current latent representation. Self-attention is then applied separately within the latent-token set and the context-token set, refining the information within each token set before the next cross-attention block. Through repeated updates, the latent tokens function as fixed-size aggregation slots that summarize the variable-size context observations into the environment representation. The environ-ment encoder output is written as 
+
+Ze = Enc Θ
+
+ X ctx  
+
+> e
+
+, Z(0)  ∈ RKz×Dm , (25) where Enc Θ(·) is the CHANNEL 2W ORLD encoder and Θ
+
+denotes the trainable model parameters. The resulting Ze
+
+consists of the processed latent token representations and serves as the wireless world embedding of environment e.
+
+C. Environment-Conditioned Estimation Heads 
+
+The estimation module uses the wireless world embedding 
+
+Ze to condition predictions for query channels that are disjoint from the context channels. It contains three prediction heads: per-path position estimation, relative path-gain estimation, and per-channel position estimation. Each input query token xqry 
+
+> e,j,ℓ
+
+is first projected to dimension Dm and then interacts with Ze
+
+through bidirectional cross-attention. This interaction allows 7
+
+each query path to retrieve environment information relevant to its calibrated propagation-delay estimate and AoA. The resulting environment-conditioned path token is written as 
+
+rpath  
+
+> e,j,ℓ
+
+= Dec path Θ
+
+ xqry 
+
+> e,j,ℓ
+
+, Ze
+
+ ∈ RDm , (26) where Dec path Θ (·) denotes the pathwise query-environment interaction module. 
+
+1) Per-path position estimation: A query path provides the BS-side ray direction through its AoA and range-related information through its propagation delay, but these quantities do not uniquely determine the UE position. The environment tokens provide the missing site-specific context by encoding reflector-related information inferred from the context chan-nels. CHANNEL 2W ORLD uses a Gaussian mixture model (GMM) head to predict a conditional density over the BS-centered UE position, ppath Θ (p | rpath  
+
+> e,j,ℓ
+
+), where p ∈ R3 denotes a UE position. The GMM components are predicted from the environment-conditioned path token rpath  
+
+> e,j,ℓ
+
+using a multi-layer perceptron (MLP) head with one hidden layer. During training, the predicted mixture density is evaluated at the observed query UE position ˆpe,j , which serves as the supervised target for each query path ℓ ∈ L e,j .
+
+2) Relative path-gain estimation: After environment-conditioned cross-attention, the path tokens are jointly refined within the query channel using intra-channel self-attention: 
+
+˜rpath  
+
+> e,j,ℓ ℓ∈L e,j
+
+= Ref Θ
+
+  rpath  
+
+> e,j,ℓ ℓ∈L e,j
+
+, (27) where Ref Θ(·) denotes the intra-channel self-attention block, and ˜rpath  
+
+> e,j,ℓ
+
+∈ RDm denotes the refined path token. This step allows the prediction heads to use the relative relationships among paths observed in the same query channel. The re-fined path token is used to estimate the relative path gain, 
+
+ˆ¯gpred  
+
+> e,j,ℓ
+
+= f gΘ(˜ rpath  
+
+> e,j,ℓ
+
+), where f gΘ : RDm → R is a shared gain head implemented by an MLP with one hidden layer. The supervised target for this head is the estimated relative dB-scale path gain ˆ¯ge,j,ℓ .
+
+3) Per-channel position estimation: For the final channel-level position estimate, CHANNEL 2W ORLD aggregates the refined path representations by attention pooling. The pooling weight of path ℓ in query channel j is 
+
+αe,j,ℓ = exp  wTp ˜rpath 
+
+> e,j,ℓ
+
+P 
+
+> q∈L e,j
+
+exp  wTp ˜rpath 
+
+> e,j,q
+
+ , (28) where wp ∈ RDm is a trainable pooling vector. The resulting channel token rch  
+
+> e,j
+
+∈ RDm is represented as 
+
+rch  
+
+> e,j
+
+= X
+
+> ℓ∈L e,j
+
+αe,j,ℓ ˜rpath  
+
+> e,j,ℓ
+
+. (29) The per-channel position head predicts a conditional den-sity over the BS-centered UE position, pch Θ (p | rch  
+
+> e,j
+
+), where 
+
+p ∈ R3 denotes a UE position. The density pch Θ (·) is also parameterized as a GMM, whose components are predicted from rch  
+
+> e,j
+
+using an MLP head with one hidden layer. During training, the predicted mixture density is evaluated at the observed query UE position ˆpe,j . The per-path position head models the ambiguity of individual propagation paths, while the per-channel position head combines multiple environment-conditioned path representations to provide the final channel-level position distribution. 
+
+D. Training Objective 
+
+Pretraining is performed using the three prediction tasks described in Section III-C. Let Etr , Ete ⊂ { 1, · · · , E } denote the training and test environment sets, respectively. For each sampled environment e ∈ E tr , we construct disjoint context and query channel-index sets satisfying Ce ∩ Q e = ∅. Let 
+
+N qry path = P 
+
+> j∈Q e
+
+|L e,j | denote the number of query path to-kens, where |L e,j | is the cardinality of the estimated path-index set for query channel j. The per-path position loss, relative path-gain loss, and per-channel position loss are defined as 
+
+Lpath pos = − 1
+
+N qry path 
+
+X
+
+> j∈Q e
+
+X
+
+> ℓ∈L e,j
+
+log ppath Θ
+
+ ˆpe,j | rpath 
+
+> e,j,ℓ
+
+,
+
+Lgain = 1
+
+N qry path 
+
+X
+
+> j∈Q e
+
+X
+
+> ℓ∈L e,j
+
+ ˆ¯gpred  
+
+> e,j,ℓ
+
+− ˆ¯ge,j,ℓ 
+
+2,
+
+Lch pos = − 1
+
+|Q e|
+
+X
+
+> j∈Q e
+
+log pch Θ
+
+ ˆpe,j | rch 
+
+> e,j
+
+.
+
+(30) The total loss for one environment-level task is 
+
+Le = Lpath pos + λgLgain + λch Lch pos , (31) where λg > 0 and λch > 0 are loss weights for relative path-gain estimation and channel-level position estimation, respectively. The training objective is 
+
+min  
+
+> Θ
+
+Ee∼E tr ECe,Qe [Le] , (32) where the outer expectation is over sampled training envi-ronments and the inner expectation is over the sampling of context and query channel-index sets within each environment. The overall training and evaluation protocol is summarized in Fig. 3. During pretraining, the environment encoder and the pretraining heads are jointly optimized. For each downstream task, the pretrained environment encoder is frozen and used to provide the wireless world embedding Ze, while only the task-specific downstream model is updated. During downstream evaluation, both the encoder and the downstream model are fixed, and generalization performance is evaluated using data from fully unseen test environments Ete .IV. D OWNSTREAM TASKS 
+
+After pretraining, the frozen CHANNEL 2W ORLD encoder produces a wireless world embedding Ze ∈ RKz×Dm for environment e. For a downstream task, let oe,i denote the task-specific observation associated with UE channel i, and let ˆye,i 
+
+denote the predicted target. A latent-conditioned downstream predictor is written as 
+
+ˆye,i = fΨ
+
+ oe,i , Ze
+
+, (33) where Ψ denotes the task-specific trainable parameters. We consider three general downstream tasks: UE position esti-mation from a single spatial channel matrix, beam-domain 8
+
+CSI reconstruction from sparse beam measurements, and RF-observable geometry reconstruction from NLoS path direc-tions. These tasks evaluate whether the wireless world em-bedding provides reusable environment conditioning across localization, communication, and geometric inference. 
+
+A. Environment-Aware Channel Matrix-to-Position Estimation 
+
+The first downstream task evaluates whether the wireless world embedding can assist UE position estimation from a single spatial channel matrix. This setting differs from the pretraining task, where path-level delay and AoA are explicitly available. For UE channel i in environment e, the downstream observation is defined as the input spatial channel matrix, 
+
+He,i ∈ CNx×Ny . The target is the BS-centered UE position 
+
+pe,i ∈ R3. The latent-conditioned position estimator is 
+
+ppred  
+
+> e,i
+
+= f pos Ψ
+
+ He,i , Ze
+
+, (34) where f pos Ψ (·) denotes a trainable estimator. The complex channel matrix He,i is converted into a real-valued feature vector by vectorizing its entries and concatenating their real and imaginary parts. This channel feature is concatenated with an attention-pooled representation of Ze and passed to an MLP prediction head, which outputs ppred  
+
+> e,i
+
+. The training loss is defined as the mean squared position error, 
+
+Lds pos = E∥ppred  
+
+> e,i
+
+− pe,i ∥22
+
+. (35) This task evaluates whether Ze provides site-specific envi-ronmental context for localization beyond the information contained in a direct channel-matrix observation. 
+
+B. Environment-Aware Beam-Domain CSI Reconstruction 
+
+The second downstream task addresses beam-domain down-link CSI reconstruction using partial beam-gain feedback from the UE. In practical beam management, the BS may observe only a subset of beam measurements due to pilot and feedback overhead. The objective is to reconstruct the full 2D DFT beam-domain received-power map from sparse, noisy beam observations. Such reconstruction is useful for beam manage-ment in multiuser MIMO systems that require interference-aware beam selection and channel-state prediction [11]. For this downstream task, all environments are evaluated under the same BS array configuration and the same fixed 2D DFT beamforming vector set B = {fm}Mm=1 , where fm ∈
+
+CNxNy and M = NxNy . For UE channel i in environment e,let γe,i ∈ RM denote the full downlink beam-domain received-power vector in dBm, whose m-th entry is the received power at the UE when the BS uses beam fm. The full vector γe,i 
+
+is the reconstruction target. Let Ω ⊂ { 1, · · · , M } denote the fixed set of measured codebook beam indices. The sparse beam observation γΩ 
+
+> e,i
+
+∈ RM is defined as 
+
+[γΩ
+
+> e,i
+
+]m =
+
+(
+
+˜γe,i,m , m ∈ Ω,
+
+0, m / ∈ Ω, (36) where ˜γe,i,m denotes the noisy dBm-scale beam-power mea-surement for beam m, obtained under the assumption of an  
+
+> Fig. 3. Pretraining and downstream protocol. The encoder is pretrained with context-query channel sets and then frozen for task-specific downstream learning.
+
+isotropic single-antenna UE. The environment-aware beam-domain CSI reconstruction model is 
+
+ˆγe,i = f beam Ψ
+
+ γΩ
+
+> e,i
+
+, Ze
+
+, (37) where f beam Ψ (·) denotes a convolutional neural network (CNN)-based latent-conditioned CSI reconstructor and ˆγe,i ∈
+
+RM is the reconstructed full beam-domain received-power vector in dBm. The sparse dBm-scale beam vector is first reshaped onto the 2D DFT beam grid and processed by convolutional layers to extract beam-domain features. In par-allel, the wireless world embedding Ze is converted into an environment-context feature through attention pooling over latent tokens. The beam-domain and environment-context fea-tures are then concatenated and passed to an MLP head, which predicts the full dBm-scale beam-domain output. The supervised objective is 
+
+Lds beam = E∥ˆγe,i − γe,i ∥22
+
+. (38) This task evaluates whether the wireless world embedding can also support site-specific communication tasks that are not explicitly formulated as geometric inference problems. 
+
+C. Environment Reconstruction via Interaction Point Estima-tion 
+
+The third downstream task assesses whether the wireless world embedding, beyond serving as a conditioning variable for communication tasks, contains recoverable information about the RF-observable geometry of the environment. This task reconstructs the first BS-side interaction points associated with NLoS paths. Given the BS-centered AoA of a path, the model estimates the range to the first interaction point along the corresponding ray direction. The resulting point set pro-9 
+
+> Fig. 4. Ray-tracing factory dataset. A one-dimensional BS grid and a dense two-dimensional UE grid generate BS-centered propagation environments for each layout.
+
+vides a BS-centered partial reconstruction of the propagation-relevant environment geometry. For an NLoS path ℓ of UE channel i in environment e,let s(1)  
+
+> e,i,ℓ
+
+∈ R3 denote the first BS-side interaction point in the BS-centered coordinate system, and let r(1)  
+
+> e,i,ℓ
+
+= ∥s(1) 
+
+> e,i,ℓ
+
+∥
+
+denote its range from the BS. The path-level observation is the BS-centered AoA feature 
+
+ηe,i,ℓ = [sin ˆθe,i,ℓ , cos ˆθe,i,ℓ , sin ˆϕe,i,ℓ , cos ˆϕe,i,ℓ ]T. (39) The latent-conditioned range predictor prec Ψ (·) is modeled as a GMM-based one-dimensional probabilistic estimator, 
+
+prec Ψ
+
+ r | ηe,i,ℓ , Ze
+
+, (40) and is trained using the negative log-likelihood 
+
+Lds rec = −E log prec Ψ
+
+ r(1)  
+
+> e,i,ℓ
+
+| ηe,i,ℓ , Ze
+
+ , (41) where the expectation is taken over the NLoS path samples from training environments. Given the predicted range distri-bution, the point estimate is obtained by maximum likelihood: 
+
+ˆr(1)  
+
+> e,i,ℓ
+
+= argmax 
+
+> r
+
+prec Ψ
+
+ r | ηe,i,ℓ , Ze
+
+. (42) The first interaction point is then reconstructed along the AoA-defined ray. Let uAoA  
+
+> e,i,ℓ
+
+∈ R3 denote the unit direction vector associated with the BS-centered AoA convention, 
+
+uAoA  
+
+> e,i,ℓ
+
+= [sin ˆθe,i,ℓ cos ˆϕe,i,ℓ , sin ˆθe,i,ℓ sin ˆϕe,i,ℓ , cos ˆθe,i,ℓ ]T.
+
+(43) The reconstructed interaction point is 
+
+ˆs(1)  
+
+> e,i,ℓ
+
+= ˆ r(1) 
+
+> e,i,ℓ
+
+uAoA  
+
+> e,i,ℓ
+
+. (44) Applying this procedure to multiple NLoS paths yields a sparse reconstruction of the RF-observable environment ge-ometry. V. S IMULATION RESULTS 
+
+This section evaluates CHANNEL 2W ORLD using ray-tracing channel data generated from 26000 BS-centered fac-                                                          
+
+> TABLE I KEY SIMULATION AND MODEL PARAMETERS .Parameter Value Factory layouts 26 randomized layouts Factory-level train/validation/test split 22 /2/2
+> BS per layout 500 positions Total BS-centered environments 26000
+> BS height and wall offset 15 m and 0.2mUE height 1.5mUE grid spacing Randomized in [0 .6,0.7] mCarrier frequency 7.0GHz Maximum paths 12 per channel Maximum path interactions 3
+> Environment latent tokens Kz= 16
+> Token dimension Dm= 128
+> Context and query channels 128 and 32
+> Attention heads 4
+> Path self-attention layers 4
+> Encoder cross-attention layers 6
+> Encoder self-attention layers 6
+> Query cross-attention layers 8
+> Query path self-attention layers 2
+> GMM components 8
+> Minimum GMM std. σmin = 0 .5mPretraining batch size 32
+> Loss weights λg= 0 .1and λch = 0 .5
+> Error-aware position observation error σpos = 0 .1mError-aware delay error στ= 1 ns Error-aware angle errors σθ=σϕ= 1 ◦
+> UE-side gain fluctuation σξ= 3 dB
+
+tory environments. Table I summarizes the main dataset, model, and training parameters. The pretrained model uses 
+
+Kz = 16 environment latent tokens with token dimension 
+
+Dm = 128 . Each pretraining sample contains 128 context channels, jointly processed as input, and 32 query channels from the same BS-centered environment. The environment encoder uses four per-channel path self-attention layers, fol-lowed by six alternating bidirectional cross-attention and self-attention layers for environment-token aggregation. The esti-mation heads use eight bidirectional cross-attention layers and two post-processing path self-attention layers. All attention blocks follow a Transformer structure with residual connec-tions, four attention heads, a feed-forward network (FFN) expansion ratio of 4, and no dropout [36]. With these settings, 
+
+CHANNEL 2W ORLD contains approximately 9.2 million train-able parameters. We consider two pretraining conditions. In the error-aware 
+
+condition, the decomposition-equivalent error model in (18) is applied to the path parameters, and the UE position error model in (2) is applied to the observed positions. The delay-error standard deviation is στ = 1 ns, and the AoA-error standard deviations are σθ = σϕ = 1 ◦. The observed UE positions are generated with σpos = 0 .1 m. The UE-side path-gain fluctuation in (10) is set to σξ = 3 dB. In the error-free condition, the delay, angle, and position perturbations are removed, while the same σξ = 3 dB gain fluctuation is applied. 
+
+A. Dataset Generation 
+
+The dataset is generated using Remcom Wireless InSite ray-tracing software. Fig. 4 shows one representative factory layout. We generate 26 base layouts with randomized building geometry. For each layout, 500 BS positions are placed along a large wall with 1 m spacing. Each BS is located at a height 10  
+
+> Fig. 5. Pretraining validation curves for position GMM loss and relative gain RMSE under error-aware and error-free inputs.
+> Fig. 6. Per-path UE-position GMMs for a query path in a test environment.
+
+of 15 m with a 0.2 m offset from the wall. UE positions are sampled over the service region using a dense 2D grid, whose spacing is randomized between 0.6 m and 0.7 m to reduce grid-induced learning artifacts. For a given factory layout and BS position, the set of valid UE channels defines a single BS-centered propaga-tion environment. Diffraction is disabled in the ray-tracing simulation, and reflection paths with up to three reflections are considered. We retain up to the 12 strongest paths per channel and remove channels with no valid propagation path. After filtering, each BS-centered environment contains 833 
+
+to 9024 valid UE channel-position pairs, with an average of 
+
+4999 pairs. Horizontal mirror augmentation is then applied by reversing the xe-axis and transforming the corresponding UE positions and path parameters. The final dataset contains 
+
+26 × 500 × 2 = 26000 unique BS-centered environments. The train/validation/test environment split is performed at the factory-layout level rather than at the BS level. This prevents neighboring BS-centered scenes, mirrored counterparts, and UE samples from the same layout from appearing across different splits. Hence, the downstream results evaluate gener-alization to unseen building realizations, rather than interpo-lation among BS locations from previously observed layouts.  
+
+> Fig. 7. Cosine similarity between wireless world embeddings obtained from nearby BSs in the same factory layout.
+
+B. Channel2World Pretraining 
+
+Fig. 5 shows the validation performance of CHAN -
+
+> NEL
+
+2W ORLD over training epochs for the three pretraining objectives. The two position curves represent the GMM neg-ative log-likelihoods of the per-path and per-channel position heads, while the gain curve represents the root mean squared error (RMSE) of the relative path-gain estimate. The dotted GMM lower bound is obtained from the minimum component standard deviation σmin = 0 .5 m. For a 3D spherical Gaussian component centered at the target, the minimum negative log-likelihood is 32 log(2 πσ 2min ). The gain-RMSE lower bound is σξ = 3 dB, since the relative gain target includes an independent UE-side fluctuation that cannot be inferred from the channel-position context. Fig. 6 visualizes the per-path position GMM produced by the pretraining head for a test environment. The query token contains only the calibrated propagation-delay estimate and BS-centered AoA of a single path. For the illustrated NLoS path, these two quantities do not uniquely determine the UE position, since the inverse mapping depends on the reflector geometry of the environment. Nevertheless, both the error-aware and error-free models place GMM components near the target UE position, even in an unseen test environment. This result indicates that Ze, inferred from multiple context channel tokens, provides the environmental information needed to interpret the delay and AoA features through the surrounding reflector structure. The error-aware model produces a broader distribution, consistent with the injected perturbations, while the error-free model yields a sharper estimate under ideal path inputs. 
+
+C. Latent Continuity Across Environments 
+
+Fig. 7 analyzes the latent geometry of the learned wireless world embeddings. For this analysis, each embedding is in-ferred from 1024 randomly sampled context channels from the corresponding BS-centered environment. We subtract the empirical mean of all 26000 environment embeddings from each embedding and compute cosine similarity between the centered embeddings. The random-pair reference lines indicate the mean similarity of randomly paired environments under the same centering and normalization procedure. Their values are 11  
+
+> Fig. 8. Channel matrix-to-position estimation in test environments. Position RMSE is shown versus the number of downstream-model parameters.
+
+close to zero, showing that the observed positive similarity of nearby same-flip environments is not caused by a global embedding offset. The same-flip curves compare BS-centered environments from the same factory layout and mirror-augmentation sign. Their similarity decreases with BS separation, as adjacent BSs observe partially overlapping reflector and blockage structures, while distant BSs induce more distinct BS-centered propa-gation relationships. At zero distance gap, the embeddings correspond to the same environment but are inferred from different random context-channel subsets, which explains the small deviation from unit similarity. The different-flip curves remain close to the random-pair reference. Although a mirror-flipped environment may share coarse layout complexity with the original environment, its BS-centered geometry and AoA-to-reflector correspondence are distinct. The embeddings pro-duced by the error-aware encoder generally show higher same-flip similarity than those produced by the error-free encoder, suggesting that error-aware pretraining learns a smoother em-bedding space under local perturbations. In contrast, the error-free encoder preserves finer site-specific differences, yielding sharper separation between nearby BS-centered environments. 
+
+D. Environment-Conditioned Downstream Evaluation 
+
+We evaluate the frozen CHANNEL 2W ORLD encoder as an environment-conditioning module for channel matrix-to-position estimation and beam-domain CSI reconstruction. The evaluation uses 16 BS-centered environments randomly se-lected from the test factory layouts. For each environment, the channel samples are divided into training and test subsets with an 80 /20 split, and all reported metrics are computed on the test subset. We compare the following settings: 
+
+• Test: Site-specific trains one site-specific model for each selected test environment using only its target-environment training split. 
+
+• Test: Combined trains one model by pooling the target-environment training splits from all 16 selected environments.  
+
+> Fig. 9. Beam-domain CSI reconstruction RMSE from sparse codebook measurements in test environments.
+
+• Global trains one model using all samples from the train-ing environments and no samples from the test environments. 
+
+• Global + fine-tuning starts from the trained Global 
+
+model and updates a lightweight output module for target-environment adaptation using 128 , 256 , or 1024 task-labeled samples from the target-environment training split. 
+
+• Proposed trains two model variants using the same training data as Global , conditioned on embeddings produced by the frozen error-aware and error-free CHANNEL 2W ORLD 
+
+encoders, respectively. At evaluation, each embedding Ze
+
+is inferred from 128 context channel-position samples from the target-environment training split, without updating the corresponding encoder or downstream model. 
+
+• Mean and Shuffled use the trained Proposed model but replace the target-environment embedding during evaluation with either the empirical mean embedding or an embedding inferred from another test environment. The target-environment reference models ( Test: Site-specific 
+
+and Test: Combined ) and fine-tuning baselines use task-labeled samples from the selected test environments to train or adapt the downstream predictor. In contrast, the proposed method uses target-environment samples only to infer the wireless world embedding and performs no gradient-based target-environment adaptation. The task-specific predictor backbone is kept the same across the target-environment, global, and proposed settings, with the proposed model adding only a lightweight attention-pooling module for Ze. The following results show that the wireless world embedding inferred by 
+
+CHANNEL 2W ORLD contains downstream-relevant environ-mental structure that can be exploited in unseen environments without task-specific target-environment adaptation. 
+
+1) Channel Matrix-to-Position Estimation Results: The first downstream task, introduced in Section IV-A, estimates the BS-centered UE position from a single uplink spatial channel matrix He,i ∈ C4×8 obtained at 7.0 GHz with a 4 × 8 BS array. Fig. 8 shows the position RMSE versus the number of trainable parameters in the downstream model. The proposed 12      
+
+> Fig. 10. RF-observable geometry reconstruction from NLoS path directions. Predicted interaction points are shown using embeddings inferred by the error-aware encoder with 128 context channels and by the error-free encoder with 1024 context channels.
+
+environment-conditioned models consistently outperform the unconditioned Global model across the tested model sizes. Since the comparison accounts for the parameter increase in-troduced by the conditioning module, the gain mainly reflects the target-environment information contained in Ze rather than the larger model size. The proposed models also outperform the Test: Site-specific and Test: Combined references, although these references use target-environment samples. This trend is attributed to the limited training data available within the selected test environments, which restricts the diversity of channel-position pairs for learning the site-specific mapping. For the fine-tuning baselines in this task, the final linear layer of the trained Global model is replaced by an MLP adaptation head with one hidden layer, and only this head is updated using target-environment samples. The fine-tuning baselines improve as more target-environment samples are used. With 
+
+128 samples, fine-tuning remains significantly worse than the proposed conditioning, despite using the same number of target-environment samples as the Proposed model. With 
+
+1024 samples, fine-tuning outperforms the proposed model by using substantially more task-labeled target-environment data. The Mean and Shuffled ablations degrade markedly and perform worse than Global , showing that the gain from environment conditioning depends on using an embedding matched to the target environment. The error-aware and error-free encoders provide nearly identical performance, indicating that the considered estimation errors do not critically reduce the usefulness of the inferred embedding for this task. 
+
+2) Beam-Domain CSI Reconstruction Results: The second downstream task, introduced in Section IV-B, reconstructs the full 8 × 16 DFT beam-domain received-power map from sparse, noisy beam measurements. The evaluation uses an 
+
+8×16 BS array at 7.0 GHz with isotropic BS antenna elements and a single isotropic UE antenna. The total BS transmit power, bandwidth, and receiver noise power spectral density are set to 24 dBm, 20 MHz, and −174 dBm/Hz, respectively. The codebook sizes |Ω| = 12 , 16 , 24 , 32 correspond to 2 × 6,
+
+4×4, 3×8, and 4×8 fixed-pattern beam subsets, respectively. The Test: Site-specific , Test: Combined , Global , and fine-tuning models have approximately 1.80 million parameters, compared with 1.86 million for the proposed model due to the latent pooling module. For this high-dimensional input-output task, we do not attach a newly initialized adaptation head for the fine-tuning baselines, since training such a head from a small target-environment set may generalize poorly. Instead, fine-tuning starts from the trained Global model and updates only its final two-layer MLP prediction block using target-environment samples. Fig. 9 reports the reconstruction RMSE in dB. Increasing |Ω| generally reduces the error, although the trend is not strictly monotonic because different fixed beam-subset patterns provide different levels of information to the learned reconstructor. The proposed models improve over 
+
+Global , although the gain is less noticeable than in position estimation because this task is largely an interpolation of the beam-domain map. The target-environment references reflect the training-data demand of this high-dimensional task. The 
+
+Test: Site-specific model is limited by the amount of per-environment data, while Test: Combined benefits from data pooling across environments and becomes more competitive for larger codebooks. The fine-tuning baselines with 128 
+
+and 256 samples are competitive with the proposed models. However, fine-tuning requires beam-domain CSI labels and additional gradient-based adaptation. The Mean and Shuffled 
+
+ablations remain closer to the proposed models than in local-ization, indicating that reconstruction is less sensitive to the ex-act environment embedding when sparse beam measurements already provide substantial information for interpolation. 
+
+3) Environment Reconstruction Results: The third down-stream task, introduced in Section IV-C, evaluates whether the wireless world embedding contains recoverable geometric information. Since the BS-centered AoA specifies only the ray direction, the range to the first BS-side interaction point must be inferred from Ze. We train two range predictors conditioned on embeddings inferred by the error-aware encoder using 128 
+
+context channel-position samples and the error-free encoder using 1024 context samples, respectively. Despite relying on fewer and perturbed context observations, the error-aware setting achieves an RMSE of 3.91 m and a mean absolute 13 
+
+error (MAE) of 1.94 m, close to the 3.88 m RMSE and 1.84 mMAE obtained in the error-free setting. Fig. 10 shows repre-sentative reconstruction results, in which the dominant BS-side reflector structures and their approximate spatial extent are recovered. The reconstruction is less accurate near cor-ners, discontinuities, and sparsely observed reflector regions. This limitation arises because the decoder predicts one range value independently for each AoA-defined ray and does not impose surface-continuity constraints. These results indicate that Ze retains recoverable RF-observable geometry, although the proposed decoder should not be interpreted as a complete environment reconstruction method. VI. C ONCLUSION 
+
+In this paper, we proposed CHANNEL 2W ORLD , a wireless foundation model that infers BS-centered RF environment representations from MIMO channel-position observations. 
+
+CHANNEL 2W ORLD aggregates these observations into wire-less world embedding tokens and trains the environment en-coder through context-query pretraining. Evaluation using ray-tracing channel data from 26,000 randomized BS-centered en-vironments demonstrated that the learned embeddings capture site-specific propagation structures and generalize to unseen building layouts. The inferred wireless world embeddings improved performance on downstream tasks, including UE po-sition estimation and sparse beam-domain CSI reconstruction, compared with unconditioned and mismatched-latent base-lines. In addition, the RF-observable geometry reconstruction task further showed that the embeddings contain sufficient information to recover dominant reflector structures. These results suggest that channel-position observations can provide reusable RF environment priors for environment-aware AI-native wireless systems. Future work includes validating the proposed framework on measured multi-site channel datasets. REFERENCES [1] J. Hoydis et al. , “Sionna: An open-source library for next-generation physical layer research,” 2022. [Online]. Available: https: //arxiv.org/abs/2203.11854 [2] C.-K. Wen, W.-T. Shih, and S. Jin, “Deep learning for massive MIMO CSI feedback,” IEEE Wireless Commun. Lett. , vol. 7, no. 5, pp. 748–751, Oct. 2018. [3] H. He et al. , “Model-driven deep learning for physical layer communi-cations,” IEEE Wireless Commun. , vol. 26, no. 5, pp. 77–83, Oct. 2019. [4] Y. Heng, J. Mo, and J. G. Andrews, “Learning site-specific probing beams for fast mmWave beam alignment,” IEEE Trans. Wireless Com-mun. , vol. 21, no. 8, pp. 5785–5800, Aug. 2022. [5] S. Alikhani, G. Charan, and A. Alkhateeb, “Large wireless model (LWM): A foundation model for wireless channels,” 2025. [Online]. Available: https://arxiv.org/abs/2411.08872 [6] B. Liu et al. , “WiFo: Wireless foundation model for channel prediction,” 
+
+Sci. China Inf. Sci , vol. 68, no. 6, p. 162302, May 2025. [7] T. Yang et al. , “WirelessGPT: A generative pre-trained multi-task learning framework for wireless communication,” IEEE Netw. , vol. 39, no. 5, pp. 58–65, Sep. 2025. [8] B. Guler, G. Geraci, and H. Jafarkhani, “A multi-task foundation model for wireless channel representation using contrastive and masked autoencoder learning,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 4489– 4504, Mar. 2026. [9] J. Jiang et al. , “A MIMO wireless channel foundation model via CIR-CSI consistency,” in Proc. IEEE Int. Conf. Mach. Learn. Commun. Netw. (ICMLCN) , 2025, pp. 1–6. [10] O. Mashaal and H. Abou-Zeid, “IQFM—a wireless foundation model for I/Q streams in AI-native 6G,” IEEE Open J. Commun. Soc. , vol. 7, pp. 1426–1441, 2026. [11] H.-J. Moon et al. , “AI-based beam management for FR3 FDD MIMO via online channel synthesis,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 3444–3458, 2026. [12] A. Aboulfotouh, E. Mohammed, and H. Abou-Zeid, “6G WavesFM: A foundation model for sensing, communication, and localization,” IEEE Open J. Commun. Soc. , vol. 6, pp. 6792–6807, Aug. 2025. [13] T. Zheng et al. , “MUSE-FM: Multi-task environment-aware foundation model for wireless communications,” IEEE Trans. Wireless Commun. ,vol. 25, pp. 19 791–19 806, Jul. 2026. [14] H. Ye, G. Y. Li, and B.-H. Juang, “Power of deep learning for channel estimation and signal detection in OFDM systems,” IEEE Wireless Commun. Lett. , vol. 7, no. 1, pp. 114–117, Feb. 2018. [15] M. Alrabeiah and A. Alkhateeb, “Deep learning for mmWave beam and blockage prediction using sub-6 GHz channels,” IEEE Trans. Commun. ,vol. 68, no. 9, pp. 5504–5518, Sep. 2020. [16] T. O’Shea and J. Hoydis, “An introduction to deep learning for the physical layer,” IEEE Trans. Cogn. Commun. Netw. , vol. 3, no. 4, pp. 563–575, Dec. 2017. [17] J. Jiang et al. , “Towards channel foundation models (CFMs): Motivations, methodologies and opportunities,” 2025. [Online]. Available: https://arxiv.org/abs/2507.13637 [18] Y. Zeng and X. Xu, “Toward environment-aware 6G communications via channel knowledge map,” IEEE Wireless Commun. , vol. 28, no. 3, pp. 84–91, Jun. 2021. [19] Y. Zeng et al. , “A tutorial on environment-aware communications via channel knowledge map for 6G,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1478–1519, 2024. [20] D. Wu et al. , “Environment-aware hybrid beamforming by leveraging channel knowledge map,” IEEE Trans. Wireless Commun. , vol. 23, no. 5, pp. 4990–5005, May 2024. [21] A. Klautau, N. Gonz´ alez-Prelcic, and R. W. Heath, “LIDAR data for deep learning-based mmWave beam-selection,” IEEE Wireless Commun. Lett. , vol. 8, no. 3, pp. 909–912, Jun. 2019. [22] M. Alrabeiah et al. , “ViWi: A deep learning dataset framework for vision-aided wireless communications,” in IEEE Veh. Technol. Conf. (VTC-Spring) , 2020, pp. 1–5. [23] W. Xu et al. , “Computer vision aided mmWave beam alignment in V2X communications,” IEEE Trans. Wireless Commun. , vol. 22, no. 4, pp. 2699–2714, Apr. 2023. [24] Y. Yang et al. , “Environment semantics aided wireless communications: A case study of mmWave beam prediction and blockage prediction,” 
+
+IEEE J. Sel. Areas Commun. , vol. 41, no. 7, pp. 2025–2040, Jul. 2023. [25] A. Alkhateeb et al. , “Deepsense 6G: A large-scale real-world multi-modal sensing and communication dataset,” IEEE Commun. Mag. ,vol. 61, no. 9, pp. 122–128, Sep. 2023. [26] R. Levie et al. , “RadioUNet: Fast radio map estimation with convolu-tional neural networks,” IEEE Trans. Wireless Commun. , vol. 20, no. 6, pp. 4001–4015, Jun. 2021. [27] S. Jiang et al. , “Learnable wireless digital twins: Reconstructing elec-tromagnetic field with neural representations,” IEEE Open J. Commun. Soc. , vol. 6, pp. 1568–1590, 2025. [28] L. Zhang et al. , “RF-3DGS: Wireless channel modeling with radio radi-ance field and 3D gaussian splatting,” IEEE Trans. Wireless Commun. ,vol. 25, pp. 10 419–10 433, 2026. [29] L. Yu et al. , “ChannelGPT: A large model toward real-world channel foundation model for 6G environment intelligence communication,” 
+
+IEEE Commun. Mag. , vol. 63, no. 10, pp. 68–74, Oct. 2025. [30] Z. Chen et al. , “A wireless world model for AI-native 6G networks,” 2026. [Online]. Available: https://arxiv.org/abs/2603.25216 [31] Z. Zhou et al. , “Low-rank tensor decomposition-aided channel estima-tion for millimeter wave MIMO-OFDM systems,” IEEE J. Sel. Areas Commun. , vol. 35, no. 7, pp. 1524–1538, Jul. 2017. [32] Y. Lin et al. , “Tensor-based channel estimation for millimeter wave MIMO-OFDM with dual-wideband effects,” IEEE Trans. Commun. ,vol. 68, no. 7, pp. 4218–4232, Jul. 2020. [33] H.-J. Moon et al. , “MAP-X: Massive field data processing for real-time wide-area mapping using high-altitude platforms with MIMO,” IEEE Trans. Wireless Commun. , vol. 25, pp. 4358–4373, Jan. 2026. [34] J. Lee et al. , “Set transformer: A framework for attention-based permutation-invariant neural networks,” in Proc. Int. Conf. on Machine Learning (ICML) , Jun. 2019, pp. 3744–3753. [35] A. Jaegle et al. , “Perceiver: General perception with iterative attention,” in Proceedings of the 38th International Conference on Machine Learn-ing . PMLR, Jul. 2021, pp. 4651–4664. [36] A. Vaswani et al. , “Attention is all you need,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 30, Jun. 2017.

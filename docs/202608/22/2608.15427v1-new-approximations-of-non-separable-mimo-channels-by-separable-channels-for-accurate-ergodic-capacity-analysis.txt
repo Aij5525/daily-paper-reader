@@ -1,0 +1,2650 @@
+Title: New Approximations of Non-Separable MIMO Channels by Separable Channels for Accurate Ergodic Capacity Analysis
+
+URL Source: https://arxiv.org/pdf/2608.15427v1
+
+Published Time: Tue, 18 Aug 2026 00:51:08 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# New Approximations of Non-Separable MIMO Channels by Separable Channels for Accurate Ergodic Capacity Analysis 
+
+Thanh Luan Nguyen ∗; Zygmunt J. Haas †; Chadi Abou-Rjeily ‡; and Georges Kaddoum ∗;
+
+∗Department of Electrical Engineering, ´ Ecole de Technologie Sup´ erieure ( ´ ETS), Montr´ eal, QC, Canada 
+
+†School of Electrical and Computer Engineering, Cornell University, Ithaca, NY 14853. 
+
+‡Department of Electrical and Computer Engineering, Lebanese American University (LAU), Byblos 5053, Lebanon. Emails: thanh-luan.nguyen.1@ens.etsmtl.ca, chadi.abourjeily@lau.edu.lb, zhaas@cornell.edu, georges.kaddoum@etsmtl.ca. 
+
+Abstract —In recent years, owing to the high accuracy in char-acterizing non-separable channels prevalent in next-generation wireless applications, the classical Weichselberger channel model has gained widespread adoption in multiple-input multiple-output (MIMO) systems. However, its non-separable structure also intro-duces severe analytical complexity, leading to a lack of tractable mathematical frameworks in the literature and thus raises an urgent need for further research. To address the aforementioned analytical complexity, we first derive the nearest separable (double-correlated Rayleigh) fading model to the Weichselberger model under the Kullback–Leibler divergence (KLD), a problem equivalent to rank-
+
+1 nonnegative matrix factorization under the Itakura–Saito (IS) distance criterion. The results of our asymptotic analysis in the high-SNR regime reveal that the KLD-enabled approximation achieves a tighter capacity estimate than the conventional Kronecker model, especially in sparse and non-regular scattering environments. Yet, a key limitation of the KLD-enabled model is its tendency to mischaracterize the channel capacity in the low-SNR regime due to its inability to preserve total channel power. As a more robust alternative, we introduce a novel moment matching method (MMM) aimed at mapping the exact channel statistics to those of a Wishart distribution. Both the KLD-enabled and MMM-enabled separable channel directly enable the use of exact closed-form expressions for the ergodic capacity. Numerical results demonstrate that the MMM-enabled model consistently improves upon the capacity accuracy of the conventional Kronecker model across all SNR regimes. 
+
+Index Terms —Weichselberger; Ergodic capacity, Moment match-ing method; Kullback-Leibler divergence; Nonnegative matrix fac-torization 
+
+I. I NTRODUCTION 
+
+# THE global evolution towards next-generation wireless net-works has increased the development and deployment of multiple-input multiple-output (MIMO) technologies to achieve further gains in capacity and reliability over bandwidth-limited channels [1], [2], [3], [4]. However, an accurate quantification of such performance gains largely depends on the ability of the underlying channel model to capture different properties of real-world propagation environments. Driven by such requirements, in recent years, considerable efforts have been invested in the development of channel models that would balance the trade-off between complexity and accuracy for reliable MIMO system performance evaluation [5], [6], [7], [8]. 
+
+This manuscript has been submitted for publication. 
+
+A main challenge in such accurate evaluation of MIMO system performance is the presence of spatial correlation. In real-world deployments, spatial correlation is inevitable and can degrade the MIMO capacity [5], [9]. Zero spatial correlation requires highly idealized (and practically unrealistic) conditions, such as isotropic scattering combined with uniform linear arrays (ULAs) spaced at exact integer multiples of half the wavelength. Since realistically uncorrelated environments are rarely observed, tremendous effort has been invested into characterizing correlated MIMO channels. One of the most well-known frameworks in the literature is the double-correlated Rayleigh model, which introduces a Kronecker correlation structure [10], [11]. The Kronecker framework sim-plifies mathematical analysis by assuming that spatial correlation at the transmitter operates independently from spatial correlation at the receiver, resulting in a separable variance profile. However, the Kronecker model fails to capture physical depen-dence between the transmitting and receiving antenna arrays and, consequently, frequently underestimates the true channel capac-ity in realistic propagation environments [12]. Another critical limitation of the Kronecker model is its inability to accurately predict capacity and diversity even for large antenna arrays [5], which makes it unsuitable for accurate performance analysis of Extremely Large Aperture Array (ELAA) technologies [3], which is an advanced wireless antenna architecture that features thou-sands of closely coordinated elements spanning large physical dimensions. To overcome the aforementioned limitations, a more generalized alternative that was recently proposed is the Weich-selberger model, which introduces a non-separable correlation structure to characterize arbitrary coupling between transmit and receive antennas while encompassing the Kronecker model as a simplified case [10], [13], [12]. As a result, the Weichselberger model provides a more general structure in representing a variety of channel scenarios. Recently, this model has become essential for evaluating emerging next-generation architectures [8], such as reconfigurable intelligent surface (RIS)-aided channels [14] and holographic MIMO systems [15]. Yet, despite the broad applicability of the Weichselberger model, its underlying non-separable structure introduces signifi-cant analytical complexities, as it often relies on analytical upper bounds [16] or large-system asymptotic approximations [12], [15], [17]. Such methods can fall short when exact performance evaluation is required for systems with finite-dimensional antenna arXiv:2608.15427v1 [cs.IT] 15 Aug 2026 2
+
+arrays. A typical example is the fully-connected beyond-diagonal RIS architecture [18], where hardware-induced attenuation scales exponentially as a result of mutual coupling between elements and limits the maximum number of deployable elements. This induces a critical need for tractable mathematical approximations capable of preserving the underlying statistical properties of the Weichselberger model across both finite-dimensional as well as large-scale configurations. 
+
+A. Related Works 
+
+The characterization of Ergodic capacity (EC) and outage probability (OP) frequently depends on whether the channel ma-trices are centered, separable, and analyzed in the asymptotic or finite (non-asymptotic) regimes. For centered and non-separable channels, in [16], the authors derived a non-asymptotic, closed-form tight upper bound for the EC using the matrix permanent (i.e., perm()) of the eigenmode channel coupling matrix. In the large-system limit for non-centered and non-separable channels, in [17] and [19], the authors evaluated the asymptotic sum-rate capacity of multiuser MIMO uplink channels as the number of transmit and receive antennas approaches infinity. Taking a finite-system approach, in [6], the authors proposed a pervasively correlated channel model to evaluate the capacity distributions via numerical sampling. In another study that relied on the Random Matrix Theory (RMT) [15], the authors established a central limit theorem (CLT) to provide closed-form, asymptotic expressions for the mean and variance of the MI in channels containing both line-of-sight (LOS) and non-line-of-sight (NLOS) components. In one of the earliest studies [20], the authors established a formal framework for approximating unknown multivariate probability density functions (PDFs) of a symmetric random matrix by using Edgeworth series expansion around the centered Wishart base. Due to their reliance on Kronecker-structured matrix moments, the dimensionality of higher-order moments was found to explode exponentially, thus complicating their moment-matching framework for heavily skewed distributions. By contrast, subsequent studies [21] and [22] derived the true matrix-valued moments of real-valued Wishart and complex-valued Wishart random matrices, respectively, which preserve the original matrix dimensions. In the closest relevant work to this paper, [23] proposed a Wishart matrix approximation to derive non-asymptotic, closed-form expressions for the ergodic sum-rate capacity of MIMO channels via exact marginal eigenvalue distributions. Although the aforementioned study was strictly limitted to the sum of isotropic complex Wishart matrices, it provided a fresh moment-matching perspective that motivates the need for a generalized approximation framework for Wishart matrices with arbitrary covariance structures. Should such an approximation framework be established, analytical results for separable channels could be directly adapted to accurately explore the performance of future wireless communication systems. In-deed, in the literature, a wealth of exact and asymptotic solutions for these separable models was already proposed. For centered and separable channels, in [24], the authors provided a strictly non-asymptotic analysis, characterizing the exact EC as a sum of determinants. Using asymptotic RMT, in [25] and [26], the authors investigated the Mutual Information (MI) distribution, establishing methods that remain accurate even when applied to non-asymptotic, finite-dimensional systems. For non-centered and separable channels, such as the correlated Rician channels, in [27], the authors optimized capacity-achieving covariance matrices by relying on an asymptotic approximation of the average MI. Through a PDF-enabled framework, another relevant work [28] derived exact, non-asymptotic eigenvalue distributions for non-central Wishart matrices to compute the mean, variance, and higher-order statistics of the random channel capacity. 
+
+B. Contributions 
+
+The main analytical complexity of non-separable Weichsel-berger channels originates from the power coupling matrix, de-noted as P. To resolve the aforementioned analytical complexity, in our present study, we propose two distinct approximations that specifically target the stochastic NLOS component. By focusing our rank-1 factorizations solely to P, the deterministic LOS component remains perfectly exact and also prevents it from masking the true approximation errors during performance evaluation. Building upon this strategy, the main contributions of this paper can be summarized as follows:  
+
+> •
+
+We formulate a computationally efficient Kullback–Leibler Divergence (KLD)-enabled rank-1 approximation algorithm for non-separable power coupling matrices. The proposed algorithm demonstrates rapid convergence and accurately tracks the exact Weichselberger eigenvalue distribution in standard scattering environments.  
+
+> •
+
+We establish an analytically tractable moment matching method (MMM) procedure that maps the exact channel statistics onto an equivalent Wishart matrix by solving a Stieltjes moment problem. The proposed framework is en-abled by deriving novel recursive expressions for the matrix-valued moments/cumulants of the sum of complex Wishart matrices with diagonal covariance.  
+
+> •
+
+We also derive exact, closed-form analytical expressions for the EC of the proposed KLD-enabled and MMM-enabled rank-1 model. In addition, we provide an asymp-totic capacity gap analysis in the high-signal-to-noise ratio (SNR) extreme to formally establish that the proposed KLD-enabled model achieves a tighter capacity gap as compared to the conventional Kronecker baseline.  
+
+> •
+
+Through extensive numerical validation, we demonstrate that the MMM-enabled model serves as a robust alternative to the KLD-enabled model that accurately approximates the dominant eigenvalue moments. Specifically, it consistently improves upon the capacity accuracy of the traditional Kronecker baseline across all signal-to-noise ratio (SNR) regimes, while providing highly reliable capacity estimates even for highly structured power coupling. 
+
+Notation : We use the diag (·) operator that puts the elements of a d-dimensional vector onto the main diagonal of an d × d
+
+diagonal matrix, and the Tr (·) operator that denotes the trace of a matrix. Superscripts (·)⊤ and (·) denote the matrix transpose and Hermitian matrix transpose, respectively. Symbols ⊙, (·)◦ 12 ,
+
+(·)◦− 1 denote the element-wise product, square root, and inverse operators, respectively. Boldface letters indicate matrices, such that E[·] and Kn[·] return the matrix-valued expectation and nth 3
+
+order cumulant, as opposed to their scalar counterparts E[·] and 
+
+Kn[·].II. W EICHSELBERGER MIMO C HANNEL MODEL 
+
+The general non-centered (Rician) Weichselberger MIMO channel matrix H ∈ CR×T is modeled as the superposition of a deterministic LOS component and a stochastic NLOS component, where R and T are the numbers of receiving and transmitting antennas, respectively, given by the following [15]: 
+
+Htot = ¯H + H (1) 
+
+= ¯H + UR
+
+h
+
+P◦ 12 ⊙ Hi.i.d. 
+
+i
+
+UT, (2) where ¯H ∈ RR×T and H ∈ CR×T are the LOS and NLOS components, respectively, Hi.i.d. ∈ CR×T represents the channel matrix of the spatially uncorrelated Rayleigh fading, whose entries are independent and identically distributed (i.i.d.) zero-mean complex Gaussian with unit variance, UR ∈ CR×R and 
+
+UT ∈ CT ×T are the deterministic matrices representing the unitary eigenbases of the receiver and transmitter, respectively, with the columns uR,r and uT,t denoting the corresponding 
+
+rth receive and tth transmit spatial eigenmodes [5], [13]. The eigenbases are defined via the eigendecomposition of the one-sided spatial correlation matrices R ∈ CR×R and T ∈ CT ×T as follows: 
+
+R ≜ E HH  = URΣRUR, (3) 
+
+T ≜ E H H = UTΣTUT, (4) where matrices ΣR = diag (σR) and ΣT = diag (σT) consist of the corresponding non-zero, real-valued eigenvalues with σR ≜
+
+[σR,1, σ R,2, . . . , σ R,R ]⊤ and σT ≜ [σT,1, σ T,2, . . . , σ T,T ]⊤.Moreover, matrix P = E
+
+h
+
+URHU T
+
+> 2
+
+i
+
+∈ RR×T denotes the power coupling matrix, which characterizes the average power transfer between the transmit and receive eigenmodes, where elements of P are related to the one-sided eigenvalues as shown below: RX
+
+> r=1
+
+Pr,t = σT,t ,
+
+> T
+
+X
+
+> t=1
+
+Pr,t = σR,r , (5) where σT,1 ≥ σT,2 ≥ · · · ≥ σT,T and σR,1 ≥ σR,2 ≥ · · · ≥ σR,R 
+
+which are normalized as follows: 
+
+> R
+
+X
+
+> r=1
+> T
+
+X
+
+> t=1
+
+Pr,t = PH, (6) where PH ≜ E Tr (HH ) = E Tr (H H) denotes the total mean power of the NLOS components, often set to PH = RT .
+
+Remark 1. In the traditional Kronecker model, the power cou-pling matrix is decomposed as P = PKronecker = 1 
+
+> PH
+
+σRσ⊤ 
+
+> T
+
+.Consequently, the channel model is separable and can be formu-lated as shown below: 
+
+HKronecker = 1
+
+√PH
+
+URΣ1/2 
+
+> R
+
+Hi.i.d. Σ1/2 
+
+> T
+
+UT, (7) which is frequently referred to as the spatially double-correlated Rayleigh fading channel model [25], [26]. While the general Rician framework effectively captures en-vironments with a dominant direct path, in the remainder of this paper, we will focus entirely on the classical Weichselberger framework [13], such that: 
+
+H ≜ UR
+
+h
+
+P◦ 12 ⊙ Hi.i.d. 
+
+i
+
+UT. (8) Focusing our rank-1 factorization above to P ensures the deterministic LOS component remains perfectly exact. As aresult, upon re-integrating the approximation of Eq. (8) into Eq. (2), the resulting channel effectively collapses into a simpler and well-studied double-correlated Rician model without inducing additional errors into the direct LOS path. In this approach, the instantaneous channel power gain is defined as follows: 
+
+GH ≜
+
+(
+
+H H, R ≥ T, 
+
+HH , R < T. 
+
+(9a) (9b) Let us denote rr ∈ RT and ct ∈ RR as the rth row and tth 
+
+column of P, respectively. Then, the stochastic representations of GH in Eq. (9a) and Eq. (9b) are rewritten by the following: 
+
+GH = UT
+
+> R
+
+X
+
+> r=1
+
+diag (rr ) 12 Hi.i.d. ,(r, :) Hi.i.d. ,(r, :) diag (rr ) 12 UT, (10) for R ≥ T and: 
+
+GH = UR
+
+> T
+
+X
+
+> t=1
+
+diag (ct) 12 Hi.i.d. ,(: ,t )Hi.i.d. ,(: ,t )diag (ct) 12 UR, (11) for R < T , where Hi.i.d. ,(r, :) and Hi.i.d. ,(: ,t ) denote the rth row and the tth column of Hi.i.d. , respectively. 
+
+Permutation and zero-row/column truncation: As implied by Eq. (10), the distribution of GH in the case R ≥ T is preserved by the removal of zero-valued rows from P and is invariant to the row permutations. Similarly, in the case R < T , the distribution of GH is preserved by the removal of zero-valued columns from P and is invariant to the column permutations. Note that simultaneously performing row and column permutations affects the distribution of the channel power gain. In light of the above observations, and without loss of gener-ality, we henceforth assume the following:  
+
+> •
+
+The coupling matrix P contains no all-zero rows or columns ,as they can be ignored without affecting the spectral distri-bution of GH. 
+
+> •
+
+The system operates in the regime where R ≥ T , since the exact same analytical framework is applicable for the regime where R ≤ T by swapping the roles of the transmitter and receiver. III. KLD-E NABLED RANK -1 FACTORIZATION 
+
+The nearest double-correlated Rayleigh fading model to the Weichselberger model under the Kullback–Leibler divergence (KLD) criterion is derived as follows: 
+
+PKLD = arg min 
+
+> α,β
+
+DKL 
+
+
+
+H ∥ eH
+
+
+
+(12) 
+
+=
+
+> R
+
+X
+
+> r=1
+> T
+
+X
+
+> t=1
+
+DKL 
+
+
+
+Hr,t ∥ eHr,t 
+
+
+
+, (13) where α ∈ RR
+
+> +
+
+, β ∈ RT
+
+> +
+
+, and 
+
+eH ≜ UR
+
+h αβ ⊤◦ 12 ⊙ eHi.i.d. 
+
+i
+
+UT (14) 4
+
+with entries of eHi.i.d. ∈ CR×T following i.i.d. zero-mean complex Gaussian with unit variance. The objective function is derived as follows [29]: 
+
+J (α, β) = −RT +
+
+> R
+
+X
+
+> r=1
+> T
+
+X
+
+> t=1
+
+Pr,t 
+
+αr βt
+
+− ln 
+
+ Pr,t 
+
+αr βt
+
+
+
+. (15) Therefore, the problem becomes the rank-1 nonnegative matrix factorization (NMF) of the matrix P under the Itakura-Saito (IS) distance criterion [30]. It is noted that the objective function is jointly convex under he logarithm transformation x = ln α and 
+
+y = ln β. Using this property, we can generate the following sequences {α(κ)} and {β(κ)} iteratively. At each κth iteration,  
+
+> •
+
+α(κ) is found by solving ∂∂α r J  α, β(κ−1)  = 0 for α,which guarantees J  α(κ), β(κ−1)  ≤ J  α(κ−1) , β(κ−1) ; 
+
+> •
+
+β(κ) is found by solving ∂∂β t J  α(κ), β = 0 for β, which guarantees J  α(κ), β(κ) ≤ J  α(κ), β(κ−1) .Consequently, the above procedure guarantees a monotonic decrease of the objective function at each iteration, such that: 
+
+J
+
+
+
+α(κ), β(κ)
+
+≤ J
+
+
+
+α(κ−1) , β(κ−1) 
+
+. (16) Of note, solving ∂J (α,β) 
+
+> ∂α r
+
+= 0 and ∂J (α,β) 
+
+> ∂β t
+
+= 0 yields the following vector forms: 
+
+α = 1
+
+T Pβ◦− 1, β = 1
+
+R P⊤α◦− 1, (17) respectively. The procedure to solve the problem in Eq. (13) can be summarized in Algorithm 1. 
+
+Algorithm 1: Optimal Rank-1 Approximation with IS-NMF Divergence  
+
+> 1:
+
+Initialization : Set κ = 0 and J(0) = ∞. Choose 
+
+α(0) = 1R, and initialize β(0) = 1 
+
+> R
+
+P⊤  α(0) ◦− 1; 
+
+> 2:
+
+repeat  
+
+> 3:
+
+Set κ ← κ + 1 ; 
+
+> 4:
+
+Update α(κ) ← 1 
+
+> T
+
+P  β(κ−1) ◦− 1; 
+
+> 5:
+
+Update β(κ) ← 1 
+
+> R
+
+P⊤  α(κ)◦− 1; 
+
+> 6:
+
+Update J(κ) ← J  α(κ), β(κ); 
+
+> 7:
+
+until J(κ−1) − J(κ) < ϵ  
+
+> 8:
+
+Compute PKLD := α(κ)  β(κ)⊤;Importantly, the computational complexity of the above proce-dure is O(RT ) per iteration. Since J (α, β) ≥ 0 and it monoton-ically decreases with each updated α(κ) and β(κ), the algorithm is guaranteed to converge to a stationary point. Moreover, the objective function becomes jointly convex the logarithm trans-formation x = ln α and y = ln β. Therefore, every stationary point is globally optimal, implying that Algorithm 1 converges to the global optimal rank-1 approximation PKLD = α⋆ (β⋆)⊤
+
+under KLD criterion with equality J⋆ = 0 if and only if P is already rank-1.IV. MMM-E NABLED RANK -1 FACTORIZATION 
+
+In this section, we adopt the MMM to map the exact channel statistics onto a simplified model via their moments and/or cumulants [31]. However, a direct application of MMM appears to be ineffective, as forcing a non-separable channel into a separable channel limits the order of moments that can be matched. As a workaround, we first approximate normalized alternatives of 
+
+H and then recover the desired channel approximation. The normalization aims to remove dominant row and column power imbalances from P, yielding a variance profile that is closer to an isotropic Wishart structure and, therefore, more amenable to moment/cumulant matching. The proposed approximation frame-work consists of the following three main steps: 1) Channel normalization. We first apply scaling matrices to yield a normalized power coupling matrix: 
+
+PNormalized = diag (sR)−1 Pdiag (sT)−1 . (18) where diag (sT) ∈ RT ×T and diag (sR) ∈ RR×R are pre-defined diagonal transmit and receive scaling matrices. The channel gain corresponding to the above variance profile can be written as UTWU T with: 
+
+W ≜
+
+> R
+
+X
+
+> r=1
+
+Σ 12 
+
+> r
+
+Hi.i.d. ,(r, :) Hi.i.d. ,(r, :) Σ 12 
+
+> r
+
+(19) 
+
+≜
+
+> R
+
+X
+
+> r=1
+
+Wr ,
+
+with Σr ≜ 1[sR]r diag (rr ) diag (sT)−1. Each Wr ∈ CT ×T
+
+component follows a singular complex Wishart distribution with a single degree of freedom and a diagonal covariance matrix Σr .2) Wishart approximation. We apply the MMM to match the eigenvalue moments of W to those of a more tractable, Wishart-distributed matrix fW ∈ CT ×T , defined as follows: 
+
+fW = eHi.i.d. Σγ eHi.i.d. , (20) where Σγ ∈ RR×R is a strictly diagonal matrix whose diagonal elements are given by vector γ ∈ RR.3) Channel recovery. Once parameter vector γ is obtained, which is equivalent to obtaining the rank-1 factorization for the matrix PNormalized , the MMM-enabled rank-1 fac-torization of P is formulated as follows: 
+
+PMMM = diag (sR) γs ⊤
+
+> T
+
+. (21) The MMM-enabled channel matrix corresponding to the above variance profile is then recovered as shown below: 
+
+eH = UR
+
+h
+
+P◦ 12 
+
+> MMM
+
+⊙ eHi.i.d. 
+
+i
+
+UT. (22) While the exact moments (or cumulant) related to W are intractable and, to the best of our knowledge, have not yet been reported in the technical literature, they are essential for the proposed matching procedure. In the next section, we address the problem of obtaining these exact moments and cumulants. 
+
+A. Moments and Cumulants of the Normalized Channel Gain Matrix 
+
+The objective of this section is to derive the eigenvalue cumulants, denoted as Kn[λW], of the normalized channel gain matrix ( W), which constitute the key quantities required by the proposed MMM framework. To this end, the derivation proceeds according to the following steps: - Derive the matrix-valued moments ( E[Wnr ]) of the individ-ual Wishart components ( {Wr }) based on Lemma 1. - Derive the corresponding matrix-valued cumulants (Kn[Wr ]) based on Lemma 2. 5
+
+- Derive the matrix-valued cumulants ( Kn[W]) of W =PRr=1 Wr from {Kn[Wr ]} based on Theorem 1. - Recover the matrix-valued moments (E[Wn]) from the matrix-valued cumulants ( Kn[W]) based on Lemma 3. - Derive the eigenvalue moments ( E[λn
+
+> W
+
+]) and the correspond-ing eigenvalue cumulants ( Kn[λW]), which are subsequently used in the moment matching procedure developed in Sec-tion IV-B. 
+
+Lemma 1. The nth order matrix-valued moment of the complex Wishart matrix Wr with one degree of freedom and a diagonal covariance Σr , is formulated as follows: 
+
+E[Wnr ] = 
+
+> n
+
+X
+
+> j=1
+
+(n − 1)! (n − j)! c(n−j) 
+
+> r
+
+Σjr , (23) where the scalar coefficient c(n−j) 
+
+> k
+
+is derived as: 
+
+c(n−j) 
+
+> r
+
+≜ E[Tr (Wr )n−j ] (24) 
+
+=
+
+> n−j
+
+X
+
+> i=1
+
+(n − j − 1)! (n − j − i)! Tr  Σir
+
+c(n−j−i) 
+
+> r
+
+. (25) 
+
+Proof: The detailed proof is provided in Appendix A and is based on the combinatorial framework established in [32]. Although Lemma 1 provides the exact expression of E[Wnr ],our objective is to characterize the statistics of W = PRr=1 Wr .Since the moments of W cannot be readily obtained from Wr ,we next derive the corresponding matrix-valued cumulants of 
+
+Wr , denoted by Kn[Wr ].
+
+Lemma 2. The recursive formula that relates the nth order matrix-valued moments and cumulants of Wr is obtained as follows: 
+
+Kn[Wr ] = E[Wnr ] −
+
+> n−1
+
+X
+
+> ℓ=1
+
+n − 1
+
+ℓ − 1
+
+
+
+Kℓ[Wr ]E[Wn−ℓr ]. (26) 
+
+Proof: We define the characteristic function (CF) and the cumulant generating function (CGF) of Wr as follows: 
+
+ΦWr (t) ≜ E eitWr (a)
+
+=
+
+> ∞
+
+X
+
+> n=0
+
+(it)n
+
+n! E[Wnr ], (27) 
+
+ΨWr (t) ≜ log ΦWr (t). (28) Here, it is important to distinguish between the element-wise exponential and matrix exponential, defined as eX ≜P∞  
+
+> n=0 1
+> n!
+
+Xn , that we used in equality (a), as well as between the element-wise logarithm and matrix logarithm, defined as 
+
+log X ≜ P∞
+
+> k=1
+
+(−1) k+1 ( X−I)k 
+
+> k
+
+.From Lemma 1, we deduce that E[Wnr ] is strictly diagonal for any order n. Therefore, ΦWr (t) and ΨWr (t) are also diagonal. Moreover, the matrix-valued cumulants, defined as Kn[Wr ] =  
+
+> 1
+> in
+> ∂nΨWr(t)
+> ∂t n
+> t→0
+
+, are thus also strictly diagonal. Since ΦWr (t) = eΨWr (t) and both matrices are diagonal, the matrix exponential coincides with the scalar exponential exactly along the diagonal entries, i.e., [ΦWr (t)] i,i = e[ΨWr (t)] i,i .Therefore, we can directly apply the classical moment-cumulant relation to each diagonal element. This can be done through the use of the generalized Leibniz’s rule [33, Eq. (4)]: 
+
+∂n[ΦWr (t)] i,i 
+
+∂t n =
+
+> n
+
+X
+
+> ℓ=1
+
+n − 1
+
+ℓ − 1
+
+ ∂ℓ[ΨWr (t)] i,i 
+
+∂t ℓ
+
+∂n−ℓ[ΦWr (t)] i,i 
+
+∂t n−ℓ .
+
+(29) Evaluating the above expression as t → 0 yields the moment-cumulant relation for each diagonal entry: 
+
+(E[Wnr ]) i,i =
+
+> n
+
+X
+
+> ℓ=1
+
+n − 1
+
+ℓ − 1
+
+
+
+(Kℓ[Wr ]) i,i (E[Wn−ℓr ]) i,i . (30) Since E[Wnr ] and Kn[Wr ] are diagonal matrices with zero off-diagonal entries, dropping the indices (i, i ) yields the matrix form in Eq. (26). This completes the proof of Lemma 2. Importantly, from Eq. (26), diagonal cumulants yield diagonal matrix-valued moments; conversely, diagonal moments guarantee diagonal cumulants. The matrix-valued moments of W admit an analogous recursive relation, as established below. 
+
+Lemma 3. The matrix-valued moments of W are strictly diagonal and are obtained recursively from its matrix-valued cumulants as follows: 
+
+E [Wn] = Kn [W] + 
+
+> n−1
+
+X
+
+> ℓ=1
+
+n − 1
+
+ℓ − 1
+
+
+
+Kℓ [W] E Wn−ℓ. (31) 
+
+Proof: The proof is similar to the proof of Lemma 2 since the diagonal matrices E[Wnr ] and Kn[Wr ] yield diagonal matrices 
+
+E[Wn] and Kn[W].Having derived the matrix-valued cumulants Kn[Wr ], we next consider the cumulants of W = PRr=1 Wr . The cumulants of W cannot be obtained by simply summing {Kn[Wr ]} be-cause {Wr } do not commute. By leveraging the multivariable Zassenhaus formula, the matrix-valued cumulants Kn[W] can be expressed as the sum of an additive contribution and aresidual term accounting for matrix non-commutativity, as stated in Theorem 1. 
+
+Theorem 1. The nth order matrix-valued cumulant of W =PRr=1 Wr consists of the sum of the matrix-valued cumulants of Wr and a residual matrix, obtained as follows: 
+
+Kn[W] = 
+
+> R
+
+X
+
+> r=1
+
+Kn[Wr ]
+
+| {z } 
+
+> ≜K+
+> n[W]
+
++Θn, (32) with Θ1 = Θ2 = 0T ×T and Θ3 being obtained as shown below: 
+
+Θ3 = P 
+
+> 1≤i<j ≤R
+
+Tr (ΣiΣj )Σi − Tr (Σi)ΣiΣj
+
++ P 
+
+> 1≤i<j ≤R
+
+Tr (ΣiΣj )Σj − Tr (Σj )ΣiΣj . (33) 
+
+Proof: The key step here is to adopt the multivariable Zassenhaus formula [34, Eq. (2.1)] to expand eitW. Details of the proof are presented in Appendix B. Following from (31), the eigenvalue moments and cumulants of W can be determined as follows: 
+
+E [λn
+
+> W
+
+] = 1
+
+T Tr (E [Wn]) , (34) 
+
+Kn[λW] = E [λn
+
+> W
+
+] −
+
+> n−1
+
+X
+
+> i=1
+
+n − 1
+
+i − 1
+
+
+
+Ki [λW] E λn−i
+
+> W
+
+. (35) While Θ1 = Θ2 = 0T ×T , the complexity of the residual terms Θn in (32) grows factorially with n for n ≥ 3 due to the higher-order Lie polynomials involved in the Zassenhaus expansion. Therefore, to maintain analytical tractability, the sub-sequent derivations focus on the contributions of the additive term 
+
+K+ 
+
+> n
+
+[W] in (32), which forms the basis of the proposed moment matching framework. 6
+
+Based on the framework, the first three moments and eigen-value cumulants of W are listed as shown below: 
+
+E[W] = RP
+
+> r=1
+
+Σr , (36) 
+
+E[W2] = 
+
+ RP
+
+> r=1
+
+Tr (Σr )Σr
+
+
+
++ ( E[W]) 2, (37) 
+
+E[W3] ∝
+
+ RP
+
+> r=1
+
+Tr (Σr )2 + Tr (Σ2 
+
+> r
+
+) Σr − Tr (Σr )Σ2 
+
+> r
+
++ Σ3
+
+> r
+
+
+
++ 3 E[W]
+
+ RP
+
+> r=1
+
+Tr (Σr )Σr
+
+
+
++ ( E[W]) 3, (38) 
+
+K1[λW] = 1
+
+T Tr (E[W]) , (39) 
+
+K2[λW] = 1
+
+> T
+
+
+
+Tr (E[W]2)+ RP
+
+> r=1
+
+Tr (Σr )2
+
+
+
+− (K1[λW]) 2, (40) 
+
+K3[λW] ∝ 1
+
+> T
+
+
+
+Tr (E[W]3) + 3 Tr 
+
+
+
+E[W] RP
+
+> r=1
+
+Tr (Σr )Σr
+
+
+
++ RP
+
+> r=1
+
+Tr (Σr )3 + Tr (Σ3 
+
+> r
+
+)
+
+
+
++ 2  
+
+> T3
+
+Tr (E[W]) 3
+
+− 3 
+
+> T2
+
+
+
+Tr (E[W]2) + RP
+
+> r=1
+
+Tr (Σr )2
+
+
+
+Tr (E[W]) , (41) where the fourth order moments and cumulants are given by Eq. (42) and Eq. (43), respectively, at top of the next page. Here, the sign ∝ means ‘proportional to’ and is used to indicate that the expressions account solely for the contributions from the additive term K+ 
+
+> n
+
+[W].
+
+B. Approximation to Semi-Correlated Wishart 
+
+Building on the cumulant expressions that will be derived in Corollary 1, we define target distribution fW as a sum of statistically independent, isotropic complex Wishart matrices: 
+
+fW ≜
+
+> N
+
+X
+
+> n=1
+
+fWn, (44) where fWn ∼ CW q (pn, σ nIq ) follows the complex Wishart distribution of dimension q × q, with pn degrees of freedom and covariance matrix σnIq .To assist in matching to complex semi-Wishart matrices, we introduce the following Lemma. 
+
+Corollary 1. Let X1, . . . , XN be statistically independent q × q
+
+random matrices, where Xn ∼ CW q (pn, σ nIq ), and define their sum as X ≜ PNn=1 Xn with rank (X) = q, the ℓth order scalar cumulants of the unordered eigenvalues of X are obtained as follows: 
+
+K1[λX] = NP
+
+> n=1
+
+pnσn, (45a) 
+
+K2[λX] = q NP
+
+> n=1
+
+pnσ2
+
+> n
+
+, (45b) 
+
+K3[λX] ∝ (q2 + 1) NP
+
+> n=1
+
+pnσ3
+
+> n
+
+, (45c) 
+
+K4[λX] ∝ (q3 − q2 + 5 q + 1) NP
+
+> n=1
+
+νnσ4
+
+> n
+
+, (45d) 
+
+· · · 
+
+Kℓ[λX] ∝ ϱℓ[λX] NP
+
+> n=1
+
+pnσℓn, ∀ℓ ≥ 3. (45e) Here, coefficient ϱℓ[λX] is defined as shown below: 
+
+ϱℓ[λX] = 
+
+> ℓ
+
+X
+
+> r=1
+
+1
+
+rq rrX
+
+> i=1
+
+ri
+
+
+
+(−1) i−1(qi )ℓ, (45f) where (x)j ≜ (x+j−1)! (x−1)! is the Pochhammer symbol. 
+
+Proof: See Appendix C. As a special case of Theorem 1, the contribution from the ad-ditive matrix-valued cumulants of Xn to the ℓth order eigenvalue cumulant of X nicely reduces to a tractable weighted sum of monomials in σn. Such a property motivates our shift from raw moment matching to cumulant matching, whose accuracy will be highlighted in Section VI. Matching the contribution of the additive matrix-valued cumu-lant terms yields the following system of equations: 
+
+> N
+
+X
+
+> n=1
+
+pnσjn = K+ 
+
+> j
+
+[λW]
+
+ϱj [λfW] , ∀j ∈ { 1, 2, . . . , 2N − 1}, (46) where K+ 
+
+> j
+
+[λW] denotes contribution of the additive term K+ 
+
+> n
+
+[W]
+
+to the jth order eigenvalue cumulant of W. The system in (46) is further subjected to the following constraints: 
+
+σn > 0, ∀n ∈ { 1, 2, . . . , N },pn > 0, ∀n ∈ { 1, 2, . . . , N },σn′̸ = σn, ∀n′̸ = n ∈ { 1, 2, . . . , N },
+
+> N
+
+P
+
+> n=1
+
+pn = R, 
+
+(47a) (47b) (47c) (47d) where Eq. (47a) and Eq. (47b) guarantee the positivity of the scale matrix and degrees of freedom, Eq. (47c) enforces the uniqueness of the solutions, and, Eq. (47d) is imposed to maintain the dimension of the receive covariance. The matching problem in Eq. (46) with the constraint Eq. (47) is known as the Stieltjes moment problem [31]. In this manner, we first treat σn as the roots and pn as the weights and we rewrite Eq. (46) in the following canonical form: 
+
+> N
+
+X
+
+> n=1
+
+pnσℓn = μℓ, ∀ℓ ∈ { 0, 1, . . . , 2N − 1}, (48) where the target moments are defined as follows: 
+
+
+
+μ0 = R, if ℓ = 0 ,μℓ = K+ 
+
+> ℓ
+
+[λW]
+
+ϱℓ[λfW] , if ℓ = 1 , 2, . . . , 2N − 1.
+
+(49a) (49b) Solvability of the system relates to the following N ×N Hankel matrices: 
+
+[∆N ]i,j ≜ μi+j−2 =
+
+> N
+
+X
+
+> n=1
+
+σi−1 
+
+> n
+
+pnσj−1 
+
+> n
+
+, (50) 
+
+[ΩN ]i,j ≜ μi+j−1 =
+
+> N
+
+X
+
+> k=1
+
+σi−1 
+
+> k
+
+pkσkσj−1 
+
+> k
+
+, (51) where ∆0 = 1 .Let us denote σ ≜ [σ1, σ 2, . . . , σ N ]⊤, p ≜ [p1, p 2, . . . , p N ]⊤
+
+and μ = μ0, μ 1, . . . , μ 2N −1
+
+⊤. The method for solving Eq. (48) is based on the construction of the following orthogonal 7
+
+E[W4] ∝ E[W]4 +
+
+hPRr=1 
+
+Tr (Σr )3 + 3 Tr (Σr )Tr (Σ2 
+
+> r
+
+) + 2 Tr (Σ3 
+
+> r
+
+) Σr − 4Tr (Σr )2 + Tr (Σ2 
+
+> r
+
+) Σ2 
+
+> r
+
++ 4 Tr (Σr )Σ3 
+
+> r
+
++ Σ4
+
+> r
+
+i
+
++ 4 E[W]
+
+hPRr=1 
+
+Tr (Σr )2 + Tr (Σ2 
+
+> r
+
+)Σr − Tr (Σr )Σ2 
+
+> r
+
++ Σ3
+
+> r
+
+i
+
++ 3 
+
+hPRr=1 Tr (Σr )Σr
+
+i2
+
++ 6( E[W]) 2
+
+hPRr=1 Tr (Σr )Σr
+
+i
+
+, (42) 
+
+K4[λW] ∝ 1 
+
+> T
+
+Tr 
+
+
+
+4E[W]
+
+hPRr=1 
+
+Tr (Σr )2 + Tr (Σ2 
+
+> r
+
+)Σr − Tr (Σr )Σ2 
+
+> r
+
++ Σ3
+
+> r
+
+i
+
++ 6 E[W]2
+
+hPRr=1 Tr (Σr )Σr
+
+i
+
++ 3 
+
+hPRr=1 Tr (Σr )Σr
+
+i2
+
++ 1
+
+> T
+
+h
+
+Tr (E[W]4) + PRr=1 Tr (Σr )4 − Tr (Σr )2Tr (Σ2 
+
+> r
+
+) − Tr (Σ2 
+
+> r
+
+)2 + 6 Tr (Σr )Tr (Σ3 
+
+> r
+
+) + Tr (Σ4 
+
+> r
+
+)
+
+i
+
+− 4 
+
+> T2
+
+h
+
+Tr (E[W]3) + 3 Tr 
+
+h
+
+E[W] PRr=1 Tr (Σr )Σr
+
+i
+
++ PRr=1 Tr (Σr )3 + Tr (Σ3 
+
+> r
+
+)
+
+i
+
+Tr (E[W]) 
+
+− 3 
+
+> T2
+
+hPRr=1 Tr (Σr ) + Tr (E[W]2)
+
+i2
+
++ 12  
+
+> T3
+
+hPRr=1 Tr (Σr )2 + Tr (E[W]2)
+
+i
+
+Tr (E[W]) 2 − 6  
+
+> T4
+
+Tr (E[W]) 4. (43) polynomial πN (σ) [31] as: 
+
+πN (σ) = det 
+
+ ∆N
+
+1 σ · · · σN
+
+
+
+det [ ∆N ] = σN + 
+
+> N−1
+
+X
+
+> i=0
+
+ciσi (52) 
+
+=
+
+> N
+
+Y
+
+> n=1
+
+(σ − σn) . (53) for i = 1 , 2, . . . , N and j = 1 , 2, . . . , N . The roots of πN (σ)
+
+are eigenvalues of the symmetric tridiagonal Jacobi matrix [31, Theorem 2.13]: 
+
+JN =
+
+
+
+α1
+
+√γ1 0 · · · 0
+
+√γ1 α2
+
+√γ2 · · · 00 √γ2 α3
+
+. . . ...... ... . . . . . . √γN −1
+
+0 0 · · · √γN −1 αN
+
+
+
+, (54) where, due to [31, Section 5.2], 
+
+αn ≜ det[ ∆′
+
+> n
+
+]det[ ∆n] − det[ ∆′
+
+> n−1
+
+]det[ ∆n−1] , (55a) 
+
+γn−1 ≜ det[ ∆n]det[ ∆n−1]det[ ∆n−2]det[ ∆n−1] ,
+
+for n = 1 , 2, . . . , N , with γ0 = 0 . Matrix ∆′ 
+
+> n
+
+∈ Rn×n is defined as follows: 
+
+[∆′
+
+> n
+
+]i,j ≜
+
+(
+
+μi+j−2, if j ≤ n − 1,μi+j−1, if j = n, (56) with ∆′ 
+
+> 0
+
+= 0 and ∆′ 
+
+> 1
+
+= μ1.Several important properties are outlined below.  
+
+> •
+
+If ∆N is positive definite, the Sylvester’s criterion guar-antees that ∆0, ∆1, . . . , ∆N −1 are also positive definite [35, Theorem 7.2.5]. Consequently, subdiagonal elements 
+
+√γ1, √γ2, . . . , √γN −1 are positive, which ensures that eigenvalues of JN are pairwise distinct. This means that entries of σ are pairwise distinct, implying that Eq. (47c) is satisfied.  
+
+> •
+
+The N × N Vandermonde matrix V, defined as [V]i,j =
+
+σi−1 
+
+> j
+
+, is invertible if and only if entries of σ are pairwise distinct. Said differently, a sufficient condition for V to be invertible is that ∆N is positive definite.  
+
+> •
+
+The Hankel matrices in Eq. (50) and Eq. (51) can be rewritten as follows: 
+
+∆N = Vdiag (p) V⊤, (57) 
+
+ΩN = Vdiag (p) diag (σ) V⊤, (58) respectively. According to the Sylvester’s law of inertia [35], if V is invertible, the number of positive, negative, and zero eigenvalues of ∆N and ΩN equals that of diag (p)
+
+and diag (p) diag (σ), respectively. 
+
+Solvability condition : Based on the aforementioned properties, a sufficient condition for the system to be solvable is that ∆N
+
+and ΩN are positive definite. Once this condition is satisfied, built-in routines available in popular computing software (e.g., MATLAB’s built-in function 
+
+eig or Mathematica’s Eigenvalues function) can be used to obtain eigenvalues of JN , thus also yielding {σn}. Accordingly, entries of p are derived as follows: 
+
+p = V−1 μ0 μ1 · · · μN −1
+
+⊤ . (59) 
+
+Rounding and scale correction : As established by the moment matching system, the calculated weights p and roots σ represent the degrees of freedom (d.o.f.) and scale parameters of the target Wishart matrices {fWn}, respectively. Since standard Wishart distributions are frequently defined with integer-valued d.o.f., following the approach previously used in [23] for isotropic Wishart matrices, we round the calculated d.o.f. to the nearest integer. Moreover, as E[λfWn ] = σnpn, updating the d.o.f. requires a corresponding adjustment to the scale parameters. With the adjusted parameters, we can now construct the target covariance matrix Σγ introduced in Section IV as follows: 
+
+Σγ = blkdiag 
+
+ piσi
+
+nint (pi) Inint (pi)
+
+
+
+> i=1 ,...,N
+
+
+
+, (60) where nint (x) denotes the nearest integer to x.V. E RGODIC CAPACITY OF THE APPROXIMATED SEPARABLE 
+
+CHANNELS 
+
+Considering the rank-1 factorization of the power coupling matrix P ≈ uv ⊤, the approximate Ergodic Capacity (EC) of the Weichselberger channel is derived as follows: 
+
+eCerg (u, v) = E
+
+h
+
+log 2 det 
+
+
+
+IT + ¯γT DvHi.i.d. DuHi.i.d. 
+
+i 
+
+, (61) where ¯γ denotes the total average receive SNR, which accounts for total transmission power, path loss, and noise power. The factors u and v for each presented rank-1 factorization are summarized in Table I. 
+
+Theorem 2. Without loss of generality, let entries of u and v
+
+be ordered as u1 > u 2 > · · · > u R and v1 > v 2 > · · · > v T ,respectively. Then, Eq.(61) can be obtained as follows: 
+
+eCerg (u, v) = − R − 1ln 2 + Tr 
+
+ eΨ−1∂ eΨ
+
+
+
+, (62) 8                    
+
+> TABLE I RANK -1FACTORS u,vFOR EACH RANK -1FACTORIZATION P≈uv ⊤.Factorization uv
+> Kronecker 1
+> TσR1
+> RσT
+> KLD α⋆β⋆
+> MMM diag (sR)γsT
+
+where eΨ ≜
+
+h eΨ⊤ 
+
+> 1
+
+Ψ⊤
+
+> 2
+
+i⊤
+
+, ∂ eΨ ≜
+
+h
+
+∂ eΨ⊤ 
+
+> 1
+
+∂Ψ⊤
+
+> 2
+
+i⊤
+
+, with 
+
+h eΨ1
+
+i
+
+> i,j
+
+≜
+
+
+
+− ¯γu j
+
+T
+
+R−1
+
+vT −1 
+
+> i
+
+ξR−1
+
++
+
+> R−2
+
+X
+
+> k=R−T
+
+
+
+− ¯γu j
+
+T
+
+k
+
+vk−R+Ti ξk, (63) 
+
+h
+
+∂ eΨ1
+
+i
+
+> i,j
+
+≜ − 1ln 2 
+
+
+
+− ¯γu j
+
+T
+
+R−1
+
+vT −1 
+
+> i
+
+ξR−1
+
+×
+
+
+
+HR−1 − e T 
+
+> ¯γu j vi
+
+E1
+
+ T
+
+¯γu j vi
+
+ 
+
+− 1ln 2 
+
+> R−2
+
+X
+
+> k=R−T
+
+
+
+− ¯γu j
+
+T
+
+k
+
+vk−R+Ti ξkHk, (64) for i = 1 , . . . , T and j = 1 , . . . , R , where Hk ≜ Pkr=1 1 
+
+> −R+r
+
+,
+
+ξr ≜ (−R + 1) r , and where En(x) denotes the nth order exponential integral function and: 
+
+[Ψ2]i,j ≜
+
+
+
+− ¯γu j
+
+T
+
+i−1
+
+ξi−1, (65) 
+
+[∂Ψ2]i,j ≜ − 1ln 2 
+
+
+
+− ¯γu j
+
+T
+
+i−1
+
+ξi−1Hi−1, (66) for i = 1 , . . . , R − T and j = 1 , . . . , R .
+
+Proof: According to [24], the moment generating function (MGF) of the mutual information (MI) of double-correlated Rayleigh channels with the transmit and receive covariance matrices being Dv and Du, respectively, is given by the following equation: 
+
+Z(s) = ϱψR(s) det 
+
+ eΨ1(s)
+
+Ψ2(s)
+
+
+
+, (67) where, for the sake of brevity, details of ϱ, ψR(s), eΨ1(s), and 
+
+Ψ2(s) are given by [24] and are omitted in this proof. Of note, eΨ1 = eΨ1(0) , ∂ eΨ1 = ∂∂s eΨ1(s) s→0
+
+, Ψ2 = Ψ2(0) , and 
+
+∂Ψ2 = ∂∂s Ψ2(s) s→0. Accordingly, the approximated EC of the Weichselberger channel is derived as follows: 
+
+eCerg (u, v) = ∂∂s Z(s)
+
+> s→0
+
+, (68) 
+
+= ϱψR(0) 
+
+ ∂∂s det 
+
+h eΨ(s)
+
+i
+
+> s→0
+
+− det 
+
+h eΨ(0) 
+
+i ψ′
+
+> R
+
+(0) 
+
+ψR(0) 
+
+
+
+.
+
+Since ψR(0)  
+
+> ϱ
+
+= det 
+
+h eΨ(0) 
+
+i
+
+as Z(0) = 1, and ψ′
+
+> R
+
+(0) = 
+
+> R−1ln 2
+
+ψR(0) [24, Eq. (36)], we further derive Eq. (68) as: 
+
+eCerg (u, v) =  
+
+> ∂∂s
+
+det 
+
+h eΨ(s)
+
+i
+
+> s→0
+
+det 
+
+h eΨ
+
+i − R − 1ln 2 . (69) Unlike the result in [24], in the present study, we adopt [36, Eq. (9)] for differentiating a determinant as: 
+
+∂∂s det 
+
+h eΨ(s)
+
+i
+
+= det 
+
+h eΨ(s)
+
+i
+
+Tr 
+
+ eΨ(s)−1∂ eΨ(s)
+
+
+
+, (70) then plugging back in to Eq. (68), which yields Eq. (62). This completes the proof of Theorem 2. 
+
+Capacity computation and comparison: We now assume that 
+
+R = T = K on the channel to aid in capacity analysis in high-SNR regime. This assumption can be relaxed using advanced RMT techniques that are beyond the scope of the present paper. In the high-SNR extreme, where ¯γ → ∞ and K → ∞ , the EC gap between the Weichselberger channel and any separable channel with transmit and receive covariances Du and Dv,respectively, converges to the following: 
+
+∆Cerg (u, v) → Elog 2 det  H H − Elog 2 det  Z Z | {z }
+
+> ∆Cerg ,i.i.d.
+
+− log 2 det ( DuDv) , (71) where ∆Cerg ,i.i.d. (bps/Hz) denotes the EC gap between the Weichselberger channel model and the spatially uncorrelated Rayleigh fading model. 
+
+Lemma 4. In the high SNR extreme, where ¯γ → ∞ and K → ∞ ,the EC gap between the Weichselberger model the KLD-enabled rank-1 spatially correlated Rayleigh model can be obtained as follows: 
+
+∆Cerg ,KLD → − 1
+
+K
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> j=1
+
+log 2
+
+ Pi,j 
+
+¯Ri ¯Cj
+
+
+
+− 12
+
+> K
+
+X
+
+> k=1
+
+log 2
+
+  ¯Rk ¯Ck
+
+ − J⋆
+
+K ln 2 ≥ 0, (72) where ¯Ri ≜  
+
+> PKk=1 Pi,k
+> K
+
+and ¯Cj ≜  
+
+> PKk=1 Pk,j
+> K
+
+denote the arithmetic means of the ith row and jth column of the coupling matrix P,respectively. 
+
+Proof: By evaluating the EC gap against the Kronecker model, we obtain the following: 
+
+∆Cerg ,Kronecker ⇝ − 12
+
+> K
+
+X
+
+> k=1
+
+log 2
+
+  ¯Rk ¯Ck
+
+ , (73) which is directly deduced from [12, Theorem 3]. Here, the arrow ‘⇝’ means ‘converges approximately to’, as the exact asymptotic behavior is unavailable [12]. Moreover, since the Kronecker model enforces that uk ← ¯Rk and vk ← ¯Ck, which is deduced from Table I, we obtain the following: 
+
+∆Cerg ,i.i.d. ⇝
+
+> K
+
+X
+
+> k=1
+
+log 2
+
+  ¯Rk ¯Ck
+
+ . (74) To obtain the desired EC gap, we first deduce from Eq. (17) that 
+
+α(κ) 
+
+> i
+
+= 1
+
+> K
+
+PKj=1 
+
+> Pi,j
+> β(κ)
+> j
+
+and β(κ) 
+
+> j
+
+= 1
+
+> K
+
+PKi=1 
+
+> Pi,j
+> α(κ)
+> i
+
+for iteration κ.Combining the aforementioned equalities yields the following: 
+
+K2 −
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> j=1
+
+Pi,j 
+
+α⋆i β⋆j
+
+= 0 . (75) Next, we rewrite objective function J⋆ = J (α⋆, β⋆) initially defined in Eq. (15). By applying the property derived above, we obtain the following: 
+
+log 2 det ( Dα⋆ Dβ⋆ ) = 1
+
+K
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> j=1
+
+log 2
+
+ α⋆i β⋆j
+
+ (76) 
+
+= J⋆
+
+K ln 2 + 1
+
+K
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> j=1
+
+log 2 Pi,j . (77) 9
+
+Plugging Eq. (74) and Eq. (77) back into the initial EC gap in Eq. (71) and performing the necessary algebraic reductions, we obtain Eq. (72) and conclude the proof of Lemma 4. Applying non-negativity property J⋆ ≥ 0 to Eq. (72) yields a lower bound for the EC gap between the Kronecker channel and the KLD-enabled channel, which is obtained as follows: 
+
+∆Cerg ,Kronecker − ∆Cerg ,KLD ≥ 1
+
+K
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> j=1
+
+log 2
+
+ Pi,j 
+
+¯Ri ¯Cj
+
+
+
+, (78) where the equality occurs when J⋆ = 0 , which is satisfied if and only if P is already rank-1. Moreover, the lower bound is nonnegative if the following condition is met: 
+
+
+
+> K
+
+Y
+
+> i=1
+> K
+
+Y
+
+> j=1
+
+Pi,j 
+
+
+
+> 1
+> K2
+
+≥
+
+" KY
+
+> i=1
+
+¯Ri
+
+# 1
+
+> K
+
+
+
+> K
+
+Y
+
+> j=1
+
+¯Cj
+
+
+
+> 1
+> K
+
+, (79) that is, when the geometric mean of the entries of P exceeds the product of the geometric means of its row and column averages. When the above condition holds, a larger value on the right-hand side of Eq. (78) indicates that the Kronecker model yields a larger capacity gap. Conversely, as established by Eq. (72), the proposed KLD-enabled rank-1 model maintains a lower EC gap. In physical propagation environments, a power coupling matrix satisfying the above inequality characterizes a sparse and non-regular scattering structure, where the total channel power is accumulated within a few entries of P, while the remaining entries are negligible [12]. Such environments cause severe EC underestimation in the Kronecker model, making the proposed KLD-enabled model a promising alternative for an accurate capacity estimation in high-SNR regimes. VI. N UMERICAL RESULTS AND DISCUSSION 
+
+Unless stated otherwise, in this section, we consider a point-to-point MIMO system with T = 8 transmit and R = 8
+
+receive antennas. We examine the following three propagation environments: sparse, intermediate, and rich scattering, where the corresponding power coupling matrices are adopted from [12, Eq. (60)-(62)]. The corresponding matrices P are normalized so that the total average channel power satisfies PH = RT = 64 , and the rank-1 KLD-enabled factorization of Algorithm 1 is performed with a convergence tolerance of ϵ = 10 −12 . The weighting matrices for the moment matching procedure are set to sR = α⋆
+
+and sT = σT, which are heuristically chosen based on numerical experimentation. 
+
+A. Convergence of the KLD-Enabled Factorization 
+
+Fig. 1 shows the convergence rate of the KLD-enabled rank-1
+
+factorization presented by Algorithm 1 under the three considered scattering environments, defined by Psparse , Pintermediate , and 
+
+Prich . As can be seen in Fig. 1, objective function J  α(κ), β(κ)
+
+reliably monotonically descends with each iteration κ, which validates that optimization sequence {α(κ), β(κ)} reliably de-scends towards a stationary point without fluctuation. In fact, the algorithm demonstrates rapid convergence in fewer than 25 
+
+iterations across all scenarios, even under the strict tolerance error of ϵ = 10 −12 . The convergence rate is governed by the structure of P: the rich scattering environment, whose coupling matrix is nearly rank-1, is well-conditioned and reaches the 5 10 15 20 25          
+
+> Iteration index ( )
+> 10 -15
+> 10 -10
+> 10 -5
+> 10 0
+> J( ) - J ( -1)
+> = 10 -12
+> spar seint er m edi at erich
+> Fig. 1. Convergence of J(κ−1) −J(κ)for the KLD-enabled rank-1factorization across sparse, intermediate, and rich scattering environments, where J(κ)=
+> J α(κ),β(κ).
+
+tolerance ϵ = 10 −12 in roughly 7 iterations, whereas the sparse environment, characterized by highly concentrated power entries and a coupling matrix far from rank-1, converges more slowly, requiring about 24 iterations. In all cases, the strict tolerance is met in fewer than 25 iterations, combined with the O(RT )
+
+per-iteration cost, confirms the computational efficiency of the proposed factorization. 
+
+B. Ergodic Capacity Accuracy and Scalability 
+
+Fig. 2(a) plots the EC against the average SNR ( ¯γ) under the three examined environments to evaluate the accuracy of the proposed rank-1 approximations. As can be seen in the figure, the derived analytical results of Theorem 2 (illustrated by colored markers) perfectly match the simulation curves across all SNR regimes. This validates the derived exact closed-form capacity expressions. In line with [12], as entries of P become more sparse, the traditional Kronecker model severely underesti-mates the true capacity under medium-to-high SNR regimes. In contrast, the proposed KLD-enabled rank-1 model matches the exact Weichselberger capacity curves across all SNR regimes, though slight mismatches are observed when using the MMM-enabled rank-1 model. Yet, both approximations demonstrate that rank-1 models remain highly promising, as they accurately capture the EC with a significantly reduced complexity. To further characterize the MMM solutions, the rounded solutions to the moment matching system in Eq. (48) for the sparse, intermediate, and rich scattering environments are σ = [0 .0815 , 0.2420] ⊤ and 
+
+p = [5 , 3] ⊤; σ = [0 .0858 , 0.1783] ⊤ and p = [4 , 4] ⊤; and 
+
+σ = [0 .1135 , 0.1605] ⊤ and p = [6 , 2] ⊤, respectively. This reveals that richer scattering environments cause the normalized matrix 
+
+W to become more isotropic. To examine whether this accuracy is preserved at larger antenna regimes, Fig. 2(b) evaluates scalability of the proposed rank-1
+
+approximations by varying the MIMO antenna array dimensions from 8×8 to 64 ×64 under the sparse scattering environment. As can be seen in Fig. 2(b), the KLD- and MMM-enabled models consistently match the exact capacity curves across all array configurations and SNR regimes, suggesting that the proposed framework scales well with increasing system dimensions. 10 -20 0 20 40 60 
+
+Average SNR (dB) 
+
+020 40 60 80 100 120 
+
+> Ergodic Capacity (bps/Hz)  spar seint er m edi at erich
+> Exact (Simulation) Kronecker (Simulation) KLD (Simulation) MMM (Simulation) Kronecker (Analytical) KLD (Analytical) MMM (Analytical)
+
+(a) -20 0 20 40 60 
+
+Average SNR (dB) 
+
+00.2 0.4 0.6 0.8 
+
+> Ergodic Capacity (Kbps/Hz)  8 x 8 16 x 16 32 x 32 64 x 64 Exact MMM KLD Kronecker
+
+(b) Fig. 2. Ergodic capacity vs. average SNR ( ¯γ): (a) across sparse, intermediate, and rich scattering environments; (b) capacity scaling for MIMO antenna array dimensions in a sparse scattering environment. 
+
+C. Eigenvalue Moment Matching: Accuracy and the Role of the Residual Θn
+
+Fig. 3 shows eigenvalue moments E[λn
+
+> W
+
+] and E[λn
+
+> H
+
+] as a function of the order n, where the analytical curves (solid and dotted) are derived using Eq. (23), Eq. (26), Eq. (32), Eq. (31), and Eq. (34) in Section IV-A while neglecting residual term Θn. As expected in Fig. 3(a), the analytical eigenvalue moments perfectly match the exact simulated moments of the target matrix W for the first two orders and start diverging beyond the third order moment. Interestingly, applying integer rounding to the solutions of the moment-matching system actually brings the moments closer to the exact values in the sparse scattering environment. This indicates that the residual term Θn marginally contributes to the eigenvalue moments of GH and the overall EC. The major finding in Fig. 3(b) is that the analytical eigenvalue moments accurately match the exact eigenvalue moments of the physical channel gain GH across both environments. 2 4 6 8
+
+Order (n) (a)    
+
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> 10 6
+> Eigenvalue moment
+> 2468
+
+Order (n) (b)     
+
+> 10 0
+> 10 5
+> 10 10
+> 10 15
+> 10 20
+> H)n]
+> spar serich
+> E[ W
+> n](Simulated) E[ W
+> n](Analytical) MMM
+> spar serich
+> Exact (Simulated) Weichselberger KLD MMM
+
+Fig. 3. Illustration of the eigenvalue moments with varying orders n under sparse and rich scattering conditions, comparing the moments formulas against exact Monte Carlo simulations with 10 6 independent realizations: a) normalized channel gain W; b) Weichselberger channel gain GH.-20 -10 0 10 20 30 40 50 60 
+
+Average SNR (dB) 
+
+020 40 60 80 100 120          
+
+> Ergodic Capacity (bps/Hz)
+> cr os sdi agonal
+> -20 -10 010 0510 15 20 25 [-20, 15] dB
+> 30 35 40 45 50 40 60 80 100 120 [30, 50] dB
+> Exact (Simulation) Kronecker (Simulation) KLD (Simulation) MMM (Simulation) Kronecker (Analytical) KLD (Analytical) MMM (Analytical)
+
+Fig. 4. Ergodic capacity vs. average SNR ( γ) for highly structured coupling matrices Pdiag and Pcross .
+
+D. Performance Under Highly Structured Coupling 
+
+In this section, the power coupling matrices are written in the normalized form as follows: 
+
+[P]i,j = pi,j 
+
+> 1
+> RT
+
+PRr=1 
+
+PTt=1 pr,t 
+
+, (80) where {pi,j } is a set of random variables (RVs) defined on 
+
+[0 , m i,j ]. By adjusting mi,j at specific values, we can generate different structured coupling matrices to model various physical radio environments. In this section, we examine the EC for highly structured spatial power matrices previously mentioned in [13], [14]– namely, the cross-like and diagonal structures. Once again, the traditional Kronecker model fails to match the exact EC, since it spreads out the total channel power across the entries of P,thus inflating the true degrees of freedom (DoF) of H. We now examine capacity mismatches of the KLD- and MMM-enabled models under each individual coupling structure. A realization of each structure is shown at the top of the next page. 11 
+
+Pcross =
+
+                                                        
+
+> 0.0348 0.0191 6.1073 0.0558 0.0090 0.0680 0.0322 0.0171 0.0021 0.0026 6.8633 0.0495 0.0599 0.0424 0.0094 0.0232 0.2926 5.9513 7.5283 4.9849 0.5388 1.6490 4.3739 3.6708 0.0440 0.0014 2.9107 0.0463 0.0450 0.0110 0.0514 0.0328 0.0157 0.0489 6.1194 0.0187 0.0688 0.0297 0.0097 0.0741 0.0345 0.0150 3.3489 0.0697 0.0540 0.0223 0.0136 0.0286 0.0202 0.0063 2.6051 0.0003 0.0681 0.0546 0.0544 0.0183 0.0511 0.0077 5.3774 0.0732 0.0511 0.0555 0.0437 0.0134
+
+
+
+(81) 
+
+Pdiag =
+
+                                                        
+
+> 4.7120 0.0858 0.0325 0.0470 0.0468 0.0845 0.0940 0.1161 0.0261 8.6129 0.1127 0.0639 0.0027 0.0274 0.0498 0.0183 0.0565 0.0365 6.9320 0.1151 0.0221 0.0979 0.0961 0.0702 0.0938 0.0730 0.0460 11 .7124 0.0549 0.0534 0.0924 0.0936 0.0555 0.0181 0.1121 0.0203 3.6522 0.0585 0.0860 0.0269 0.1110 0.1004 0.0991 0.1179 0.0254 1.7186 0.0055 0.0905 0.1041 0.0175 0.0902 0.0326 0.0759 0.1096 11 .6444 0.0745 0.0715 0.0035 0.0879 0.0381 0.0072 0.0261 0.0599 11 .4805
+
+
+
+(82) 
+
+1) Cross-like coupling structure , characterized by Pcross in Eq. 81, which produces full-rank correlation matrices at both the transmit and the receive link ends. However, the instantaneous channel realizations generated from this structure are approxi-mately rank-2. This physical behavior aims to mimic the “keyhole channel phenomenon”, where a physical bottleneck restricts the spatial DoF despite rich local scattering at both the transmitter and the receiver. Fig. 4 confirms the limitation of the KLD-enabled rank-1 model in the low-to-medium SNR regime (e.g., 
+
+−20 to 15 dB interval), where capacity mismatches begin to appear. The figure also highlights the role of MMM-enabled model, which acts as a robust alternative to the KLD-enabled model that maintains high accuracy at low SNR while causing only a slight capacity mismatch in the high SNR region. 
+
+2) Diagonal coupling structure , characterized by Pdiag Eq. 82, where each transmit eigenmode is linked to a single receive eigenmode, through a single scatterer or a scattering cluster. This structure aims to characterize spatial multiplexing frequently encountered in the presence of MIMO beamforming and/or RIS-enabled channels [14]. A closer inspection of the [30 , 50] dB interval reveals a clear limitation of the rank-1 frameworks: specifically, the Kronecker, KLD-enabled, and MMM-enabled models all underestimate the exact EC. Such a discrepancy high-lights that rank-1 approximations cannot preserve the parallel, orthogonal eigenmodes required to support multiple independent data streams, thereby failing to capture the full spatial multiplex-ing gain in the high-SNR regime. Yet, the proposed KLD-enabled and MMM-enabled models still provide more reliable capacity estimates by yielding a narrower EC gap as compared to the traditional Kronecker model. VII. C ONCLUSION 
+
+In this paper, to address the analytical complexities of the non-separable channel model, we proposed two rank-1 factorization frameworks for power coupling matrix P of the Weichselberger MIMO channels. To this end, we first introduced a KLD-enabled approximation computed via an efficient rank-1 IS-NMF under a strict error tolerance. Our analytical and numerical results revealed that the KLD-enabled model has a high accuracy in char-acterizing the EC in medium-to-high SNR regimes, especially for sparse scattering environments where the traditional Kronecker model severely underestimates performance. To address the KLD model’s capacity mismatches in low-SNR and highly structured scattering scenarios, we subsequently developed a novel MMM-enabled channel. By mapping eigenvalue moments of GH onto a Wishart distribution, we found that the MMM framework preserves the dominant statistical moments while maintaining robust capacity estimates across all SNR regimes. Both pro-posed approximations were found to enable exact, closed-form expressions for the EC while providing highly accurate and computationally efficient alternatives to the traditional Kronecker model. APPENDIX APROOF OF LEMMA 1The (k1, k n+1 )th element of the matrix-valued moment E[Wnr ]
+
+is derived by expanding E[Wnr ] using the matrix products as follows: 
+
+(E[Wnr ]) k1,k n+1 = E
+
+h
+
+(Wnr )k1,k n+1 
+
+i
+
+= X
+
+> k2,...,k n
+
+E
+
+h nQ
+
+> j=1
+
+Wr, (kj ,k j+1 )
+
+i
+
+, (83) where Wr, (i,j ) denotes the (i, j )th element of Wr .According to [32, Corollary 6], we obtain: 
+
+(E[Wnr ]) k1,k n+1 = X
+
+> π∈Sn
+
+X
+
+> k2,...,k n
+> n
+
+Y
+
+> j=1
+
+Σr, (kj ,k π(j)+1 ). (84) where Σr, (i,j ) denotes the (i, j )th element of Σr , Sn refers to the set of all possible permutation of {1, 2, . . . , n }, and π ∈ Sn is a permutation picked out from Sn. As matrix Σr is diagonal, the product term in Eq. (84) is non-zero if and only if kj = kπ(j)+1 ,
+
+∀j ∈ [1 , n ]. Hence, (E[Wnr ]) k1,k n+1 = 0 for all k1̸ = kn+1 , thus 
+
+E[Wnr ] is also strictly diagonal. The diagonal elements of E[Wnr ] are rewritten as: 
+
+(E[Wnr ]) k1,k 1 = X
+
+> π∈Sn
+
+Σl1(π+1) 
+
+> r, (k1,k 1)
+
+Y
+
+> c∈C(π+1) \{ c1(π+1) }
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+
+
+(85) 
+
+=
+
+> n
+
+X
+
+> j=1
+
+Σjr, (k1,k 1)
+
+X
+
+> π∈Sn
+> j=|c1(π+1) |
+
+Y
+
+> c∈C(π+1) \{ c1(π+1) }
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+
+
+,
+
+(86) where l1(π + 1) = |c1(π + 1) | denotes the length of the cycle containing the index k1, i.e., c1(π + 1) = ( k1, . . . , k n+1 ) and P π∈Sn
+
+> j=|c1(π+1) |
+
+is a shorthand notation for summation over all permutations in Sn with the cycle c1(π+1) in C(π+1) having the length of j. Of note, the product term in Eq. (86) is invariant over all combinations of c1(π + 1) , each with length of j and contains the starting element k1. We have  n−1
+
+> j−1
+
+ combinations to choose the remaining (j−1) elements from the available (n−1) elements. Moreover, these j elements can be arranged into a distinct cycle in (j − 1)! ways. Therefore, we rewrite Eq. (86) as follows: 
+
+X
+
+> π∈Sn
+> j=l1(π+1)
+
+Y
+
+> c∈C(π+1) \{ c1(π+1) }
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+
+
+=
+
+n − 1
+
+j − 1
+
+
+
+(j − 1)! X
+
+> π∈Sn−j
+
+Y
+
+> c∈C(π)
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+
+
+(87) 
+
+> (a)
+
+= (n − 1)! (n − j)! E
+
+h
+
+Tr (Wr )n−j i
+
+, (88) 12 
+
+where (a) is due to [32, Theorem 1]. Plugging the above result back into Eq. (86) and considering that E[Wnr ] is strictly diagonal, we obtain Eq. (23). For the recursive form in Eq. (25), we first rewrite c(t) 
+
+> r
+
+as follows: 
+
+c(t) 
+
+> k
+
+=
+
+> t
+
+X
+
+> i=1
+
+X
+
+> π∈Sm
+> |c1(π)|=i
+
+Tr  Σir
+
+ Y
+
+> c∈C(π)\{ c1(π)}
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+
+
+. (89) Similarly to the approach used to obtain Eq. (87), forming 
+
+c1(π) from the available (t − 1) elements yields  t−1
+
+> i−1
+
+(i − 1)! =  
+
+> (t−1)! (t−i)!
+
+distinct cycles. This yields: 
+
+c(t) 
+
+> k
+
+=
+
+> t
+
+X
+
+> i=1
+
+(t − 1)! (t − i)! Tr  Σir
+
+ X
+
+> π∈St−i
+
+Y
+
+> c∈C(π)
+
+Tr 
+
+
+
+Σ|c|
+
+> r
+
+| {z }
+
+> c(t−i)
+> k
+
+. (90) This completes the proof of Lemma 1. APPENDIX BPROOF OF THEOREM 1Using the multivariable Zassenhaus formula [34, Eq. (2.1)] to expand eitW, we obtain the following series for the CGF of W:
+
+ΨW(t) = log E
+
+h
+
+eitW1 . . . e itWR e(it)2C2 e(it)3C3 . . . 
+
+i
+
+, (91) where Ck denotes the homogeneous Lie polynomial in {Wr }
+
+of degree k. To derive the nth order moment or cumulant, one must plug in the explicit formulas of C2, C3, . . . , Cn.These Lie polynomials were previously presented in [34] with 
+
+C2 ≜ 12
+
+P
+
+> 1≤i<j ≤R
+
+[Wj , Wi] and C3 being as follows: 
+
+C3 ≜ P  
+
+> 1≤i<j ≤R16
+
+[Wi, [Wi, Wj ]] + 13 [Wj , [Wi, Wj ]] + 13
+
+P
+
+> 1≤i<j<k ≤R
+
+[Wj , [Wi, Wk]] + [ Wk, [Wi, Wj ]] ,
+
+(92) where [X, Y] = XY −YX denotes the commutator of X and Y.Let us hereby specifically focus on the third order cumulant. First, we use the following definition of matrix exponential: 
+
+e(it)2C2 = IT + ( it)2C2 + O(t4), (93) 
+
+e(it)3C3 = IT + ( it)3C3 + O(t4), (94) 
+
+eitW1 . . . e itWR = IT + it PRr=1 Wr + O(t2). (95) Since {Wr } are mutually independent and {E[Wr ]} are also mutually commutative due to being strictly diagonal matrices, it is straightforward to show that E[C2] = 0T ×T . Plugging the above results into Eq. (91), we obtain: 
+
+ΨW(t) = log 
+
+"
+
+Π(t) + ( it)3
+
+"
+
+E[C3] + RP
+
+> r=1
+
+E[Wr C2]
+
+| {z } 
+
+> 13! Θ3
+
+## 
+
++ O(t4)
+
+where Π(t) ≜ QRr=1 E[eitWr ].The derivation for the closed-form expression of Θ3 in Eq. (33) uses E[Wi] = Σi and E[W2 
+
+> i
+
+] = Tr (Σi)Σi + Σ2 
+
+> i
+
+, both obtained directly from Lemma 1, together with E[WiWj Wi],which is derived as follows: 
+
+E[WiWj Wi] = E[WiE[Wj ]Wi] = E[WiΣj Wi]= Σ−1/2 
+
+> j
+
+E[Σ1/2 
+
+> j
+
+WiΣj WiΣ1/2 
+
+> j
+
+]Σ−1/2
+
+> j
+
+= Σ−1/2
+
+> j
+
+Tr (ΣiΣj )ΣiΣj + Σ2 
+
+> i
+
+Σ2
+
+> j
+
+ Σ−1/2 
+
+> j
+
+(96) 
+
+= Tr (ΣiΣj )Σi + Σ2 
+
+> i
+
+Σj , (97) where Eq. (96) is due to the fact that E[Σ1/2 
+
+> j
+
+WiΣj WiΣ1/2 
+
+> j
+
+]
+
+computes the second moment of Σ1/2 
+
+> j
+
+WiΣ1/2 
+
+> j
+
+, which follows complex Wishart distribution with unit degree of freedom and a diagonal covariance Σ1/2 
+
+> j
+
+ΣiΣ1/2 
+
+> j
+
+.Then, Π(t) is factored out and the resulting equation now contains Π(t)−1. Since the cumulants are evaluated as t → 0,both Π(t) = IT + O(t) and the Neumann series expansion 
+
+Π(t)−1 = IT + O(t) can be used to simplify the resulting equa-tion, yielding the following: 
+
+ΨW(t) = 
+
+> R
+
+X
+
+> r=1
+
+ΨWr (t) + log 
+
+
+
+IT + (it)3
+
+3! Θ3
+
+
+
++ O(t4). (98) Taking derivatives both side and evaluating as t → 0 yields Eq. (32), thus completing the proof of Theorem 1. APPENDIX CPROOF OF COROLLARY 1The sum of statistically independent isotropic complex Wishart matrices can be rewritten in the following stochastic representa-tion: 
+
+X P
+
+=
+
+> p
+
+X
+
+> i=1
+> νi
+
+X
+
+> j=1
+
+Xi,j , (99) where {Xi,j }νi 
+
+> j=1
+
+are statistically i.i.d. complex Wishart matrices with covariance matrix σiIq . Based on Eq. (23) and Eq. (24), the 
+
+nth moment of Xi,j is derived as shown below: 
+
+E[Xni,j ] = nP
+
+> j=1
+
+(n − 1)! (n − j)! E Tr (Xi,j )n−j  σji Iq
+
+= σninP
+
+> j=1
+
+(n − 1)! (n − j)! (q + n − j − 1)! (q − 1)! Iq (100) 
+
+= (q + n − 1)! 
+
+q! σni Iq , n ≥ 1. (101) Since Tr (Xi,j ) is Gamma-distributed with shape q and scale 
+
+σ2 
+
+> i
+
+, thus E Tr (Xi,j )n−j  = (q+n−j−1)! (q−1)! σn−ji . Accordingly, the matrix-valued moment generating function of Xi,j is obtained as: 
+
+Φi,j (t) = Iq +
+
+> ∞
+
+X
+
+> n=1
+
+tn
+
+n!(q + n − 1)! 
+
+q! σni Iq (102) 
+
+=
+
+
+
+1 + (1 − σit)−q − 1
+
+q
+
+
+
+Iq . (103) Thus, the matrix-valued cumulant of X is obtained as shown below: 
+
+Ψ(t) = 
+
+> p
+
+X
+
+> i=1
+> νi
+
+X
+
+> j=1
+
+log [ Φi,j (t)] + Ψ∆(t), (104) where Ψ∆(t) is induced by the higher homogeneous Lie poly-nomial in {Xi,j }. We ignore Ψ∆(t), since evaluating the infinite series of commutator is mathematically intractable for high-order moments. In such a fashion, the eigenvalue moment and cumulant generating functions of X are obtained as follows: 
+
+ϕ(t) ∝ Tr (eΨ(t))
+
+q = e− pP  
+
+> i=1
+> νilog[ q(1 −σit)q]
+
+, (105) 
+
+ψ(t) ∝ log [ ϕ(t)] = 
+
+> p
+
+X
+
+> i=1
+
+νi log 
+
+
+
+1 + (1 − σit)−q − 1
+
+q
+
+
+
+, (106) respectively. 13 
+
+Let f (x) ≜ log( x) and gi(t) ≜ 1 + (1 −σit)−q −1 
+
+> q
+
+so that Eq. (106) is rewritten as ψ(t) = Ppi=1 νif (gi(t)) , then the rth and 
+
+tth derivatives of f (x) and g(t) are given by the following [37]: 
+
+f (r)(x) = (−1) r−1(r − 1)! 
+
+xr , (107) 
+
+g(t)(t) = (q + t − 1)! 
+
+q! (1 − σit)−q−tσmi . (108) The nth eigenvalue cumulant of X is the nth order derivatives of ψ(t) ∝ Ppi=1 νif (gi(x)) evaluated at t → 0. The higher other derivatives of composite function f (gi(x)) is obtained by using the Fa` a di Bruno’s formula [38], which yields: 
+
+Kn[λX] ∝
+
+ pP
+
+> i=1
+
+νinP
+
+> r=1
+
+f (r)(gi(t)) 
+
+× Bn,r 
+
+
+
+g(1)  
+
+> i
+
+(t), g (2)  
+
+> i
+
+(t), . . . , g (n−r+1)  
+
+> i
+
+(t)
+
+ 
+
+> t→0
+
+∝
+
+ pP
+
+> i=1
+
+νiσni
+
+  nP
+
+> r=1
+
+(−1) r−1(r − 1)! 
+
+qr
+
+× Bn,r (( q)1, (q)2, . . . , (q)n−r+1 )
+
+
+
+, (109) where Bn,r (·) denotes the incomplete Bell polynomial. Note that we used [39, Eq. (2)], i.e., Bn,r (αβx 1, . . . , αβ n−r+1 xn−r+1 ) = 
+
+αr βnBn,r (x1, . . . , x n−r+1 ) to obtain the last equation. Next, from [39, Eq. (30)], we deduce that: 
+
+Bn,r (( q)1, . . . , (q)n−r+1 ) = (−1) r
+
+r!
+
+> r
+
+P
+
+> l=1
+
+rl
+
+
+
+(−1) l(ql )n. (110) Plugging the above identity into Eq. (109) and replacing the component inside the square brackets by ϱn[λX], we obtain Eq. (45e). This completes the proof of Corollary 1. REFERENCES [1] J. Zhang et al. , “3D MIMO for 5G NR: Several observations from 32 to massive 256 antennas based on channel measurement,” IEEE Commun. Mag. , vol. 56, no. 3, pp. 62–70, March 2018. [2] E. Bj¨ ornson, L. Sanguinetti, H. Wymeersch, J. Hoydis, and T. L. Marzetta, “Massive MIMO is a reality—what is next?: Five promising research directions for antenna arrays,” Digital Signal Processing , vol. 94, pp. 3– 20, 2019. [3] T. S. Rappaport et al. , “Wireless communications and applications above 100 GHz: Opportunities and challenges for 6G and beyond,” IEEE Access ,vol. 7, pp. 78 729–78 757, 2019. [4] C.-X. Wang et al. , “On the road to 6G: Visions, requirements, key tech-nologies, and testbeds,” IEEE Commun. Surveys Tut. , vol. 25, no. 2, pp. 905–974, 2023. [5] M. Ozcelik, N. Czink, and E. Bonek, “What makes a good MIMO channel model?” in IEEE VTC , vol. 1, 2005, pp. 156–160. [6] M. Wang, Y. He, H. Wang, C.-X. Wang, and X. You, “A pervasively correlated channel model for massive MIMO transmission,” IEEE Trans. Commun. , vol. 72, no. 4, pp. 2441–2456, 2023. [7] ¨O. T. Demir, A. Kosasih, and E. Bj¨ ornson, “Spatial correlation modeling and RS-LS estimation of near-field channels with uniform planar arrays,” in 2024 IEEE 25th International Workshop on Signal Processing Advances in Wireless Communications (SPAWC) . Ieee, 2024, pp. 236–240. [8] K. Psychogios, N. Moraitis, and A. D. Panagopoulos, “Dual-polarized MIMO UAV-to-ground tree shadowed channel: Capacity, multiplexing, stationarity, and statistical modeling assessment,” IEEE Trans. Antennas Propag. , vol. 73, no. 6, pp. 3892–3903, June 2025. [9] A. M. Sayeed, “Deconstructing multiantenna fading channels,” IEEE Trans. Sig. Process. , vol. 50, no. 10, pp. 2563–2579, 2002. [10] J.-P. Kermoal, L. Schumacher, K. I. Pedersen, P. E. Mogensen, and F. Frederiksen, “A stochastic MIMO radio channel model with experimental validation,” IEEE J. Sel. Areas Commun. , vol. 20, no. 6, pp. 1211–1226, 2002. [11] D. Ying, F. W. Vook, T. A. Thomas, D. J. Love, and A. Ghosh, “Kronecker product correlation model and limited feedback codebook design in a 3D channel model,” in IEEE ICC , 2014, pp. 5865–5870. [12] V. Raghavan, J. H. Kotecha, and A. M. Sayeed, “Why does the Kronecker model result in misleading capacity estimates?” IEEE Trans. Inf. Theory ,vol. 56, no. 10, pp. 4843–4864, Oct. 2010. [13] W. Weichselberger et al. , “A stochastic MIMO channel model with joint correlation of both link ends,” IEEE Trans. Wirel. Commun. , vol. 5, no. 1, pp. 90–100, Jan. 2006. [14] Y. Ren et al. , “Multi-state RIS-assisted MIMO stochastic channel modeling and spatial characteristic measurement,” IEEE Trans. Wirel. Commun. ,vol. 25, pp. 15 582–15 596, April 2026. [15] X. Zhang, S. Song, and K. B. Letaief, “Fundamental limits of non-centered non-separable channels and their application in holographic MIMO communications,” IEEE Trans. Inf. Theory , vol. 71, no. 9, pp. 6870–6894, Sep. 2025. [16] X. Gao, B. Jiang, X. Li, A. B. Gershman, and M. R. McKay, “Statistical eigenmode transmission over jointly correlated MIMO channels,” IEEE Trans. Inf. Theory , vol. 55, no. 8, pp. 3735–3750, 2009. [17] C.-K. Wen et al. , “On the Ergodic capacity of jointly-correlated Rician fading MIMO channels,” in IEEE ICASSP , 2011, pp. 3224–3227. [18] H. Li, M. Nerini, S. Shen, and B. Clerckx, “A tutorial on beyond-diagonal reconfigurable intelligent surfaces: Modeling, architectures, system design and optimization, and applications,” IEEE Commun. Surveys Tut. , vol. 28, pp. 4086–4126, Dec. 2026. [19] C.-K. Wen, S. Jin, and K.-K. Wong, “On the sum-rate of multiuser MIMO uplink channels with jointly-correlated Rician fading,” IEEE Trans. Commun. , vol. 59, no. 10, pp. 2883–2895, 2011. [20] T. Kollo and D. von Rosen, “Approximating by the wishart distribution,” 
+
+Annals of the Institute of Statistical Mathematics , vol. 47, no. 4, pp. 767– 783, 1995. [21] G. Hillier and R. Kan, “Moments of a Wishart matrix,” Journal of Quanti-tative Economics , vol. 19, no. Suppl 1, pp. 141–162, 2021. [22] D. Maiwald and D. Kraus, “Calculation of moments of complex Wishart and complex inverse Wishart distributed matrices,” IEE Proc. Radar, Sonar Navigat. , vol. 147, no. 4, pp. 162–168, 2000. [23] G. F. Pivaro et al. , “On the exact and approximate eigenvalue distribution for sum of Wishart matrices,” IEEE Trans. Veh. Technol. , vol. 66, no. 11, pp. 10 537–10 541, Nov. 2017. [24] M. Kiessling and J. Speidel, “Exact ergodic capacity of MIMO channels in correlated Rayleigh fading environments,” in Int. Zurich Seminar Commun. ,2004, pp. 128–131. [25] W. Hachem et al. , “A new approach for mutual information analysis of large dimensional multi-antenna channels,” IEEE Trans. Inf. Theory , vol. 54, no. 9, pp. 3987–4004, 2008. [26] Z. Bao, G. Pan, and W. Zhou, “Asymptotic mutual information statistics of MIMO channels and CLT of sample covariance matrices,” IEEE Trans. Inf. Theory , vol. 61, no. 6, pp. 3413–3426, 2015. [27] J. Dumont, W. Hachem, S. Lasaulce, P. Loubaton, and J. Najim, “On the capacity achieving covariance matrix for Rician MIMO channels: An asymptotic approach,” IEEE Trans. Inf. Theory , vol. 56, no. 3, pp. 1048– 1069, 2010. [28] A. Maaref and S. Aissa, “Joint and marginal eigenvalue distributions of (non) central complex Wishart matrices and PDF-based approach for characterizing the capacity statistics of MIMO Ricean and Rayleigh fading channels,” IEEE Trans. Wirel. Commun. , vol. 6, no. 10, pp. 3607–3619, 2007. [29] B. Chen and J. Kortje, “Divergence maximizing linear projection for supervised dimension reduction,” IEEE Trans. Inf. Theory , vol. 71, no. 3, pp. 2104–2115, March 2025. [30] C. F´ evotte, N. Bertin, and J.-L. Durrieu, “Nonnegative matrix factorization with the Itakura-Saito divergence: With application to music analysis,” 
+
+Neural computation , vol. 21, no. 3, pp. 793–830, 2009. [31] G. H. Golub and G. Meurant, Matrices, moments and quadrature with applications . Princeton University Press, 2009. [32] P. Graczyk, G. Letac, and H. Massam, “The complex Wishart distribution and the symmetric group,” The Annals of Statistics , vol. 31, no. 1, pp. 287– 309, 2003. [33] P. J. Smith, “A recursive formulation of the old problem of obtaining moments from cumulants and vice versa,” The American Statistician ,vol. 49, no. 2, pp. 217–218, 1995. [34] L. Wang, Y. Gao, and N. Jing, “On multivariable Zassenhaus formula,” 
+
+Frontiers of Mathematics in China , vol. 14, no. 2, pp. 421–433, 2019. [35] R. A. Horn and C. R. Johnson, Matrix analysis . Cambridge university press, 2012. [36] M. A. Golberg, “The derivative of a determinant,” The American Mathe-matical Monthly , vol. 79, no. 10, pp. 1124–1126, 1972. [37] Y. A. Brychkov, Handbook of special functions: derivatives, integrals, series and other formulas . Chapman and Hall/CRC, 2008. [38] W. P. Johnson, “The curious history of Fa` a di Bruno’s formula,” The American mathematical monthly , vol. 109, no. 3, pp. 217–234, 2002. 14 
+
+[39] S. Jin, B.-N. Guo, and F. Qi, “Partial Bell polynomials, falling and rising factorials, Stirling numbers, and combinatorial identities,” CMES Comput. Model. Eng. Sci , vol. 132, no. 3, pp. 781–799, 2022.

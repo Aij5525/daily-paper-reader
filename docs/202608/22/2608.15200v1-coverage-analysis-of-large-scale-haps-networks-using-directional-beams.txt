@@ -1,0 +1,2095 @@
+Title: Coverage Analysis of Large-Scale HAPS Networks Using Directional Beams
+
+URL Source: https://arxiv.org/pdf/2608.15200v1
+
+Published Time: Tue, 18 Aug 2026 00:37:07 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# Coverage Analysis of Large-Scale HAPS Networks Using Directional Beams 
+
+Zhengying Lou, Baha Eddine Youcef Belmekki, Senior Member, IEEE, and Mohamed-Slim Alouini, Fellow, IEEE 
+
+Abstract —High-altitude platform stations (HAPS) are pivotal in next-generation wireless networks for reducing core network burdens and enabling cost-effective communication. In this arti-cle, we propose a spherical stochastic geometry-based analytical framework for the coverage performance evaluation of HAPS networks. Considering the significant influence of directional antenna gain on interference evaluation, we analyze coverage performance under a general channel model that accommodates various beam patterns. Analytical expressions of the uplink and downlink coverage probabilities in cellular and cell-free networks are provided respectively and their accuracy are verified by Monte Carlo simulation. Furthermore, the influences of network-level and physical-level parameters on coverage probability are studied. Finally, several factors that align with the analytical framework of this article are discussed. 
+
+Index Terms —High altitude platform station, stochastic geom-etry, directional antenna gain, coverage probability. 
+
+I. I NTRODUCTION 
+
+A. Motivation 
+
+In the next generation of wireless communication networks, particularly in non-terrestrial networks, high-altitude platform stations (HAPS) are expected to play a pivotal role in reducing the load on core communication networks while facilitating cost-effective connectivity [1]–[4]. HAPS offer widespread wireless connectivity in regions where fiber installation is ex-pensive or challenging, such as remote and sparsely populated rural areas [5], [6]. Moreover, HAPS offer a range of flexible deployment options that make them indispensable for various scenarios, including emergency response and disaster recovery efforts [7]. In recent years, the Google Loon project alone has launched a total of more than 600 HAPS to provide network coverage [8]. The deployment of large-scale HAPS networks brings opportunities for wireless network connectivity, but it also presents challenges for evaluating network quality. Most existing studies focus on the behavior and performance of an individual HAPS [9]–[11], which corresponds to small-scale HAPS systems. However, evaluating the overall perfor-mance of the network is more critical for large-scale HAPS networks. Moreover, co-channel interference among HAPS significantly affects large-scale HAPS networks. Performance evaluations must account for both serving and interference links, causing the number of links to increase quadratically with the number of HAPS. Consequently, the computational    
+
+> Z. Lou and M. -S. Alouini are with King Abdullah University of Science and Technology (KAUST), CEMSE division, Thuwal 23955-6900, Saudi Arabia (e-mail: zhengying.lou@kaust.edu.sa; slim.alouini@kaust.edu.sa). B. E. Y. Belmekki with the School of Engineering and Physical Sciences, Heriot-Watt University, Edinburgh EH14 4AS, United Kingdom (e-mail: b.belmekki@hw.ac.uk).
+
+complexity of performance evaluation through numerical sim-ulations grows rapidly with network scale. [10], [12]. Moti-vated by the need for a low-complexity and accurate evaluation method for large-scale HAPS networks, this paper proposes an interference-considerate analytical framework for both uplink and downlink. 
+
+B. Related Works 
+
+Stochastic geometry (SG) is a powerful mathematical tool to study large-scale networks, and it is also one of the few methods capable of interference analysis [13]. Furthermore, the computational complexity of the analytical expressions derived under the SG framework does not increase with the number of devices [14]. Several studies have attempted to analyze the performance of large-scale HAPS networks within the SG framework [15]–[19]. Among them, authors in [18], [19] modeled HAPS as a spherical binomial point process (BPP) and analyzed the network’s performance in terms of coverage, channel capacity, and energy efficiency with a case study approach. Furthermore, authors in [15]–[17] established comprehensive analytical frameworks for HAPS networks and derived analytical expressions for the coverage probability. The spherical Poisson point process (PPP) is adopted in [15]– [17] to model HAPS. The main difference between the two distributions is that the number of HAPS in a given region is a deterministic value under the BPP model, while it is a random variable under the PPP model. Compared to BPP, PPP is more suitable for modeling networks in non-closed areas [20]. Therefore, PPP is adopted in this article, and we will demonstrate through numerical results that the impact of the two modeling approaches on performance analysis is negligible. As for channel modeling, the authors in [21] provided chan-nel models of air-to-ground links for high-altitude equipment, and concluded that the multi-path propagation and shadowing effects are primary factors influencing communication. Fur-thermore, the direct/serving links between HAPS and users are typically line-of-sight (LoS). While classic Rician models offer simple expressions for analyzing LoS links, shadowed rician (SR) fading can further incorporate shadowing effects for more accurate characterization [22], [23]. Moreover, interference links usually cannot maintain a stable LoS and are more susceptible to reflections, diffraction, and scattering. Conse-quently, the Nakagami-m model is better suited to characterize the statistical properties of interference signals [9], [23]. Several existing studies investigate the performance of large-scale wireless networks employing directional beam trans-mission. The flat-top antenna pattern is the most commonly arXiv:2608.15200v1 [eess.SP] 15 Aug 2026 2
+
+used model due to its simple mathematical formulation, which reduces computational complexity [24]–[26]. However, this antenna pattern fails to capture the roll-off characteristics of actual antenna patterns, leading to deviations in performance evaluation [27]. To better represent actual antenna properties, [28] introduces an antenna pattern where parameters are linked to frequency and dimensions through physical formulas. Meanwhile, authors in [29] employ a sectorized-cosine direc-tional antenna pattern and consider a bidirectional alignment mechanism in UAV networks. Specifically, the transmitter directs its beam toward the receiver to reduce interference to others, while the receiver orients its reception to filter out interference from surrounding devices. To sum up, SG is an effective tool for analyzing the perfor-mance of large-scale HAPS network. Moreover, employing SR fading for serving links and nakagami-m fading for interfer-ence links is consistent with air-ground propagation character-istics. Additionally, bidirectional beam alignment mechanism is crucial for reducing interference. However, to the best of the authors’ knowledge, no studies have investigated the uplink and downlink coverage probability of HAPS networks with bidirectional beam alignment. The lack of studies may be attributed to the difficulty of interference analysis in large-scale HAPS network. 
+
+C. Contribution 
+
+In this paper, we present an analytical framework based on spherical SG for evaluating the performance of large-scale HAPS network. Next, the specific contributions and distinctions from existing research [15]–[19] are outlined as follows:  
+
+> •
+
+Unlike existing studies that focus solely on downlink performance analysis in cellular networks, we have sig-nificantly broadened the scope of research. Specifically, we derive the analytical expressions of the interference Laplace transform and coverage probability of cellular and cell-free HAPS networks in the uplink and downlink transmission scenarios, respectively.  
+
+> •
+
+This is the first article to introduce a bidirectional beam alignment mechanism into the spherical SG framework, and this is the most comprehensive study on beam models within the SG framework. We provide flexibility for antenna patterns, and investigate their impact on coverage probability.  
+
+> •
+
+We analyze the impacts of network-level parameters (e.g., coverage thresholds and device density) and physical-level parameters (e.g., beam antenna patterns and half-power beamwidth) on coverage probability. The perfor-mances of cellular and cell-free networks are compared. Additionally, we provide insights into potential open issues, the analytical framework evaluated in this paper serves as a solid foundation and powerful tool for future research of HAPS network. The rest of this paper is organized as follows. The system model of HAPS network is presented in Section II. Analytical 𝑅 !
+
+> 𝑅 "
+> Θ = arccos 𝑅 !
+> 𝑅 "
+> 𝑅 !
+> 𝑅 "
+> Θ = arccos 𝑅 !
+> 𝑅 "
+> or
+> or
+> Fig. 1: Schematic diagram of cellular and cell-free HAPS networks.
+
+expressions of uplink and downlink coverage probabilities are derived in Section III and Section IV, respectively. Section V shows the comprehensive numerical results. Section VI discusses potential open issues and future research directions. Section VII concludes this paper. II. S YSTEM MODEL 
+
+A. Distribution Model 
+
+We consider a scenario in which multiple HAPS provide services for ground users in a massive air network, as depicted in Fig. 1. Users are uniformly distributed over a local region of a sphere with radius Ru and forming a PPP with density λu,where Ru is Earth’s radius. 1 HAPS are distributed over a local region of a sphere with radius RH above the user distribution region and forming a PPP with density λH .
+
+B. Cellular and Cell-Free 
+
+According to different association strategies, the type of network can be further classified into cellular or cell-free, as shown in Fig. 1. In cellular networks, the user adopts the strongest average received power association strategy, while in a cell-free network, the user associates with a HAPS within its LoS region. The user’s LoS region is defined as the area of the sky where HAPS are visible to the user without any obstructions caused by the Earth’s curvature, as indicated in the bottom right of Fig. 1. The whole spectrum resource is divided into a set of orthogonal channels, and then evenly distributed among all users. Here we focus on the analysis of co-channel interference in a particular sub-band. The associated HAPS provides communication services to the user, while the power from other HAPS within the user’s        
+
+> 1We denote Earth’s radius by Ruinstead of the commonly used R⊕,thereby also indicating users’ radius. Although Earth is oblate, it is typically approximated as a sphere with its average radius within SG framework to reduce computational complexity. Since Earth’s flattening ratio is only 0.3%, and this deviation has a negligible impact on performance evaluation [30]. 3𝜙 𝜃 Θ
+> Earth
+> HAPS
+> 𝑅 !
+> 𝑅 "
+> 𝑥 #’ Beam Alignment Direction
+> 𝑥 $
+> 𝑥 %
+> 𝑥 &𝑥 #
+> 𝑥 '
+> Typical HAPS’ LoS Region Typical HAPS’ Beam Alignment Direction
+> 𝜃 #(
+> 𝜃 #)
+> User
+> Typical HAPS Other HAPS User Served by Typical HAPS Interference User
+
+Fig. 2: Uplink parameter description (cell-free network in the left and cellular network in the right). 
+
+LoS is considered as interference. Due to the Earth’s occlusion, the interference power from HAPS in the non-line-of-sight (NLoS) region is weak, thus, it is ignored in the analysis. Note that both in cellular and cell-free networks, one user can receive only one HAPS service, but one HAPS might be associated with multiple users. As mentioned, we assume that there is at least one HAPS in the user’s LoS region. Subsequent numerical results also verify that the impact of HAPS availability is negligible. 
+
+C. Uplink and Downlink Coordinate Systems 
+
+In uplink transmission, and without loss of generality, we focus on the coverage performance of a typical HAPS. We assume that the polar angle is zero at the ray from the Earth center to typical HAPS, and establish a spherical coordinate system. Therefore, the coordinate of typical HAPS is (RH , 0, 0) . We assume that the locations of users in the LoS range of typical HAPS constitute a set X :
+
+X ={x0(Ru, ϕ 0, θ 0), x 1(Ru, ϕ 1, θ 1), . . . , xK−1(Ru, ϕ K−1, θ K−1), x K (Ru, ϕ K , θ K )}, (1) where xk(Ru, ϕ k, θ k) is the coordinate of the kth user, ϕk and 
+
+θk denote azimuth angle and polar angle, respectively. The condition θk ≤ Θ = arccos( Ru/R H ) is satisfied for any 0 ≤
+
+k ≤ K to ensure users are in the LoS region. x0(Ru, ϕ 0, θ 0) is the coordinate of the user being served by the typical HAPS, as indicated in Fig. 2. Note that due to the Earth’s curvature, the altitude of HAPS plays a critical role in determining its LoS region. Specifically, as the altitude increases, the LoS region expands. Conventionally, HAPS fly in the stratosphere at altitudes of 17-20 km above sea level. The same method is used to establish a coordinate system for downlink transmission. In this case, the coordinate of the typical user is (Ru, 0, 0) and X denotes the positions of HAPS in the typical user’s LoS region, as shown in Fig.3. 
+
+D. Channel Model 
+
+Based on the existing literature [6], [11], we consider that the channel model of the HAPS-user link follows the free space fading model experienced with large-scale fading and small-scale fading [22]. Moreover, HAPS typically remain quasi-stationary in the stratosphere, making the impact of drift speed negligible, as demonstrated by the world’s first 5G 𝜙 𝜃 Θ     
+
+> Earth
+> HAPS
+> 𝑅 !
+> 𝑅 "
+> 𝑥 #’ Beam Alignment Direction Typical User’ Beam Alignment Direction
+> 𝜃 #$𝜃 #%User
+> Typical User Other Users HAPS Associated with Typical User Interference HAPS
+> Typical User’ LoS Region
+> 𝑥 &𝑥 #
+> 𝑥 '
+
+Fig. 3: Downlink parameter description (cell-free network in the left and cellular network in the right). 
+
+HAPS communication trial [2]. In uplink transmission, the received power of HAPS from the kth user is, 
+
+ρrH,k = ρtu Gu(θtk) GH (θrk)
+
+ ν
+
+4π
+
+2
+
+ζD −2 
+
+> k
+
+WQ, (2) where ρtu is the transmitted power from the user, Gu(θtk) and 
+
+GH (θrk) are antenna gains, θtk and θrk are angles,   ν
+
+> 4π
+
+2 ζD −2
+
+> k
+
+denotes the large-scale fading, and WQ, Q = {S, I } denotes the small-scale fading. Next, we will discuss these notations in detail. 
+
+TABLE I: Antenna gains when antenna patterns are adopted.                     
+
+> Antenna Pattern Model Omnidirectional [31] G(θ) = Gm
+> Gaussian [32] G(θ) = Gm2−θ2
+> θ23dB
+> Flat-top [33] G(θ) =
+> Gm|θ| ≤ θ3dB
+> 0otherwise
+> Sinc [27] G(θ) = Gmsin 2(πN θ )(πN θ )2
+> Cosine [27] G(θ) =
+> (
+> Gmcos 2
+> πN
+> 2θ
+> 
+> |θ| ≤ 1
+> N
+> 0otherwise
+> Parameter
+> Gm: maximum gain
+> θ3dB : half-power beamwidth
+> N: number of antenna elements
+
+Here G(θ) represents the general antenna gain, which can be replaced by specific models when different antenna patterns are adopted. Table I enumerates five common models, and their visual representations are provided in Fig.4. 
+
+Gu(θtk) and GH (θrk) represent the antenna gain when an-tenna patterns are applied by the user and HAPS respectively. 
+
+θtk is the angle between the kth user’s beam alignment direction and the user-HAPS direction. θrk is the angle between the HAPS’ beam alignment direction and the user-HAPS direction. When HAPS is serving the kth user, the user and HAPS’ beams are bidirectionally aligned ( θtk = θrk = 0 ), and the total antenna gain reaches its maximum. When HAPS is associated with the kth user but is serving another user, only the user’s beam is aligned ( θtk = 0 , θ rk̸ = 0 ). Since the communication distance can reach tens or even hundreds of kilometers, we consider the transmitter will not adopt the omnidirectional antenna pattern. As for large-scale fading   ν
+
+> 4π
+
+2 ζD −2 
+
+> k
+
+, ν is the wave length of the transmitted signal. ζ denotes the additional gain during transmission in the medium. In this scenario, ζ represents the average rain attenuation [34]. Dk is the Euclidean distance between the kth user and HAPS. When the distributions of 40 2 4 6 8 10 12 14 16 18 20  
+
+> Angle [Degree]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Normalized Antenna Gain
+> Omnidirectional Antenna Pattern Gaussian Antenna Pattern Flat-top Antenna Pattern Sinc Antenna Pattern Cosine Antenna Pattern
+
+Fig. 4: Visualization of five different antenna patterns when N = 8 ,
+
+θ3dB = 3 .581 ◦.
+
+HAPS and user both follow PPPs, Dk is a random variable subject to a specific distribution. Especially, when the user associates with the HAPS, the distribution of Dk is called contact distance distribution [35]. Considering that HAPS and users are distributed on spheres, using the central angle in the spherical coordinate system instead of the Euclidean distance can make the result more tractable. 
+
+Definition 1 (Central Angle) . The central angle between a HAPS and a user is an angle whose vertex is the Earth center and whose sides are the line from the Earth center to the user and the line from the Earth center to the HAPS. 
+
+Considering the above definition, the relationship between 
+
+Dk and central angle θk can be established by law of cosines, 
+
+cos θk = R2 
+
+> u
+
++ R2 
+
+> H
+
+− D2
+
+> k
+
+2RuRH
+
+. (3) According to [9], we assume that the small-scale fading of interference signal WI follows Nakagami-m fading, and that of the non-interference signal WS follows shadowed Rician fading. The probability density functions (PDF) of Nakagami-
+
+m fading is given by [36]: 
+
+fWI (g) = mmgm−1
+
+Γ ( m) e−m g , (4) where Γ ( m) = R ∞ 
+
+> 0
+
+zm−1e−z dz is the Gamma function, m
+
+is the scale parameter of Nakagami-m fading. The cumulative distribution function (CDF) of shadowed Rician fading is given as by [22] 
+
+FWS (g) = 
+
+ 2b0n
+
+2b0n + Ω 
+
+n
+
+×
+
+> ∞
+
+X
+
+> z=0
+
+(n)z
+
+z!Γ( z + 1) 
+
+ Ω2b0n + Ω 
+
+z
+
+Γ
+
+
+
+z + 1 , g
+
+2b0
+
+
+
+, (5) where (n)z is the Pochhammer symbol, n, b0 and Ω are parameters of the shadowed Rician fading. Γ( ·) and Ξ( ·, ·)
+
+denote the gamma function and lower incomplete gamma function, respectively. Finally, we assume downlink transmission experience the same channel fading as uplink transmission. Therefore, the received power of the user is given by 
+
+ρru,k = ρtH Gu(θrk) GH (θtk)
+
+ ν
+
+4π
+
+2
+
+ζD −2 
+
+> k
+
+WQ, (6) where ρtH is the transmitted power from the HAPS. 
+
+E. Metric Definition 
+
+This subsection gives the definition of coverage probability in uplink transmission. The definition of coverage probability in downlink transmission is similar to that of uplink transmis-sion, thus omitted here. From the above descriptions, the received power from the user at x0 associated by the typical HAPS is given as 
+
+ρrH, 0 = ρtu Gu(0) GH (0) 
+
+ ν
+
+4π
+
+2
+
+ζD −20 WS . (7) The total interference received by the typical HAPS is the sum of the received power from K other users: 
+
+I = X
+
+> xi∈X \ x0
+
+ρrH,x i
+
+=
+
+> K
+
+X
+
+> k=1
+
+ρtu Gu(θtk) GH (θrk)
+
+ ν
+
+4π
+
+2
+
+ζD −2 
+
+> k
+
+WI . (8) The coverage probability is defined as the probability that the received signal-to-interference plus noise ratio (SINR) at the typical HAPS is greater than a coverage threshold γH , such as 
+
+P C,Y u (γH ) = 
+
+P
+
+" ρtu Gu(0) GH (0)   ν
+
+> 4π
+
+2 ζD −20 WS
+
+PKk=1 ρtu Gu(θtk) GH (θrk)   ν
+
+> 4π
+
+2ζD −2 
+
+> k
+
+WI +σ2 > γ H
+
+#
+
+, (9) where σ2 is noise power, u in the subscript of P C,Y u rep-resents uplink transmission. The parameter Y is defined as 
+
+Y ∈ { cll ,cf }, where cll and cf stand for cellular and cell-free networks, respectively. III. U PLINK ANALYSIS 
+
+A. Cellular Networks 
+
+In this section, we analyze the uplink coverage probability of the typical HAPS in cellular networks, as shown in the right of Fig. 2. First, considering that users are associated with the HAPS that provides the strongest average received power, the distribution of users served by the typical HAPS is inhomogeneous. Users far from typical HAPS are more likely to be associated with other HAPS. Therefore, the following Lemma gives the probability that users at different locations are associated with typical HAPS. 
+
+Lemma 1. In cellular networks, for the given typical HAPS with coordinate (RH , 0, 0) , the probability that a user with 5
+
+coordinate (Ru, ϕ, θ ) is associated with this HAPS is given as, 
+
+P A, cll  
+
+> u
+
+(θ) = exp 
+
+
+
+−
+
+
+
+λH − 12πR H (RH −Ru)
+
+
+
+2πR 2 
+
+> H
+
+(1 − cos θ)
+
+
+
+, (10) 
+
+where θ ≤ arccos Ru 
+
+> RH
+
+is satisfied to ensure that the user is in the typical HAPS’ LoS region. Proof. See Appendix A. The last Lemma studies the distribution of associated users, whereas the following three Lemmas are about interfering users. We first introduce the operator T to describe the beam deflection angle. 
+
+Lemma 2. In a triangle with vertices (R1, ϕ 1, θ 1),
+
+(R2, ϕ 2, θ 2), and (R3, ϕ 3, θ 3), the interior angle correspond-ing to vertex (R2, ϕ 2, θ 2) is, 
+
+T (R1, ϕ 1, θ 1; R2, ϕ 2, θ 2; R3, ϕ 3, θ 3) = arccos 
+
+d2 (R1, ϕ 1, θ 1; R2, ϕ 2, θ 2)+ d2 (R2, ϕ 2, θ 2; R3, ϕ 3, θ 3)2d (R1, ϕ 1, θ 1; R2, ϕ 2, θ 2) d (R2, ϕ 2, θ 2; R3, ϕ 3, θ 3)
+
+− d2 (R1, ϕ 1, θ 1; R3, ϕ 3, θ 3)2d (R1, ϕ 1, θ 1; R2, ϕ 2, θ 2) d (R2, ϕ 2, θ 2; R3, ϕ 3, θ 3)
+
+!
+
+, (11) 
+
+where d (R1, ϕ 1, θ 1; R2, ϕ 2, θ 2) represents the Euclidean dis-tance between vertex (R1, ϕ 1, θ 1) and vertex (R2, ϕ 2, θ 2),which is given by 
+
+d(R1, ϕ 1, θ 1; R2, ϕ 2, θ 2) =  R21 + R22 − 2R1R2
+
+× (sin θ1 sin θ2 cos( ϕ1 − ϕ2) + cos θ1 cos θ2) 12 . (12) 
+
+Proof. We first convert the coordinates from the spherical co-ordinates to cartesian coordinates and calculate the Euclidean distance. Then, the interior angle is obtained through the law of cosines. In the scenario of uplink interference analysis, we con-sider that the coordinate of typical HAPS is (RH , 0, 0) ,the coordinate of the interfering user is (Ru, ϕ 2, θ 2),and the coordinate of HAPS which is associated with the interfering user is (RH , ϕ 3, θ 3). Then, the operator 
+
+T (RH , 0, 0; Ru, ϕ 2, θ 2; RH , ϕ 3, θ 3) outputs the beam devia-tion angle between the typical HAPS and the alignment beam direction of the interfering user. With this operator, we can calculate the average antenna gain from the user at a given position (Ru, ϕ, θ ) to the typical HAPS. 
+
+Lemma 3. In cellular networks, given that the coordinate of the typical HAPS is (RH , 0, 0) , the average antenna gain of uplink transmission from the user with coordinate (Ru, ϕ, θ )
+
+can be derived as, 
+
+Gcll  
+
+> u
+
+(θ) = P A, cll  
+
+> u
+
+(θ)Gu(0) +
+
+Z 2π
+
+> 0
+
+Z θ
+
+> 0
+
+
+
+λH − 12πR H (RH − Ru)
+
+
+
+R2 
+
+> H
+
+P A, cll  
+
+> u
+
+(ψ)
+
+× sin ψG u (T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ )) d ψdφ, (13) 
+
+where the association probability P A, cll  
+
+> u
+
+(θ) is given in Lemma 1. Proof. See Appendix B. According to the average antenna gain of users at given positions given by Lemma 3, we can obtain the distribution of interference signal power of users at given positions. The total interference power can be obtained by traversing the entire LoS range of the typical HAPS. As an important intermediate result in the analytical expression of coverage probability, the Laplace transform of interference is further derived in the following lemma. Note that the results in Lemma 1 and Lemma 3 are independent of the user’s azimuth angle, the Laplace transform of the interference power is also not a function of the azimuth angle. 
+
+Lemma 4. In cellular networks, given that the typical HAPS at (RH , 0, 0) is serving a user with coordinate (Ru, ϕ, θ ), the Laplace transform of uplink interfering power caused by other users is given by, 
+
+Lcll  
+
+> u
+
+(s, θ ) = 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+mm ·
+
+
+
+m + sρ tuGcll  
+
+> u
+
+(ψ)
+
+× GH
+
+ T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ ) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ (d(RH , 0, 0; Ru, φ, ψ )) −2
+
+−m
+
+×
+
+
+
+λu − RH
+
+2πR 2
+
+> u
+
+(RH − Ru)
+
+
+
+R2 
+
+> u
+
+sin ψdφdψ, (14) 
+
+where Gcll  
+
+> u
+
+(ψ) is defined in Lemma 3, 
+
+T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ ) and d(RH , 0, 0; Ru, φ, ψ ) are defined in Lemma 2. Proof. See Appendix C. Based on the above lemmas, the coverage probability is given by the following theorem. 
+
+Theorem 1. For a given typical HAPS, the uplink coverage probability in cellular networks is given by, 
+
+P C, cll  
+
+> u
+
+(γH ) = 
+
+Z Θ0
+
+1 −
+
+ 2b0n
+
+2b0n + Ω 
+
+n
+
+×
+
+> ∞
+
+X
+
+> z=0
+
+(n)z
+
+z!
+
+ Ω2b0n + Ω 
+
+z 
+
+1−
+
+> z+1
+
+X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp  −kβ u(θ, γ H )σ2 Lcll  
+
+> u
+
+(kβ u(θ, γ H ), θ )
+
+!
+
+× λH 2πR 2 
+
+> H
+
+sin θ exp  −λH 2πR 2 
+
+> H
+
+(1 − cos θ) dθ, (15) 
+
+where Lcll  
+
+> u
+
+(kβ u(θ, γ H ), θ ) is the Laplace transform of the interference power defined in Lemma 4, P A, cll  
+
+> u
+
+(θ) is the 6
+
+association probability defined in Lemma 1, and βu(θ, γ H )
+
+is defined as, 
+
+βu(θ, γ H ) =  (z + 1)!  −1
+
+> z+1
+
+× γH ×  R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+2b0ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζ . (16) 
+
+Proof. See Appendix D. 
+
+B. Cell-Free Networks 
+
+In this section, we analyze the coverage probability of the typical HAPS in cell-free networks, as shown in the left of Fig. 2. In general, the analytical framework of cell-free networks is similar to that of cellular networks. Compared with cellular networks, cell-free networks have a simpler expression with regard to the association relationship between the typical HAPS and users. 
+
+Lemma 5. In cell-free networks, given that the coordinate of the typical HAPS is (RH , 0, 0) , the average antenna gain of uplink transmission from the user with coordinate (Ru, ϕ, θ )
+
+can be derived as, 
+
+Gcf  
+
+> u
+
+(θ) = Gu(0) 
+
+λH 2πR H (RH − Ru)+
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+
+
+λH − 12πR H (RH − Ru)
+
+
+
+R2 
+
+> H
+
+sin ψ
+
+× Gu (T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ )) 
+
+λH 2πR H (RH − Ru) dψdφ, (17) 
+
+where T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ ) is defined in Lemma 2. Proof. See Appendix E. 
+
+Lemma 6. In cell-free networks, given that the typical HAPS at (RH , 0, 0) is serving a user with coordinate (Ru, ϕ, θ ), the Laplace transform of uplink interfering power caused by users is given by, 
+
+Lcf  
+
+> u
+
+(s, θ ) = 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+mm ·
+
+
+
+m + sρ tuGcf  
+
+> u
+
+(ψ)
+
+× GH
+
+ T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ ) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ (d(RH , 0, 0; Ru, φ, ψ )) −2
+
+−m
+
+×
+
+
+
+λu − RH
+
+2πR 2
+
+> u
+
+(RH − Ru)
+
+
+
+R2 
+
+> u
+
+sin ψdφdψ, (18) 
+
+where Gcf  
+
+> u
+
+(ψ) is defined in Lemma 5, T (Ru, 0, θ ; RH , 0, 0; 
+
+Ru, φ, ψ ) and d(RH , 0, 0; Ru, φ, ψ ) are defined in Lemma 2. Proof. The proof of Lemma 6 is similar to that of Lemma 4, therefore omitted here. 
+
+Theorem 2. For a given typical HAPS, the uplink coverage probability in cell-free networks is given by, 
+
+P C, cf  
+
+> u
+
+(γH ) = 
+
+Z Θ0
+
+RH sin θRH − Ru
+
+1 −
+
+ 2b0n
+
+2b0n + Ω 
+
+n
+
+×
+
+> ∞
+
+X
+
+> z=0
+
+(n)z
+
+z!
+
+ Ω2b0n + Ω 
+
+z 
+
+1−
+
+> z+1
+
+X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp  −kβ u(θ, γ H )σ2 Lcf 
+
+> u
+
+ kβ u(θ, γ H ), θ !
+
+dθ, (19) 
+
+where Lcf  
+
+> u
+
+(kβ u(θ, γ H ), θ ) is the Laplace transform of the interference power defined in Lemma 6, and βu(θ, γ H ) is defined in (16). Proof. In cell-free networks, the probability of providing service to users in any area is the same because it is within the LoS region of the typical HAPS. Therefore, the PDF of the contact angle distribution, which is the distribution of the central angle between the typical HAPS and serving user, is given as, 
+
+fθ0 (θ) = ddθ Fθ0 (θ)= ddθ
+
+2πR 2
+
+> u
+
+(1 − cos θ)2πR 2
+
+> u
+
+(1 − cos Θ) = sin θ
+
+1 − cos Θ , (20) where Θ = arccos( Ru/R H ) is the upper bound of the central angle. After replacing the results of (20) into (38), the remaining proof of Theorem 2 is similar to that of Theorem 1, therefore omitted here. IV. D OWNLINK ANALYSIS 
+
+This section analyzes the downlink coverage probability of the typical user. The analysis of downlink coverage probability is similar to that of uplink coverage probability. Due to space limitations, the analytic results are extended from the uplink scenario and most of the proofs are omitted. 
+
+A. Cellular Networks 
+
+Lemma 7. In cellular networks, given that the coordinate of the typical user is (Ru, 0, 0) , the approximate average antenna gain of downlink transmission from the interfering HAPS with coordinate (RH , ϕ, θ ) can be estimated as, 
+
+Gcll  
+
+> H
+
+(θ) = 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+sin ψP Au (ψ)2π R Θ0 sin ψP Au (ψ)d ψ
+
+× GH (T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ )) d ψdφ, (21) 
+
+where the association probability P A, cll  
+
+> u
+
+(θ) is defined in Lemma 1. Proof. See Appendix F. 
+
+Lemma 8. In cellular networks, given that the typical user at 
+
+(Ru, 0, 0) is served by a HAPS with coordinate (Ru, ϕ, θ ), the 7
+
+Laplace transform of downlink interfering power from other interfering HAPS is given by, 
+
+Lcll  
+
+> d
+
+(s, θ ) = 
+
+Z 2π
+
+> 0
+
+Z Θ
+
+> θ
+
+mm ·
+
+
+
+m + sρ tH Gcll  
+
+> H
+
+(ψ)
+
+× Gu
+
+ T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ ) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ d(Ru, 0, 0; RH , φ, ψ )−2
+
+−m
+
+×
+
+
+
+λH − 12πR H (RH − Ru)
+
+
+
+R2 
+
+> H
+
+sin ψdφdψ, (22) 
+
+where Gcll  
+
+> H
+
+(ψ) is defined in Lemma 7, T (RH , 0, θ ; Ru, 0, 0; 
+
+RH , φ, ψ ) and d(Ru, 0, 0; RH , φ, ψ ) are defined in Lemma 2. Proof. In cellular networks, interfering HAPS are further away from the typical user than the associated HAPS. Therefore, the integral interval of ψ needs to be changed accordingly. The remaining proof of Lemma 8 is similar to that of Lemma 4, therefore, it is omitted here. 
+
+Theorem 3. For a given typical user, the downlink coverage probability in cellular networks is given by, 
+
+P C, cll  
+
+> d
+
+(γu) = 
+
+Z Θ0
+
+1 −
+
+ 2b0n
+
+2b0n + Ω 
+
+n ∞X
+
+> z=0
+
+(n)z
+
+z!
+
+×
+
+ Ω2b0n + Ω 
+
+z 
+
+1 −
+
+> z+1
+
+X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp   − kβ H (θ, γ u)σ2Lcll 
+
+> d
+
+ kβ H (θ, γ u), θ !
+
+× λH 2πR 2 
+
+> H
+
+sin θ exp  −λH 2πR 2 
+
+> H
+
+(1 − cos θ) dθ, (23) 
+
+where Lcll  
+
+> d
+
+(kβ H (θ, γ u), θ ) is the Laplace transform of the interference power defined in Lemma 8, P A, cll  
+
+> u
+
+(θ) is the association probability defined in Lemma 1, and βH (θ, γ u)
+
+is defined as, 
+
+βH (θ, γ u) =  (z + 1)!  −1
+
+> z+1
+
+× γu
+
+ R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+2b0ρtH Gu(0) GH (0)   ν
+
+> 4π
+
+2 ζ . (24) 
+
+Proof. The proof of Theorem 3 is similar to that of Theorem 1, therefore omitted here. 
+
+B. Cell-Free Networks 
+
+Lemma 9. In cell-free networks, given that the coordinate of the typical user is (Ru, 0, 0) , the average antenna gain of the downlink transmission from the interfering HAPS with coordinate (RH , ϕ, θ ) can be derived as, 
+
+Gcf  
+
+> H
+
+(θ) = 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+
+
+λu − RH
+
+2πR 2
+
+> u
+
+(RH − Ru)
+
+
+
+R2 
+
+> u
+
+sin ψ
+
+× RH Gu (T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ )) 
+
+λu2πR 2 
+
+> u
+
+(RH − Ru) dψdφ. (25) 
+
+Proof. The proof of Lemma 9 is similar to that of Lemma 5, therefore omitted here. Model network elements              
+
+> •HAPS: Spherical PPP
+> •Users: Spherical PPP
+> Model channel and propagation effects
+> •Serving link: SR fading
+> •Interference link: Nakagami-m fading
+> Association strategies
+> •Cellular
+> •Cell-free
+> Key performance metrics
+> •Uplink coverage probability
+> •Downlink coverage probability
+> Average antenna gain of interference users
+> Laplace transform of uplink interfering power
+> Uplink coverage probability
+> Contact distance between typical HAPS and its serving user
+> Association distribution between HAPS and users
+> Average antenna gain of interference HAPS
+> Laplace transform of downlink interfering power
+> Downlink coverage probability
+> Contact distance between typical user and its serving HAPS
+> Association distribution between HAPS and users
+> System model
+> Analyze the uplink coverage probability of the typical HAPS
+> Analyze the downlink coverage probability of the typical user
+
+Fig. 5: Block diagram to describe the overall evaluation effectiveness of SG. 
+
+Lemma 10. In cell-free networks, given that the typical user at (Ru, 0, 0) is served by a HAPS with coordinate (RH , ϕ, θ ),the Laplace transform of downlink interfering power is given by, 
+
+Lcf  
+
+> H
+
+(s, θ ) = 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+mm ·
+
+
+
+m + sρ tH Gcf  
+
+> H
+
+(ψ)
+
+× Gu
+
+ T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ ) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ d(Ru, 0, 0; RH , φ, ψ )−2
+
+−m
+
+×
+
+
+
+λH − 12πR H (RH − Ru)
+
+
+
+R2 
+
+> H
+
+sin ψdφdψ, (26) 
+
+where Gcf  
+
+> H
+
+(ψ) is defined in Lemma 7, T (RH , 0, θ ; Ru, 0, 0; 
+
+RH , φ, ψ ) and d(Ru, 0, 0; RH , φ, ψ ) are defined in Lemma 2. Proof. The proof of Lemma 10 is similar to that of Lemma 4, therefore omitted here. 
+
+Theorem 4. For a given typical user, the downlink coverage probability in cell-free networks is given by, 
+
+P C, cf  
+
+> d
+
+(γu) = 
+
+Z Θ0
+
+RH sin θRH − Ru
+
+1 −
+
+ 2b0n
+
+2b0n + Ω 
+
+n
+
+×
+
+> ∞
+
+X
+
+> z=0
+
+(n)z
+
+z!
+
+ Ω2b0n + Ω 
+
+z 
+
+1−
+
+> z+1
+
+X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp  −kβ H (θ, γ u)σ2 Lcf  
+
+> H
+
+(kβ H (θ, γ u), θ )
+
+!
+
+dθ, (27) 
+
+where Lcf  
+
+> H
+
+(kβ H (θ, γ u), θ ) is the Laplace transform of the interference power defined in Lemma 10, and βH (θ, γ u) is defined in (24). Proof. The remaining proof of Theorem 4 is similar to that of Theorem 2, therefore omitted here. 82 4 6 8 10 12 14 16 18 20 22         
+
+> Half-power Beamwidth 3dB [Degree]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability  Network Antenna Pattern Cellular Flat-top Cellular Gaussian Cellular Gaussian, Omni. Cell-free Flat-top Cell-free Gaussian Cell-free Gaussian, Omni. Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 6: Influence of different antenna patterns on uplink coverage probability. 2 4 6 8 10 12 14 16 18 20 22         
+
+> Half-power Beamwidth 3dB [Degree]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Network Antenna Pattern Cellular Flat-top Cellular Gaussian Cellular Gaussian, Omni. Cell-free Flat-top Cell-free Gaussian Cell-free Gaussian, Omni. Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 7: Influence of different antenna patterns on downlink coverage probability. 16 18 20 22 24 26 28 30 32                
+
+> Maximum Gain of the Directional Antenna G m[dB]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Cellular, H= -10 dB Cellular, H= - 5 dB Cellular, H=0 dB Cell-free, H= -10 dB Cell-free, H= - 5 dB Cell-free, H=0 dB Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 8: Influence of maximum antenna gain on uplink coverage probability. 
+
+It is important to emphasize that the expressions for cover-age probability ((15), (19), (23), and (27)) cannot be straight-forwardly expressed in closed-form. This difficulty arises from the complexity of spherical topology, as the curvature of the sphere complicates geometric relationships. Furthermore, considering interference further adds to the challenge of sim-plifying these expressions. 
+
+C. Overall Evaluation Effectiveness 
+
+As shown in Fig. 5, the evaluation process begins with the establishment of a system model, encompassing network elements, association strategies, channel models, and a pa-rameter matrix. Firstly, the primary distinction between the uplink and downlink coverage probability evaluation lies in the different sources of interference. Specifically, each user can associate with only one HAPS, whereas a single HAPS can associate with multiple users. This results in a more complex interference analysis for the uplink compared to the downlink. Secondly, the analytical framework for cellular networks is more intricate than that for cell-free networks. This is because the association distribution between HAPS and users is inhomogeneous in cellular networks, whereas it is homogeneous in cell-free networks. V. N UMERICAL RESULTS 
+
+In this section, we analyze the effects of antenna parameters as well as users and HAPS distributions on the uplink coverage probability (Fig. 6, Fig. 8 and Fig. 10) and downlink coverage probability (Fig. 7, Fig. 9 and Fig. 11) in cellular and cell-free networks. In the figures, we use triangles and circles to represent the analytical results for cellular and cell-free networks, respectively, whereas lines represent the results obtained by Monte Carlo simulations. In simulations, all the metrics used are averaged over 10,000 iterations. According to the law of large numbers, the mean of the simulation results converges to the theoretical expected value. Moreover, the analytical results and simulation outcomes match perfectly, thereby validating the accuracy of the theorems derived in this paper. The simulation parameters are summarized in Table II, unless stated otherwise. 
+
+TABLE II: Parameters and default values [34], [37].                                       
+
+> Notation Parameter Value
+> Ru,RHRadius of users, HAPS 6371, 6391 [km]
+> λu,λHDensity of users, HAPS 6, 0.6 [ ×10 −4km −2]
+> ρtu,ρtHTransmission power of users, HAPS 3, 15 [dBW]
+> GmMaximum gain 26 dBi
+> γu,γHCoverage threshold of users, HAPS 10 ,−5[dB]
+> ζAverage rain attenuation −2dB
+> SR (Ω , b 0, n )Parameters of SR fading SR (1 .29 ,0.158 ,19 .4)
+> mParameter of Nakagami-mfading 2
+> νWavelength of transmission link 0.0150 m
+> σ2Noise power 1×10 −12 W
+
+When applying Monte Carlo simulation to calculate uplink coverage probability, it suffices to take typical HAPS as the center, generate users in the range of polar angle less than Θ,and generate HAPS in the range of polar angle less than 2Θ .We note that Θ = arccos( Ru/R H ) is the maximum center angle that can be formed between the user and HAPS within the LoS range. Users with polar angles that are less than Θ
+
+may associate with HAPS with polar angle that is up to 2Θ .The same remark above applies for the simulation of downlink coverage probability. 
+
+A. Antenna Pattern Impact 
+
+In Fig. 6 and Fig. 7, the impact of various antenna patterns on uplink and downlink coverage probability is depicted. At the transmitters, directional antennas are employed, while receivers use the same directional antennas as the transmitter, except for two scenarios (red and sky blue dot lines) where omnidirectional antennas are adopted. We can observe from Fig. 6 and Fig. 7 that employing directional antennas at the receiver can significantly enhance the coverage probability. This is because directional signal reception can reduce interference by selectively focusing on signals from a specific direction while attenuating signals from 916 18 20 22 24 26 28 30 32              
+
+> Maximum Gain of the Directional Antenna G m[dB]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Cellular, u= 5 dB Cellular, u= 10 dB Cellular, u= 15 dB Cell-free, u= 5 dB Cell-free, u= 10 dB Cell-free, u= 15 dB Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 9: Influence of maximum antenna gain on downlink coverage probability. 1 2 3 4 5 6 7 8 9 10            
+
+> Density of HAPS H[/km 2]10 -5
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Network u[/km 2]Cellular, 0.0002 Cellular, 0.0006 Cellular, 0.001 Cell-free, 0.0002 Cell-free, 0.0006 Cell-free, 0.001 Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 10: Influence of density of HAPS and users on uplink coverage probability. 1 2 3 4 5 6 7 8 9 10            
+
+> Density of HAPS H[/km 2]10 -5
+> 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Network u[/km 2]Cellular, 0.0002 Cellular, 0.0006 Cellular, 0.001 Cell-free, 0.0002 Cell-free, 0.0006 Cell-free, 0.001 Analysis (Cellular) Analysis (Cell-free)
+
+Fig. 11: Influence of density of HAPS and users on downlink coverage probability. 
+
+other directions. It is straightforward to notice that a smaller half-power beamwidth corresponds to a greater coverage prob-ability. This relationship can be explained by the fact that a smaller half-power beamwidth concentrates the signal energy into a narrower beam, directing more of the transmitted power toward the desired direction and minimizing signal spillage into unwanted areas. It also shows in Fig. 6 and Fig. 7 that cellular networks outperforms cell-free networks. This is attributed to the fact that in cell-free networks, where users are more likely to be associated with distance HAPS, the received signal strength tends to be weaker due to higher path loss. Specifically, in cell-free networks, each HAPS within a user’s LoS range has an equal probability of being associated. In contrast, in cellular networks, users are always associated with the nearest HAPS. 
+
+B. Parameter Selection 
+
+Fig. 8 and Fig. 9 show the coverage probability under different coverage thresholds and antenna gains, with the transmitter and receiver employing Gaussian antenna patterns. We configure different coverage thresholds for uplink and downlink, since the lower transmit power of users results in weaker signal strength received by HAPS. Additionally, HAPS are equipped with a more powerful demodulation system capable of handling lower SINR signals. We can see from Fig. 8 and Fig. 9 that with the enhancement of antenna gain, the coverage probability initially increases before converging. This is because as antenna gain increases, signal and interference strengths increase accordingly, while noise power remains constant. As observed in Fig. 8 and Fig. 9, cellular networks outper-form cell-free networks under the same coverage threshold. This phenomenon is primarily attributed to the fact that, in the cell-free network architecture, the distances between users and HAPS are generally greater than those in cellular networks, as explained earlier. It also indicates that the contact distance (the distance between a user and his associated HAPS) has a greater impact on coverage probability than interference. 
+
+C. User and HAPS Density Impact 
+
+Fig. 10 and Fig. 11 depict the influence of user and HAPS density on the coverage probability, with transmitter and receiver employing Gaussian antenna patterns As we can see from Fig. 10, enhancing the HAPS density while keeping the user density constant can improve the coverage probability, with a more pronounced enhancement effect observed in cellular networks compared to cell-free networks. The reason for this phenomenon is that with higher HAPS density, the contact distance becomes shorter in cellular networks, while that in cell-free networks does not decrease, due to random associations. Furthermore, reducing user den-sity also improves coverage probability. This is because a lower number of users associated with each HAPS leads to fewer sources of co-frequency interference, consequently, improving the performance. Fig. 11 also reflects that cellular networks keep excellent coverage performances. This indicates that users aligned with interfering HAPS’ beams have a large distance from the typical user, so the probability of the typical user falling into the interfering HAPS’ main lobe is low. On the contrary, the randomness of beam alignment in cell-free networks results in a linear negative correlation between the density of HAPS and the coverage probability. This correlation stems from the limitation that augmenting HAPS density does not effectively reduce the average contact distance between HAPS and users; instead, it tends to exacerbate interference within the network. 
+
+D. Summary 
+
+In what follows, we summarize the main takeaway insights.  
+
+> •
+
+Although cell-free networks offer users more options, enhance network availability, and reduce interference, contact distance plays a more critical role in improving HAPS network coverage probability, ultimately leading to cellular networks tending to outperform cell-free net-works.  
+
+> •
+
+Employing directional antennas for transmitters and re-ceivers can significantly enhance coverage probability. 10 10 11 12 13 14 15 16 17 18 19 20     
+
+> Coverage Threshold at Users u[dB]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Cellular, Without Multi-Beam Cellular, With Multi-Beam Cell-free, Without Multi-Beam Cell-free, With Multi-Beam
+
+Fig. 12: Influence of multi-beam on downlink coverage probability. -10 -9 -8 -7 -6 -5 -4 -3 -2 -1 0                
+
+> Coverage Threshold at HAPS H[dB]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Network Users HAPS Cellular, PPP, PPP Cellular, PPP, BPP Cellular, PCP, PPP(Cluster Center) Cell-free, PPP, PPP Cell-free, PPP, BPP Cell-free, PCP, PPP(Cluster Center)
+
+Fig. 13: Influence of stochastic model on uplink coverage probability. 10 11 12 13 14 15 16 17 18 19 20                 
+
+> Coverage Threshold at Users u[dB]
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Coverage Probability
+> Network Users HAPS Cellular, PPP, PPP Cellular, PPP, BPP Cellular, PCP, PPP(Cluster Center) Cell-free, PPP, PPP Cell-free, PPP, BPP Cell-free, PCP, PPP(Cluster Center)
+
+Fig. 14: Influence of stochastic model on downlink coverage probability. 
+
+This improvement stems from the combined effect of interference reduction and focused signal energy, show-casing the potential for more efficient spectrum use in HAPS networks.  
+
+> •
+
+Increasing antenna gain initially improves coverage prob-ability, but eventually levels off as signal and interference strengths rise. This insight suggests an optimal antenna gain threshold, beyond which additional gains do not translate into improved coverage probability.  
+
+> •
+
+In cell-free networks, there is a counterintuitive neg-ative correlation between HAPS density and downlink coverage probability, driven by the randomness of beam alignment. VI. I NSIGHTS ON POTENTIAL OPEN ISSUES AND 
+
+RESEARCH DIRECTIONS 
+
+This section explores several factors that align with the analytical framework of this article. The combination of these factors with the existing framework is a potential and interest-ing future research direction. 
+
+A. Multi-Beam 
+
+To provide communication services for more users simul-taneously, it is necessary to introduce multi-beam technol-ogy [38], especially for communication devices with large coverage such as HAPS. In Fig. 12, we consider that one HAPS is configured with the ability to transmit four beams with the Gaussian antenna pattern simultaneously in each sub-band. Fig. 12 shows that the introduction of a multi-beam communication mechanism has a little effect on downlink coverage probability. Because multi-beam communication will lead to a slight increase in downlink interference compared to single-beam communication. However, the cost can be justified since there is a substantial four times increase of the original channel capacity. In summary, the adoption of multi-beam technology, despite the slight increase in downlink interference, offers a significant boost in channel capacity, making it a valuable investment for enhancing communication services, particularly in large coverage scenarios such as HAPS. 
+
+B. Other Models 
+
+In addition to the PPP model adopted in this article, other stochastic point processes for HAPS and user modeling are also worth discussing. As shown in Fig. 13 and Fig. 14, modeling with PPP and BPP has a negligible effect on the coverage probability. In large-scale networks, another widely studied model for users who initiate service requests is the Poisson cluster process (PCP) [39]. In the PCP model, cluster centers are randomly distributed on the Earth’s surface. For instance, a cluster center can be a city center or a gateway connecting the core network. Users follow a specific random distribution around these cluster centers. We assume cluster centers follow a spherical PPP with density λH and radius Ru. HAPS are located directly above cluster centers with height RH − Ru.The users to be served are distributed within a range of 50 km from cluster centers. Users around each cluster center follow an independent PPP with a density of 1.3 km 2. Overall, the users initiating the service follow a PCP and the average number of users is equal to users in a PPP with density 
+
+λu. Fig. 13 and Fig. 14 indicate that there is little difference in the downlink coverage performance between the PCP and PPP models, while the uplink coverage performance is slightly better under the PCP model than the PPP model. In general, different distribution models for users and HAPS are not the main factors influencing the coverage probability. 
+
+C. Limitation and Future Direction 
+
+SG framework is primarily applied in network performance evaluation. Specifically, performance evaluation aims to pro-vide rapid and accurate assessments, and offer insight into system metrics under various parameters. SG focuses on com-putational complexity and evaluation accuracy, rather than on proposing better strategies. Therefore, while the SG framework outperforms Monte Carlo simulation in terms of computational 11 
+
+complexity, it does not lead to better system performance. This represents the inherent limitation of performance evaluation studies. An improved approach is to use SG framework to evaluate the performance of systems that integrate cutting-edge communication technologies, such as multiple-input multiple-output (MIMO) [40] and reconfigurable intelligent surface (RIS) [41]. In HAPS networks, multi-beam technology has proven ef-fective in enhancing system coverage probability and through-put, as shown in Subsection IV-A. Combining multi-beam technology with MIMO arrays can further improve system performance [42]. Following the completion of this work, the downlink performance of MIMO satellite networks was inves-tigated within the framework of spherical SG [40]. However, for simplicity, both transmitters and receivers were equipped with single antennas. The results in [40] can serve as a baseline for coverage analysis in multi-antenna models, which is left for future work. Based on this study, we believe that integrating MIMO technology, modeling channel matrices and antenna correlations, will open up opportunities for further advancing HAPS networks. VII. C ONCLUSION 
+
+This paper presented a tractable approach for evaluating performance in massive HAPS networks with the aid of the spherical SG framework. Accordingly, we derived analytical expressions of uplink and downlink coverage probability with directional transmitting and receiving beams in cellular and cell-free HAPS networks. Analytical results align with simu-lation results, thereby validating the accuracy of our model. We observe that cellular networks outperform cell-free networks, underscoring the importance of contact distance in HAPS network design. In addition, increasing antenna gain and reducing the half-power beamwidth demonstrate diminishing returns in terms of coverage improvement; accordingly, our analytical model can guide practitioners in balancing cost and performance. Moreover, this work can be extended to study the integration of multi-beam and MIMO technologies in HAPS networks, providing system-level insights. APPENDIX APROOF OF LEMMA 1According to the strongest average received power associa-tion strategy, a sufficient and necessary condition for the user associating with the typical HAPS is that there are no HAPS closer to the user than the typical HAPS. We use Su(θ) to present the spherical cap with a central angle as 2θ, whose rotation axis is the line connecting the center of the Earth and the user. Therefore, the probability of the user associating with the HAPS that has a polar angle difference of θ can be calculated as 
+
+P Au (θ) = P [N (Su(θ)) = 0] 
+
+> (a)
+
+= exp ( −λH A (Su(θ))) exp ( −λH A (Su(θ))) 0
+
+0! = exp  −λH 2πR 2 
+
+> H
+
+(1 − cos θ) , (28) 
+
+N (Su(θ)) counts the number of HAPS in the spherical cap 
+
+Su(θ), and A (Su(θ)) is the area measure of Su(θ). Step (a)
+
+is from the general PPP [43]. Therefore, the probability of the user at (Ru, ϕ, θ ) associating with the typical HAPS at 
+
+(RH , 0, 0) can be calculated as 
+
+P A, cll  
+
+> u
+
+(θ) = exp 
+
+
+
+−eλH 2πR 2 
+
+> H
+
+(1 − cos θ)
+
+
+
+, (29) where eλH is the density of HAPS in the user’s LoS region after removing the typical HAPS, 
+
+eλH = λH − 12πR H (RH − Ru) . (30) Note that the association probability is only related to the polar angle θ of the user, not to the radius Ru and azimuth angle ϕ.APPENDIX BPROOF OF LEMMA 3According to Slivnyak’s theorem [44], the distribution of homogeneous PPP is invariant with the rotation of the sphere. Furthermore, the association probability is not related to the azimuth angle. Therefore, the average antenna gain from a user with coordinate (Ru, ϕ, θ ) to the typical HAPS with coordinate 
+
+(RH , 0, 0) is equal to the average antenna gain from a user with coordinate (Ru, 0, 0) to the typical HAPS with coordinate 
+
+(RH , 0, θ ). Between them, the derivation of the latter is more concise. Next, we want to derive the position the user’s beam aligns with, i.e. the position of the associated HAPS of this user at (Ru, 0, 0) . The first case is when the user associates with the HAPS at (RH , 0, θ ), which happens with probability 
+
+P A, cll  
+
+> u
+
+(θ). Therefore, the average gain, in this case, is, 
+
+Gcll  
+
+> u, 1
+
+(θ) = P A, cll  
+
+> u
+
+(θ) Gu(0) . (31) The second case is the user associates with one of the other HAPS. Denote the associated HAPS’ coordinate as 
+
+(RH , φ, ψ ). The corresponding beam deflection angle is 
+
+T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ ). The average antenna gain of the second case is, 
+
+Gcll  
+
+> u, 2
+
+(θ) = Eφ,ψ [Gu (T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ ))] =
+
+Z 2π
+
+> 0
+
+Z θ
+
+> 0
+
+Gu (T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ )) 
+
+× fψ (ψ) fφ (φ) d ψdφ. (32) From the invariance of the azimuth angle with respect to the association probability, φ is uniformly distributed between 0
+
+and 2π. On the other hand, the probability density function (PDF) of ψ is derived as follows, 
+
+fψ (ψ) = dFψ (ψ)dψ
+
+= ddψ
+
+
+
+1 − exp 
+
+
+
+−eλH 2πR 2 
+
+> H
+
+(1 − cos ψ)
+
+ 
+
+= eλH 2πR 2 
+
+> H
+
+sin ψ exp 
+
+
+
+−eλH 2πR 2 
+
+> H
+
+(1 −cos ψ)
+
+
+
+, (33) 12 
+
+where 0 ≤ ψ ≤ θ and eλH is defined in (30). Substitute (33) into (32), Gcll  
+
+> u, 2
+
+(θ) is derived. Note that fψ (ψ) is called the PDF of contact angle distribution, and the contact angle is defined as the central angle between a user and the HAPS associated with the user [45]. Finally, combining the two cases, the final average antenna gain is Gcll  
+
+> u
+
+(θ) = Gcll 
+
+> u, 1
+
+(θ)+ Gcll 
+
+> u, 2
+
+(θ).APPENDIX CPROOF OF LEMMA 4We assume that the typical HAPS at (RH , 0, 0) is serving a user at x0(Ru, ϕ 0, θ 0). Similarly, according to Slivnyak’s theorem, the distribution of interfering users is independent of the position of the serving user. In addition, the association probability and average uplink antenna gain are only related to θ0. Therefore, the Laplace transform of total interfering power when the user is located at coordinate x0(Ru, ϕ 0, θ 0)
+
+is equivalent to that when the user is located at coordinate 
+
+x0(Ru, 0, θ 0). Then, the Laplace transform of total interfering power from other users can be derived from its definition, 
+
+Lcll  
+
+> u
+
+(s, θ 0) = EI [exp( −sI (θ0)] 
+
+> (a)
+
+= EX ,W I
+
+exp 
+
+ X
+
+> xi∈X \ x0
+
+−sρ ru,x i (θ0)
+
+
+
+> (b)
+
+= EX
+
+ Y
+
+> xi∈X \ x0
+
+mm+sρ tuGu(θti )GH (θri )   ν
+
+> 4π
+
+2ζD −2
+
+> i
+
+!m , (34) where the equation in step (a) is satisfied because of the independence of the users’ positions and small-scale fading. Step (b) follows the moment-generating function (MGF) of Nakagami-m fading [46]. Then, Step (c) in (35) follows the probability generating functional (PGFL) of the PPP [43]. We calculate the Laplace transform of the total interference power by traversing all interfering users within the LoS region of the typical HAPS. The LoS region is divided into area elements S⊙(φ, φ +dφ; ψ, ψ + d ψ) with a fixed radius, whose azimuth angle varies from φ to φ + d φ, and polar angle varies from ψ
+
+to ψ + d ψ (we denote the area element as S⊙ for conve-nient). The average uplink antenna gain Gcll  
+
+> u
+
+(ψ) at the typical HAPS from users in area element S⊙ is defined in (13). Given the position of serving user (Ru, 0, θ 0), the average downlink antenna gain at users in area element S⊙ from the typical HAPS is GH (T (Ru, 0, θ 0; RH , 0, 0; Ru, φ, ψ )) .The Euclidean distance between the typical HAPS to the interfering d(RH , 0, 0; Ru, φ, ψ ) is defined in (12). Finally, 
+
+N (S⊙) counts the number of interfering users in area element 
+
+S⊙. Through the above analysis, the results in (34) can be derived as, 
+
+EX
+
+ Y
+
+> xi∈X \ x0
+
+mm+sρ tuGu(θti )GH (θri )   ν
+
+> 4π
+
+2ζD −2
+
+> i
+
+!m
+
+> (c)
+
+=
+
+Z
+
+> φ
+
+Z
+
+> ψ
+
+mm ·
+
+
+
+m + sρ tuGcll  
+
+> u
+
+(ψ)
+
+× GH (T (Ru, 0, θ 0; RH , 0, 0; Ru, φ, ψ )) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ (d(RH , 0, 0; Ru, φ, ψ )) −2 −m
+
+× N (S⊙(φ, φ + d φ; ψ, ψ + d ψ)) 
+
+> (d)
+
+=
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+mm ·
+
+
+
+m + sρ tuGcll  
+
+> u
+
+(ψ)
+
+× GH (T (Ru, 0, θ 0; RH , 0, 0; Ru, φ, ψ )) 
+
+×
+
+ ν
+
+4π
+
+2
+
+ζ (d(RH , 0, 0; Ru, φ, ψ )) −2
+
+−m
+
+×
+
+
+
+λu − RH
+
+2πR 2
+
+> u
+
+(RH − Ru)
+
+
+
+R2 
+
+> u
+
+sin ψdφdψ, (35) where Θ = arccos( Ru/R H ) is the maximum polar angle of the typical HAPS’ LoS region. In step (d), N (S⊙) =
+
+eλuA(S⊙), where eλu is the average density of user in S⊙
+
+excluding the serving user, 
+
+eλu = λu
+
+λu2πR 2
+
+> u
+
+(1 − cos Θ) − 1
+
+λu2πR 2
+
+> u
+
+(1 − cos Θ) , (36) and A(S⊙) = R2 
+
+> u
+
+sin ψdφdψ is the area measure of S⊙.APPENDIX DPROOF OF THEOREM 1Considering the bidirectional beam alignment between typ-ical HAPS and service users being achieved, signal receiving power at the typical HAPS is, 
+
+ρrH = ρtuGu(0) GH (0) 
+
+ ν
+
+4π
+
+2
+
+ζD −2 
+
+> S
+
+WS , (37) where DS is a random variable called contact distance that records the distance between the typical HAPS and its serv-ing user [47]. The relationship between the PDF of contact distance and the PDF of the contact angle is, 
+
+fθ0 (θ) = λH 2πR 2 
+
+> H
+
+sin θ exp  −λH 2πR 2 
+
+> H
+
+(1 − cos θ)
+
+= fDs
+
+q 
+
+R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+
+
+. (38) Next, we derive the analytical expression for the coverage probability from the definition, 
+
+P C, cll  
+
+> u
+
+(γH ) = P
+
+ ρrH
+
+I + σ2 > γ H
+
+
+
+= P
+
+"
+
+WS > γH · (I + σ2)
+
+ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζD −2
+
+> S
+
+#
+
+=
+
+Z Θ0
+
+EI
+
+"
+
+F WS
+
+ R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζ
+
+× γH (I + σ2)
+
+!# 
+
+λH 2πR 2 
+
+> H
+
+sin θ
+
+× exp  −λH 2πR 2 
+
+> H
+
+(1 − cos θ) dθ, (39) 13 
+
+where Θ = arccos Ru 
+
+> RH
+
+is the upper bound of polar angle for the typical HAPS’ LoS region, and F WS (·) is the complemen-tary cumulative distribution function (CCDF) of the shadowed Rician fading. We take the well-known approximation of the CDF of the incomplete Gamma distribution [48], the result of the approximation is proved to provide a tight upper bound for the incomplete Gamma distribution [49], 
+
+Γl(m, mg )Γ( m) ≲
+
+
+
+1 − exp 
+
+
+
+− (m!) −1 
+
+> m
+
+mg 
+
+ m
+
+. (40) Applying the above approximation, the CCDF of the shadowed Rician fading can be further written as, 
+
+EI
+
+"
+
+F WS
+
+γH (I + σ2)  R2 
+
+> H
+
++R2 
+
+> u
+
+−2RH Ru cos θ
+
+ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζ
+
+!# 
+
+≳ 1 −
+
+ 2b0n
+
+2b0n + Ω 
+
+n ∞X
+
+> z=0
+
+(n)z
+
+z!
+
+ Ω2b0n + Ω 
+
+z
+
+× EI
+
+"
+
+1 − exp − (( z + 1)!) −1 
+
+> z+1
+
+γH (I + σ2)
+
+×
+
+ R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+2b0ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζ
+
+!! z+1 #
+
+.), (41) Define βu(θ, γ H ) as 
+
+βu(θ, γ H ) = (( z + 1)!) −1
+
+> z+1
+
+× γH ·  R2 
+
+> H
+
++ R2 
+
+> u
+
+− 2RH Ru cos θ
+
+2b0ρtuGu(0) GH (0)   ν
+
+> 4π
+
+2 ζ , (42) then we have, 
+
+EI
+
+
+
+1−exp 
+
+
+
+−(( z + 1)!) −1 
+
+> z+1
+
+(I + σ2)βu(θ, γ H )
+
+z+1 
+
+> (a)
+
+= 1 − EI
+
+" z+1 X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp   − kβ u(θ, γ H )  I + σ2  #
+
+= 1 −
+
+> z+1
+
+X
+
+> k=1
+
+z + 1 
+
+k
+
+
+
+(−1) k+1 
+
+× exp  −kβ u(θ, γ H )σ2 Lcll  
+
+> u
+
+(kβ u(θ, γ H ), θ ), (43) where step (a) follows from the binomial theorem, and 
+
+Lcll  
+
+> u
+
+(kβ u(θ, γ H ), θ ) is defined in Lemma 4. Finally, the proof is finished by substituting (41) and (43) into (39). APPENDIX EPROOF OF LEMMA 5In cell-free networks, each HAPS within the user’s LoS region is associated with equal probability. Since the average number of HAPS within the LoS region is 
+
+λH 2πR H (RH − Ru). Therefore, the probability that a user in the typical HAPS’ LoS region is associated with this HAPS is given as, 
+
+P A, cf  
+
+> u
+
+= ( λH 2πR H (RH − Ru)) −1 . (44) In addition, the user’s associated HAPS cannot be further away from the user than the typical HAPS in cellular networks. However, cell-free networks do not have this limitation, so the integral interval of ψ needs to be transformed accordingly. The remaining proof of Lemma 5 is similar to that of Lemma 3, and the association probability can be written as, 
+
+Gcf  
+
+> u
+
+(θ) = P A, cf  
+
+> u
+
+Gu(0)+ 
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+λH
+
+ 1−P A, cf 
+
+> u
+
+ R2 
+
+> H
+
+sin ψ
+
+× P A, cf  
+
+> u
+
+Gu (T (RH , 0, θ ; Ru, 0, 0; RH , φ, ψ )) d ψdφ. (45) Substitute (44) into (45), and Lemma 5 is proved. APPENDIX FPROOF OF LEMMA 7As the same with the proof in Lemma 3, according to Slivnyak’s theorem and the rotation invariance of the PPP distribution, we consider analyzing the average antenna gain from the HAPS with coordinate (RH , 0, 0) to the typical user with coordinate (Ru, 0, θ ).The total number of users associated with the HAPS in area element S⊙(φ, φ + d φ; ψ, ψ + d ψ) is 
+
+eλuR2 
+
+> u
+
+sin ψP A, cll  
+
+> u
+
+(ψ)d φdψ, where eλu is defined in (36), and 
+
+P A, cll  
+
+> u
+
+(ψ) is defined in Lemma 1. The area element S⊙ is defined in Appendix C. Assuming that a user is associated with the HAPS at (RH , 0, 0) , the probability of the user locating in S⊙ is equal to the ratio of the number of users in S⊙ to the number of all users in HAPS’ LoS region. The latter can be rewritten as, 
+
+eλuR2 
+
+> u
+
+sin ψP A, cll  
+
+> u
+
+(ψ)d φdψ
+
+R 2π
+
+> 0
+
+R Θ0 eλuR2 
+
+> u
+
+sin ψP A, cll  
+
+> u
+
+(ψ)d φdψ
+
+= sin ψP A, cll  
+
+> u
+
+(ψ)d ψdφ
+
+2π R Θ0 sin ψP A, cll  
+
+> u
+
+(ψ)d ψ , (46) where Θ = arccos( Ru/R H ). When the HAPS at (RH , 0, 0) 
+
+is serving with a user in area element S⊙, the corresponding beam deflection angle between the typical user and the serving user is T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ ). The average antenna gain is, 
+
+Gcll  
+
+> H
+
+(θ) = Eφ,ψ [GH (T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ ))] =
+
+Z 2π
+
+> 0
+
+Z Θ0
+
+GH (T (Ru, 0, θ ; RH , 0, 0; Ru, φ, ψ )) 
+
+× sin ψP Au (ψ)d ψdφ
+
+2π R Θ0 sin ψP Au (ψ)d ψ . (47) Finally, note that the derived expression is an approximation of the average antenna gain. In the last step, we integrate the entire LoS region of the interfering HAPS. However, in the cellular network, users in the neighborhood of the typical user 14 
+
+are most likely associated with the HAPS which is providing service to the typical user, rather than interfering HAPS. Therefore, the estimated average antenna gain from interfering HAPS will be slightly larger than the real value, resulting in a smaller value of estimated coverage probability. In the section on numerical simulation, it is proved that the estimated coverage probability provides a tight lower bound for the coverage probability obtained by Monte Carlo simulation. REFERENCES [1] O. Abbasi, A. Yadav, H. Yanikomeroglu, N. Dao, G. Senarath, and P. Zhu, “HAPS for 6G networks: Potential use cases, open challenges, and possible solutions,” IEEE Wirel. Commun. , vol. 31, no. 3, pp. 324– 331, 2024. [2] B. E. Y. Belmekki, A. J. Aljohani, S. A. Althubaity, A. A. Harthi, K. Bean, A. Aijaz, and M.-S. Alouini, “Cellular network from the sky: Toward people-centered smart communities,” IEEE Open J. Commun. Soc. , vol. 5, pp. 1916–1936, 2024. [3] Q. Ren, O. Abbasi, G. K. Kurt, H. Yanikomeroglu, and J. Chen, “High altitude platform station (HAPS)-enabled parallel computing for handoff control in vehicular networks,” IEEE ICC , pp. 290–295, 2023. [4] B. E. Y. Belmekki and M.-S. Alouini, “NOMA as the next-generation multiple access in nonterrestrial networks,” Proceedings of the IEEE ,2024. [5] C. E. Kement, F. Kara, W. Jaafar, H. Yanikomeroglu, G. Senarath, N. Dao, and P. Zhu, “Sustaining dynamic traffic in dense urban areas with high altitude platform stations (HAPS),” IEEE Commun. Mag. ,vol. 61, no. 7, pp. 150–156, 2023. [6] B. E. Y. Belmekki and M.-S. Alouini, “Unleashing the potential of networked tethered flying platforms: Prospects, challenges, and appli-cations,” IEEE open j. veh. technol. , May 2022. [7] M. Matracia, N. Saeed, M. A. Kishk, and M.-S. Alouini, “Post-disaster communications: Enabling technologies, architectures, and open challenges,” IEEE Open J. Commun. Soc. , vol. 3, pp. 1177–1205, Jul. 2022. [8] P. Serrano, M. Gramaglia, F. Mancini, L. Chiaraviglio, and G. Bianchi, “Balloons in the sky: unveiling the characteristics and trade-offs of the Google loon service,” IEEE Trans. Mob. Comput. , vol. 22, no. 6, pp. 3165–3178, 2023. [9] Y. Tian, G. Pan, M. A. Kishk, and M.-S. Alouini, “Stochastic analy-sis of cooperative satellite-UAV communications,” IEEE Trans. Wirel. Commun. , vol. 21, no. 6, pp. 3570–3586, 2021. [10] Y. Xing, F. Hsieh, A. Ghosh, and T. S. Rappaport, “High altitude platform stations (HAPS): Architecture and system performance,” in 
+
+VTC2021-Spring . IEEE, 2021, pp. 1–6. [11] R. Swaminathan, S. Sharma, N. Vishwakarma, and A. Madhukumar, “HAPS-based relaying for integrated space-air-ground networks with hybrid FSO/RF communication: A performance analysis,” IEEE Trans. Aerosp. Electron. Syst. , vol. 57, no. 3, pp. 1581–1599, 2021. [12] Y. Shibata, N. Kanazawa, M. Konishi, K. Hoshino, Y. Ohta, and A. Nagate, “System design of gigabit HAPS mobile communications,” 
+
+IEEE Access , vol. 8, pp. 157 995–158 007, 2020. [13] R. Wang, M. A. Kishk, and M.-S. Alouini, “Ultra-dense LEO satellite-based communication systems: A novel modeling technique,” IEEE Commun. Mag. , vol. 60, no. 4, pp. 25–31, 2022. [14] ——, “Ultra reliable low latency routing in LEO satellite constellations: A stochastic geometry approach,” IEEE J. Sel. Areas Commun. , 2024, early Access. [15] Z. Wei, L. Wang, Z. Gao, H. Wu, N. Zhang, K. Han, and Z. Feng, “Spectrum sharing between high altitude platform network and terrestrial network: Modeling and performance analysis,” IEEE Trans. Commun. ,2023. [16] J. Xu, M. A. Kishk, and M.-S. Alouini, “Space-air-ground-sea integrated networks: Modeling and coverage analysis,” IEEE Trans. Wirel. Com-mun. , 2023. [17] Z. Gao, Z. Wei, Z. Wang, J. Zhu, G. Deng, and Z. Feng, “Spectrum sharing for high altitude platform networks,” in 2019 IEEE/CIC Inter-national Conference on Communications in China (ICCC) . IEEE, 2019, pp. 411–415. [18] Z. Lou, B. E. Y. Belmekki, and M.-S. Alouini, “HAPS in the non-terrestrial network nexus: Prospective architectures and performance insights,” IEEE Wirel. Commun. , vol. 30, no. 6, pp. 52–58, 2023. [19] Q. Huang, B. E. Y. Belmekki, A. M. Eltawil, and M.-S. Alouini, “System-level metrics for non-terrestrial networks under stochastic ge-ometry framework,” IEEE Commun. Mag. , 2024, accepted. [20] R. Wang, M. A. Kishk, and M.-S. Alouini, “Stochastic geometry-based low latency routing in massive LEO satellite networks,” IEEE Trans. Aerosp. Electron. Syst. , vol. 58, no. 5, pp. 3881–3894, 2022. [21] C. Loo, “A statistical model for a land mobile satellite link,” IEEE Trans. Veh. Technol. , vol. 34, no. 3, pp. 122–127, 1985. [22] D.-H. Na, K.-H. Park, Y.-C. Ko, and M.-S. Alouini, “Performance analysis of satellite communication systems with randomly located ground users,” IEEE Trans. Wirel. Commun. , vol. 21, no. 1, pp. 621–634, 2021. [23] X. Hu, B. Lin, X. Lu, P. Wang, N. Cheng, Z. Yin, and W. Zhuang, “Performance analysis of end-to-end LEO satellite-aided shore-to-ship communications: A stochastic geometry approach,” IEEE Transactions on Wireless Communications , 2024. [24] M. Di Renzo, “Stochastic geometry modeling and analysis of multi-tier millimeter wave cellular networks,” IEEE Trans. Wirel. Commun. ,vol. 14, no. 9, pp. 5038–5057, 2015. [25] A. Thornburg, T. Bai, and R. W. Heath, “Performance analysis of outdoor mmWave Ad hoc networks,” IEEE Trans. Signal Process. ,vol. 64, no. 15, pp. 4065–4079, 2016. [26] W.-Y. Dong, S. Yang, P. Zhang, and S. Chen, “Stochastic geometry based modelling and analysis of uplink cooperative satellite-aerial-terrestrial networks for nomadic communications with weak satellite coverage,” 
+
+IEEE Journal on Selected Areas in Communications , 2024. [27] X. Yu, J. Zhang, M. Haenggi, and K. B. Letaief, “Coverage analysis for millimeter wave networks: The impact of directional antenna arrays,” 
+
+IEEE J. Sel. Areas Commun. , vol. 35, no. 7, pp. 1498–1512, 2017. [28] Y. Liu, H.-N. Dai, Q. Wang, O. J. Pandey, Y. Fu, N. Zhang, D. Niy-ato, and C. C. Lee, “Space-air-ground integrated networks: Spherical stochastic geometry-based uplink connectivity analysis,” IEEE Journal on Selected Areas in Communications , 2024. [29] M. T. Dabiri, H. Safi, S. Parsaeefard, and W. Saad, “Analytical channel models for millimeter wave UAV networks under hovering fluctuations,” 
+
+IEEE Transactions on Wireless Communications , vol. 19, no. 4, pp. 2868–2883, 2020. [30] Y. Hmamouche, M. Benjillali, S. Saoudi, H. Yanikomeroglu, and M. Di Renzo, “New trends in stochastic geometry for wireless networks: A tutorial and survey,” Proceedings of the IEEE , vol. 109, no. 7, pp. 1200–1252, 2021. [31] S. Sun, G. R. MacCartney, M. K. Samimi, and T. S. Rappaport, “Synthesizing omnidirectional antenna patterns, received power and path loss from directional antennas for 5G millimeter-wave communications,” in IEEE Glob. Commun. Conf. , Dec. 2015, pp. 1–7. [32] R. M. Gagliardi, Satellite communications . Springer Science &Business Media, 2012. [33] C. A. Balanis, Antenna theory: analysis and design . John wiley & sons, 2015. [34] A. Talgat, M. A. Kishk, and M.-S. Alouini, “Stochastic geometry-based analysis of leo satellite communication systems,” IEEE Commun. Lett. ,vol. 25, no. 8, pp. 2458–2462, 2021. [35] R. Wang, A. Talgat, M. A. Kishk, and M.-S. Alouini, “Conditional contact angle distribution in LEO satellite-relayed transmission,” IEEE Commun. Lett. , vol. 26, no. 11, pp. 2735–2739, 2022. [36] D. Wackerly, W. Mendenhall, and R. L. Scheaffer, Mathematical Statis-tics with Applications . Cengage Learning, 2014. [37] Z. Song, J. An, G. Pan, S. Wang, H. Zhang, Y. Chen, and M.-S. Alouini, “Cooperative satellite-aerial-terrestrial systems: A stochastic geometry model,” IEEE Trans. Wirel. Commun. , vol. 22, no. 1, pp. 220–236, Jul. 2022. [38] M. Sellathurai, S. Vuppala, and T. Ratnarajah, “User selection for multi-beam satellite channels: A stochastic geometry perspective,” in 50th Asilomar Conference on Signals, Systems and Computers . IEEE, 2016, pp. 487–491. [39] J. G. Andrews, F. Baccelli, and R. K. Ganti, “A tractable approach to coverage and rate in cellular networks,” IEEE Trans. Commun. , vol. 59, no. 11, pp. 3122–3134, 2011. 15 
+
+[40] X. Li and B. Shang, “Downlink performance of cell-free massive MIMO for LEO satellite mega-constellation,” arXiv preprint arXiv:2501.05655 ,2025. [41] M. A. Shaikh, N. Kouzayha, A. Elzanaty, M. Kishk, and T. Y. Al-Naffouri, “Performance analysis of RIS-aided localization in wireless networks using stochastic geometry,” in 2024 IEEE Wireless Communi-cations and Networking Conference (WCNC) . IEEE, 2024, pp. 01–06. [42] D. Goto, H. Shibayama, F. Yamashita, and T. Yamazato, “LEO-MIMO satellite systems for high capacity transmission,” in 2018 IEEE Global Communications Conference (GLOBECOM) . IEEE, 2018, pp. 1–6. [43] J. G. Andrews, A. K. Gupta, and H. S. Dhillon, “A primer on cellular network analysis using stochastic geometry,” CoRR , vol. abs/1604.03183, 2016. [Online]. Available: http://arxiv.org/abs/1604. 03183 [44] W. Feller, An introduction to probability theory and its applications, Volume 2 . John Wiley & Sons, 1991, vol. 81. [45] B. Al Homssi and A. Al-Hourani, “Modeling uplink coverage perfor-mance in hybrid satellite-terrestrial networks,” IEEE Commun. Lett. ,vol. 25, no. 10, pp. 3239–3243, 2021. [46] A. Annamalai and C. Tellambura, “A moment-generating function (MGF) derivative-based unified analysis of incoherent diversity reception of M-ary orthogonal signals over independent and correlated fading channels,” Int. J. Wirel. Inf. Netw. , vol. 10, pp. 41–56, 2003. [47] A. Talgat, M. A. Kishk, and M.-S. Alouini, “Nearest neighbor and contact distance distribution for binomial point process on spherical surfaces,” IEEE Commun. Lett. , vol. 24, no. 12, pp. 2659–2663, 2020. [48] M. Alzenad and H. Yanikomeroglu, “Coverage and rate analysis for vertical heterogeneous networks (VHetNets),” IEEE Trans. Wirel. Com-mun. , vol. 18, no. 12, pp. 5643–5657, 2019. [49] T. Bai and R. W. Heath, “Coverage and rate analysis for millimeter-wave cellular networks,” IEEE Trans. Wirel. Commun. , vol. 14, no. 2, pp. 1100–1114, 2014.

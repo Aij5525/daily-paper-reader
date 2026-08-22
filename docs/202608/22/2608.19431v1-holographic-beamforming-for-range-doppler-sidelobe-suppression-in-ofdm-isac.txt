@@ -1,0 +1,827 @@
+Title: Holographic Beamforming for Range-Doppler Sidelobe Suppression in OFDM-ISAC
+
+URL Source: https://arxiv.org/pdf/2608.19431v1
+
+Published Time: Fri, 21 Aug 2026 00:12:32 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Holographic Beamforming for Range-Doppler Sidelobe Suppression in OFDM-ISAC 
+
+Amirhossein Azarbahram Member, IEEE and Onel L. A. López Senior Member, IEEE 
+
+Abstract —This paper investigates range–Doppler (RD) sidelobe suppression in an integrated sensing and communications system with a reconfigurable holographic surface (RHS). We jointly design the digital feed precoders and RHS amplitudes to minimize the integrated RD sidelobe level subject to transmit-power, target-illumination, and communication constraints. For this, we develop an alternating successive convex approximation method updating both variable blocks through quadratic subproblems. Numerical results reveal diminishing returns from additional feeds, while increasing the aperture remains more effective and allows the RHS design to reduce sidelobe level. 
+
+Index Terms —Integrated sensing and communications, recon-figurable holographic surfaces, range-Doppler sidelobe. 
+
+I. I NTRODUCTION 
+
+# WIRELESS systems are embracing the integrated sens-ing and communications (ISAC) paradigm, enabling communication infrastructure to support radar functions [1]. For this, orthogonal frequency-division multiplexing (OFDM) is attractive because its time-frequency structure supports data transmission while enabling range-Doppler (RD) processing. However, the finite OFDM grid generally produces non-negligible RD sidelobes, which may mask weak targets [2]. In multiple-input multiple-output (MIMO)-OFDM ISAC, beam-forming provides spatial degrees of freedom (DoF), con-strained by transmit architecture, for shaping the RD response. Reconfigurable holographic surfaces (RHSs) have attracted interest as scalable apertures for future wireless systems due to dense arrangement of subwavelength radiating elements [3]. RHSs enable flexible wavefront shaping by controlling the ra-diation amplitudes of elements excited by a limited number of feeds, thereby reducing hardware complexity. However, their feed-to-aperture mapping couples the digital feed precoders with the surface amplitudes [4], preventing the direct applica-tion of fully digital (FD) OFDM-ISAC precoding methods. Most ISAC beamforming designs control the spatial beam-pattern, e.g., as in [5]. However, suppressing angular sidelobes does not, by itself, suppress the RD replicas produced by a finite multi-carrier block. Ambiguity-aware designs have instead optimized OFDM range sidelobes [6], MIMO-OFDM RD integrated sidelobe level (ISL) through symbol-level wave-form design [7], [8], local RD sidelobes for orthogonal time frequency space [9], and range-angle sidelobes through block-level beamforming [10]. More recently, movable antenna po-sitions and transmit beamforming have been jointly optimized for RD ISL suppression [11]. These works demonstrate the                     
+
+> Authors are with Centre for Wireless Communications (CWC), University of Oulu, Finland, (e-mail: {amirhossein.azarbahram, onel.alcarazlopez}@oulu.fi). This work is supported in Finland by the Research Council of Finland (Grant 369116 (6G Flagship)).
+
+importance of hardware and spatial DoF for RD sidelobe suppression, but do not consider RHSs. RHS-based ISAC has been studied through joint digital-holographic beamforming [3], multi-band positioning and communication [12], sensing-information maximization [13], and joint transmit-receive holographic beamforming [14]. Mutual-coupling-aware holographic beamforming has also been used to suppress undesired spatial sidelobes toward clutter directions [15], which is fundamentally different from shaping the OFDM RD ambiguity surface. To the best of our knowledge, RD sidelobe suppression has not previously been investigated for RHS-aided OFDM systems. Here, we consider a multiuser MIMO-OFDM ISAC system employing an RHS as the transmitter. Our contributions are threefold: i) we formulate the joint design of the digital feed precoders and RHS amplitudes for RD ISL minimization un-der transmit-power, target-illumination, and per-user signal-to-interference-plus-noise ratio (SINR) constraints; ii) we develop an alternating successive convex approximation (SCA) method in which both variable blocks are updated through convex subproblems with feasible inner approximations; and iii) we show numerically that the proposed joint design outperforms random and fixed RHS baselines, while staying close to FD benchmark. 
+
+Notation: Vectors and matrices are denoted by boldface lowercase and boldface uppercase letters, respectively. (·)T ,
+
+(·)H , and (·)∗ denote the transpose, Hermitian transpose, and complex conjugate, respectively. Moreover, Tr( ·), vec( ·),
+
+Re {·} , and E[·] denote the trace, vectorization, real part, and expectation operators. Diag( x) and diag( X) construct a diagonal matrix from x and extract the main diagonal of X,respectively. ⊗ and ⊙ denote the Kronecker and Hadamard products, while ∥ · ∥ 2 and ∥ · ∥ F denote the Euclidean and Frobenius norms. Finally, IN , 0, and ek denote the N × N
+
+identity matrix, the all-zero vector or matrix of appropriate dimension, and the k-th canonical basis vector, respectively. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+The system comprises a monostatic OFDM-ISAC base station (BS) equipped with an RHS consisting of M elements and Nf feeds, with a separate co-located sensing receiver with 
+
+Nr antennas, as in [3], [13], [15]. The BS serves K ≤ Nf
+
+single-antenna users and senses a target. The OFDM block contains Nc subcarriers and Ns symbols. The information-carrying vector on subcarrier n and symbol q is sn,q ∈ CK ,
+
+E[sn,q sH 
+
+> n,q
+
+] = IK . The digital precoder on subcarrier n is 
+
+Vn = [vn, 1, . . . , vn,K ] ∈ CNf ×K and the feed-to-RHS reference-wave matrix is Gn ∈ CM ×Nf , whose (m, r )-th arXiv:2608.19431v1 [eess.SP] 19 Aug 2026 2 
+
+> Fig. 1. RHS-assisted monostatic OFDM-ISAC system.
+
+entry captures the propagation from feed r to element m on subcarrier n. The system model is illustrated in Fig. 1. The RHS applies an amplitude-control vector m =[m1, . . . , m M ]T ∈ [0 , 1] M , with Dm = diag( m). The transmitted aperture-domain vector is given by xn,q =
+
+DmGnVnsn,q ∈ CM . Moreover, the transmit power averaged over the communication symbols is given by 
+
+Ptx =
+
+> Nc−1
+
+∑
+
+> n=0
+
+Tr (DmGnVnVH 
+
+> n
+
+GH 
+
+> n
+
+Dm
+
+) . (1) 
+
+A. Communication Model 
+
+Let hn,k ∈ CM denote the channel from the RHS elements to user k on subcarrier n, with received signal written as 
+
+yn,q,k = hH
+
+> n,k
+
+DmGnVnsn,q + zn,q,k , (2) where zn,q,k ∼ CN (0 , σ 2 
+
+> c
+
+) is the noise. Then, the SINR of user k on subcarrier n is given by 
+
+SINR n,k = |hH
+
+> n,k
+
+DmGnvn,k |2
+
+∑  
+
+> j̸=k
+
+|hH
+
+> n,k
+
+DmGnvn,j |2 + σ2
+
+> c
+
+. (3) 
+
+B. Sensing Echo and Delay-Doppler Response 
+
+We consider a point target located at angle θ, range R,and radial velocity v. Its round-trip delay and Doppler shift are τ0 = 2R/c 0, fd = 2vf c/c 0. Let aT(θ) ∈ CM and 
+
+aR(θ) ∈ CNr denote the unit-norm steering vectors of the RHS and the receive array, respectively. We consider a one-dimensional azimuth-domain propagation for notation simplic-ity; while a planar RHS formulation follows directly by replac-ing the linear element coordinates with their two-dimensional counterparts [3]. Assuming far-field narrowband propagation, synchronization and transmit–receive self-interference sup-pression, a block-static target response, τ0 within the cyclic prefix, and |fd| ≪ ∆f with negligible intercarrier interference, the sensing echo on subcarrier n and symbol q is given by 
+
+yr 
+
+> n,q
+
+= α0aR(θ)aHT(θ)xn,q ej2 π(fdqT sym −n∆f τ 0) + nr 
+
+> n,q
+
+, (4) where Tsym is the OFDM symbol duration, α0 incorporates the radar cross-section, propagation loss, and carrier phase, and nr 
+
+> n,q
+
+∼ CN (0, σ 2 
+
+> r
+
+INr ).Unlike dedicated radar sequences, an ISAC waveform car-ries random communication symbols, which generally produce nonuniform directional powers across the time–frequency grid and non-negligible RD sidelobes. These sidelobes can be controlled through the feed precoders and RHS amplitudes, while their aggregate energy is quantified using the ISL. Let bn,q = aT(θ)Hxn,q denote the scalar transmit sequence radiated toward the target, and define A(θ) = aT(θ)aT(θ)H.After compensation for the nominal target delay and Doppler, the sampled periodic RD response over the discrete delay– Doppler grid is given by the two-dimensional discrete Fourier transform of the directional resource-element powers [7], [16], 
+
+χl,ν =
+
+> Ns−1
+
+∑
+
+> q=0
+> Nc−1
+
+∑
+
+> n=0
+
+|bn,q |2e−j2 πln/N c ej2 πνq/N s
+
+=
+
+> Ns−1
+
+∑
+
+> q=0
+> Nc−1
+
+∑
+
+> n=0
+
+sH 
+
+> n,q
+
+VH 
+
+> n
+
+GH 
+
+> n
+
+DmA(θ)DmGnVnsn,q 
+
+× e−j2 πln/N c ej2 πνq/N s . (5) Then, the ISL is given by ΨISL = ∑ 
+
+> (l,ν )∈Ω
+
+|χl,ν |2, where 
+
+G = {0, . . . , N c − 1} × { 0, . . . , N s − 1}, Ω = G \ { (0 , 0) }.
+
+C. Problem Formulation 
+
+Reliable sensing requires both low RD sidelobes and suf-ficient echo strength. Since the received sensing signal-to-noise ratio (SNR) depends on reflectivity and propagation loss, not directly controlled by the BS, we use the power radiated toward the target as a controllable proxy. Assuming that the target direction θ is available from a preceding detection stage, the symbol-averaged illumination power is given by 
+
+PI =
+
+> Nc−1
+
+∑
+
+> n=0
+
+Tr (VH 
+
+> n
+
+GH 
+
+> n
+
+DmA(θ)DmGnVn
+
+) . (6) Then, the optimization problem is written as 
+
+min  
+
+> {Vn},m
+
+ΨISL (7a) s.t. Ptx ≤ Pt, (7b) 
+
+PI ≥ P0, (7c) 
+
+SINR n,k ≥ γn,k , ∀n, k, (7d) 
+
+0 ≤ mi ≤ 1, i = 1 , . . . , M. (7e) Problem (7) is nonconvex because the feed precoders and RHS amplitudes are multiplicatively coupled, the illumination and desired-signal terms are convex quadratic functions con-strained from below, and the ISL objective is quartic. III. O PTIMIZATION FRAMEWORK 
+
+Although semidefinite relaxation can be applied to the feed-precoder and RHS-amplitude subproblems, it introduces quadratically sized lifted matrices and may yield higher-rank solutions requiring potentially infeasible recovery. We there-fore optimize the original variables by alternating between separate feed-precoder and RHS-amplitude SCA updates. 
+
+A. Feed-Domain SCA 
+
+For fixed m, define v = [vec( V0), . . . , vec( VNc−1)] T ∈
+
+CDv , where Dv = NcNf K. Let En ∈ { 0, 1}Nf K×Dv satisfy 
+
+Env = vec( Vn), En,j ∈ { 0, 1}Nf ×Dv satisfy En,j v = vn,j ,and define 
+
+Tn(m) = GH 
+
+> n
+
+D2
+
+> m
+
+Gn, Bn(m) = GH 
+
+> n
+
+DmA(θ)DmGn. (8) 3
+
+By using sHVHBVs = vec( V)H [(ss H)T ⊗ B] vec( V),the fixed-m objective becomes fv(v; m) =∑ 
+
+> (l,ν )∈Ω
+
+|vHQl,ν (m)v|2, where 
+
+Ql,ν (m) = 
+
+> Ns−1
+
+∑
+
+> q=0
+> Nc−1
+
+∑
+
+> n=0
+
+e−j2 πln/N c ej2 πνq/N s
+
+× EH
+
+> n
+
+[(sn,q sH 
+
+> n,q
+
+)T ⊗ Bn(m)] En. (9) Then, the feed-domain power and illumination matrices are 
+
+Pv(m) ≜
+
+> Nc−1
+
+∑
+
+> n=0
+
+EH 
+
+> n
+
+(IK ⊗ Tn(m)) En, (10) 
+
+Bv(m) ≜
+
+> Nc−1
+
+∑
+
+> n=0
+
+EH 
+
+> n
+
+(IK ⊗ Bn(m)) En, (11) satisfying vHPv(m)v = Ptx and vHBv(m)v = PI. For the communication terms, define 
+
+gn,k (m) ≜ GH 
+
+> n
+
+Dmhn,k ∈ CNf , (12) and 
+
+Cv 
+
+> n,k,j
+
+(m) ≜ EH 
+
+> n,j
+
+gn,k (m)gH
+
+> n,k
+
+(m)En,j ⪰ 0, (13) leading to the interference-plus-noise written as 
+
+J v
+
+> n,k
+
+(v; m) ≜ ∑ 
+
+> j̸=k
+
+vHCv 
+
+> n,k,j
+
+(m)v + σ2 
+
+> c
+
+. (14) At feed-SCA iteration r, let χ(r) 
+
+> l,ν
+
+= ( v(r))HQl,ν (m)v(r). The gradient of fv with respect to v∗ is written as 
+
+g(r)v = ∑
+
+> (l,ν )∈Ω
+
+[
+
+(χ(r) 
+
+> l,ν
+
+)∗Ql,ν (m) + χ(r) 
+
+> l,ν
+
+QH 
+
+> l,ν
+
+(m)
+
+]
+
+v(r). (15) Accordingly, a proximal first-order model is given by ̂
+
+f (r)v (v) = fv(v(r); m) + 2 Re 
+
+{
+
+(g(r)v )H(v − v(r))
+
+}
+
++ β(r)v
+
+2
+
+∥∥∥v − v(r)
+
+∥∥∥22
+
+, β(r)v > 0. (16) Then, the illumination term in (7c) is lower-bounded by 
+
+˜I(r)v (v) = 2 Re 
+
+{
+
+(v(r))HBv(m)v
+
+}
+
+− (v(r))HBv(m)v(r),
+
+(17) and the desired-signal term w.r.t. v is lower-bounded by 
+
+˜Dv,(r)  
+
+> n,k
+
+(v) = 2 Re 
+
+{
+
+(v(r))HCv
+
+> n,k,k
+
+(m)v
+
+}
+
+− (v(r))HCv
+
+> n,k,k
+
+(m)v(r). (18) Hereby, the feed update becomes a convex quadratically constrained quadratic program (QCQP) [17] written as 
+
+min 
+
+> v
+
+̂ f (r)v (v) (19a) s.t. vHPv(m)v ≤ Pt, (19b) 
+
+˜I(r)v (v) ≥ P0, (19c) 
+
+˜Dv,(r)  
+
+> n,k
+
+(v) ≥ γn,k J v
+
+> n,k
+
+(v; m), ∀n, k. (19d) 
+
+B. RHS-Amplitude SCA 
+
+For fixed feed precoders, we proceed by defining Un =
+
+GnVn, un,q = Unsn,q , and un,j = Unej . For any c ∈
+
+CM , we introduce the matrix H(c) = Re {c∗cT} satisfying 
+
+|mTc|2 = mTH(c)m for every real m. Let us define cs 
+
+> n,q
+
+=
+
+aT(θ)∗ ⊙ un,q , |bn,q |2 = mTH(cs 
+
+> n,q
+
+)m, and write the fixed-feed RHS objective as fm(m; v) = ∑ 
+
+> (l,ν )∈Ω
+
+|mTSl,ν (v)m|2,where 
+
+Sl,ν (v) = 
+
+> Ns−1
+
+∑
+
+> q=0
+> Nc−1
+
+∑
+
+> n=0
+
+e−j2 πln/N c ej2 πνq/N s H(cs 
+
+> n,q
+
+). (20) Then, the RHS-domain transmit-power matrix is 
+
+Pm(v) ≜ Diag 
+
+(Nc−1∑
+
+> n=0
+
+diag( UnUH 
+
+> n
+
+)
+
+)
+
+⪰ 0, (21) which gives mTPm(v)m = Ptx . For illumination, we define 
+
+cI 
+
+> n,j
+
+≜ aT(θ)∗ ⊙ un,j , and 
+
+Bm(v) ≜
+
+> Nc−1
+
+∑
+
+> n=0
+> K
+
+∑
+
+> j=1
+
+H(cI 
+
+> n,j
+
+) ⪰ 0, (22) giving mTBm(v)m = PI. Then, by defining 
+
+dn,k,j ≜ h∗ 
+
+> n,k
+
+⊙ un,j , Rn,k,j (v) ≜ H(dn,k,j ) ⪰ 0, (23) we write the interference and noise term as 
+
+J m
+
+> n,k
+
+(m; v) ≜ ∑ 
+
+> j̸=k
+
+mTRn,k,j (v)m + σ2 
+
+> c
+
+. (24) At SCA iteration r, let χ(r) 
+
+> l,ν
+
+= ( m(r))TSl,ν (v)m(r). Since 
+
+ST 
+
+> l,ν
+
+= Sl,ν , the gradient of fm is given by 
+
+g(r)m = 4 ∑
+
+> (l,ν )∈Ω
+
+Re 
+
+{
+
+(χ(r) 
+
+> l,ν
+
+)∗Sl,ν (v)m(r)}
+
+. (25) A proximal first-order model for (7a) is then written as ̂
+
+f (r)m (m) = fm(m(r); v) + ( g(r)m )T(m − m(r))+ β(r)m
+
+2
+
+∥∥∥m − m(r)
+
+∥∥∥22
+
+, β(r)m > 0. (26) The lower bound for (7c) is given by 
+
+˜I(r)m (m) = 2( m(r))TBm(v)m − (m(r))TBm(v)m(r), (27) while the desired-signal w.r.t. m lower bound is written as 
+
+˜Dm,(r)  
+
+> n,k
+
+(m) = 2( m(r))TRn,k,k (v)m
+
+− (m(r))TRn,k,k (v)m(r). (28) Finally, the RHS local QCQP subproblem is rewritten as 
+
+min 
+
+> m∈RM
+
+̂ f (r)m (m) (29a) s.t. mTPm(v)m ≤ Pt, (29b) 
+
+˜I(r)m (m) ≥ P0, (29c) 
+
+˜Dm,(r)  
+
+> n,k
+
+(m) ≥ γn,k J m
+
+> n,k
+
+(m; v), ∀n, k, (29d) 
+
+0 ≤ mi ≤ 1, i = 1 , . . . , M. (29e) 4
+
+C. Algorithm Description, Convergence, and Complexity 
+
+Algorithm 1 starts from a feasible pair and alternately updates the feed and RHS using the block-SCA procedure. For either block x ∈ { v, m}, the tight global lower bounds preserve feasibility. Backtracking increases βx by τβ > 1 until satisfying the constraints and fx(x+; y) ≤̂ f (r)x (x+; y), where 
+
+y is the fixed block. Consequently, 
+
+fx(x+; y) ≤̂ f (r)x (x+; y) ≤̂ f (r)x (x(r); y) = fx(x(r); y),
+
+(30) so every accepted update yields a non-increasing ISL. The inner and outer loops terminate according to ϵin and ϵout or their respective iteration limits; if an update stalls, the best retained feasible pair is returned. Since the ISL is nonnegative and non-increasing, the objec-tive sequence converges. Under the standard regularity condi-tions of SCA, any accumulation point is stationary, although global optimality is not guaranteed [18]. A dense interior-point solution of a convex QCQP of size n costs approximately 
+
+O(n3.5 log(1 /ϵ )) [17], where the feed- and RHS-subproblem sizes scale as O(NcNf K) and O(M + NcK), respectively. IV. N UMERICAL RESULTS 
+
+The M RHS elements form a uniform linear aperture with spacing d = λc/5, positions xm = ( m − (M + 1) /2) d, and unit-norm steering vector [aT(θ)] m = ej2 πx m sin( θ)/λ c /√M .The Nf feeds are uniformly positioned behind the aperture at 
+
+zf = 2 λc. The feed response is given by [19] 
+
+[ ˜Gn]m,r = e−j2 πf nrm,r /c 0 /r m,r , Gn =
+
+√M ˜Gn
+
+∥ ˜Gn∥F
+
+, (31) where rm,r = √(xm − xf,r )2 + z2f and fn = fc + ( n − (Nc −
+
+1) /2)∆ f . We adopt the Rician communication channel as 
+
+˜hn,k = √KR/(KR + 1) aT(ϕ0,k )+ √1/(KR + 1) 
+
+> Lc
+
+∑
+
+> ℓ=1
+
+ρℓ,k aT(ϕℓ,k )e−j2 πf nτℓ,k , (32) and hn,k = ˜hn,k /∥˜hn,k ∥2. Here, ρℓ,k ∼ CN (0 , 1/L c),
+
+ϕ0,k , ϕ ℓ,k ∼ U[−60 ◦, 60 ◦], and τℓ,k ∼ U[0 , 100 ns] . The target angle is drawn uniformly from [−30 ◦, 30 ◦], independent QPSK symbols are generated, and the results are averaged over 250 realizations. The noise variance is fixed as σ2 
+
+> c
+
+= 1 , and the transmit-power budget is expressed through the total transmit SNR as Pt = 10 SNR t/10 with SNR t = 25 dB. We compare the proposed joint method with three baselines: a fixed RHS with optimized feed precoding (Fixed), a random RHS with optimized feed precoding (Rand-SCA), and fully digital SCA (FD-SCA), obtained by replacing DmGn with IM .For initialization, we test the all-one RHS and Nrand =10 4 random amplitude vectors independently drawn from 
+
+U[0 .15 , 1] . For each candidate, per-subcarrier zero forcing (ZF) directions are constructed and powered to satisfy the SINR and illumination constraints. The feasible candidate with the smallest ISL is selected. Inner and outer convergence are declared when the relative changes in the original block objective and ISL fall below ϵin = ϵout = 10 −3. We set 
+
+(Rmax , I max ) = (10 , 50) , initialize each proximal parameter 
+
+Algorithm 1 SCA-based alternating RHS optimization 
+
+Require: {Gn}, {hn,k }, {sn,q }, θ, Pt, P0, {γn,k }, βv, β m >
+
+0, τβ , Imax , Rmax , Bmax , and a feasible (v(0) , m(0) ); set 
+
+(vbest , mbest ) ← (v(0) , m(0) ) and ζ ← CAPPED . 
+
+> 1:
+
+for i = 0 , . . . , I max − 1 do  
+
+> 2:
+
+(v(i+1) , ζ v) ← BLOCK SCA (v(i), m(i), (19) , β v) 
+
+> 3:
+
+Evaluate ΨISL (v(i+1) , m(i)) and update best pair  
+
+> 4:
+
+if ζv = STALLED then  
+
+> 5:
+
+ζ ← STALLED ; break  
+
+> 6:
+
+end if  
+
+> 7:
+
+(m(i+1) , ζ m) ← BLOCK SCA (m(i), v(i+1) , (29) , β m) 
+
+> 8:
+
+Evaluate ΨISL (v(i+1) , m(i+1) ) and update best pair  
+
+> 9:
+
+if ζm = STALLED then  
+
+> 10:
+
+ζ ← STALLED ; break  
+
+> 11:
+
+end if  
+
+> 12:
+
+end for  
+
+> 13:
+
+return the best feasible ({V⋆n}, m⋆) and ζ.
+
+procedure BLOCK SCA (x(0) , y, Px, β x) 
+
+> 1:
+
+for r = 0 , . . . , R max − 1 do accepted ← false . 
+
+> 2:
+
+for b = 0 , . . . , B max − 1 do  
+
+> 3:
+
+Solve Px at x(r) for x+. 
+
+> 4:
+
+if x+ satisfies the original constraints and 
+
+fx(x+; y) ≤̂ f (r)x (x+; y) then  
+
+> 5:
+
+accepted ← true ; break . 
+
+> 6:
+
+else  
+
+> 7:
+
+βx ← τβ βx. 
+
+> 8:
+
+end if  
+
+> 9:
+
+end for  
+
+> 10:
+
+if accepted = false then  
+
+> 11:
+
+return (x(r), STALLED ). 
+
+> 12:
+
+end if  
+
+> 13:
+
+x(r+1) ← x+. 
+
+> 14:
+
+if block convergence then  
+
+> 15:
+
+return (x(r+1) , CONVERGED ). 
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+return (x(Rmax ), CAPPED ).
+
+end procedure                           
+
+> TABLE I DEFAULT SIMULATION PARAMETERS .
+> Parameter Value Parameter Value
+> fc28 GHz ∆f120 kHz
+> (Nc, N s)(4 ,8) (M, N f, K )(8 ,2,2)
+> dλc/5zf2λc
+> KR10 dB Lc5
+> γ3dB P00.1Pt
+
+as βx = 1 , and allow at most Bmax = 20 backtracking trials with τβ = 2 . The rest of the parameters are denoted in Table I. Fig. 2 confirms the convergence with a rapid reduction followed by slower refinement depending on the problem size. Fig. 3 shows that increasing M generally improves the pro-posed method, as the larger aperture and additional amplitude variables provide greater spatial and waveform-shaping flexi-bility. Joint RHS-SCA consistently outperforms the random-50 10 20 30 40 50 Iteration -100 -50 050 
+
+> Objective function (dB)
+
+Fig. 2. Convergence of the proposed joint RHS-SCA method. 5 10 15 20 M-150 -100 -50 0NISL (dB) Joint Fixed Rand-SCA FD 
+
+Fig. 3. Average NISL versus the number of RHS elements. 
+
+RHS benchmarks and is close to FD performance. Fig. 4 shows that increasing Nf initially improves the achievable NISL, as additional feeds provide greater design flexibility, while the improvement saturates for larger Nf .Fig. 5 shows that increasing the users’ required SINR degrades the achievable NISL, as more transmit resources are required to satisfy the communication constraints. Nev-ertheless, the proposed joint design remains close to the FD benchmark over the whole SINR range. V. C ONCLUSION 
+
+We studied RD sidelobe suppression in an OFDM-ISAC system employing an RHS. For this, the feed precoders and RHS amplitudes were jointly optimized subject to transmit power, illumination, and multiuser SINR constraints. An alter-nating SCA method was developed to update variable blocks through convex subproblems while maintaining feasibility. Numerical results showed that increasing the aperture size generally improves sidelobe suppression, while stricter SINR requirements increase ISL value. REFERENCES [1] 3GPP, “Study on Integrated Sensing and Communication,” 3GPP, Tech-nical Report TR 22.837, 2024, Release 19. [2] C. Sturm and W. Wiesbeck, “Waveform design and signal processing aspects for fusion of wireless communications and radar sensing,” Proc. IEEE , vol. 99, no. 7, pp. 1236–1259, 2011. [3] H. Zhang et al. , “Holographic integrated sensing and communication,” 
+
+IEEE J. Sel. Areas Commun. , vol. 40, no. 7, pp. 2114–2130, 2022. [4] B. Di, “Reconfigurable holographic metasurface aided wideband OFDM communications against beam squint,” IEEE Trans. Veh. Technol. ,vol. 70, no. 5, pp. 5099–5103, 2021. [5] H. Hua, J. Xu, and T. X. Han, “Optimal transmit beamforming for integrated sensing and communication,” IEEE Trans. Veh. Technol. ,vol. 72, no. 8, pp. 10 588–10 603, 2023. [6] W. Ji et al. , “Low-range-sidelobe waveform design for dual-function-radar-communication system,” IEEE Trans. Commun. , vol. 73, no. 12, pp. 14 974–14 985, 2025. 2 3 4 5 6Nf
+
+-150 -100 -50 0
+
+> NISL (dB)
+
+Joint Fixed Rand-SCA FD 
+
+Fig. 4. Average NISL versus the number of feeds. 0 2 4 6(dB) -150 -100 -50 0
+
+> NISL (dB)
+
+Joint Fixed Rand-SCA FD 
+
+Fig. 5. Average NISL versus the SINR requirement. [7] P. Li et al. , “MIMO-OFDM ISAC waveform design for range-doppler sidelobe suppression,” IEEE Trans. Wireless Commun. , vol. 24, no. 2, pp. 1001–1015, 2025. [8] ——, “Low range-doppler sidelobe ISAC waveform design: A low-complexity approach,” IEEE Trans. Veh. Technol. , vol. 74, no. 10, pp. 16 544–16 549, 2025. [9] K. Zhang et al. , “Dual-functional waveform design with local sidelobe suppression via otfs signaling,” IEEE Trans. Veh. Technol. , vol. 73, no. 9, pp. 14 044–14 049, 2024. [10] M. Liu et al. , “Beamforming design for ISAC systems with suppressed range-angle sidelobes,” IEEE Wireless Commun. Lett. , vol. 14, no. 7, pp. 1989–1993, 2025. [11] Q. Feng et al. , “Movable antenna-enabled integrated sensing and communication for range-doppler sidelobe suppression,” IEEE Wireless Commun. Lett. , vol. 15, pp. 2234–2238, 2026. [12] J. Hu et al. , “Multi-band reconfigurable holographic surface based ISAC systems: Design and optimization,” in IEEE ICC 2023 , 2023, pp. 2927– 2932. [13] P. Zhu et al. , “Integrated sensing and communication with reconfigurable holographic surface,” IEEE Trans. Commun. , vol. 73, no. 11, pp. 10 377– 10 390, 2025. [14] J. Yu et al. , “Joint transmit and receive beamforming for holographic ISAC with leakage power constraint,” in VTC 2025 , 2025, pp. 1–6. [15] S. Zeng et al. , “Holographic beamforming for integrated sensing and communication with mutual coupling effects,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 480–497, 2026. [16] S. Mercier et al. , “Comparison of correlation-based OFDM radar re-ceivers,” IEEE Trans. Aerosp. Electron. Syst. , vol. 56, no. 6, pp. 4796– 4813, Dec. 2020. [17] S. Boyd and L. Vandenberghe, Convex Optimization . Cambridge University Press, 2004. [18] Y. Sun et al. , “Majorization-minimization algorithms in signal pro-cessing, communications, and machine learning,” IEEE Trans. Signal Process. , vol. 65, no. 3, pp. 794–816, 2017. [19] S. Zeng et al. , “Dual-polarized reconfigurable intelligent surface-based antenna for holographic MIMO communications,” IEEE Transactions on Wireless Communications , vol. 23, no. 11, pp. 17 339–17 353, 2024.

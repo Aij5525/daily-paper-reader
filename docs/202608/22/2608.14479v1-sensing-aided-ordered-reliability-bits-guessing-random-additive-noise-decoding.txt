@@ -1,0 +1,322 @@
+Title: Sensing-Aided Ordered Reliability Bits Guessing Random Additive Noise Decoding
+
+URL Source: https://arxiv.org/pdf/2608.14479v1
+
+Published Time: Mon, 17 Aug 2026 01:02:44 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Sensing-Aided Ordered Reliability Bits Guessing Random Additive Noise Decoding 
+
+Yu Ge ∗, Lukas Rapp ∗, Ken R. Duffy †, Muriel M´ edard ∗∗Research Laboratory for Electronics, Massachusetts Institute of Technology, Cambridge, USA, 
+
+> †
+
+College of Engineering and College of Science, Massachusetts Northeastern University, Boston, USA, 
+
+{yuge, rappl, medard }@mit.edu, k.duffy@northeastern.edu 
+
+Abstract —Integrated sensing and communication (ISAC) is a key enabler for future wireless systems, providing environmental information that can support tasks beyond conventional data transmission. However, its impact on channel decoding remains less explored. This paper studies sensing-aided ordered reliability bits guessing random additive noise decoding (ORBGRAND) over single-input single-output narrowband fading channels. Environmental information is used to construct a geometry-based prior for the channel coefficient, which is fused with pilot observations via linear minimum mean square error (LMMSE) estimation. The resulting posterior channel estimate and un-certainty are used to compute the log-likelihood ratios (LLRs) supplied to ORBGRAND, improving the reliability ordering that drives its noise-guessing process. Simulation results demonstrate improved block error rate and reduced average query complexity, with the largest gains in pilot-limited regimes. 
+
+Index Terms —ISAC, sensing, ORBGRAND, LMMSE, LLR. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communication (ISAC) has emerged as a key technology for future wireless networks, where communication systems are expected not only to transmit data but also to sense and understand the surrounding environment [1], [2]. Radio sensing lies at the heart of ISAC, where ISAC systems can infer geometric information, such as the states of connected devices and passive objects in the propagation environment, by exploiting signals that propagate through and interact with the environment [3], [4]. Owing to its broad range of potential applications, radio sensing has attracted considerable research attention [3], [5], and recent real-world experiments have demonstrated its practical feasibility [6], [7]. Beyond localization and mapping, sensing information can also support physical-layer communication. Many exist-ing ISAC studies use environmental information to improve physical-layer transmission before decoding, for example, by refining channel estimates, predicting beam directions, or reducing pilot overhead [8], [9]. However, its direct impact on channel decoding has received much less attention. In conven-tional soft-decision decoding architectures, channel estimation and demodulation are performed before decoding, producing bit-wise log-likelihood ratios (LLRs) that are then consumed by the channel decoder [10], [11]. This separation overlooks an important opportunity: sensing can improve the reliability of the soft information supplied to the decoder, and therefore should be incorporated into the decoding process. Guessing random additive noise decoding (GRAND) is a recently developed universal decoding framework for channel codes [12]–[14]. Instead of designing a decoder around a specific code structure, GRAND decodes by guessing the binary noise effects that corrupted the transmitted codeword and checking whether the resulting candidate satisfies the code constraints [12]. Ordered reliability bits guessing random addi-tive noise decoding (ORBGRAND) is a practical soft-decision variant of GRAND that exploits reliability information from the received symbols. Specifically, ORBGRAND uses the ordering of bit reliabilities to construct a near-likelihood-ordered sequence of noise effects, so that less reliable bit positions are flipped earlier [15]–[18]. Since ORBGRAND relies directly on the rank ordering of the magnitudes of the input LLRs, its decoding performance and query complexity are contingent on channel-estimation quality. This dependence creates a natural connection between ISAC and ORBGRAND: sensing information can improve channel estimation, which in turn improves the LLRs and the noise-query order used by ORBGRAND. Recent works have investigated the impact of channel-estimation errors in GRAND-based receivers [19], [20]. However, to the best of our knowledge, the use of environmental sensing information to assist GRAND-based frameworks has not yet been studied. In this paper, we investigate sensing-aided ORBGRAND, where sensing improves decoding through the soft-information pipeline. Specifically, sensing information is used to construct a geometry-based prior for the channel coefficient, which is fused with pilot observations through linear minimum mean square error (LMMSE) channel estimation, and the resulting channel estimate and uncertainty are used to compute the LLRs supplied to ORBGRAND. The main contributions of this paper are summarized as fol-lows: (i) We connect ISAC with GRAND-based frameworks by showing how environmental side information can improve ORBGRAND reliability ordering through channel-estimation priors; (ii) We develop a geometry-based channel prior using sensing information and fuse it with pilot observations via LMMSE estimation to generate sensing-aided LLRs for OR-BGRAND; (iii) We validate the effectiveness of the proposed framework, demonstrating the performance gain brought by sensing information within the decoding pipeline. 
+
+Notation: Scalars (e.g., x) are denoted in italic, and vectors (e.g., x) in bold, matrices (e.g., X) in bold capital letters. arXiv:2608.14479v1 [eess.SP] 14 Aug 2026 The transpose is denoted by (⋅) ⊺. The Hermitian transpose is denoted by (⋅) H. The L2 norm is denoted by ∣∣ ⋅ ∣∣ . The i-th component in vector x is denoted by xi.II. S IGNAL AND SYSTEM MODELS 
+
+In this paper, we consider a pilot-aided single-input single-output (SISO) scenario, in which the transmitter sends nar-rowband signals to the receiver through the propagation en-vironment. This section introduces the received signal model and the system model. 
+
+A. End-to-End System Model 
+
+We consider a pilot-aided coded communication system, in which environmental side information is available at the receiver. A binary channel encoder maps an information message to a length-n binary codeword c = [ c1, . . . , c n]⊺ ∈{0, 1}n, which belongs to a binary linear block code C with parity-check matrix H. The coded bits are then mapped to the binary phase shift keying (BPSK) symbols according to 
+
+xi = 1 − 2ci, i = 1, . . . , n. (1) Before data transmission, the transmitter sends known pilot symbols for channel estimation. Depending on the available side information, the receiver either estimates the channel coefficient using pilots only, or fuses the pilot observations with environmental information to obtain an improved channel estimate and an associated uncertainty. The resulting channel estimate is then used to compute bit-wise LLRs for the re-ceived coded symbols. Finally, the LLR vector and the parity-check matrix H are provided to ORBGRAND, which returns an estimated codeword ˆc ∈ C . Environmental information does not modify the code or ORBGRAND directly. Instead, it affects the channel estimate ˆh and the resulting LLR vector 
+
+L supplied to the decoder. 
+
+B. Signal Models 
+
+In the considered scenario, the transmitter sends signals to the receiver, which can reach the receiver directly, termed as the line-of-sight (LoS) path, and/or bounced off by the landmarks in the environment, for example, reflected by the reflecting surface, and then reach the receiver, termed as non-line-of-sight (NLoS) paths. We work with an equivalent discrete-time complex baseband model obtained after pulse shaping at the transmitter and matched filtering and symbol-rate sampling at the receiver [21, Chapter 3]. Under this model, when the narrowband signals are sent, the received signal is given by 
+
+yi = hx i + wi, i = 1, . . . , n, (2) where xi denotes the i-th transmitted symbol, yi ∈ C is the cor-responding received symbol, wi ∼ CN ( 0, σ 2
+
+> w
+
+) is complex cir-cularly symmetric white Gaussian noise with known variance, where σ2 
+
+> w
+
+denotes the noise variance per received symbol, and h ∈ C is the narrowband channel coefficient. We assume that the channel h does not change during transmission of n
+
+symbols. Since the channel consists of multipath components, and we explicitly model one LoS path and one NLoS path reflected by a reflecting surface, the channel coefficient can be expressed as 
+
+h = ρLoS e−ȷ2πf cτLoS 
+
+´¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¸¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¶ 
+
+> hLoS
+
++ ρNLoS e−ȷ2πf cτNLoS 
+
+´¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¸¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¹¶ 
+
+> hNLoS
+
++hres , (3) where fc is the carrier frequency, hLoS is the LoS channel component, hNLoS is the reflected-path channel component, 
+
+hres ∼ CN ( 0, σ 2
+
+> res
+
+) denotes the channel effect caused by other residual unmodeled scattering, modeling mismatch, and other effects not captured by the two-path model, with σ2 
+
+> res
+
+being its variance. Moreover, ρLoS and τLoS are the channel gain and the time of arrival (ToA) of the LoS path, respectively, and ρNLoS 
+
+and τNLoS are the channel gain and the ToA of the reflected path, respectively. The LoS and the reflected-path channel components are determined by the channel gain and the ToA of each path, which are given by 
+
+ρLoS = λ
+
+4π ∥xTx − xRx ∥ (4) 
+
+τLoS = ∥xTx − xRx ∥
+
+c (5) 
+
+ρNLoS = λΓeȷπ 
+
+4π ∥xVA − xRx ∥ (6) 
+
+τNLoS = ∥xVA − xRx ∥
+
+c (7) where λ is the wavelength, c is the speed of light, and Γ ∈[0, 1] denotes the reflection attenuation factor of the reflecting surface. We also assume a constant phase shift of π for the reflected path, corresponding to the ideal specular reflection. In addition, xTx denotes the position of the transmitter, which is known, xRx denotes the position of the receiver, and xVA 
+
+denotes the location of the virtual anchor (VA) of the reflecting surface, which is the reflection of the transmitter with respect to the reflecting surface, serving as a compact representation of the surface and is surface-specific [22]. In this paper, we assume that the sensing task has already been performed, and that the receiver position xRx and the VA location xVA are available at the receiver. III. GRAND AND ORBGRAND In this section, we introduce the basics of the GRAND and ORBGRAND for decoding a binary linear code, and describe how the LLRs are computed. 
+
+A. GRAND as Noise Guessing 
+
+For the parity-check matrix H, the transmitted binary codeword c satisfies 
+
+Hc = 0 mod 2 . (8) Given the received soft information, the decoder first forms a hard-decision vector z ∈ { 0, 1}n. GRAND then queries binary noise effects e ∈ { 0, 1}n and forms the candidate [12] 
+
+ˆc = z ⊕ e, (9) where ⊕ denotes bit-wise XOR. Each candidate is checked for codebook membership via the parity-check condition 
+
+Hˆc = 0 mod 2 . (10) The first candidate satisfying the parity-check constraints is returned as the decoded codeword. Therefore, the performance and complexity of GRAND depend on the order in which the candidate noise effects are queried [12]. If the true noise effect appears early in the query order, decoding succeeds with low complexity; otherwise, many queries may be required. In addition, under a finite query budget, decoding may be abandoned, or an incorrect codeword might be found earlier, resulting in decoding errors. 
+
+B. ORBGRAND 
+
+ORBGRAND is a soft-input GRAND variant that uses the magnitudes of the bit-wise LLRs to determine which bit positions are more likely to be erroneous [15]. Let L =[L1, . . . , L n]⊺ denotes the bit-wise LLR vector supplied to the decoder, where 
+
+Li = log p(ci = 0∣yi)
+
+p(ci = 1∣yi) = log p(yi∣ci = 0)
+
+p(yi∣ci = 1) , (11) where the equality follows from the assumption of equiprob-able coded bits. The hard decision is obtained from the sign of the LLR as 
+
+zi =⎧⎪⎪⎨⎪⎪⎩
+
+0, Li ≥ 0,
+
+1, Li < 0, i = 1, . . . , n. (12) The magnitude ∣Li∣ quantifies the reliability of this decision, where a small value of ∣Li∣ indicates that the receiver is uncertain about the corresponding bit, whereas a large value indicates a more reliable decision. ORBGRAND sorts the bit positions from least reliable to most reliable. Let κ be a permutation satisfying 
+
+∣Lκ(1)∣ ≤ ∣ Lκ(2)∣ ≤ ⋯ ≤ ∣ Lκ(n)∣. (13) Noise effects involving less reliable bit positions, i.e., κ(1),are queried earlier. Hence, when the LLRs accurately reflect the bit reliabilities, the correct noise effect is more likely to appear early in the query order. In addition to the block error rate (BLER), query complexity is a key performance metric for ORBGRAND. We denote by 
+
+Nguess the number of queried noise effects before the decoder terminates. In practical implementations, the decoder may also be constrained by a maximum query budget Tmax , in which case decoding is abandoned if no valid codeword is found within Tmax queries. 
+
+C. LLRs under Imperfect Channel Knowledge 
+
+The LLR vector is the fundamental soft input to ORB-GRAND [15]. It determines both the hard-decision vector used as the starting point of decoding and the reliability ordering used to construct the noise-query sequence. There-fore, the quality of the LLRs directly affects not only the decoding performance, but also the number of noise effects that ORBGRAND must query before termination. For the BPSK mapping in (1) and the received signal in (2), given a channel estimate ˆh, the receiver computes the LLR for the 
+
+i-th coded bit using (11). Under the complex Gaussian noise model, this can be written as 
+
+Li = log p(yi∣ci = 0, ˆh)
+
+p(yi∣ci = 1, ˆh) ≈ 4 Re {ˆh∗yi}
+
+σ2eff 
+
+, (14) where σ2eff is the effective noise variance used in the LLR computation, and ˆh is the channel estimate. Note that (14) is equivalent to marginalization over the posterior channel distribution [20]. With perfect channel knowledge, ˆh = h
+
+and σ2eff = σ2
+
+> w
+
+. With imperfect channel estimation, residual channel uncertainty can be incorporated by increasing the effective variance. It is clear in (14) that the LLRs are computed based on ˆh, and the channel estimate affects both the sign and magnitude of the LLRs. The sign determines the hard-decision vector z, while the magnitude determines the reliability ordering used by ORBGRAND. IV. S ENSING -A IDED CHANNEL ESTIMATION FOR 
+
+ORBGRAND Environmental sensing information can improve channel estimation and the associated uncertainty quantification, which in turn determines the LLRs supplied to ORBGRAND. In this section, we describe how environmental sensing information is incorporated into channel estimation and how the resulting estimate is used to compute the LLRs for ORBGRAND. 
+
+A. Pilot-Only Channel Estimation 
+
+We first consider conventional pilot-only channel estima-tion. Before data transmission, the transmitter sends known pilot symbols that are used for channel estimation, and the received pilot signals are given by 
+
+yp = hxp + wp, (15) where xp ∈ CNp is the known pilot sequence, with Np
+
+denoting its length, yp ∈ CNp is the corresponding received pilot sequence, and wp ∼ CN ( 0, σ 2
+
+> w
+
+I) is complex-valued white Gaussian noise. We further denote the pilot energy as 
+
+Ep = xH 
+
+> p
+
+xp. Given the known pilot sequence xp and the received pilot sequence yp, we can perform channel estimation to estimate the channel h. The least-squares (LS) channel estimate is given by 
+
+ˆhLS = xH 
+
+> p
+
+yp
+
+Ep
+
+. (16) Substituting (15) into (16), we have 
+
+ˆhLS = h + xH 
+
+> p
+
+wp
+
+Ep
+
+= h + ˜wLS , (17) where the estimation error follows ˜wLS ∼ CN ( 0, σ 2LS ). Thus, the LS estimate is unbiased, and its error variance is 
+
+σ2LS = E [∣ ˆhLS − h∣2] = σ2
+
+> w
+
+Ep
+
+. (18) For unit-power pilots, Ep = Np, and the uncertainty of pilot-only estimation decreases with the pilot budget. When the pilot length is small, however, the channel estimate may be inaccurate, leading to unreliable LLRs for ORBGRAND. 
+
+B. Channel Prior from Sensing Information 
+
+Environmental sensing information can provide geometric knowledge about the propagation channel. Let Isen denote the available sensing information, such as the receiver position 
+
+xRx , the VA location xVA , and the reflection attenuation factor 
+
+Γ associated with a reflecting surface. Based on the two-path model in Section II, this information can be used to predict a part of the channel coefficient. We represent this prediction via a conditional Gaussian prior 
+
+p(h∣I sen ) ∼ CN ( μsen , σ 2sen ) , (19) where μsen is the sensing-predicted channel mean and σ2sen 
+
+captures the remaining channel uncertainty. Different levels of sensing information lead to different priors, and we consider the following cases:  
+
+> ●
+
+Rx-aided : If only the receiver position is available, the receiver can predict the LoS component, so that 
+
+μsen = hLoS according to (4)–(5). The reflected path and residual propagation effects remain uncertain. In this case, the prior variance include the uncertainty due to the unmodeled reflected component and residual scattering, i.e., σ2sen = σ2NLoS + σ2res , where σ2NLoS and σ2res denote the uncertainties of the unmodeled reflected component and residual scattering, respectively.  
+
+> ●
+
+Rx+VA-aided : If both the receiver and the VA informa-tion are available, the receiver can predict both the LoS and reflected components, so that μsen = hLoS + hNLoS 
+
+according to (4)–(7). The corresponding prior variance is smaller, since only residual modeling errors and un-modeled scattering remain, i.e., σ2sen = σ2res . Therefore, sensing information improves channel estimation by pro-viding a more accurate prior mean and reducing the prior variance.  
+
+> ●
+
+Mismatched prior : If there are errors in the receiver and/or the VA information, the predicted channel mean may be biased, while the corresponding prior variance remains small. Therefore, inaccurate sensing information can yield a biased and overconfident channel prior. 
+
+C. Sensing-Aided LMMSE Estimation 
+
+The sensing prior can be fused with the pilot observation through scalar LMMSE estimation. Given the LS channel estimate in (16) and the conditional Gaussian prior for the channel in (19), the LMMSE estimate is [23, Chapter 8.3] 
+
+ˆhsen = μsen + σ2sen 
+
+σ2sen + σ2LS 
+
+(ˆhLS − μsen ) . (20) The corresponding posterior variance is 
+
+σ2post = σ2sen σ2LS 
+
+σ2sen + σ2LS 
+
+. (21) 0 2 4 6 8 10 12 10 -2    
+
+> 10 -1
+> 10 0
+> Fig. 1. Channel estimation MSE versus the energy per symbol to noise power spectral density ratio ( Es/N0) for pilot-only, Rx-aided, Rx+VA-aided, and mismatched-prior (accurate Rx, and inaccurate VA) LMMSE estimation (Np=2).
+
+From (20), we can observe that when the pilot estimate is reliable, σ2LS is small and the estimator relies mainly on ˆhLS .When the pilot budget is small or the pilot observation is noisy, 
+
+σ2LS is large and the estimate is pulled toward the sensing-based prior mean μsen . Therefore, accurate sensing informa-tion is most beneficial in pilot-limited regimes. Conversely, an inaccurate but overconfident sensing prior may degrade the estimate, which motivates evaluating mismatched-prior cases. Fig. 1 shows the channel-estimation mean square error (MSE) for four cases, indicating that more accurate sensing yields better channel estimation, with the larger gains for more noisy pilot sequences, while inaccurate sensing information introduces bias in the channel estimate. 
+
+D. Impact on LLR 
+
+After channel estimation, the received signal in (2) can be written as 
+
+yi = ˆhsen xi + ∆ˆhx i + wi, i = 1, . . . , n, (22) where ∆ˆh ∼ CN ( 0, σ 2post ) is the channel estimation error. Using the posterior mean ˆhsen , the receiver computes symbol-wise LLRs using (14), where, for BPSK symbols with unit magnitude, the effective variance is upper-bounded by [24] 
+
+σ2eff ≤ σ2 
+
+> w
+
++ σ2post . (23) This expression can be interpreted as the symbol-wise marginalization of the residual scalar channel uncertainty. Since the same channel error is common to the whole block, it induces a rank-one correlated component in the received block covariance [19]. This structure is simpler than arbitrary correlated noise, and is governed by σ2post . Exploiting this cor-relation requires joint processing across the entire codeword. Instead, we use the corresponding symbol-wise marginal LLRs as practical reliability inputs to ORBGRAND. Sensing information therefore benefits ORBGRAND through two mechanisms. First, a more accurate channel estimate improves the sign of the LLRs, reducing errors in the initial hard-decision vector. Second, a better uncertainty characterization improves the magnitude of the LLRs, which determines the reliability ordering used by ORBGRAND to query noise effects. As a result, accurate sensing information can reduce both the decoding error probability and the number of required noise queries, especially when the pilot budget or the ORBGRAND query budget is limited. V. R ESULTS 
+
+A. Simulation Scenario 
+
+We evaluate the proposed sensing-aided ORBGRAND re-ceiver in a SISO narrowband two-path propagation scenario. The propagation channel consists of one LoS path and one reflected NLoS path associated with a reflecting surface. The transmitter and receiver communicate using coded BPSK over the channel, where the channel remains constant over one coded block. The transmitter location is fixed at xTx =[0, 0]⊺ m. The VA of the reflecting surface is located at xVA =[12 , 0]⊺ m, corresponding to a surface at x = 6 m. For each transmitted block, the receiver position is drawn uniformly from a rectangular region centered at xRx = [ 3.5, 2.0]⊺ m, with a maximum displacement 1 m along each coordinate. The carrier frequency is fc = 3.5 GHz. The reflection attenuation coefficient is set to Γ = 0.75 . The variance of the residual unmodeled channel component is set to σ2res = 0.03 . The transmitted BPSK symbols and pilot symbols are normalized to unit energy. The noise variance is set according to the target Es/N0 as σ2 
+
+> w
+
+= 1/( Es/N0). Since unit-energy pilot symbols are used, the total pilot energy is Ep = Np. We use an extended Bose–Chaudhuri–Hocquenghem (eBCH) (16 , 11 )
+
+code with rate R = 11 /16 . However, the instantaneous received signal-to-noise Ratio (SNR) additionally depends on the block channel gain. Unless otherwise stated, the pilot length is set to Np = 2, and the ORBGRAND’s abandonment threshold is set to Tmax = 1000 . We compare the following receivers:  
+
+> ●
+
+Perfect CSI : The receiver computes LLRs using the true channel coefficient. This serves as a benchmark.  
+
+> ●
+
+Pilot-only : The receiver estimates the channel using pilots only, without sensing information, corresponding to the case in Section IV-A.  
+
+> ●
+
+Rx-aided : The receiver uses the known receiver position to construct a prior based on the LoS component.  
+
+> ●
+
+Rx+VA-aided : The receiver uses both the receiver posi-tion and the VA location to construct a two-path prior.  
+
+> ●
+
+Mismatched prior : The receiver uses an accurate re-ceiver position, but an inaccurate VA location to construct the prior, which is used to assess robustness. For each transmitted block, pilot symbols are first used to obtain an LS channel estimate. Depending on the available sensing information, this estimate is either used directly or combined with a sensing-based channel prior through LMMSE estimation. The resulting channel estimate and posterior un-certainty are then used to compute the LLRs supplied to ORBGRAND. When the reflecting surface is not available to the receiver, the reflected component is not included in the prior mean and is instead treated as channel uncertainty. In this case, the prior variance considers the reflected-path through an additional uncertainty term σ2NLoS = 0.25 . When both the receiver position and the VA location are available, the reflected component is included in the prior mean, and the remaining prior variance is set to σ2res = 0.03 . For performance evaluation, BLER and average number of OR-BGRAND queries are recorded. In total, 10000 Monte Carlo (MC) simulations are performed for each case. 
+
+B. Results and Discussion 
+
+We first evaluate the benefit of sensing information within the ORBGRAND framework. Fig. 2 compares the BLER of the five receiver configurations. The perfect-CSI curve is a benchmark in which the true channel coefficient is known at the receiver. In contrast, the pilot-only receiver exhibits a clear performance loss due to channel-estimation error, especially at low and medium Es/N0. Incorporating sens-ing information improves performance: the Rx-aided receiver leverages the known receiver position to form a prior for the LoS component, yielding a more accurate channel estimate and, hence, more reliable LLRs. The Rx+VA-aided receiver achieves the best practical performance and closely approaches the perfect-CSI benchmark across the simulated Es/N0 range, providing an approximately 1.8 dB gain over the pilot-only case. This indicates that, when both receiver position and reflector information are available, the resulting two-path prior significantly improves the channel estimate and thus the LLRs supplied to ORBGRAND. Conversely, the mismatched-prior case can underperform even the pilot-only receiver, especially at higher Es/N0, demonstrating that inaccurate environmental information may degrade decoding when used with high confidence. At low Es/N0, the LS estimation error dominates and partially masks the bias introduced by the mismatched prior, leading to a small apparent difference. The same ordering observed in BLER is reflected in the query complexity: the pilot-only receiver requires more queries because channel-estimation errors perturb both the LLR signs and their reliability magnitudes, causing ORB-GRAND to explore less favorable noise effects. Sensing-aided receivers reduce the query count. At Es/N0 = 4 dB, the Rx-aided and Rx+VA-aided receivers reduce the average query count by 13.2% and 18.2%, respectively, compared to the pilot-only receiver, while the perfect-CSI receiver achieves a 20.0% reduction. The performance gap narrows at high 
+
+Es/N0, where the LMMSE estimator relies more on pilot observations and the residual error approaches that of LS. Overall, sensing improves ORBGRAND performance not by modifying the decoder, but by improving the reliability order-ing of LLRs via more accurate and precise channel estimates, which enhances both decoding accuracy and query efficiency. Fig. 3 evaluates the impact of pilot length. As the number of pilot symbols increases, the pilot-only receiver improves be-cause the LS estimation variance decreases with pilot energy. Similar trends are observed for the sensing-aided receivers; however, the improvement is less pronounced because the prior information already reduces the estimation uncertainty, so the remaining error does not decrease as rapidly with pilot length. The Rx+VA-aided receiver remains markedly better in the pilot-limited regime: with very short pilots, the geometry-based prior compensates for scarce pilot observations by providing a good prediction of the channel coefficient. This 4 6 8 10 12 14 16 10 -4    
+
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> 12 13 14 12310 -3
+
+Fig. 2. BLER versus Es/N0 for the five receiver configurations ( Np = 2). 4 5 6 7 8 9 10 11 12 13 14 15 16 10 -4    
+
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> 12 13 14 0.5 11.5 210 -3
+
+Fig. 3. BLER versus Es/N0 for the pilot-only and the Rx+VA-aided receivers using different Np.
+
+suggests that sensing information can reduce the pilot over-head required to achieve a target BLER. As the pilot length increases, the gap between the pilot-only and the Rx+VA-aided receivers narrows, since the pilot-only channel estimate becomes more accurate and there is less room for the prior to improve the estimate. This experiment keeps Es/N0 and uses unit-energy pilots, so increasing Np also increases the total pilot energy. Thus, Fig. 3 shows the benefit of additional pilot resources rather than an energy-fair comparison. With fixed total block energy, longer pilots would trade improved channel estimation against reduced data-symbol energy. Since the Rx+VA-aided receiver achieves a low BLER with much shorter pilot sequences, it would provide even larger gains in such an energy-constrained scenario, where the pilot-only receiver would require longer pilots to achieve comparable performance. VI. C ONCLUSIONS 
+
+This paper investigated sensing-aided ORBGRAND over a SISO narrowband fading channel. Environmental information was incorporated through a channel prior and fused with pilot observations via LMMSE estimation. The resulting posterior mean and uncertainty were then used to compute the LLRs supplied to ORBGRAND. Simulation results showed that sensing-aided estimation improves the BLER and reduces the average number of ORBGRAND queries, with the largest gains occurring in pilot-limited regimes. These gains arise from the improved reliability ordering of the LLRs enabled by more accurate and precise channel estimates. We also observed that mismatched environmental priors can degrade performance, underscoring the importance of accurate sensing information and uncertainty-aware prior modeling. Future work will explicitly account for sensing uncertainty and ex-ploit block-level channel correlation. ACKNOWLEDGMENT 
+
+> This work was partially supported by the Wallenberg AI, Autonomous Systems and Software Program (WASP) funded by Knut and Alice Wallenberg Foundation, and by the National Science Foundation under Grant No. (NSF grant number ECCS-2433994 and ECCS-2433996).
+
+REFERENCES [1] A. Liu, et al. , “A survey on fundamental limits of integrated sensing and communication,” IEEE Commun. Surv. Tutor. , vol. 24, no. 2, pp. 994–1034, 2022. [2] N. Gonz´ alez-Prelcic, et al. , “The integrated sensing and communication revolution for 6G: Vision, techniques, and applications,” Proceedings of the IEEE , vol. 112, no. 7, pp. 676–723, 2024. [3] Y. Ge, et al. , “Mmwave mapping and SLAM for 5G and beyond,” in 
+
+Integrated Sensing and Communications . Springer, 2023, pp. 445–475. [4] Y. Ge, et al. , “Sensing with mobile devices through radio SLAM: Models, methods, opportunities, and challenges,” IEEE Communications Magazine , vol. 63, no. 12, pp. 80–87, 2025. [5] B. Amjad, et al. , “Radio SLAM: A review on radio-based simultaneous localization and mapping,” IEEE Access , vol. 11, pp. 9260–9278, 2023. [6] Y. Ge, et al. , “Experimental validation of single BS 5G mmwave positioning and mapping for intelligent transport,” IEEE Transactions on Vehicular Technology , vol. 73, no. 11, pp. 16 744–16 757, 2024. [7] E. Rastorgueva-Foi, et al. , “Millimeter-wave radio SLAM: End-to-end processing methods and experimental validation,” IEEE Journal on Selected Areas in Communications , vol. 42, no. 9, pp. 2550–2567, 2025. [8] F. Liu, et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE Journal on Selected Areas in Communications , vol. 40, no. 6, pp. 1728–1767, 2022. [9] H. Wymeersch, et al. , “Cross-layer integrated sensing and communica-tion: A joint industrial and academic perspective,” IEEE Open Journal of the Communications Society , vol. 6, pp. 6966–7015, 2025. [10] G. Caire, et al. , “Bit-interleaved coded modulation,” IEEE Transactions on Information Theory , vol. 44, no. 3, pp. 927–946, 1998. [11] A. Martinez, et al. , “Bit-interleaved coded modulation revisited: A mismatched decoding perspective,” IEEE Transactions on Information Theory , vol. 55, no. 6, pp. 2756–2765, 2009. [12] K. R. Duffy, et al. , “Capacity-achieving guessing random additive noise decoding,” IEEE Transactions on Information Theory , vol. 65, no. 7, pp. 4023–4040, 2019. [13] K. Galligan, et al. , “IGRAND: Decode any product code,” in IEEE Global Communications Conference , 2021, pp. 1–6. [14] A. Riaz, et al. , “Multi-code multi-rate universal maximum likelihood decoder using GRAND,” in IEEE European Solid State Circuits Con-ference (ESSCIRC) , 2021, pp. 239–246. [15] K. R. Duffy, et al. , “Ordered reliability bits guessing random additive noise decoding,” IEEE Transactions on Signal Processing , vol. 70, pp. 4528–4542, 2022. [16] M. Liu, et al. , “ORBGRAND is almost capacity-achieving,” IEEE Transactions on Information Theory , vol. 69, no. 5, pp. 2830–2840, 2022. [17] W. An, et al. , “Keep the bursts and ditch the interleavers,” IEEE Transactions on Communications , vol. 70, no. 6, pp. 3655–3667, 2022. [18] A. Riaz, et al. , “A sub-0.8 pJ/b 16.3 Gbps/mm 2 universal soft-detection decoder using ORBGRAND in 40nm CMOS,” in IEEE ISSCC , 2023, pp. 432–434. [19] K. R. Duffy, et al. , “Using channel correlation to improve decoding-ORBGRAND-AI,” in IEEE Global Communications Conference , 2023, pp. 3585–3590. [20] C. Wiame, et al. , “Joint error correction and fading channel estimation enhancement leveraging GRAND,” in IEEE International Conference on Communications , 2025, pp. 2014–2019. [21] B. Sklar, Digital Communications: Fundamentals and Applications .Pearson, 2021. [22] J. Palacios, et al. , “Single-and multiple-access point indoor localization for millimeter-wave networks,” IEEE Trans. Wireless Commun. , vol. 18, no. 3, pp. 1927–1942, 2019. [23] A. V. Oppenheim et al. , Signals, Systems & Inference . Pearson London, UK:, 2017. [24] M. Medard, “The effect upon channel capacity in wireless commu-nications of perfect and imperfect knowledge of the channel,” IEEE Transactions on Information Theory , vol. 46, no. 3, pp. 933–946, 2000.

@@ -1,0 +1,1446 @@
+Title: Distortion-Aware Integrated Sensing and Communication with Affine Filter Bank Modulation
+
+URL Source: https://arxiv.org/pdf/2608.16420v1
+
+Published Time: Tue, 18 Aug 2026 01:57:41 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Distortion-Aware Integrated Sensing and Communication with Affine Filter Bank Modulation 
+
+Eya Gourar , Henrique L. Senger , Gustavo P. Gonc ¸alves , Kuranage Roche Rayan Ranasinghe , Graduate Student Member, IEEE, Hyeon Seok Rou , Member, IEEE, 
+
+Bruno S. Chang , Member, IEEE, Yahia Medjahdi , Member, IEEE, 
+
+Giuseppe Thadeu Freitas de Abreu , Senior Member, IEEE, and Didier Le Ruyet , Senior Member, IEEE 
+
+Abstract —The stringent energy-efficiency requirements of future Integrated Sensing and Communications (ISAC) systems are fundamentally challenged. Unlike conventional communi-cation systems, ISAC transmitters must radiate significantly higher power to ensure reliable target detection, forcing the High-Power Amplifier (HPA) to operate closer to satura-tion, where nonlinear distortions become unavoidable. Con-sequently, the robustness of every candidate ISAC wave-form to HPA nonlinearities must be carefully assessed. In this context, this paper investigates the robustness of Affine Filter Bank Modulation (AFBM), a recently proposed waveform that combines the delay-Doppler resilience of affine modulation with reduced Peak-to-Average Power Ratio (PAPR) and improved spectral containment. We develop a statistical characterization of the Ambiguity Function (AF) of the amplified AFBM waveform, deriving approximate expressions for its mean, variance, and Rician-distributed magnitude. Furthermore, a low-complexity Gaussian belief propagation receiver accounting for HPA nonlinearities is proposed for communication detection. Simulation results validate the analytical framework and demon-strate that AFBM preserves favorable sensing characteristics and robust Bit Error Rate (BER) performance even under severe nonlinear amplification. 
+
+Index Terms —Waveform design, Sixth Generation (6G), AFBM, PAPR, Out-of-Band Emission (OOBE), ISAC, Affine Frequency Division Multiplexing (AFDM), Orthogonal Frequency Division Multiplexing (OFDM). 
+
+I. I NTRODUCTION 
+
+Integrated Sensing and Communications (ISAC) aims to use wireless transmission to simultaneously convey informa-tion and probe the surrounding environment [2]. By unifying these two functionalities, ISAC enables applications such as localization, tracking, and context awareness without dedicat-ing separate spectrum or hardware chains for sensing. These new functionalities create waveform requirements that go beyond traditional communication metrics, like 
+
+E. Gourar and Y. Medjahdi are with IMT Nord Europe, Institut Mines T´ el´ ecom, Center for Digital Systems, F-59653 Villeneuve d’Ascq, France (emails: [eya.gourar,yahia.medjahdi]@imt-nord-europe.fr). H. L. Senger, G. P. Gonc ¸alves and B. S. Chang are with the CPGEI/Electronics Department, Federal University of Technology - Paran´ a, Curitiba, Brazil (emails: [hsenger,gustavog.1999]@alunos.utfpr.edu.br, bschang@utfpr.edu.br). K. R. R. Ranasinghe, H S. Rou and G. T. F. de Abreu are with the School of Computer Science and Engineering, Constructor Univer-sity, Campus Ring 1, 28759 Bremen, Germany (emails: [kranasinghe,hrou, gabreu]@constructor.university). D. Le Ruyet is with the CEDRIC, Conservatoire National des Arts et M´ etiers - Paris, France (email: didier.le ruyet@cnam.fr). Parts of this work have been accepted for presentation at the 2026 Asilomar Conference on Signals, Systems, and Computers [1]. 
+
+throughput and reliability, since the transmitted signal must also exhibit favorable sensing ambiguity properties, robust spectral use, and robustness to practical impairments. While Orthogonal Frequency Division Multiplexing (OFDM) is expected to remain the multicarrier solution for 6G systems due to its simplicity and mature ecosystem, it is also known to exhibit high Peak-to-Average Power Ratio (PAPR), suboptimal performance on doubly-dispersive channels, and non-negligible Out-of-Band Emission (OOBE). These characteristics become particularly problematic in ISAC systems, especially in high-mobility scenarios such as Vehicle-to-Vehicle communications. These limitations motivate the study of alternative waveforms that preserve implementation tractability while improving time-frequency localization for both communications and sensing [3]. In this context, Affine Frequency Division Multiplexing (AFDM) has emerged as a promising alternative modulation scheme by exploiting affine (chirp) structures [4]. The use of chirps can be understood from the representation of doubly-dispersive channels. Rather than seeking a fixed orthonormal basis that diagonalizes the channel, the objective is to choose a signal domain in which the channel response becomes structured and sparse. Such a representation is possible because practical propagation channels typically occupy a bounded region in the delay-Doppler plane [5]. These features have led to numerous recent developments in AFDM-based ISAC, including a thorough analysis of its Ambiguity Function (AF) and the corresponding transceiver design (see e.g. , [6]–[9]) which support its use as a novel ISAC waveform. Nevertheless, AFDM inherits the high PAPR and poor spec-tral containment of OFDM. To address this gap, a novel wave-form, termed Affine Filter Bank Modulation (AFBM), was first introduced in [10], which combines affine-domain spread-ing with per-subcarrier filtering to reduce the OOBE and the PAPR of the AFDM signal without excessively intro-ducing transceiver complexity, while keeping its advantages. The current state of the art indicates that AFBM preserves quasi-orthogonality and strong resilience to doubly dispersive channels, while achieving approximately 3 dB lower PAPR than conventional AFDM and OOBE as low as -100 dB with PHYDYAS prototype filters [11]. Recent studies also report competitive Bit Error Rate (BER), AF, and sensing-estimation performance using tailored Gaussian belief-propagation detec-tion and probabilistic target-estimation methods [12]. Even though AFBM improves PAPR, its real value de-pends on how it handles hardware imperfections. In ISAC arXiv:2608.16420v1 [eess.SP] 17 Aug 2026 2
+
+systems, the sensing functionality imposes significantly higher transmit power requirements than conventional commu-nications, since radar echoes undergo two-way propaga-tion losses and additional attenuation from target reflec-tions, resulting in weak received signals [13]. Consequently, High-Power Amplifier (HPA) must operate at high output powers, often close to saturation, to guarantee sufficient sens-ing coverage and target detectability. However, this operating regime inherently introduces nonlinear distortion, which be-comes particularly problematic for the high-PAPR waveforms commonly employed in modern communication systems, as their large envelope fluctuations frequently drive the HPA into its nonlinear region [14]. This raises a central question: does the lower PAPR of AFBM translate into increased robustness to HPA nonlineari-ties, or does nonlinear distortion remain a major factor limiting performance? Moreover, although operating the HPA with substantial back-off can mitigate these distortions by keeping the amplifier in its linear operating region, it substantially reduces power efficiency, leading to greater energy dissipation and limiting the achievable transmit power. Therefore, ISAC systems face an inherent trade-off between transmit power, amplifier linearity, and energy efficiency, making HPA non-linearities an unavoidable hardware impairment whose impact must be carefully analyzed to understand their effect on both communication reliability and sensing performance. Research on the impact of HPA nonlinearities on the AFBM framework remains at an early stage. In our previous work in [1], we investigated the influence of such distortions on the AF and on sensing performance when employing the Probabilistic Data Association (PDA)-based sensing algo-rithm proposed in [12]. Our results demonstrated that both waveform-level and receiver-level sensing performance are largely insensitive to PA-induced distortions, thereby high-lighting the robustness and practical advantages of AFBM in realistic ISAC system scenarios. However, a comprehensive characterization of the gain associated with the AFBM wave-form in the presence of such hardware impairments should also incorporate the communication aspects, which have not yet been investigated. Moreover, an analytical framework capable of describing the typical behavior and fluctuations of the AF is needed to obtain a more complete understanding of the AFBM sensing robustness to nonlinear amplification. This work presents an analysis of the AFBM waveform under HPA-induced distortions. Our main contributions are:  
+
+> •
+
+We develop a statistical characterization of the AF of the AFBM waveform under HPA nonlinearities using the Bussgang decomposition followed by a memoryless polynomial approximation. Approximate expressions for the mean and variance are derived, showing that the AF magnitude remains Rician distributed after nonlinear am-plification. The analysis is validated through simulations.  
+
+> •
+
+The communication performance robustness of AFBM under HPA nonlinearities is investigated. Numerical re-sults demonstrate that AFBM maintains robust BER performance even under severe nonlinear amplification, showcasing the resilience of the novel waveform.  
+
+> •
+
+A low-complexity HPA-aware Gaussian belief propaga-tion receiver is derived by explicitly accounting for the nonlinear distortion. The proposed receiver mitigates the impact of HPA nonlinearities and provides improved communication performance with only a marginal in-crease in computational complexity. The remainder of this paper is organized as follows: Sec-tion II introduces the system model and the AFBM transmit signal construction, while Section III derives the ambigu-ity function considering power amplifier nonlinearities. Sec-tion IV presents the communications receiver algorithms for the proposed architecture. The simulation results are presented and analyzed in Section V. Finally, the concluding remarks are given in Section VI. 
+
+Notations: The following notations are adopted throughout this manuscript. Boldface lowercase and uppercase letters denote vectors and matrices, respectively. The sets of N -dimensional complex and real column vectors are denoted by CN and RN , respectively, while CM×N and RM×N
+
+denote the corresponding sets of M × N matrices. For a vector a, the notation a(n) denotes its n-th element, while for a matrix A, A(m, n ) denotes the entry in its m-th row and n-th column. The operators (·)∗, (·)T , and (·)H denote complex conjugation, transpose, and Hermitian (conjugate transpose), respectively. For a given matrix ¯A, ¯A† denotes its left Moore–Penrose pseudoinverse. The notation CN (μ, σ 2)
+
+denotes the circularly symmetric complex Gaussian distri-bution with mean μ and variance σ2. If Z ∼ CN (μ, σ 2),then |Z| ∼ Rice( |μ|, σ 2/2) . The identity matrix of size N is denoted by IN , the all-zero vector by 0N and 0L×N denotes an all-zero matrix of size L×N . FL denotes the normalized L-point Discrete Fourier Transform (DFT) matrix. The operator 
+
+ℜ(·) extracts the real part of a complex quantity. ⊗ and ⊙ de-note the Kronecker product and the Hadamard (element-wise) product, respectively. For a matrix A, |A| denotes the element-wise magnitude, while |A|⊙p denotes the element-wise p-th power of the magnitude, i.e. , [|A|⊙p]m,n = |A(m, n )|p. The expectation operator is denoted by E[·]. The operators diag( A)
+
+and diag( a) denote, respectively, the vector formed by the diagonal entries of a matrix and the diagonal matrix whose diagonal entries are given by the vector a. The Euclidean norm of a vector is denoted by ‖ · ‖ 2, while the Frobenius norm of a matrix is denoted by ‖·‖ F , and tr( ·) denotes the trace operator. II. S YSTEM MODEL 
+
+A. Transmit Signal Model 
+
+The considered system model is presented in Figure 1. As a starting point, let L denote the number of active subcarriers in an AFBM system with N total subcarriers. The system is organized into blocks of K symbols, each with a duration of T / 2 seconds, to keep the same rate as an AFDM system transmitting for each T seconds. Each subcarrier is spaced by 
+
+F Hz. This results in a time-frequency grid with L/ 2 points in frequency, spaced by F Hz, and K points in time, spaced by T / 2 seconds. Accordingly, the total bandwidth is given by 
+
+B = LF , and the total transmission interval by KT / 2.3
+
+## H Doubly-dispersive Channel          
+
+> Mapping
+> Ξ
+> DAFT Precoding
+> IK⊗Cf
+> IDAFT+FD Zero Padding
+> IK⊗QP
+> Prototype Filter Matrix
+> G
+> High Power Amplifier
+> y=g(s) = κs+d
+> Symbol Estimation
+> ˆx
+> Detector
+> LMMSE, GaBP, FOGa
+
+x ∈ D Z
+
+s y  
+
+> Ambiguity Function
+> Ay(l, f )
+> Waveform metric
+
+r = Hy + n
+
+Received Signal 
+
+Transmitter Communication Receiver 
+
+Fig. 1. Schematic of the AFBM transmitter, sensing and communications receiver. 
+
+x ∈ D Z denotes the complex transmit symbol vector for the proposed scheme, where D denotes the complex modulation constellation and Z , KL/ 2. For the sake of convenience, 
+
+L = N/ 2 is adopted. Symbols in x are arranged in the first and last L/ 4 positions of a matrix A ∈ CL×K to uphold a quasicomplex orthogonality condition [12]. This mapping Ξ
+
+is expressed as 
+
+a , vec( A) = Ξx ∈ CLK ×1, (1) where vec( ·) denotes the column-wise vectorization operation and Ξ ∈ CLK ×Z is defined as Ξ , IK ⊗ ¯Ξ, with ¯Ξ ∈ CL× L
+
+> 2
+
+given by 
+
+¯Ξ ,
+
+ IL/ 4 0L/ 4
+
+0L/ 2×L/ 4 0L/ 2×L/ 4
+
+0L/ 4 IL/ 4
+
+ . (2) Overall, the complete AFBM transmit signal in the Time-Domain (TD) for all K blocks s ∈ CM×1, with M ,
+
+ON + N 
+
+> 2
+
+(K − 1) , can be written as 
+
+s = G(IK ⊗ QP
+
+) · (IK ⊗ Cf
+
+)a
+
+= G(IK ⊗ QP Cf
+
+)Ξx 
+
+= ¯Gx , (3) where ¯G = G(IK ⊗ QP Cf
+
+)Ξ ∈ CM×Z is the overall modulation matrix. It can be expressed in terms of the precoding matrix Cf in (10), the modified Inverse Discrete Affine Fourier Transform (IDAFT) matrix 
+
+QP in (6), and the block Toeplitz filter matrix G ∈ RM×N K ,defined as 
+
+G =
+
+
+
+G0 0 0 0 . . . 00 G1 G0 0 . . . 0G2 0 0 G1 . . . 00 G3 G2 0 . . . 0
+
+... 0 0 G3 . . . 0
+
+... ... ... ... . . . ...
+
+G2O−4
+
+... ... ... . . . 00 G2O−3 G2O−4
+
+... . . . G1
+
+G2O−2 0 0 G2O−3
+
+. . . 00 G2O−1 G2O−2 0 . . . G3
+
+... 0 0 G2O−1
+
+. . . ...... ... . . . ... . . . 00 0 . . . 0 . . . G2O−1
+
+
+
+, (4) where Gp ∈ RN/ 2×N/ 2 denote the diagonal matrix of real filter coefficients, i.e. ,
+
+Gp = diag( gp), p = 0 , 1, 2, . . . , 2O − 1, (5) where 
+
+gp = [ g[pN/ 2] , g [pN/ 2 + 1] , . . . , g [pN/ 2 + N/ 2 − 1]] ,
+
+and g represents the prototype filter of length ON , with O
+
+denoting the overlap factor. The structure of G, through the inclusion of 0N/ 2×N/ 2 matrices and with the representation as a sum of delayed matrices [15], ensures that the transmitted symbols are delayed from one another every N/ 2 samples. 
+
+QP is comprised of an IDAFT whose output is zero-padded in the frequency domain, obtained as 
+
+QP = FHN TN P FP ˜WH 
+
+> P
+
+, (6) where TN P , [[IP/ 2 0P/ 2]T 0P ×(N −P ) [0P/ 2 IP/ 2]T ]T
+
+is an N × P matrix with TTN P TN P = IP .For a given N , WN ∈ CN ×N is the N -point Discrete Affine Fourier Transform (DAFT) matrix, defined as 
+
+WN = Λc1,N FN Λc2,N , (7) with 
+
+Λci,N = diag[ e−j2πc i (0) 2
+
+, . . . , e −j2πc i(N −1) 2
+
+] ∈ CN ×N (8) 4
+
+denoting an N × N diagonal chirp matrix with central digital frequency ci. We recall that FHN TN P FP , where P < N , will guarantee that the chirps are sampled at a rate lower than the Nyquist rate and introduce frequency domain zero padding, enabling frequency containment [16]. The extended DAFT 
+
+˜WP ∈ CL×P is defined as 
+
+˜WP = [IL 0L×(P −L)
+
+] WP . (9) Finally, let us define Cf ∈ CL×L as 
+
+Cf , WLdiag( ˜b), (10) where the ˜l-th element of ˜b is obtained as 
+
+˜b(˜l) = 
+
+√ 1˜c(˜l) , ˜l ∈ [0, . . . , L 
+
+> 4
+
+− 1] ∪ [L − L 
+
+> 4
+
+, . . . , L − 1]
+
+0, otherwise ,
+
+with 
+
+˜c , diag( WH
+
+> L
+
+QHP ˜GH ˜GQ P WL),
+
+and ˜G ∈ RON ×N is the single-symbol filtering matrix con-structed from Gp [12]. Based on the proposed system model, the waveform can be interpreted as a filtered version of the DAFT-spread AFDM scheme [17], where the standard sinc-chirp subcarriers are replaced with chirp-filtered subcarriers. Here, the considered filter is well localized both in time and in frequency and implemented with a filterbank. Due to this well-localized filter, a Cyclic Prefix (CP) is not used in AFBM. 
+
+B. Modeling of the HPA Nonlinearities 
+
+In this paper, we consider a memoryless HPA model, as commonly assumed when the HPA bandwidth is significantly larger than that of the transmitted signal, which is the case in most commercial communication systems [14]. Moreover, memory effects correspond to frequency-selective behavior and are assumed to be compensated for at the transmitter. 
+
+1) Rapp Model: The Rapp model is a memoryless, widely accepted Solid-State Power Amplifier (SSPA) model encom-passing amplitude clipping ( i.e. , AM-AM distortion) [14], [18]. The n-th element of the amplified signal can be written as 
+
+y(n) = g(s(n)) = s(n)
+
+[
+
+1 + 
+
+( |s(n)|
+
+Asat 
+
+)2q ]− 12q
+
+, (11) where g(·) is the HPA transfer function and q is the smooth-ness factor that controls the transition from the linear to the saturation domain determined by the input saturation voltage 
+
+Asat . In practice, to mitigate the impacts of the nonlinear distortion, the HPA operates at an Input Back-Off (IBO) from a given HPA operating point. The IBO, usually expressed in dB, is defined as the ratio between the 1-dB compression input power Pin, 1dB and the average input signal power 
+
+IBO = 10 log 10 
+
+( Pin, 1dB 
+
+α2σ2
+
+> s
+
+)
+
+(dB) , (12) where σ2 
+
+> s
+
+= E[|s(n)|2] denotes the mean input signal power, and the back-off coefficient α ∈ (0 , 1] is 
+
+α =
+
+√
+
+Pin, 1dB 
+
+σ2
+
+> s
+
+10 −IBO /10 . (13) 
+
+2) Bussgang Decomposition: Since the input of the HPA is approximately Gaussian [1], the output of a memoryless nonlinear HPA can be expressed using the Bussgang decom-position [19], [20] as 
+
+y = κs + d = κ ¯Gx + d, (14) where d denotes the nonlinear distortion with variance σ2
+
+> d
+
+,uncorrelated with the input signal s, and κ is the complex Bussgang gain given by 
+
+κ = E[sH g(s)] 
+
+E[sH s] . (15) The variance σ2 
+
+> d
+
+of the nonlinear distortion d is given by 
+
+σ2 
+
+> d
+
+= E[|d(n)|2] = E[|g(s(n)) |2] − | κ|2E[|s(n)|2]. (16) III. A NALYSIS OF THE AMBIGUITY FUNCTION 
+
+To explore the inherent characteristics of the communication waveforms in terms of sensing capabilities, we study the AF. 
+
+A. Definition 
+
+For a discrete-time signal s, the AF is defined as 
+
+A(l, f ) = 
+
+> M
+
+∑
+
+> n=1
+
+s(n + l)s∗(n)e−j2πf n/M , (17) where l denotes the delay index and f the Doppler frequency index. In practice, the delay index spans l ∈ [−(M −
+
+1) , M − 1] , corresponding to all possible linear shifts of an M -sample sequence, while the Doppler frequency lies in 
+
+f ∈ [−M/ 2, M/ 2] [6]. Using vector notation, the AF can be expressed in matrix form as [21] 
+
+A(l, f ) = sH Df Jls, (18) where Jl is the l-samples linear left shift matrix whose elements are defined as 
+
+Jl =
+
+[0(M−l)×l IM−l
+
+0l×l 0l×(M−l)
+
+]
+
+, (19) and D ∈ CM×M is the diagonal roots-of-unity matrix, given by 
+
+D = diag 
+
+(
+
+{e−j2πk/M }M−1
+
+> k=0
+
+)
+
+, (20) and is raised to the power f . Substituting the signal model in (3) into (18), the AF can be written compactly as 
+
+A(l, f ) = xH Φl,f x, (21) where Φl,f = ¯GH Df Jl ¯G is the modulation ambiguity matrix. 5           
+
+> Table I KURTOSIS VALUES OF TYPICAL CONSTELLATIONS [22]
+> Constellation PSK 16-QAM 64-QAM 128-QAM 256-QAM
+> Kurtosis 11.32 1.381 1.3427 1.3953
+
+B. Preliminaries: Properties of the Ambiguity Function 
+
+Property 1 (Sensitivity to the constellation symbols) To evaluate the impact of constellation symbols statistics on the sidelobes, we study the expected squared magnitude of the AF, expressed as [21] 
+
+E[|A (l, f )|2] = σ4
+
+> x
+
+(
+
+| tr( Φl,f )|2 + ‖Φl,f ‖2
+
+> F
+
+)
+
++ ( μ4 − 2σ4
+
+> x
+
+)‖ diag( Φl,f )‖22, (22) where σ2 
+
+> x
+
+= E[|x(k)|2 ], | tr( Φl,f )|2 =∑ 
+
+> i,k
+
+Φl,f (i, i ) Φ∗ 
+
+> l,f
+
+(k, k ), ‖Φl,f ‖2 
+
+> F
+
+= ∑ 
+
+> i,j
+
+|Φl,f (i, j )|2
+
+is the Frobenius norm of the matrix Φl,f , and 
+
+‖ diag( Φl,f )‖22 = ∑ 
+
+> n
+
+|Φl,f (n, n )|2.The constellation symbols’ implications are generally stud-ied for the ranging or delay sidelobes i.e, f = 0 [22], given that the randomness of the data payload directly impacts the autocorrelation properties. The dependence of the sidelobe energy on constellation statistics enters through the term 
+
+(μ4 − 2σ4
+
+> x
+
+). For PSK constellations, μ4 = 1 , making this term constant. For Quadrature Amplitude Modulation (QAM) constellations, μ4 varies only slightly (see Table I), leading to marginal variations in ambiguity sidelobe levels, but also mainly if ‖Φl, 0‖2 
+
+> F
+
+≫ ‖ diag( Φl, 0)‖22. This depends on how the energy of Φl, 0 is distributed between its diagonal and off-diagonal elements. If Φl, 0 is diagonal with non-negligible diagonal terms, the constellation-dependent term has a sub-stantial contribution. In contrast, if most of the energy lies in off-diagonal elements, the ambiguity sidelobe energy becomes invariant to the constellation choice. For the AFBM waveform, the matrix Φl, 0 = ¯GH Jl ¯G is sparse and non-diagonal, given 
+
+Jl is not diagonalized by the precoding matrix ¯G. This also implies that, for the AFBM, the difference in the ranging sidelobe energy between constant-modulus and non-constant-modulus constellations is not as substantial either, since the difference in kurtosis is on the order of 10 −1, in contrast to the case of the OFDM signal, where constant-modulus constellations result in optimally low ranging sidelobes [22]. 
+
+Property 2 (Rician distribution of |A (l, f )|)To evaluate the sensing capability of a waveform, we derive an approximate distribution for |A (l, f )|. For sufficiently large Z,the AF in (21) is approximated as a complex Gaussian random variable using the Central Limit Theorem (CLT), 
+
+A(l, f ) ∼ CN (μ(l, f ), Σ2(l, f )) , (23) with μ(l, f ) = E[A(l, f )] , and Σ2(l, f ) = Var( A(l, f )) . In the following, we derive μ(l, f ) and Σ( l, f ).Using E [xH Φl,f x] = tr (Φl,f E[xx H ]) and E[xx H ] =
+
+σ2
+
+> x
+
+IZ , we express the expectation of the AF as follows, 
+
+μ(l, f ) = E[A(l, f )] = σ2 
+
+> x
+
+tr( Φl,f ) . (24)                  
+
+> (a) Zero-Doppler cut (b) Zero-delay cut Fig. 2. Comparison of empirical average and Rice distribution of the magnitude of (a) Zero-Doppler and (b) Zero-delay cuts, L= 64 ,N= 128 ,
+> K= 8 , and O= 1 .5, with the Hermite prototype filter [23].
+
+Combining the expression of the AF average squared magni-tude (21) and the mean (24), the AF variance satisfies 
+
+Σ2(l, f ) = E[|A (l, f )|2] − | μ(l, f )|2
+
+= σ4
+
+> x
+
+‖Φl,f ‖2 
+
+> F
+
++ ( μ4 − 2σ4
+
+> x
+
+)
+
+> Z−1
+
+∑
+
+> k=0
+
+|Φl,f (k, k )|2. (25) Since A(l, f ) is approximately complex Gaussian, its mag-nitude follows a Rician distribution [21] 
+
+|A (l, f )| ∼ Rice 
+
+(
+
+|μ(l, f )|, Σ2(l, f )2
+
+)
+
+. (26) Fig 2 shows the empirical average and the approximate Rice distribution of the magnitude of the AF, and they closely match, validating our derivations. 
+
+C. Ambiguity Function under HPA Nonlinearities 
+
+Let P ¯G , ¯G ( ¯GH ¯G)−1 ¯GH denote the orthogonal projec-tor onto the modulation subspace spanned by the columns of 6
+
+¯G. The TD distortion can be decomposed as 
+
+d = d‖ + d⊥, (27) where d‖ = P ¯Gd = ¯Gt , and d⊥ = ( IM − P ¯G) d. The least-squares modulation-domain representation of the distortion is therefore 
+
+t = ¯G†d = ( ¯GH ¯G)−1 ¯GH d. (28) The Bussgang decomposition becomes 
+
+y = κ ¯Gx + ¯Gt + d⊥. (29) Numerical evaluation indicates that η = 97% of the distortion energy lies in the modulation subspace ( i.e., E [‖d‖‖22
+
+] ≫
+
+E [‖d⊥‖22
+
+]), allowing us to neglect d⊥ and approximate d ≈
+
+¯Gt . Accordingly, the amplified signal is approximated as 
+
+y ≈ ¯G(κx + t). (30) Using (30), the AF of the amplified signal becomes 
+
+Ay (l, f ) ≈ | κ|2 xH Φl,f x + κ xH Φl,f t + κ∗ tH Φl,f x
+
++ tH Φl,f t. (31) The post-amplification AF depends on the complete AFBM modulation chain and, in particular, on the selected proto-type filter, making an exact characterization of its mainlobe and sidelobe behavior likewise analytically filter-dependent. We therefore adopt an approximate statistical characterization through its mean μy (l, f ) and variance Σ2 
+
+> y
+
+(l, f ), which re-spectively capture the average levels and fluctuations of the AF under HPA nonlinearities. We start by deriving the mean of |A (l, f )| by taking the expectation of the AF expressed with the Bussgang parameters (in (31)). Under the adopted modulation-domain approxima-tion, we further assume that the projected distortion is uncorre-lated with the transmitted symbol vector, i.e. , E[xt H ] = 0Z .It then follows that the cross E[xH Φl,f t] and E[tH Φl,f x]
+
+vanish. We note that the expectation of the remaining distortion term is E [tH Φl,f t] = tr (Φl,f E[tt H ]) = tr ( Φl,f Rt), where 
+
+Rt = E[tt H ]. Hence, we write the expectation of Ay (l, f ) as follows, 
+
+μy (l, f ) = E[Ay (l, f )] = |κ|2σ2 
+
+> x
+
+tr( Φl,f ) + tr( Φl,f Rt ) .
+
+(32) Next, we note that the variance is given by 
+
+Σ2 
+
+> y
+
+(l, f ) = E[|A y (l, f )|2] − | μy (l, f )|2. (33) We recall that the approximation of E[|A y (l, f )|2] derived in [1] is given by 
+
+E[|A y (l, f )|2] ≈ | κ|4[
+
+σ4
+
+> x
+
+(
+
+| tr( Φl,f )|2 + ‖Φl,f ‖2
+
+> F
+
+)
+
++ ( μ4 − 2σ4
+
+> x
+
+)‖ diag( Φl,f )‖22
+
+]
+
++ |κ|2 tr (Φl,f Rt ΦHl,f 
+
+)
+
++ |κ|2 tr (ΦHl,f Rt Φl,f 
+
+)
+
++ |tr( Φl,f Rt )|2
+
++ tr (Φl,f Rt ΦHl,f Rt
+
+)
+
++ 2 |κ|2ℜ{tr( Φl,f ) tr( Φl,f Rt )∗} . (34)                       
+
+> (a) Zero-Doppler cut (b) Zero-delay cut Fig. 3. Comparison of empirical average and Rice distribution of the magnitude of the (a) zero-Doppler cut and (b) zero-delay cut under HPA nonlinearities, Asat = 1 and q= 1 .1.L= 64 ,N= 128 ,K= 8 , and
+> O= 1 .5, with the Hermite prototype filter.
+
+Given that |μy (l, f )|2 = |κ|4 |tr( Φl,f )|2 + |tr( Φl,f Rt )|2 +2|κ|2ℜ{tr( Φl,f ) tr( Φl,f Rt )∗}, substituting (34) in (33) yields 
+
+Σ2 
+
+> y
+
+(l, f ) ≈ | κ|4 [
+
+σ4
+
+> x
+
+‖Φl,f ‖2 
+
+> F
+
++ ( μ4 − 2σ4
+
+> x
+
+) ‖diag( Φl,f )‖22
+
+]
+
++ |κ|2 tr (Φl,f Rt ΦHl,f 
+
+) + |κ|2 tr (ΦHl,f Rt Φl,f 
+
+)
+
++ tr (Φl,f Rt ΦHl,f Rt
+
+) . (35) Following the same reasoning as in the linear case, Ay (l, f )
+
+is approximately complex Gaussian distributed, 
+
+Ay (l, f ) ∼ CN (μy (l, f ), Σ2
+
+> y
+
+(l, f )) . (36) Therefore, its magnitude follows a Rician distribution, 
+
+|A y (l, f )| ∼ Rice 
+
+(
+
+|μy (l, f )|, Σ2 
+
+> y
+
+(l, f )2
+
+)
+
+. (37) We present in Fig. 3 the approximate Rice distribution of the magnitude of the zero-Doppler and zero-delay cuts, 7
+
+and it closely matches the empirical average, validating our derivations. The expressions in (35) and (32) are formulated in terms of the Bussgang gain κ and the projected distortion covariance matrix Rt. To explicitly relate the nonlinearities’ impact to the HPA parameters rather than to the random distortion statistics, we approximate the Bussgang parameters using a polynomial HPA model. For simplicity and analytical tractability, we adopt a third-order polynomial model 1.Provided that σ2 
+
+> s
+
+= ( σ2
+
+> x
+
+/M ) tr ( ¯G ¯G H ), approximating the sample-dependent Bussgang gain and distortion variance by their average values yields 
+
+κ = 1 − 2α3σ2 
+
+> s
+
+= 1 − 2α3
+
+M σ2 
+
+> x
+
+tr ( ¯G ¯G H ) , (38) and 
+
+σ2 
+
+> d
+
+= 2 α23σ6 
+
+> s
+
+. (39) 
+
+Proof: Please refer to Appendix A. 
+
+The expressions of μy (l, f ) and Σ2 
+
+> y
+
+(l, f ) in (32) and (35) are therefore rewritten using the cubic HPA nonlinear gain α3,respectively in (40) and (41). 
+
+Proof: The covariance matrix of the projected distortion is 
+
+Rt = ¯G†Rd( ¯G†)H . (42) Noting that Rs = E[ss H ] = σ2 
+
+> x
+
+¯G ¯GH , and that the distortion covariance satisfies Rd = 2 α23(Rs ⊙ | Rs|⊙2), we obtain 
+
+Rd = 2 α23σ6
+
+> x
+
+( ¯G ¯GH ⊙ ∣∣ ¯G ¯GH ∣∣⊙2)
+
+. (43) Hence (42) becomes 
+
+Rt = 2 α23σ6 
+
+> x
+
+¯G† ( ¯G ¯GH ⊙ ∣∣ ¯G ¯GH ∣∣⊙2)
+
+( ¯G†)H . (44) 
+
+
+
+The analysis is restricted to operating points satisfying 
+
+2α3σ2 
+
+> s
+
+< 1. We can observe from (40) and (41) that for small values of α3, the useful signal component may dominate, and that for stronger nonlinearities i.e. , increasing α3, the distortion-induced terms become more significant and may increase the AF statistics, depending on how the ambiguity matrix Φl,f projects onto the distortion covariance. Further-more, since we have shown that the AFBM AF characteristics are weakly dependent on the constellation statistics, the be-havior in the presence of HPA nonlinearities will likewise be independent of the particular constellation used. In the following section, the communications aspect of the AFBM waveform under HPA nonlinearities will be tackled.  
+
+> 1Only odd-order terms are considered in the adopted polynomial model. The first-order term represents the linear response, and the third-order term is therefore the first nonlinear contribution.
+
+IV. G AUSSIAN APPROXIMATION BELIEF 
+
+PROPAGATION -BASED RECEIVERS 
+
+The distorted signal y at the output of the transmitter is expressed as in (14). Correspondingly, the signal at the input of the receiver is given by 
+
+r = Hy + n
+
+= κH ¯G︸ ︷︷ ︸ 
+
+> ,B
+
+x + Hd + n
+
+︸ ︷︷ ︸
+
+> ,w
+
+= Bx + w, (45) where H ∈ CM×M denotes the doubly-dispersive channel composed of R resolvable paths. Each r-th path induces a de-lay τr ∈ [0 , τ max ] and a Doppler shift νr ∈ [−νmax , +νmax ],with integer delay index ℓr , ⌊ τr 
+
+> Ts
+
+⌉ ∈ N0 and Doppler index fr , Mν r 
+
+> fs
+
+∈ R, where fs , 1 
+
+> Ts
+
+denotes the sam-pling frequency. The noise vector n ∈ CM×1 represents Additive White Gaussian Noise (AWGN) samples with vari-ance σ2
+
+> n
+
+. The overall matrix B is of size M × Z. The variance of the noise w is σ2 
+
+> n
+
++ σ2
+
+> d
+
+. As described in [3], the channel matrix H is expressed as 
+
+H ,
+
+> R
+
+∑
+
+> r=1
+
+hrDfr Jlr ∈ CM×M , (46) where hr ∈ C denotes the complex fading coefficient of the r-th path, and Jlr , and D are defined as in (19) and (20), respectively. In total, H is formed by R diagonals, with positions determined by the path delays and coefficients modulated by the Doppler shifts. The standard receiver does not have knowledge of σ2 
+
+> d
+
+, while a more advanced transceiver design can take into account the knowledge of the distortion introduced by the HPA nonlinear-ities. These will be introduced in the next subsection. 
+
+A. GaBP-based Receiver 
+
+In [12], the authors have proposed to perform the AFBM data detection using the so-called Gaussian Approximation Belief Propagation (GaBP) [24], [25]. In this approach, only means and variances are exchanged between the variable nodes and the factor nodes of the factor graph associated to (45). Let us denote μtxi→fj (xi) the message sent from the vari-able node xi to factor node fj in the t-th iteration, and let us denote μtfj →xi (xi) the message from the factor node fj to variable node xi. The minimum Kullback-Leibler divergence criterion [26] is applied to calculate parameters ˆxtxi→fj (mean of projection distribution) and ˆτ txi→fj (variance of projection distribution). The message updated from the variable nodes to factor nodes are equal to 
+
+ˆxtxi →fj = ∑
+
+> xi∈D
+
+xiμtxi→fj (xi), (47) 
+
+ˆτ txi→fj = ∑
+
+> xi∈D
+
+|xi|2μtxi→fj (xi) − | ˆxtxi →fj |2
+
+. (48) Let B = {bj,i }1≤j≤M, 1≤i≤Z . The message μtfj →xi (xi) can be approximated by a complex Gaussian function as follows: 8
+
+μy (l, f ) = 
+
+∣∣∣∣1 − 2α3σ2
+
+> x
+
+M tr ( ¯G ¯GH )∣∣∣∣
+
+> 2
+
+σ2 
+
+> x
+
+tr( Φl,f )
+
+︸ ︷︷ ︸  
+
+> μsignal ,useful signal term
+
++ tr 
+
+(
+
+Φl,f 
+
+(
+
+2α23σ6 
+
+> x
+
+¯G† ( ¯G ¯GH ⊙ ∣∣ ¯G ¯GH ∣∣⊙2)
+
+( ¯G†)H )) ︸ ︷︷ ︸  
+
+> μdist ,distortion-induced term
+
+. (40) 
+
+Σ2 
+
+> y
+
+(l, f ) ≈
+
+∣∣∣∣1 − 2α3σ2
+
+> x
+
+M tr ( ¯G ¯GH )∣∣∣∣ 
+
+> 4
+
+[
+
+σ4
+
+> x
+
+‖Φl,f ‖2 
+
+> F
+
++ ( μ4 − 2σ4
+
+> x
+
+) ‖diag( Φl,f )‖22
+
+] }
+
+Σ2 
+
+> signal
+
+, useful signal term 
+
++ 2 α23σ6
+
+> x
+
+∣∣∣∣1 − 2α3σ2
+
+> x
+
+M tr ( ¯G ¯GH )∣∣∣∣
+
+> 2
+
+tr 
+
+(
+
+ΦHl,f ¯G†( ¯G ¯GH ⊙ ∣∣ ¯G ¯GH ∣∣⊙2 )
+
+( ¯G†)H Φl,f 
+
+)
+
++ 2 α23σ6
+
+> x
+
+∣∣∣∣1 − 2α3σ2
+
+> x
+
+M tr ( ¯G ¯GH )∣∣∣∣
+
+> 2
+
+tr 
+
+(
+
+Φl,f ¯G†( ¯G ¯GH ⊙ ∣∣ ¯G ¯GH ∣∣⊙2 )
+
+( ¯G†)H ΦHl,f 
+
+)
+
++ 4 α43σ12  
+
+> x
+
+tr 
+
+(
+
+Φl,f ¯G† ( ¯G ¯G H ⊙ ∣∣ ¯G ¯G H ∣∣⊙2)
+
+( ¯G†)H ΦHl,f ¯G† ( ¯G ¯G H ⊙ ∣∣ ¯G ¯G H ∣∣⊙2)
+
+( ¯G†)H )
+
+Σ2 
+
+> dist
+
+,
+
+distortion-induced term (41) 
+
+μtfj →xi (xi) ≈ N C
+
+(
+
+bj,i xi; ztfj →xi , f tfj →xi
+
+)
+
+, (49) 
+
+where NC(x; ˆ x; ˆ τ ) = ( πˆτ )−1 exp( −| x − ˆx|2/ˆτ ) . Assuming the knowledge of σ2 
+
+> n
+
+and the equivalent noise due to the HPA nonlinearities σ2 
+
+> d
+
+, the parameters ztfj →xi (mean messages from factor nodes to variable nodes) and f tfj →xi (variance messages from factor nodes to variable nodes) are given by 
+
+ztfj →xi = rj − ∑ 
+
+> l6=i
+
+bj,l ˆxtxl →fj
+
+, (50) 
+
+f tfj →xi = σ2 
+
+> n
+
++ σ2 
+
+> d
+
++ ∑ 
+
+> l6=i
+
+|bj,l |2 ˆτ txl→fj . (51) Consequently, messages μtxi→fj (xi) can be normalized as follows: 
+
+μtxi→fj (xi) = 
+
+NC
+
+(
+
+xi; ζt−1 
+
+> xi→fj
+
+, γ t−1
+
+> xi→fj
+
+)∑ 
+
+> xi∈D
+
+NC
+
+(
+
+xi; ζt−1 
+
+> xi→fj
+
+, γ t−1
+
+> xi→fj
+
+) , (52) where γt−1 
+
+> xi→fj
+
+(variance messages from variable nodes to factor nodes) and ζt−1  
+
+> xi→fj
+
+(means messages from variable nodes to factor node) are given by 
+
+γtxi→fj =
+
+∑ 
+
+> d6=j
+
+|bd,i |2
+
+f tfd →xi
+
+
+
+> −1
+
+, (53) 
+
+ζtxi →fj = γtxi→fj
+
+∑ 
+
+> d6=j
+
+b∗
+
+> d,i
+
+ztfd →xi
+
+f tfd →xi
+
+. (54) After T iterations, the marginal distribution μ Txi (xi) can be calculated as follows: 
+
+μTxi (xi) ∝ exp 
+
+(
+
+− |xi − ζTxi |2
+
+γTxi
+
+)
+
+, (55) where ζTxi and γTxi are the estimated mean and variance of xi
+
+γTxi =
+
+( M∑
+
+> d=1
+
+|bd,i |2
+
+f Tfd →xi
+
+)−1
+
+, (56) 
+
+ζTxi = γtxi
+
+> M
+
+∑
+
+> d=1
+
+b∗
+
+> d,i
+
+zTfd →xi
+
+f Tfd →xi
+
+. (57) To avoid convergence to local minimum and minimize the BER, we apply damping using a factor 0 < ∆ ≤ 1 as follows: 
+
+μtxi→fj (xi) = (1 − ∆) μt−1  
+
+> xi→fj
+
+(xi) + ∆ μtxi→fj (xi). (58) 
+
+B. FOGa-based Receiver 
+
+We propose the first-order Gaussian approximation (FOGa) receiver, which reduces the complexity of GaBP by following a strategy in which the messages are rewritten after recursive updates, and the negligible terms are omitted in the large system limit. Following the approximation rules given in [27], we first rewrite the standard messages in (52) as follows: 
+
+μtxi (xi) = NC
+
+(xi; ζt−1 
+
+> xi
+
+, γ t−1
+
+> xi
+
+)∑ 
+
+> xi∈D
+
+NC
+
+(xi; ζt−1 
+
+> xi
+
+, γ t−1
+
+> xi
+
+) , (59) where γt−1 
+
+> xi
+
+(variance messages variables nodes) and ζt−1
+
+> xi
+
+(means messages variables nodes) are the messages exchanged from variables nodes to factor nodes and are approximated as follows: 
+
+γtxi =
+
+( M∑
+
+> d=1
+
+|bd,i |2
+
+f tfd
+
+)−1
+
+, (60) 
+
+ζtxi = ˆ xtxi + γtxi
+
+> M
+
+∑
+
+> d=1
+
+b∗ 
+
+> d,i
+
+ztfd
+
+f tfd
+
+, (61) with ztfd and f tfd the mean and variance messages from factor nodes to variable nodes, respectively. To initiate the exchange of messages from factor nodes to variable nodes, eq. (59) is updated for all variable nodes, and then the mean and variance 9
+
+Algorithm 1 FOGa algorithm  
+
+> 1:
+
+Initialization: ζ0 
+
+> xi
+
+= 0 , f 0 
+
+> fj
+
+= 1000 , z0 
+
+> fj
+
+= 0 , γ0 
+
+> xi
+
+= 1000 ,
+
+t = 1 . 
+
+> 2:
+
+while t ≤ T do  
+
+> 3:
+
+for i = 1 → Z do  
+
+> 4:
+
+Calculate message μtxi (xi) using Eq.(59).  
+
+> 5:
+
+Calculate ˆxtxi and ˆτ txi using Eq.(62) and Eq.(63), respectively.  
+
+> 6:
+
+end for  
+
+> 7:
+
+for j = 1 → M do  
+
+> 8:
+
+Calculate f tfj and ztfj using Eq.(65) and Eq.(64), respectively.  
+
+> 9:
+
+end for  
+
+> 10:
+
+for i = 1 → Z do  
+
+> 11:
+
+Calculate γtxi and ζtxi using Eq.(60) and Eq.(61), respectively.  
+
+> 12:
+
+Damping calculation  
+
+> 13:
+
+end for  
+
+> 14:
+
+t = t + 1 . 
+
+> 15:
+
+end while  
+
+> 16:
+
+for i = 1 → Z do  
+
+> 17:
+
+Calculate the mean estimated of xi ζTxi using Eq. (61)  
+
+> 18:
+
+end for 
+
+of the projection distribution for each symbol of the QAM alphabet are calculated as 
+
+ˆxtxi = ∑
+
+> xi∈D
+
+xiμtxi (xi) , (62) 
+
+ˆτ txi = ∑
+
+> xi∈D
+
+|xi|2μtxi (xi) − | ˆxtxi |2. (63) Then, all the means and variances of the messages ex-changed from factor nodes to variable nodes are calculated as follows 
+
+ztfj = rj −
+
+> Z
+
+∑
+
+> l=1
+
+bj,l ˆxtxl + zt−1
+
+> fj
+
+∑Zl′=1 ˆτ txl′ |bj,l ′ |2
+
+f t−1
+
+> fj
+
+, (64) 
+
+f tfj = σ2 
+
+> n
+
++ σ2 
+
+> d
+
++
+
+> Z
+
+∑
+
+> l=1
+
+|bj,l |2 ˆτ txl . (65) The pseudo-code of the proposed FOGa detection procedure is summarized in Algorithm 1. 
+
+C. Complexity Analysis 
+
+The complexity of both algorithms is evaluated in terms of floating-point operations (FLOPs) for one iteration. It is assumed that the multiplication of two complex numbers needs six FLOPs and the multiplication of a complex number and a real number needs two FLOPs. The exp( ·) operation needs one FLOP. Computing the messages μtxi→fj (xi) ∀i, ∀j in the GaBP algorithm and μtxi (xi) ∀i in the FOGa algorithm require (9 |D| − 1) ZM and (9 |D| − 1) Z FLOPs, respectively. 
+
+ˆxtxi→fj and ˆτ txi→fj ∀i, ∀j in the GaBP algorithm needs 
+
+(10 |D| − 2) ZM FLOPs and ˆxtxi and ˆτ txi ∀i in the FOGa algorithm needs (10 |D| − 2) Z FLOPs.                                                          
+
+> Table II COMMON SIMULATION PARAMETERS .Parameter Symbol Value Number of active subcarriers L64
+> Chirp Spread Size P128
+> Total number of subcarriers N128
+> Number of multicarrier symbols K8
+> Prototype-filter overlap factor O1.5
+> First L-point DAFT chirp parameter c1,L 0.1015625
+> Second L-point DAFT chirp parameter c2,L 7.7712 ×10 −5
+> First P-point DAFT chirp parameter c1,P 0.05078125
+> Second P-point DAFT chirp parameter c2,P 1.9428 ×10 −5
+> Prototype filter –Hermite Simulated Frames per SNR –5000 Table III DOUBLY -DISPERSIVE CHANNEL PARAMETERS .
+> Parameter Symbol Value
+> Number of propagation paths R4
+> Carrier frequency fc4 GHz
+> Maximum delay index ℓmax 3
+> Maximum Doppler index fmax 2
+> Carrier wavelength λc=c/f c74 .948 mm
+> Signal bandwidth B1 MHz
+> Sampling frequency fs2 MHz
+> Sampling interval Ts0.5μs
+> Maximum radial velocity vmax 2342 .09 m /s
+
+For computing the messages exchanged from factor nodes to variables nodes, ztfj →xi and f tfj →xi ∀i, ∀j in the GaBP algorithm require 13 ZM FLOPs while ztfj and f tfj ∀j in the FOGa algorithm require 12 ZM + 4 M FLOPs. Finally, for computing the messages exchanged from variables nodes to factor nodes, γtxi→fj and ζtxi →fj ∀i, ∀j in the GaBP algorithm need 18 ZM − 3Z FLOPs, while γtxi and ζtxi ∀i in the FOGa algorithm need 10 ZM + 2 Z + 2 M FLOPs. Thus, the overall computational complexity of one iteration of the GaBP and FOGa algorithms is 19 |D| ZM + 28 ZM −
+
+3Z and 22 ZM + 19 Z|D| − Z + 6 M FLOPs, respectively. Based on the parameters listed in Table II, the FOGa algorithm reduces the computational complexity to approximately 21% 
+
+and 7% of that of the GaBP algorithm for 4-QAM and 16-QAM, respectively. V. N UMERICAL RESULTS 
+
+A. Common Simulation Parameters 
+
+Unless explicitly stated otherwise, all numerical results presented in this section are obtained using the common simulation parameters summarized in Table II, and the doubly dispersive channel parameters are listed in Table III. 
+
+B. Analysis of the AF Statistics under HPA Nonlinearities 
+
+The statistical characterization developed in subsection III-C provides a framework for interpreting the influence of HPA nonlinearities on the AF. In the following, the mean and variance in (40) and (41) are analyzed by separating the con-tributions of the useful signal, governed by the Bussgang gain 
+
+κ, and the nonlinear distortion, represented by the covariance 10 
+
+matrix Rt. The AF sidelobe statistics are evaluated at a rep-resentative delay-Doppler bin, chosen as (l0, f 0) = (10 , 10) .Figs 4.a and 4.b show the decomposition of the AF mean and variance for the zero-Doppler sidelobe normalized to the corresponding reference signal sidelobe value. The figures reveal that the delay sidelobe statistics remain largely governed by the useful signal component despite the presence of HPA nonlinearities. As the nonlinearity increases, the useful contri-bution is attenuated through the Bussgang gain, whereas the distortion-induced contribution remains comparatively small. At the representative operating point, e.g. α 3 = 0 .28 fitted to the considered Rapp AM–AM response corresponding to the IBO = 4 dB operating point, the distortion-induced mean is more than 30 dB below the useful contribution, while the distortion variance is approximately 11.1 dB lower than the useful variance. Figs 5.a and 5.b show the decompositions of the zero-delay sidelobe normalized to the corresponding reference signal sidelobe value. The Doppler sidelobes exhibit a markedly different behavior. While the useful signal contribution is attenuated in the same manner through the Bussgang gain, the distortion-induced mean increases much more rapidly than in the zero-Doppler case, and the distortion exceeds the useful contribution as α3 increases. Therefore, HPA nonlinearities affect the fluctuations of the Doppler sidelobes much more strongly than those of the delay sidelobes. To compare the sensitivity of the AF cuts independently of their absolute magnitudes, Figs 6.a and 6.b present the distortion-to-signal ratios for the mean and variance. These ratios quantify the relative contribution of the nonlinear dis-tortion with respect to the useful signal component, enabling a direct comparison between the mainlobe peak and the delay-and Doppler-domain sidelobes. As the nonlinearity increases, the distortion-to-signal ratio rises for both the mean and the variance. Nevertheless, the zero-Doppler cut consistently exhibits the lowest ratios, confirming that the delay-domain sidelobes are the least sensitive to HPA distortion. In contrast, the zero-delay cut curve is closer to the mainlobe curve, particularly in terms of the mean, indicating that the Doppler-domain sidelobes experience a distortion level closer to that of the mainlobe peak. These ratios provide a statistical interpretation of the ambiguity metrics reported next. Let us recall that the Peak Sidelobe Level Ratio (PSLR) is defined as the ratio be-tween the largest sidelobe magnitude and the mainlobe peak, whereas the Integrated Sidelobe Level Ratio (ISLR) measures the ratio between the total sidelobe energy and the mainlobe energy [6]. Consequently, both metrics depend on the relative evolution of the sidelobes with respect to the mainlobe. The previous ratio results are thus reflected by the AF-related metrics presented in Table IV; the delay-domain PSLR and ISLR exhibit only marginal variations, while the largest changes are observed along the Doppler cut. Moreover, since the ISLR is determined by the expected sidelobe energy through E[|A (l, f )|2] = |μ(l, f )|2 + Σ 2(l, f ), its evolution can be explained by the combined contributions of the mean and variance derived above. In particular, the decrease in Doppler-domain ISLR reflects a nonlinear redistribution of the AF energy that reduces the sidelobe-to-mainlobe energy ratio. These results confirm that AFBM preserves its superior localization in the Doppler domain under HPA nonlinearities, whereas OFDM remains the waveform exhibiting the strongest localization in the delay domain. Fig. 7 shows the analytical zero-Doppler and zero-delay variance profiles for the nonlinear gain α3 = 0 .28 . The delay-domain structure is largely preserved, whereas the Doppler-domain variance undergoes a more noticeable redistribution around the mainlobe, consistent with the pointwise analysis and simulations. 
+
+C. Analysis of the BER under HPA Nonlinearities 
+
+The previous subsection demonstrated that the impact of HPA nonlinearities on the AF is governed by the interaction between the nonlinear distortion statistics and the AFBM modulation matrix. We now investigate whether the resulting robustness also extends to the communication performance. To evaluate the impact of HPA nonlinearities on communication performance, the AFBM receiver BER was evaluated using the standard Linear Minimum Mean Square Error (LMMSE) detector and the proposed GaBP and FOGa detectors, assuming that the receiver has perfect channel knowledge and knowledge of the Bussgang gain κ and equivalent distortion variance σ2
+
+> d
+
+.The Rapp model was considered in our simulations. Figure 8 shows the BER as a function of the IBO at a fixed Signal-to-Noise Ratio (SNR) of 15 dB and for a 4-QAM modulation. For all three detectors, the BER decreases as the IBO increases due to the HPA operating farther from saturation. Using the no-distortion result of each detector as its respective reference, the BER increase at an IBO of 1 dB is approximately 41.31% for LMMSE, 43.98% for FOGa, and 45.56% for the GaBP detector. All three detectors show similar degradation due to the HPA, but the GaBP detector outperforms the FOGa and LMMSE in scenarios with and without HPA distortion. Figs 9 and 10 show the BER as a function of SNR for 4-QAM and 16-QAM, respectively. In the low values of SNR, the distorted and non-distorted curves remain close due to the performance being mostly limited by the doubly dispersive channel interference and thermal noise. At higher SNR values, the effect of the nonlinearity becomes more apparent due to the reduction in performance being mostly dominated by the HPA distortions. Regarding the choice of detection method, while FOGa exhibits slightly worse BER performance than the GaBP detector, it requires substantially fewer computa-tions, corresponding to approximately 21% and 7% of GaBP complexity for 4-QAM and 16-QAM, respectively. This makes FOGa an attractive trade-off between detection performance and computational cost. VI. C ONCLUSION 
+
+This paper investigated the impact of HPA nonlinearities on AFBM from both sensing and communication perspec-tives. An approximate statistical characterization of the post-amplification AF was derived by exploiting the Bussgang 11                                                 
+
+> (a) Mean (b) Variance Fig. 4. Zero-Doppler (a) mean and (b) variance components, versus the nonlinear gain α3.
+> (a) Mean (b) Variance Fig. 5. Zero-delay (a) mean and (b) variance components, versus the nonlinear gain α3.Table IV PSLR AND ISLR OF THE DELAY AND DOPPLER AF CUTS BEFORE AND AFTER HPA NONLINEARITIES , IBO = 4 DB. Waveform Case Delay cut Doppler cut PSLR (dB) ISLR (dB) PSLR (dB) ISLR (dB) AFBM Input -18.76 0.03 -13.48 3.48 Output -18.81 0.14 -13.44 1.94 AFDM Input -27.04 0.00 -13.33 6.45 Output -27.29 -0.06 -13.29 4.30 OFDM Input -33.05 -4.75 -13.14 6.35 Output -33.26 -4.62 -13.34 4.32
+
+decomposition and a cubic approximation of the HPA, yielding closed-form expressions for the mean and variance of the AF. The proposed analysis showed that the effect of nonlinear distortion is governed by the interaction between the distortion statistics and the AFBM modulation matrix, explaining the different sensitivities of the delay- and Doppler-domain am-biguity characteristics. The analytical results were validated through Monte Carlo simulations and shown to accurately predict the evolution of the AF statistics as well as the resulting PSLR and ISLR. Next, a Gaussian belief propagation receiver accounting for the nonlinear distortion statistics was proposed. Numerical results over doubly dispersive chan-nels showed that the proposed detector achieves a favorable complexity–performance trade-off while confirming that the inherent properties of AFBM enable robust communication performance under HPA nonlinearities. In the follow-up, ded-icated PAPR-reduction techniques could further improve the hardware efficiency of AFBM by enabling operation at lower IBO. Moreover, the proposed distortion-aware communication receiver motivates the development of distortion-aware sens-ing receivers for enhanced sensing performance under HPA nonlinearities. 12 
+
+(a) Mean (b) Variance Fig. 6. Distortion-to-signal ratio of the mainlobe, zero-Doppler and zero-delay (a) mean and (b) variance, versus the nonlinear gain α3.(a) Zero-Doppler (b) Zero-delay Fig. 7. Variance of the (a) zero-Doppler and (b) zero-delay cuts, under HPA nonlinearities, IBO = 4 dB.       
+
+> 0123456
+> IBO [dB]
+> 10 -3
+> 10 -2
+> BER
+> LMMSE, no distortion FoGaBP, no distortion GaBP, no distortion LMMSE FoGaBP GaBP
+
+Fig. 8. Comparison of the effect of varying IBO values at a SNR of 15 dB for the considered detection schemes. 
+
+APPENDIX APROOF OF EQUATIONS (38) AND (39) To obtain closed-form expressions for the Bussgang pa-rameters, the considered Rapp HPA is approximated by an equivalent third-order polynomial over the input-amplitude range corresponding to the considered operating point. The equivalent polynomial is obtained by a least-squares fitting of its AM-AM characteristic to the Rapp response, yielding the model 
+
+y(n) = a1s(n) + a3|s(n)|2s(n),
+
+where a1 = 1, a3 = −α3, and α3 > 0 denotes the nonlinear gain coefficient [28]. Assuming that the AFBM TD signal is circularly symmetric complex Gaussian [1], its even-order moments satisfy E[|s(n)|2m] = m!σ2ms . Substituting these moments into the Bussgang decomposition yields the following, 
+
+κ = 1 − 2α3σ2 
+
+> s
+
+.
+
+The corresponding distortion component is 
+
+d(n) = y(n) − κs (n) = −α3
+
+(|s(n)|2 − 2σ2
+
+> s
+
+) s(n),
+
+with its variance expressed as 
+
+σ2 
+
+> d
+
+= E[|d(n)|2] = α23E
+
+[
+
+|s(n)|2 (|s(n)|2 − 2σ2
+
+> s
+
+)2]
+
+= 2 α23σ6 
+
+> s
+
+.
+
+REFERENCES [1] E. Gourar, H. L. Senger, G. P. Gonc ¸alves, K. R. Ranasinghe, H. S. Rou, B. S. Chang, Y. Medjahdi, G. T. F. de Abreu, and D. Le Ruyet, “On the robustness of AFBM sensing to power amplifier nonlinearities,” arXiv preprint arXiv:2606.11879 , 2026. [2] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Transactions on Communications , vol. 68, no. 6, pp. 3834–3862, 2020. 13           
+
+> 0246810 12 14 16 18 20 SNR [dB] 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER LMMSE, no distortion LMMSE, IBO = 1 dB FoGaBP, no distortion FoGaBP, IBO = 1 dB GaBP, no distortion GaBP, IBO = 1 dB
+
+(a) IBO = 1 dB           
+
+> 0246810 12 14 16 18 20 SNR [dB] 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER LMMSE, no distortion LMMSE, IBO = 4 dB FoGaBP, no distortion FoGaBP, IBO = 4 dB GaBP, no distortion GaBP, IBO = 4 dB
+
+(b) IBO = 4 dB Fig. 9. AFBM BER with 4-QAM on DD channel with the considered detection methods.           
+
+> 0246810 12 14 16 18 20 SNR [dB] 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER LMMSE, no distortion LMMSE, IBO = 1 dB FoGaBP, no distortion FoGaBP, IBO = 1 dB GaBP, no distortion GaBP, IBO = 1 dB
+
+(a) IBO = 1 dB           
+
+> 0246810 12 14 16 18 20 SNR [dB] 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER LMMSE, no distortion LMMSE, IBO = 4 dB FoGaBP, no distortion FoGaBP, IBO = 4 dB GaBP, no distortion GaBP, IBO = 4 dB
+
+(b) IBO = 4 dB Fig. 10. AFBM BER with 16-QAM on DD channel with the considered detection methods. [3] H. S. Rou, G. T. F. de Abreu, J. Choi, D. Gonz´ alez, M. Kountouris, Y. L. Guan, and O. Gonsa, “From orthogonal time–frequency space to affine frequency-division multiplexing: A comparative study of next-generation waveforms for integrated sensing and communications in doubly dispersive channels,” IEEE Signal Processing Magazine , vol. 41, no. 5, pp. 71–86, 2024. [4] H. Yin, Y. Tang, J. Xiong, F. Liu, Y. Ni, Q. Luo, R. Bomfin, M. Chafii, M. Kountouris, and C. Masouros, “From OFDM to AFDM: Enabling adaptive integrated sensing and communication in high-mobility scenar-ios,” arXiv preprint arXiv:2510.27192 , 2025. [5] H. S. Rou, G. T. F. de Abreu, E. Bj¨ ornson, S. Kim, and M. Kountouris, “The resurrection of spectrum spreading for 6G and beyond: From sinusoids to chirps,” arXiv preprint arXiv:2605.00249 , 2026. [6] H. S. Rou and G. T. F. de Abreu, “Normalized ambiguity function characteristics of OFDM, OTFS, AFDM, and CP-AFDM for ISAC,” in 
+
+ICC 2026 - IEEE International Conference on Communications . IEEE, 2026, pp. 1–6. [7] Y. Ni, F. Liu, H. Yin, Y. Tang, Y. Ma, and Z. Wang, “Ambiguity function analysis of AFDM under pulse-shaped random ISAC signaling,” IEEE Transactions on Wireless Communications , vol. 25, pp. 13 619–13 635, 2026. [8] Y. Ni, P. Yuan, Q. Huang, F. Liu, and Z. Wang, “An integrated sensing and communications system based on affine frequency division multiplexing,” IEEE Transactions on Wireless Communications , vol. 24, no. 5, pp. 3763–3779, 2025. [9] Y. Luo, Y. L. Guan, Y. Ge, D. Gonz´ alez, and C. Yuen, “A novel angle-delay-doppler estimation scheme for AFDM-ISAC system in mixed near-field and far-field scenarios,” IEEE Internet of Things Journal ,vol. 12, no. 13, pp. 22 669–22 682, 2025. [10] H. L. Senger, G. P. Gonc ¸alves, B. S. Chang, H. S. Rou, K. R. R. Ranasinghe, G. T. F. de Abreu, and D. Le Ruyet, “Affine filter bank modulation: A new waveform for high mobility communications,” in 
+
+2025 59th Asilomar Conference on Signals, Systems, and Computers .IEEE, 2025, pp. 807–811. [11] M. G. Bellanger, “Specification and design of a prototype filter for filter bank based multicarrier transmission,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP) , vol. 4, Salt Lake City, UT, USA, May 2001, pp. 2417–2420. [12] K. R. R. Ranasinghe, H. L. Senger, G. P. Gonc ¸alves, H. S. Rou, B. S. Chang, G. T. F. de Abreu, and D. Le Ruyet, “Affine filter bank modulation (AFBM): A novel 6G ISAC waveform with low PAPR and OOBE,” IEEE Transactions on Wireless Communications , vol. 25, pp. 12 754–12 769, 2026. [13] Y. Cui, H. Ding, Y. Ma, X. Li, H. Zhang, and Y. Fang, “Energy-efficient integrated sensing and communication in collaborative millimeter wave networks,” IEEE Transactions on Wireless Communications , vol. 24, no. 3, pp. 2341–2357, 2025. [14] D. Guel, “Etude de nouvelles techniques de r´ eduction du ‘‘facteur de crˆ ete’’ (PAPR) ` a compatibilit´ e descendante pour les syst` emes multipor-teuses,” Ph.D. dissertation, Universit´ e Rennes 1, 2009. [15] R. P. Junior, C. A. F. d. Rocha, B. S. Chang, and D. Le Ruyet, “A generalized DFT precoded filter bank system,” IEEE Wireless Commu-nications Letters , vol. 11, no. 6, pp. 1176–1180, 2022. [16] V. Savaux, “Special cases of DFT-based modulation and demodulation for affine frequency division multiplexing,” IEEE Transactions on Com-munications , vol. 72, no. 12, pp. 7627–7638, 2024. [17] Y. Tao, M. Wen, Y. Ge, T. Mao, Y. Tang, and A. Doosti-Aref, “Affine frequency division multiple access based on DAFT spreading for next-generation wireless networks,” IEEE Transactions on Wireless Commu-nications , vol. 25, pp. 4626–4641, 2026. [18] C. Rapp, “Effects of HPA-nonlinearity on a 4-DPSK/OFDM signal for a digital sound broadcasting system,” in Proc. 2nd European Conference 14 
+
+on Satellite Communications (ECSC-2) , Li` ege, Belgium, Oct. 1991, pp. 179–184. [19] J. J. Bussgang, “Crosscorrelation functions of amplitude-distorted Gaus-sian signals,” Research Laboratory of Electronics, Massachusetts Insti-tute of Technology, Cambridge, MA, USA, Tech. Rep. 216, Mar. 1952. [20] ¨O. T. Demir and E. Bj¨ ornson, “The Bussgang decomposition of nonlin-ear systems: Basic theory and MIMO extensions [lecture notes],” IEEE Signal Processing Magazine , vol. 38, no. 1, pp. 131–136, Jan. 2021. [21] E. Bedeer, “Ambiguity function analysis of affine frequency division multiplexing for ISAC,” in GLOBECOM 2025 - 2025 IEEE Global Communications Conference . IEEE, 2025, pp. 2850–2855. [22] F. Liu, Y. Zhang, Y. Xiong, S. Li, W. Yuan, F. Gao, S. Jin, and G. Caire, “CP-OFDM achieves the lowest average ranging sidelobe under QAM/PSK constellations,” IEEE Transactions on Information Theory , vol. 71, no. 9, pp. 6950–6967, 2025. [23] R. Haas and J.-C. Belfiore, “A time-frequency well-localized pulse for multiple carrier transmission,” Wireless Personal Communications ,vol. 5, no. 1, pp. 1–18, Jul. 1997. [24] P. Som, T. Datta, A. Chockalingam, and B. S. Rajan, “Improved large-MIMO detection based on damped belief propagation,” in 2010 IEEE Information Theory Workshop on Information Theory (ITW 2010, Cairo) ,2010, pp. 1–5. [25] T. Takahashi, S. Ibi, and S. Sampei, “Design of adaptively scaled belief in multi-dimensional signal detection for higher-order modulation,” 
+
+IEEE Transactions on Communications , vol. 67, no. 3, pp. 1986–2001, 2019. [26] T. Minka et al. , “Divergence measures and message passing,” Technical report, Microsoft Research, Tech. Rep., 2005. [27] S. Wu, L. Kuang, Z. Ni, J. Lu, D. Huang, and Q. Guo, “Low-complexity iterative detection for large-scale multiuser MIMO-OFDM systems using approximate message passing,” IEEE Journal of Selected Topics in Signal Processing , vol. 8, no. 5, pp. 902–915, 2014. [28] A. R. M. Ismail, M. Guenach, A. Sakhnini, A. Bourdoux, and H. Steen-dam, “Robustness of ISAC waveforms to power amplifier distortion,” in 
+
+2024 IEEE 4th International Symposium on Joint Communications & Sensing (JC&S) . IEEE, 2024, pp. 1–6.

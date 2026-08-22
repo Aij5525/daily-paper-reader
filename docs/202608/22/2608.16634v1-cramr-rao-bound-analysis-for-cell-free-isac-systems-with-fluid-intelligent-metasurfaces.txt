@@ -1,0 +1,890 @@
+Title: Cramér-Rao Bound Analysis for Cell-Free ISAC Systems with Fluid Intelligent Metasurfaces
+
+URL Source: https://arxiv.org/pdf/2608.16634v1
+
+Published Time: Tue, 18 Aug 2026 02:30:34 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Cramér-Rao Bound Analysis for Cell-Free ISAC Systems with Fluid Intelligent Metasurfaces 
+
+Changhao He, Asmaa Abdallah, Ahmed M. Eltawil, 
+
+King Abdullah University of Science and Technology (KAUST), Saudi Arabia {changhao.he, asmaa.abdallah, ahmed.eltawil}@kaust.edu.sa 
+
+Abstract —Fluid intelligent metasurface (FIM) is an emerging antenna architecture that continuously reshapes its physical ge-ometry to optimize wireless performance. While existing studies on FIM-aided integrated sensing and communication (ISAC) rely on co-located single-base-station (BS) deployments, they fundamentally underutilize FIM’s morphological flexibility due to restricted observation angles. In this paper, we investigate a FIM-augmented cell-free ISAC architecture, where distributed access points (APs) collaboratively observe a target from diverse angles. We derive the complete Fisher information matrix for target angle estimation and obtain a closed-form localization CRB that explicitly quantifies the angular diversity gain. By analyzing the block structure of the Fisher information matrix, we uncover three cell-free-specific phenomena: (i) cross-AP infor-mation coupling, (ii) multiplicative Tx–Rx FIM coupling, and (iii) angular diversity amplification. Under a 28 GHz configuration with four APs and eight FIM elements per AP, our analysis shows that distributed angular diversity amplifies the FIM morphing gain to 15.8 dB, compared to only 0.4 dB in a single-AP pair deployment with the same total antenna count. We further propose an alternating optimization algorithm for joint beamforming and FIM shape design via semidefinite relaxation whose tightness is formally proved. Numerical results confirm that the proposed cell-free FIM-ISAC architecture achieves a 4.5 dB localization CRB reduction over the single-AP fixed-array baseline at 10 dB sensing SNR while maintaining communication quality-of-service constraints across the entire Pareto frontier. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communication (ISAC) has become a cornerstone of next-generation wireless systems, enabling a single infrastructure to serve both data delivery and radar-like target sensing [1], [2]. A key architectural enabler is the cell-free network, where geographically distributed access points (APs) jointly serve users and sense targets, offering macro-diversity and reduced path loss [3]. Recent works have explored cell-free ISAC, demonstrating the potential of distributed multi-static sensing [4], [5], where multiple APs observe a target from diverse angles analogous to distributed MIMO radar [6]. Furthermore, programmable apertures, such as reconfigurable intelligent surfaces (RIS), have been exten-sively deployed to optimize phase shifts for joint localization and communication [7]. In parallel, fluid intelligent metasurface (FIM) also termed fluid antenna [8] or movable antenna [9] has emerged as a flex-ible antenna architecture [10]. Unlike fixed-geometry arrays, FIM can continuously reconfigure the physical positions of its radiating elements, thereby reshaping the array manifold in real time. Recent studies have demonstrated that FIM achieves a 3 dB power reduction for multi-user communication [10], doubles MIMO capacity [11], [12]. For sensing, FIM enables adaptive beampattern design that improves angular resolu-tion [13], with extensions to wideband systems [14]. The intersection of FIM and ISAC has attracted growing interest. In [15], the first CRB analysis for FIM-enabled ISAC is provided, deriving a closed-form angle-estimation CRB that accounts for FIM shape uncertainty and proposing a joint beamforming and FIM shape optimization algorithm. However, their analysis is restricted to a single co-located BS, where all antennas share a common direction to the target. A key insight from [13], [16] is that the angle-estimation CRB is inversely proportional to the variance of physical element positions, not to any phase-domain parameter. Con-sequently, programmable surfaces that only reconfigure phase shifts [7] leave the array geometry unchanged and cannot reduce the geometric component of the sensing CRB. This distinction is critical in cell-free networks: with APs dis-tributed around a service area, some APs inevitably observe the target near endfire, where conventional ULA angular sensitivity collapses, precisely the regime where FIM morph-ing, by physically repositioning array elements, can recover the lost aperture and restore sensing performance [17]. FIM addresses this by physically repositioning elements at each AP to maximize the local steering-vector derivative, converting otherwise ineffective endfire APs into useful sensing nodes, a per-AP adaptability that phase-only surfaces cannot provide. While cell-free architectures and FIM have individually proven transformative for ISAC, their amalgamation, specif-ically exploiting distributed angular diversity for FIM shape optimization, remains largely unexplored. We address this gap by recognizing that localization accuracy in ISAC systems is jointly governed by angle estimation quality and geometric diversity. To enhance both, we propose a FIM-augmented cell-free ISAC architecture in which distributed APs, each equipped with a controllable FIM, collaboratively sense a target from diverse directions. We derive the complete angle-domain Fisher information matrix, revealing cross-AP cou-pling and multiplicative Tx–Rx effects absent in single-AP systems, and obtain a closed-form localization CRB that ex-plicitly quantifies angular diversity. Building on this analysis, we develop a joint beamforming and FIM shape optimization framework that directly minimizes the localization CRB under communication constraints, solved via alternating optimiza-tion with SDR whose tightness is formally established. arXiv:2608.16634v1 [cs.IT] 17 Aug 2026 Fig. 1. FIM-augmented cell-free ISAC system. 
+
+II. S YSTEM MODEL 
+
+We consider a cell-free ISAC system consisting of Mt
+
+transmitting access points (Tx APs) and Mr receiving access points (Rx APs) distributed over a geographical area and coordinated by a central processing unit (CPU), as illustrated in Fig.1. Each AP is connected to the CPU via a reliable backhaul link, enabling cooperative signal processing and joint sensing operations. The positions of the Tx and Rx APs are denoted by p(Tx)  
+
+> mt
+
+∈ R2 and p(Rx)  
+
+> mr
+
+∈ R2, respectively, where mt = 1 , . . . , M t and mr = 1 , . . . , M r . Each Tx AP is equipped with an Nt-element 1-Dimensional (1D) FIM array, and each Rx AP with an Nr -element 1D FIM array. The positions of FIM elements at each AP can be independently adjusted within a bounded region, as detailed in Section II-A1. The Mt Tx APs simultaneously serve Kc single-antenna downlink users while, together with the Mr Rx APs, also sense a point target located at p0 = [ x0, y 0]⊤.
+
+A. Sensing Model 
+
+Due to the distributed AP deployment, each AP observes the target from a different spatial direction. The resulting angle of departure (AoD) from Tx AP mt and the angle of arrival (AoA) at Rx AP mr are given by 
+
+θ(AoD ) 
+
+> mt
+
+= ∠(p0 − p(Tx ) 
+
+> mt
+
+), θ(AoA ) 
+
+> mr
+
+= ∠(p0 − p(Rx ) 
+
+> mr
+
+). (1) Unlike in a single-AP system where all antennas share a common target direction, the distributed geometry ensures that each AP observes the target from a distinct angle θm,providing Mt + Mr independent angular observations. 
+
+1) FIM-Augmented Array Response 
+
+Let ζmt = [ ζmt,1, . . . , ζ mt,N t ]⊤ denote the displacement vector of the FIM elements at the transmit AP mt, where each element displacement is bounded as |ζmt,n | ≤ ˜ζ for 
+
+n = 1, . . . , N t. The morphing range ˜ζ typically lies be-tween 0.5λ and 2λ [10], [13], corresponding to millimeter-scale adjustments at mmWave frequencies. Similarly, for the receive AP mr , the displacement vector is defined as 
+
+ξmr = [ ξmr ,1, . . . , ξ mr ,N r ]⊤, with each displacement satis-fying |ξmr ,n | ≤ ˜ξ.The FIM array response at Tx AP mt, assuming half-wavelength element spacing, is [amt ]n = 1√Nt
+
+ej ϕ mt,n , ∈
+
+CNt×1, where the phase of the n-th element is [10] 
+
+ϕmt,n = ( n−1) π sin θmt + 2πλ ζmt,n cos θmt . (2) The first term corresponds to the standard half-wavelength ULA, while the latter captures FIM’s physical shape defor-mation; setting ζmt = 0 recovers the conventional ULA response. The Rx AP array response amr follows the same structure with mt, Nt, and ζmt replaced by mr , Nr , and ξmr ,respectively. To characterize angular sensitivity, we define the phase-rate 
+
+[dm]n ≜ ∂ϕ m,n /∂θ m for a generic AP m ∈ { mt, m r } [17]: 
+
+[dm]n = ( n − 1) π cos θm − 2πλ ζm,n sin θm, (3) so that ˙am ≜ ∂am/∂θ m = j diag( dm) am. The quantity 
+
+|[dm]n| measures n th element angular sensitivity; FIM mor-phing modifies this via the ζm,n sin θm term. 
+
+2) Bistatic Sensing Channels 
+
+Since the Tx and Rx APs are spatially separated, the system operates in multi-bistatic configuration. The sensing channel from Tx AP mt to Rx AP mr via the target is 
+
+Gmt,m r = αmt,m r amr (θmr , ξmr ) aHmt (θmt , ζmt ), (4) where αmt,m r is the complex path gain. The received sensing signal at Rx AP mr is Ymr = PMt 
+
+> mt=1
+
+Gmt,m r Xmt + Nmr ,where Xmt ∈ CNt×L denote the transmitted waveform matrix from Tx AP mt, where L is the number of snapshots. Nmr ∼CN (0 , ς 2 
+
+> mr
+
+INr ) denotes additive complex Gaussian noise. 
+
+B. Communication Model 
+
+Let hk,m t ∈ CNt denote the downlink channel from Tx AP mt to user k, which incorporates the FIM-augmented array response at AP mt. Each Tx AP applies a per-user beamform-ing vector wk,m t ∈ CNt , so that the aggregate transmit signal at AP mt is xmt = PKc 
+
+> k=1
+
+wk,m t sk +x(s) 
+
+> mt
+
+, where sk is the data symbol for user k with E[|sk|2] = 1 , and x(s) 
+
+> mt
+
+is the sensing waveform component. The received signal at user k is yk =PMt 
+
+> mt=1
+
+hHk,m t wk,m t sk + P 
+
+> j̸=k
+
+PMt 
+
+> mt=1
+
+hHk,m t wj,m t sj +
+
+PMt 
+
+> mt=1
+
+hHk,m t x(s) 
+
+> mt
+
++ nk, where nk ∼ CN (0 , σ 2 
+
+> c
+
+) is receiver noise. Let R(s) 
+
+> mt
+
+= E[x(s) 
+
+> mt
+
+x(s)Hmt ] denote the sensing waveform covariance at Tx AP mt. Define Sk = P 
+
+> mt
+
+hHk,m t wk,m t
+
+> 2
+
+,
+
+Ik = P 
+
+> j̸=k
+
+P 
+
+> mt
+
+hHk,m t wj,m t 
+
+> 2
+
++ P 
+
+> mt
+
+hHk,m t R(s) 
+
+> mt
+
+hk,m t , the communication SINR at user k is SINR k = Sk
+
+  Ik + σ2
+
+> c
+
+.
+
+III. CRB A NALYSIS 
+
+Building on the signal model, we now derive the Fisher information matrix and the resulting CRB for joint angle estimation and target localization. The full angle parameter vector is θ = [ θ(AoD )1 , . . . , θ (AoD ) 
+
+> Mt
+
+, θ (AoA )1 , . . . , θ (AoA ) 
+
+> Mr
+
+]⊤ ∈ RK ,where K = Mt + Mr . The CRB for estimating θ is governed by the Fisher information matrix derived below. 
+
+A. Fisher Information Matrix 
+
+Applying the Slepian–Bangs formula [17], [18] to the received signal model, the (i, j )-th element of the Fisher information matrix I(θ) ∈ RK×K is 
+
+[I(θ)] ij = X
+
+> mr
+
+2
+
+ς2
+
+> mr
+
+Re 
+
+
+
+tr 
+
+ ∂SHmr
+
+∂θ j
+
+∂Smr
+
+∂θ i
+
+ 
+
+, (5) where Smr = P 
+
+> mt
+
+αmt,m r amr aHmt Xmt ∈ CNr ×L is the noise-free received signal, and Xmt ∈ CNt×L is the trans-mitted waveform matrix with L denoting the number of snapshots. To evaluate (5), we compute the partial deriva-tives of Smr with respect to the angle parameters. Dif-ferentiating with respect to an AoD parameter θmt yields 
+
+∂Smr /∂θ mt = αmt,m r amr ˙aHmt Xmt , while differentiating with respect to an AoA parameter θmr gives ∂Smr /∂θ mr =P 
+
+> mt
+
+αmt,m r ˙amr aHmt Xmt . Substituting into (5) and group-ing by parameter type, the FIM decomposes into I(θ) = I(dd ) I(da ) 
+
+> I(da )⊤I(aa )
+
+,where I(dd ), I(aa ), I(da ) are defined in the sequel. 
+
+AoD–AoD block I(dd ) ∈ RMt×Mt :
+
+I(dd )
+
+> mt,m ′
+> t
+
+=
+
+> Mr
+
+X 
+
+> mr=1
+
+2
+
+ς2
+
+> mr
+
+Re αmt,m r α∗ 
+
+> m′
+> t,m r
+
+Qmt,m ′ 
+
+> t
+
+, (6) where mt, m ′ 
+
+> t
+
+∈ { 1, . . . , M t} index the Tx APs, Qmt,m ′ 
+
+> t
+
+=
+
+aHm′
+
+> t
+
+Dm′ 
+
+> t
+
+RHmt,m ′
+
+> t
+
+Dmt amt , Dmt = diag( dmt ), and Rmt,m ′ 
+
+> t
+
+=
+
+Xmt XHm′
+
+> t
+
+.For mt̸ = m′
+
+> t
+
+, the off-diagonal terms I(dd )
+
+> mt,m ′
+> t
+
+represent 
+
+cross-AP Fisher information coupling , absent in single-AP systems ( Mt = 1 ) where I(dd ) reduces to a scalar. These terms arise because the same Rx AP simultaneously observes target reflections from multiple Tx APs; non-zero waveform cross-correlation ( Rmt,m ′
+
+> t
+
+̸ = 0) couples their angular information, with the coupling strength governed by αmt,m r α∗ 
+
+> m′
+> t,m r
+
+.
+
+AoA–AoA block I(aa ) ∈ RMr ×Mr is always diagonal :
+
+I(aa )  
+
+> mr,m r
+
+= 2
+
+ς2
+
+> mr
+
+γmr (ξmr ) βmr (ζmt ), (7) where γmr (ξmr ) = aHmr D2 
+
+> mr
+
+amr is the Rx effective aperture (depends only on Rx FIM shape ξmr ), and βmr (ζmt ) =P
+
+> mt
+
+P
+
+> m′
+> t
+
+α∗ 
+
+> mt,m r
+
+αm′ 
+
+> t,m r
+
+aHmt Rmt,m ′ 
+
+> t
+
+am′ 
+
+> t
+
+is the coherent beam gain, which depends on all Tx FIM shapes. AoA estimation accuracy at each Rx AP involves a Tx–Rx FIM coupling : Tx shapes affect AoA information through 
+
+βmr , which scale as M 2 
+
+> t
+
+with coherent combining. This multiplicative structure means that optimizing Tx FIM shapes benefits AoA estimation at all Rx APs simultaneously. The effective Rx aperture γmr depends solely on the local Rx FIM shape ξmr , enabling fully decentralized Rx-side optimization without inter-AP coordination. 
+
+AoD–AoA cross block I(da ) ∈ RMt×Mr is defined as: 
+
+I(da )
+
+> m′
+> t,m ′
+> r
+
+= 2
+
+> ς2
+> m′
+> r
+
+Re 
+
+
+
+jμ m′
+
+> r
+
+X
+
+> mt
+
+α∗ 
+
+> mt,m ′
+> r
+
+αm′
+
+> t,m ′
+> r
+
+× aHmt Rmt,m ′ 
+
+> t
+
+Dm′ 
+
+> t
+
+am′
+
+> t
+
+
+
+, (8) where μmr = aHmr Dmr amr is the Rx directional gain. 
+
+B. Localization CRB via Jacobian 
+
+To obtain the position-domain CRB, we apply the trans-formation I(p0) = J⊤I(θ)J, where the Jacobian J ∈ RK×2
+
+has entries ∂θ m/∂x 0 = −(y0 − ym)/r 2 
+
+> m
+
+and ∂θ m/∂y 0 =(x0 − xm)/r 2
+
+> m
+
+, with rm = ∥p0 − pm∥. The localization CRB is CRB (p0) = tr[ I−1(p0)] in [m2].The Jacobian J has K = Mt +Mr rows from diverse direc-tions, yielding a well-conditioned I(p0).Moreover, from (3), the FIM-induced shift ζm,n sin θm depends on the local angle 
+
+θm, enabling each AP to independently tune its FIM shape to its own observation direction. This angular diversity gain can be quantified in closed form under orthogonal waveforms: Rmt,m ′ 
+
+> t
+
+= 0 for 
+
+mt̸ = m′
+
+> t
+
+, I(θ) reduces to a diagonal matrix with en-tries Im ≜ [I(θ)] m,m . Since each Jacobian row takes the form Jm = r−1 
+
+> m
+
+[− sin θm, cos θm]⊤, the 2 × 2 position FIM becomes I(p0) = P
+
+> m
+
+(Im/r 2
+
+> m
+
+) umu⊤ 
+
+> m
+
+with um =[− sin θm, cos θm]⊤, and the localization CRB reduces to 
+
+CRB( p0) = 
+
+P 
+
+> m
+
+Im/r 2
+
+> m
+
+P 
+
+> m<m ′
+
+(ImIm′ /r 2
+
+> m
+
+r2 
+
+> m′
+
+) sin 2(θm − θm′ ) , (9) where Im is the per-AP angular Fisher information. The 
+
+sin 2(θm − θm′ ) terms in the denominator show that more diverse observation angles directly lower the CRB. This leads to angular diversity amplification , where the localization information scales with both per-AP Fisher information and the pairwise angular separation between APs. For co-located APs with θm = θ ∀m, the denominator vanishes, confirming that a single observation angle cannot resolve 2D position. IV. J OINT BEAMFORMING AND FIM O PTIMIZATION 
+
+A. Problem Formulation 
+
+The CRB analysis in Section III showed that localization accuracy in the proposed cell-free FIM-ISAC system is de-termined by two coupled factors: i) the quality of the dis-tributed AoD/AoA estimates, captured by the angular Fisher information matrix I(θ), and ii) the geometric diversity with which these angles are mapped into the target position domain through the Jacobian J. The cell-free deployment inherently provides the second ingredient by creating diverse observation directions across APs. The remaining design question is therefore how to actively improve the first ingredient, namely the quality of angle estimation at the distributed Tx/Rx APs. Since the CRB serves as a tight lower bound on the mean-squared error of any unbiased estimator [18], minimizing the CRB at the design stage is equivalent to maximizing the best attainable estimation accuracy for angles and, consequently, for target position. To this end, we jointly optimize the Tx beamforming matrices {Wmt } = {[w1,m t , . . . , wKc,m t ]} and FIM shapes 
+
+{ζmt , ξmr } to minimize the localization CRB subject to per-AP power and communication SINR constraints: 
+
+min     
+
+> {Wmt},{ζmt,ξmr }
+
+tr I−1(p0) (10a) s.t. SINR k ≥ Γk, ∀ k = 1 , . . . , K c, (10b) 
+
+∥Wmt ∥2 
+
+> F
+
+≤ Pmt , ∀ mt, (10c) 
+
+|ζmt,n | ≤ ˜ζ, |ξmr ,n | ≤ ˜ξ, (10d) where I(p0) = J⊤I(θ)J is the position-domain FIM obtained via the Jacobian transformation in Section III-C, Γk is the minimum SINR requirement for user k, and Kc is the number of communication users. Problem (10) is non-convex due to the coupled dependence of I(p0) on both Wmt (through Rmt,m ′ 
+
+> t
+
+= Wmt WHm′
+
+> t
+
+) and FIM shapes (through am and dm). We propose an alternating optimization (AO) framework that decomposes the problem into tractable subproblems. 
+
+B. Subproblem 1: Tx FIM Shape Optimization ζmt
+
+For fixed {Wmt } and {ξmr }, each Tx FIM shape ζmt is optimized via gradient projection. Since FIM-shape depen-dence enters through dmt and amt , the gradient has the form 
+
+∂CRB 
+
+∂ζ mt,n 
+
+= − tr 
+
+
+
+I−1(p0) ∂I(p0) 
+
+> ∂ζ mt,n
+
+I−1(p0)
+
+
+
+, (11) 
+
+where ∂I(p0)/∂ζ mt,n is computed in closed form from (6)– (8) using ∂d mt,n /∂ζ mt,n = −(2 π/λ ) sin θmt .For the sensing-only case, the beamforming reduces to isotropic waveforms, the per-element problem admits a closed-form solution: ζ∗ 
+
+> mt,n
+
+= arg max |ζ|≤ ˜ζ d2
+
+> mt,n
+
+, which always occurs at ζ∗ 
+
+> mt,n
+
+∈ {− ˜ζ, +˜ζ}. Each element is updated via projected gradient descent initialized at the boundary solution: 
+
+ζ(ℓ+1)  
+
+> mt,n
+
+= P[−˜ζ, ˜ζ]
+
+
+
+ζ(ℓ) 
+
+> mt,n
+
+− η ∂ CRB 
+
+∂ζ mt,n 
+
+
+
+, (12) where η > 0 is the step size, the gradient ∂CRB /∂ζ mt,n is given by (11), and P[−˜ζ, ˜ζ](x) = min( ˜ζ, max( −˜ζ, x )) projects onto the feasible interval. 
+
+C. Subproblem 2: Rx FIM Shape Optimization ξmr
+
+Since I(aa ) is diagonal (see (7)), each Rx AP’s FIM shape 
+
+ξmr can be optimized independently by maximizing the effective Rx aperture γmr (ξmr ) = aHmr D2 
+
+> mr
+
+amr . This is structurally identical to Subproblem 1 and admits the same boundary solution. 
+
+D. Subproblem 3: Beamforming under SINR Constraints 
+
+For fixed FIM shapes, the optimization over {Wmt } be-comes 
+
+min   
+
+> {Wmt}
+
+tr[ I−1(p0)] s.t. (10b)–(10c) . (13) We adopt semidefinite relaxation (SDR). Define the stacked beamforming vector ˜wk = [ w⊤
+
+> k, 1
+
+, . . . , w⊤ 
+
+> k,M t
+
+]⊤ ∈ CMtNt , the aggregate channel ˜hk = [ h⊤
+
+> k, 1
+
+, . . . , h⊤ 
+
+> k,M t
+
+]⊤ ∈ CMtNt , and let 
+
+Qk = ˜ wk ˜wHk ∈ CMtNt×MtNt ⪰ 0. Dropping the rank-one 
+
+Algorithm 1 Joint Beamforming and FIM Shape Optimization  
+
+> 1:
+
+Initialize: ζ(0)  
+
+> mt
+
+= 0, ξ(0)  
+
+> mr
+
+= 0, W(0)  
+
+> mt
+
+∝ INt 
+
+> 2:
+
+for ℓ = 1 , 2, . . . , L max do  
+
+> 3:
+
+Tx FIM: Update ζ(ℓ) 
+
+> mt
+
+via gradient projection (11), ∀mt 
+
+> 4:
+
+Rx FIM: Update ξ(ℓ) 
+
+> mr
+
+by maximizing γmr , ∀mr 
+
+> 5:
+
+Beamforming: Solve (13) by SDR to obtain W(ℓ) 
+
+> mt
+
+, ∀mt 
+
+> 6:
+
+Compute CRB (ℓ) = tr[ I−1(p0)]  
+
+> 7:
+
+if |CRB (ℓ) − CRB (ℓ−1) |/CRB (ℓ−1) < ϵ then  
+
+> 8:
+
+break  
+
+> 9:
+
+end if  
+
+> 10:
+
+end for  
+
+> 11:
+
+Output: {ζ∗ 
+
+> mt
+
+, ξ∗ 
+
+> mr
+
+, W∗ 
+
+> mt
+
+}
+
+constraint rank( Qk) = 1 , problem (13) is relaxed to 
+
+min   
+
+> {Qk⪰0}
+
+tr I−1(p0) (14a) s.t. ˜hHk Qk ˜hk ≥ Γk
+
+X 
+
+> j̸=k
+
+˜hHk Qj ˜hk + σ2
+
+> c
+
+
+
+, ∀k, (14b) 
+
+> Kc
+
+X
+
+> k=1
+
+tr( Emt Qk) ≤ Pmt , ∀mt, (14c) where Emt = diag( 0, . . . , INt , . . . , 0) selects AP mt’s block, and I(p0) depends on {Qk} through the aggregate waveform covariance ¯R = P 
+
+> k
+
+Qk. Since the objective is convex in 
+
+{Qk} and all constraints are linear, (14) is a semidefinite program solvable in polynomial time. 
+
+Proposition 1 (SDR Tightness): If Slater’s condition holds for (14) and every per-AP power constraint (14c) is active at the optimum, then rank( Q∗
+
+> k
+
+) = 1 for all k = 1 , . . . , K c.
+
+Proof: Let λk ≥ 0, μmt ≥ 0, and Φk ⪰ 0 be the optimal dual variables for constraints on Qk respectively. Let A ≜ G +PKc 
+
+> j=1
+
+λj ˜hj ˜hHj + PMt 
+
+> mt=1
+
+μmt Emt , where G = ∇ ¯R tr[ I−1(p0)] ⪰
+
+0 is the sensing objective gradient. The Karush–Kuhn–Tucker con-dition ∂L/∂ Qk = 0 yields 
+
+Φk = A − λk (1 + Γ −1 
+
+> k
+
+) ˜hk ˜hHk . (15) 
+
+Step 1 ( A ≻ 0): Since every power budget is fully consumed, 
+
+μ∗ 
+
+> mt
+
+> 0 for all mt, so P 
+
+> mt
+
+μmt Emt ≻ 0. As G ⪰ 0 and 
+
+P 
+
+> j
+
+λj ˜hj ˜hHj ⪰ 0, we have A ≻ 0.
+
+Step 2 ( rank( Q∗ 
+
+> k
+
+) = 1 ): Let ck = λk (1+Γ −1 
+
+> k
+
+) ≥ 0. Since A ≻ 0
+
+and ck ˜hk ˜hHk has rank one, Φk in (15) satisfies dim(null( Φk )) ≤ 1.Complementary slackness Φk Q∗ 
+
+> k
+
+= 0 then gives rank( Q∗ 
+
+> k
+
+) ≤ 1,and SINR feasibility ensures Q∗
+
+> k
+
+̸ = 0, hence rank( Q∗ 
+
+> k
+
+) = 1 .
+
+E. Overall AO Algorithm 
+
+Algorithm 1 summarizes the proposed AO framework. Each subproblem either admits a closed-form solution (FIM shapes) or is a convex program (beamforming SDR), ensuring that the objective is non-increasing across iterations and convergence to a stationary point is guaranteed. 
+
+Complexity : See Remark 2 below for detailed analysis. 
+
+Remark 1 (Sensing-only case): When no communication constraints are present ( Kc = 0), the beamforming sub-problem reduces to isotropic power allocation Wmt =pPmt /N t INt , and the FIM shapes admit boundary solutions as described in Subproblem 1. This regime is used in Figs. 2-5 -10 0 10 20 30 
+
+> Sensing SNR (dB)
+
+10 0
+
+10 2                                      
+
+> Average angle RMSE (degree)
+> 15.8 dB
+> CF + Optimized FIM CF + Random FIM CF + Fixed array SA + FIM SA + Fixed Fig. 2. Per-angle RMSE vs. sensing SNR. 00.5 11.5 2
+> Morphing range
+> 10 -1
+> 10 0
+> 10 1
+> Average angle RMSE (deg)
+> CF + FIM SA + FIM CF fixed SA fixed Fig. 3. Angle RMSE vs. morphing range ˜ζ/λ .-10 010 20 30
+> Sensing SNR (dB)
+> 10 -2
+> 10 -1
+> 10 0
+> 10 1
+> Localization RMSE (m)
+> 4.5 dB
+> CF + FIM CF + Fixed SA + FIM SA + Fixed
+> 10 0.3 0.4 0.5 0.6 Fig. 4. Localization RMSE vs. SNR. 2345678
+> Number of APs per role
+> 10 -1
+> 10 0
+> Localization RMSE (m)
+> CF + FIM CF + Random FIM CF + Fixed array SA + FIM
+> Fig. 5. Localization RMSE vs. number of APs 0123456
+> Communication sum-rate (bps/Hz)
+> 10 0
+> 10 1
+> Localization RMSE (m)  CF + FIM CF + Fixed SA + FIM Fig. 6. Localization RMSE vs. sum-rate. Peak: 17.3% (60 deg) Same-side Targets Opposite
+> Target angle separation (degrees)
+> 020 40 60 80
+> Sensitivity gain (%)
+> 0510 15 Fig. 7. Sensitivity gain vs. target angle separation
+
+to isolate the fundamental sensing gains; the ISAC trade-off is evaluated separately in Fig. 6. 
+
+Remark 2 (Convergence speed): In the sensing-only regime, each FIM element’s optimal displacement is a boundary solution ζ∗ 
+
+> m,n
+
+∈ {− ˜ζ, +˜ζ} (cf. Subproblem 1), because d2
+
+> m,n
+
+is monotonic in |ζm,n | for any fixed θm. Consequently, the AO reduces to MtNt + Mr Nr independent binary decisions, each requiring a single function evaluation. Since inter-AP FIM coupling is weak (different APs contribute nearly indepen-dently to the block-diagonal FIM), one AO iteration suffices to place most elements at their correct boundary. The total per-iteration complexity is O(MtNt +Mr Nr ) for FIM shapes plus O(K1.5 
+
+> c
+
+(MtNt)3.5) for the SDP beamforming step when SINR constraints are active. V. S IMULATION RESULTS 
+
+We consider a 100 ×100 m 2 area with Mt = Mr = 4 APs in a circular layout, each with Nt = Nr = 8 FIM elements (see Fig. 1). The carrier frequency is 28 GHz ( λ ≈ 10 .7 mm), the morphing range is ˜ζ = 0 .5λ, and waveforms use partial cross-correlation ( ρ = 0 .3). The single-AP pair (SA) baseline uses the same total antenna count ( 4 × 8 = 32 per side) and total power, with Tx AP and Rx AP separated by 80 m. In Figs. 2–5, we isolate the fundamental sensing CRB gains using isotropic beamforming ( Kc = 0 ); the ISAC trade-off under communication constraints is evaluated in Fig. 6, and the extension to multi-target scenarios is examined in Fig. 7. All CRB curves are averaged over 200 independent channel realizations. Fig. 2 compares the per-angle RMSE across architectures. The single-AP baseline, which reduces to the co-located FIM-ISAC setting of [15] with a 32-element coherent array, achieves the lowest absolute angle RMSE because it provides roughly 18 dB more aperture gain than any individual 8-element cell-free AP. However, the key comparison is the marginal FIM morphing gain: in cell-free, optimized FIM reduces RMSE by 15.8 dB over fixed arrays, whereas the “SA + FIM” and “SA + Fixed” curves nearly overlap (0.4 dB gap). This 15.4 dB amplification arises because each distributed AP observes a distinct target angle, enabling independent per-AP shape optimization via (3), while co-located antennas sharing a common angle gain negligibly from morphing. Among cell-free curves, random FIM shapes already capture 10.5 dB of the 15.8 dB gain; the remaining 5.3 dB confirms the value of Algorithm 1’s optimization. Fig. 3 illustrates how RMSE varies with the FIM morphing range at SNR ≃ 10 dB. For cell-free, RMSE decreases steadily as ˜ζ increases from 0 to 2 λ, confirming that larger morphing flexibility translates directly to better sensing. The single-AP curve, in contrast, remains nearly flat, all elements at the same angle produce similar phase-rate improvements from morphing, yielding diminishing returns. Fig. 4 presents the localization RMSE, which is the most practically relevant metric. Cell-free + FIM consistently achieves the lowest RMSE across all SNR values, with a 4.5 dB advantage over the single-AP fixed-array baseline at 10 dB SNR (0.29 m vs. 0.49 m). This gain reflects the 
+
+combined benefit of distributed angular diversity (cell-free) and adaptive shape optimization (FIM) over a conventional co-located system. Fig. 5 evaluates localization RMSE as the number of cell-free APs increases, each with Nt = Nr = 16 elements. The SA baseline concentrates the equivalent total count ( Ntot =4×16 = 64 ) at a single Tx/Rx pair and is therefore independent of M (horizontal line). Cell-free matches SA at M = 3 
+
+despite using fewer total antennas, and dominates for M ≥ 4TABLE I PERFORMANCE COMPARISON 
+
+Scheme Angle Loc. RMSE FIM gain 
+
+RMSE ( ◦) (m) (dB) CF + Optimized FIM 1.05 0.29 15.8 CF + Random FIM 1.99 0.34 10.5 CF + Fixed array 6.70 0.36 0 (ref.) SA + FIM 0.30 0.41 0.4 SA+ Fixed 0.31 0.49 0 (ref.) 
+
+CF amplification ∼15.4dB (15.8dB / 0.4dB) 
+
+CF+FIM vs. SA+Fixed 4.5 dB (0.29 m vs. 0.49 m) 
+
+where resources are equal or greater, confirming that angular diversity outweighs coherent aperture gain. Fig. 6 addresses the fundamental ISAC trade-off by sweep-ing the per-user SINR threshold Γk in problem (10). Each AP first allocates the minimum power needed to satisfy Γk
+
+via MRT beamforming for Kc = 2 users, then devotes the remaining power to isotropic sensing. As Γk increases, the communication sum-rate improves but the localization RMSE degrades due to reduced sensing power. Cell-free + FIM consistently dominates the fixed-array baseline across the entire Pareto frontier, confirming that FIM shape optimiza-tion provides a uniform sensing benefit without sacrificing communication performance. Table I summarizes the key performance metrics at 10 dB SNR for all architectures. 
+
+Remark 3 (Extension to Multi-Target Scenarios): While the derived closed-form CRB focuses on a single target, the proposed architecture inherently scales to multi-target ISAC. For Q targets, the parameter space expands to θ ∈ RQK ,introducing cross-target interference blocks in the FIM. How-ever, the physical flexibility of FIM can mitigate this. As a preliminary validation, Fig. 7 evaluates the sensitivity gain of a dual-target-optimized FIM over a fixed ULA as a function of the target angle separation |θ2 − θ1|. For each separation, the FIM elements are independently shifted to boundary solutions that maximize the sum of phase-rates at both target angles. The gain increases with separation, peaking at 17.3% for a 60 ◦ separation, confirming that FIM morphing is most effective when targets are well-separated angularly. Beyond 
+
+60 ◦, the gain decreases as the two targets impose increasingly opposing displacement requirements on shared elements. This validates that the local FIM morphing gain can be leveraged for multi-target resolution, laying a foundation for future QK -dimensional CRB analysis. VI. C ONCLUSION 
+
+This paper investigated FIM-augmented cell-free ISAC sys-tems and revealed that localization performance is fundamen-tally governed by the interplay between angular estimation accuracy and geometric diversity. By deriving a closed-form localization CRB, we showed that distributed sensing not only provides multiple observation angles but also ampli-fies the impact of FIM-induced angular information, thereby overcoming the geometric limitations of conventional single-AP architectures. Building on this insight, we proposed a joint beamforming and FIM shape optimization framework that directly minimizes localization error under communica-tion constraints, and validated its effectiveness through ISAC Pareto trade-off analysis. Future work includes extending the framework to multi-target dynamic tracking and experimental validation with practical FIM hardware prototypes. VII. A CKNOWLEDGEMENT 
+
+The authors would like to acknowledge the support and detailed guidance of Dr. Asmaa Abdallah, Prof. Ahmed M. Eltawil, and the Communications and Computational Systems Laboratory (CCSL) at KAUST. REFERENCES [1] F. Liu et al. , “Integrated Sensing and Communications: Towards Dual-Functional Wireless Networks for 6G and Beyond,” IEEE Journal on Selected Areas in Communications , vol. 40, no. 6, pp. 1728–1767, 2022. [2] F. Liu, Y.-F. Liu, A. Li, C. Masouros, and Y. C. Eldar, “Cramér-Rao Bound Optimization for Joint Radar-Communication Beamforming,” 
+
+IEEE Transactions on Signal Processing , vol. 70, pp. 240–253, 2022. [3] U. T. Demir, E. Björnson, and L. Sanguinetti, “Foundations of User-Centric Cell-Free Massive MIMO,” Foundations and Trends in Signal Processing , vol. 14, no. 3–4, pp. 162–472, 2021. [4] U. Demirhan and A. Alkhateeb, “Cell-Free ISAC MIMO Systems: Joint Sensing and Communication Beamforming,” IEEE Transactions on Communications , vol. 73, no. 6, pp. 4454–4468, 2025. [5] Z. Behdad, O. T. Demir, K. W. Sung, E. Björnson, and C. Cavdar, “Multi-Static Target Detection and Power Allocation for Integrated Sensing and Communication in Cell-Free Massive MIMO,” IEEE Trans-actions on Wireless Communications , vol. 23, no. 9, pp. 11 580–11 596, 2024. [6] J. Li and P. Stoica, “MIMO Radar with Colocated Antennas,” IEEE Signal Processing Magazine , vol. 24, no. 5, pp. 106–114, 2007. [7] J. He, H. Wymeersch, T. Sanguanpuak, O. Silvén, and M. Juntti, “Adap-tive Beamforming Design for mmWave RIS-Aided Joint Localization and Communication,” in Proc. IEEE Wireless Communications Network Conference Workshops , 2020, pp. 1–6. [8] K. K. Wong, A. Shojaeifard, K. F. Tong, and Y. Zhang, “Fluid Antenna Systems,” IEEE Transactions on Wireless Communications , vol. 20, no. 3, pp. 1950–1962, 2021. [9] L. Zhu, W. Ma, and R. Zhang, “Movable Antennas for Wireless Communication: Opportunities and Challenges,” IEEE Communications Magazine , vol. 62, no. 6, pp. 68–74, 2024. [10] L. Zhu, W. Ma, and R. Zhang, “Modeling and performance analysis for movable antenna enabled wireless communications,” IEEE Transactions on Wireless Communications , vol. 23, no. 6, pp. 6234–6250, 2024. [11] Z. Xiao, X. Pi, L. Zhu, X. Xia, and R. Zhang, “Multiuser Communica-tions With Movable-Antenna Base Station: Joint Antenna Positioning, Receive Combining, and Power Control,” IEEE Transactions on Wire-less Communications , vol. 23, no. 12, pp. 19 744–19 759, 2024. [12] W. Ma, L. Zhu, and R. Zhang, “Mimo capacity characterization for movable antenna systems,” IEEE Transactions on Wireless Communi-cations , vol. 23, no. 4, pp. 3392–3407, 2024. [13] W. Ma, L. Zhu, and R. Zhang, “Movable antenna enhanced wireless sensing via antenna position optimization,” IEEE Transactions on Wire-less Communications , vol. 23, no. 11, pp. 16 575–16 589, 2024. [14] L. Zhu, W. Ma, Z. Xiao, and R. Zhang, “Performance Analysis and Optimization for Movable Antenna Aided Wideband Communications,” 
+
+IEEE Transactions on Wireless Communications , vol. 23, no. 12, pp. 18 653–18 668, 2024. [15] Q. Zhang et al. , “Cramér-Rao Bound Minimization for Flexi-ble Intelligent Metasurface-Enabled ISAC Systems,” arXiv preprint arXiv:2601.16455 , 2026. [16] W. Ma, L. Zhu, and R. Zhang, “Movable-Antenna Trajectory Optimiza-tion for Wireless Sensing: CRB Scaling Laws over Time and Space,” 
+
+arXiv preprint arXiv:2509.14905 , 2025. [17] H. L. Van Trees, Optimum Array Processing . New York: Wiley, 2002. [18] S. M. Kay, Fundamentals of Statistical Signal Processing: Estimation Theory . Upper Saddle River, NJ: Prentice-Hall, 1993.

@@ -1,0 +1,233 @@
+Title: Universal CKM for Environment-Aware Wireless Networks: Enabling Cross-Device and Cross-Task Channel Knowledge Transfer
+
+URL Source: https://arxiv.org/pdf/2608.17382v1
+
+Published Time: Wed, 19 Aug 2026 00:33:56 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+> 1
+
+# Universal CKM for Environment-Aware Wireless Networks: Enabling Cross-Device and Cross-Task Channel Knowledge Transfer 
+
+Haiquan Lu, Member, IEEE, Yong Zeng, Fellow, IEEE, Cheng-Xiang Wang, Fellow, IEEE, 
+
+Xiqi Gao, Fellow, IEEE, and Rui Zhang, Fellow, IEEE 
+
+Abstract —Channel knowledge map (CKM) is a promising technology for environment-aware sixth-generation (6G) wireless networks. However, most existing CKMs are tightly coupled with wireless devices and downstream tasks, which limit their scalability and reusability in wireless networks. To address these limitations, this article proposes the concept of universal CKM (uCKM) as a foundational wireless environment prior, which aims to enable cross-device and cross-task channel knowledge transfer for environment-aware wireless networks. We first revisit the representative CKMs and discuss their limitations. Then, the uCKM-enabled new paradigm for environment-aware wireless networks is introduced, and its benefits are highlighted from the perspectives of uCKM construction and utilization phases, for which we propose the visions of “All for uCKM” and “uCKM for All”, i.e., the data acquired by all devices and tasks should contribute to the construction of uCKM, and vice versa. Subsequently, we discuss the main challenges of uCKM and propose potential solutions. Last, we provide simulation results to demonstrate the feasibility and performance gains brought by uCKM and outline future research directions. 
+
+I. I NTRODUCTION 
+
+Channel knowledge map (CKM) has emerged as a promis-ing technology for enabling environment-aware wireless net-works [1]. As a site-specific digital database or artificial intelligence (AI) model, CKM tries to learn from the mas-sive location-tagged data and establish a mapping from the transceiver location to channel prior knowledge, such as line-of-sight (LoS)/non-LoS (NLoS) states, channel gain, angle-of-arrival/departure (AoA/AoD), and propagation delay. With such channel knowledge priors, diverse downstream tasks, including communication, sensing, localization, and naviga-tion, can operate in an environment-aware manner [1], [2]. This avoids repeatedly performing a prior channel estimation or environment sensing from scratch, which is particularly appealing for sixth-generation (6G) networks characterized by large spatial and frequency dimensions of wireless channels 
+
+Haiquan Lu is with the School of Electronic and Optical Engineering, Nanjing University of Science and Technology, Nanjing 210094, China (e-mail: haiquanlu@njust.edu.cn). Yong Zeng, Cheng-Xiang Wang, and Xiqi Gao are with the National Mobile Communications Research Laboratory, Southeast University, Nanjing 210096, China, and also with the Purple Mountain Laboratories, Nanjing 211111, China (e-mail: {yong zeng, chxwang, xqgao }@seu.edu.cn). ( Corresponding author: Yong Zeng. )Rui Zhang is with the Department of Electrical and Computer En-gineering, National University of Singapore, Singapore 117583 (e-mail: elezhang@nus.edu.sg). 
+
+> NLoS sensing Navigation
+> CKM Beam
+> management Clutter
+> Target
+> Clutter suppression
+> NLoS tracking
+> Localization
+
+Fig. 1. Illustration of CKM applications, including communication task such as beam management; localization task such as NLoS localization and geometry-based localization; sensing task such as NLoS sensing, NLoS tracking, and clutter suppression; as well as navigation task. 
+
+and denser node deployments [3]. Building upon this ca-pability, CKM has found extensive applications in wireless networks, as illustrated in Fig. 1. For example, CKM can facilitate environment-aware network planning, resource allo-cation, beam management, and interference mitigation [2], [4]. Beyond wireless communications, CKM has been also used for localization, sensing and clutter suppression in complex NLoS environment [5]. Moreover, with the rapid development of the low-altitude economy, CKM can provide the three-dimensional (3D) environmental priors for LoS/NLoS link identification, trajectory planning and aerial navigation for unmanned aerial vehicles (UAVs). On the other hand, wireless communication, localization, and sensing tasks usually require different forms of location-dependent channel knowledge. For instance, for wireless com-munications, the large-scale channel gain is usually sufficient for network planning to determine the deployment strategy of base stations (BSs). For beam management, the set of most probable candidate beam indices are required to perform fast beam selection. In contrast, localization and sensing usually benefit from multi-path characteristics that capture the geometric features of the surrounding environment, such as AoA/AoD and propagation delay. To accommodate these diverse knowledge requirements, different types of CKMs have been proposed, such as channel map (CM) [6], channel gain map (CGM) [7], beam index map (BIM) [3], and channel path arXiv:2608.17382v1 [cs.IT] 18 Aug 2026 2
+
+map (CPM) [8]. Besides, earlier works have mainly focused on techniques such as radio map [9], which typically characterizes the signal power spectrum density. In the following, four representative types of CKMs are discussed. 
+
+1) CM: CM directly learns the complete location-specific time-domain channel impulse response, whose dimension in-creases with the number of transmit and receive antennas, as well as that of the channel taps. As an alternative, the location-specific frequency-domain transfer function can be learned. For efficient storage, the transfer function can be discretized with the channel coherence bandwidth. By exploiting the fact that channel coherence bandwidth is typically inversely proportional to the channel delay spread, the number of sub-bands can be approximated by that of channel taps. Thus, the dimension of the frequency-domain channel knowledge is equal to its time-domain counterpart. Despite preserving the most complete channel knowledge, CM suffers from practical issues, including the substantial storage overhead and the diffi-culty of reliably associating instantaneous channel coefficients with location. 
+
+2) CGM: Compared to CM, CGM is usually simpler since it only focuses on the channel strength. For wide-band frequency-selective channel, the dimension of channel knowledge is equal to the number of channel taps, which is independent of the number of transmit and receive antennas. Besides, one common practice is to store the average value across all channel taps or sub-bands, and thus the dimension of channel knowledge is reduced to one. However, CGM inevitably discards fine-grained channel information, which limits its application in downstream tasks. 
+
+3) BIM: For massive multiple-input multiple-output (MIMO) and extremely large-scale MIMO (XL-MIMO) systems, BIM provides an efficient approach by directly learning the location-specific optimal beam pair or a small set of candidate beam pairs, thus bypassing the explicit high-dimensional channel representation and enabling a fast beam management. 
+
+4) CPM: CPM aims to learn the location-specific multi-path parameters, including the complex-valued path gain, elevation and azimuth AoDs, AoAs, and the propagation delay. Since the complex-valued path gain involves both real and imaginary parts, the dimension of channel knowledge is 7L,where L denotes the number of multi-paths. Note that CPM is appealing for massive MIMO and XL-MIMO communications over high-frequency channels with multi-path sparsity, such as millimeter wave (mmWave) and Terahertz channels. In this case, given the transceiver characteristics, CPM can in principle reconstruct the complete channel impulse response with a much smaller dimension than CM. However, existing CPMs are typically defined in the local coordinate systems that are severely coupled with the antenna configuration and orientation of the associated devices, and the complex-valued path gain is sensitive to location variations and localization errors. Despite their effectiveness in respective application scenar-ios, existing CKMs have two major limitations: 1) incapable of cross-device CKM sharing: specifically, CM, CGM, BIM, and CPM are severely coupled with device-specific transceiver   
+
+> Smartphone Smartphone
+> Vehicle Vehicle UAV UAV
+> (a) Channel knowledge transfer across heterogeneous devices
+> Sensing Communication Navigation
+> echo
+> (b) Channel knowledge transfer across diverse downstream tasks
+> uCKM
+> echo
+> Cross-device transferability Cross-task transferability
+> (c) uCKM as a channel knowledge prior base for all devices and tasks Fig. 2. uCKM-enabled cross-device and cross-task knowledge transfer.
+
+configurations, such as antenna number, array geometry, de-vice orientation, and beam codebook. For example, the CGM learned for one device (say a mobile phone) is useless for an-other device (say a vehicle), even when they operate in exactly the same environment. This greatly limits the scalability and usability of CKM; 2) incapable of cross-task CKM sharing: existing CKMs are usually tailored to specific downstream tasks, resulting in fragmented knowledge representations. For example, BIM stores the location-specific candidate beam indices for communication-oriented beam management. Al-though these indices may convey coarse direction information, they cannot explicitly provide the detailed environment and path information required by sensing tasks, such as AoA/AoD, scatterer and obstacle locations, as well as clutter character-istics. Thus, such task-specific designs lead to isolated CKM silos and limited cross-task knowledge sharing. The above limitations naturally raise a fundamental ques-tion: As illustrated in Fig. 2, is it possible to construct a unified CKM that enables channel knowledge transfer across all devices and downstream tasks? This question motivates the concept of universal CKM (uCKM). Specifically, uCKM is a foundational wireless environment prior that learns underlying propagation knowledge independent of specific devices or tasks, thus allowing a single uCKM to be shared and reused across heterogeneous devices and downstream tasks. If uCKM is feasible, then for each area of interest, only a single uCKM needs to be constructed, which is essential to unlock the full potential of CKM and facilitate its practical implementation. 3   
+
+> Rx @ qr
+> Nr
+> 
+> 12
+> Tx @ qt
+> 12
+> 
+> uCKM depends on environment only Environment
+> CM, CGM, BIM, CPM, and radio map depend on both environment and Tx/Rx configurations
+> Tx configurations
+> Antenna number Array geometry Device orientation Beam codebook
+> Rx configurations
+> Nt
+> Antenna number Array geometry Device orientation Beam codebook
+> Fig. 3. Illustration of uCKM, which depends on the wireless propagation en-vironment only, while independent of the Tx/Rx configurations or operations.
+
+To achieve the above vision, uCKM needs to satisfy two essential requirements:  
+
+> •
+
+Underlying wireless propagation knowledge: uCKM should only learn the underlying wireless propagation knowledge that is governed by the surrounding en-vironment, while independent of the device-specific characteristics such as the transmitter/receiver (Tx/Rx) antenna configurations, as shown in Fig. 3. Such knowl-edge could be those multi-path parameters, including AoA/AoD, path amplitude, and propagation delay.  
+
+> •
+
+Unified global coordinate system and probabilistic representation: uCKM should be defined based on a unified global coordinate system, rather than in the local coordinate systems as in conventional chan-nel representation approaches. Moreover, to accommo-date environmental dynamics, the mapping from the transceiver location q to channel knowledge z can be represented as a location-conditional probability density function (pdf) [5], i.e., p ( z| q), rather than as a purely deterministic mapping. It is worth noting that the above two key requirements jointly lay the foundation for uCKM to provide a reusable wireless environment prior. Specifically, capturing the device-decoupled propagation knowledge renders it possible to trans-fer the learned channel knowledge across heterogeneous de-vices, while representing such knowledge in a unified global coordinate system with a probabilistic form makes it alignable and fusible across different data sources, as well as robust to environmental dynamics. Then, global data collected from either channel estimation in communication tasks or path information extraction in sensing tasks is represented as a unified location-conditional pdf, and diverse downstream tasks can exploit the common channel knowledge to infer the customized knowledge according to device configurations and task requirements. In this article, we provide an overview of uCKM and discuss the uCKM-enabled paradigm from two complementary per-spectives, i.e., construction and utilization phases, respectively. Then, the challenges towards realizing uCKM and potential solutions are discussed. Furthermore, the simulation results are presented to demonstrate the feasibility and performance gains of uCKM. II. UCKM-E NABLED ENVIRONMENT -A WARE WIRELESS 
+
+NETWORKS 
+
+With the shared wireless propagation knowledge, uCKM en-ables a closed-loop paradigm for environment-aware wireless networks, which consists of the construction and utilization phases, as illustrated in Fig. 4. In the construction phase, the data collected from heterogeneous devices and different down-stream tasks are collaboratively fused to construct uCKM, a vision which we term as “All for uCKM”. In the utilization phase, the constructed uCKM serves as a common environ-ment prior base that can be leveraged to support heterogeneous devices and different downstream tasks, which we refer to as “uCKM for All”. Such a paradigm is significantly different from conventional wireless communication, localization and sensing systems, where the estimated channel state information (CSI) and probed environmental information are typically confined to the associated devices and tasks, rather than accumulated for cross-device and cross-task reuse. Moreover, uCKM goes beyond isolated and fragmented CKMs by unify-ing device- and task-decoupled propagation knowledge into a shared wireless environment prior. As illustrated in Fig. 4, during the construction phase, the massive heterogeneous devices, such as smartphones, vehicles, UAVs, and sensing nodes, serve as the natural sensors and col-laboratively contribute to a crowdsourced wireless knowledge acquisition process. To this end, each device needs to decouple its local observations from the transceiver configuration and extract the path information. With the position and orientation information of the device, the obtained path information is transformed into a unified global coordinate system. Then, the globally aligned tuples including the transceiver locations and corresponding channel knowledge are fused to construct the location-conditional pdf. Depending on the statistical char-acteristics of channel knowledge, including AoA/AoD, path amplitude, and propagation delay, the pdf can be modeled by Gaussian distribution [8], Gaussian mixture distribution, trun-cated Gaussian distribution, Rayleigh distribution, and their hybrid forms. Compared to the deterministic representation, such a probabilistic representation conveys richer information by indicating not only the most likely realization of channel knowledge, but also the associated uncertainty. Besides, the probabilistic representation can reduce the channel knowledge dimension, since only the distribution parameters are stored. For example, the Gaussian distribution can be compactly characterized by its first- and second-order statistics, i.e., mean vector and covariance matrix. As a result, uCKM converts fragmented observations from individual devices into a shared wireless propagation knowledge, and the probabilistic form captures the uncertainty caused by environmental dynamics and measurement noise. In particular, the probabilistic uCKM degenerates to the deterministic uCKM, when the conditional pdf reduces to a Dirac delta function. 4
+
+Construction phase: All for uCKM 
+
+> Heterogeneous
+> devices
+> Downstream
+> tasks
+> Communication Communication Localization Localization Sensing Sensing Navigation Navigation Communication Localization Sensing Navigation
+> Raw
+> data Path
+> information extraction
+> Global coordinate
+> transformation Fusion and pdf modeling
+
+Construction phase: All for uCKM 
+
+> Heterogeneous
+> devices
+> Downstream
+> tasks
+> Communication Localization Sensing Navigation
+> Raw
+> data Path
+> information extraction
+> Global coordinate
+> transformation Fusion and pdf modeling
+
+uCKM 
+
+Location-conditional pdf 
+
+Utilization phase: uCKM for All 
+
+> Query by
+> (coarse) physical or virtual location Retrieve distribution parameters
+> Mean vector Covariance matrix
+> ȜȜ
+> Incorporate device-specific
+> characteristics
+> Task-specific
+> information
+> Task execution Task execution
+> Communication Communication Localization Localization Sensing Sensing Navigation Navigation Communication Localization Sensing Navigation
+> Channel knowledge
+> feedback
+> Antenna number Array geometry Device orientation
+
+Ȝ
+
+Fig. 4. The uCKM-enabled new paradigm for environment-aware wireless networks, where heterogeneous devices and downstream tasks collaboratively construct uCKM under the vision of “All for uCKM”, and the constructed uCKM is utilized to support heterogeneous devices and tasks under the vision of “uCKM for All”. 
+
+On the other hand, during the utilization phase, each device queries uCKM according to its (coarse) physical or virtual location and recovers the location-conditional pdf based on the distribution parameters, where the physical location corre-sponds to the device’s actual geometric location, whereas the virtual location refers to a privacy-preserving representation of its physical location. By incorporating the device-specific characteristics, the device-specific channel distribution can be derived and transformed into the task-specific information. Specifically, for wireless communication, the obtained channel distribution can be used to derive the channel matrix or candi-date beam indices, thus reducing the pilot or beam sweeping overhead. For localization, the location-conditional pdf can be used to evaluate the likelihood of the observed channel knowledge at each candidate location, and the device location can be obtained by selecting the location with the maxi-mum likelihood. Moreover, the environment prior provided by uCKM can be utilized to suppress clutter, identify targets, and infer environmental changes. In particular, the construction and utilization phases form a closed-loop knowledge cycle, which transforms uCKM into a self-evolving wireless environment prior for future environment-aware networks. In the following, we elaborate on the benefits in terms of “uCKM for All” and “All for uCKM”. 
+
+A. uCKM for All 1) Cross-Device Channel Knowledge Transfer: By cap-turing the device-agnostic wireless propagation knowledge, uCKM provides a common environment prior that can be shared across heterogeneous devices. This enables rapid adap-tation to newly deployed devices or changes in device config-urations, without requiring extensive additional measurements, model retraining, or even constructing a new CKM from scratch. With the proliferation of heterogeneous devices, such knowledge reuse can also significantly reduce the network-level map construction and maintenance costs compared with existing CKMs. Moreover, the standardized and vendor-neutral knowledge representation of uCKM can provide a common knowledge interface for heterogeneous devices and vendors, which facilitates the cross-vendor coordination and improves interoperability among diverse network entities. 
+
+2) Cross-Task Channel Knowledge Transfer: Beyond facil-itating cross-device channel knowledge transfer, uCKM allows diverse downstream tasks to reuse a common knowledge prior. Specifically, although communication, localization, sensing, and navigation tasks have different objectives, they extract the task-specific information from the same wireless prop-agation environment. Accordingly, each task can obtain its required information based on uCKM on demand through appropriate processing. As a result, uCKM not only reduces redundant task-specific map construction and maintenance, but also improves the utilization efficiency of wireless propagation knowledge, thus advancing the development of environment-aware applications. More broadly, by serving as a common environment prior base, uCKM provides a foundation for the wireless digital twin and AI-native environment-aware networks. 
+
+B. All for uCKM 1) Cross-Device Collaborative Knowledge Acquisition: In contrast to existing CKMs that are typically constructed based on the isolated measurements, uCKM fuses globally aligned observations crowdsourced from heterogeneous devices. Such 5
+
+a mechanism improves the construction of uCKM in terms of coverage and reliability. On one hand, crowdsourced ob-servations from heterogeneous devices can progressively fill the spatial blind spots that are difficult to be covered via the isolated measurement, such as indoor corridors, urban corners, low-altitude regions, and rarely visited regions. As the obser-vations accumulate, uCKM can obtain a more comprehensive representation of the wireless propagation environment. On the other hand, observations from multiple independent devices can be exploited for consensus-based knowledge validation before incorporating them into uCKM. For instance, consistent deviations reported by multiple independent devices in the same region may indicate that the environment has changed. On the contrary, if only one device reports an abnormal observation, such an abnormality is more likely to be caused by the device itself. Thus, multi-source consensus can support anomaly detection and trustworthy knowledge fusion, thus enhancing the reliability of uCKM construction. 
+
+2) Cross-Task Complementary Knowledge Enrichment: 
+
+Besides the cross-device collaborative knowledge acquisition, diverse downstream tasks contribute complementary observa-tions that broaden and refine the knowledge captured by the uCKM. Specifically, communication tasks provide the CSI, beam management information, and link quality variations; localization tasks contribute the location-tagged multi-path fingerprints; and sensing tasks offer the information of clutters, scatterers, obstacles, and environmental changes. Instead of being the redundant replicas, these complementary knowledge jointly yield a richer, fine-grained, and more physically in-terpretable representation of the underlying propagation en-vironment for uCKM. Moreover, by exploiting the real-time task feedbacks, uCKM can identify the environmental changes and update the outdated channel knowledge. Thus, cross-task participation not only enriches the knowledge dimension of uCKM, but also maintains its freshness via the closed-loop refinement. III. C HALLENGES IN U CKM AND POTENTIAL SOLUTIONS 
+
+Despite the above appealing benefits, uCKM is also faced with several new challenges. 
+
+A. Data Acquisition and Dataset Construction 
+
+The foundational prerequisite for constructing a high-fidelity uCKM is the acquisition of massive high-quality mea-surement data. Traditionally, high-fidelity radio measurements are mainly obtained through dedicated channel sounding, which can provide detailed channel characteristics. However, the high measurement overhead renders it difficult to support the dense uCKM deployment. To address this limitation, the real-world measurement data can be complemented by multi-modal sensing data, such as radar, light detection and ranging (LiDAR), and vision. By capturing the environmental geometry including reflectors, scatterers, obstacles, mobile objects, and semantic scene information, the multi-modal data can provide the physical context behind radio measurements, which is particularly beneficial for the uCKM construction that relies on multi-path parameters. Meanwhile, by converting channel knowledge into visual representations and leverag-ing the advanced computer vision techniques, simulation-generated data can serve as a scalable supplement to real-world measurement data [10], [11]. In addition, constructing a reliable dataset remains non-trivial, since it is not merely to accumulate the data, but to integrate the real-world measurement and multi-modal sensing data into a spatially consistent and location-specific data repository. To achieve this goal, the collected data should be arranged in a unified data format with metadata such as location, timestamp, and source type. Moreover, real-world measurement, multi-modal, and simulation data should be spa-tially and temporally aligned in a common global coordinate system, thus enabling a quality-aware dataset construction for uCKM. 
+
+B. Device-Decoupled Path Knowledge Extraction 
+
+The collected raw data are in fact device-filter observations and inevitably coupled with the device-specific transceiver configurations, and a key challenge is to decouple the universal propagation knowledge from the device-dependent observa-tions. First, accurately characterizing transceiver characteris-tics, including antenna pattern, hardware impairments, and unknown calibration state, is a non-trivial task, since these factors can be time-varying or even proprietary. Second, even if the transceiver characteristics can be perfectly characterized and removed, the intrinsic resolution differences among de-vices will lead to different observed multi-path representations. Specifically, the delay and angular resolutions are determined by the system bandwidth and physical array aperture, respec-tively, and low-resolution devices may be unable to resolve closely spaced propagation paths and observe them as a single equivalent path. This resolution mismatch renders the fine-grained path recovery an ill-posed inverse problem. To address these challenges, device-decoupled path knowl-edge extraction should jointly account for transceiver charac-teristics, device resolution, and propagation physics. Specif-ically, the transceiver characteristics can be obtained based on the offline calibration, pilot-aided estimation, and auxil-iary sensors. Meanwhile, path knowledge extraction should take into account the intrinsic resolution of each device. In this context, integrated sensing and communication (ISAC) is an effective approach for extracting path knowledge, by leveraging its sensing capability to estimate the geometric and propagation properties of multi-path components. The resulting information provides physics-informed prior for sep-arating closely spaced paths, resolving ambiguities caused by limited device resolution, and associating multi-path com-ponents across heterogeneous devices. Furthermore, physics-informed AI models can fuse heterogeneous observations, associate paths across devices, and quantify uncertainties, thus transforming the device-specific observations into the fundamental and reusable channel knowledge. 
+
+C. Discrete-to-Continuous uCKM Construction in Dynamic Environments 
+
+After obtaining the universal propagation knowledge at sampled locations, constructing a continuous uCKM from 6         
+
+> -1.0 -0.5 0.0 0.5 1.0
+> Global angle (rad)
+> 0100 200 300 400 500
+> Delay (ns)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Conditional pdf
+> (a)
+> -1.0 -0.5 0.0 0.5 1.0
+> Global angle (rad)
+> 0100 200 300 400 500
+> Delay (ns)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Conditional pdf
+> (b) Fig. 5. Illustration of uCKM for two locations, where the location-specific channel knowledge at each location, including the angle and delay represented in the global coordinate system, is represented by a corresponding conditional pdf: a) location 1; b) location 2.
+
+discrete and sparse observations remains challenging. Unlike a standard interpolation problem, uCKM construction needs to capture the abrupt spatial transitions in multi-path characteris-tics, e.g., the dominant LoS path may suddenly vanish and be replaced by NLoS reflections at a street corner. In such cases, simply interpolating neighboring observations may yield phys-ically inconsistent channel knowledge [12]. Moreover, training a deep neural network (DNN) to map the location to channel knowledge may also over-smooth the predicted channel knowl-edge near propagation boundaries, since neural networks tend to favor smooth function approximations. To tackle this issue, the DNN should be designed in an environment-aware and physics-informed manner, by embedding physical knowledge and constraints into data representations, loss functions, or net-work architectures. Besides, the DNN can be trained to jointly predict the multi-path visibility and parameters, thus explicitly capturing the path birth-death behaviour and alleviating over-smoothing near propagation boundaries. On the other hand, representing the mapping from the transceiver location to channel knowledge as a conditional pdf for uCKM provides a feasible solution to handle environmental dynamics, which characterizes the joint distribution of the channel knowledge vector given the location. As illustrated in Fig. 5, the two locations exhibit distinct probabilistic distri-butions, which not only provide the most probable realization of the location-specific channel knowledge, but also quantify the associated uncertainty, e.g., through the variance. However, a key challenge lies in accurately learning the ground-truth conditional pdf. Model-based pdf representations, such as Gaussian, Gaussian mixture, and Rayleigh distributions, are compact and interpretable, while they may fail to accurately approximate the ground-truth conditional pdf in highly dy-namic and complex propagation environments. To this end, model-free approach can be adopted, and generative AI is particularly suitable for such an approach, since it can train an AI model to approximate the ground-truth distribution and generate the new channel knowledge realizations according to the learned distribution [11], [13], [14]. 
+
+D. Privacy-Preserving and Trustworthy uCKM Deployment 
+
+As uCKM provides wireless environment prior for hetero-geneous devices and diverse tasks, its large-scale deployment introduces challenges in privacy preservation and trustwor-thiness. On one hand, the reported channel knowledge may unintentionally expose the user privacy, since the embedded multi-path fingerprints can be exploited by malicious users to infer the locations and trajectories of target users. Besides, legitimate users may expose sensitive mobility patterns when querying uCKM, as a sequence of location-specific queries can be linked to infer their destinations, frequently visited areas, or locations of interest. Moreover, the channel knowledge accessed by malicious users can be exploited to launch the targeted eavesdropping, jamming, or spoofing attacks. On the other hand, in crowdsourced data acquisition scenarios, the malicious users can inject the forged or incorrect measurement data to poison the map, thus misleading the downstream tasks. To mitigate the above issues, security mechanisms should be integrated across data acquisition, access, and utilization of uCKM. First, privacy-preserving techniques, such as dif-ferential privacy and homomorphic encryption, can be ap-plied to allow devices to collaboratively construct and up-date uCKM without exposing raw data. Meanwhile, multi-source validation and anomaly detection are needed to identify the forged or incorrect measurement data, so as to mitigate the map contamination. Second, during the access process, authentication and access control are essential to prevent the leakage of sensitive propagation knowledge. Specifically, the identities of querying entities should be verified before granting access, and different devices may be provided with channel knowledge at different granularities based on their roles and trust levels. Last, devices and downstream tasks should explicitly account for the uncertainty and reliability of uCKM, thus establishing robust decision-making mechanisms when uCKM is potentially contaminated. IV. S IMULATION RESULTS 
+
+In this section, simulation results are presented to evaluate the cross-device and cross-task transferability of uCKM. The 7                 
+
+> -15 -10 -5 0510 15 -10 -5
+> 0
+> 5
+> 10
+> x(m)
+> y (m) Tx
+> Glass Glass Wood Wood Metal Metal
+> Dynamic scatterer Dynamic scatterer
+> (a)
+> 20 25 30 35 40
+> SNR (dB)
+> 00.2 0.4 0.6 0.8 1
+> Average achievable rate (bps/Hz)  Perfect CSI uCKM Device 1-specific BIM Random beam selection
+> (b)
+> 0510 15 20 25 30
+> Localization error (m)
+> 00.2 0.4 0.6 0.8 1
+> CDF
+> uCKM Local coordinate system based CKM
+> (c) Fig. 6. Performance evaluation of uCKM for communication and localization: a) simulation setup, where the dynamic scatterers correspond to one realization, while their locations vary across different sub-scenes; b) average achievable rate versus SNR; c) the CDF of the localization error.
+
+open-source ray-tracing tool Sionna is employed to simu-late the wireless propagation characteristics and generate the corresponding multi-path parameters. The simulation setup is shown in Fig. 6(a). The Tx is equipped with a uniform linear array (ULA) with Nt = 64 antennas, where adjacent antennas are separated by half wavelength. We consider K = 3 
+
+heterogeneous devices, each equipped with a ULA, where the number of receive antennas are Nr = 16 , 8, 4, respec-tively. The configurations may correspond to an autonomous vehicle, a robot, and a smartphone, respectively. The device orientations are varied by adjusting their yaw angles, and the devices follow a local random-walk sampling strategy within a rectangular region, with its length and width given by 30 m and 20 m, respectively. Multiple sub-scenes are generated with the same static scatterers shown in Fig. 6(a), but different realizations of five randomly located dynamic scatterers. Moreover, the region is discretized into multiple grid cells of size 0.25 m × 0.25 m. Fig. 6(b) shows the average achievable rate over the three devices versus the signal-to-noise ratio (SNR). For compari-son, the following benchmark schemes are considered: 1) Per-fect CSI: The device-specific CSI of each device is perfectly available, and the optimal transmit and receive beam pair is then selected from the predefined codebooks via exhaustive beam search, which provides an upper bound on the achievable rate; 2) Device 1-specific BIM: The BIM constructed for device 1 is directly reused across heterogeneous devices; 3) Random beam selection: five beam pairs are randomly selected, and the beam pair with the highest achievable rate is chosen. Moreover, uCKM is constructed by learning the global AoA/AoD distribution using a Gaussian mixture dis-tribution, and stores the corresponding weights, mean vectors and covariance matrices. Based on the distribution, five beam pairs are selected and the beam pair with the highest achiev-able rate is chosen. It is observed that the proposed uCKM scheme achieves a performance close to that of the perfect CSI scheme, thanks to the flexible transferability of channel knowledge across heterogeneous devices. Besides, the slight performance gap is mainly due to the mismatch between the accurate CSI and the location-conditional channel knowledge distribution represented by uCKM. It is also observed that the proposed uCKM scheme significantly outperforms the bench-mark schemes of device-1-specific BIM and random beam selection. This is because device 1-specific BIM scheme is highly entangled with the antenna orientation of device 1 and thus cannot be directly transferred to the other devices, while uCKM stores the underlying wireless propagation knowledge and can adapt it to the device-specific beam domain. Fig. 6(c) shows the cumulative distribution function (CDF) of localization error, where the uCKM employed for the above communication task is directly utilized for localization. Specifically, given the device observations, uCKM evaluates the posterior probability scores of candidate cells and infers the most probable device location from the grid cell with the maximum score. As a comparison, the benchmark scheme of CKM constructed in the local coordinate systems of devices is considered. It is observed that uCKM yields a better localiza-tion performance than the local coordinate system based CKM. This is expected since the channel knowledge is represented in the unified global coordinate system for uCKM, and the result demonstrates its cross-task transferability. By contrast, for the local coordinate system representation, the wireless propaga-tion environment may correspond to different features, thus leading to the knowledge mismatch and degraded localization accuracy. V. F UTURE DIRECTIONS 
+
+In the future, there are several important directions worthy of in-depth studies. 
+
+A. Data-Efficient Construction and Utilization of uCKM 
+
+The prediction accuracy of uCKM depends on the amount of data, and a larger spatial sample density generally im-proves the prediction accuracy by increasing the likelihood of finding nearby observations with high spatial correlations [15]. However, indiscriminately increasing the spatial sample density may result in the excessive measurement overhead with marginal performance improvement. Thus, an important direction is to develop data-efficient strategies for uCKM construction and utilization, so as to achieve the reliable prediction with affordable cost. 8
+
+B. World Model-Based uCKM Update 
+
+World models may serve as a promising direction for proactive uCKM updates in dynamic environments. Instead of only learning the mapping from the transceiver location to channel knowledge, a wireless world model aims to capture the latent state and temporal evolution of the radio environment, thus guiding the proactive uCKM updates before significant prediction errors occur. 
+
+C. Standardization and Commercial Deployment of uCKM 
+
+Despite the technical potential of uCKM, its scalable de-ployment in future wireless networks requires further stud-ies. On one hand, the common knowledge representations, interface protocols, and map update mechanisms should be standardized to enable cross-vendor interoperability. On the other hand, the commercial deployment involves the operation and maintenance mechanism, and business ecosystem design, so as to promote uCKM as an economically viable and operationally sustainable wireless environment prior. VI. C ONCLUSION 
+
+This paper presented an overview of uCKM as a shared wireless environment prior base for environment-aware wire-less networks, where uCKM aims to enable channel knowl-edge transfer across heterogeneous devices and diverse down-stream tasks. We elaborated the benefits of uCKM through two complementary visions, termed “uCKM for All” and “All for uCKM”, and discussed the challenges for realizing uCKM and potential solutions. Simulation results demonstrated the feasibility of cross-device and cross-task knowledge transfer enabled by uCKM. REFERENCES [1] Y. Zeng and X. Xu, “Toward environment-aware 6G communications via channel knowledge map,” IEEE Wireless Commun. , vol. 28, no. 3, pp. 84–91, Jun. 2021. [2] X. Liu, S. Sun, M. Tao, A. Kaushik, and H. Yan, “Channel knowledge maps for 6G wireless networks: Construction, applications, and future challenges,” ZTE Commun. , vol. 23, no. 2, pp. 46–59, Jun. 2025. [3] Y. Zeng, J. Chen, J. Xu, D. Wu, X. Xu, S. Jin, X. Gao, D. Gesbert, S. Cui, and R. Zhang, “A tutorial on environment-aware communications via channel knowledge map for 6G,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1478–1519, 3rd Quart. 2024. [4] J. Wang, J. Zhang, Y. Zhang, Y. Sun, G. Nie, L. Shi, P. Zhang, and G. Liu, “Radio environment knowledge pool for 6G digital twin channel,” IEEE Commun. Mag. , vol. 63, no. 5, pp. 158–164, May 2025. [5] D. Wu, Z. Dai, and Y. Zeng, “You may use the same channel knowledge map for environment-aware NLoS sensing and communication,” IEEE Trans. Wireless Commun. , vol. 25, pp. 14 627–14 641, 2026. [6] T. Qi, C.-X. Wang, C. Huang, J. Li, and J. S. Thompson, “Data-model co-driven continuous channel map construction: A perceptive foundation for embodied intelligent agents in 6g networks,” IEEE Trans. Cogn. Commun. Netw. , vol. 12, pp. 9297–9311, 2026. [7] Z. Jin, L. You, J. Wang, X.-G. Xia, and X. Gao, “An I2I inpainting approach for efficient channel knowledge map construction,” IEEE Trans. Wireless Commun. , vol. 24, no. 2, pp. 1415–1429, Feb. 2025. [8] W. Jiang, X. Yuan, B. Teng, H. Wang, and J. Qian, “Interference-cancellation-based channel knowledge map construction and its appli-cations to channel estimation,” IEEE Trans. Wireless Commun. , vol. 24, no. 7, pp. 6240–6256, Jul. 2025. [9] S. Bi, J. Lyu, Z. Ding, and R. Zhang, “Engineering radio maps for wireless resource management,” IEEE Wireless Commun. , vol. 26, no. 2, pp. 133–141, Apr. 2019. [10] J. Li, C.-X. Wang, C. Huang, T. Qi, and T. Wu, “Digital twin online channel modeling: Challenges, principles, and applications,” IEEE. Veh. Technol. Mag. , vol. 20, no. 1, pp. 94–103, Mar. 2025. [11] Z. Ren, J. Zhou, J. Xu, L. Qiu, Y. Zeng, H. Hu, J. Zhang, and R. Zhang, “Channel knowledge map construction: Recent advances and open challenges,” IEEE Wireless Commun. , 2026. [12] Y. Wang, C. Huang, S. Zhang, G. Chen, W. Guo, S. Lan, L. Xu, X. Cheng, X. Tang, and S. Cui, “Toward precise channel knowledge map: Exploiting environmental information from 2D visuals to 3D point clouds,” IEEE Commun. Mag. , 2026. [13] S. Fu, Y. Zeng, Z. Wu, D. Wu, J. Xu, S. Jin, C.-X. Wang, and X. Gao, “CKMDiff: A generative diffusion model for CKM construction via inverse problems with learned priors,” npj Wireless Technol. , vol. 2, no. 1, pp. 1–15, 2026. [14] L. Zhao, Z. Fei, X. Wang, J. Luo, and Z. Zheng, “3D-RadioDiff: An altitude-conditioned diffusion model for 3D radio map construction,” 
+
+IEEE Wireless Commun. Lett. , vol. 14, no. 7, pp. 1969–1973, Jul. 2025. [15] X. Xu and Y. Zeng, “How much data is needed for channel knowledge map construction?” IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 13 011–13 021, Oct. 2024.

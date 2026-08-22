@@ -1,0 +1,565 @@
+Title: LiDAR-Derived Surface Priors for Multimodal Sensing-Assisted NLoS Beam Search in Indoor 60-GHz Networks
+
+URL Source: https://arxiv.org/pdf/2608.18396v1
+
+Published Time: Thu, 20 Aug 2026 00:17:22 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> 1
+
+# LiDAR-Derived Surface Priors for Multimodal Sensing-Assisted NLoS Beam Search in Indoor 60-GHz Networks 
+
+Amod Ashtekar, Dalton Davis, Rafaela Lomboy, Omar Ibrahim, Raj Sai Sohel Bandari, and Mohammed E. Eltayeb, Senior Member, IEEE, 
+
+Abstract —Highly directional 60-GHz Internet-of-Things (IoT) links can exploit naturally occurring indoor surfaces to sustain connectivity under blockage. Identifying viable non-line-of-sight (NLoS) paths, however, can require extensive RF beam training. This paper investigates whether LiDAR can reduce this search overhead by providing a surface-aware prior without assuming a direct mapping between optical return and mmWave reflection. The proposed framework uses LiDAR-derived geometry and return statistics to rank candidate propagation directions, while RF measurements remain responsible for final beam selection. The experimental validation is organized in three stages to separate descriptor robustness, cross-modal association, and beam-search performance. Controlled LiDAR measurements first quantify how geometric and radiometric surface descriptors vary with acquisition geometry. Matched LiDAR and 60-GHz measurements in an L-shaped corridor then determine whether these descriptors are associated with the measured surface-mediated RF response under a prescribed NLoS interaction. Finally, a separate room-scale campaign evaluates the resulting prior using exhaustive TX–RX beam maps without prescribing the underlying propagation mechanism. The measurements show that descriptor reliability depends on acquisition geometry and point-cloud representation, and that LiDAR and RF surface responses exhibit cross-modal association without supporting deterministic RF-power prediction. In the room experiment, local three-ring 3-D planarity retains a beam within 3 dB of exhaustive search at 74 .5% of the measured locations while reducing RF beam-pair probing by 72% relative to exhaustive probing over the candidate search region. These results establish LiDAR-derived local surface structure as a communication-oriented prior for concentrating RF probing and reducing mmWave beam-search uncertainty. 
+
+Index Terms —Internet of Things, LiDAR sensing, millimeter-wave communications, multimodal sensing, NLoS beam align-ment, passive reflectors, sensing-assisted beam search. 
+
+I. I NTRODUCTION 
+
+# MILLIMETER-wave (mmWave) communication enables high-rate connectivity for emerging Internet-of-Things (IoT) applications, including industrial automation, mobile robots, smart infrastructure, and dense indoor networks [1]– [3]. At 60 GHz, however, reliable connectivity requires highly directional transmission that is vulnerable to blockage and                 
+
+> Amod Ashtekar, Rafaela Lomboy, Omar Ibrahim, Raj Sai Sohel Bandari, and Mohammed E. Eltayeb are with the Department of Electrical and Electronic Engineering, California State University, Sacramento, Sacramento, CA, USA. Dalton Davis is with the Department of Computer Science, University of California, Davis, Davis, CA, USA. Corresponding author: Mohammed E. Eltayeb (e-mail: mo-hammed.eltayeb@csus.edu). This material is based upon work supported by the National Science Foundation under Grant NSF-2243089.
+
+beam misalignment [4], [5]. In sensing-enabled IoT deploy-ments, such as industrial gateways and robotic platforms, blockage therefore creates both a coverage problem and a beam-reacquisition problem: an alternative propagation direc-tion must be identified while limiting the RF resources con-sumed by beam training. Indoor environments contain walls, boards, cabinets, glass, metallic objects, and other naturally occurring surfaces that can support alternative non-line-of-sight (NLoS) propagation. Measurements of building mate-rials and indoor environments have demonstrated substantial reflection and scattering at millimeter-wave frequencies [6]– [9]. Moreover, passive reflectors have been shown to extend mmWave coverage around corners and into blocked regions [10]. The networking challenge is therefore how to identify and prioritize promising NLoS directions without repeatedly probing the complete TX–RX beam codebook. RF-only exhaustive, hierarchical, and sparse beam-training methods address this problem through additional channel measurements [11]–[13]. Repeated beam acquisition consumes radio resources that would otherwise support data transmission and link maintenance, motivating the use of side information to reduce the directional search space [14]. Multimodal envi-ronmental sensing provides a complementary approach where sensing-enabled IoT infrastructure can first reduce spatial uncertainty and concentrate RF probing on a smaller set of candidate directions. This architecture is particularly relevant to IoT deployments in which gateways, access points, robots, or instrumented infrastructure already observe the surrounding environment while supporting directional wireless links. It also relates to broader integrated sensing and communica-tion (ISAC) and multimodal sensing-assisted communication, where heterogeneous environmental information can support beamforming and communication-resource allocation [15]– [17]. LiDAR is attractive for this role because it directly mea-sures range and angle, resolves finite surface extent and local orientation, and provides an instantaneous observation of the surrounding environment. In this paper, we consider a sensing-enabled IoT gateway, access point, or robotic end-point equipped with a directional 60-GHz radio and co-located LiDAR. Unlike map-assisted approaches, the proposed method does not require a pre-existing geometric map or prior knowledge of the propagation surface at the current location. Candidate surface directions are identified opportunistically from the current LiDAR observation. After LiDAR-to-RF angular registration, the observed surfaces are associated with candidate RF directions and ranked before RF probing. Fusion therefore occurs at the decision level: LiDAR reduces the arXiv:2608.18396v1 [eess.SY] 18 Aug 2026 2
+
+directional search space by prioritizing candidate directions based on the observed environment, while measured mmWave power determines the final communication beam direction. The objective is not to reconstruct the propagation environ-ment or predict the RF channel from LiDAR, but to use instantaneous environmental sensing to reduce beam-search uncertainty and RF training expenditure. Prior work has used LiDAR and other sensing modalities for learned sensor-to-beam prediction and multimodal beam selection [16], [18]–[22]. Model-based approaches have also exploited explicit scene structure. SpaceBeam, for example, reconstructs a three-dimensional environment and uses ray-based propagation modeling for beam management [23], while point-cloud observations combined with RF measurements have been used to estimate material permittivity at 60 GHz [24]. These approaches demonstrate the value of environ-ment awareness, but they leave a central modeling question: 
+
+what LiDAR-observed surface information can be used to opportunistically identify and prioritize candidate mmWave propagation directions? 
+
+This distinction is fundamental. A LiDAR generally mea-sures a monostatic or near-monostatic optical return, whereas a useful mmWave NLoS path involves a bistatic TX–surface– RX interaction. LiDAR intensity depends on sensing range, incidence angle, optical response, footprint, detection thresh-old, and sensor processing [25], [26]. The 60-GHz surface-mediated field additionally depends on RF permittivity and loss, polarization, wavelength-normalized surface variation, in-cidence and departure directions, and the scattering mechanism [27]–[29]. Consequently, a strong LiDAR return cannot in gen-eral be interpreted as a strong 60-GHz reflection. The objective of this work is therefore not to infer material identity or predict RF received power from LiDAR, but to determine whether LiDAR-observed geometry and surface-return structure can rank naturally occurring surfaces as candidates for RF probing. Our prior work explored LiDAR-aided NLoS path iden-tification and backscatter-guided alignment [30], [31]. The present work extends these studies through a unified surface-prior formulation, controlled cross-view and cross-modal mea-surements, and an independent room-scale evaluation using exhaustive TX–RX beam maps. The paper addresses three research questions: 
+
+RQ1 Which geometric and radiometric LiDAR descriptors retain surface-dependent information across changes in viewing geometry and sensing conditions? 
+
+RQ2 Do oblique 3-D LiDAR surface descriptors contain in-formation associated with the measured 60-GHz surface-mediated response of the same surfaces under a controlled NLoS geometry? 
+
+RQ3 Can instantaneous local 3-D LiDAR observations re-duce RF beam-search uncertainty without a pre-existing environmental map or prior knowledge of the relevant propagation surface? Together, the three research questions progress from LiDAR descriptor robustness, to cross-modal surface association, and finally to communication-level beam-search performance. The main contributions are summarized as follows: 
+
+(a) RX4 (b) RX17 (c) RX49   
+
+> Fig. 1. Representative LiDAR returned-intensity maps at three receiver locations in an indoor environment. Colors indicate relative returned optical power within each panel.
+> •
+
+We formulate LiDAR-assisted NLoS beam search as a 
+
+surface-informed prior that opportunistically ranks candi-date RF directions using locally observed indoor surface structure for targeted RF probing.  
+
+> •
+
+We relate physical surface-height variation to mmWave phase dispersion and distinguish RF surface roughness from LiDAR-observed geometric dispersion, coherence, and planarity.  
+
+> •
+
+We characterize the acquisition dependence of geometric and radiometric LiDAR descriptors and examine their as-sociation with the measured 60-GHz response of matched indoor surfaces.  
+
+> •
+
+We evaluate LiDAR-guided beam selection in a separate indoor environment and compare it with alternative Li-DAR representations, geometry-informed selection, and equal-budget random probing. The remainder of the paper is organized as follows. Sec-tion II develops the LiDAR-derived surface-prior framework and its physical motivation. Section III describes the measure-ment campaigns and evaluation protocol. Section IV addresses RQ1 and RQ2, and Section V addresses RQ3. Section VI discusses the resulting design implications, and Section VII concludes the paper. II. L IDAR-D ERIVED SURFACE PRIORS FOR MM WAVE 
+
+BEAM SEARCH 
+
+The proposed framework uses complementary LiDAR and mmWave observations to exploit naturally occurring indoor surfaces for NLoS communication. The LiDAR observation provides three complementary forms of information: sur-face geometry, apparent optical return, and local geomet-ric/radiometric structure. These observations depend on sens-ing location and viewing geometry. Fig. 1 illustrates this dependence using representative returned-intensity maps from three receiver locations in an indoor environment. Although the physical environment is unchanged, the measured LiDAR response varies with range, viewing angle, visible support, footprint, and occlusion. The communication relevance of these descriptors is evaluated experimentally in Sections IV and V. 
+
+A. Physical Motivation for Surface-Assisted Communication 
+
+The use of LiDAR-observed surfaces as an RF prior is motivated by the dependence of surface-mediated propagation 3
+
+on the physical structure of the reflecting surface. For a surface with physical root-mean-square (RMS) height variation σh,the classical Rayleigh/Beckmann–Kirchhoff rough-surface ap-proximation gives the coherent specular field roughness factor 
+
+ρs = exp[ −8( πσ h cos ϑinc /λ RF )2] [32], [33]. Since reflected power is proportional to the squared magnitude of the field coefficient, the corresponding coherent reflected-power factor is 
+
+ηcoh = |ρs|2 = exp 
+
+"
+
+−
+
+ 4πσ h cos ϑinc 
+
+λRF 
+
+2#
+
+, (1) where ηcoh is the coherent reflected-power factor, λRF is the RF wavelength, and ϑinc is the incidence angle measured from the local surface normal. Equation (1) shows that physical surface-height variation becomes increasingly important as its magnitude grows relative to the wavelength. The associated phase mechanism is summarized by the following lemma. 
+
+Lemma 1: Consider a locally planar surface with zero-mean height deviations hm, m = 1 , . . . , M , and RMS height σh =(M −1 PMm=1 h2
+
+> m
+
+)1/2. For a wave of wavelength λ, the RMS phase dispersion caused by the surface-height variation is 
+
+σϕ(λ) = 2πσ h
+
+λ |cos θi + cos θs| , (2) where θi and θs are the incident and scattered angles, respec-tively, measured from the local surface normal. Thus, phase dispersion increases with the wavelength-normalized height variation σh/λ .
+
+Proof: Let k = 2πλ , denote the wavenumber. For a small local height deviation hm relative to the propagation distances, the incident and scattered path lengths change to first order by hm cos θi and hm cos θs, respectively, up to an overall sign determined by the direction of the surface displacement. The resulting total path-length perturbation is therefore 
+
+∆ℓm = hm (cos θi + cos θs) .
+
+The corresponding phase perturbation is 
+
+ϕm = k∆ℓm = 2πλ hm (cos θi + cos θs) .
+
+Since the height deviations are zero mean, the phase pertur-bations are also zero mean and their RMS value becomes 
+
+σϕ = 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+ϕ2
+
+> m
+
+!1/2
+
+(3) 
+
+=
+
+"
+
+1
+
+M
+
+> M
+
+X
+
+> m=1
+
+ 2πλ hm(cos θi + cos θs)
+
+2#1/2
+
+(4) 
+
+= 2πλ |cos θi + cos θs| 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+h2
+
+> m
+
+!1/2
+
+. (5) Using the definition 
+
+σh = 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+h2
+
+> m
+
+!1/2
+
+gives 
+
+σϕ(λ) = 2πσ h
+
+λ |cos θi + cos θs| ,
+
+which proves (2). For specular reflection, θs = θi, and hence 
+
+σϕ(λ) = 4πσ h cos θi
+
+λ . (6) Thus, larger wavelength-normalized height variation produces larger phase differences among contributions from different parts of the surface and can reduce their coherent concentration in the specular direction. Lemma 1 highlights the role of wavelength. If a surface is physically smooth relative to the much shorter LiDAR wavelength, the same physical height variations are neces-sarily small relative to the 60-GHz wavelength. However, a practical LiDAR point cloud does not directly measure the microscopic σh in (1). Its observed geometry also depends on ranging resolution, beam footprint, sampling density, viewing geometry, edge mixing, and sensor processing. Consequently, high LiDAR planarity or coherence does not by itself establish physical RF smoothness. Likewise, LiDAR observations with greater geometric vari-ation are not discarded a priori, since structured or irregular surfaces may redistribute RF energy into useful off-specular directions. We therefore treat the LiDAR-derived quantities below as observation-domain surface cues and determine their communication relevance experimentally rather than using them as direct estimates of RF roughness or reflection loss. 
+
+B. LiDAR Surface Characterization for Communication 
+
+Let S denote a local LiDAR observation containing NS
+
+returns, with m indexing a return in S. Each return provides the 3-D coordinate pm = [ xm, y m, z m]T, range dL,m , and linear returned intensity IL,m .A nominally range-normalized apparent-return quantity is defined as wL,m = IL,m d2
+
+> L,m
+
+. This compensation removes only the nominal inverse-square range dependence. The quan-tity can still depend on viewing angle, footprint, local surface orientation, and sensor response and is therefore treated as an apparent-return cue rather than an intrinsic material property. 
+
+1) Geometric Return Dispersion: To characterize how closely the measured LiDAR points follow a local plane, let 
+
+δh m denote the perpendicular residual of return m from the best-fit plane through S. The geometric return dispersion is 
+
+Rrms ,L (S) = 
+
+s 1
+
+NS
+
+X
+
+> m∈S
+
+δh 2
+
+> m
+
+. (7) A smaller Rrms ,L (S) indicates that the measured returns lie more closely around a common local plane. This sensor-domain quantity is distinct from the physical RMS height σh
+
+used in Section II-A. 
+
+2) Local Surface Organization: Local surface organization is characterized by how the LiDAR points spread in space. For a horizontal LiDAR slice, let λ1 ≥ λ2 ≥ 0 denote the point-cloud spread along its two principal directions. A well-organized surface slice has a dominant spread along the surface and relatively little spread transverse to it. The 2-D coherence is defined as 4
+
+Π( S) = λ1 − λ2
+
+λ1 + λ2 + ϵΠ
+
+, 0 ≤ Π( S) ≤ 1, (8) where ϵΠ > 0 prevents division by zero. A larger Π( S)
+
+indicates a more clearly organized horizontal surface slice. For a local 3-D point cloud, let λ1 ≥ λ2 ≥ λ3 ≥ 0 denote the spread along its three principal directions. For a planar surface, the two largest spreads lie primarily along the surface, whereas the smallest spread is associated with the surface-normal direction. The 3-D planarity is defined as 
+
+Π3D (S) = λ2 − λ3
+
+λ1 + ϵΠ
+
+. (9) A larger Π3D (S) indicates that the measured returns more closely form a local planar surface. 
+
+3) Radiometric Return Structure: Let the mean linear re-turned intensity within S be 
+
+¯IL(S) = 1
+
+NS
+
+X
+
+> m∈S
+
+IL,m . (10) The returned-intensity coefficient of variation is 
+
+CV I (S) = 
+
+q
+
+N −1
+
+> S
+
+P
+
+> m∈S
+
+ IL,m − ¯IL(S)2
+
+¯IL(S) + ϵI
+
+, (11) where ϵI > 0 prevents numerical instability. A larger CV I (S)
+
+indicates greater variation in the measured optical return across 
+
+S.Localized strong-return behavior is summarized by the linear max-to-mean ratio 
+
+Smax /μ (S) = max m∈S IL,m 
+
+¯IL(S) . (12) A larger Smax /μ (S) indicates that one or more localized returns are strong relative to the mean return. For compact reporting, the values in the tables and figures are expressed in decibels as 10 log 10 Smax /μ (S). Collectively, Rrms ,L , Π, and 
+
+Π3D describe the measured geometric structure, while CV I
+
+and Smax /μ describe radiometric structure. The quantity wL,m 
+
+provides a separate range-compensated apparent-return cue. These descriptors are evaluated individually as surface-ranking cues rather than as direct predictors of RF received power. 
+
+C. Beam-Level Mapping and RF Verification 
+
+The LiDAR point cloud is more densely sampled than the RF beam codebook. Accordingly, the descriptors above are evaluated over LiDAR returns associated with each candi-date RF receive direction. Let ϕL,m denote the measured azimuth of LiDAR return m, and let A(·) denote the angular-registration mapping from the LiDAR coordinate frame to the RF coordinate frame. The registered LiDAR azimuth is 
+
+eϕL,m = A(ϕL,m ) . Each return is then associated with the RF receive direction whose boresight angle is nearest to the registered LiDAR azimuth, 
+
+rm = arg min  
+
+> r∈R
+
+dang 
+
+ eϕL,m , ϕ r
+
+
+
+, (13)   
+
+> (a) Drywall. (b) Copper.
+> Fig. 2. Controlled near-normal LiDAR surface-characterization setup.
+
+where ϕr is the boresight angle of receive direction r and 
+
+dang (·, ·) denotes wrapped angular distance. Let T and R denote the evaluated TX and RX beam codebooks, respectively. At measurement location i, let Pi,t,r 
+
+denote the measured linear RF power for beam pair (t, r ),where t ∈ T and r ∈ R . The exhaustive-search reference is 
+
+P ⋆i = max   
+
+> t∈T , r ∈R
+
+Pi,t,r . (14) For TX-independent LiDAR selection, let SRi (KR) ⊆ R 
+
+contain the KR highest-ranked RX directions. All TX beams are then swept for the retained RX directions, giving 
+
+Pi, sel = max  
+
+> t∈T
+> r∈S Ri(KR)
+
+Pi,t,r , (15) where KR is the number of retained RX directions. The beamforming loss relative to exhaustive search is Li =10 log 10 
+
+ P ⋆i
+
+> Pi, sel
+
+
+
+dB. III. E XPERIMENTAL METHODOLOGY 
+
+The experimental setup spans three campaigns of increas-ing complexity. The first establishes a near-normal LiDAR reference over representative indoor surfaces. The second uses matched full-3-D LiDAR observations of five surfaces under an approximately 45 ◦ geometry and relates them to a controlled 60-GHz NLoS field in an L-shaped corridor. The third evaluates LiDAR-guided beam selection in a sep-arate room-scale environment using exhaustive TX–RX beam measurements and full 3-D LiDAR scans. The near-normal and oblique LiDAR measurements jointly address RQ1, the matched LiDAR–mmWave corridor measurements address RQ2, and the room-scale campaign addresses RQ3. 
+
+A. Near-Normal LiDAR Surface Campaign 
+
+A Quanergy M8 LiDAR is used to characterize 16 in-door surfaces under an approximately near-normal observation geometry. Representative drywall and copper measurement setups are shown in Fig. 2. The near-normal reference is collected at approximately 3 ft 4 in distance. The full 3-D surface point cloud is used to compute the plane-fit RMS and the radiometric descriptors. This campaign establishes controlled surface-dependent observations; it is not an RF reflector test or a semantic material-classification experiment. 5  
+
+> Fig. 3. Controlled LiDAR/mmWave corridor campaign. The LiDAR and 60-GHz transmitter are co-located approximately 14 ft 10 in from the test surface, which is placed near the corner at approximately 45 ◦. The RF receiver samples the resulting surface-mediated field over the blocked hallway grid.
+
+B. Oblique 3-D LiDAR/mmWave Corridor Campaign 
+
+Five matched surfaces (copper, silver, rough wood, card-board, and smooth compressed wood) are observed at approx-imately 45 ◦ in an L-shaped corridor. The 60-GHz measure-ments use Sivers phased-array evaluation kits. The direct TX– RX path is blocked, the test surface is mounted near the corner, and the 60-GHz receiver is moved over 102 locations in the blocked branch. The TX is co-located with the Quanergy M8 LiDAR. This campaign is designed to test whether LiDAR-observed surface characteristics under an oblique geometry are associated with the surface-mediated 60-GHz response under a controlled NLoS configuration. Figure 3 shows the measurement setup. Two full-3-D oblique LiDAR observations are available: a short-range scan at approximately 3 ft 8 in and a long-range observation corresponding to the corridor configuration. Together with the near-normal 3 ft 4 in reference, these observations provide two distinct comparisons. Near-normal versus short-range oblique primarily tests a viewing-condition change at comparable range, whereas short- versus long-range oblique tests the effect of a larger change in acquisition scale while retaining the approximately 45 ◦ surface orientation. Because the sensing conditions and illuminated footprints differ, these are controlled comparisons rather than a pure one-factor calibration. The RF experiment keeps the surface position and orientation fixed while changing the material. All cross-surface RF comparisons use a fixed TX AoD. 
+
+C. Independent Room-Scale Campaign 
+
+The third campaign uses the same Sivers 60-GHz phased-array kits and a Quanergy M8 co-located with the RF receiver. The TX remains fixed while the RX/LiDAR assembly is moved over the room grid in Fig. 4. The TX codebook contains 19 sectors spanning −45 ◦ : 5 ◦ : +45 ◦, and the RX codebook contains 36 sectors spanning −170 ◦ : 10 ◦ : +180 ◦.A complete 19 ×36 RF beam-power map and a full 3-D LiDAR scan are available at each of the 55 measured RX locations. 
+
+> Fig. 4. Room-scale LiDAR/mmWave environment. The TX is fixed while the co-located RX and LiDAR are moved across the measurement grid. Labeled strict-NLoS locations are the primary blockage subset.
+
+The strict-NLoS subset contains 12 locations: rx36, rx42– 44, rx48–52, and rx54–56. Forty-one locations are labeled LoS: rx01–35, rx37–41, and rx46. Locations rx45 and rx47 are mixed. 
+
+D. Local 3-D Beam Representation and Evaluation Protocol 
+
+To form an NLoS-emphasized search region, the forward-facing RX angles toward the TX are pruned at the LoS locations, leaving the side/rear directions for secondary-path evaluation. The resulting receive set is RN = {r ∈ R all :
+
+|ϕr | > 50 ◦}.
+
+The primary 3-D representation uses LiDAR rings 5–7, providing local vertical support around ring 6 (horizontal slice) while limiting the mixing of unrelated surfaces. Ring-6-only and all-ring representations are retained for comparison. To control point-density effects, the sample-count-sensitive descriptors are computed from a common N0 = 64 returns per candidate direction. This choice retains all strict-NLoS candidates while providing sufficient support for the local 3-D descriptors. The subsampling is repeated 200 times, and the median value is retained. The evaluated descriptors include 3-D plane-fit RMS, CV I , Smax /μ , range-normalized apparent return, and local 3-D planarity Π3D .The evaluated descriptors include 3-D plane-fit RMS, CV I ,
+
+Smax /μ , range-normalized apparent return, and local 3-D planarity Π3D . TX-independent selection retains the KR = 7 
+
+highest-ranked RX directions and sweeps all 19 TX beams for each retained direction. The TX location is not used in the LiDAR ranking. For held-out evaluation, the ranking cue is selected using all other locations in the corresponding evaluation subset and is then applied to the held-out location. This leave-one-location-out procedure is repeated for each location. IV. C ONTROLLED LIDAR S URFACE -S ENSING VALIDATION 
+
+This section presents the controlled results for RQ1 and RQ2. 6                                                                              
+
+> TABLE I NEAR -NORMAL LIDAR DESCRIPTORS FOR 16 INDOOR SURFACES .SURFACES MARKED BY ∗ARE RETAINED FOR THE MATCHED 3-D
+> OBLIQUE EXPERIMENT .
+> Surface NSRrms ,L (mm) CV ISmax /μ (dB) Whiteboard 4940 10.59 4.13 22.23 TV screen 4993 13.11 3.00 16.50 Linoleum 5189 12.43 1.65 15.02 Silver ∗5066 25.34 2.51 14.01 Metal tin 4780 14.68 2.38 12.27 Copper ∗4896 23.44 2.49 11.28 Drywall 5032 10.01 0.45 4.83 Rough wood ∗5048 11.57 0.47 4.07 Cardboard ∗5010 9.96 0.36 3.79 Styrofoam 4977 10.21 0.40 3.72 Corkboard 4965 9.95 0.37 3.71 Projector screen 4994 9.58 0.40 3.63 Smooth wood ∗5073 9.54 0.38 3.60 Fabric pinboard 4984 9.88 0.42 3.49 Concrete wall 5025 11.11 0.39 3.43 Carpet 3193 15.67 0.02 0.99
+
+A. RQ1: 3-D Surface Description Across View and Range 
+
+The near-normal campaign first establishes the broader 16-surface reference in Table I. The measurements exhibit sub-stantial surface-dependent variation in the LiDAR return statis-tics. In particular, Smax /μ spans from 0.99 dB for carpet to 
+
+22 .23 dB for whiteboard, while CV I ranges from 0.02 to 4.13 .Whiteboard, TV screen, linoleum, silver, metal tin, and copper exhibit substantially larger localized radiometric contrast than most of the remaining surfaces. This behavior is qualitatively consistent with the observations reported in SpaceBeam [23]. In Table 1 of that work, the authors characterize infrared specularity using the ratio of maximum measured intensity to average intensity and observe that surfaces with higher infrared specularity tend to exhibit lower measured mmWave reflection loss. The numerical values should not be compared directly, however, because the sensing hardware, acquisition geometry, sampled surface regions, and RF measurement conditions differ. More importantly, the optical and mmWave responses are not physically equivalent, so the comparison supports only the broader observation that LiDAR radiometric structure can contain surface-dependent information relevant to RF propagation. Figure 5 provides representative examples of the near-normal 3-D plane fits underlying the geometric RMS de-scriptor. Copper and silver exhibit larger residual point-cloud dispersion ( 23 .44 and 25 .34 mm, respectively) than cardboard and rough wood ( 9.96 and 11 .57 mm, respectively). These differences characterize the measured LiDAR point-cloud ge-ometry under the given acquisition condition; they should not be interpreted as differences in microscopic physical surface roughness at the 60-GHz wavelength scale. For the five surfaces, Table II compares the near-normal reference with two full-3-D oblique observations. Throughout the controlled analysis, r denotes the Pearson correlation coefficient and ρ
+
+denotes the Spearman rank correlation coefficient. Because only five matched surfaces are available, these correlations are interpreted descriptively. A three-condition comparison is used rather than a single near/oblique pair because the long-range observation changes both viewing geometry and acquisition 
+
+(a) Copper (b) Silver 
+
+(c) Cardboard (d) Rough wood  
+
+> Fig. 5. Representative near-normal 3-D LiDAR surface fits. Large residual dispersion is a property of the measured point cloud and is not interpreted as RF-scale physical roughness.
+
+scale. Geometric RMS exhibits complete rank preservation between the near-normal and short-range oblique observations (ρ = 1 .00 ), for which the sensing ranges are comparable. In contrast, the RMS ordering reverses between the short- and long-range oblique observations ( ρ = −0.90 ). This reversal indicates that the long-range change cannot be attributed to incidence angle alone. Changes in LiDAR footprint, sampling density, ranging behavior, retained surface support, and sensor processing with acquisition scale can also affect the measured return-dispersion descriptor. Figure 6 illustrates the different sensitivities of the geo-metric and radiometric descriptors. Geometric RMS preserves the surface ordering between the near-normal and short-range oblique measurements ( ρ = 1 .00 ), which were collected at comparable ranges, but the ordering changes substantially at the long-range condition. In contrast, Smax /μ changes in magnitude across the measurements but retains a strong rank association between the two oblique ranges (ρ = 0.90 ). Intensity CV is less consistent across the three conditions. These results indicate that no single descriptor is robust to all acquisition changes: geometric RMS is more stable under the tested angular change at comparable range, whereas max-to-mean radiometric contrast better preserves surface ranking across the tested oblique range change. 
+
+B. RQ2: Controlled 3-D LiDAR/mmWave Association 
+
+The RF experiment uses the same prescribed corner surface and a fixed TX AoD. The mmWave transmitter is positioned approximately 14 ft 10 in from the surface, while the receiver 7Copper Silver Cardboard Rough wood Smooth wood 0510 15 20 25 30 3-D plane-fit RMS (mm) Near 45° short 45° long 
+
+(a) 3-D geometric RMS. Copper Silver Cardboard Rough wood Smooth wood 0246810 12    
+
+> Smax/  (dB)
+> Near 45° short 45° long
+
+(b) Max-to-mean radiometric contrast. 
+
+Fig. 6. Three-condition full-3-D LiDAR comparison. RMS preserves ordering across the comparable-range angular change but changes strongly at the long range; Smax /μ retains stronger ordering between the two oblique ranges. TABLE II FULL -3-D L IDAR DESCRIPTORS AND CROSS -CONDITION ASSOCIATIONS FOR THE FIVE MATCHED SURFACES . T HE NEAR -NORMAL AND SHORT -RANGE OBLIQUE OBSERVATIONS WERE COLLECTED AT COMPARABLE RANGES , WHEREAS THE THIRD OBSERVATION REPRESENTS THE LONG -RANGE OBLIQUE ACQUISITION CONDITION . C ORRELATIONS ARE DESCRIPTIVE BECAUSE n = 5 .
+
+(a) Full-3-D LiDAR descriptors 
+
+Near, 3 ft 4 in 45 ◦, 3 ft 8 in 45 ◦, long range Surface RMS CV Smax /μ RMS CV Smax /μ RMS CV Smax /μ 
+
+(mm) (dB) (mm) (dB) (mm) (dB) Copper 23.46 2.493 11.23 22.36 0.519 5.81 6.70 0.747 6.22 Silver 25.27 2.493 12.45 31.69 0.310 4.45 7.00 0.938 5.21 Cardboard 9.94 0.361 2.83 9.42 0.496 4.42 7.53 0.305 2.06 Rough wood 11.44 0.472 4.08 10.12 0.395 3.96 7.12 0.271 1.67 Smooth wood 9.51 0.375 3.55 8.68 0.513 3.91 8.35 0.347 2.01 
+
+(b) Cross-condition correlation (r, ρ )
+
+Descriptor Near–45 ◦ short Near–45 ◦ long 45 ◦ short–long RMS (0 .969 , 1.000) (−0.738 , −0.900) (−0.643 , −0.900) CV I (−0.338 , −0.103) (0 .967 , 0.667) (−0.452 , 0.000) 
+
+Smax /μ (0 .650 , 0.600) (0 .953 , 0.500) (0 .839 , 0.900) 
+
+is moved over the 102-point blocked-region grid in the or-thogonal corridor branch. This placement avoids an artificially close TX–surface configuration and better reflects the oper-ating regime of interest, in which a useful passive surface may be separated from the transmitter by several meters. The controlled geometry emphasizes a surface-mediated TX– surface–RX interaction while allowing the spatial structure of the resulting 60-GHz field to be measured throughout the blocked region. Table III summarizes the resulting RF field over the 102-point blocked-region receiver grid. For each surface, coverage is defined as the percentage of receiver-grid locations at which the measured relative RSS exceeds −70 dB. Silver and copper provide the strongest average responses among the five matched surfaces and each maintains RSS above −70 dB over 90.2% of the blocked-region grid. In contrast, cardboard and smooth wood produce substantially weaker average fields, with coverage of 44.1% and 49.0%, respectively. For weakly reflecting or partially transmitting surfaces, the measured field may also contain contributions from structures behind the test 
+
+TABLE III L-SHAPED CORRIDOR RF RESPONSE FOR THE FIVE SURFACES HAVING MATCHED 3-D L IDAR MEASUREMENTS . C OVERAGE (C OV .) IS THE PERCENTAGE OF THE 102 BLOCKED -REGION RECEIVER LOCATIONS WITH RELATIVE RSS GREATER THAN −70 DB. 
+
+Surface Mean Median Peak Cov. > −70 
+
+RSS (dB) (%) Silver -47.84 -53.99 -36.46 90.20 Copper -49.89 -56.70 -40.17 90.20 Rough wood -60.13 -64.48 -48.12 78.43 Cardboard -66.72 -71.70 -57.41 44.12 Smooth wood -68.05 -70.17 -60.07 49.02 
+
+surface and from residual environmental multipath. The re-ported RSS should therefore be interpreted as the received field with the test surface present rather than as an isolated material reflection coefficient. The substantial spatial variation across the receiver grid motivates examining RF spatial statistics in addition to mean received power. Table IV compares the long-range full-3-D LiDAR de-scriptors with the measured 60-GHz response. Mean RSS 8                                    
+
+> TABLE IV ASSOCIATION BETWEEN THE MATCHED LONG -RANGE FULL -3-D L IDAR
+> DESCRIPTORS AND THE MEASURED 60-GH Z SURFACE -MEDIATED FIELD .RF SPATIAL STANDARD DEVIATION AND P90 −P10 ARE COMPUTED OVER THE 102-POINT BLOCKED -REGION RECEIVER GRID .
+> LiDAR descriptor RF metric rρRrms ,L Mean RSS -0.838 -0.900
+> Rrms ,L RF spatial std. -0.653 -0.800
+> Rrms ,L RF P90 −P10 -0.636 -0.600
+> CV IMean RSS 0.907 0.600
+> Smax /μ Mean RSS 0.893 0.600
+> Smax /μ RF P90 −P10 0.865 0.900
+
+characterizes the average received field over the blocked-region grid, the spatial standard deviation measures variation across the grid, and the robust P90 − P10 spread reduces the influence of isolated extreme measurements. Because only five matched surfaces are available, the reported Pearson and Spearman coefficients are interpreted descriptively rather than as population-level material relationships. The measurements show that geometric LiDAR return dis-persion should not be interpreted as a scalar reflector-quality metric. Across the five surfaces, Rrms ,L is negatively associ-ated with mean RSS ( r = −0.838 , ρ = −0.900 ) and with the RF spatial-dispersion measures. Thus, a larger residual about the fitted LiDAR plane does not imply a stronger 60-GHz response under this measurement condition. The radiometric descriptors exhibit a different relationship. Intensity CV has r = 0 .907 with mean RSS, while Smax /μ 
+
+has r = 0 .893 with mean RSS and a strong rank association with the robust RF spatial spread ( ρ = 0 .900 for P90 − P10 ). These observations indicate that the LiDAR return distribution contains surface-dependent information associated with the measured 60-GHz field, even though the optical and RF responses are not physically equivalent. Figure 7 illustrates these matched cross-modal relationships. In particular, copper and silver, which produce the strongest average 60-GHz responses among the five matched surfaces, also exhibit the two largest Smax /μ values. The remain-ing three surfaces exhibit smaller max-to-mean contrast and weaker RF responses. Thus, Smax /μ does not predict received-power magnitude or reproduce the exact RF ordering, but it preserves useful coarse surface ranking for communication-oriented candidate selection. V. R OOM -S CALE VALIDATION : L IDAR-G UIDED BEAM 
+
+SEARCH 
+
+RQ3 evaluates whether the LiDAR-derived surface prior remains useful in an indoor environment where neither the relevant propagation surface nor the dominant NLoS path is prescribed. Rather than predicting RF power directly, the LiDAR observation is used to prioritize receive directions for subsequent RF probing. Performance is evaluated against the measured exhaustive 19 × 36 TX/RX beam map at each room location, which provides the RF reference for determining whether the LiDAR-guided search retains a near-optimal beam while reducing the number of directions that must be probed.                                
+
+> TABLE V FIXED -CUE LIDAR REPRESENTATION COMPARISON OVER THE 12
+> STRICT -NL OSLOCATIONS AT KR= 7 AND N0= 64 . E ACH ENTRY REPORTS THE PERCENTAGE OF LOCATIONS WITH BEAMFORMING LOSS WITHIN 3DBOF EXHAUSTIVE SEARCH ,WITH THE MEDIAN BEAMFORMING LOSS SHOWN IN PARENTHESES .
+> Ranking cue One-ring 2-D Three-ring 3-D All-ring 3-D RMS dispersion 41.7% (4.14 dB) 50.0% (5.71 dB) 66.7% (0.00 dB) Intensity CV 41.7% (5.17 dB) 33.3% (5.50 dB) 16.7% (5.76 dB) Max/mean 41.7% (4.92 dB) 16.7% (8.50 dB) 33.3% (5.76 dB) Coherence / planarity 75.0% (0.00 dB) 75.0% (0.00 dB) 41.7% (6.67 dB) Apparent return 66.7% (0.67 dB) 66.7% (0.67 dB) 75.0% (0.00 dB)
+
+A. LoS-RSS Angular Calibration and Geometry Check 
+
+The 41 LoS-labeled locations are first used as a calibration check for the LiDAR-to-RF angular registration. The direct TX–RX direction is known from the room geometry and is independently observed through the strongest measured LoS RSS beam pair. After registration, the median absolute angular errors are 2.84 ◦ at the TX and 6.34 ◦ at the RX, and 38 /41 = 92 .7% of the LoS locations fall within ±10 ◦ at the TX and 
+
+±20 ◦ at the RX. No NLoS location is used to fit an additional angular offset. With this calibration fixed, we test whether the measured RF beam pair is compatible with a LiDAR-observed single-bounce surface using tolerances of ±7.5◦ at the TX and ±15 ◦
+
+at the RX. Under the full codebook, 7/12 strict-NLoS optima are geometrically compatible. The AoA-pruned receive-region compatibility is 40 /55 = 72 .7% across all measured room locations. At LoS locations, the strongest side/rear secondary component is selected rather than the direct LoS beam. The incompatible cases may result from unobserved surfaces, mul-tiple interactions, off-specular scattering, or sidelobe coupling. Thus, the LoS measurements verify the numerical LiDAR– RF registration, while the compatibility test quantifies how often the registered visible-surface geometry can explain the measured RF direction. 
+
+B. Three-Ring 3-D Representation and Ablation 
+
+Table V compares fixed LiDAR ranking cues across the one-ring 2-D, local three-ring 3-D, and unrestricted all-ring 3-D representations at the primary KR = 7 RX-direction probing budget over the 12 strict-NLoS locations. The reported per-centage denotes the fraction of locations for which the selected beam is within 3 dB of the exhaustive-search optimum. The ring-6 2-D coherence Π( S) in (8) and the local three-ring 3-D planarity Π3D (S) in (9) both achieve 75 .0% within-3-dB recovery with zero median loss. In contrast, fixed all-ring 3-D planarity achieves 41 .7% , while all-ring apparent return achieves 75 .0% . These results show that increasing vertical LiDAR support does not necessarily improve beam ranking and that its effect depends on both the descriptor and the point-cloud representation. Table V is therefore used as a fixed-cue diagnostic to separate the effects of descriptor choice and point-cloud rep-resentation. The following subsection considers a different question; whether a ranking cue selected from the remaining locations generalizes to a held-out location. Equal-budget 96.75 7.00 7.25 7.50 7.75 8.00 8.25 8.50 Long-range 3-D plane-fit RMS (mm) 70     
+
+> 65
+> 60
+> 55
+> 50
+> Mean RSS over 102-point grid (dB)
+> Copper Silver Cardboard Rough wood Smooth wood
+> r=0.838
+> =0.900
+
+(a) 3-D RMS versus mean RSS. 6.75 7.00 7.25 7.50 7.75 8.00 8.25 8.50 Long-range 3-D plane-fit RMS (mm) 6.0 6.5 7.0 7.5 8.0 8.5 9.0 9.5 10.0 RF spatial standard deviation (dB)      
+
+> Copper Silver Cardboard Rough wood Smooth wood
+> r=0.653
+> =0.800
+
+(b) 3-D RMS versus RF spatial stan-dard deviation. 2 3 4 5 6Long-range Smax/ (dB)  
+
+> 16 18 20 22 24 26 RF  P90  P10  spread (dB)
+> Copper Silver Cardboard Rough wood Smooth wood
+> r= 0.865 = 0.900
+
+(c) Smax /μ versus robust RF spatial spread. 
+
+Fig. 7. Matched long-range full-3-D LiDAR/mmWave associations across five controlled surfaces. Geometric RMS does not provide a monotonic reflector ranking, whereas larger max-to-mean LiDAR contrast is associated with stronger measured 60-GHz responses. Correlations are descriptive for n = 5 .TABLE VI HELD -OUT TX-INDEPENDENT PERFORMANCE AT KR = 7 FOR THE THREE LIDAR REPRESENTATIONS . L OS AND ALL 55 USE THE COMMON 
+
+AOA-PRUNED RECEIVE REGION .
+
+Representation Selected cue Strict NLoS LoS secondary All 55 pruned One-ring 2-D Horizontal coherence 9/12 (75.0%) 21/41 (51.2%) 29/55 (52.7%) Three-ring 3-D Local planarity 9/12 (75.0%) 32/41 (78.0%) 41/55 (74.5%) 
+
+All-ring 3-D Held-out selected cue 9/12 (75.0%) 16/41 (39.0%) 15/55 (27.3%) 
+
+random probing is evaluated separately in the system-level comparison of Fig. 9. 
+
+C. Held-Out Three-Ring 3-D Beam Selection 
+
+The objective of this experiment is to determine whether LiDAR beam-level descriptors can reduce RX beam-search effort at a held-out room location. The descriptors are used to rank candidate RX directions, and performance is measured by whether the top KR directions contain an RF beam within 3 dB of the exhaustive-search optimum. Using the leave-one-location-out procedure defined in Sec-tion III-D, the ranking cue for each LiDAR representation is selected using the remaining locations and then applied to the held-out location. For the local three-ring representation, pla-narity is selected in all 12 strict-NLoS folds. At KR = 7 , the resulting search retains a beam within 3 dB of the exhaustive optimum at 9/12 = 75 .0% of the strict-NLoS locations. The procedure is repeated separately over the 41 LoS-labeled locations using the side/rear AoA-pruned receive re-gion. Three-ring planarity is again selected in every fold and achieves 32 /41 = 78 .0% within-3-dB recovery. A separate held-out evaluation over all 55 measured locations uses the same AoA-pruned receive region and achieves 41 /55 = 74 .5% 
+
+recovery with zero median loss. These are separate within-subset evaluations; the method is not trained on the strict-NLoS subset and then transfer-tested to the other locations. Table VI and Fig. 8 compare the three LiDAR representations. 
+
+D. Comparison with a Known-TX Geometry Baseline 
+
+Figure 9 compares the cumulative distribution of beamform-ing loss over all 55 measured locations under the common Strict NLoS LoS side/rear All 55 side/rear 020 40 60 80 100 
+
+> Held-out recovery within 3 dB (%)
+
+One-ring 2-D Three-ring 3-D All-ring 3-D 
+
+Fig. 8. Held-out TX-independent beam-selection performance at KR = 7 
+
+for the three LiDAR representations across strict-NLoS, LoS-secondary, and all-location AoA-pruned evaluations. 
+
+KR = 7 RX-direction probing budget. The held-out three-ring 3-D planarity method achieves within-3-dB recovery at 
+
+41 /55 = 74 .5% of the locations, compared with 43 .6% 
+
+for the known-TX minimum TX–surface–RX path baseline and 44 .3% for equal-budget random probing. The geometry baseline uses additional knowledge of the TX location to rank candidate paths, whereas the three-ring method ranks RX directions from locally observed LiDAR surface structure without assuming the upstream propagation path. The results therefore show that local 3-D surface structure can provide a useful beam-search prior even when explicit TX–surface–RX 10 
+
+TABLE VII SUMMARY OF THE EXPERIMENTAL ANSWERS TO RQ1–RQ3 AND THEIR IMPLICATIONS FOR LIDAR– MM WAVE BEAM MANAGEMENT .                        
+
+> RQ Key Experimental Evidence Answer and IoT Implication
+> RQ1 Descriptor stability depends on the LiDAR acquisition condition. Geometric RMS preserves surface ordering at comparable range, whereas Smax /μ shows stronger rank persistence across the two tested oblique ranges.
+> Descriptor behavior is acquisition dependent. Surface priors should therefore be derived from the current LiDAR observation rather than treated as fixed material properties. RQ2 In the matched corridor measurements, copper and silver produce the strongest average 60-GHz fields and also exhibit the largest LiDAR max-to-mean radiometric contrast, although the exact RF ordering is not preserved.
+> LiDAR provides surface-ranking information but does not directly predict the 60-GHz response. This supports LiDAR-guided candidate prioritization followed by RF verification. RQ3 With KR=7, held-out three-ring 3-D planarity retains a beam within 3 dB of exhaustive search at 41 /55 = 74 .5% of the measured locations under the common AoA-pruned receive-region evaluation.
+> Local LiDAR structure can reduce beam-search uncertainty. Li-DAR prioritizes RX directions for RF probing, while the mmWave measurements determine the final beam. 0.0 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0
+> Beamforming loss (dB)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> CDF
+> 3-dB criterion
+> One-ring 2-D Three-ring 3-D All-ring 3-D Min. TX-surface-RX path Random probing (expected)
+
+Fig. 9. CDF of beamforming loss at KR = 7 over all 55 locations using the common AoA-pruned receive region. The three-ring LiDAR result uses held-out cue selection; the known-TX minimum-path geometry and random baselines use the same seven-direction probing budget. 
+
+path geometry is not used. VI. D ISCUSSION 
+
+The three measurement campaigns provide affirmative but bounded answers to RQ1–RQ3 and demonstrate a multimodal approach for exploiting naturally occurring passive reflectors in indoor environments. In this framework, LiDAR provides environmental information about surface geometry and return structure, while the mmWave radio determines the commu-nication utility of the observed surfaces through RF probing. The central result is therefore not that LiDAR predicts 60-GHz received power, but that complementary information from the two modalities can reduce uncertainty about which visible sur-faces and directions are worth probing. Table VII summarizes the experimental evidence and the resulting answers to the three research questions. 
+
+A. Acquisition Dependence and Cross-Modal Interpretation 
+
+RQ1 shows that the measured LiDAR descriptors should be interpreted as properties of the observed surface under the current sensing condition rather than as intrinsic mate-rial constants. In particular, the near-normal to short-range oblique experiment preserves the geometric RMS ordering, whereas the long-range oblique condition changes it substan-tially. The change cannot be attributed to incidence angle alone because range, footprint, sampling, retained support, and sensor response also change. Consequently, Rrms ,L represents geometric return dispersion rather than microscopic RF-scale roughness. The radiometric results provide a more useful communication-oriented observation. Although Smax /μ is not invariant in magnitude, it retains stronger ordering across the tested oblique conditions and, in RQ2, places copper and silver surfaces above the three weaker RF surfaces. This does not establish an optical-to-RF reflection law. Instead, it shows that one sensing modality can provide useful prior information for another: LiDAR can rank naturally occurring candidate reflectors, while RF measurements determine which surface actually supports the useful communication link. 
+
+B. Local 3-D Structure for Beam Search 
+
+RQ3 extends this multimodal surface-prior concept to a room where neither the relevant surface nor the propagation path is prescribed. The room results show that a local three-ring representation is preferable to unrestricted vertical ag-gregation. Combining all eight rings can mix floor, walls, furniture, and other structures within the same azimuth sector, whereas the three-ring representation better preserves local surface organization. The held-out beam-selection results provide the communication-level evidence. Using only the top KR = 7 
+
+LiDAR-ranked RX directions, three-ring planarity retains a beam within 3 dB of the exhaustive optimum at 75 .0% 
+
+of strict-NLoS locations, 78 .0% of the LoS locations when searching for side/rear secondary components, and 74 .5% 
+
+over all 55 measured locations. These results illustrate the complementary roles of the two modalities. 
+
+C. Surface Characterization Rather Than Material Classifica-tion 
+
+The proposed approach does not require semantic mate-rial identification. Instead, the objective is communication-oriented surface characterization: identify naturally available indoor surfaces that are geometrically plausible and struc-turally promising enough to merit RF probing. Exact material identity is neither required nor inferred. This distinction is important because optical and 60-GHz responses depend on different wavelengths, material prop-erties, polarizations, and propagation geometries. A surface that is prominent in LiDAR may not provide the strongest 11 
+
+RF reflection toward a particular receiver. The multimodal framework therefore does not require a direct mapping be-tween LiDAR return strength and RF power. LiDAR provides a prior for identifying candidate passive reflectors, while RF measurements remain the final indicator of communication utility. VII. C ONCLUSION 
+
+This paper developed and experimentally evaluated a multi-modal LiDAR–mmWave framework for sensing-assisted beam search in indoor 60-GHz networks. The framework pro-poses exploiting indoor reflective surfaces to support NLoS beam search. LiDAR provides geometric and radiometric surface information to prioritize candidate RF directions, while RF measurements determine the final communication beam. The controlled experiments show that LiDAR provides use-ful surface-dependent information for communication-oriented ranking. Geometric return dispersion remains consistent at comparable LiDAR ranges, while max-to-mean radiometric contrast is more persistent across the tested oblique ranges and is associated with stronger measured 60-GHz responses. In the room-scale experiment, local three-ring 3-D planarity retains a beam within 3 dB of exhaustive search at 74 .5% of the measured locations under the common AoA-pruned evaluation using KR = 7 RX directions. Future work will extend the framework to broader indoor environments and adaptive 3-D surface representations. Over-all, the results support using LiDAR-observed surface structure to prioritize candidate RF directions, followed by targeted RF probing for final beam selection. REFERENCES [1] B. P. S. Sahoo, C.-C. Chou, C.-W. Weng, and H.-Y. Wei, “Enabling millimeter-wave 5G networks for massive IoT applications: A closer look at the issues impacting millimeter-waves in consumer devices under the 5G framework,” IEEE Consum. Electron. Mag. , vol. 8, no. 1, pp. 49–54, Jan. 2019. [2] T. H. L. Dinh, M. Kaneko, and K. Fujii, “Device selection and beamforming optimization in large-scale mmWave IoT networks,” IEEE Internet Things J. , vol. 9, no. 24, pp. 25395–25408, 2022. [3] D. Solomitckii, A. Orsino, S. Andreev, Y. Koucheryavy, and M. Valkama, “Characterization of mmWave channel properties at 28 and 60 GHz in factory automation deployments,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , 2018, pp. 1–6. [4] C. Cano, G. H. Sim, A. Asadi, and X. Vilajosana, “A channel mea-surement campaign for mmWave communication in industrial settings,” 
+
+IEEE Trans. Wireless Commun. , vol. 20, no. 1, pp. 299–315, Jan. 2021. [5] J.-W. Kim, W.-H. Lim, and H. L. Lee, “Widebeam coverage antenna so-lution for low-complexity mmWave indoor IoT network,” IEEE Internet Things J. , vol. 11, no. 7, pp. 12012–12021, Apr. 2024. [6] B. Langen, G. Lober, and W. Herzig, “Reflection and transmission behaviour of building materials at 60 GHz,” in Proc. 5th IEEE Int. Symp. Pers., Indoor Mobile Radio Commun. (PIMRC) , The Hague, The Nether-lands, 1994, vol. 2, pp. 505–509, doi: 10.1109/WNCMF.1994.529141. [7] J. Lu, D. Steinbach, P. Cabrol, P. Pietraski, and R. V. Pragada, “Propaga-tion characterization of an office building in the 60 GHz band,” in Proc. 8th Eur. Conf. Antennas Propag. (EuCAP) , The Hague, The Netherlands, 2014, pp. 809–813, doi: 10.1109/EuCAP.2014.6901885. [8] Telecom Infra Project, “Analysis of 28 GHz and 60 GHz channel measurements in an indoor environment,” Telecom Infra Project, Inc., White Paper, Aug. 2019. [9] Y. Xing, O. Kanhere, S. Ju, and T. S. Rappaport, “Indoor wireless channel properties at millimeter wave and sub-terahertz frequencies,” in 
+
+Proc. IEEE Global Commun. Conf. (GLOBECOM) , Waikoloa, HI, USA, Dec. 2019, pp. 1–6, doi: 10.1109/GLOBECOM38437.2019.9013236. [10] W. Khawaja, O. Ozdemir, Y. Yapici, F. Erden, M. Ezuma, and I. Gu-venc, “Coverage enhancement for NLOS mmWave links using passive reflectors,” IEEE Open J. Commun. Soc. , vol. 1, pp. 263–281, 2020, doi: 10.1109/OJCOMS.2020.2969751. [11] Q. Xue, C. Ji, S. Ma, J. Guo, Y. Xu, Q. Chen, and W. Zhang, “A survey of beam management for mmWave and THz communications towards 6G,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1520–1559, 3rd Quart. 2024, doi: 10.1109/COMST.2024.3361991. [12] A. Alkhateeb, O. El Ayach, G. Leus, and R. W. Heath, Jr., “Channel estimation and hybrid precoding for millimeter wave cellular systems,” 
+
+IEEE J. Sel. Topics Signal Process. , vol. 8, no. 5, pp. 831–846, Oct. 2014, doi: 10.1109/JSTSP.2014.2334278. [13] M. E. Eltayeb, A. Alkhateeb, R. W. Heath, Jr., and T. Y. Al-Naffouri, “Opportunistic beam training with hybrid analog/digital codebooks for mmWave systems,” in Proc. IEEE Global Conf. Signal Inf. Pro-cess. (GlobalSIP) , Orlando, FL, USA, Dec. 2015, pp. 315–319, doi: 10.1109/GlobalSIP.2015.7418208. [14] Q. Xiao, Y. He, G. Yu, J. Yuan, and R. Yin, “Localization-assisted fast and robust beam optimization for mmWave communications,” IEEE Internet Things J. , vol. 12, no. 9, pp. 12383–12396, May 2025. [15] F. Liu, Y. Cui, C. Masouros, J. Xu, T. X. Han, Y. C. Eldar, and S. Buzzi, “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, Jun. 2022, doi: 10.1109/JSAC.2022.3156632. [16] K. Patel and R. W. Heath, Jr., “Harnessing multimodal sensing for multi-user beamforming in mmWave systems,” IEEE Trans. Wire-less Commun. , vol. 23, no. 12, pp. 18725–18739, Dec. 2024, doi: 10.1109/TWC.2024.3475950. [17] Y. Peng, L. Xiang, K. Yang, F. Jiang, K. Wang, and D. O. Wu, “SIMAC: A semantic-driven integrated multimodal sensing and communication framework,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 673–688, 2026, doi: 10.1109/JSAC.2025.3610398. [18] A. Klautau, N. Gonz´ alez-Prelcic, and R. W. Heath, Jr., “LIDAR data for deep learning-based mmWave beam-selection,” IEEE Wire-less Commun. Lett. , vol. 8, no. 3, pp. 909–912, Jun. 2019, doi: 10.1109/LWC.2019.2899571. [19] M. Boloursaz Mashhadi, M. Jankowski, T.-Y. Tung, S. Kobus, and D. G¨ und¨ uz, “Federated mmWave beam selection utilizing LIDAR data,” 
+
+IEEE Wireless Commun. Lett. , vol. 10, no. 10, pp. 2269–2273, Oct. 2021, doi: 10.1109/LWC.2021.3099136. [20] S. Jiang, G. Charan, and A. Alkhateeb, “LiDAR aided future beam prediction in real-world millimeter wave V2I communications,” IEEE Wireless Commun. Lett. , vol. 12, no. 2, pp. 212–216, Feb. 2023, doi: 10.1109/LWC.2022.3219409. [21] S. Tariq, B. E. Arfeto, U. Khalid, S. Kim, T. Q. Duong, and H. Shin, “Deep quantum-transformer networks for multimodal beam prediction in ISAC systems,” IEEE Internet Things J. , vol. 11, no. 18, pp. 29387– 29401, Sep. 2024, doi: 10.1109/JIOT.2024.3420455. [22] Z. Deng, M. Xue, S. Xiong, C. Luo, and Y. Luo, “Toward reliable mul-timodal beam prediction in mmWave communications via probabilistic embedding and uncertainty-aware,” IEEE Internet Things J. , vol. 13, no. 3, pp. 5097–5112, Feb. 2026, doi: 10.1109/JIOT.2025.3641184. [23] T. Woodford, X. Zhang, E. Chai, K. Sundaresan, and A. Khojastepour, “SpaceBeam: LiDAR-driven one-shot mmWave beam management,” in 
+
+Proc. 19th Annu. Int. Conf. Mobile Syst., Appl., Services (MobiSys’21) ,2021, pp. 389–401, doi: 10.1145/3458864.3466864. [24] U. Virk, S. Nguyen, K. Haneda, and J.-F. Wagen, “On-site permittivity estimation at 60 GHz through reflecting surface identification in the point cloud,” IEEE Trans. Antennas Propag. , vol. 66, no. 7, pp. 3599–3609, Jul. 2018, doi: 10.1109/TAP.2018.2829798. [25] B. H¨ ofle and N. Pfeifer, “Correction of laser scanning intensity data: Data and model-driven approaches,” ISPRS J. Photogramm. Remote Sens. , vol. 62, no. 6, pp. 415–433, Dec. 2007, doi: 10.1016/j.isprsjprs.2007.05.008. [26] K. Tan and X. Cheng, “Correction of incidence angle and distance effects on TLS intensity data based on reference targets,” Remote Sens. , vol. 8, no. 3, Art. no. 251, Mar. 2016, doi: 10.3390/rs8030251. [27] K. Sato, T. Manabe, T. Ihara, H. Saito, S. Ito, T. Tanaka, K. Sugai, N. Ohmi, Y. Murakami, M. Shibayama, Y. Konishi, and T. Kimura, “Measurements of reflection and transmission characteristics of inte-rior structures of office building in the 60-GHz band,” IEEE Trans. Antennas Propag. , vol. 45, no. 12, pp. 1783–1792, Dec. 1997, doi: 10.1109/8.650196. [28] A. A. Goulianos, A. L. Freire, T. Barratt, E. Mellios, P. Cain, M. Rumney, A. Nix, and M. Beach, “Measurements and characterisation of surface scattering at 60 GHz,” in Proc. IEEE 86th Veh. Technol. Conf. (VTC-Fall) , Toronto, ON, Canada, 2017, pp. 1–5, doi: 10.1109/VTC-Fall.2017.8288373. 12 
+
+[29] V. Degli-Esposti, F. Fuschini, E. M. Vitucci, and G. Falciasecca, “Measurement and modelling of scattering from buildings,” IEEE Trans. Antennas Propag. , vol. 55, no. 1, pp. 143–153, Jan. 2007, doi: 10.1109/TAP.2006.888422. [30] D. Davis, R. Lomboy, L. S. Ho, and M. E. Eltayeb, “LiDAR-aided NLoS path identification for enhanced indoor mmWave communication,” in 
+
+Proc. IEEE 22nd Consumer Commun. Netw. Conf. (CCNC) , Las Vegas, NV, USA, 2025, pp. 1–4, doi: 10.1109/CCNC54725.2025.10976030. [31] A. Ashtekar and M. E. Eltayeb, “LiDAR backscatter-driven mmWave beam alignment in indoor NLoS environments,” in Proc. IEEE 23rd Consumer Commun. Netw. Conf. (CCNC) , 2026, pp. 1–6, doi: 10.1109/CCNC65079.2026.11366599. [32] R. Piesiewicz, C. Jansen, D. Mittleman, T. Kleine-Ostmann, M. Koch, and T. K¨ urner, “Scattering analysis for the modeling of THz commu-nication systems,” IEEE Trans. Antennas Propag. , vol. 55, no. 11, pp. 3002–3009, Nov. 2007, doi: 10.1109/TAP.2007.908559. [33] S. Ju et al., “Scattering mechanisms and modeling for terahertz wireless communications,” in Proc. IEEE Int. Conf. Commun. (ICC) , Shanghai, China, 2019, pp. 1–7, doi: 10.1109/ICC.2019.8761205.

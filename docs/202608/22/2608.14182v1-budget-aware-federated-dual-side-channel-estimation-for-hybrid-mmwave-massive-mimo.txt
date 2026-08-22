@@ -1,0 +1,414 @@
+Title: Budget-Aware Federated Dual-Side Channel Estimation for Hybrid mmWave Massive MIMO
+
+URL Source: https://arxiv.org/pdf/2608.14182v1
+
+Published Time: Mon, 17 Aug 2026 00:42:26 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Budget-Aware Federated Dual-Side Channel Estimation for Hybrid mmWave Massive MIMO 
+
+Jiawei Chen ∗, Ruining Fan ∗, Mouli Chakraborty †, Avishek Nag ‡, and Anshu Mukherjee ∗§ ∗School of Electrical and Electronic Engineering, University College Dublin, Ireland 
+
+†School of Computer Science and Statistics, Trinity College Dublin, Ireland 
+
+‡School of Computer Science, University College Dublin, Ireland 
+
+§Beijing-Dublin International College, Beijing University of Technology, Chaoyang, Beijing, China Email: {jiawei.chen, ruining.fan }@ucdconnect.ie, moulichakraborty@ieee.org, avishek.nag@ucd.ie, anshu.mukherjee@ieee.org 
+
+Abstract —This work studies communication-constrained fed-erated dual-side channel state information (CSI) estimation in hybrid millimeter-wave (mmWave) massive multiple input multiple output (MIMO) systems. Accurate CSI recovery is challenging because hybrid beamforming yields compressed and noisy observations, while repeated model exchange in federated learning (FL) makes communication efficiency strongly depen-dent on estimator size. Rather than developing a new federated optimization algorithm, we focus on estimator design under standard federated averaging (FedAvg) and study how to use a limited parameter budget effectively under repeated model exchange. Based on this perspective, we propose a budget-aware recalibrated refinement network (BARRNet), which combines a compact residual backbone with lightweight channel-wise recalibration for dual-side CSI refinement. Simulation results show that BARRNet achieves a better normalized mean squared error (NMSE)–communication tradeoff than the backbone-only control and heavier convolutional neural network (CNN) base-lines. At 5 dB SNR, for the -13 dB DL NMSE target, it reduces the cumulative communication required by 28.9% relative to the architecture-matched backbone-only control. These results indicate that communication-efficient federated CSI estimation depends not only on model compactness, but also on how limited model capacity is used under repeated model exchange. 
+
+Index Terms —federated learning, channel estimation, hybrid mmWave massive MIMO, dual-side CSI estimation, communica-tion efficiency, budget-aware design 
+
+I. I NTRODUCTION 
+
+Millimeter-wave (mmWave) massive multiple-input multiple-output (MIMO) is a key technology for high-capacity wireless communications due to its large bandwidth and spatial multiplexing capability. Fully digital beamforming requires one radio-frequency (RF) chain per antenna, resulting in high hardware cost and power consumption in large arrays. Hybrid analog/digital beamforming provides a practical alternative by using fewer RF chains while retaining most of the beamforming gain [1], [2]. However, accurate channel state information (CSI) remains essential, and channel estimation is challenging because observations are compressed by the hybrid RF architecture and corrupted by noise. Recent learning-based methods have shown strong potential for channel estimation, including dual-side CSI refinement [3]–[5]. However, most existing approaches are trained cen-trally, assuming that channel samples collected at user devices can be aggregated at a server. In practical wireless networks, channel data are naturally distributed across users, and direct sharing may incur excessive communication overhead or raise privacy concerns. Federated learning (FL) addresses this issue by keeping local data at clients and exchanging only model parameters during training [6], [7]. However, repeated model exchange still incurs substantial overhead, especially on the uplink. Under fixed-precision transmission, this overhead is largely determined by the number of trainable parameters. Existing communication-efficient FL studies have mainly focused on optimization improvement and update reduction through quan-tization or compression [6], [8], [9]. By comparison, the allo-cation of a limited estimator parameter budget under repeated model exchange has been less explicitly studied in federated CSI estimation. Unlike prior FL-based channel estimation studies, including recent dual-side massive MIMO and RIS-aided settings [10], [11], this work focuses on estimator-level parameter-budget allocation under repeated model exchange. In other words, most prior communication-efficient FL studies focus on reducing the cost of transmitting model updates, whereas this work focuses on how the estimator itself should be designed when every trainable parameter is repeatedly exchanged. In this work, we study federated dual-side CSI estimation from a budget-aware estimator design perspective. Rather than modifying the federated optimization algorithm, we fix standard federated averaging (FedAvg) and focus on estimator design under repeated parameter transmission. For the struc-tured observations considered here, communication efficiency depends not only on keeping the estimator compact, but also on allocating limited parameters to the components that contribute most to performance. Based on this perspective, we propose budget-aware re-calibration refinement network (BARRNet), which refines structured downlink and uplink observations using a compact residual backbone enhanced by a lightweight channel-wise recalibration module. An architecture-matched backbone-only control is used to isolate whether the gain comes from im-proved parameter budget allocation rather than merely adding arXiv:2608.14182v1 [eess.SP] 14 Aug 2026 parameters. The main contributions of this work are summarized as follows:  
+
+> •
+
+We construct structured downlink and uplink observations from compressed hybrid measurements, enabling a uni-fied learning-based CSI refinement pipeline for dual-side channel estimation.  
+
+> •
+
+We formulate communication-constrained federated dual-side CSI estimation as an estimator-level parameter-budget-allocation problem under repeated model ex-change and develop BARRNet as a lightweight communication-aware refinement architecture under stan-dard FedAvg.  
+
+> •
+
+We provide architecture-matched evidence that lightweight channel-wise recalibration uses a limited parameter budget more effectively than uniform backbone scaling and yields a better NMSE–communication tradeoff. II. S YSTEM MODEL 
+
+As illustrated in Fig. 1, we consider a multi-user mmWave massive MIMO system with dual-side hybrid beamforming, where the base station (BS) employs digital baseband pre-coding and analog RF precoding, and each user employs analog RF combining followed by baseband combining. The BS is equipped with NBS antennas and NRF RF chains, and serves K users. Each user equipment (UE) is equipped with NUE antennas and N UE RF RF chains. A fully connected hybrid structure is adopted, where the BS employs the analog precoder FRF and the kth UE employs the analog combiner 
+
+WRF ,k . Each RF chain is connected to all antennas through phase shifters. The analog precoder and combiner satisfy the constant modulus constraints 
+
+|[FRF ]i,j | = 1
+
+√NBS 
+
+, |[WRF ,k ]m,n | = 1
+
+√NUE 
+
+. (1) We consider a narrowband block-fading mmWave channel. Let Hk ∈ CNBS ×NUE denote the uplink channel from the k-th UE to the BS. Using the geometric Saleh–Valenzuela model, it is given by [2] 
+
+Hk =
+
+r NBS NUE 
+
+L
+
+> L
+
+X
+
+> l=1
+
+αk,l aBS (φk,l )aHU E (ϑk,l ), (2) where (·)H denotes the Hermitian transpose, L is the number of propagation paths, αk,l is the complex gain of the lth path, and φk,l and ϑk,l denote the angle of arrival (AoA) and angle of departure (AoD), respectively. Here, aBS (φk,l ) ∈ CNBS ×1
+
+and aU E (ϑk,l ) ∈ CNUE ×1 denote the BS and UE array response vectors, respectively. Under time division duplex (TDD) operation, the corresponding downlink channel is HHk .Since hybrid beamforming compresses the received mea-surements into a lower dimensional RF domain, direct CSI recovery is difficult. We therefore construct structured obser-vations for both downlink (DL) and uplink (UL) transmission so that they become suitable for learning based refinement [1], [2], [10]. For DL training, standard discrete Fourier transform (DFT) codebooks are used at both the BS and the UE [10]. Let 
+
+¯FBS ∈ CNBS ×NBS and ¯WUE ,k ∈ CNUE ×NUE denote the cor-responding normalized DFT codebook matrices at the BS and the kth UE, respectively. The received DL pilot observation is 
+
+YDL  
+
+> k
+
+= ¯WH
+
+> UE ,k
+
+HHk ¯FBS + ZDL  
+
+> k
+
+, (3) where ZDL  
+
+> k
+
+∈ CNUE ×NBS is additive Gaussian noise. Project-ing the observation back through the conjugate DFT bases yields 
+
+Rk = ¯WUE ,k YDL  
+
+> k
+
+¯FH 
+
+> BS
+
+= HHk + eZDL  
+
+> k
+
+, (4) where eZDL  
+
+> k
+
+= ¯WUE ,k ZDL  
+
+> k
+
+¯FH 
+
+> BS
+
+and Rk ∈ CNUE ×NBS is the structured noisy DL observation. For UL training, each UE transmits an orthogonal pilot matrix Pk ∈ CNUE ×T , where PkPHk = I and PkPHj = 0
+
+for k̸ = j. To probe the BS array with only NRF RF chains, the BS employs D successive analog combiners, giving 
+
+Feq = [ F1, . . . , FD ] ∈ CNBS ×DN RF .
+
+The aggregated UL pilot observation is 
+
+YUL = FH
+
+> eq
+> K
+
+X
+
+> k=1
+
+HkPk + ZUL , (5) where ZUL ∈ CDN RF ×T is additive Gaussian noise. Pilot correlation and spatial back-projection give 
+
+Gk = Feq YUL PHk ≈ Hk + eZUL  
+
+> k
+
+, (6) where eZUL  
+
+> k
+
+= Feq ZUL PHk and Gk ∈ CNBS ×NUE is the structured noisy UL observation. Hence, Rk and Gk provide unified inputs for learning-based CSI refinement, allowing the same compact architecture to be applied to both DL and UL. III. P ROBLEM FORMULATION 
+
+A. Federated Channel Estimation Objective 
+
+Based on the DL/UL observation construction in Section II, each client obtains a structured noisy observation for channel estimation. Since these observations are locally generated and naturally distributed across users, we formulate CSI estimation as a federated supervised learning problem [12]. For notational simplicity, let Xk denote the noisy structured observation and let Yk denote the corresponding clean channel target, where 
+
+(Xk, Yk) = 
+
+(
+
+(Rk, HHk ), for DL ,
+
+(Gk, Hk), for UL . (7) To fit the neural estimator, each complex-valued matrix is converted into a real-valued tensor by stacking its real and imaginary parts along the channel dimension. This unified rep-resentation enables the same compact estimator design to be applied consistently to both downlink and uplink refinement. Let Nk denote the number of local training samples at UE 
+
+k. The local dataset is 
+
+Dk = {(X(i) 
+
+> k
+
+, Y(i) 
+
+> k
+
+)}Nk
+
+> i=1
+
+. (8) S  
+
+> Baseband
+> Precoder
+> 𝐹 𝐵𝐵
+> NRF × N s
+> RF Chain
+> RF Chain
+> RF Chain
+> Analog
+> Precoder
+> 𝐹 𝑅𝐹
+> NBS × N RF
+> 𝐇 1𝐻
+> 𝐇 2𝐻
+> 𝐇 𝐾 𝐻
+
+Base Station  Multi -user Receiver Side            
+
+> Baseband Combiner 𝑊 {𝐵𝐵,2}
+> Analog combiner
+> 𝑊 {𝑅𝐹,2}
+> N𝑈𝐸 × N 𝑅𝐹 𝑈𝐸
+> Baseband Combiner 𝑊 {𝐵𝐵,𝑘}
+> Analog combiner
+> 𝑊 {𝑅𝐹,𝑘}
+> N𝑈𝐸 × N 𝑅𝐹 𝑈𝐸 N𝑅𝐹 𝑈𝐸 × N 𝑠
+> N𝑅𝐹 𝑈𝐸 × N 𝑠
+> RF Chain
+> Bank
+> Baseband Combiner 𝑊 {𝐵𝐵,1}
+> Analog combiner
+> 𝑊 {𝑅𝐹,1}
+> N𝑈𝐸 × N 𝑅𝐹 𝑈𝐸 N𝑅𝐹 𝑈𝐸 × N 𝑠 N𝑅𝐹 𝑈𝐸
+> N𝑅𝐹 𝑈𝐸
+> N𝑅𝐹 𝑈𝐸
+> RF Chain
+> Bank
+> RF Chain
+> Bank
+> s1
+> s2
+> sk
+
+{𝐇 𝐾 𝐻 }𝑘=1 𝐾 Fig. 1. Hybrid multi-user massive MIMO system with dual-side hybrid beamforming. The BS performs digital baseband precoding followed by analog RF precoding, and transmits to multiple users through channels {HHk }Kk=1 . Each user employs analog RF combining followed by baseband combining. 
+
+Given a neural estimator fη (·), the local training objective is defined as 
+
+Lk(η) = 1
+
+NkNkX
+
+> i=1
+
+Y(i) 
+
+> k
+
+− fη (X(i) 
+
+> k
+
+) 2
+
+> F
+
+. (9) The corresponding global objective is 
+
+min 
+
+> η
+> K
+
+X
+
+> k=1
+
+pkLk(η), (10) where pk = NkPKj=1 Nj
+
+is the aggregation weight of UE k,typically chosen according to the local data size. 
+
+B. Communication-Constrained Federated Optimization 
+
+The federated setting avoids uploading raw CSI samples to the BS, but each communication round still requires global model broadcast and local model upload. This overhead be-comes critical when the estimator is exchanged repeatedly over many rounds, making communication efficiency closely tied to the number of transmitted parameters. In round t, the BS broadcasts the current global parameters to the participating client set St, and each selected client uploads its updated local parameters to the BS. Let Pmodel 
+
+denote the number of transmitted parameters, and let bDL and 
+
+bU L denote the downlink and uplink bitwidth per parameter, respectively. We use a first-order communication accounting model in which the dominant per-round cost is 
+
+Bround (t) = |St| Pmodel (bDL + bU L ). (11) This accounting captures the leading dependence on parameter count under repeated model exchange while abstracting away protocol overhead and implementation-specific details. Under standard FP32 transmission, bDL and bU L are fixed, so (11) shows that the main estimator design variable that can be reduced is the parameter count. This motivates a compact channel estimator for communication-constrained FL. Given a total communication budget Bmax , the learning problem is formulated as 
+
+min 
+
+> η
+> K
+
+X
+
+> k=1
+
+pkLk(η) s.t. 
+
+> T
+
+X
+
+> t=1
+
+Bround (t) ≤ Bmax . (12) The main objective of this work is not to reduce the number of communication rounds through a new federated optimization rule, but to study how estimator design affects the normalized mean square error (NMSE)–communication tradeoff under an explicit communication budget. Accordingly, in addition to the final NMSE, we also evaluate the cumulative communication required to reach a target estimation accuracy. In the following, BARRNet is trained under standard FedAvg, and the budget-aware aspect is reflected through the communication constraint in (12), rather than through a new federated optimization or update compression mechanism. Therefore, the goal is not simply to reduce model size, but to use the available model capacity more effectively under a fixed communication budget. IV. B UDGET -A WARE RECALIBRATED REFINEMENT 
+
+NETWORK 
+
+A. Design Motivation 
+
+In the considered federated setting, every additional param-eter contributes directly to repeated model transmission. Under fixed-precision exchange, model size is therefore not merely a complexity issue, but an estimator level communication budget variable. For the structured dual-side observations considered here, a compact residual backbone already provides a strong baseline. Our hypothesis is that, under repeated model exchange, a small number of extra parameters may be used more effectively for selective feature recalibration than for uniform backbone scaling. This is later tested against an architecture-matched backbone-only control in which the recalibration module is re-moved while the refinement backbone is otherwise unchanged. X                   
+
+> noisy observation Compact Encoder Channel-wise Recalibration Residual Refinement Head ˆN×
+> β
+> −ˆH
+> Fig. 2. Overview of BARRNet. A compact encoder Eϕextracts latent features, a channel-wise recalibration module Gψreweights them, and a residual refinement head Dωpredicts the disturbance estimate ˆNfor channel reconstruction ˆH=X−βˆN.
+
+B. Selective Feature Recalibration under a Parameter Budget 
+
+As shown in Fig. 2, the proposed model follows a compact encoder–recalibration–refinement pipeline. Given a structured noisy observation X, where X = Rk for downlink estimation and X = Gk for uplink estimation, the encoder first extracts latent features 
+
+F = Eϕ(X). (13) The channel-wise recalibration module follows the squeeze-and-excitation principle [13]. Given encoder features F ∈
+
+RC×H×W , global average pooling is applied to obtain a channel descriptor s ∈ RC . A lightweight bottleneck MLP then generates channel-wise gates 
+
+g = σ(W2 δ(W1s)) , F′ = Gψ (F) = g ⊙ F, (14) where δ(·) and σ(·) denote ReLU and sigmoid, respectively, and ⊙ denotes channel-wise multiplication. The recalibrated representation is passed to a compact residual refinement head 
+
+ˆN = Dω (F′), (15) which predicts the structured disturbance component. The final channel estimate is reconstructed by 
+
+ˆH = X − β ˆN, (16) where β is a learnable residual scaling factor. The full param-eter set is 
+
+η = {ϕ, ψ, ω, β }. (17) V. S IMULATION RESULTS 
+
+A. Experimental Setup 
+
+We evaluate BARRNet in a hybrid mmWave massive MIMO system with K = 4 , NBS = 64 , NRF = 16 , and NUE = 4 .The channel model uses L = 3 dominant paths and uniform linear arrays (ULAs) with half-wavelength spacing. For uplink preamble construction, the BS employs D = 4 combining stages and pilot length T = 16 , such that DN RF = 64 = NBS .The training pairs are (Rk, HHk ) for DL and (Gk, Hk)
+
+for UL. Linear minimum mean square error (LMMSE) is included as a classical reference. As external neural base-lines, we consider a denoising convolutional neural network (DnCNN)-based federated baseline inspired by Han et al. [10] and instantiated using the canonical DnCNN architecture of Zhang et al. [5], as well as a larger Heavy convolutional neural network (CNN) baseline that follows the same overall refinement pipeline as BARRNet but uses a deeper and wider intermediate CNN backbone. Backbone-only serves as the primary architecture-matched control by removing the recal-ibration module while keeping the encoder and refinement head otherwise unchanged, thereby testing whether the gain of BARRNet comes from more effective parameter alloca-tion rather than merely increased model size. We further include 8-bit uplink-quantized variants as communication-reduced references. Since the practical FL bottleneck is typ-ically the client upload, only uplink model transmission is quantized. Accordingly, “BARRNet + 8-bit UL” is treated as a compressed variant of the same estimator rather than as a separate method. For fairness, all neural baselines are retrained under the same data generation process, FedAvg protocol, and communication-accounting setup. The performance metric is 
+
+NMSE = E
+
+"
+
+∥ ˆH − H∥2
+
+> F
+
+∥H∥2
+
+> F
+
+#
+
+. (18) Because DL and UL observations are generated through different preprocessing pipelines, the same nominal signal-to-noise ratio (SNR) does not imply the same effective observa-tion quality. To enable a fair DL/UL comparison, we introduce a constant uplink SNR offset, 
+
+SNR U L = SNR + ∆ SNR , (19) where ∆SNR is calibrated so that DL and UL share the same no-learning baseline NMSE. For the considered configuration, 
+
+∆SNR = 1 .53 dB. We use SNR = 5 dB as the representa-tive operating point for communication-to-target comparisons, while additional SNR values are reported to assess robustness and dual-side consistency. 
+
+B. Communication-Efficient Performance Comparison 
+
+Fig. 3 shows that the shared BARRNet can be trained stably under FedAvg while improving both DL and UL NMSE over federated rounds, supporting the intended dual-side reuse of the same compact refinement architecture. The DL/UL gap is expected because the DL and UL observations are obtained through different preprocessing steps. As a result, the effective noise and reconstruction difficulty are not exactly the same on the two sides, even under the same nominal SNR. Fig. 4 shows the main communication-efficiency result by comparing DL NMSE against cumulative transmitted bits. Un-der full-precision model exchange, BARRNet achieves the best NMSE–communication tradeoff among the federated base-lines. For reference, the horizontal LMMSE baseline attains 
+
+−6.44 dB, whereas BARRNet reaches −14 .43 dB. TABLE I COMMUNICATION -EFFICIENCY SUMMARY AT SNR = 5 DB ( K = 4 ). L OWER IS BETTER .Method Params UL Bits/round (Gbits) Best DL/UL NMSE (dB) Bits to −12 / − 13 dB (Gbits) DnCNN 558,211 FP32 0.143 -13.38 / -12.77 4.72 / 11.29 Heavy CNN 1,077,275 FP32 0.276 -13.31 / -12.61 2.48 / 7.45 Backbone-only 408,003 FP32 0.104 -13.89 / -12.88 0.84 / 2.72 BARRNet 419,027 FP32 0.107 -14.43 / -13.31 0.64 / 1.93 
+
+Heavy CNN 1,077,275 8-bit 0.172 -13.28 / -12.59 1.72 / 4.65 BARRNet 419,027 8-bit 0.067 -14.39 / -13.30 0.40 / 1.27 0 25 50 75 100 125 150 175 200 
+
+> Federated Learning Rounds
+> 0.02 0.03 0.04 0.05 0.06 0.07
+> Training Loss
+> Train Loss Test NMSE (DL) Test NMSE (UL)
+> −14 −13 −12 −11 −10 −9
+> NMSE (dB)
+
+Fig. 3. Convergence of the shared BARRNet on both DL and UL refinement tasks at SNR = 5 dB. The same model improves both DL and UL NMSE over federated rounds. TABLE II BUDGET -ALLOCATION ABLATION AT SNR = 5 DB. H ERE , (C, N e, N h, G )
+
+> DENOTES THE FEATURE WIDTH
+
+, ENCODER DEPTH , HEAD DEPTH , AND GATE HIDDEN WIDTH , RESPECTIVELY . L OWER IS BETTER .                                  
+
+> Variant (C, N e, N h, G )Params Best DL/UL (dB) Bits to −13 dB Balanced (80 ,2,4,24) 419k -14.43 / -13.31 1.93
+> Encoder-heavy (76 ,3,3,12) 429k -14.00 / -12.97 3.40 Head-heavy (76 ,2,5,12) 429k -14.06 / -13.09 2.52 Recalib-heavy (76 ,2,4,160) 425k -14.00 / -13.00 3.04
+
+Comparisons with DnCNN and Heavy CNN establish the overall competitiveness of BARRNet, while the architecture-matched backbone-only control isolates whether the gain comes from more effective parameter allocation rather than merely increased model size. Relative to backbone-only, selec-tive recalibration improves the best DL NMSE from −13 .89 
+
+dB to −14 .43 dB with only a marginal increase in model size, while reaching the same target accuracy with fewer transmitted bits than both backbone-only and the heavier CNN baselines. This supports the design motivation of BARRNet that under a limited parameter budget, lightweight recalibration uses model capacity more effectively than uniform backbone scaling. 
+
+C. Communication-to-Target Cost and Budget Allocation 
+
+Fig. 5 reports the cumulative communication required to reach different target DL NMSE levels. Under full precision FedAvg, BARRNet reaches the same target accuracy with fewer transmitted bits than both the heavier baselines and the architecture-matched backbone-only control. In particular, the 0 1 2 3 4 5 6 7 8
+
+> Cumulative Communication (Gbits)
+> −14 −12 −10 −8 −6
+> NMSE (dB)
+> Classical LMMSE = -6.44dB target = -12.0 dB
+> BARRNet (proposed) Backbone-only Heavy CNN + 8-bit UL Heavy CNN (fp32) DnCNN (fp32) Classical LMMSE (-6.44 dB)
+
+Fig. 4. DL NMSE versus cumulative communication cost at SNR = 5 dB. 
+
+communication required to reach -13 dB is reduced from 2.716 Gbits for backbone-only to 1.931 Gbits for BARRNet. Compared with the architecture-matched backbone-only control, BARRNet increases the parameter count by only 2.7% (419,027 vs. 408,003), yet improves the best DL NMSE from -13.89 dB to -14.43 dB and reduces the communica-tion required to reach -13 dB from 2.716 to 1.931 Gbits, corresponding to a 28.9% reduction in communication cost at SNR = 5 dB. Relative to the external DnCNN baseline, BARRNet also improves the best DL NMSE from -13.38 dB to -14.43 dB while reducing the communication required to reach -13 dB from 11.289 to 1.931 Gbits. In addition, the 8-bit uplink results show that compact estimator design and classical FL communication compression are complementary, since applying uplink quantization preserves nearly the same best DL NMSE while further reducing communication cost. To test the budget-allocation hypothesis more directly, Ta-ble II compares four variants with similar parameter bud-gets but different allocations across the encoder, recalibra-tion module, and refinement head. The balanced allocation used by BARRNet achieves the best DL/UL performance (−14 .43 / − 13 .31 dB) and the lowest communication required to reach the −13 dB target (1.93 Gbits). By comparison, the encoder-heavy, head-heavy, and recalibration-heavy variants require 3.40, 2.52, and 3.04 Gbits, respectively, to reach the same target. These results indicate that simply moving more parameters to a single component is less effective than a balanced allocation under the same communication budget. -11.0 dB -12.0 dB -13.0 dB   
+
+> SNR
+> 0246810 12
+> Cumulative Communication (Gbits)
+> 0.32 0.64 1.93 0.42 0.84 2.72 0.52 1.72 4.65 0.83 2.48 7.45 2.14 4.72 11.29
+> BARRNet (proposed) Backbone-only Heavy CNN + 8-bit UL Heavy CNN (fp32) DnCNN (fp32)
+> NMSE NMSE (dB)
+
+Fig. 5. Communication cost required to reach target DL NMSE levels at SNR = 5 dB. 0 1 2 3 4 5 6 7 8            
+
+> Cumulative Communication (Gbits)
+> −14 −13 −12 −11 −10 −9 −8
+> NMSE (dB)
+> Proposed, K= 4 , full Proposed, K= 4 , 50% Proposed, K= 8 , full Proposed, K= 8 , 50% Backbone-only, K= 8 , full Backbone-only, K= 4 , 50%
+
+Fig. 6. DL NMSE versus cumulative communication cost under different user populations and client participation ratios. 
+
+D. Federated Robustness Across Participation and SNR 
+
+Fig. 6 shows that the communication-efficiency advantage of BARRNet is preserved under a larger user population (K = 8) and under 50% client participation. Increasing the number of participating users can improve NMSE but also increases the per-round communication cost, whereas partial participation reduces communication and can yield a more favorable operating point. Table III further shows that BARRNet remains effective across different SNR regimes on both DL and UL. As the SNR increases from 0 to 10 dB, all methods improve, while BARRNet consistently achieves the best federated performance and remains close to central-ized BARRNet, indicating effective training under standard FedAvg. VI. C ONCLUSION 
+
+This work studied communication-constrained federated CSI estimation for hybrid mmWave massive MIMO sys-tems. To enable learning-based refinement under compressed hybrid observations, we designed structured downlink and uplink observation construction procedures and proposed 
+
+TABLE III BEST CONVERGED DL/UL NMSE ( DB) ACROSS DIFFERENT SNR 
+
+> REGIMES
+
+. L OWER IS BETTER .
+
+Method 0 dB 5 dB 10 dB Centralized BARRNet -10.18/-9.18 -14.54/-13.65 -18.74/-17.94 BARRNet -9.99/-9.03 -14.44/-13.31 -18.41/-17.32 
+
+Backbone-only -9.57/-8.80 -13.89/-12.96 -18.24/-17.11 Heavy CNN + 8-bit UL -9.11/-8.68 -13.28/-12.59 -17.19/-16.35 
+
+BARRNet, which enhances a compact residual backbone through lightweight channel-wise recalibration rather than indiscriminate backbone scaling. The method was developed under standard FedAvg, with emphasis on estimator design rather than a new federated optimization algorithm. Simulation results showed that BARRNet achieves a bet-ter NMSE–communication tradeoff than both external CNN baselines and the architecture-matched backbone-only control. The additional same-budget ablation further indicates that the gain comes not simply from adding parameters, but from al-locating a limited parameter budget more effectively. Overall, communication-efficient FL-based CSI estimation should be studied not only through communication compression, but also through budget-aware estimator design. REFERENCES [1] L. Liang, W. Xu, and X. Dong, “Low-complexity hybrid precoding in massive multiuser mimo systems,” IEEE Wireless Communications Letters , vol. 3, no. 6, pp. 653–656, 2014. [2] A. Alkhateeb, O. El Ayach, G. Leus, and R. W. Heath, “Channel estimation and hybrid precoding for millimeter wave cellular systems,” 
+
+IEEE Journal of Selected Topics in Signal Processing , vol. 8, no. 5, pp. 831–846, 2014. [3] P. Dong, H. Zhang, G. Y. Li, I. S. Gaspar, and N. NaderiAlizadeh, “Deep cnn-based channel estimation for mmwave massive mimo systems,” 
+
+IEEE Journal of Selected Topics in Signal Processing , vol. 13, no. 5, pp. 989–1000, 2019. [4] M. Soltani, V. Pourahmadi, A. Mirzaei, and H. Sheikhzadeh, “Deep learning-based channel estimation,” IEEE Communications Letters ,vol. 23, no. 4, pp. 652–655, 2019. [5] K. Zhang, W. Zuo, Y. Chen, D. Meng, and L. Zhang, “Beyond a gaussian denoiser: Residual learning of deep cnn for image denoising,” IEEE transactions on image processing , vol. 26, no. 7, pp. 3142–3155, 2017. [6] J. Koneˇ cn` y, H. B. McMahan, F. X. Yu, P. Richt´ arik, A. T. Suresh, and D. Bacon, “Federated learning: Strategies for improving communication efficiency,” arXiv preprint arXiv:1610.05492 , 2016. [7] A. M. Elbir and S. Coleri, “Federated learning for channel estimation in conventional and ris-assisted massive mimo,” IEEE transactions on wireless communications , vol. 21, no. 6, pp. 4255–4268, 2021. [8] D. Alistarh, D. Grubic, J. Li, R. Tomioka, and M. Vojnovic, “Qsgd: Communication-efficient sgd via gradient quantization and encoding,” 
+
+Advances in neural information processing systems , vol. 30, 2017. [9] M. Chen, N. Shlezinger, H. V. Poor, Y. C. Eldar, and S. Cui, “Communication-efficient federated learning,” Proceedings of the Na-tional Academy of Sciences , vol. 118, no. 17, p. e2024789118, 2021. [10] F. Han, W. Chen, Y. Zhu, and C. Yuen, “Federated learning aided dual-side channel estimation in multi-user massive mimo systems,” IEEE Wireless Communications Letters , 2025. [11] B. Qiu, X. Chang, X. Li, H. Xiao, and Z. Zhang, “Federated learning-based channel estimation for ris-aided communication systems,” IEEE Wireless Communications Letters , vol. 13, no. 8, pp. 2130–2134, 2024. [12] B. McMahan, E. Moore, D. Ramage, S. Hampson, and B. A. y Arcas, “Communication-efficient learning of deep networks from decentralized data,” in Artificial intelligence and statistics . Pmlr, 2017, pp. 1273– 1282. [13] J. Hu, L. Shen, and G. Sun, “Squeeze-and-excitation networks,” in 
+
+Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 7132–7141.

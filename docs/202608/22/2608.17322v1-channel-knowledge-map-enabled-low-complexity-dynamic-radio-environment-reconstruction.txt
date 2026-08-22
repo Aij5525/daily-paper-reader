@@ -1,0 +1,243 @@
+Title: Channel Knowledge Map Enabled Low-Complexity Dynamic Radio Environment Reconstruction
+
+URL Source: https://arxiv.org/pdf/2608.17322v1
+
+Published Time: Wed, 19 Aug 2026 00:27:46 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Channel Knowledge Map Enabled Low-Complexity Dynamic Radio Environment Reconstruction 
+
+Yujun Lin, Zhiqiang Xiao, Hao Wu, Xiaoqiang Qiao, Fayu Wan, and Tao Zhang 
+
+Abstract —Accurate and timely radio environment reconstruc-tion is important but challenging under particularly dynamic transmitter configurations. The conventional methods such as compressed sensing (CS), Kriging method or U-Net typically require environment measurements and reconstruction overhead for radio environment updating as the transmitter locations or radiation patterns change. In this paper, we propose a novel channel knowledge map (CKM)-enabled dynamic radio environ-ment reconstruction method for efficient radio map updating. Specifically, the recently proposed CKM can store reusable path-level propagation knowledge that is decoupled from the transmitter-side radiation characteristics. We can leverage CKM for lightweight forward radio map generation as the transmitter locations and radiation patterns are known, without requiring new target-map measurements. Simulation results show that the proposed method outperforms CS, Kriging, and U-Net in recon-struction accuracy and exhibits strong robustness performance under dynamic transmitter configurations, which demonstrates the potential of the proposed method for flexible and efficient radio environment reconstruction in dynamic wireless networks. 
+
+Index Terms —Channel knowledge map, dynamic transmitter configuration, radio environment reconstruction, radio map, received power. 
+
+I. I NTRODUCTION 
+
+# RADIO environment reconstruction aims to characterize the spatial distribution of radio parameters over a tar-get region, and serves as an important basis for spectrum management, wireless network planning, localization, and environment-aware optimization [1]. A typical representation of the radio environment is the radio map (RM), which describes location-dependent quantities such as power spectral density, path loss, and received power. In this paper, we focus on received signal power-based RM construction. As wire-less systems evolve toward denser and more heterogeneous deployments, the regional radio environment is increasingly affected by changes in transmitter locations, transmit powers, radiation patterns, and the number of transmitters. Therefore, accurate and timely radio environment reconstruction becomes both more valuable and more challenging. 
+
+Y. Lin is with the Nanjing University of Information Science and Technol-ogy, Nanjing, 210044, China, and also with the Sixty-Third Research Institute, National University of Defense Technology, Nanjing, 210007, China (email: 17268233472@163.com). Z. Xiao, H. Wu, X. Qiao and Tao Zhang are with the Sixty-Third Research Institute, National University of Defense Technology, Nanjing, 210007, China (e-mail: zhiqiang xiao@nudt.edu.cn; whao1983@126.com; qxq0527@163.com; ztcool@126.com). F. Wan is with the Nanjing University of Information Science and Tech-nology, Nanjing, 210044, China (email: fayu.wan@nuist.edu.cn). 
+
+Existing RM construction methods can be broadly divided into source-aware prediction and source-agnostic inverse re-construction. Source-aware methods predict the RM from known transmitter information and environmental geometry, with ray tracing and learning-based RadioUNet as represen-tative examples [2], [3]. Source-agnostic methods recover the RM from limited spatial measurements, including Kriging in-terpolation [4], compressed sensing (CS) [5], and CNN-based reconstruction [6]. Despite their differences, these methods usually regard the RM under a given transmitter configuration as the direct construction target. Meanwhile, the channel knowledge map (CKM) has emerged as a promising paradigm for organizing and ex-ploiting location-specific channel knowledge [7]. We focus on scenarios in which the propagation environment remains quasi-static over the period of interest, while transmitter configurations vary more frequently. In this setting, reusable propagation knowledge can be combined with configuration-dependent transmitter characteristics to generate updated RMs. Motivated by the above insight, this paper develops aCKM-based framework for dynamic radio environment re-construction, represented by received power-based RM con-struction. Different from conventional methods that directly construct configuration-specific received power maps, the pro-posed approach stores reusable propagation knowledge in a CKM and synthesizes the desired received power map by combining the queried CKM parameters with transmitter-side radiation characteristics. In this way, transmitter relocation, power adjustment, radiation-pattern change, and transmitter-number variation can be handled through CKM querying and lightweight forward computation, without new field mea-surements, repeated map reconstruction, or per-configuration training. The remainder of this paper is organized as follows. Section II introduces the system model, conventional RM construction methods, and the CKM-enabled reconstruction framework. Section III presents the proposed CKM construc-tion and CKM-based RM generation method. Section IV reports the simulation results, and Section V concludes the paper. II. S YSTEM MODEL 
+
+In this paper, we consider a radio environment reconstruc-tion problem, which refers to reconstructing the received power distribution over a geographic area of interest. As illustrated in Fig. 1, such areas contain multiple heterogeneous wireless signal transmitters, including fixed wireless hotspots, arXiv:2608.17322v1 [eess.SP] 18 Aug 2026 2 
+
+> Fig. 1. An illustration of a dynamic radio environment with heterogeneous transmitters and passive sensors.
+
+mobile users, and vehicles. The transmitted signals propagate through complex wireless channels and intricately intertwine within the area of interest. As a result, the radio environment is complex and dynamic, posing significant challenges for accurate and timely reconstruction. For ease of exposition, we consider a quasi-static propaga-tion environment over the time duration of interest and assume that the channel variations are governed solely by the TX-RX location geometry. Accordingly, by collecting the received power over the spectrum of interest f ∈ F , across all Qr
+
+sensors, the received power distribution over the area can be obtained as 
+
+M = {Z(r, f )|r ∈ Q r , f ∈ F} , (1) where r ∈ R2 denotes the location of a passive sensor in horizontal plane, while Qr and F represent the sets of sensor locations and spectrum of interest, respectively. However, due to hardware cost and implementation con-straints, directly measuring the received signal power over a wide area and across a broad spectrum is challenging. The concept of a RM has recently been proposed, which aims at providing a continuous representation of the received signal power distribution over the geographic area of interest across the target spectrum. 
+
+A. Conventional Radio Environment Reconstruction Methods 
+
+The conventional RM construction methods can be loosely classified into two categories, i.e., source-aware prediction and source-agnostic inverse reconstruction. For source-aware prediction methods [8], [9], the transmitter (TX) location and its radiation parameters are prior known, and the objective is to forward predict the RM from the propagation environment. To this end, deep neural networks (DNNs) are often employed to learn the implicit mapping from the propagation environment and TX configuration to the spatial spectral received power distribution. Let Dθ (·) be the parametric function to be learned, such that 
+
+ˆZ(ri, f ) = Dθ (ri, f, {Gt, qt, t ∈ T } , E), (2) where θ denotes the learnable parameters, ˆZ(ri, f ) is the predicted received signal power, Gt and qt represent the radiation parameters and location of the tth TX for t ∈ T ,respectively, with T ≜ {1, · · · , T } denoting the index set of transmitters, and E is the propagation environment. The network is typically trained by minimizing the mean squared error (MSE) between the predicted and ground-truth received power over a set of training samples {Zi}Ni=1 , i.e., L(θ) = 
+
+> 1
+> N
+
+PNi=1 ˆZ(ri, f ) − Zi
+
+> 2
+
+. As a result, the mapping from the environment geometry and TX configuration to the spatial spectral received power distribution can be obtained. Alternatively, RM construction can be formulated as an inverse problem. Specifically, to recover the received power distribution over all M spatial-spectral grids from a limited set of N measurements, with N ≪ M , an inverse problem can be formulated as 
+
+y = Φx + n, (3) where x ∈ CM ×1 denotes the discretized received power to be recovered, y ∈ CN ×1 represents the N collected measurements, Φ ∈ RN ×M is the sampling matrix, and 
+
+n ∈ CN ×1 is measurement noise. Since Φ is typically rank-deficient, the problem is underdetermined and difficult to solve directly [10]. To address this challenge, extensive research efforts have been devoted to this field, including Kriging-based spatial interpolation, CS-based sparse recovery [11], and CNN-based radio-map reconstruction. The aforementioned methods primarily focus on the RM construction under a given TX configuration. However, even in a quasi-static propagation environment, any changes in TX locations or radiation characteristics can lead to significant variations of the RM. As a result, the entire map reconstruction or regional updating is necessary, which inevitably incurs substantial operational overhead. To address this limitation, in this paper, we propose a low-complexity dynamic spectrum environment reconstruction framework based on the recently proposed CKM, which de-couples the propagation environment from TX configuration by leveraging CKM as an intermediate representation. 
+
+B. Proposed CKM-Enabled Reconstruction Method 
+
+Specifically, consider an any-to-any (X2X) CKM. For each TX-RX location pair within the area of interest, the CKM can be regarded as a mapping K from the location pair (r, qt) to the channel knowledge vector c ∈ CJ , i.e., 
+
+K : (r, qt) 7 −→ c(r, qt), (4) where c(r, qt) captures propagation knowledge with the di-mension of J. In this work, we consider that the CKM stores a set of the path state information (PSI) [12] for the given location pair (r, qt), i.e., 
+
+c(r, qt) = {| αl,t |, ∠αl,t , τ l,t , ϕ l,t }Ll=1 , (5) where L is the number of significant multi-paths, |αl,t | and 
+
+∠αl,t denote the amplitude and phase of the lth propagation path, respectively, τl,t is the corresponding propagation delay, and ϕl,t is the angle-of-departure (AoD) of the lth path. 3 
+
+> Fig. 2. The proposed CKM-based radio environment construction method.
+
+Here, we consider a millimeter wave (mmWave) frequency band radio environment reconstruction, where the number of significant propagation paths per location pair is typically small. Here, we assume that all location pairs have the same number of multi-paths L. This in fact loses no generality as we could simply add virtual paths with zero gain for any location pair with fewer multi-paths. For any given location pair (r, qt), with the obtained chan-nel knowledge in (5), the spatial-frequency channel response can be expressed as 
+
+H(f, ϕ ; r, qt) = 
+
+> L
+
+X
+
+> l=1
+
+αl,t e−j2πf τ l,t δ(ϕ − ϕl,t ), (6) where αl,t ≜ |αl,t |ej∠αl,t denotes the complex gain of the lth propagation path. Therefore, as shown in Fig. 2, as the TX configurations are prior known, the corresponding noise-free received power Z(r, f ) can be calculated immediately as 
+
+Z(r, f ) = E
+
+
+
+> T
+
+X
+
+> t=1
+
+⟨H(f, ϕ ; r, qt), x t(f, ϕ )⟩ϕ
+
+> 2
+
+
+
+> (a)
+
+=
+
+> T
+
+X
+
+> t=1
+
+E
+
+
+
+⟨H(f, ϕ ; r, qt), x t(f, ϕ )⟩ϕ
+
+> 2
+
+
+
+,
+
+(7) where (a) follows from the assumption of incoherent signal superposition and xt(f, ϕ ) denotes the transmit signal of the 
+
+tth TX, whose expression is to be derived later in Section III. Note that the angular coupling integral is used in (7), which is defined as ⟨u, v ⟩ϕ ≜ R π 
+
+> −π
+
+u(ϕ)v(ϕ) d ϕ. 
+
+III. P ROPOSED CKM-E NABLED RADIO ENVIRONMENT 
+
+RECONSTRUCTION METHOD 
+
+A. CKM Construction 
+
+In this paper, the CKM composed of the PSI for each TX-RX location pair can be constructed through data acquisition followed by spatial prediction. Specifically, the region of interest can be first discretized into several spatial grids. Then, the channel measurement can be conducted offline using a dedicated test device that traverses all grids to obtain the PSI as given in (5), or in an opportunistic manner by leveraging the channel estimation from other users. Subsequently, when the PSI for the finite TX-RX location pairs have been obtained, many interpolation techniques such as K-nearest neighbors (KNN), inverse-distance weight (IDW), and the Kriging al-gorithms, or deep neural networks can be trained for CKM construction [13]. Note that, different from the radio map, which may vary rapidly as the transmit power or radiation pattern change, the CKM depends only on the propagation environment that evolves on a much slower timescale. Therefore, we can construct the CKM once and reuse it for dynamic radio environment reconstruction as the TX configurations change, eliminating the need for repeated site-specific measurements. 
+
+B. Propagation-Aware Radio Environment Reconstruction 
+
+With the CKM, for a given TX-RX location pair (r, qt), the PSI and the corresponding channel response can be obtained from (5) and (6), respectively. Therefore, according to (7), as the spatial-frequency radiation pattern for all transmitters, i.e., {xt(f, ϕ )}Tt=1 , are known, the radio environment at any location r can be directly calculated. Specifically, for ease of exposition, the radiation pattern for the tth TX can be modeled as 
+
+xt(f, ϕ ) = pG(ϕ − ϕt)st(f ), (8) where G(ϕ−ϕt) denotes the angle-dependent radiation pattern and st(f ) represents the transmit information-bearing symbol at the frequency f and st(f ) ∼ CN (0 , P t), with Pt being the average transmit power. Here, we assume that G(0) is the maximum gain, with ϕt ∈ [−π, π ) denoting the orientation angle of the tth TX. By substituting (6) and (8) into (7), we obtain 
+
+Z(r, f ) = 
+
+> T
+
+X
+
+> t=1
+
+E
+
+
+
+⟨H(f, ϕ ; r, qt), x t(f, ϕ )⟩ϕ
+
+> 2
+
+
+
+=
+
+> T
+
+X
+
+> t=1
+
+Pt
+
+> L
+
+X
+
+> l=1
+
+αl,t e−j2πf τ l,t 
+
+q
+
+G(ϕl,t − ϕt)
+
+> 2
+
+.
+
+(9) Finally, the complete radio environment can be reconstructed according to (9) over all r ∈ Q r .Note that compared with conventional methods, the pro-posed CKM-enabled radio environment reconstruction frame-work enjoys the following advantages: (i) Low-overhead radio environment updating. With the CKM, the radio environment can be efficiently updated to accommodate dynamic changes with the TX configurations, including the transmit power, radiation pattern, and the number of transmitters, without requiring additional measurements. (ii) CKM as a reusable propagation foundation. Once constructed, the CKM serves as a fundamental propagation knowledge base for radio environment reconstruction, enabling efficient generation of diverse radio maps under arbitrary TX deployments within the same environment. IV. S IMULATION RESULTS 
+
+In this section, experiments are conducted using Sionna RT 1.2.1 in sionna.rt.scene.etoile and 4Ground truth CS Kriging U-Net CKM                                                     
+
+> −200 −175 −150 −125 −100 −75 −50 −25
+> Received power [dBm]
+> Fig. 3. Comparison of the radio environment reconstruction accuracy for different methods. TABLE I MAIN SIMULATION PARAMETERS .Parameter Value
+> Scene and map configuration
+> Reconstruction-accuracy experiment Area / grid spacing 500 ×500 m 2/5mGrid size 101 ×101
+> Robustness experiment Area / grid spacing 1000 ×1000 m 2/10 mGrid size 101 ×101
+> Carrier frequency 28 GHz TX/RX height 1.6m
+> Propagation and antenna configuration
+> Samples per source 10 4
+> Maximum path depth 4
+> TX pattern Gaussian, 15 ◦HPBW TX gain range −30 to 27 .79 dBi Transmit power 27 ,30 , or 33 dBm Boresight direction Uniform in [−π, π )
+> Baseline configuration
+> Observation ratio ρ= 60%
+> CS DCT-OMP ( 6×6,K≤5)Kriging Ordinary ( 32 neighbors, 120 m) U-Net data split 200 /30 /20
+
+sionna.rt.scene.munich scenes [14]. The evaluated areas in the Etoile and Munich scenes cover 500 × 500 m 2
+
+and 1000 × 1000 m 2, respectively, and are sampled at grid spacings of 5 m and 10 m, yielding 101 × 101 grid points in both experiments. The carrier frequency is 28 GHz, and the TX and RX heights are both set to 1.6 m. Here, we employ the built-in PathSolver of Sionna RT to compute the propagation paths between the TXs and RXs, configured with 10 4 rays sampled per source and a maximum propagation depth of four. The RX is isotropic, while each TX employs an azimuth-dependent Gaussian power-gain pattern given by 
+
+G(ϕ) = G(0) exp 
+
+
+
+− 4 ln 2 
+
+ϕ23dB 
+
+ϕ2
+
+
+
+, (10) where G(0) denotes the maximum antenna gain and ϕ3dB 
+
+denotes the half-power beamwidth, which are set to 27 .79 dBi and 15 ◦, respectively. The ground-truth map is generated by direct ray tracing, whereas the proposed method reconstructs the map using the stored PSI and the known TX configuration. The conventional CS, Kriging, and U-Net are selected as the benchmark, which use the same target-map observations, and the target-map observation ratio is set to ρ = 60% . The U-Net training,                          
+
+> TABLE II RECONSTRUCTION ACCURACY FOR 10-TX RECEIVED -POWER MAPS .MSE ↓RMSE ↓NMSE ↓SSIM ↑
+> CS 0.0417 0.2041 0.1121 0.1933 Kriging 0.0300 0.1733 0.0808 0.3329 U-Net 0.0022 0.0472 0.0060 0.7384 CKM 0.0003 0.0161 0.0007 0.9837
+
+validation, and internal-test sets contain 200, 30, and 20 maps, respectively, whose TX configurations are disjoint from the 100 evaluation cases. The main parameter settings are summarized in Table I. 
+
+A. Reconstruction Accuracy 
+
+The radio environment reconstruction accuracy is first eval-uated in sionna.rt.scene.etoile scene using 100 independent cases, each comprising ten outdoor TXs with different locations, transmit powers, and boresight directions. Following the normalized map-evaluation metrics in [15], we evaluate the reconstructed power maps using mean squared error (MSE), root mean squared error (RMSE), normalized mean squared error (NMSE), and structural similarity index measure (SSIM). The MSE and NMSE are computed over all valid outdoor points across the 100 cases, while RMSE is the square root of MSE, and SSIM ( data range = 1 ) is computed per map and then averaged. As shown in Table II, the proposed CKM-based method achieves the best performance for all four metrics. Specifically, the RMSE of the proposed CKM-enabled method is less than half that of U-Net and substantially lower than those of CS and Kriging, while the SSIM of 0.9837 indicates it better preservation of the spatial power-distribution structure. Fig. 3 provides a qualitative comparison for the reconstruc-tion accuracy for different methods. It can be observed that CS and Kriging exhibit larger reconstruction errors and recover less spatial detail in this example, while U-Net captures the overall distribution but introduces visible smoothing. In contrast, the CKM result closely follows the ground truth in both coverage structure and local power variation. 
+
+B. Robustness and Overhead Analysis 
+
+To further investigate the robustness of the proposed method, we evaluate its performance under varying TX counts. Specifically, to mitigate the potential spatial smoothing caused 52 3 4 5 6 7 8 9 10 11 12 13 14 TX count 0.000 0.025 0.050 0.075 0.100 0.125 0.150 0.175 RMSE 
+
+> CKM CS Kriging U-Net
+
+Fig. 4. RMSE versus the TX count. 
+
+by increasing TX counts, we replace the original scene with the larger sionna.rt.scene.munich scene and vary the number of active TXs as |T | ∈ { 2, . . . , 14 }, while keeping all other simulation settings unchanged. As shown in Fig. 4, CKM consistently achieves the lowest RMSE and exhibits only limited performance variation across all evaluated TX counts. However, both CS and Kriging suffer from a pronounced rise in RMSE as the TX count increases. Although U-Net performs relatively better than these two, it still fails to preserve its accuracy as the scenario complexity grows. In contrast, the proposed CKM-enabled method demon-strates remarkable robustness. Beyond its robustness, the proposed method also reduces the measurement and adaptation overhead associated with RM updating. CS, Kriging, and U-Net demand 60% fresh coverage per TX configuration, with U-Net often needing retraining when TX configuration deviates significantly from training data. In contrast, the proposed CKM-enabled method generates an accurate RM through CKM querying and lightweight forward computation, without acquiring new target-map mea-surements or retraining a prediction model. This property is particularly valuable for complex and dynamic radio environ-ment reconstruction. V. C ONCLUSION 
+
+This paper proposed a CKM-based framework for recon-structing received-power RMs in dynamic radio environments. By decoupling reusable propagation knowledge from TX-specific radiation characteristics, the proposed method updates the RM through CKM querying and forward computation without requiring additional target-map measurements. Sim-ulation results demonstrate that the proposed method achieves superior reconstruction accuracy among the considered meth-ods and exhibits strong robustness performance across varying numbers of active TXs. More importantly, once constructed, the CKM serves as a reusable propagation foundation that ac-commodates changes in TX power, radiation pattern, and num-ber, enabling low-overhead generation of diverse RMs within the same physical environment. Future work will validate the proposed framework in real-world complex environments and investigate its integration with practical measurement-driven CKM construction. REFERENCES [1] D. Romero and S.-J. Kim, “Radio map estimation: A data-driven approach to spectrum cartography,” IEEE Signal Processing Magazine ,vol. 39, no. 6, pp. 53–72, 2022. [2] Z. Yun and M. F. Iskander, “Ray tracing for radio propagation modeling: Principles and applications,” IEEE Access , vol. 3, pp. 1089–1100, 2015. [3] R. Levie, C. Yapar, G. Kutyniok, and G. Caire, “Radiounet: Fast radio map estimation with convolutional neural networks,” IEEE Transactions on Wireless Communications , vol. 20, no. 6, pp. 4001–4015, 2021. [4] E. Dall’Anese, S.-J. Kim, and G. B. Giannakis, “Channel gain map tracking via distributed kriging,” IEEE Transactions on Vehicular Tech-nology , vol. 60, no. 3, pp. 1205–1211, 2011. [5] F. Shen, Z. Wang, G. Ding, K. Li, and Q. Wu, “3d compressed spectrum mapping with sampling locations optimization in spectrum-heterogeneous environment,” IEEE Transactions on Wireless Communi-cations , vol. 21, no. 1, pp. 326–338, 2022. [6] Y. Teganya and D. Romero, “Deep completion autoencoders for ra-dio map estimation,” IEEE Transactions on Wireless Communications ,vol. 21, no. 3, pp. 1710–1724, 2022. [7] Y. Zeng and X. Xu, “Toward environment-aware 6g communications via channel knowledge map,” IEEE Wireless Communications , vol. 28, no. 3, pp. 84–91, 2021. [8] X. Li, R. Liu, S. Xu, S. G. Razul, and C. Yuen, “Transpathnet: A novel two-stage framework for indoor radio map prediction,” in ICASSP 2025 - 2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) , 2025, pp. 1–2. [9] X. Zhang, X. Shu, B. Zhang, J. Ren, L. Zhou, and X. Chen, “Cellular network radio propagation modeling with deep convolutional neural networks,” in Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining , ser. KDD ’20. New York, NY, USA: Association for Computing Machinery, 2020, p. 2378–2386. [Online]. Available: https://doi.org/10.1145/3394486.3403287 [10] L. Li, Y. Fang, L. Liu, H. Peng, J. Kurths, and Y. Yang, “Overview of compressed sensing: Sensing model, reconstruction algorithm, and its applications,” Applied Sciences , vol. 10, no. 17, p. 5909, 2020. [11] J. A. Tropp and A. C. Gilbert, “Signal recovery from random mea-surements via orthogonal matching pursuit,” IEEE Transactions on Information Theory , vol. 53, no. 12, pp. 4655–4666, 2007. [12] Z. Xiao, Y. Zeng, F. Wen, Z. Zhang, and D. W. K. Ng, “Integrated sensing and channel estimation by exploiting dual timescales for delay-doppler alignment modulation,” IEEE Transactions on Wireless Com-munications , vol. 24, no. 1, pp. 415–429, 2025. [13] Y. Zeng, J. Chen, J. Xu, D. Wu, X. Xu, S. Jin, X. Gao, D. Gesbert, S. Cui, and R. Zhang, “A tutorial on environment-aware communications via channel knowledge map for 6g,” IEEE Communications Surveys & Tutorials , vol. 26, no. 3, pp. 1478–1519, 2024. [14] F. Ait Aoudia, J. Hoydis, M. Nimier-David, S. Cammerer, and A. Keller, “Sionna RT: Technical report,” arXiv preprint arXiv:2504.21719 , 2025. [15] S. Fu, Y. Zeng, Z. Wu, D. Wu, J. Xu, S. Jin, C.-X. Wang, and X. Gao, “CKMDiff: A generative diffusion model for CKM construction via inverse problems with learned priors,” npj Wireless Technology , vol. 2, p. 35, 2026.

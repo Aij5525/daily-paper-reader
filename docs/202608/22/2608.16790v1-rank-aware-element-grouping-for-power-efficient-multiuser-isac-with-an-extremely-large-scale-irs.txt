@@ -1,0 +1,1450 @@
+Title: Rank-Aware Element Grouping for Power-Efficient Multiuser ISAC With an Extremely Large-Scale IRS
+
+URL Source: https://arxiv.org/pdf/2608.16790v1
+
+Published Time: Tue, 18 Aug 2026 02:25:54 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Rank-Aware Element Grouping for Power-Efficient Multiuser ISAC With an Extremely Large-Scale IRS 
+
+Shengsheng Zhang, Graduate Student Member, IEEE, Ritao Cheng, Zitong Wang, 
+
+Graduate Student Member, IEEE, Meng Hua, Senior Member, IEEE, Cheng Zhang, Member, IEEE, 
+
+Yongming Huang, Fellow, IEEE, and Luxi Yang, Senior Member, IEEE 
+
+Abstract —We investigate power-efficient multiuser integrated sensing and communication (ISAC) assisted by an element-grouping extremely large-scale intelligent reflecting surface (EG-XL-IRS). The grouping pattern is designed using slowly varying statistical channel state information (S-CSI), so that both IRS-related channel acquisition and online passive beamforming operate in the group domain rather than the element domain. We reveal a fundamental gain–rank tradeoff induced by element grouping: phase-consistent grouping can coherently enhance selected deterministic propagation components, while excessive concentration on a common deterministic mode can reduce the effective spatial rank of the multiuser channel and, for extended targets, the diversity of desired-scatterer responses. Motivated by this observation, we develop a task-adaptive rank-aware grouping strategy that balances weak-user enhancement and target-scatterer illumination while preserving task-relevant spatial dimensions. For each candidate grouping pattern, the transmit covariances and group-wise reflection phases are jointly optimized under communication and sensing quality-of-service constraints, followed by physical phase recovery and feasibility verification. Numerical results show that the proposed design substantially reduces the required transmit power compared with representative grouping benchmarks under the same grouping dimension and online optimization budget. 
+
+Index Terms —Integrated sensing and communication (ISAC), element-grouping extremely large-scale intelligent reflecting sur-face (EG-XL-IRS), extended target, effective rank, signal-to-clutter-plus-noise ratio (SCNR). 
+
+I. I NTRODUCTION 
+
+# INTEGRATED sensing and communication (ISAC) enables a common wireless platform to support data transmis-sion and environmental sensing by sharing spectrum, radio-frequency hardware, and signal-processing resources [1]–[3]. 
+
+This work was supported by the National Science and Technology Major Project of China under Grant 2025ZD1302500, the Natural Science Founda-tion on Frontier Leading Technology Basic Research Project of Jiangsu under Grant BK20222001, and the National Natural Science Foundation of China under Grants U1936201 and 61971128. Shengsheng Zhang, Zitong Wang, Cheng Zhang, Yongming Huang and Luxi Yang are with the School of Information Science and En-gineering, the National Mobile Communications Research Laboratory, and the Frontiers Science Center for Mobile Information Communica-tion and Security, Southeast University, Nanjing 210096, China, and also with the Pervasive Communications Center, Purple Mountain Laborato-ries, Nanjing 211111, China (e-mail: zhangshengsheng@seu.edu.cn; zt-wang2410@seu.edu.cn; zhangcheng seu@seu.edu.cn; huangym@seu.edu.cn; lxyang@seu.edu.cn). Ritao Cheng is with the China Mobile Group Design Institute Co., Ltd., No. 16 Danling Street, Haidian District, Beijing 100080, China (e-mail: chengritao@cmdi.chinamobile.com). Meng Hua is with the Department of Electrical and Electronic En-gineering, Imperial College London, London SW7 2AZ, UK (e-mail: m.hua@imperial.ac.uk). 
+
+In multiantenna ISAC systems, performance depends not only on the available waveform degrees of freedom (DoFs) [4], but also on the spatial structure of the propagation channels. Multiuser communication benefits from sufficiently separable effective user channels, whereas sensing requires target re-sponses that are distinguishable from clutter and, for extended targets, sufficiently diverse across scattering centers [5], [6]. Transmit-power minimization in ISAC therefore depends on both transmit-side resource allocation and the propagation structure available to the communication and sensing func-tions. Intelligent reflecting surfaces (IRSs) can reconfigure the reflected links among the ISAC base station (ISAC-BS), communication users (CUs), and the sensing scene [7]– [10]. Existing IRS-assisted ISAC designs commonly optimize element-wise reflection coefficients based on full or near-perfect instantaneous channel state information (CSI) [11]– [16]. Acquiring the associated cascaded CSI generally incurs an overhead that increases with the number of passive re-flecting elements, even when time-division-duplex reciprocity is exploited [17], [18]. For extremely large-scale IRSs (XL-IRSs), both channel acquisition and real-time element-wise reflection optimization become high-dimensional [19], [20]. For XL-IRS-assisted ISAC, a lower-dimensional representa-tion is needed to reduce channel-acquisition and online-control dimensions while retaining propagation structure relevant to both communication and sensing. Element grouping provides such a lower-dimensional rep-resentation. Consider an XL-IRS with N passive elements partitioned into Q groups, where Q ≪ N , with all elements in each group sharing one reflection coefficient [12], [13], [21]. The online passive-beamforming dimension is then reduced from N to Q. Under the group-wise channel-estimation pro-tocol adopted in this work, only the post-grouping cascaded channels are estimated, so the IRS-related training dimension scales with Q rather than N . The partition also changes the effective communication and sensing channels because the element-domain responses are aggregated within each group before fast-timescale optimization. A fixed geometric partition mainly reduces the control dimension, whereas a partition designed from statistical CSI (S-CSI) can use slowly varying spatial phase information to determine which element responses are combined over a slow timescale [22]. The resulting element associations affect coherent gain, multiuser channel separability, and, for extended targets, the diversity of the desired-scatterer responses. arXiv:2608.16790v1 [eess.SP] 17 Aug 2026 2
+
+Existing studies treat these aspects separately. Channel-estimation methods focus on reducing CSI-acquisition over-head [11], [12], [20], while joint active–passive beamform-ing optimizes the transmission and reflection variables af-ter the relevant CSI has been acquired [22]–[33]. Existing communication-oriented grouping methods mainly optimize received-power or rate-related criteria [13]–[15], [21], [34]. These approaches do not directly address how the element partition should be chosen so that the reduced-dimensional representation retains spatial structure relevant to both mul-tiuser communication and sensing. This issue becomes more involved for extended-target sensing. Maximizing an aggregate target response may concentrate most of the sensing energy on one scattering center, whereas algebraic rank alone does not indicate whether the response energy is concentrated in one dominant singular mode. The grouping design should therefore account for coherent gain, communication-channel separability, and, when multiple desired scattering centers are present, target-response diversity. Motivated by this observation, we treat element grouping as both a dimensionality-reduction mechanism and a slow-timescale propagation-structure design variable. The group-ing matrix is constructed from S-CSI, whereas only the 
+
+Q-dimensional post-grouping cascaded CSI is acquired and the group-wise reflection coefficients are optimized on the fast timescale. This two-timescale design does not require realization-wise knowledge of all N element-domain cascaded coefficients when determining the partition. We consider one desired target represented by T ≥ 1 scattering centers in the presence of a separate set of clutter scatterers. For T = 1 , the grouping design seeks useful-link gain while avoiding exces-sive concentration of the multiuser channel onto a common spatial mode. For T > 1, it also needs to avoid concentrating the desired-target response on only a small subset of scattering centers or a single dominant response mode. The proposed design therefore combines S-CSI-based gain criteria with task-dependent structural screening, followed by instantaneous active–passive beamforming under the original communication and sensing quality-of-service (QoS) constraints. The main contributions are summarized as follows.  
+
+> •
+
+We develop a two-timescale element-grouping XL-IRS (EG-XL-IRS) framework in which an S-CSI-based binary partition reduces the passive control dimension from N
+
+elements to Q groups. Under the adopted group-wise channel-estimation protocol, the IRS-related channel-acquisition dimension is also reduced to the group do-main, while instantaneous post-grouping CSI is used for fast-timescale active–passive beamforming.  
+
+> •
+
+Under the adopted channel model, we characterize the gain–rank behavior induced by element grouping. Phase-consistent grouping can coherently enhance selected de-terministic propagation components while preserving the total average power of the modeled i.i.d. isotropic dif-fuse component. We further show that, when a common rank-one line-of-sight component dominates the residual channel, the effective rank of the multiuser channel, and for T > 1 that of the desired-scatterer response ma-trix, approaches one. This behavior motivates rank-aware screening in addition to coherent-gain and algebraic-rank criteria.  
+
+> •
+
+We develop task-dependent grouping strategies for point and extended targets by accounting for weak-CU and desired-scatterer gains. Both branches screen candidate partitions according to communication-channel separa-bility. For extended targets, the design also incorpo-rates per-scatterer gain floors and response-diversity safe-guards, together with an angle Fisher information ma-trix (FIM)/Cram´ er–Rao bound (CRB)-based screening criterion under the adopted sensing model. The retained candidates are then ranked according to their recovered transmit power.  
+
+> •
+
+For each retained grouping pattern, we formulate transmit-power minimization subject to CU signal-to-interference-plus-noise ratio (SINR), target signal-to-clutter-plus-noise ratio (SCNR), illumination, and response-correlation constraints, and solve the resulting fixed-partition problem using SDR-based alternating op-timization (AO) and successive convex approximation (SCA). We distinguish the conservative approximation of the sensing constraints, semidefinite rank relaxation, and subsequent rank-one recovery, and verify the recovered solution against the original physical quality-of-service constraints. 
+
+Organization: Section II presents the system model and formulates the joint design problem. Section III develops the S-CSI-guided task-dependent grouping strategy. Section IV presents the fast-timescale active–passive beamforming algorithm. Section V provides numerical results, and Section VI concludes the paper. 
+
+Notation: (·)T , (·)H , Tr( ·), rank( ·), diag( ·), and vec( ·)
+
+denote transpose, Hermitian transpose, trace, rank, diagonal-ization, and vectorization, respectively. The operators ⊙, ⊗,and E{·} denote the Hadamard product, Kronecker product, and expectation, respectively. Identity and zero matrices of compatible dimensions are denoted by I and 0.II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model  
+
+> Fig. 1. EG-XL-IRS-assisted multiuser ISAC system with one desired target and non-target clutter scatterers. 3
+
+As shown in Fig. 1, an ISAC-BS equipped with an M -antenna uniform linear array (ULA) serves K single-antenna CUs while sensing one desired target comprising T ≥ 1
+
+scattering centers. The environment also contains L non-target scatterers whose echoes are treated as clutter. The CU, desired-scatterer, and clutter index sets are denoted by K, T , and 
+
+L, respectively. Thus, T = 1 corresponds to a point target, whereas T > 1 represents an extended target. For clarity, the direct BS–CU and BS–target links are assumed blocked, and an EG-XL-IRS with N reflecting elements provides the controllable reflected paths. Let G ∈ { 0, 1}Q×N denote the grouping matrix, where Gq,n = 1 indicates that element n
+
+belongs to group q. All elements in group q share the reflection coefficient vq = ejθ q , and v = [ v1, . . . , v Q]T ∈ CQ. The resulting element-wise reflection matrix is 
+
+Φ = diag GT v , (1) Following [24], the ISAC-BS transmits both communication symbols and a dedicated sensing waveform so that the transmit DoFs can also be used for sensing. The transmitted signal is 
+
+x = Wss + Wcc, (2) where Ws ∈ CM ×M is the sensing beamforming matrix and Wc = [ w1, . . . , wK ] ∈ CM ×K is the communication beamforming matrix. The sensing vector s ∈ CM satisfies 
+
+E{s} = 0 and E{ss H } = IM , while c = [ c1, . . . , c K ]T ∼CN (0, IK ) collects the communication symbols. We assume 
+
+s and c are statistically independent, i.e., E{sc H } = 0.The resulting transmit covariance matrix is 
+
+Rx ≜ E xx H  = Rs + X
+
+> k∈K
+
+Rk, (3) where Rs = WsW Hs and Rk = wkwHk .Assuming half-wavelength spacing at both the ISAC-BS and the EG-XL-IRS, the response of an N -element ULA is [35] 
+
+aN (θ) = 
+
+h
+
+1, e −jπ sin θ , . . . , e −jπ (N −1) sin θ iT
+
+, (4) where θ ∈ (−π/ 2, π/ 2) denotes the azimuth angle relative to array broadside. We adopt a narrowband far-field plane-wave model and assume that the angular supports of the target and clutter are available from prior acquisition or tracking. Near-field propagation, mutual coupling, and blind initial acquisition are outside the present scope. 1
+
+As illustrated in Fig. 1, let Hbi ∈ CM ×N , hk ∈ CN , and 
+
+Hs ∈ CN ×N denote the BS–IRS channel, IRS–CU-k channel, and IRS-domain sensing response, respectively. Based on (4),    
+
+> 1The far-field model is a deliberate abstraction used to isolate the grouping-induced gain–rank and dimensionality-reduction effects. Thus, N= 4096 is used to stress the element-domain acquisition/control dimension, not to assert that a half-wavelength 4096-element physical aperture at the stated geometry necessarily satisfies the Fraunhofer far-field condition.
+
+we model these quantities as [25] 
+
+Hbi = α
+
+r κbi 
+
+1 + κbi 
+
+¯Hbi 
+
+| {z }
+
+> LoS
+
++ α
+
+r 11 + κbi 
+
+˜Hbi 
+
+| {z }
+
+> NLoS
+
+,
+
+hk = βk
+
+r κk
+
+1 + κk
+
+¯hk
+
+| {z }
+
+> LoS
+
++ βk
+
+r 11 + κk
+
+˜hk
+
+| {z }
+
+> NLoS
+
+, k ∈ K ,
+
+Hs = X
+
+> t∈T
+
+γtaN
+
+ θts
+
+ aHN
+
+ θts
+
+| {z }
+
+> Target
+
++ X
+
+> l∈L
+
+γlaN
+
+ θls
+
+ aHN
+
+ θls
+
+| {z }
+
+> Clutter
+
+,
+
+(5) where ¯Hbi = aM (θbi ) aHN (ϕbi ), ¯hk = aN (ϕk), vec( ˜Hbi ) ∼CN (0, IM N ) and ˜hk ∼ CN (0, IN ). α, θbi , and ϕbi denote the complex large-scale gain, angle of departure, and angle of arrival of the BS–IRS LoS path, respectively. Similarly, 
+
+βk and ϕk specify the large-scale gain and LoS direction of CU k. For desired scatterer t, |γt| denotes its effective reflection magnitude (an radar-cross-section (RCS)-related co-efficient under the adopted normalization) and θts its direction; for clutter scatterer l, γl ∼ CN (0 , δ 2 
+
+> l
+
+) models a random scattering coefficient at angular location θls. The dominant angles, path losses, Rician factors, desired-scatterer strengths 
+
+{| γt|} , and clutter variances {δ2 
+
+> l
+
+} are treated as slowly vary-ing S-CSI. Instantaneous NLoS coefficients and scattering phases/realizations are handled on the fast timescale and are not assumed known when constructing G.Because a passive IRS cannot separately estimate its inci-dent and reflected links, the ISAC-BS operates on cascaded CSI. We assume that the deliberately deployed BS–IRS and IRS–CU/target links contain exploitable LoS components. Separating the scattering magnitude from its phase, the one-way factors used to construct the cascaded CU, desired-scatterer, and clutter responses are 
+
+Ck =Hbi diag {hk} ,
+
+Cs,t = p|γt|Hbi diag aN
+
+ θts
+
+| {z }
+
+> Cascaded Target Component
+
+,
+
+Cs,l = p|γl|Hbi diag aN
+
+ θls
+
+| {z }
+
+> Cascaded Clutter Component
+
+,k ∈ K , t ∈ T , l ∈ L ,
+
+(6) where Ck is the cascaded BS–IRS–CU-k channel. The matri-ces Cs,t and Cs,l are one-way factors whose outer products generate, respectively, the desired-target and clutter round-trip responses after multiplication by the corresponding scattering phase. We refer to Cs,l as a cascaded clutter component :this terminology identifies its role in the end-to-end sensing channel and does not imply that the clutter is spatially isotropic or coherent with the desired target. Grouping reduces the dimensions of cascaded-CSI acqui-sition and online phase optimization while retaining deter-ministic structures relevant to communication and desired-target sensing. The partition uses only slow angular/statistical information, not realization-specific NLoS samples or clutter phases; angular support is assumed available from prior ac-quisition or tracking. 4
+
+B. Problem Formulation 
+
+For the considered EG-XL-IRS-assisted system, the post-grouping cascaded channels associated with Ck, Cs,t , and 
+
+Cs,l are Cg,k ≜ CkGT ∈ CM ×Q, Cgs,t ≜ Cs,t GT ∈
+
+CM ×Q, and Cgs,l ≜ Cs,l GT ∈ CM ×Q, respectively. Thus, the dimension of each cascaded channel seen by the online optimizer is reduced from N to Q.The protocol operates on two timescales. Slowly varying path losses, Rician factors, dominant angles, and scattering-power statistics determine G, whereas the ISAC-BS esti-mates the Q-dimensional post-grouping responses and updates the group phases within each coherence interval. Under the adopted group-wise estimation protocol, the IRS-related pi-lot/configuration count scales with Q rather than N , yielding an overhead–control-resolution tradeoff. For the communication link, the received signal at CU k is given by 
+
+yk = hHg,k x + nk, (7) where hg,k = Cg,k v is the effective channel of CU k and 
+
+nk ∼ CN (0 , σ 2
+
+> k
+
+) is receiver noise. From (3) and (7), the received SINR at CU k is given by 
+
+SINR k = Tr ( RkHg,k )
+
+P 
+
+> i∈K\{ k}
+
+Tr ( RiHg,k ) + Tr ( RsHg,k ) + σ2
+
+> k
+
+,
+
+(8) where Hg,k = hg,k hHg,k .The dedicated sensing waveform contributes probing energy but appears as interference at the CUs; we assume that the CUs do not cancel this waveform, so its covariance must be optimized jointly with the communication covariances. For the sensing link, the received echo at the ISAC-BS is modeled as 
+
+ys = Hgt x
+
+| {z } 
+
+> desired-target echo
+
++ Hgc x
+
+| {z } 
+
+> clutter echo
+
++ns, (9) where ns ∼ CN (0, σ 2 
+
+> s
+
+IM ) is the receiver noise. Define 
+
+hgt,t = Cgs,t v and hgc,l = Cgs,l v. The per-scatterer round-trip matrices and the corresponding aggregate desired-target and clutter responses are 
+
+Hgt,t = γs,t hgt,t hHgt,t , Hgc,l = γs,l hgc,l hHgc,l ,
+
+Hgt = X
+
+> t∈T
+
+Hgt,t , Hgc = X
+
+> l∈L
+
+Hgc,l . (10) where γs,t = γt/|γt| and γs,l = γl/|γl| retain the scattering phases, with nonzero scattering coefficients understood. Using the clutter-whitened receive model in [23], the target SCNR is 
+
+SCNR = Tr  Hgt RxHHgt D−1 , (11) where D = Hgc RxHHgc +σ2 
+
+> s
+
+IM ≻ 0 is the conditional clutter-plus-noise covariance matrix for the estimated fast-timescale clutter response. Aggregate SCNR alone does not guarantee sufficient exci-tation of every desired scattering center. We use the received energy associated with scattering center t, defined as 
+
+Et(Rx, v) = Tr  Hgt,t RxHHgt,t 
+
+ . (12) The constraints Et ≥ et prevent the optimizer from satisfying the aggregate SCNR primarily through the strongest scattering center. To limit mutual correlation among desired-scatterer re-sponses, define the cross-correlation budget (CCB) as 
+
+CCB = X 
+
+> t,u ∈T , t<u
+
+Tr  Hgt,t RxHHgt,u 
+
+ . (13) For T = 1 , the sum in (13) is empty and the CCB constraint is inactive. Because the unnormalized CCB has channel- and power-dependent units, ϵs is normalized using the same refer-ence channel gain and noise power adopted in the simulations. We first state the full joint design problem, in which the ISAC-BS transmit power is minimized over the active beamformers, group-wise phases, and binary grouping pattern: 
+
+P0 : min  
+
+> Ws,Wc,G,v
+
+Tr( Rx),
+
+s.t. SINR k ≥ Γk, k ∈ K , (14a) 
+
+SCNR ≥ Γs, (14b) 
+
+Et ≥ et, t ∈ T , (14c) 
+
+CCB ≤ ϵs, (14d) 
+
+|vq | = 1 , q = 1 , . . . , Q, (14e) 
+
+Gq,n ∈ { 0, 1},
+
+> Q
+
+X
+
+> q=1
+
+Gq,n = 1 ,
+
+> N
+
+X
+
+> n=1
+
+Gq,n ≥ 1, q = 1 , . . . , Q. (14f) Here, Γk and Γs denote the required SINR of CU k and the required target SCNR, respectively. Constraints (14c) and (14d) protect the desired-scatterer illumination and response correlation, (14e) enforces unit-modulus group coefficients, and (14f) assigns every reflecting element to exactly one nonempty group. Problem P0 is a mixed-integer nonconvex program due to the binary grouping variables, unit-modulus constraints, coupling between active and passive variables, and quartic dependence of the round-trip sensing terms on v. Direct global optimization is therefore impractical in the considered XL-IRS regime. We instead adopt a two-timescale candidate-restricted approach. Section III uses S-CSI to construct and screen a finite set of grouping candidates. For each retained candidate, the Q-dimensional post-grouping cascaded channels are estimated, after which Section IV alternately optimizes the transmit covariances and group-wise phases. The final grouping is selected according to the recovered transmit power among candidates satisfying the prescribed feasibility and rank/diversity criteria. The slow-timescale design relies on path losses, Rician fac-tors, dominant angles, and scattering-power statistics, avoiding realization-wise optimization over all N IRS elements. The fast-timescale design still requires instantaneous post-grouping cascaded CSI; grouping reduces the channel-estimation and optimization dimensions but does not remove the need for CSI acquisition. Hence, the proposed framework is a task-aware dimensionality-reduction strategy rather than a CSI-free passive-beamforming scheme. 5
+
+III. T ASK -A DAPTIVE S-CSI-G UIDED GROUPING FOR 
+
+POINT AND EXTENDED TARGETS 
+
+We construct grouping candidates from slowly varying S-CSI. For T = 1 , only communication-channel separability must be protected against excessive common-mode concen-tration. For T > 1, the grouping must additionally prevent the desired-scatterer responses from collapsing into a nearly one-dimensional subspace; hence the extended-target branch includes per-scatterer illumination and response-diversity safe-guards. 
+
+A. Common Coherent-Gain Benefit and Common-Mode Rank Cost 
+
+The post-grouping cascaded communication channel of CU 
+
+k is decomposed as 
+
+Cg,k = CkGT = Cg,k + eCg,k , k ∈ K , (15) where 
+
+Cg,k = ηkaM (θbi )bHk GT , bk = aN (ϕbi ) ⊙ a∗ 
+
+> N
+
+(ϕk). (16) Likewise, for desired scattering center t ∈ T and clutter scatterer l ∈ L , we write 
+
+Cgs,t = Cgs,t + eCgs,t , Cgs,t = ηtaM (θbi )bHt GT , (17) 
+
+Cgs,l = Cs,l GT , bt = aN (ϕbi ) ⊙ a∗ 
+
+> N
+
+(θts). (18) The large-scale gains and Rician factors are retained in ηk =
+
+αβ k
+
+q κbi κk  
+
+> (1+ κbi )(1+ κk)
+
+and ηt = α
+
+q κbi  
+
+> 1+ κbi
+
+|γt|. Retaining these factors is essential because the slow-timescale grouping should distinguish a distant CU or weak desired scattering center from a nearby strong component. We do not assign a coherent-gain utility to clutter in the outer grouping objective: Cgs,l may remain directionally structured, but it represents an undesired and realization-dependent component whose impact is handled by the fast-timescale SCNR constraint and the final feasibility audit. Let Sq be the element set of group q and μq = |S q |. Since the groups are disjoint, we have 
+
+GG T = diag( μ1, . . . , μ Q),
+
+> Q
+
+X
+
+> q=1
+
+μq = N. (19) For an isotropic diffuse component ec ∼ CN (0, σ 2 
+
+> c
+
+IN ), it follows that 
+
+E∥Gec∥2 = σ2
+
+> cQ
+
+X
+
+> q=1
+
+μq = N σ 2 
+
+> c
+
+. (20) Thus, grouping preserves the total average power of the modeled i.i.d. isotropic NLoS component; this identity does not apply to a directional clutter scatterer in (5). If the deterministic phases of component i are approximately aligned within each group, then 
+
+∥Gci∥2 ≈ | ηi|2
+
+> Q
+
+X
+
+> q=1
+
+μ2 
+
+> q
+
+. (21) where ci = ηibi. For equal-size groups, the coherent deter-ministic term in (21) scales as N 2/Q , whereas the diffuse-power term in (20) scales as N . Phase-consistent grouping can therefore increase the deterministic-to-diffuse power ratio of selected components without reducing the absolute average diffuse power. Let v = GT v and collect the effective CU and desired-scatterer one-way channels as 
+
+Hc = [ hg, 1, . . . , hg,K ], HT = [ hgt, 1, . . . , hgt,T ]. (22) Their deterministic LoS components satisfy 
+
+Hc = aM (θbi )[ q1, . . . , q K ], qk = ηkbHk v, (23) 
+
+HT = aM (θbi )[ s1, . . . , s T ], st = ηtbHt v. (24) Consequently, 
+
+rank( Hc) ≤ 1, rank( HT ) ≤ 1. (25) For a nonzero matrix X with singular values {σj (X)}, define 
+
+pj (X) = σ2 
+
+> j
+
+(X)
+
+∥X∥2
+
+> F
+
+, (26) 
+
+reff (X) = exp 
+
+− X
+
+> j
+
+pj (X) log pj (X)
+
+ , (27) where the convention 0 log 0 = 0 is used. 
+
+Proposition 1 (effective-rank collapse under common-mode domination): Let Hi = Hi + eHi for i ∈ {c, T } , where 
+
+rank( Hi) ≤ 1 and σ1(Hi) > 0. For fixed matrix dimensions, if 
+
+ϵi ≜ ∥ eHi∥2
+
+σ1(Hi) −→ 0, (28) then 
+
+σ2(Hi)
+
+σ1(Hi) −→ 0, reff (Hi) −→ 1. (29) 
+
+Proof: By the Eckart–Young theorem, σ2(Hi) ≤ ∥ eHi∥2,while the reverse triangle inequality gives σ1(Hi) ≥ σ1(Hi)−∥ eHi∥2. Hence, for ϵi < 1, σ2(Hi)/σ 1(Hi) ≤ ϵi/(1 −ϵi) → 0.Because the matrix dimensions are fixed, all singular values beyond the first are likewise bounded by the residual spectral norm; their normalized energy therefore vanishes, yielding 
+
+reff (Hi) → 1.Proposition 1 has different implications for the two sensing tasks. For T = 1 , HT contains a single column and is rank one by construction, so coherent target enhancement cannot eliminate an additional desired-target dimension. The commu-nication matrix Hc, however, should retain multiple energetic singular modes whenever the CUs rely on spatial separation. For T > 1, reff (HT ) ≈ 1 indicates that the desired-scatterer energy is concentrated in one dominant response mode de-spite the presence of multiple physical scattering centers. In this regime, aggregate echo gain and useful target-response diversity can diverge. We therefore use effective rank together with the dominant-mode energy fraction, rather than algebraic rank alone, when screening grouping candidates. 
+
+B. Point-Target Branch: Weak-Link Gain Enhancement With Communication-Rank Protection 
+
+For T = 1 , denote the point target by p. Let Kw ⊆ K con-tain the path-loss-limited CUs identified from their cascaded large-scale gains; it contains at least the weakest CU and may include several distant CUs. Define 
+
+Uk = CHk Ck, Up = CHs,p Cs,p , (30) 6
+
+where Ck = ηkaM (θbi )bHk and Cs,p = ηpaM (θbi )bHp . For 
+
+0 < r < 1, the normalized deterministic gains are 
+
+gpt  
+
+> k
+
+(v; r) = vH Ukv
+
+rΓkσ2
+
+> k
+
+, k ∈ K , (31) 
+
+gpt  
+
+> p
+
+(v; r) = vH Upv
+
+(1 − r)Γ sσ2
+
+> s
+
+. (32) Because |ηk|2 is retained in Uk, a path-loss-limited CU typically attains a smaller normalized deterministic gain and is therefore naturally emphasized by the max–min objective. To avoid rewarding an already strong common LoS mode without limit, we define the bounded utility 
+
+ψi(g) = 1 − exp( −g/χ i), χi > 0. (33) The point-target candidate is generated by 
+
+PPT (r) : max  
+
+> v
+
+min 
+
+> i∈I PT
+
+ψi
+
+ gpt  
+
+> i
+
+(v; r) (34) s.t. |vn| = 1 , n = 1 , . . . , N, ψk(gpt  
+
+> k
+
+) ≥ uk, k ∈ K \ K w,
+
+where IPT = Kw ∪ { p}. The floors {uk} prevent the weak-link objective from severely degrading the remaining CUs. In an approximately noise-limited regime, a useful power scaling is 
+
+plb  
+
+> k
+
+≈ Γkσ2
+
+> k
+
+∥hg,k ∥2 . (35) Equation (35) motivates using the weak-CU deterministic gain as an outer-layer proxy in the noise-limited regime, while the final performance is governed by the coupled SINR/SCNR design. Communication-rank protection is enforced explicitly during candidate screening rather than inferred from gain alone. 
+
+C. Extended-Target Branch: Per-Scatterer Illumination and Angular-Separability Preservation 
+
+For T > 1, the target cannot be replaced by a single representative direction. Define Us,t = CHs,t Cs,t and 
+
+get  
+
+> t
+
+(v; r) = vH Us,t v
+
+(1 − r)νtΓsσ2
+
+> s
+
+, t ∈ T , (36) where νt > 0 and P 
+
+> t∈T
+
+νt = 1 specify the desired illumi-nation profile. The user gains get  
+
+> k
+
+are defined as in (31). A gain-balanced element-wise candidate is first obtained from 
+
+max  
+
+> |vn|=1
+
+min 
+
+> i∈I ET
+
+ψi
+
+ get  
+
+> i
+
+(v; r) (37) s.t. ψt(get  
+
+> t
+
+) ≥ ut, t ∈ T ,ψk(get  
+
+> k
+
+) ≥ uk, k ∈ K \ K w,
+
+where IET = Kw ∪ T . The constraints for all t prevent the outer gain objective from concentrating only on the strongest scattering center. They are S-CSI-based surrogates used for candidate generation; the exact received-energy constraints are enforced again in the fast-timescale design. Gain balancing alone does not protect angular separability. For a recovered grouping matrix G, we define the group-domain signature of scattering center t as 
+
+zt(G) = vec( Cs,t GT ) = ηt(Gb∗ 
+
+> t
+
+) ⊗ aM (θbi ), (38) and its normalized version bzt = zt/∥zt∥. Let bZT =[bz1, . . . , bzT ]. We use the worst-case signature coherence 
+
+μang (G) = max  
+
+> t̸=u
+
+|bzHt bzu|2, (39) and the normalized log-determinant diversity 
+
+Dang (G) = 1
+
+T log det 
+
+
+
+εIT + bZH 
+
+> T
+
+bZT
+
+
+
+, ε > 0. (40) The coherence term penalizes the most ambiguous pair, whereas the log-determinant rewards global signature diver-sity. Both are S-CSI-based structural surrogates; neither alone guarantees a particular angular-estimation accuracy. After the gain seed is quantized into balanced groups, the extended-target grouping is refined through pairwise element swaps that monotonically increase 
+
+JET (G, v) = F ET  
+
+> τ
+
+(GT v)+ λD Dang (G)−λμμang (G), (41) subject to the gain floors in (37). Here, F ET  
+
+> τ
+
+is the smooth ap-proximation of the minimum bounded utility, while λD , λ μ ≥
+
+0 weight the diversity terms. The group centroids are updated after every accepted swap. Because each swap preserves group sizes and is accepted only when it strictly increases (41), the finite assignment process terminates at a swap-wise local optimum. For estimator-aware screening, let Hgt (θ) denote the ag-gregate desired-target round-trip channel, ˙Ht = ∂Hgt /∂θ ts,
+
+Lp the number of independent probing snapshots, and D
+
+the clutter-plus-noise covariance. Under the adopted Gaussian receive model, with D treated as independent of the target-angle parameters, a conditional angle Fisher information ma-trix (FIM) for a candidate with optimized Rx and v is 
+
+[Jθ ]t,u = 2 Lp Re 
+
+n
+
+Tr 
+
+
+
+D−1 ˙HtRx ˙HHu
+
+o 
+
+. (42) If the complex target-scattering coefficients collected in γT
+
+are unknown nuisance parameters and the corresponding real-parameter block Jγγ is nonsingular, the angle-only equivalent FIM is obtained via the Schur complement 
+
+Jθ,nuis = Jθθ − Jθγ J−1 
+
+> γγ
+
+Jγθ . (43) The corresponding metric is 
+
+CRB ang = Tr 
+
+
+
+J−1
+
+> θ,nuis
+
+
+
+. (44) Equations (39)–(40) serve as low-complexity structural sur-rogates during candidate generation and swap refinement, whereas (44) is evaluated after the inner design provides Rx
+
+and v. Lower signature coherence can improve numerical separability, but it is not equivalent to a lower estimation CRB, which also depends on the transmit covariance, clut-ter whitening, scattering amplitudes, and nuisance-parameter coupling. The CRB threshold is therefore used only to screen the generated extended-target candidates before power-based selection. 
+
+D. Continuous Candidate Optimization and Balanced Group-ing Recovery 
+
+For either branch, the nonsmooth minimum bounded utility is approximated by 
+
+Fτ (v) = −τ log X
+
+> i∈I
+
+exp 
+
+
+
+− ψi(gi(v)) 
+
+τ
+
+!
+
+, τ > 0, (45) 7
+
+where I = IPT or IET . Here, Fτ is a smooth lower approximation of the minimum and becomes tight as τ → 0.With 
+
+πi = exp[ −ψi(gi)/τ ]
+
+P 
+
+> j∈I
+
+exp[ −ψj (gj )/τ ] , (46) the Wirtinger gradient is 
+
+∇v∗ Fτ = X
+
+> i∈I
+
+πiψ′
+
+> i
+
+(gi) Uiv
+
+di
+
+, (47) where di is the corresponding positive normalization factor in (31), (32), or (36). Parameterizing v = ejϕ gives 
+
+∇ϕFτ = 2 Im {v∗ ⊙ ∇ v∗ Fτ } . (48) An Armijo line search ensures a nondecreasing Fτ for fixed τ .Multiple initializations and a continuation schedule for τ are used because the unit-modulus problem remains nonconvex. Accordingly, the phase-gradient iterations provide, at most, a stationary point of each fixed-τ smoothed problem and do not guarantee a global optimum of the original nonsmooth max– min design. For a locally optimized element-wise candidate v⋆, the binary grouping matrix and group-wise phase vector are recovered from 
+
+min  
+
+> G,v
+
+∥v⋆ − GT v∥2 (49) s.t. Gq,n ∈ { 0, 1},
+
+> Q
+
+X
+
+> q=1
+
+Gq,n = 1 , |vq | = 1 ,μmin ≤
+
+> N
+
+X
+
+> n=1
+
+Gq,n ≤ μmax , q = 1 , . . . , Q. 
+
+The size bounds are selected around N/Q and prevent one excessively large coherent group from dominating several nearly empty groups. For fixed groups, we have 
+
+vq = exp 
+
+j arg X
+
+> n∈S q
+
+v⋆n
+
+ . (50) For fixed centroids, the capacity-constrained assignment is a minimum-cost allocation problem with costs |v⋆n − vq |2. With deterministic tie breaking, alternating exact assignment and centroid updates monotonically decreases (49) and terminates at a coordinatewise local solution over the finite assignment set. The measure-zero case of a zero centroid sum is handled by retaining the previous phase. For T > 1, the diversity-aware swap refinement in (41) is then applied. The recovered 
+
+v only initializes the fast-timescale passive-beamforming op-timization; it does not replace that optimization. 
+
+E. Task-Dependent Candidate Screening and Selection 
+
+For every candidate c ∈ C and each of S validation channel realizations drawn under the adopted S-CSI model, the fast-timescale algorithm is executed and the original constraints are rechecked after rank-one recovery. With feasibility indicator 
+
+Is(c) and recovered power Ps(c), define bf (c) = S−1 P 
+
+> s
+
+Is(c)
+
+and bPtx (c) = P 
+
+> s
+
+Is(c)Ps(c)/ P 
+
+> s
+
+Is(c). The latter is evalu-ated only when at least one feasible recovery exists and is always reported together with bf (c). Using the same validation realizations, compute 
+
+brc(c) = 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+reff (H(s) 
+
+> c
+
+(c)) , (51) 
+
+bδc(c) = 1
+
+S
+
+> S
+
+X
+
+> s=1
+
+σ21 (H(s) 
+
+> c
+
+(c)) 
+
+∥H(s) 
+
+> c
+
+(c)∥2
+
+> F
+
+. (52) Effective rank is evaluated realization by realization before averaging. In particular, reff (E{HH H }) can be large even when individual instantaneous channels are nearly rank one, because averaging may mix different dominant directions. We therefore screen the empirical mean effective rank together with the dominant-mode energy fraction bδc; jointly, these metrics distinguish an energetically multi-mode channel from one whose nominal rank is sustained mainly by weak singular components. For the point-target branch, let CPT contain the candidates satisfying bf (c) ≥ fmin , the point-target safeguards, and 
+
+brc(c) ≥ rc, min , bδc(c) ≤ δc, max . (53) No target-subspace rank constraint is imposed because T = 1 .The selected point-target grouping is 
+
+c⋆ 
+
+> PT
+
+∈ arg min 
+
+> c∈C PT
+
+bPtx (c). (54) For the extended-target branch, additionally compute brT
+
+and bδT by replacing Hc with HT in (51)–(52). Define the normalized response coherence 
+
+ρt,u = | Tr( Hgt,t RxHHgt,u )|√EtEu + ε , t̸ = u, (55) where Et = Tr( Hgt,t RxHHgt,t ). Let bρmax (c) and [CRB ang (c)
+
+denote the corresponding conditional averages over feasible validation samples. The set CET retains candidates satisfying 
+
+bf (c) ≥ fmin and 
+
+bρmax (c) ≤ ρmax , [CRB ang (c) ≤ ϵθ , (56) 
+
+brc(c) ≥ rc, min , bδc(c) ≤ δc, max , (57) 
+
+brT (c) ≥ rT ,min , bδT (c) ≤ δT ,max . (58) The selected extended-target grouping is 
+
+c⋆ 
+
+> ET
+
+∈ arg min 
+
+> c∈C ET
+
+bPtx (c). (59) In this work, the Gaussian receive model and nuisance-parameter assumptions stated in (42)–(43) are adopted when forming [CRB ang (c); hence, the CRB threshold in (56) is enforced as part of the extended-target candidate screen rather than used only for post hoc validation. If the clutter covariance becomes angle dependent or a different nuisance model is adopted, the corresponding FIM must be modified; that ex-tension is outside the present scope. In summary, the point-target screen protects communication-channel structure, whereas the extended-target screen additionally checks desired-scatterer concentration and angular information. For C = |C| candidates and Rg gradient steps, gain generation costs O(CR g N (K + T )) , excluding balanced clustering and validation-stage decompositions. The extended-target branch also evaluates a T × T signature Gram matrix and the angle-FIM/CRB screen; once the required 8         
+
+> TABLE I TASK -D EPENDENT GROUPING SAFEGUARDS
+> Aspect Point target Extended target Shared CU gain floors; communication-rank screen CU gain floors; communication-rank screen Sensing SCNR; target illumination SCNR; per-scatterer illumination; CCB; diversity/CRB screens Failure mode CU-channel collinearity CU collapse or target-response concentration
+
+derivatives and covariance terms are formed, this includes inversion of the T ×T equivalent angle-information matrix (or the corresponding nuisance-augmented Schur complement). Selection is restricted to the retained finite candidate set and the recovered solutions produced by the stated inner algorithm; no global optimality for P0 is implied. Selecting only the candidate with the largest outer-layer utility can be misleading because high deterministic gain may coexist with poor instantaneous recovery when post-grouping channels are nearly collinear or diffuse/clutter components produce an unfavorable realization. We therefore require a minimum empirical recovery rate before ranking the retained candidates by recovered transmit power. Effective rank is used only as a structural screening metric, not as a stand-alone performance objective. 
+
+F. Design Interpretation and Parameter Selection 
+
+Table I summarizes the task-dependent safeguards. Both branches use CU gain floors and communication-rank screen-ing. For T = 1 , no target-subspace rank constraint is meaning-ful because the desired response has one column. For T > 1,however, aggregate SCNR alone can be satisfied by a dom-inant scatterer; per-scatterer illumination and CCB therefore complement the signature-diversity screens. Under the adopted FIM model, the angle CRB is enforced as an estimator-aware screening criterion before the surviving extended-target candidates are ranked by recovered transmit power. Parameter r is a normalization-dependent design weight rather than a physical power-allocation fraction and is selected by a coarse sweep. The angle-CRB threshold ϵθ represents the admissible aggregate angle-estimation variance and is specified from the sensing-resolution requirement before the retained candidates are ranked by transmit power. The util-ity scales {χi} should span the useful gain range: overly small values saturate the bounded utility, whereas overly large values weaken the intended emphasis on the worst components. The soft-min temperature τ is decreased with warm starts. Rank thresholds satisfy rc, min ≤ min {M, K }
+
+and rT ,min ≤ min {M, T } and should account for finite-sample uncertainty; candidates close to a screen are preferably retained unless their uncertainty interval clearly violates the threshold. Group-size bounds are centered around N/Q to avoid a dominant coherent group. These parameters affect candidate generation and screening only; the fast-timescale feasibility decision is made after rank-one recovery using the original QoS constraints. IV. J OINT ACTIVE AND PASSIVE BEAMFORMING DESIGN 
+
+For a fixed grouping candidate, the ISAC-BS estimates the low-dimensional post-grouping cascaded CSI and alternately updates the transmit covariances and group-wise phase shifts. The resulting fixed-group problem is 
+
+P5 : min  
+
+> Ws,Wc,v
+
+Tr( Rx)s.t. (14a)–(14e) . (60) Problem P5 remains nonconvex because the sensing con-straints are quartic in v, the phase shifts have unit modulus, and the active and passive variables are coupled. Following the SDR principle in [23], define Rs = WsW Hs , Rk = wkwHk ,and V = vv H . These lifted variables satisfy Rs ⪰ 0,
+
+Rk ⪰ 0, V ⪰ 0, Vq,q = 1 , rank( Rk) = 1 , and rank( V ) = 1 .The rank-one constraints are relaxed during block optimization and are addressed explicitly in the recovery stage. Since λmax (D) ≤ Tr( D) for D ≻ 0, we have D−1 ⪰
+
+IM / Tr( D). Hence, the exact SCNR admits the conservative lower bound 
+
+Tr  Hgt RxHHgt D−1 ≥ Tr( Hgt RxHHgt )Tr( D) . (61) For compactness, write Hg,k (V ) = Cg,k V CHg,k and define 
+
+Hgt,t (V ) and Hgc,l (V ) analogously to (10). Replacing the exact SCNR constraint by the sufficient condition induced by (61) and relaxing the rank constraints yields the following conservative lifted problem: 
+
+P6 : min   
+
+> Rs,{Rk},V
+
+Tr( Rx),
+
+s.t.
+
+
+
+1 + 1Γk
+
+
+
+Tr( RkHg,k )
+
+− Tr( RxHg,k ) ≥ σ2
+
+> k
+
+, k ∈ K , (62a) 
+
+Tr( Hgt RxHHgt ) − Γs Tr( Hgc RxHHgc )
+
+≥ M Γsσ2 
+
+> s
+
+, (62b) 
+
+Tr( Hgt,t RxHHgt,t ) ≥ et, t ∈ T , (62c) 
+
+X
+
+> t<u
+
+Tr( Hgt,t RxHHgt,u ) ≤ ϵs, (62d) 
+
+Rs ⪰ 0, Rk ⪰ 0, k ∈ K , (62e) 
+
+V ⪰ 0, Vq,q = 1 , q = 1 , . . . , Q. (62f) Problem P6 remains nonconvex because the transmit-covariance and lifted-phase blocks are coupled. Equation (62b) is a sufficient, rather than equivalent, replacement of the exact SCNR constraint, so the resulting design is generally conservative. We optimize the two variable blocks alternately. 
+
+A. Optimization of Transmit Beamformers 
+
+For fixed V , all channel matrices are constant and the transmit-covariance subproblem is 
+
+P7 : min   
+
+> Rs,{Rk}
+
+Tr( Rx)s.t. (62a)–(62e) . (63) For fixed V , problem P7 is a convex semidefinite program (SDP) after the absolute-value terms in the CCB are written with standard epigraph variables. Let {Ropt  
+
+> k
+
+, Ropt  
+
+> s
+
+} denote an optimal solution. 9
+
+Lemma 2 (Rank-one recovery for communication beamform-ing): Let {Ropt  
+
+> k
+
+, Ropt  
+
+> s
+
+} be any feasible solution of P7 with 
+
+Tr( Ropt  
+
+> k
+
+Hg,k ) > 0. Define 
+
+w⋆k = Ropt  
+
+> k
+
+hg,k 
+
+q
+
+Tr( Ropt  
+
+> k
+
+Hg,k )
+
+, (64a) 
+
+R⋆s = Ropt  
+
+> s
+
++ X
+
+> k∈K
+
+
+
+Ropt  
+
+> k
+
+− w⋆kw⋆,H k
+
+
+
+. (64b) Then R⋆s ⪰ 0, each communication covariance 
+
+w⋆kw⋆,H k is rank one, and all constraints and the objective of P7 are preserved. This follows from 
+
+Ropt  
+
+> k
+
+− Ropt  
+
+> k
+
+hg,k hHg,k Ropt  
+
+> k
+
+/(hHg,k Ropt  
+
+> k
+
+hg,k ) ⪰ 0 and from preservation of both Rx and the desired-signal terms. No rank-one restriction is imposed on R⋆s [24, Proposition 1]. 
+
+B. Optimization of Post-grouping Phase Shifts 
+
+For fixed transmit covariances, the lifted phase block can be written as the following feasibility problem: 
+
+P8 : find V
+
+s.t.
+
+
+
+1 + 1Γk
+
+
+
+Tr( AkV )
+
+− Tr( BkV ) ≥ σ2
+
+> k
+
+, k ∈ K , (65a) 
+
+∥E∥2 
+
+> F
+
+− Γs∥F ∥2 
+
+> F
+
+≥ M Γsσ2 
+
+> s
+
+, (65b) 
+
+∥Et∥2 
+
+> F
+
+≥ et, t ∈ T , (65c) 
+
+X
+
+> t<u
+
+| Tr( EtEHu )| ≤ ϵs, (65d) 
+
+V ⪰ 0, Vq,q = 1 , q = 1 , . . . , Q. 
+
+where Ak = CHg,k RkCg,k , Bk = CHg,k RxCg,k ,
+
+E = P 
+
+> t∈T
+
+Et, and F = P 
+
+> l∈L
+
+Fl, with Et =
+
+γs,t Cgs,t V CHgs,t R1/2 
+
+> x
+
+and Fl = γs,l Cgs,l V CHgs,l R1/2 
+
+> x
+
+. Con-straint (65a) and the positive-semidefinite (PSD) constraints are convex, whereas (65b)–(65d) are nonconvex in V . Let 
+
+z = vec( V ) and Qs = M HE ME − ΓsM HF MF . Then 
+
+∥E∥2 
+
+> F
+
+− Γs∥F ∥2 
+
+> F
+
+= zH Qsz. (66) where 
+
+ME = X
+
+> t∈T
+
+γs,t 
+
+
+
+CHgs,t R1/2
+
+> x
+
+T
+
+⊗ Cgs,t 
+
+
+
+, (67) 
+
+MF = X
+
+> l∈L
+
+γs,l 
+
+
+
+CHgs,l R1/2
+
+> x
+
+T
+
+⊗ Cgs,l 
+
+
+
+. (68) The matrix Qs is Hermitian but generally indefinite; conse-quently, the quadratic sensing-feasibility condition in P8 is nonconvex. We use successive convex approximation (SCA) to generate feasible candidates for the lifted phase block. At SCA iteration 
+
+r, the convex desired-energy functions are replaced by their first-order global affine lower bounds: 
+
+∥E∥2 
+
+> F
+
+≥ 2 Re {Tr( E(r)EH )} − ∥ E(r)∥2 
+
+> F
+
+, (69a) 
+
+∥Et∥2 
+
+> F
+
+≥ 2 Re {Tr( E(r) 
+
+> t
+
+EHt )} − ∥ E(r) 
+
+> t
+
+∥2 
+
+> F
+
+. (69b) where E(r) = P 
+
+> t∈T
+
+E(r) 
+
+> t
+
+and E(r) 
+
+> t
+
+is evaluated at V (r).These lower bounds are value- and gradient-tight at the current point. Introducing nonnegative feasibility margins yields the convex candidate-generation subproblem 
+
+P9 : max   
+
+> V,η s,{ηk}
+
+ηs + X
+
+> k∈K
+
+ηk,
+
+s.t.
+
+
+
+1 + 1Γk
+
+
+
+Tr( AkV )
+
+− Tr( BkV ) ≥ σ2 
+
+> k
+
++ ηk, k ∈ K , (70a) 
+
+2 Re {Tr( E(r)EH )} − ∥ E(r)∥2
+
+> F
+
+− Γs∥F ∥2 
+
+> F
+
+≥ M Γsσ2 
+
+> s
+
++ ηs, (70b) 
+
+2 Re {Tr( E(r) 
+
+> t
+
+EHt )} − ∥ E(r) 
+
+> t
+
+∥2
+
+> F
+
+≥ et, t ∈ T , (70c) 
+
+ηs ≥ 0, ηk ≥ 0, k ∈ K , (70d) 
+
+V ⪰ 0, Vq,q = 1 , q = 1 , . . . , Q. 
+
+Problem P9 is a convex quadratically constrained SDP. Be-cause (69a)–(69b) are global affine lower bounds that are value- and gradient-tight at V (r), constraints (70b)–(70c) constitute inner approximations of the corresponding desired-energy constraints. Feasibility of these lower-bounded con-straints implies feasibility of the associated lifted energy constraints. The CCB is treated differently because its absolute bilinear cross terms do not admit the same simple inner ap-proximation; each candidate update is therefore accepted only if the exact lifted constraints (65a)–(65d) are satisfied. Rank-one/unit-modulus feasibility is asserted only after Gaussian randomization and re-evaluation of the original SINR, exact SCNR, illumination, and CCB constraints. The implementa-tion distinguishes three levels: conservative SCNR approxi-mation, rank-relaxed lifted feasibility, and final feasibility of a physical phase vector. Because the CCB is enforced by post-update acceptance rather than a first-order-tight surrogate, stationarity of the original phase problem is not claimed. Algorithm 1 summarizes the complete update and recovery procedure. Each accepted phase update keeps the current transmit covariances feasible for the next P7 solve; hence, the AO transmit-power sequence is nonincreasing and lower bounded, and its objective value converges. This does not imply station-arity of P5, because the phase block maximizes a feasibility margin and the CCB is enforced by post-update acceptance. SDR likewise does not ensure rank-one recovery; feasibility is claimed only for a randomized physical phase that passes the original-constraint audit. The reported point is therefore a feasible finite-iteration solution, not an optimizer of P0 or P5.
+
+C. Initialization and Numerical Safeguards 
+
+The grouping centroid in (50) initializes v. If P7 is infeasi-ble for this initialization, a phase-I procedure tests statistically informed rotations and additional random unit-modulus starts; only starts with nonnegative feasibility margin are retained. The AO/SCA iterations use warm starts, relative-change toler-ances, and iteration caps. For numerical conditioning, solver matrices are Hermitian-symmetrized and the channels/noise powers are normalized consistently. After Gaussian random-ization, every projected unit-modulus phase is followed by a new P7 solve and an audit of the original constraints; 10 
+
+Algorithm 1 Proposed SDR-Based AO Algorithm for Joint Active and Passive Beamforming 
+
+Input: Grouping matrix G, post-grouping channels {Cg,k },
+
+{Cgs,t }, and {Cgs,l }, thresholds, and tolerances. 
+
+Output: Recovered transmit covariances {Rs, Rk} and phase vector v. 
+
+> 1:
+
+Initialize V 1 = v1(v1)H from the grouping-recovery phase vector; use a phase-I problem or multiple starts until 
+
+P7 is feasible for the fixed V 1. Set p = 1 . 
+
+> 2:
+
+repeat  
+
+> 3:
+
+With V = V p, solve P7 to obtain {Rps , Rpk}. 
+
+> 4:
+
+Set V p, 0 = V p and repeatedly solve P9, updating its SCA point, until the phase-block change is below tolerance.  
+
+> 5:
+
+Accept the resulting V p+1 only after verifying (65a)– (65d); otherwise retain V p and terminate the current start.  
+
+> 6:
+
+Update p = p + 1 . 
+
+> 7:
+
+until The relative transmit-power decrease is below toler-ance.  
+
+> 8:
+
+Generate unit-modulus candidates from the final V by Gaussian randomization. For each candidate, resolve P7
+
+and recheck the exact SINR, SCNR, illumination, and CCB constraints; retain the feasible candidate of minimum power.  
+
+> 9:
+
+Recover {w⋆k} using (64a) and factorize R⋆s to obtain the sensing streams. If no randomized candidate is feasible, declare rank-one recovery unsuccessful. candidates feasible only in the relaxed problem are discarded, and the feasible-recovery rate is reported. 
+
+D. Complexity Analysis 
+
+Problem P7 contains K + 1 Hermitian PSD blocks of size M , whereas P9 contains one Q × Q PSD block and 
+
+K + 1 scalar margins. Let m7 = O(K + T 2), after in-troducing epigraph variables for the absolute-value terms, and let m9 = O(K + T ) denote the corresponding num-bers of scalar conic constraints. As a coarse dense-solver scaling proxy, consider the generic interior-point estimate 
+
+CSDP (n, m, ϵ ) = O √n log(1 /ϵ )( mn 3 + m2n2 + m3). A conservative order estimate for IAO AO iterations and ISCA 
+
+SCA iterations is therefore O IAO [CSDP (( K +1) M, m 7, ϵ 7)+ 
+
+ISCA CSDP (Q, m 9, ϵ 9)] . Because this expression ignores ex-ploitable block-diagonal and sparsity structure, it should be interpreted only as a generic dense-solver scaling law rather than as an implementation-level runtime prediction. Gaussian randomization adds one P7 solve for each tested phase candi-date. The phase block contains a Q × Q PSD variable rather than an N × N one. Although each slow-timescale grouping-gradient evaluation can still scale linearly with N , this step is amortized over many coherence intervals and does not require an N × N online SDP. Increasing Q reduces grouping distortion at the cost of higher training and online optimization dimensions; Section V evaluates this tradeoff.                                    
+
+> TABLE II DEFAULT SIMULATION PARAMETERS
+> Parameter Value ISAC-BS antennas / CUs, (M, K )(8 ,3)
+> IRS elements / groups, (N, Q )(4096 ,8)
+> Target / clutter scatterers, (T, L )(3 ,2)
+> Rician factor / tradeoff coefficient 3dB / 0.20
+> CU SINR / sensing SCNR 20 dB / 10 dB CU / sensing noise power −80 dBm / −80 dBm Normalized illumination / CCB 1/0.25
+> Grouping-gradient updates / swaps 32 /32
+> AO / SCA updates / randomizations 3/2/24
+> Monte Carlo realizations per point 800
+
+V. N UMERICAL RESULTS 
+
+We evaluate five grouping strategies over 800 independent realizations, using the same element-domain channel across strategies in each trial. A recovery is feasible only if the original SINR, exact SCNR, illumination, and CCB con-straints hold within 2×10 −3 relative tolerance. Shading shows 
+
+P ± 1.96 sP /√nf over feasible powers; failed recoveries are not imputed and paired win rates use jointly feasible trials. Overall, 155 ,989 of 156 ,000 records are feasible, with a mini-mum per-curve recovery rate of 99 .75% . Powers are arithmetic means in watts and savings are 10 log 10 (Pref /P proposed ); a fixed master seed is used without smoothing or interpolation. 
+
+A. Simulation Setup and Benchmarks 
+
+The ISAC-BS and EG-XL-IRS are located at (0 , 0) m and 
+
+(100 , 10) m. Two CUs are uniformly drawn from a radius-
+
+2.5 m disk centered at (100 , 0) m and the path-loss-limited CU from an identical disk centered at (115 , 0) m. The large-scale power gain is ℓ(d) = 10 −3d−2.2. Both communication hops use a 3-dB Rician factor. The default target has T = 3 
+
+scattering centers separated by 15 ◦ around broadside, with total RCS −40 dB divided equally among them. Two clutter scatterers lie outside 7.5◦ guard intervals and each has RCS 
+
+20 dB below the total target RCS; scattering phases are independent and uniform. For numerical conditioning, communication channels are normalized by σk and one-way sensing factors by (σ2 
+
+> s
+
+)1/4,so that both solver-side noise variances equal one while the recovered physical transmit power is unchanged. We set 
+
+et = M Γsσ2 
+
+> s
+
+/T and ϵs = 0 .25 M Γsσ2 
+
+> s
+
+. The remaining default parameters are listed in Table II. All methods use identical iteration/randomization bud-gets, restart rules, AO/SCA optimization, rank-one recov-ery, and feasibility audits, leaving grouping as the main design difference. Random grouping uses balanced partitions, adjacent-element-grouping XL-IRS (AEG-XL-IRS) uses ad-jacent groups, and the proposed method balances weak-CU and target S-CSI before diversity-aware swaps. Sensing- and communication-only baselines deactivate the opposite outer-layer utility ( r = 0 and r = 1 are limiting cases). QoS sweeps keep the nominal-QoS grouping fixed with feasible warm starts, while the Q ∈ { 2, 4, 8, 16 } sweep uses nested partitions and coarse-to-fine phase carryover to retain inherited feasible points. Because grouping changes both coherent gain and channel geometry, we also keep restart/randomization limits 11 
+
+and online iteration budgets identical and report recovery rates rather than allocating extra computation to difficult partitions. The curves therefore characterize the stated finite-iteration implementations, not global optima. 
+
+B. Communication–Sensing Weight 0.2 0.4 0.6 0.8 1.0      
+
+> Tradeoff coefficient r
+> 10 1
+> 10 2
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+> Fig. 2. Average transmit power versus the communication–sensing tradeoff coefficient r. The four fixed baselines are repeated across ras common references.
+
+Fig. 2 shows a broad interior minimum: the proposed method decreases from 3.552 W at r = 0 .05 to 2.054 W at 
+
+r = 0 .20 and 1.996 W at r = 0 .30 , then rises to 4.192 W at 
+
+r = 0 .99 . The overlapping intervals at r = 0 .20 and 0.30 mo-tivate r = 0 .20 as a sensing-aware operating point rather than a universal optimum. At r = 0 .20 , Sensing-DoF-only requires 
+
+5.684 W, giving a 63 .87% (4.42 dB) saving and a 95 .75% 
+
+paired win rate. For this geometry and finite solver budget, the larger powers of random, adjacent, and communication-only grouping indicate that fast phase adaptation does not fully compensate for an unfavorable slow-timescale partition. A partition that overconcentrates deterministic gain in unsuitable propagation modes can reduce weak-CU separability or target-response diversity and require additional active-beamforming power to satisfy the joint SINR and sensing constraints. 
+
+C. Group Dimension and Pilot Overhead 
+
+With nested partitions and feasible-solution carryover, Fig. 3 is nonincreasing for all methods. The proposed method changes from 1.588 W at Q = 2 to 1.459 W at Q = 16 ,whereas Sensing-DoF-only decreases from 7.648 to 4.724 W, suggesting that extra online coefficients partly compensate for an unfavorable weak-CU geometry in the latter partition. At 
+
+Q = 8 , the proposed method requires 1.494 W versus 4.945 
+
+W for Sensing-DoF-only, a 5.20 -dB saving with a 97 .88% 
+
+paired win rate. Increasing Q from 8 to 16 yields only 2.34% 
+
+further reduction while (Q + 1) /(N + 1) rises from 0.220% to 
+
+0.415% . For this setup, Q = 8 is an empirical power–overhead knee rather than a universal optimum. The Q sweep should not be interpreted as showing that more groups are intrinsically unnecessary. Rather, it shows diminishing returns under the present channel statistics, candi-date design, and finite online optimization budget. Increasing 2 4 6 8 10 12 14 16  
+
+> Number of groups Q
+> 10 1
+> 10 2
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+> Fig. 3. Average transmit power versus the number of balanced XL-IRS groups
+> Q. Nested partitions and feasible-solution carryover are used for all strategies.
+
+Q enlarges the passive control space but also increases the dimension of cascaded-CSI estimation and the lifted phase SDP. The preferred Q depends jointly on transmit power, training overhead, online computation, and coherence time. 
+
+D. Communication and Sensing QoS 
+
+The curves in Fig. 4 are nondecreasing, consistent with nested QoS feasible sets and feasible warm starts. In Fig. 4(a), the proposed method rises from 0.443 W at Γc = 10 dB to 
+
+15 .616 W at 30 dB; at the nominal 20 dB, it saves 6.09 dB over Sensing-DoF-only and 17 .20 dB over random grouping. At 30 dB, the proposed method still retains a 3.68 -dB power gap over sensing-only grouping, consistent with the benefit of protecting the path-loss-limited CU. In Fig. 4(b), the proposed method increases from 1.378 to 5.390 W over Γs = 0 –20 dB, whereas Sensing-DoF-only increases from 3.563 to 43 .315 W. At Γs = 10 dB, the paired win rate is 97 .00% . A sensing-favored partition can incur a large active-power penalty if it creates a deep communication fade, because the fast-timescale optimizer must then increase active-beamforming power while still meeting the sensing constraints. Two Communication-DoF-only recoveries fail at Γc = 30 dB. 
+
+E. Point and Extended Targets 
+
+In Fig. 5, total target RCS is fixed while the illumination constraints grow with T and pairwise CCB terms with  T
+
+> 2
+
+.The proposed power increases from 1.195 W for a point target to 4.298 W at T = 5 , reflecting the stricter cover-age/decorrelation constraints rather than an increase in total target strength. At T = 3 , the saving over Sensing-DoF-only is 6.27 dB; at T = 5 , the powers are 4.298 and 13 .648 W, respectively, giving a 68 .50% reduction and a 93 .00% paired win rate. The larger spread at high T indicates sensitivity to realizations containing both a weak CU and poorly separated target responses. 
+
+F. Clutter Robustness 
+
+In Fig. 6, increasing each clutter RCS from −20 to 30 
+
+dB relative to total target RCS raises the proposed power 12 10.0 12.5 15.0 17.5 20.0 22.5 25.0 27.5 30.0             
+
+> (a) CU SINR threshold Γc(dB)
+> 10 0
+> 10 1
+> 10 2
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+> 0.0 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0
+> (b) Sensing SCNR threshold Γs(dB)
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+
+Fig. 4. Average transmit power versus (a) the common CU SINR threshold and (b) the sensing SCNR threshold. The grouping matrix of each method is fixed at its nominal-QoS design during each sweep. 1 2 3 4 5 
+
+> Number of target scatterers T
+> 10 0
+> 10 1
+> 10 2
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+
+Fig. 5. Average transmit power versus the number of desired target scattering centers T . The total target RCS is fixed and divided equally among the centers. −20 −10 0 10 20 30 
+
+> Clutter-to-target RCS ratio (dB)
+> 10 1
+> 10 2
+> Transmit power (W)
+> Random grouping AEG-XL-IRS Sensing-DoF-only Communication-DoF-only Proposed
+
+Fig. 6. Average transmit power versus the RCS of each clutter scatterer rel-ative to the total target RCS. Desired and clutter directions are independently regenerated in every realization. 
+
+from 1.811 to 3.615 W and Sensing-DoF-only from 5.692 
+
+to 10 .173 W. At 30 dB, the proposed method saves 4.49 
+
+dB over sensing-only grouping and 15 .75 –18 .93 dB over the other baselines, with a 99 .875% feasible-recovery rate over the 
+
+10 –30 dB points. The gaps are consistent with the different slow-timescale partitions: baselines that preserve only one task-relevant structure can leave either weak-CU geometry or desired-target separability unfavorable, requiring the common fast-timescale optimizer to use higher transmit power. The monotonic increase with clutter strength is consistent with the SCNR denominator. Grouping can improve the geometry between desired and directional-clutter responses but cannot eliminate clutter power. Equation (20) applies only to the modeled i.i.d. isotropic diffuse component; directional clutter may itself be coherently enhanced. The fast-timescale SCNR constraint handles this structured interference. Robustness to S-CSI errors, mutual coupling, hardware impairments, and unmodeled near-field scattering remains for future uncertainty-aware extensions [36]. Across the five sweeps, the proposed method attains the smallest conditional mean power under the common online optimizer. Because all strategies use the same element-domain channel realization in each trial, the same restart/randomization budget, and the same feasibility audit, the reported gaps are reproducible consequences of the group-ing partitions and their downstream recoverability under the stated implementation. Within the adopted far-field Rician model and finite solver budget, the results favor S-CSI-aware partition design; they do not establish global optimality, universal superiority, or robustness to model mismatch. All feasibility decisions use the original constraints after physical phase recovery. VI. C ONCLUSION 
+
+We investigated power-efficient multiuser ISAC assisted by an element-grouping XL-IRS and developed a two-timescale design that separates slow-timescale grouping from fast-timescale active and passive beamforming. The key insight is that element grouping is not merely a means of reducing the IRS control dimension. By coherently combining phase-consistent elements, grouping can enhance desirable determin-istic propagation components, but excessive concentration on a common LoS mode may simultaneously reduce the spatial diversity required for multiuser communication and extended-target sensing. This gain–rank tradeoff motivates the proposed task-adaptive grouping strategy, which exploits statistical CSI to enhance weak communication links and desired target responses while preserving task-relevant spatial dimensions. 13 
+
+For each retained grouping pattern, the transmit covariances and group-wise reflection phases are optimized using the instantaneous post-grouping CSI, followed by physical phase recovery and verification against the original communication and sensing constraints. Numerical results demonstrate that the proposed grouping strategy consistently requires lower trans-mit power than the considered benchmarks under the same group dimension and online optimization budget. The results also reveal diminishing power gains as the number of groups increases, highlighting a practical tradeoff among transmit power, channel-estimation overhead, and online optimization complexity. These findings show that propagation-structure-aware element grouping can provide an effective means of scaling XL-IRS-assisted ISAC without relying on element-wise real-time control. Future work will consider statistical-CSI uncertainty, near-field propagation, hardware impairments, and joint design of grouping and channel-acquisition protocols. REFERENCES [1] F. Liu, Y. Cui, C. Masouros, J. Xu, T. X. Han, Y. C. Eldar, and S. Buzzi, “Integrated sensing and communications: Toward dual-functional wire-less networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [2] J. Li, G. Zhou, T. Gong, N. Liu, and R. Zhang, “Joint active and passive beamforming design for IRS-aided MIMO ISAC based on sensing mutual information,” IEEE Trans. Wirel. Commun. , vol. 25, pp. 6568– 6585, 2026. [3] M. Hua, Q. Wu, W. Chen, A. Jamalipour, C. Wu, and O. A. Dobre, “Integrated sensing and communication: Joint pilot and transmission design,” IEEE Trans. Wireless Commun. , vol. 23, no. 11, pp. 16 017– 16 032, 2024. [4] X. Liu, T. Huang, N. Shlezinger, Y. Liu, J. Zhou, and Y. C. Eldar, “Joint transmit beamforming for multiuser MIMO communications and MIMO radar,” IEEE Trans. Signal Process. , vol. 68, pp. 3929–3944, 2020. [5] D. Tse and P. Viswanath, Fundamentals of Wireless Communication .Cambridge University Press, 2005. [6] G. Cui, H. Li, and M. Rangaswamy, “MIMO radar waveform design with constant modulus and similarity constraints,” IEEE Trans. Signal Process. , vol. 62, no. 2, pp. 343–353, 2014. [7] Q. Wu and R. Zhang, “Intelligent reflecting surface enhanced wireless network via joint active and passive beamforming,” IEEE Trans. Wirel. Commun. , vol. 18, no. 11, pp. 5394–5409, 2019. [8] Q. Wu, B. Zheng, C. You, L. Zhu, K. Shen, X. Shao, W. Mei, B. Di, H. Zhang, E. Basar, L. Song, M. Di Renzo, Z.-Q. Luo, and R. Zhang, “Intelligent surfaces empowered wireless network: Recent advances and the road to 6G,” Proceedings of the IEEE , vol. 112, no. 7, pp. 724–763, 2024. [9] Z. Zhang, L. Dai, X. Chen, C. Liu, F. Yang, R. Schober, and H. V. Poor, “Active RIS vs. passive RIS: Which will prevail in 6G?” IEEE Transactions on Communications , vol. 71, no. 3, pp. 1707–1725, 2023. [10] M. Hua, Q. Wu, W. Chen, Z. Fei, H. C. So, and C. Yuen, “Intelligent reflecting surface-assisted localization: Performance analysis and algo-rithm design,” IEEE Wirel. Commun. Lett. , vol. 13, no. 1, pp. 84–88, 2024. [11] B. Zheng and R. Zhang, “Intelligent reflecting surface-enhanced OFDM: Channel estimation and reflection optimization,” IEEE Wireless Commu-nications Letters , vol. 9, no. 4, pp. 518–522, 2020. [12] Y. Yang, B. Zheng, S. Zhang, and R. Zhang, “Intelligent reflecting surface meets OFDM: Protocol design and rate maximization,” IEEE Transactions on Communications , vol. 68, no. 7, pp. 4522–4535, 2020. [13] Z. Li, N. K. Kundu, J. Rao, S. Shen, M. R. McKay, and R. Murch, “Performance analysis of RIS-assisted communications with element grouping and spatial correlation,” IEEE Wireless Communications Let-ters , vol. 12, no. 4, pp. 630–634, 2023. [14] N. K. Kundu, Z. Li, J. Rao, S. Shen, M. R. McKay, and R. Murch, “Optimal grouping strategy for reconfigurable intelligent surface assisted wireless communications,” IEEE Wireless Communications Letters ,vol. 11, no. 5, pp. 1082–1086, 2022. [15] Z. Mao, W. Wang, Q. Xia, C. Zhong, X. Pan, and Z. Ye, “Element-grouping intelligent reflecting surface: Electromagnetic-compliant model and geometry-based optimization,” IEEE Transactions on Wireless Com-munications , vol. 21, no. 7, pp. 5362–5376, 2022. [16] Z. Yu, H. Ren, C. Pan, G. Zhou, B. Wang, M. Dong, and J. Wang, “Active RIS-aided ISAC systems: Beamforming design and performance analysis,” IEEE Trans. Commun. , vol. 72, no. 3, pp. 1578–1595, 2024. [17] C. Pan, H. Ren, K. Wang, W. Xu, M. Elkashlan, A. Nallanathan, and L. Hanzo, “Multicell MIMO communications relying on intelligent reflecting surfaces,” IEEE Transactions on Wireless Communications ,vol. 19, no. 8, pp. 5218–5233, 2020. [18] B. Zheng and R. Zhang, “Simultaneous transmit diversity and passive beamforming with large-scale intelligent reflecting surface,” IEEE Trans-actions on Wireless Communications , vol. 22, no. 2, pp. 920–933, 2023. [19] M. Najafi, V. Jamali, R. Schober, and H. V. Poor, “Physics-based mod-eling and scalable optimization of large intelligent reflecting surfaces,” 
+
+IEEE Transactions on Communications , vol. 69, no. 4, pp. 2673–2691, 2021. [20] H. Guo and V. K. N. Lau, “Uplink cascaded channel estimation for intelligent reflecting surface assisted multiuser MISO systems,” IEEE Transactions on Signal Processing , vol. 70, pp. 3964–3977, 2022. [21] S. Zhang, T. Ji, M. Hua, Y. Huang, and L. Yang, “Element-grouping strategy for intelligent reflecting surface: Performance analysis and algorithm optimization,” IEEE Trans. Wirel. Commun. , vol. 25, pp. 13 274–13 289, 2026. [22] S. Lu, F. Liu, and L. Hanzo, “The degrees-of-freedom in monostatic ISAC channels: NLoS exploitation vs. reduction,” IEEE Transactions on Vehicular Technology , vol. 72, no. 2, pp. 2643–2648, 2023. [23] M. Hua, Q. Wu, C. He, S. Ma, and W. Chen, “Joint active and passive beamforming design for IRS-aided radar-communication,” IEEE Trans. Wirel. Commun. , vol. 22, no. 4, pp. 2278–2294, 2023. [24] X. Song, X. Qin, J. Xu, and R. Zhang, “Cram´ er–rao bound minimization for IRS-enabled multiuser integrated sensing and communications,” 
+
+IEEE Trans. Wirel. Commun. , vol. 23, no. 8, pp. 9714–9729, 2024. [25] Y. Geng, T. Hiang Cheng, K. Zhong, K. Chan Teh, and Q. Wu, “Joint beamforming for CRB-constrained IRS-aided ISAC system via product manifold methods,” IEEE Trans. Wirel. Commun. , vol. 24, no. 1, pp. 691–705, 2025. [26] Y. Xu, Y. Li, and T. Q. S. Quek, “RIS-Enhanced Cognitive Integrated Sensing and Communication: Joint Beamforming and Spectrum Sens-ing,” IEEE J. Sel. Areas Commun. , vol. 43, no. 3, pp. 795–810, 2025. [27] A. Bazzi and M. Chafii, “Low Dynamic Range for RIS-Aided Bistatic Integrated Sensing and Communication,” IEEE J. Sel. Areas Commun. ,vol. 43, no. 3, pp. 912–927, 2025. [28] Z. Yigit and E. Basar, “Hybrid STAR-RIS Enabled Integrated Sensing and Communication,” IEEE Trans. Commun. , vol. 73, no. 9, pp. 8289– 8300, 2025. [29] X. Zhou, F. Ke, C. Wu, X. Y. Zhang, and D. W. K. Ng, “Robust Beamforming for STAR-RIS Aided Hybrid-Field ISAC Systems,” IEEE Trans. Commun. , vol. 74, pp. 5654–5669, 2026. [30] H. Yang, S. Gong, H. Liu, C. Xing, N. Zhao, and D. Niyato, “Frequency Diverse Array-Enabled RIS-Aided Integrated Sensing and Communica-tion,” IEEE Trans. Wireless Commun. , vol. 24, no. 9, pp. 7546–7562, 2025. [31] H. Wu, H. Ren, C. Pan, and Y. Zhang, “Movable Antenna-Enabled RIS-Aided Integrated Sensing and Communication,” IEEE Trans. Cogn. Commun. Netw. , vol. 11, no. 5, pp. 2879–2892, 2025. [32] X. Gan, C. Huang, Z. Yang, X. Chen, F. Bader, Z. Zhang, C. Yuen, Y. L. Guan, and M. Debbah, “Modeling and Coverage Analysis of RIS-Assisted Integrated Sensing and Communication Networks,” IEEE Trans. Wireless Commun. , vol. 24, no. 7, pp. 6006–6019, 2025. [33] Y. Liu, G. Chen, Y. Wen, Q. Luo, C. Zhang, and D. Niyato, “STAR-RIS-Enabled Full-Duplex Integrated Sensing and Communication System,” 
+
+IEEE Trans. Wireless Commun. , vol. 24, no. 11, pp. 9465–9477, 2025. [34] S. J. Lee, “IRS element grouping with element-wise reflection coef-ficients,” IEEE Wireless Communications Letters , vol. 13, no. 1, pp. 168–172, 2024. [35] Y. Lu and L. Dai, “Near-field channel estimation in mixed LoS/NLoS environments for extremely large-scale MIMO systems,” IEEE Trans. Commun. , vol. 71, no. 6, pp. 3694–3707, 2023. [36] X. Dong, Z. Fei, M. Hua, X. Wang, and Y. Liu, “Semi-Passive RIS Aided Near-Field ISAC: CRB Analysis and Optimization,” IEEE Trans. Veh. Technol. , vol. 74, no. 6, pp. 9084–9099, 2025.

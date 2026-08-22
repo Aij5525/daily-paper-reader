@@ -1,0 +1,568 @@
+Title: Secrecy Rate Maximization for UAV-Mounted Six-Dimensional Movable IRS-Assisted ISAC Systems
+
+URL Source: https://arxiv.org/pdf/2608.20278v1
+
+Published Time: Fri, 21 Aug 2026 01:11:13 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Secrecy Rate Maximization for UAV-Mounted Six-Dimensional Movable IRS-Assisted ISAC Systems 
+
+Chengye Hong 1,∗, Botang Shi 1,∗, Rongkun Zhu 1, Yuhan Wang 2, Chenyiming Jiang 1, and Lei Xie 1,†
+
+> 1
+
+School of Cyber Science and Engineering, Southeast University, Nanjing 210096, China 
+
+> 2
+
+Chien-Shiung Wu College, Southeast University, Nanjing 210096, China 
+
+Abstract —Integrated sensing and communication (ISAC) is a key enabling technology for 6G wireless networks, but its broadcast nature raises a physical-layer security concern when the sensing target can act as a potential eavesdropper. Although intelligent reflecting surfaces (IRSs) can enhance wireless propa-gation and improve secrecy, existing secure IRS-assisted ISAC designs are mostly limited to fixed deployments and passive phase control, which offer limited spatial adaptability in line-of-sight-dominated low-altitude scenarios. To address this limitation, we investigate an unmanned aerial vehicle (UAV)-mounted six-dimensional movable IRS-assisted secure ISAC system, where the IRS location, orientation, and reflection coefficients are jointly optimized with the BS beamformer to maximize the secrecy rate under communication quality-of-service (QoS), power, unit-modulus, and visibility constraints. The resulting problem is highly non-convex due to the coupled active/passive beamform-ing variables and the location-and-orientation-dependent (pose-dependent) channel responses. To solve it efficiently, we develop a three-block alternating optimization (AO) framework, in which the active beamformer, IRS pose, and passive reflection vector are updated via linearized ADMM, warm-started particle swarm optimization, and Riemannian gradient descent, respectively. Simulation results show that the proposed design significantly outperforms fixed-location and orientation-only baselines, high-lighting the importance of joint translation, rotation, and phase control for secure ISAC. 
+
+Index Terms —Integrated sensing and communication, UAV communications, six-dimensional movable IRS, intelligent reflect-ing surface, physical-layer security, alternating optimization. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communication (ISAC) has emerged as one of the foundational paradigms for sixth-generation (6G) wireless networks, since it enables sensing and com-munication functionalities to share spectrum, hardware, and signal processing resources in a unified framework [1], [2]. However, the reuse of a common waveform for both sensing and communication also introduces a fundamental physical-layer security concern [3]. In particular, the object being sensed may simultaneously act as a potential eavesdropper, and thus confidential communication intended for legitimate   
+
+> This work was supported in part by the National Natural Science Foundation of China (No. 62501143), in part by the Basic Research Program of Jiangsu (No. BK20251332), and in part by Undergraduate Training Programs for Innovation of Jiangsu Province (No. S202610286144). ∗Chengye Hong and Botang Shi contributed equally to this work. †Corresponding author: Lei Xie (email: leixie@seu.edu.cn).
+
+users can be exposed through the sensing process itself. There-fore, achieving security-aware ISAC is no longer an optional enhancement, but a prerequisite for trustworthy 6G systems. Among the technologies developed to improve wireless propagation environments, intelligent reflecting surface (IRS) has attracted considerable attention because of its low-cost, energy-efficient, and programmable phase-control capabil-ity [4]. In ISAC systems, IRS can enhance the desired commu-nication link while suppressing the leakage toward unintended directions, thereby offering an effective means to improve both sensing and secrecy performance [5]. Nevertheless, most existing IRS-assisted secure transmission schemes rely on fixed deployment and passive phase tuning only [6]. Such designs are particularly limited in low-altitude line-of-sight (LoS)-dominant scenarios, where the base station (BS), le-gitimate user, and sensing target/eavesdropper often lie in closely aligned angular directions. In these environments, fixed IRSs may not provide sufficient spatial degree of freedom to simultaneously strengthen the legitimate link and weaken the eavesdropping link. To overcome the inherent rigidity of conventional fixed IRS deployments, movable antenna technologies have recently been proposed as a promising new direction for wireless system design. In particular, a UAV-mounted six-dimensional movable IRS (6D movable IRS) can jointly adjust its three-dimensional position and three-dimensional orientation, thus reconfiguring not only the path loss but also the incident/reflection angles and the effective aperture projection of the cascaded channels [7]– [9]. Compared with phase-only control, such six-dimensional geometric flexibility provides a new layer of macroscopic channel control, which is especially valuable in LoS-dominated low-altitude environments where subtle changes in location and pose can lead to significant variations in channel geometry. However, most of the current literature focuses on sum-rate maximization, coverage extension, or beam alignment, while secrecy-aware designs remain relatively underexplored. In par-ticular, how to exploit six-dimensional mobility to improve secrecy in ISAC systems is still an open problem. Motivated by these observations, we propose a UAV-mounted 6D movable IRS-assisted secure ISAC system, where the BS transmits a unified orthogonal frequency-division mul-tiplexing (OFDM) signal to serve a legitimate user while simultaneously sensing a target that may act as a potential arXiv:2608.20278v1 [eess.SP] 20 Aug 2026 eavesdropper. By jointly adjusting the IRS three-dimensional location, three-dimensional orientation, and element-wise re-flection coefficients, the proposed architecture dynamically re-shapes the cascaded propagation channels and creates favorable spatial discrimination between the legitimate communication link and the leakage link toward the target. To exploit these geometric and electromagnetic degrees of freedom, we for-mulate a secrecy-rate maximization problem under transmit-power, communication quality-of-service (QoS), unit-modulus reflection, and physical visibility constraints. To tackle the resulting highly non-convex problem, we develop a three-block alternating optimization framework: the BS active beam-former is updated via a linearized alternating direction method of multipliers (ADMM) [10], the six-dimensional IRS pose is searched using warm-started particle swarm optimization (PSO) [11], and the passive reflection vector is optimized over the complex-circle manifold by Riemannian gradient descent. Simulation results demonstrate that the proposed scheme achieves stable convergence and significantly improves the secrecy rate compared with fixed-location and orientation-optimized IRS baselines, thereby confirming the critical role of joint displacement, rotation, and phase control in secure low-altitude ISAC systems. II. S YSTEM MODEL 
+
+A. Network Architecture and Coordinate Systems 
+
+We consider a downlink secure ISAC system assisted by a UAV-mounted IRS. The BS is equipped with Nt transmit antennas and Nr receive antennas. A single-antenna legitimate user, denoted by UE, receives confidential information from the BS. Meanwhile, a sensing target, denoted by Eve, may act as a potential eavesdropper. The UAV carries a passive IRS with 
+
+N = NxNz reflecting elements arranged as a uniform planar array (UPA). A global Cartesian coordinate system (GCCS) is established with the BS array center as the origin. The positions of the BS, UE, Eve, and IRS center are denoted by pB = [0 , 0, 0] T ,
+
+pU = [ pU,x , p U,y , p U,z ]T , pE = [ pE,x , p E,y , p E,z ]T , and pR =[pR,x , p R,y , p R,z ]T , respectively. A local Cartesian coordinate system (LCCS) is attached to the IRS center. The IRS orientation is represented by the Euler-angle vector γ, while the IRS pose is defined as the joint 6D vector consisting of its 3D position pR and orientation 
+
+γ, which is characterized by 
+
+g , [pT
+
+> R
+
+, γ T ]T , (1) where γ = [ γx, γ y , γ z ]T denotes the Euler-angle vector rep-resenting roll, pitch, and yaw. Let Q(γ) ∈ SO(3) denote the rotation matrix from the LCCS to the GCCS. Then, for any node X ∈ { B, U, E }, its local direction observed from the IRS is determined by 
+
+uL 
+
+> R,X
+
+(g) = QT (γ)( pX − pR)
+
+‖pX − pR‖2
+
+. (2) This transformation is essential because the IRS array response and aperture projection depend on the incident and reflection angles in the local IRS coordinate system. The n-th IRS element has local coordinate ¯rn ∈ R3.For a UPA lying on the x′z′-plane, ¯rn can be written as 
+
+¯rn = [( m − Nx+1 2
+
+) dx, 0, (ℓ − Nz +1 2
+
+) dz
+
+]T , where n = ( m −
+
+1) Nz + ℓ, m = 1 , . . . , N x, ℓ = 1 , . . . , N z , and dx, d z are the element spacings. Let λ denote the carrier wavelength. The IRS steering vector toward node X is modeled as 
+
+aR(uL 
+
+> R,X
+
+) = 1
+
+√N
+
+[
+
+e− 2πλ ¯rT  
+
+> 1uL
+> R,X
+
+, . . . , e − 2πλ ¯rTN uL
+
+> R,X
+
+]T
+
+. (3) Similarly, the BS transmit steering vector toward node X is denoted by aB (uB,X ) ∈ CNt ×1, where uB,X = pX −pB   
+
+> ‖pX−pB‖2
+
+.
+
+B. Communication Channel 
+
+Since the UAV-mounted IRS operates in a low-altitude LoS-dominant environment, all links are modeled as LoS channels. For nodes I, J ∈ { B, R, U, E }, define dI,J = ‖pJ − pI ‖2.
+
+The corresponding complex path gain is 
+
+αI,J =
+
+√
+
+β0d−ηI,J  
+
+> I,J
+
+e−2πd I,J /λ , (4) where β0 is the reference path loss at 1 meter and ηI,J is the path-loss exponent. The direct BS–UE and BS–Eve channels are expressed as hHB,U = αB,U aHB (uB,U ), and hHB,E = αB,E aHB (uB,E ),respectively. The BS–IRS channel is given by 
+
+GB,R (g) = αB,R aR(uL 
+
+> R,B
+
+)aHB (uB,R ) ∈ CN ×Nt . (5) The IRS-X channel, where X ∈ { U, E }, is given by 
+
+hHR,X (g) = αR,X aHR (uL 
+
+> R,X
+
+). (6) Let the IRS reflection matrix be 
+
+Θ = diag( v) = diag( eθ 1 , . . . , e θ N ), (7) where v = [ eθ 1 , . . . , e θ N ]T and |vn| = 1 .Due to the finite planar aperture of the IRS, the effective reflection gain depends on the incident and reflection angles. Let n(γ) = Q(γ)n0 denote the global normal vector of the IRS, where n0 is the local normal vector. The aperture projection factor associated with the BS–IRS– X cascaded link is modeled as [12] 
+
+FX (g) = 
+
+[ nT (γ)( pB − pR)
+
+dB,R 
+
+]
+
+> +
+
+[ nT (γ)( pX − pR)
+
+dR,X 
+
+]
+
+> +
+
+,
+
+(8) where [x]+ = max {x, 0}. For X ∈ { U, E }, the equivalent BS– X channel assisted by the UAV-mounted IRS is therefore 
+
+hHX (Θ, g) = hHB,X + √FX (g)hHR,X (g)ΘG B,R (g). (9) III. P ROBLEM FORMULATION 
+
+In this paper, we consider the OFDM signal. In particular, the transmitted signal is given by x = UH s, where U is the normalized discrete Fourier transform (DFT) matrix of size L,and s ∈ CL×1 denotes the symbol vector. The i-th entry of s
+
+is randomly drawn from a complex constellation. In this paper, we assume that E(si) = 0 , E(|si|) = 1 . Let f ∈ CNt×1 denote the BS active beamforming vector. The received signal at the UE is 
+
+yU = hHU (Θ, g)fx T + nU , (10) where nU ∼ CN (0 , σ 2 
+
+> U
+
+I). The corresponding communication signal-to-noise ratio (SNR) is 
+
+γU (f , Θ, g) = |hHU (Θ, g)f |2
+
+σ2
+
+> U
+
+. (11) The signal intercepted by Eve is 
+
+yE = hHE (Θ, g)fx T + nE , (12) where nE ∼ CN (0 , σ 2 
+
+> E
+
+I). The eavesdropping SNR is 
+
+γE (f , Θ, g) = |hHE (Θ, g)f |2
+
+σ2
+
+> E
+
+. (13) The achievable secrecy rate is defined as 
+
+Rs = [log 2(1 + γU ) − log 2(1 + γE )] + . (14) Since maximizing the nonnegative clipped secrecy rate is equivalent to maximizing the unclipped rate difference when-ever a positive secrecy rate is achievable, we optimize 
+
+¯Rs = log 2(1 + γU ) − log 2(1 + γE ). (15) The considered secrecy-rate maximization problem is for-mulated as (P1) max   
+
+> f,v,g
+
+log 2(1 + γU ) − log 2(1 + γE )
+
+s.t. γU (f , Θ, g) ≥ ΓU ,
+
+‖f ‖22 ≤ Pmax ,
+
+|vn| = 1 , n = 1 , . . . , N, 
+
+pR ∈ C , γ ∈ G ,
+
+nT (γ)( pX − pR) ≥ 0, X ∈ { B, U, E }.
+
+(16) Here, ΓU is the minimum communication QoS requirement, 
+
+Pmax is the maximum transmit power, C denotes the feasible UAV deployment region, and G denotes the allowable rotation range. Specifically, Constraint 1 guarantees the communication QoS requirement for the legitimate user (UE). Constraint 2 denotes the total transmit power limit at the BS, while con-straint 3 represents the non-convex unit-modulus constraints for the IRS reflection. Constraint 4 defines the spatial and rotational boundaries for the 6-DoF movable IRS platform. Finally, constraint 5 ensures physical visibility, where the direction vector pX,R = pX − pR from the IRS to node 
+
+X ∈ { BS, UE, Eve } must maintain an angle of less than 90 degrees relative to the panel normal [13]. Problem (P1) is difficult to solve globally because of the coupled active and passive beamforming variables, the unit-modulus constraints, and the highly nonlinear dependence of the channel on the IRS position and orientation. To obtain an efficient solution, we develop a three-block alternating optimization algorithm. IV. P ROPOSED ALTERNATING OPTIMIZATION ALGORITHM 
+
+The proposed algorithm alternately updates the BS active beamforming vector f , the IRS pose g, and the IRS reflection vector v. For notational simplicity, in each subproblem we omit variables that are fixed. 
+
+A. Active Beamforming Optimization via Linearized ADMM 
+
+For given v and g, define AU = hU hHU
+
+> σ2
+> U
+
+, and AE = hE hHE
+
+> σ2
+> E
+
+.Then, we have γU = f H AU f , γE = f H AE f . The active beamforming subproblem is 
+
+max  
+
+> f
+
+log 2(1 + f H AU f ) − log 2(1 + f H AE f )
+
+s.t. f H AU f ≥ ΓU , ‖f ‖22 ≤ Pmax . (17) To facilitate a simple first-order update, we equivalently min-imize the negativ secrecy objective and introduce an auxiliary variable z ith the consensus constraint f = z. The augmented Lagrangian is 
+
+Lρ(f , z, y)= gE (f ) + gU (z) + Re {yH (f − z)} + ρ
+
+2 ‖f − z‖22, (18) where gE (f ) = log 2(1 + f H AE f ) and gU (z) = − log 2(1 + 
+
+zH AU z), ρ > 0 is the penalty parameter, and y is the dual variable. At the (k + 1) -th inner iteration, the f -update is obtained by linearizing gE (f ) around f (k):
+
+∇f ∗ gE (f (k) ) = 1ln 2 
+
+AE f (k)
+
+1 + ( f (k))H AE f (k) . (19) To simplify the mathematical representation, we define the intermediate gradient-step vector as 
+
+b(k) = z(k) − 1
+
+ρ
+
+(
+
+y(k) + ∇f ∗ gE (f (k))
+
+)
+
+. (20) Then, the active beamforming vector is updated by 
+
+f (k+1) = Π W (b(k)), (21) where ΠW (·) denotes the projection operator onto the feasible set 
+
+W = {f : f H AU f ≥ ΓU }. (22) The QoS-compliant projection ΠW (b) is mathematically de-fined as [14] 
+
+ΠW (b) = 
+
+{
+
+b, if bH AU b ≥ ΓU ,
+
+b⊥ + βe jφ ¯hU , otherwise , (23) where ¯hU = hU /‖hU ‖2 is the maximum-ratio transmission direction, φ = ∠(¯hHU b), b⊥ = b − (¯hHU b)¯hU , and β =√ ΓU σ2 
+
+> U
+> ‖hU‖22
+
+is the minimum magnitude required to satisfy the QoS constraint ΓU .For the z-update, gU (z) is linearized around z(k). Its Wirtinger gradient is [15] 
+
+∇z∗ gU (z(k) ) = − 1ln 2 
+
+AU z(k)
+
+1 + ( z(k))H AU z(k) . (24) Thus, the auxiliary variable is updated as 
+
+z(k+1) = Π P
+
+(
+
+f (k+1) + 1
+
+ρ
+
+(
+
+y(k) − ∇ z∗ gU (z(k))
+
+))
+
+, (25) where P = {z : ‖z‖22 ≤ Pmax }. The dual variable is updated by 
+
+y(k+1) = y(k) + ρ(f (k+1) − z(k+1) ). (26) 
+
+B. Six-Dimensional Pose Optimization via Warm-Started PSO 
+
+For given f and v, the IRS pose optimization subproblem is 
+
+max  
+
+> g
+
+Rs(f , v, g) (27a) s.t. pR ∈ C , γ ∈ G , (27b) 
+
+nT (γ)( pX − pR) ≥ 0, X ∈ { B, U, E }. (27c) This subproblem is highly nonlinear because g affects the path loss, array responses, phase rotations, and aperture projection factors. To avoid poor local stationary points, we employ a warm-started PSO method. Each particle represents a candidate IRS pose: 
+
+gm = [ pR,x , p R,y , p R,z , γ x, γ y, γ z ]T , m = 1 , . . . , M. (28) For the m-th particle, the penalized fitness function is defined as 
+
+F(gm) = Rs(f , v, gm) − κ1 [Γ U − γU (f , v, gm)] +
+
+− κ2
+
+∑
+
+> X∈{ B,U,E }
+
+[−nT (γ)( pX − pR)] 
+
+> +
+
+, (29) where κ1 and κ2 are penalty coefficients. The first penalty enforces the UE QoS requirement, while the second penalty enforces the physical visibility constraints. To improve search efficiency, the particle population is initialized by a hybrid strategy. In the first AO iteration, Latin hypercube sampling [16] is used to generate diverse initial poses within C × G . In subsequent AO iterations, the best pose obtained in the previous AO round is used as the first particle, while the remaining particles are randomly sampled around it with bounded perturbations. This warm-start mechanism exploits the temporal correlation among AO iterations. Let μ(t) 
+
+> m
+
+be the velocity of the m-th particle at PSO iteration 
+
+t. The particle velocity and position are updated as 
+
+μ(t+1)  
+
+> m
+
+= ω(t)μ(t) 
+
+> m
+
++ c1r(t)1
+
+(
+
+gm, pbest − g(t)
+
+> m
+
+)
+
++ c2r(t)2
+
+(
+
+ggbest − g(t)
+
+> m
+
+)
+
+, (30) 
+
+g(t+1)  
+
+> m
+
+= Π C×G 
+
+(
+
+g(t) 
+
+> m
+
++ μ(t+1) 
+
+> m
+
+)
+
+, (31) where c1 and c2 are the cognitive and social learning factors, respectively, r(t)1 and r(t)2 are uniformly distributed random variables in [0 , 1] , and ΠC×G (·) denotes element-wise projec-tion onto the feasible pose region. The inertia weight ω(t) is linearly adjusted as 
+
+ω(t) = ωmax − tTPSO 
+
+(ωmax − ωmin ), (32) where TPSO is the maximum number of PSO iterations. 
+
+C. Passive Beamforming (PBF) Optimization on the Complex-Circle Manifold 
+
+For given f and g, the passive reflection design is 
+
+max  
+
+> v
+
+Rs(f , v, g) (33a) s.t. |vn| = 1 , n = 1 , . . . , N. (33b) The feasible set is the product of N complex circles: 
+
+M = {v ∈ CN : |vn| = 1 , n = 1 , . . . , N } . (34) Thus, the passive beamforming subproblem can be efficiently solved by Riemannian gradient descent. For X ∈ {U, E }, the equivalent channel in (9) can be rewritten as an affine function of v:
+
+hHX = hHB,X + vT DX , (35) where 
+
+DX = √FX (g) diag( hHR,X (g)) GB,R (g). (36) Define 
+
+qX (v) = hHX f = hHB,X f + vT DX f . (37) Then, we have 
+
+γX (v) = |qX (v)|2
+
+σ2
+
+> X
+
+, X ∈ { U, E }. (38) The Euclidean gradient of the negative secrecy objective 
+
+fv(v) = log 2(1 + γE (v)) − log 2(1 + γU (v)) (39) with respect to v∗ is 
+
+∇v∗ fv = 1ln 2 11 + γE
+
+∇v∗ γE − 1ln 2 11 + γU
+
+∇v∗ γU , (40) where 
+
+∇v∗ γX = 1
+
+σ2
+
+> X
+
+(DX f )∗ qX (v), X ∈ { U, E }. (41) The tangent space of M at v is 
+
+TvM = {ξ ∈ CN : Re {ξ ⊙ v∗} = 0} . (42) The Riemannian gradient is obtained by projecting the Eu-clidean gradient onto the tangent space: 
+
+grad fv = ∇v∗ fv − Re {∇ v∗ fv ⊙ v∗} ⊙ v. (43) Algorithm 1 Proposed AO Algorithm for Secure 6D Movable IRS-Assisted ISAC  
+
+> 1:
+
+Input: Locations pB , pU , pE , feasible region C, rotation set G, power budget Pmax , QoS threshold ΓU . 
+
+> 2:
+
+Initialize f (0) , v(0) , and g(0) . 
+
+> 3:
+
+Set AO iteration index r = 0 . 
+
+> 4:
+
+repeat  
+
+> 5:
+
+Given v(r) and g(r), update f (r+1) by the linearized ADMM iterations in (21)–(26).  
+
+> 6:
+
+Given f (r+1) and v(r), update g(r+1) by the warm-started PSO in (30)–(31).  
+
+> 7:
+
+Given f (r+1) and g(r+1) , update v(r+1) by Riemannian gradient descent in (43)–(44).  
+
+> 8:
+
+Compute R(r+1)  
+
+> s
+
+. 
+
+> 9:
+
+r ← r + 1 . 
+
+> 10:
+
+until |R(r) 
+
+> s
+
+− R(r−1)  
+
+> s
+
+| ≤ ǫ or r = Rmax . 
+
+> 11:
+
+Output: f ⋆, v⋆, g⋆.Given a step size αi, the retraction operation [17] is 
+
+v(i+1) = Retr v(i)
+
+(
+
+−αi grad fv(v(i) )
+
+)
+
+= e arg (v(i) −αi grad fv (v(i) )).
+
+(44) The step size is selected by backtracking line search to guarantee monotonic improvement of the secrecy objective. 
+
+Remark: Algorithm 1 summarizes the AO procedure, which guarantees convergence since the objective value is monotonically non-decreasing and upper-bounded. Specifi-cally, updating active beamformer f (with auxiliary z) re-quires O(IADMM N 2 
+
+> t
+
+) operations; searching 6D pose g requires 
+
+O(TPSO M N N t) operations; and updating passive vector v
+
+requires O(IRGD N N t) operations. Thus, the total per-iteration complexity is O(IADMM N 2 
+
+> t
+
++TPSO M N N t +IRGD N N t), where 
+
+IADMM , Nt, TPSO , M , N , and IRGD denote the ADMM inner iterations, BS antennas, maximum PSO iterations, particle size, IRS elements, and backtracking steps, respectively. This polynomial complexity underscores the practical feasibility of the proposed algorithm for real-time deployment. V. S IMULATION RESULTS 
+
+In this section, numerical simulations are presented to evaluate the proposed UAV-mounted six-dimensional movable IRS-assisted secure ISAC design. Unless otherwise specified, the BS is equipped with Nt = 32 transmit antennas and 
+
+Nr = 32 receive antennas. The IRS is configured as a UPA with N = NxNz reflecting elements. The carrier frequency is 
+
+fc = 3 .6 GHz. The reference path loss is set to β0 = −30 dB. The noise power spectral density is −174 dBm/Hz, and the system bandwidth is 1 MHz. The maximum transmit power is 
+
+Pmax = 30 dBm. The BS is located at pB = [0 , 0, 0] T m. The legitimate user and the potential eavesdropper/sensing target are located at pU = [280 , 0, 0] T m and pE = [0 , 20 , 0] T m, respectively. The UAV-mounted IRS flies at a fixed altitude 
+
+H = 150 m, i.e., pR,z = H. The path-loss exponents of the             
+
+> 0246810 12 14 16 18 20
+> Iteration Number
+> 3456789
+> Objective Value
+> Large-scale Region Scheme (6D+PBF) Small-scale Region Scheme (6D+PBF) 3D Orientation + PBF Fixed IRS Scheme (Baseline)
+> Fig. 1. Convergence behavior of the proposed algorithm under different 3D spatial constraints ( N= 16 ).
+
+communication and eavesdropping links are set to 3 and 2.2,respectively. The PSO parameters are set as c1 = 0 .9, c2 = 0 .1,
+
+ωmin = 0 .1, and ωmax = 1 .1.To demonstrate the impact of the six-dimensional mobility, we compare the following schemes:  
+
+> •
+
+Proposed 6D+PBF, large region: The IRS six-dimensional pose and passive beamforming are jointly optimized in a large deployment region R2, where pR,x ∈
+
+[0 , 100] m, and pR,y ∈ [0 , 100] m.  
+
+> •
+
+Proposed 6D+PBF, small region: The IRS six-dimensional pose and passive beamforming are jointly op-timized in a smaller region R1, where pR,x ∈ [50 , 100] m ,and pR,y ∈ [50 , 100] m . 
+
+> •
+
+3D orientation+PBF: The IRS location is fixed at pR =[100 , 100 , 150] T m, while only its three-dimensional ori-entation and passive reflection coefficients are optimized.  
+
+> •
+
+Fixed IRS baseline: The IRS location is fixed at 
+
+pR = [100 , 100 , 150] T m, and its orientation is fixed as γ = [ 53 π, 75 π, 17 π]T , and only the passive reflection coefficients are optimized. Fig. 1 compares the convergence performance under differ-ent spatial mobility constraints. For all schemes, the objective value increases rapidly during the first few AO iterations and then stabilizes. This confirms that the proposed block-wise design effectively coordinates active beamforming, 6D pose control, and passive reflection optimization. The early rapid improvement is driven by the macroscopic pose adjustment of the UAV-mounted IRS which substantially changes the channel geometry, while the later fine-grained gains stem from passive phase alignment on the IRS. Furthermore, the proposed 6D+PBF schemes outperform the orientation-only and fixed-IRS baselines. Specifically, the large-region scheme achieves a higher secrecy rate than the small-region counterpart, as a larger feasible region provides more spatial DoFs to balance communication enhancement and eavesdropping suppression. This reveals that the translation DoFs of the UAV-mounted IRS 916 25 36 49 64 81 100 121 144 169 196 
+
+> Number of IRS Reflective Elements (N)
+> 345678910 11 12 13 14 15 16
+> Achieved Secrecy Rate
+> Large-scale (6D+PBF) Small-scale (6D+PBF) 3D Orientation + PBF Fixed IRS Baseline
+
+Fig. 2. Achievable secrecy rate versus the number of IRS reflecting elements, 
+
+N , for different configurations. 
+
+are essential for secure ISAC, especially when the UE and Eve have close angular directions relative to the BS. Fig. 2 illustrates the impact of the number of IRS reflective elements, N , on the achievable secrecy rate. As N increases, the secrecy rate exhibits a clear upward trend, credited to the enhanced passive aperture gain and sharper beam directivity. However, as N grows beyond a certain threshold, the per-formance gain gradually saturates. This demonstrates that in line-of-sight (LoS)-dominated propagation environments, the system performance faces an inherent physical bottleneck, and solely expanding the IRS size cannot yield unlimited security enhancements. Additionally, the performance relations among different configurations remain consistent with our previous observations. Specifically, the 6D+PBF scheme excels over both baselines, while the larger region surpasses its smaller counterpart, reinforcing the efficacy of the 6D+PBF design and relaxed spatial constraints in boosting secure transmission. Overall, the simulation results confirm that 6D pose opti-mization provides a key spatial-domain mechanism for enhanc-ing physical-layer security, particularly in the angular-overlap regime where the UE and Eve are closely aligned from the perspective of the BS. In this regime, their highly correlated direct channels cause unavoidable leakage and limit the effec-tiveness of conventional fixed IRSs. By contrast, the proposed 6D movable IRS exploits 3D translation to reshape the path loss and angular geometry, thereby improving link separability, while using 3D rotation to adjust the panel normal and local propagation angles. These two mechanisms significantly am-plify the disparity between their effective aperture projection factors ( FU(g) and FE(g)), creating a favorable power-domain asymmetry that enhances the legitimate cascaded link. VI. C ONCLUSION 
+
+This paper investigated a UAV-mounted 6D movable IRS-assisted secure ISAC system. By jointly optimizing the active beamformer, 6D IRS pose, and passive reflection vector, we maximized the secrecy rate under QoS and visibility con-straints. An efficient alternating optimization framework was proposed based on linearized ADMM, warm-started PSO, and Riemannian gradient descent. Simulation results demonstrated that the proposed scheme achieves significant secrecy gains over static baselines.Future work may extend this framework to multi-user secure ISAC, robust design under imperfect channel state information, and dynamic UAV trajectory optimization. REFERENCES [1] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Trans. Commun. , vol. 68, no. 6, pp. 3834–3862, Jun. 2020. [2] L. Xie, S. Song, Y. C. Eldar, and K. B. Letaief, “Collaborative sensing in perceptive mobile networks: Opportunities and challenges,” IEEE Wireless Commun. , vol. 30, no. 1, pp. 16–23, 2023. [3] L. Xie, P. Wang, G. Shen, G. Li, W. Mei, and L. Chen, “Secure communication in MIMOME movable-antenna systems with statistical eavesdropper csi,” arXiv preprint arXiv:2601.14755 , 2026. [4] Q. Wu and R. Zhang, “Towards smart and reconfigurable environment: Intelligent reflecting surface aided wireless network,” IEEE Commun. Mag. , vol. 58, no. 1, pp. 106–112, Jan. 2020. [5] Q. Wu, Q. Peng, Z. Zhang, X. Shao, Y. Liu, Y. Jiang, Y. Zhao, Y. Zhu, Y. Chen, Z. Ren et al. , “Intelligent reflecting surfaces for integrated sens-ing and communications: A survey,” arXiv preprint arXiv:2511.10990 ,2025. [6] X. Pang, N. Zhao, J. Tang, C. Wu, D. Niyato, and K.-K. Wong, “IRS-Assisted secure UAV transmission via joint trajectory and beamforming design,” IEEE Trans. Commun. , vol. 70, no. 2, pp. 1140–1152, Feb. 2022. [7] C. Zhou, C. You, C. Zhou, L. Yao, W. Yuan, B. Zheng, and N. Wu, “Ro-tatable IRS-Assisted 6DMA communications: A two-timescale design,” 
+
+arXiv preprint arXiv:2512.15092 , 2025. [8] Q. Wu, Z. Zheng, Y. Gao, W. Mei, X. Wei, W. Chen, and B. Ning, “Integrating movable antennas and intelligent reflecting surfaces (MA-IRS): Fundamentals, practical solutions, and ISAC,” IEEE Wireless Commun. , 2025. [9] P. Wang, Y. Xue, W. Mei, J. Fang, and R. Zhang, “UAV-enabled passive 6D movable antenna for ISAC: Joint location, orientation, and reflection optimization,” IEEE Wireless Commun. Lett. , 2025, early access. [10] S. Boyd, N. Parikh, E. Chu, B. Peleato, and J. Eckstein, “Distributed optimization and statistical learning via the alternating direction method of multipliers,” Found. Trends Mach. Learn. , vol. 3, no. 1, pp. 1–122, 2011. [11] J. Kennedy and R. Eberhart, “Particle swarm optimization,” in Proc. IEEE Int. Conf. Neural Networks , Perth, WA, Australia, Nov. 1995, pp. 1942–1948. [12] W. Tang, X. Chen, M. Z. Chen, J. Y. Dai, Y. Han, M. Di Renzo, S. Jin, Q. Cheng, and T. J. Cui, “Path loss modeling and measurements for reconfigurable intelligent surfaces in the millimeter-wave frequency band,” IEEE Transactions on Communications , vol. 70, no. 9, pp. 6259– 6276, 2022. [13] T. Liu and S. Shamai, “A note on the secrecy capacity of the multiple-antenna wiretap channel,” IEEE Trans. Inf. Theory , vol. 55, no. 6, pp. 2547–2553, Jun. 2009. [14] L. Xie, P. Wang, S. Song, and K. B. Letaief, “Perceptive mobile network with distributed target monitoring terminals: Leaking communication energy for sensing,” IEEE Trans. Wireless Commun. , vol. 21, no. 12, pp. 10 193–10 207, 2022. [15] W. Wirtinger, “Zur formalen theorie der funktionen von mehr komplexen Ver¨ anderlichen,” Math. Ann. , vol. 97, no. 1, pp. 357–375, Dec. 1927. [16] M. D. McKay, R. J. Beckman, and W. J. Conover, “A comparison of three methods for selecting values of input variables in the analysis of output from a computer code,” Technometrics , vol. 42, no. 1, pp. 55–61, Feb. 2000. [17] P.-A. Absil, R. Mahony, and R. Sepulchre, Optimization Algorithms on Matrix Manifolds . Princeton, NJ, USA: Princeton Univ. Press, 2008.

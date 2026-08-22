@@ -1,0 +1,1648 @@
+Title: GCNO: Gramian Chebyshev Neural Operator for Physics-Based Compression of Wireless Channels
+
+URL Source: https://arxiv.org/pdf/2608.18522v1
+
+Published Time: Thu, 20 Aug 2026 00:27:16 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# GCNO: Gramian Chebyshev Neural Operator for Physics-Based Compression of Wireless Channels 
+
+## Rafid Umayer Murshed, 1 Shahab Hamidi-Rad, 2 Elahe Soltanaghai, 1 Akshay Malhotra 2
+
+> 1
+
+Department of Computer Science, University of Illinois Urbana-Champaign 
+
+> 2
+
+InterDigital AI Lab 
+
+{rum3, elahe}@illinois.edu , {Shahab.Hamidi-Rad, akshay.malhotra}@interdigital.com 
+
+Abstract 
+
+Large antenna arrays allow wireless systems to serve more users and achieve higher data-rates, but they also make chan-nel feedback expensive: the receiving device must repeatedly report a large complex-valued channel matrix to the base sta-tion. Most neural compressors treat this matrix like an image and replace it with a fixed-length code that only a matched neural decoder can interpret. The message therefore does not adapt to channel complexity, and changing the antenna count typically requires retraining. We ask whether a device can instead report only the few dominant propagation paths un-derlying each channel. We introduce the Gramian Cheby-shev Neural Operator (GCNO) , a physics-based, variable-rate compressor that identifies a sample-dependent set of path directions. GCNO uses receive–transmit channel structure to locate paths, a first-order Taylor correction to refine direc-tions that fall between grid points, and least squares to recover their complex strengths. It is trained without path labels, and the base station reconstructs the channel analytically from the transmitted path tuples rather than through a learned decoder. Across three ray-traced environments, GCNO achieves better reconstruction accuracy at the same payload—or lower pay-load at the same accuracy—than neural feedback baselines, and transfers to unseen antenna counts without retraining. 
+
+## 1 Introduction 
+
+Modern cellular systems place large antenna arrays at the base station, known as massive MIMO technology. These arrays can serve many users simultaneously and carry far more data, but only when the base station knows the current wireless channel: how the transmitted signal fades, reflects, and combines on its way to the user. How the base station obtains this information depends on the duplexing scheme. In frequency-division duplex systems, the uplink and down-link occupy different frequency bands, so the user measures the downlink channel state information (CSI) and reports it to the base station over a control link. Reporting CSI in full is costly. The channel between an Nr × Nt array pair is a com-plex matrix that requires 2Nr Nt real numbers to describe. A 32 × 32 channel already requires 2,048 numbers, and this cost continues to grow as antenna counts increase toward 6G (Marzetta 2010; Larsson et al. 2014). Because this feed-back consumes control-link resources that could otherwise carry data, CSI compression has become a central problem in massive MIMO (Larsson et al. 2014). This raises the main question of our work: What compact channel representation can reduce CSI feedback without sacrificing reconstruction accuracy or tying the method to one antenna configuration? 
+
+Deep learning (DL) has been studied extensively for com-pressing CSI feedback (O’Shea and Hoydis 2017; Guo et al. 2022). Most learned approaches treat the channel matrix sim-ilarly to an image. A neural encoder on the user device (UE) compresses the matrix into a short code, which a matched neural decoder at the base station (BS) uses to reconstruct the channel (Wen, Shih, and Jin 2018). Subsequent meth-ods improve this architecture through convolutional, recur-rent, and attention-based processing (Cui, Guo, and Song 2022; Xu, Yuan, and Pun 2021; Tang et al. 2022; Wang et al. 2019), while retaining the same paired encoder–decoder structure. This structure has two important limitations. Chan-nels with different levels of complexity are compressed into codes of the same length, preventing the feedback overhead from adapting to the amount of information in each chan-nel. In addition, the encoder and decoder are jointly trained for a specific antenna configuration, so changing the antenna count generally requires both networks to be retrained. These limitations motivate two corresponding evaluation criteria. We assess how few values a method must transmit to achieve a target channel-reconstruction normalized mean-squared er-ror (NMSE) and how accurately it reconstructs channels with different antenna counts without retraining. To address the limitations of prior work, we represent the channel through its underlying multipath structure rather than an antenna-specific latent code. Many outdoor and high-frequency channels are dominated by only a few strong prop-agation paths (Akdeniz et al. 2014; El Ayach et al. 2014). Under the geometric channel model, each path is described by its complex gain and transmit and receive directions, and the full channel can be reconstructed from the corre-sponding array responses (Alkhateeb et al. 2014). A channel with K paths therefore requires only 4K real-valued pa-rameters, compared with 2Nr Nt values for the full complex matrix. The user feeds back these path parameters, and the base station reconstructs the channel analytically without a matched neural decoder. Because the underlying paths are determined by the propagation environment rather than the antenna count, the same representation can be used across different antenna configurations, while its feedback length naturally follows the number of dominant paths. arXiv:2608.18522v1 [cs.IT] 19 Aug 2026 Having reduced the feedback problem to a few path pa-rameters, the main challenge is to estimate the continuous transmit and receive directions of those paths. Classical es-timators search over a fixed grid of candidate transmit and receive directions and identify the grid points that best match the measurements (Klukas and Fattouche 1998). Such a grid is unsuitable as the final feedback representation because a physical path rarely aligns exactly with one grid point. Its en-ergy instead spreads across neighboring bins (fig. 1), and sev-eral grid coefficients may be needed to represent a single path, especially when patterns from multiple paths overlap (Tang et al. 2013). This would increase the feedback length and undermine the compact path-based representation. Directly predicting continuous directions with a neural network is also ill-posed because small directional changes produce rapidly oscillating phase variations in the array response, resulting in a highly non-convex learning objective (Wagle et al. 2025a). We therefore adopt a hybrid approach that uses the direction grid only to construct a structured evidence map and learns to map it to one continuous direction pair for each path. Recovering continuous path directions across different an-tenna configurations requires a model whose learned param-eters are not tied to a fixed input dimension. This motivates the use of neural operators, which learn transformations that can be evaluated on inputs of different sizes (Li et al. 2021; Lu et al. 2021). However, the grid-matching pattern also varies across channels according to the locations and inter-actions of their paths. Standard neural operators apply filters defined by a fixed basis or graph and therefore process every channel using the same filtering structure (Li et al. 2021; Defferrard, Bresson, and Vandergheynst 2016). To address this challenge, we introduce the Gramian Chebyshev Neural Operator (GCNO) to retain the size flexibility of neural op-erators while adapting the filtering to each observed channel. GCNO constructs receive- and transmit-side Gramian matri-ces from the channel and uses them to define its Chebyshev filters. The resulting operators reflect the current channel structure, while the learned polynomial coefficients remain shared across antenna configurations. Our complete approach follows a simple division of work for recovering the path angles and corresponding gains. GCNO first identifies likely path directions (angles) from the channel. Continuous refinement then moves each selected di-rection away from its grid point and toward a more accurate location. GCNO retains only paths that provide meaningful reconstruction improvement, allowing the path count K to adapt to the channel. Once the path directions are extracted, a least-squares (LS) solver computes their complex strengths (gains). The model learns from channel reconstruction alone and does not require ground-truth path directions, strengths, or path counts. At inference time, the user device feeds back only the recovered path tuples, and the base station recon-structs the full channel by combining the reported path gains and angles with the transmit and receive array geometries. We evaluate GCNO on city-scale ray-traced channels from Arizona State University (ASU), Dallas, and Seattle. Across the full NMSE–payload trade-off, GCNO achieves lower NMSE at the same payload, or lower payload at the same NMSE, when compared with eight neural feedback baselines. −0.8 0.0 0.8     
+
+> Transmit spatial frequency, ut
+> −0.8 0.0 0.8
+> Receive spatial frequency,  ur
+> (a) Diffuse matched-filter map
+> −0.8 0.0 0.8
+> Transmit spatial frequency, ut
+> −0.8 0.0 0.8
+> Receive spatial frequency,  ur
+> (b) Diffuse map with path locations
+> −60 −40 −20 0
+> Normalized magnitude (dB)
+
+Figure 1: Off-grid paths spread their energy across neigh-boring cells. The map is shown (a) alone and (b) with the underlying paths marked, illustrating why a grid-only de-scription may use several entries for one physical path. It also retains substantially more accuracy when evaluated on antenna counts not seen during training. Replacing GCNO with CNN, Fourier, polynomial, or dilated-convolutional al-ternatives weakens this transfer or the NMSE–payload trade-off, showing that the gain does not come only from model size. Finally, retraining the model without continuous re-finement clearly worsens NMSE, confirming that correcting off-grid directions is necessary for compact path feedback. Our contributions are: 
+
+• Variable-rate path compression. We formulate CSI feedback as a variable-length list of retained paths, requir-ing 4K real values for K reported paths. The feedback size therefore adapts to the channel, and the known array model reconstructs the channel without a matched neural decoder. Across three environments, this framework pro-vides better reconstruction at the same feedback size, or uses fewer reported values at the same accuracy. 
+
+• Gramian Chebyshev Neural Operator. We introduce GCNO, which constructs channel-specific filters from receive- and transmit-side correlations while sharing its learned coefficients across antenna counts. This design improves both path recovery and generalizes to antenna counts not seen during training. 
+
+• Continuous refinement and LS recovery. We refine each selected receive–transmit direction pair within its grid cell and recover its gain through LS, without us-ing path labels. A separately retrained grid-only variant, evaluated under the same support-selection and payload rules, performs substantially worse in reconstruction and angular accuracy across all three environments. 
+
+## 2 Related Work 
+
+Our work draws on learned CSI feedback, neural operators, and sparse off-grid recovery. 
+
+Neural CSI feedback and learned compression. 
+
+CsiNet (Wen, Shih, and Jin 2018) introduced the common encoder–decoder design: the user compresses the real and imaginary parts of CSI into a dense code, and a paired base-station network reconstructs the channel. Later work improves this design through residual or dilated convo-lutions (Lu, Wang, and Song 2020; Tang et al. 2022), stronger CsiNet variants (Guo et al. 2020), recurrent refine-ment (Wang et al. 2019), attention (Li et al. 2020), and trans-formers (Xu, Yuan, and Pun 2021; Cui, Guo, and Song 2022). These methods still use a fixed-length code tied to a trained decoder, so feedback does not naturally follow channel com-plexity, and changing the antenna configuration usually re-quires a matched model. We instead send a variable set of path gains and effective spatial directions that the receiver converts to CSI using the array geometry. 
+
+Neural operators and spectral filters. Neural operators, including FNO (Li et al. 2021) and DeepONet (Lu et al. 2021), learn maps between sampled functions and can oper-ate across discretizations. FNO uses a fixed periodic Fourier basis, while Chebyshev graph networks (Defferrard, Bresson, and Vandergheynst 2016) filter a predefined graph Laplacian. These filtering structures do not adapt to an individual chan-nel, and Fourier periodicity is poorly matched to a bounded angular field of view. GCNO instead forms receive- and transmit-side Gramians from each sample and applies shared Chebyshev polynomial filters, enabling channel-dependent processing across array sizes. 
+
+Sparse recovery and off-grid methods. OMP (Pati, Rezaii-far, and Krishnaprasad 1993a), basis pursuit (Chen, Donoho, and Saunders 1998), and sparse Bayesian learning (Tipping 2001) recover dictionary supports without path labels, but off-grid paths spread across several atoms. Atomic-norm re-covery (Tang et al. 2013), ESPRIT (Roy and Kailath 1989), off-grid Bayesian learning (Yang, Xie, and Zhang 2013), and Newton refinement (Mamandipoor, Ramasamy, and Madhow 2016a) address continuous directions but require spectral or iterative solves. LISTA (Gregor and LeCun 2010) and re-lated unrolled methods (Borgerding, Schniter, and Rangan 2017) reduce this cost, yet often remain grid-dependent or supervised. GCNO predicts support and Taylor offsets in one pass, followed by a small least-squares gain solve. 
+
+## 3 Problem Formulation 
+
+Given a channel matrix, our goal is to describe it with as few reported values as possible while preserving accurate reconstruction at the BS. We do this by extracting a small set of dominant propagation paths that captures the important structure of the channel. Each retained path is described by one complex gain and two spatial directions. We use K to denote the number of paths retained for a particular channel. The compression problem is therefore to choose both K and the corresponding path parameters so that the feedback re-mains small and the reconstructed channel remains accurate. We also analyze whether the same learned compressor can be applied when the antenna count changes without retraining. 
+
+3.1 Physical Path Representation 
+
+A propagation path produces a predictable phase pattern across each antenna array. We call this pattern the array response . The geometric channel model represents the full channel as the sum of the contributions produced by its paths. For the uniform linear arrays considered here, a direction is described by its spatial coordinate u ∈ [−1, 1] . The corre-sponding normalized array response is           
+
+> aN(u)[ n] = 1
+> √Nexp
+> 
+> jπ
+> 
+> n−N−12
+> 
+> u
+> 
+> ,n= 0 , . . . , N −1.
+> (1)
+
+We report u through the effective spatial angle ψ =arcsin( u). This is the direction seen by the array. Let K⋆ denote the total number of paths in the standard geometric channel model (Alkhateeb et al. 2014). The mea-sured channel is written as 
+
+H =
+
+> K⋆
+
+X
+
+> k=1
+
+gk aNr (ur,k )aNt (ut,k )H, (2) where H ∈ CNr ×Nt , gk ∈ C is the complex gain of path 
+
+k, and ur,k and ut,k are its receive and transmit spatial di-rections. Although a channel may contain many weak con-tributions, most of its energy is often concentrated in a much smaller set of dominant paths. In outdoor and high-frequency channels, this dominant set can often contain five or fewer paths (Akdeniz et al. 2014; El Ayach et al. 2014). Our com-pressed representation therefore retains K ≤ K⋆ paths that preserve the important channel energy. Here, K is the num-ber of paths used for compression, not the total number of physical paths in the environment. 
+
+3.2 Path-Based Feedback and Reconstruction 
+
+Our approach frames CSI feedback directly as a list of re-tained path parameters. For each path, the device reports its complex gain and its receive and transmit effective spatial angles. The transmitted description is 
+
+T (H) = 
+
+n 
+
+ℜbgk, ℑbgk, bψr,k , bψt,k 
+
+o Kk=1 
+
+. (3) Each path contributes four real values, so the feedback size is 4K. Because K is selected separately for each channel, a channel that can be represented accurately with fewer paths requires fewer reported values. Appendix A theoretically de-rives when 4K feedback is more compact than a fixed latent. At the base station, the reported effective angles are converted back to spatial coordinates: bur,k = sin( bψr,k )
+
+and but,k = sin( bψt,k ). The channel is then recon-structed through the same channel model as bH =
+
+PKk=1 bgk aNr (bur,k )aNt (but,k )H. Each retained path still re-quires only four reported values when the antenna count changes. The base station simply evaluates the same array-response formula for the new array size. Thus, the feedback format and reconstruction rule do not depend on a neural decoder trained for one fixed antenna configuration. 
+
+## 4 GCNO for Physics-Based CSI Compression 
+
+The problem formulation represents the channel using a com-pact set of path directions and complex gains. We now de-scribe how these parameters are recovered from the measured channel. The pipeline first compares the measured channel with a dictionary of candidate path responses constructed from the known antenna geometry. This produces a direction-space map indicating which receive and transmit directions 1. Inputs 2. Dual Branch 3. GCNO 4. Support Head 5. Selection & LS         
+
+> Channel Hnorm
+> Evidence map H branch
+> (antenna)
+> C branch
+> (grid) Fused features  Gramians
+> Ar,At
+> Chebyshev
+> T0…T3
+> LocalGate
+> ×3 layers
+> Score map Taylor offsets
+> ΔUrΔUt
+> Path selection Exact LS gains
+> (no gradient)
+> Output payload
+> {ψr,ψt,g}k
+> Transmit
+> 4Kreals
+
+Figure 2: Overview of GCNO compression. The channel and evidence map are encoded jointly; GCNO predicts path scores and off-grid corrections, path selection retains useful directions, and LS recovers their gains. Appendix B provides more detail. are most consistent with the observation. GCNO takes the measured channel and this map as inputs and outputs a score for each candidate direction together with continuous cor-rections that move the estimated directions beyond the dis-crete grid. The resulting candidates are then filtered to retain distinct paths that contribute meaningfully to channel recon-struction, allowing the estimated path count to vary across channels. Given the retained directions and the measured channel, LS finds the corresponding complex gains. During training, path selection is replaced by a differen-tiable approximation so that the complete pipeline can be optimized using channel reconstruction error. The corrected directions are converted into candidate channel responses, least squares estimates their gains, and the retained responses are combined to reconstruct the measured channel. The re-construction loss therefore trains GCNO without requiring ground-truth path directions, gains, or path counts. 
+
+4.1 Direction Grid, Dictionary, and Evidence 
+
+The entries of H contain the complete channel observa-tion, but they do not directly show which propagation di-rections produced it. We obtain a more useful view by first testing a finite set of possible directions. Let {uri }Rr 
+
+> i=1
+
+and 
+
+{utj }Rt 
+
+> j=1
+
+be evenly spaced receive and transmit directions over the field of view. Combining these two lists gives a two-dimensional direction grid . Each cell (i, j ) represents one candidate receive–transmit direction pair. For every cell, we use the known array responses from Equation (1) to precompute the channel pattern created by a unit-gain path at that pair: 
+
+Dij = aNr (uri )aNt (utj )H, H ≈
+
+> Rr
+
+X
+
+> i=1
+> Rt
+
+X
+
+> j=1
+
+Wij Dij . (4) 
+
+We call Dij a dictionary atom , and the fixed collection of all such atoms the dictionary . The second relation is exact when all paths fall on the grid and becomes an approximation otherwise. In that relation, Wij is the complex contribution assigned to cell (i, j ).This construction follows the dictionary-based lineariza-tion of (Wagle et al. 2025a,b). Predicting continuous direc-tions directly places oscillatory array-response functions in-side backpropagation and creates a difficult non-convex ob-jective. Holding the candidate patterns fixed instead makes the reconstructed channel a linear combination of known ma-trices. In our method, the grid is only an intermediate search space; its cells are not the final reported paths. To reveal which cells agree with the measured channel, we compute the complex inner product Cij = ⟨Dij , H⟩F between H and each dictionary atom. The resulting matrix C is the evidence map . A large |Cij | means that the channel contains a com-ponent consistent with that direction pair. An off-grid path usually produces a broad pattern over several nearby cells rather than one isolated value. We therefore give GCNO both the complete observation H and the evidence C. Separate lightweight encoders process their real and imaginary parts and combine them into a common complex feature field. 
+
+4.2 Finding Likely Paths with GCNO 
+
+The evidence map indicates where paths may lie, but several paths can produce overlapping patterns, and one off-grid path can activate many cells. GCNO is designed to interpret this full receive–transmit structure rather than process each cell independently. Its central idea is to measure how the current features are related along the receive and transmit axes, then use those sample-specific relationships to filter the features. Let {X(ℓ) 
+
+> c
+
+}Cℓ 
+
+> c=1
+
+denote the complex feature maps at layer 
+
+ℓ. GCNO forms two correlation matrices, called Gramians: 
+
+G(ℓ) 
+
+> r
+
+=
+
+> Cℓ
+
+X
+
+> c=1
+
+X(ℓ) 
+
+> c
+
+X(ℓ)H 
+
+> c
+
+, G(ℓ) 
+
+> t
+
+=
+
+> Cℓ
+
+X
+
+> c=1
+
+X(ℓ)H 
+
+> c
+
+X(ℓ) 
+
+> c
+
+. (5) 
+
+The first records relationships across receive positions, while the second records relationships across transmit positions. After normalization, they give operators A(ℓ) 
+
+> r
+
+and A(ℓ) 
+
+> t
+
+.GCNO then filters each feature map using low-order Cheby-shev polynomials (We use order upto Q = 3): 
+
+Y(ℓ) 
+
+> c
+
+=
+
+> Cℓ
+
+X
+
+> c′=1
+> Q
+
+X
+
+> p,q =0
+
+Θ(ℓ) 
+
+> cc ′pq
+
+Tp
+
+
+
+A(ℓ)
+
+> r
+
+
+
+X(ℓ) 
+
+> c′
+
+Tq
+
+
+
+A(ℓ)
+
+> t
+
+
+
+. (6) 
+
+The matrices Tp(Ar ) and Tq (At) mix information through increasingly broad receive- and transmit-side relationships. The coefficients Θ(ℓ) 
+
+> cc ′pq
+
+are learned, but the Gramians are recomputed from every input channel. Thus, GCNO uses the same learned rule for all samples while adapting how that rule is applied to each channel. We use three layers and the polynomials T0, . . . , T 3; normalization, recurrence, and local residual corrections are detailed in Appendix B. The output head produces three maps. The score Sij gives the priority for testing a path near grid cell (i, j ), while 
+
+∆U rij and ∆U tij correct its receive and transmit directions. GCNO does not predict path gains. Its learned coefficients depend on feature channels and polynomial orders rather than particular antenna indices. When the antenna count changes, the Gramians and physical patterns change size, but the same learned filtering coefficients can still be used. 
+
+4.3 Off-Grid Refinement, Path Selection, and LS 
+
+A grid cell gives only a coarse direction estimate. GCNO refines it within the cell as 
+
+burij = uri + ∆ U rij , butij = utj + ∆ U tij ,
+
+Bij = Dij + ∆ U rij Drij + ∆ U tij Dtij .
+
+(7) Each correction is bounded to half a grid interval on either side of the atoms. The fixed derivative atoms Drij and Dtij 
+
+describe how the path pattern changes locally with receive and transmit direction. Thus, Bij is a first-order Taylor ap-proximation of the pattern at the corrected direction. The dictionary and both derivative dictionaries are analytical, non-trainable tensors. Training therefore does not differenti-ate through newly generated steering functions. Appendix B gives their construction and the approximation error. The score map may contain more candidates than should be reported. At inference, our approach examines cells in de-scending score order. A candidate is ignored if its corrected pattern is nearly identical to a path already retained. Other-wise, it is temporarily added and all complex gains are refitted jointly by ridge LS. The candidate is retained only when this addition reduces the channel reconstruction error by a suf-ficient amount. The scan ends when further candidates no longer provide a meaningful improvement. This procedure lets a simple channel retain fewer paths and a richer chan-nel retain more; the resulting number is K. Exact duplicate, admission, and stopping thresholds are given in Appendix B. For the final retained directions, the device forms the exact analytical path patterns under no gradient and uses LS to find the gains that jointly best reconstruct H. Joint fitting accounts for overlap among the retained paths and avoids asking the neural network to estimate their complex gains. The resulting gains and effective spatial angles form the 4K-value message in Equation (3). The base station only evaluates that same geometric channel model with known array response; it does not run GCNO or repeat the selection procedure. 
+
+4.4 Learning from Channel Reconstruction 
+
+Sorting candidates and making hard retention decisions are not differentiable. During training, we replace them with a smooth version of the same process. A fixed maximum number of soft candidates is available. Each candidate forms a weighted average of the corrected grid locations, and nearby scores are reduced before forming the next candidate so that different candidates cover different regions. An activity value 
+
+αk ∈ [0 , 1] controls how strongly candidate k contributes. Therefore, P 
+
+> k
+
+αk is a differentiable estimate of the retained path count rather than a fixed K.The corresponding first-order patterns are built using Equation (7), and differentiable ridge LS determines their gains jointly. Let bHsoft denote this training-time reconstruc-tion. With EH denoting the average over training channels, the objective is            
+
+> L=EH
+> "
+> log
+> 
+> NMSE( H,bHsoft ) + ε
+> 
+> +λrate
+> X
+> k
+> αk
+> #
+> +λdup Ldup +λoff Loff +λscore Lscore .
+> (8)
+
+The first term rewards accurate tuple-based reconstruction, while the second discourages unnecessary paths. The remain-ing terms discourage repeated candidates, corrections near the edge of a grid cell, and broadly activated score maps. Their exact definitions and the smooth selection procedure are provided in Appendix B. Every quantity used for learning comes from the observed channel, the fixed dictionaries, the model outputs, or the LS reconstruction. Ground-truth path directions, gains, and path counts are not used in the loss, validation criterion, check-point selection, or hyperparameter selection. At deployment, the smooth training approximation is discarded and replaced by the adaptive hard selection and exact no-gradient LS pro-cedure described above. Fig. 2 summarizes GCNO. 
+
+## 5 Experimental Protocol 
+
+5.1 Datasets and Splits 
+
+We evaluate on the ASU, Dallas, and Seattle ray-traced Deep-MIMO scenarios (Alkhateeb 2019). ASU represents a cam-pus; Dallas and Seattle provide distinct urban geometries. Holding channel generation fixed while changing the scene tests whether our findings depend on one map. For each scenario, we use disjoint sets of 10,000 training, 2,000 val-idation, and 1,500 test channels and train a separate model. The test set remains untouched until all choices are fixed, and path annotations are used only for final test-set diagnostics. 
+
+5.2 Baselines 
+
+We compare GCNO with eight paired encoder–decoder mod-els: CsiNet (Wen, Shih, and Jin 2018), CRNet (Lu, Wang, and Song 2020), CLNet (Ji and Li 2021), CSITransformer (Xu, Yuan, and Pun 2021), TransNet (Cui, Guo, and Song 2022), M-Net (Yu et al. 2023), SwinCFNet (Cheng et al. 2023), and StarCANet (Zhao et al. 2026). This set spans con-volutional, multi-resolution, complex-input, MLP, global-attention, windowed-attention, and compact designs. Each baseline sends a learned latent code that a matched neural decoder converts back to CSI, providing a direct comparison with our sparse physical payload and analytic reconstruction. We retain the published architectures and retrain them from scratch on our splits, using released implementations when available. Appendix C additionally reports comparisons with classical non-neural methods and model sizes: GCNO has only 95 K trainable parameters, whereas the closest perform-ing neural baseline SwinCFNet exceeds 10 Millions. 4 8 12 16 24 32 (a) Payload (floats per sample) 0−5 −10 −15 −20 −25 NMSE (dB)                 
+
+> 32 64 96 128 160 192 (b) Payload (bits per sample)
+> −30 −20 −10 0(c) NMSE (dB) 00.5 1Cumulative fraction
+> median
+> CsiNet MNet CSITransformer CLNet CRNet TransNet StarCANet SwinCFNet GCNO (ours)
+
+Figure 3: Rate–distortion results on ASU. Median NMSE is shown against (a) unquantized payload and (b) total feedback bits; (c) compares the test-channel error distributions at 16 transmitted values. Lower and farther left is better. 
+
+5.3 Metrics 
+
+Our primary metric is NMSE, reported in decibels (dB). It measures reconstruction error relative to the channel energy. For GCNO, reconstruction uses only the transmitted path tuples; for each baseline, it uses the paired neural decoder. We report median NMSE and its empirical CDF. Unquantized rate is the number of transmitted real values: mean 4K for GCNO and the latent length for a baseline. Quantized rate includes all transmitted bits, including the path-count header and quantized tuple or latent entries. Unquantized (floats) and quantized (bits) budgets are separate operating points, not conversions of each other. GCNO budgets are swept via the admission threshold of Section 4; a stated budget is a test-set mean, not a per-sample cap. We also report effective-angle errors for ψ = arcsin( u) in degrees. 
+
+5.4 Reproducibility Details 
+
+Appendix B gives the dataset, optimization, training, quan-tization, parameter-count, hardware, software, runtime, and selection details. Training and model selection use only label-free reconstruction and rate; path counts, directions, gains, oracle quantities, and test results never influence either. 
+
+## 6 Results 
+
+This section asks two practical questions: how much feedback is needed to reconstruct a channel accurately, and whether the same compressor remains useful when the antenna di-mensions change. We first compare GCNO with established neural feedback methods across several environments, us-ing both quantized and unquantized payloads, to determine which method gives the best reconstruction for a given com-munication cost. We then isolate the main parts of our de-sign. The Taylor ablation tests whether continuous direction refinement is necessary to represent each off-grid path with one compact tuple, while the backbone ablation tests whether GCNO itself provides an advantage over more general neu-ral architectures. Finally, we examine how the selected num-ber of paths changes with channel difficulty, whether the transmitted directions correspond to meaningful propaga-tion structure, and how well a model trained at one array size transfers to unseen antenna configurations without retraining. Appendix C provides extended results and analysis. Table 1: Median NMSE (dB; lower is better) vs 3 best base-lines. Full Comparison is in Appendix C. 
+
+Seattle Dallas 
+
+Method 64 bits 16 floats 64 bits 16 floats TransNet −9.71 −10 .11 −6.01 −6.22 
+
+StarCANet −13 .04 −13 .65 −9.35 −9.79 
+
+SwinCFNet −14 .37 −14 .70 −10 .71 −11 .28 
+
+GCNO (Ours) −14 .93 −18 .15 −15 .22 −19 .23 
+
+6.1 Main Rate–Distortion (RD) Results 
+
+The key question is whether a variable-length path list pro-vides a better accuracy–payload trade-off than a fixed neural code. Figure 3 shows that GCNO remains on the best quan-tized RD frontier across the tested bit budgets. The improve-ment also holds over all of the per-channel error distribution at 16 floats (Fig. 3), rather than arising from a small num-ber of easy channels. Table 1 shows the same ordering in Seattle and Dallas at both quantized and unquantized rates. All GCNO reconstructions use only the transmitted tuples and LS gains. These results support our claim: physical path feedback can provide better reconstruction per transmitted value and is not tied to one environment. 
+
+6.2 Taylor On/Off Ablation 
+
+Path feedback is compact only when one physical path can be represented by one tuple. Without continuous correc-tion, an off-grid path must be approximated from inaccu-rate grid directions or several neighboring entries. We test this mechanism by retraining GCNO without Taylor offsets while keeping the support selection and payload rules un-changed. Table 2 shows a large and consistent loss in all three environments, together with much less accurate directions. Retraining therefore cannot compensate for the missing off-grid correction. Taylor refinement is what converts coarse grid evidence into an accurate continuous path description, preserving the payload advantage of path-based feedback. 4 8 16 24 32 −5 −10 −15 −20 −25 NMSE (dB)                    
+
+> 16×16 16×32 32×16 24×24
+> 32×32
+> 32×64 48×48
+> 0−5 −10 −15 −20 NMSE (dB)
+> baselines
+> GCNO
+> -12 -14 -16 -18 -20 025 50 75 100 Test samples (%)  4.0 5.8 9.5 13.9 14.4
+> K=1 K=2
+> 1234560.1 0.2 0.3 0.4 0.5 Angular error (deg)  100 86 77 80 69 92
+> (a) Payload (floats) (b) Array size (c) Target NMSE (dB) (d) Strong paths FNO-lite FNO-16 Residual CNN Dilated CNN Kron. CNN Poly P=2 Poly P=3 Poly P=4 Cheb. fixed GCNO (ours)
+
+Figure 4: Ablation and Generalization results on ASU. (a) RD after replacing only the GCNO backbone. (b) Generalization of the 32 × 32 -trained model to unseen array sizes without retraining. (c) Selected path counts (Numbers above bars show mean of 4K) as the target NMSE becomes stricter. (d) Angular error and recall (above markers) versus the number of strong paths. Table 2: Effect of Taylor refinement, error is median (P75).                   
+
+> Dataset Method@16 floats Median NMSE (dB) Angular error ( ◦)ASU GCNO (Taylor) −20 .08 0.23 (0 .37)
+> GCNO (no Taylor) −3.84 2.01 (2 .75)
+> Dallas GCNO (Taylor) −19 .23 0.28 (0 .59)
+> GCNO (no Taylor) −4.14 2.17 (3 .66)
+> Seattle GCNO (Taylor) −18 .15 0.23 (0 .46)
+> GCNO (no Taylor) −3.29 2.11 (3 .20)
+
+6.3 GCNO Backbone Ablation 
+
+We ask whether the physical decoder alone explains the im-provement. We replace only the 3 native GCNO layers while retaining the same inputs, support head, Taylor refinement, selection rule, and LS recovery. GCNO gives the strongest RD trade-off against CNN, dilated-CNN, FNO, static Cheby-shev, and learned-polynomial replacements (Fig. 4). Since every replacement produces the same type of path pay-load, the gain cannot be attributed to the analytical decoder alone. The sample-specific receive and transmit Gramians help GCNO identify a smaller, more useful support. 
+
+6.4 Physical Interpretability 
+
+Variable-rate feedback should adapt to what each channel needs rather than act as a fixed code under another name. As the requested accuracy becomes stricter, GCNO assigns ad-ditional paths to a growing fraction of the channels (Fig. 4). At the strictest setting, payload continues to increase while reconstruction improves little, revealing the point of dimin-ishing returns. The transmitted directions also remain ac-curate as the number of strong diagnostic paths increases (Fig. 4). Recall is lower for some richer channels, showing the expected limitation of a compact representation: it pre-serves the dominant resolvable structure rather than every annotated ray. Appendix C elaborates on this. 
+
+6.5 Generalization Across Array Sizes 
+
+Our second main question is whether the learned compres-sor remains useful when the antenna count changes. Figure 4 applies the same model trained at 32 × 32 to six changed square and rectangular array configurations, without retrain-ing. GCNO retains strong reconstruction quality throughout, whereas the paired neural baselines lose most of their ac-curacy away from their native dimensions. This behavior is consistent with GCNO’s design: its learned polynomial co-efficients are shared across array sizes, while the physical projections and reconstruction patterns are recomputed for the new geometry. The result supports our claim that one trained model can transfer across antenna counts without re-quiring a new matched decoder. Appendix C provides exact details on how the baselines were adapted for various arrays. 
+
+## 7 Conclusion 
+
+This paper examined whether a wireless channel is better compressed through its dominant propagation paths than through a fixed-size code produced for a paired neural de-coder. Across ASU, Dallas, and Seattle, the results support the path-based view. GCNO finds a channel-dependent set of directions, Taylor refinement moves them away from the fixed grid, and least squares estimates their strengths. The device reports the retained path tuples. This variable payload gives a better trade-off between reconstruction accuracy and feedback size than neural compressors, while the physical reconstruction rule allows the same model to work when the antenna count changes. The method is trained from channel reconstruction alone, without path labels. Our experiments focus on narrowband spatial channels. We sought to isolate the value of path-based compression and compare it fairly with encoder-decoder methods, rather than combine that question with delay and OFDM model-ing. Extending the representation to wideband channels re-quires adding delay, or an equivalent frequency coordinate, to each path. Path directions and delays remain nearly constant across nearby subcarriers, and gain changes follow a struc-tured pattern. One path description can therefore serve many frequencies. This shared structure may make OFDM chan-nels even more compressible than the narrowband channels studied here. References 
+
+3GPP. 2025a. NR; Physical Channels and Modulation. Tech-nical Report ETSI TS 138 211 V18.7.0 (3GPP TS 38.211, Release 18), European Telecommunications Standards Insti-tute. Sec. 4.3.2 and Table 4.3.2-1. 3GPP. 2025b. NR; Physical Layer Procedures for Data. Tech-nical Report ETSI TS 138 214 V18.7.0 (3GPP TS 38.214, Release 18), European Telecommunications Standards Insti-tute. Sec. 5.4 and Tables 5.4-1–5.4-2. 3GPP. 2025c. NR; Radio Resource Control (RRC) Pro-tocol Specification. Technical Report ETSI TS 138 331 V18.6.0 (3GPP TS 38.331, Release 18), European Telecommunications Standards Institute. Sec. 6.3.2, CSI-ReportPeriodicityAndOffset. Akdeniz, M. R.; Liu, Y.; Samimi, M. K.; Sun, S.; Rangan, S.; Rappaport, T. S.; and Erkip, E. 2014. Millimeter Wave Channel Modeling and Cellular Capacity Evaluation. IEEE Journal on Selected Areas in Communications , 32(6): 1164– 1179. Alkhateeb, A. 2019. DeepMIMO: A generic deep learning dataset for millimeter wave and massive MIMO applications. 
+
+arXiv preprint arXiv:1902.06435 .Alkhateeb, A.; El Ayach, O.; Leus, G.; and Heath, R. W. 2014. Channel Estimation and Hybrid Precoding for Millimeter Wave Cellular Systems. IEEE Journal of Selected Topics in Signal Processing , 8(5): 831–846. Borgerding, M.; Schniter, P.; and Rangan, S. 2017. AMP-Inspired Deep Networks for Sparse Linear Inverse Problems. 
+
+IEEE Transactions on Signal Processing , 65(16): 4293– 4308. Chen, S. S.; Donoho, D. L.; and Saunders, M. A. 1998. Atomic Decomposition by Basis Pursuit. SIAM Journal on Scientific Computing , 20(1): 33–61. Cheng, J.; Chen, W.; Xu, J.; Guo, Y.; Li, L.; and Ai, B. 2023. Swin Transformer-Based CSI Feedback for Massive MIMO. In 2023 IEEE 23rd International Conference on Communication Technology (ICCT) , 809–814. IEEE. Cui, Y.; Guo, A.; and Song, C. 2022. TransNet: Full Attention Network for CSI Feedback in FDD Massive MIMO System. 
+
+IEEE Wireless Communications Letters , 11(5): 903–907. Defferrard, M.; Bresson, X.; and Vandergheynst, P. 2016. Convolutional Neural Networks on Graphs with Fast Local-ized Spectral Filtering. In Advances in Neural Information Processing Systems 29 , 3837–3845. El Ayach, O.; Rajagopal, S.; Abu-Surra, S.; Pi, Z.; and Heath, R. W. 2014. Spatially Sparse Precoding in Millimeter Wave MIMO Systems. IEEE Transactions on Wireless Communi-cations , 13(3): 1499–1513. Gregor, K.; and LeCun, Y. 2010. Learning Fast Approxima-tions of Sparse Coding. In Proceedings of the 27th Interna-tional Conference on Machine Learning , 399–406. Guo, J.; Wen, C.-K.; Jin, S.; and Li, G. Y. 2020. Convo-lutional Neural Network-Based Multiple-Rate Compressive Sensing for Massive MIMO CSI Feedback: Design, Simula-tion, and Analysis. IEEE Transactions on Wireless Commu-nications , 19(4): 2827–2840. Guo, J.; Wen, C.-K.; Jin, S.; and Li, G. Y. 2022. Overview of deep learning-based CSI feedback in massive MIMO sys-tems. IEEE Transactions on Communications , 70(12): 8017– 8045. Ji, S.; and Li, M. 2021. CLNet: Complex Input Lightweight Neural Network Designed for Massive MIMO CSI Feedback. 
+
+IEEE Wireless Communications Letters , 10(10): 2318–2322. Klukas, R.; and Fattouche, M. 1998. Line-of-sight angle of arrival estimation in the outdoor multipath environment. 
+
+IEEE transactions on vehicular technology , 47(1): 342–351. Larsson, E. G.; Edfors, O.; Tufvesson, F.; and Marzetta, T. L. 2014. Massive MIMO for Next Generation Wireless Sys-tems. IEEE Communications Magazine , 52(2): 186–195. Li, Q.; Zhang, A.; Liu, P.; Li, J.; and Li, C. 2020. A Novel CSI Feedback Approach for Massive MIMO Using LSTM-Attention CNN. IEEE Access , 8: 7295–7302. Li, Z.; Kovachki, N.; Azizzadenesheli, K.; Liu, B.; Bhat-tacharya, K.; Stuart, A.; and Anandkumar, A. 2021. Fourier Neural Operator for Parametric Partial Differential Equa-tions. In International Conference on Learning Representa-tions .Lu, L.; Jin, P.; Pang, G.; Zhang, Z.; and Karniadakis, G. E. 2021. Learning Nonlinear Operators via DeepONet Based on the Universal Approximation Theorem of Operators. Nature Machine Intelligence , 3(3): 218–229. Lu, Z.; Wang, J.; and Song, J. 2020. Multi-Resolution CSI Feedback With Deep Learning in Massive MIMO System. In ICC 2020 – 2020 IEEE International Conference on Com-munications (ICC) , 1–6. Mamandipoor, B.; Ramasamy, D.; and Madhow, U. 2016a. Newtonized Orthogonal Matching Pursuit: Frequency Esti-mation Over the Continuum. IEEE Transactions on Signal Processing , 64(19): 5066–5081. Mamandipoor, B.; Ramasamy, D.; and Madhow, U. 2016b. Newtonized Orthogonal Matching Pursuit: Frequency Esti-mation over the Continuum. IEEE Transactions on Signal Processing , 64(19): 5066–5081. Marzetta, T. L. 2010. Noncooperative Cellular Wireless with Unlimited Numbers of Base Station Antennas. IEEE Trans-actions on Wireless Communications , 9(11): 3590–3600. O’Shea, T.; and Hoydis, J. 2017. An Introduction to Deep Learning for the Physical Layer. IEEE Transactions on Cog-nitive Communications and Networking , 3(4): 563–575. Pati, Y. C.; Rezaiifar, R.; and Krishnaprasad, P. S. 1993a. Orthogonal Matching Pursuit: Recursive Function Approx-imation with Applications to Wavelet Decomposition. In 
+
+Conference Record of the Twenty-Seventh Asilomar Confer-ence on Signals, Systems and Computers , volume 1, 40–44. Pati, Y. C.; Rezaiifar, R.; and Krishnaprasad, P. S. 1993b. Orthogonal Matching Pursuit: Recursive Function Approx-imation with Applications to Wavelet Decomposition. In 
+
+Proceedings of the 27th Asilomar Conference on Signals, Systems and Computers , 40–44. Roy, R.; and Kailath, T. 1989. ESPRIT—Estimation of Sig-nal Parameters via Rotational Invariance Techniques. IEEE Transactions on Acoustics, Speech, and Signal Processing ,37(7): 984–995. Tang, G.; Bhaskar, B. N.; Shah, P.; and Recht, B. 2013. Compressed Sensing Off the Grid. IEEE Transactions on Information Theory , 59(11): 7465–7490. Tang, S.; Xia, J.; Fan, L.; Lei, X.; Xu, W.; and Nallanathan, A. 2022. Dilated Convolution Based CSI Feedback Com-pression for Massive MIMO Systems. IEEE Transactions on Vehicular Technology , 71(10): 11216–11221. Tipping, M. E. 2001. Sparse Bayesian Learning and the Relevance Vector Machine. Journal of Machine Learning Research , 1: 211–244. Wagle, S.; Malhotra, A.; Hamidi-Rad, S.; Sant, A.; Love, D. J.; and Brinton, C. G. 2025a. Physics-based genera-tive models for geometrically consistent and interpretable wireless channel synthesis. In Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelli-gence , 9384–9392. Wagle, S.; Malhotra, A.; Hamidi-Rad, S.; Sant, A.; Love, D. J.; and Brinton, C. G. 2025b. Physics-Informed Generative Approaches for Wireless Channel Modeling. In ICLR 2025 Workshop on Deep Generative Model in Machine Learning: Theory, Principle and Efficacy .Wang, T.; Wen, C.-K.; Jin, S.; and Li, G. Y. 2019. Deep Learning-Based CSI Feedback Approach for Time-Varying Massive MIMO Channels. IEEE Wireless Communications Letters , 8(2): 416–419. Wen, C.-K.; Shih, W.-T.; and Jin, S. 2018. Deep Learning for Massive MIMO CSI Feedback. IEEE Wireless Commu-nications Letters , 7(5): 748–751. Xu, Y.; Yuan, M.; and Pun, M.-O. 2021. Transformer Em-powered CSI Feedback for Massive MIMO Systems. In 
+
+2021 30th Wireless and Optical Communications Confer-ence (WOCC) , 157–161. Yang, Z.; Xie, L.; and Zhang, C. 2013. Off-Grid Direction of Arrival Estimation Using Sparse Bayesian Inference. IEEE Transactions on Signal Processing , 61(1): 38–43. Yu, Y.; Teng, Y.; Wang, B.; Liu, A.; and Lau, V. 2023. M-Net: A Lightweight Network Based on Multilayer Perceptron for Massive MIMO CSI Feedback. In 2023 IEEE Globecom Workshops (GC Wkshps) , 26–31. IEEE. Zhao, K.; Wu, H.; Xiong, Y.; Zhu, L.; and Xu, M. 2026. StarCANet: A Compact and Efficient Neural Network for Massive MIMO CSI Feedback. IEEE Wireless Communica-tions Letters , 15: 540–544. 
+
+## A When Is Path-Based Feedback Minimal? 
+
+The main paper uses K for the number of paths retained by the compressor and K⋆ for the total number of paths in the geometric model. Throughout this appendix, K re-tains the same meaning as in the main paper. We isolate the ideal K-path component and ask how many real coordinates are required to represent it exactly. The hats used for esti-mated quantities in the main paper are omitted here because this appendix analyzes the ideal exact representation. This is a statement about the unquantized payload used in the main rate–distortion comparison; it is not a finite-bit entropy bound. 
+
+A.1 Identifiable K-Path Channels 
+
+Write gk = xk + j yk and collect the path parameters as           
+
+> ϑ= ( x1, y 1, u r, 1, u t, 1, . . . , x K, y K, u r,K , u t,K )∈ΘK⊂R4K.
+> (9)
+
+After imposing a fixed canonical ordering of the paths, define the synthesis map 
+
+ΦK (ϑ) = 
+
+> K
+
+X
+
+> k=1
+
+gk aNr (ur,k )aNt (ut,k )H, (10) and its real vectorization 
+
+ϕK (ϑ) = 
+
+ℜ{ vec (Φ K (ϑ)) }ℑ{ vec (Φ K (ϑ)) }
+
+
+
+∈ R2Nr Nt . (11) The finite permutation ambiguity does not change the con-tinuous dimension; the canonical ordering only selects one representative. 
+
+Assumption A.1 (local identifiability). At the channel under consideration, all retained gains are nonzero, the path direc-tion pairs are distinct and lie in the interior of the unaliased field of view, and ϕK is locally one-to-one with 
+
+rank JϕK (ϑ) = 4 K. (12) This assumption excludes coincident or locally unresolvable paths. Its four local directions for path k are generated by 
+
+ar aH 
+
+> t
+
+, jar aH 
+
+> t
+
+, gka′ 
+
+> r
+
+aH 
+
+> t
+
+, and gkar (a′
+
+> t
+
+)H, where the steering vectors and their derivatives are evaluated at path k. Full Jacobian rank states that the corresponding 4K real pertur-bations are locally independent. 
+
+A.2 Minimum Dimension of an Exact Fixed Latent 
+
+Theorem A.1 (minimal exact latent dimension). Let e :
+
+R2Nr Nt → Rm and d : Rm → R2Nr Nt be an encoder and decoder that are differentiable at the considered channel. Suppose that they exactly reconstruct every identifiable K-path channel in a neighborhood of ϑ:
+
+d e ϕK (ϑ′) = ϕK (ϑ′) for all ϑ′ in that neighborhood. (13) Then 
+
+m ≥ 4K. (14) The physical path tuple uses exactly 4K real coordinates and therefore attains this local lower bound. 
+
+Proof. Differentiate (13) with respect to ϑ′ at ϑ. The chain rule gives 
+
+Jd Je JϕK = JϕK . (15) By Assumption A.1, the right-hand side has rank 4K. The left-hand side factors through an m-dimensional latent space and therefore has rank at most m. Hence 4K ≤ m.Under local identifiability, the parameters in (9) them-selves form valid local coordinates, and (10) reconstructs the channel exactly. The 4K-coordinate path representa-tion therefore achieves equality. Finally, ψ = arcsin( u) is a smooth one-to-one change of coordinates inside the field of view, so reporting ψ instead of u does not change the coordinate count. □A.3 Variable Path Count Versus a Fixed-Width Autoencoder 
+
+Corollary A.1 (variable-rate advantage). Suppose one fixed-width autoencoder must exactly represent all identi-fiable channels with 
+
+1 ≤ K ≤ Kmax .
+
+Since this family contains an identifiable Kmax -path subset, Theorem A.1 implies 
+
+mfixed ≥ 4Kmax . (16) The path message instead uses 
+
+Ppath (H) = 4 K(H), E[Ppath ] = 4 E[K]. (17) Consequently, it uses strictly fewer real values on every chan-nel with K < K max , and it has strictly smaller average pay-load whenever 
+
+Pr[ K < K max ] > 0.
+
+At K = Kmax , it meets the 4Kmax lower bound; an ideal autoencoder with the same latent dimension may tie this bound. Thus, under the ideal identifiable model, both represen-tations may reconstruct the channel exactly, but the path representation uses a strictly smaller message whenever the current channel requires fewer than Kmax paths. 
+
+Scope. The result is deliberately narrow. It applies to dif-ferentiable, locally exact codecs with a fixed real-coordinate latent for the identifiable geometric component before quan-tization. It does not claim that every trained autoencoder must perform worse, or that no alternative 4K-dimensional coordinates exist. It also does not cover deliberately lossy codes, entropy-coded bit strings, coincident paths, or the dif-fuse and omitted energy outside the retained K-path model. Those effects are measured empirically by the deployable NMSE in the main paper. 
+
+## B GCNO Details and Multipath Interpretation 
+
+This section gives the normalization and stability details omitted from the main text and then connects the Gramian– Chebyshev operation directly to the geometric multipath model. Bold symbols denote vectors or matrices, and 
+
+⟨A, B⟩F = tr  AHB .
+
+B.1 Multipath Footprints in the Evidence Map 
+
+Consider first the retained K-path component 
+
+HK =
+
+> K
+
+X
+
+> k=1
+
+gk aNr (ur,k )aNt (ut,k )H. (18) For the receive and transmit grids in the main paper, define the one-dimensional matched-filter footprints 
+
+br,k [i] = aNr (uri )HaNr (ur,k ), (19) 
+
+bt,k [j] = aNt (utj )HaNt (ut,k ). (20) For the centered steering convention of the main paper, each entry is a normalized Dirichlet kernel (with removable sin-gularities defined by continuity), 
+
+κN (δ) = sin( N πδ/ 2) 
+
+N sin( πδ/ 2) , (21) where δ is the difference between the physical and grid spatial coordinates. Thus, an off-grid path produces a broad receive footprint times a broad transmit footprint. Let 
+
+Br = [ br, 1, . . . , br,K ], Bt = [ bt, 1, . . . , bt,K ],
+
+and 
+
+Γ = diag( g1, . . . , g K ).
+
+Lemma B.1 (exact evidence-map factorization). For the matched-filter map 
+
+Cij = ⟨Dij , HK ⟩F ,
+
+we have 
+
+C =
+
+> K
+
+X
+
+> k=1
+
+gkbr,k bH 
+
+> t,k
+
+= Br ΓB H 
+
+> t
+
+, rank( C) ≤ K. 
+
+(22) 
+
+Proof. Substituting one path into the Frobenius inner product gives 
+
+Dij , g kaNr (ur,k )aNt (ut,k )H 
+
+> F
+
+= gk br,k [i] bt,k [j]∗.
+
+(23) Summing over k gives (22). The rank bound follows because the result is a sum of at most K rank-one matrices. □
+
+The two evidence-map Gramians therefore satisfy 
+
+CC H = Br Γ(BH 
+
+> t
+
+Bt)ΓHBH 
+
+> r
+
+, (24) 
+
+CHC = BtΓH(BH 
+
+> r
+
+Br )ΓB H 
+
+> t
+
+. (25) Hence their active receive and transmit subspaces are con-tained in span( Br ) and span( Bt), respectively. The diag-onal contributions encode individual path strengths, while the off-diagonal terms encode overlap between nearby path footprints. If the measured channel also contains omitted or diffuse energy, its matched-filter contribution is simply added to C by linearity. 
+
+B.2 Normalized Gramian–Chebyshev Filtering 
+
+For the complex feature state 
+
+n
+
+X(ℓ)
+
+> c
+
+oCℓ
+
+> c=1
+
+,
+
+GCNO forms the Gramians given in the main paper and normalizes each side s ∈ { r, t } as 
+
+G(ℓ) 
+
+> s
+
+= G(ℓ) 
+
+> s
+
++ ϵI
+
+tr 
+
+
+
+G(ℓ) 
+
+> s
+
++ ϵI
+
+ , A(ℓ) 
+
+> s
+
+= 2 G(ℓ) 
+
+> s
+
+− I. (26) The Chebyshev matrices are evaluated without an eigende-composition through     
+
+> T0(A) = I, T 1(A) = A,Tq+1 (A) = 2 ATq(A)−Tq−1(A).
+> (27)
+
+The implementation uses q = 0 , . . . , Q with Q = 3 .
+
+Proposition B.1 (stable filtering and size-independent weights). For every sample and layer, all eigenvalues of A(ℓ)
+
+> r
+
+and A(ℓ) 
+
+> t
+
+lie in [−1, 1] . Therefore, 
+
+Tp(A(ℓ) 
+
+> r
+
+) 2
+
+≤ 1, Tq (A(ℓ) 
+
+> t
+
+) 2
+
+≤ 1. (28) For one output channel of the linear GCNO core, 
+
+∥F ℓ(X)c∥F ≤
+
+> Cℓ
+
+X
+
+> c′=1
+> Q
+
+X
+
+> p,q =0
+
+Θ(ℓ) 
+
+> cc ′pq
+
+X(ℓ)
+
+> c′
+> F
+
+. (29) Moreover, the learned coefficients are indexed by feature channels and polynomial orders, not by receive or transmit locations. 
+
+Proof. Each Gramian is Hermitian positive semidefinite. Equation (26) therefore places the eigenvalues of G(ℓ) 
+
+> s
+
+in 
+
+[0 , 1] and those of A(ℓ) 
+
+> s
+
+in [−1, 1] . Since 
+
+|Tq (λ)| ≤ 1 for every λ ∈ [−1, 1] ,
+
+the spectral-norm bounds in (28) follow. Applying submul-tiplicativity and the triangle inequality to the bilateral filter in the main paper gives (29). The final statement follows directly from the indices of Θ(ℓ) 
+
+> cc ′pq
+
+. Array and grid sizes enter through the analytical projections and sample-specific Gramians, while the learned coefficients remain unchanged. 
+
+□
+
+B.3 Neural-Operator Characterization 
+
+A neural operator parameterizes a map between function spaces using learned coefficients that are independent of one particular sampling resolution. Let HC = L2(Ω r × Ωt; CC )
+
+and let X = ( X1, . . . , XC ) ∈ H C denote a complex feature field. Define its receive- and transmit-side Gramian kernels by 
+
+kX 
+
+> r
+
+(u, u ′) = 
+
+> C
+
+X
+
+> c=1
+
+Z
+
+> Ωt
+
+Xc(u, v )Xc(u′, v ) dv, (30) 
+
+kX 
+
+> t
+
+(v, v ′) = 
+
+> C
+
+X
+
+> c=1
+
+Z
+
+> Ωr
+
+Xc(u, v )Xc(u, v ′) du. (31) Let Gr [X ] and Gt[X ] be the corresponding positive semidefi-nite integral operators. For E(X ) = P 
+
+> c
+
+∥X c∥2 
+
+> L2
+
+> 0, define 
+
+Gs[X ] = Gs[X ]
+
+E(X ) , As[X ] = 2 Gs[X ] − I s, s ∈ { r, t }.
+
+(32) The function-space GCNO core is 
+
+[F(ℓ)Θ (X )] o =
+
+> Cℓ
+
+X
+
+> c=1
+> Q
+
+X
+
+> p,q =0
+
+Θ(ℓ)
+
+> ocpq
+
+× Tp(Ar [X ]) XcTq (At[X ]) ,
+
+(33) where the left and right actions operate on the receive and transmit coordinates, respectively. Residual addition and the shared pointwise nonlinearity are then composed with this core as in the implemented layer. 
+
+Operator characterization. Equation (33) defines a non-linear map HCℓ → H Cℓ+1 , because its Gramian operators depend on the current input field. Under the uniform sam-pling used here, quadrature reduces the two kernels to ma-trices proportional to P 
+
+> c
+
+XcXH 
+
+> c
+
+and P 
+
+> c
+
+XH 
+
+> c
+
+Xc. The com-mon quadrature factors cancel under normalization, giving exactly the bilateral matrix filter, with ϵI serving only as finite-dimensional numerical regularization. The learned tensor Θ(ℓ) 
+
+> ocpq
+
+is indexed only by feature chan-nels and polynomial orders; no learned index ranges over a receive position, transmit position, antenna count, or grid cell. Consequently, the same learned coefficients define com-patible discrete realizations on different admissible receive– transmit samplings after the fixed analytical projections and sample Gramians are recomputed. GCNO therefore satisfies the neural-operator criterion used in the main paper: it learns a function-space transformation rather than a dimension-specific matrix map. This is an architectural transfer property, not a claim of exact equality across resolutions or arbitrary array geome-tries. Approximation quality under a changed discretization remains an empirical question. The shared stems, LocalGate corrections, and support head are auxiliary maps around the Gramian–Chebyshev backbone and introduce no location-specific learned parameters. 
+
+B.4 Physical Interpretation of the Chebyshev Core 
+
+For one implemented GCNO layer, define the joint receive and transmit subspaces of its input feature maps as        
+
+> Uℓ= span
+> 
+> Cℓ[
+> c=1
+> range( X(ℓ)
+> c)
+> ,Vℓ= span
+> 
+> Cℓ[
+> c=1
+> range
+> 
+> (X(ℓ)
+> c)H.
+> (34)
+
+Proposition B.2 (subspace action of the GCNO core). For every output channel of the linear bilateral filter in the main paper, 
+
+range ( Fℓ(X)c) ⊆ U ℓ, range  Fℓ(X)H
+
+> c
+
+ ⊆ V ℓ. (35) Thus, the linear core mixes the receive and transmit modes already present in the current multi-channel state rather than introducing a fixed external basis. For a single feature map 
+
+X = UΣV H,
+
+let Λr and Λt denote the eigenvalues of the normalized Gramian operators on the active subspaces. The correspond-ing single-map core satisfies 
+
+> Q
+
+X
+
+> p,q =0
+
+θpq Tp(Ar )XTq (At) = U
+
+" Q
+
+X
+
+> p,q =0
+
+θpq Tp(Λr )ΣTq (Λt)
+
+#
+
+VH.
+
+(36) 
+
+In particular, when X = C, Lemma B.1 places these ac-tive subspaces inside the spans of the physical receive and transmit footprints. If, in addition, the normalized footprints 
+
+ebr,k = br,k 
+
+∥br,k ∥2
+
+, ebt,k = bt,k 
+
+∥bt,k ∥2
+
+are mutually orthonormal on each side, then the evidence-map core reduces to 
+
+> Q
+
+X
+
+> p,q =0
+
+θpq Tp(Ar )CTq (At) = 
+
+> K
+
+X
+
+> k=1
+
+egk hΘ(ξr,k , ξ t,k ) ebr,k ebH
+
+> t,k
+
+,
+
+(37) where 
+
+egk = gk∥br,k ∥2∥bt,k ∥2, hΘ(x, y ) = 
+
+> Q
+
+X
+
+> p,q =0
+
+θpq Tp(x)Tq (y),
+
+(38) and 
+
+ξr,k , ξ t,k ∈ [−1, 1] 
+
+are the normalized Gramian eigenvalues associated with path 
+
+k. In this separated-path case, the core therefore applies a learned bivariate polynomial response to each physical path footprint. 
+
+Proof. The subspace Uℓ is invariant under G(ℓ) 
+
+> r
+
+because each term 
+
+X(ℓ) 
+
+> c
+
+(X(ℓ) 
+
+> c
+
+)H
+
+maps into 
+
+range( X(ℓ) 
+
+> c
+
+) ⊆ U ℓ.
+
+It is consequently invariant under A(ℓ) 
+
+> r
+
+and every polynomial of that operator. The same argument applied to the adjoint feature maps shows that Vℓ is invariant under every poly-nomial of A(ℓ) 
+
+> t
+
+. Left and right polynomial filtering, channel mixing, and summation therefore give (35). For the single-map case, Ar and At are affine functions of 
+
+XX H and XHX,
+
+so they share the active eigenvectors U and V. A matrix polynomial preserves these eigenvectors; substitution gives (36). Under footprint orthogonality, each normalized foot-print is itself a Gramian eigenvector, and applying the same identity path by path yields (37). □
+
+Interpretation and scope. Lemma B.1 shows that a K-path channel produces at most K separable matched-filter footprints. Proposition B.2 shows that the implemented lin-ear GCNO core filters the joint receive/transmit modes of its current features; for the ideal evidence map, these modes lie in the physical footprint spans. When the footprints are sepa-rated, the action becomes the explicit path-wise response hΘ.When footprints overlap, the Gramian modes can be mixtures of nearby paths, so the correct interpretation is filtering of their joint physical subspace rather than independent pro-cessing of each path. The full GCNO also contains pointwise nonlinearities and local sharpening. We therefore make no claim that every hidden feature remains rank K; the result characterizes the physics-aligned linear Gramian–Chebyshev core. 
+
+B.5 Complete Processing Pipeline 
+
+The preceding subsections characterized the evidence-map structure and the Gramian–Chebyshev core. We now give the complete implemented path from an observed channel to the transmitted tuple set. The detailed record below refers to the ASU reference model; Dallas and Seattle use the same method and are trained separately on their corresponding splits. For the reference configuration, Nr = Nt = 32 
+
+and the receive and transmit direction grids each con-tain R = 28 uniformly spaced spatial coordinates over 
+
+[− sin(75 ◦), sin(75 ◦)] . The grid spacing is 
+
+δu = 0 .07155 .
+
+Every input is first normalized as 
+
+hscale = ∥H∥F , Hnorm = Hhscale 
+
+. (39) Only Hnorm is used by the neural feature extractor. The scale does not require a separate transmitted field: solving for gains using Hnorm and multiplying the fitted gains by hscale is equivalent to fitting the gains directly to H.The fixed matched-filter evidence is 
+
+Cij = ⟨Dij , H norm ⟩F , C ∈ C28 ×28 , (40) where D, Dr , and Dt are analytical tensors and are excluded from the optimizer. For the centered steering convention, let pN,n = n −
+
+(N − 1) /2. The steering derivative with respect to the spatial coordinate is 
+
+a′ 
+
+> N
+
+(u)[ n] = jπp N,n aN (u)[ n]. (41) Accordingly, the fixed derivative dictionaries are 
+
+Drij = a′ 
+
+> Nr
+
+(uri )aNt (utj )H,
+
+Dtij = aNr (uri )a′ 
+
+> Nt
+
+(utj )H. (42) These tensors are constructed analytically once for each array configuration and remain non-trainable. For offsets |δr |, |δt| ≤ δu/2, define the exact and first-order atoms 
+
+Aij (δr , δ t) = aNr (uri + δr )aNt (utj + δt)H,
+
+B(1)  
+
+> ij
+
+(δr , δ t) = Dij + δr Drij + δtDtij . (43) The best scalar multiple of the unrefined grid atom has nor-malized squared error 
+
+ϵgrid = 1 − | κNr (δr )|2|κNt (δt)|2, (44) where κN is defined in Eq. (13). By first-order expansion, 
+
+Aij (δr , δ t) − B(1)  
+
+> ij
+
+(δr , δ t) F
+
+= O δ2 
+
+> r
+
++ δ2 
+
+> t
+
++ |δr δt| ,
+
+(45) and hence its normalized squared approximation error is 
+
+ϵTaylor = O
+
+h δ2 
+
+> r
+
++ δ2 
+
+> t
+
++ |δr δt|2i
+
+. (46) The |δr δt| term is the omitted receive–transmit cross term; the remaining omitted terms are second order along the in-dividual direction axes. The channel and evidence are processed by separate lightweight branches. The channel branch preserves the antenna-domain observation before projecting its learned features to the direction grid, whereas the evidence branch directly processes the grid-domain matched-filter map. Their outputs are fused and passed through the three GCNO/Lo-calGate layers described below. Table 3 gives the complete tensor flow. Complex quantities are stored in complex64 ; neural real-valued channels and scalar metadata use float32 . “Fixed” denotes an analytical operation whose coefficients are not trainable. Such a fixed linear operation may still pass gradients to its learned input features. The learned network therefore predicts only support prior-ities and local direction corrections. It does not predict gains and does not reconstruct the channel through a neural de-coder. During training, a smooth selector and Taylor atoms make the tuple-based reconstruction differentiable. During deployment, the smooth approximation is discarded: the UE performs adaptive hard support selection, generates exact an-alytical atoms under no gradient, and jointly fits the gains. The BS receives only the resulting tuples, converts bψ to 
+
+bu = sin( bψ), and evaluates the known geometric synthesis model. 
+
+B.6 Layer-by-Layer GCNO Architecture 
+
+Dual input branches. The channel and evidence branches use identical stem widths but do not share parameters. Each stem applies 
+
+Conv 1×1(2 , 96) → GELU → Conv 1×1(96 , 48) .
+
+The 48 real output channels are interpreted as the real and imaginary parts of 24 complex feature maps. The channel-branch maps are initially sampled on the 32 × 32 antenna grid and are projected to the 28 × 28 direction grid using the fixed dictionary. The evidence branch already operates on the direction grid. The real and imaginary parts of both branch outputs pro-vide 96 real channels. Two normalized receive/transmit coor-dinate maps are appended, producing the 98-channel fusion input. The fusion stem applies 
+
+Conv 1×1(98 , 96) → GELU → Conv 1×1(96 , 48) ,
+
+and again pairs the result into a 24-channel complex state. 
+
+Bilateral GCNO layers. The fused state passes through exactly three GCNO layers. Each layer uses the normalized receive and transmit Gramian operators defined in Sec. B.5 and the preceding theoretical subsections. The Chebyshev order is three, so each side contains the four basis matrices 
+
+T0, T 1, T 2, T 3. For 24 input and 24 output complex channels, one layer has the coefficient tensor 
+
+Θ(ℓ) ∈ C24 ×24 ×4×4.
+
+All 16 receive–transmit polynomial pairs are applied: 
+
+Y (ℓ) 
+
+> o
+
+=
+
+> 24
+
+X
+
+> c=1 3
+
+X
+
+> p=0 3
+
+X
+
+> q=0
+
+Θ(ℓ) 
+
+> ocpq
+
+Tp
+
+
+
+A(ℓ)
+
+> r
+
+
+
+X(ℓ) 
+
+> c
+
+Tq
+
+
+
+A(ℓ)
+
+> t
+
+
+
+. (47) The layer adds the input state as a residual connection and applies GELU separately to the real and imaginary parts. 
+
+LocalGate. A LocalGate follows each of the three GCNO layers. It has two complementary paths. The local path con-verts the 24 complex maps into 48 real channels, applies a 
+
+3 × 3 depthwise convolution, GELU, and a 1 × 1 projection, and returns the result through a learned residual scale. This path provides local sharpening without replacing the global Gramian operation. The channel path averages the power of each complex feature channel and applies a 24 → 12 → 24 
+
+MLP with GELU and sigmoid. Its multiplicative response is centered at one, so it softly rescales rather than removes feature channels. 
+
+Support and offset head. After the third LocalGate, the complex state is represented by 
+
+"
+
+ℜX, ℑX, |X|, log 
+
+> 24
+
+X
+
+> c=1
+
+|Xc|2
+
+!# 
+
+,
+
+which contains 24 + 24 + 24 + 1 = 73 real channels. The compact head is 
+
+73 1×1 Conv 
+
+−−−−−−−→ 64 GELU 
+
+−−−−−→ 64 
+
+> 3×3 DWConv
+
+−−−−−−−−−→ 64 GELU 
+
+−−−−−→ 64 1×1 Conv 
+
+−−−−−−−→ 3.
+
+Its first output is the unconstrained score map S. The remain-ing outputs are converted to receive and transmit corrections by 
+
+∆U r = δu
+
+2 tanh Zr , ∆U t = δu
+
+2 tanh Zt. (48) Thus each correction remains within one half-cell of its an-chor. No gain head is present. 
+
+Exact trainable parameter count. Table 4 counts real scalar parameters. A complex coefficient contributes two real scalars. Fixed dictionaries, coordinate maps, Taylor construc-tion, support selection, and LS contain no trainable parame-ters. The checkpoint contains 54 parameter tensors and 95,253 trainable real scalars, which is the 95 K model size reported in the main paper. 
+
+B.7 Training Objective and Optimization 
+
+Strictly label-free optimization. Training begins from random initialization and does not use a pretrained check-point, teacher warmup, signal-processing pseudolabel, path label, oracle path count, oracle gain, oracle direction, or ex-ternal warm start. Every differentiable quantity is computed from Hnorm , the fixed dictionaries, model outputs, or the corresponding LS reconstruction. The same restriction ap-plies to validation, checkpoint selection, the controller, and operating-point selection. Table 3: End-to-end tensor flow for GCNO. 
+
+Stage Output shape Type Operation Status Observed channel Nb × 32 × 32 complex Physical channel H Input Channel scale Nb real hscale = ∥H∥F Fixed Normalized channel Nb × 32 × 32 complex H/h scale Fixed Channel-branch input Nb × 2 × 32 × 32 real Real and imaginary parts of Hnorm Fixed Evidence map Nb × 28 × 28 complex Cij = ⟨Dij , H norm ⟩F Fixed Evidence-branch input Nb × 2 × 28 × 28 real Real and imaginary parts of C Fixed Channel stem Nb × 24 × 32 × 32 complex 2 → 96 → 48 real channels, paired into 24 com-plex channels Learned Channel-grid projection Nb × 24 × 28 × 28 complex Projection of every learned channel feature through fixed D
+
+Fixed Evidence stem Nb × 24 × 28 × 28 complex 2 → 96 → 48 real channels, paired into 24 com-plex channels Learned Fusion input Nb × 98 × 28 × 28 real Real and imaginary parts of both 24-channel branches, plus two coordinate maps Mixed Fused state Nb × 24 × 28 × 28 complex 98 → 96 → 48 real channels, paired into 24 complex channels Learned GCNO states Nb × 24 × 28 × 28 complex Three bilateral Gramian–Chebyshev layers, each followed by a LocalGate Mixed Head features Nb × 73 × 28 × 28 real ℜX, ℑX, |X|, and log  P  
+
+> c
+
+|Xc|2 Fixed Head outputs Nb × 3 × 28 × 28 real One score map and two bounded Taylor-offset maps Learned Selected atoms Nb × K × 32 × 32 complex Taylor atoms during training; exact steering atoms during deployment Fixed Fitted gains Nb × K complex Joint ridge least squares Fixed Transmitted message Nb × 4K real (ℜbgk , ℑbgk , bψr,k , bψt,k )Kk=1 Output 
+
+Table 4: Trainable parameters of the implemented GCNO model. 
+
+Component Real parameters Channel stem, 2 → 96 → 48 4,944 Evidence stem, 2 → 96 → 48 4,944 Fusion stem, 98 → 96 → 48 14,160 GCNO layer 1 18,432 GCNO layer 2 18,432 GCNO layer 3 18,432 Three local residual paths 8,499 Three channel gates 1,839 Score/offset head 5,571 
+
+Total 95,253 
+
+Smooth candidate selection. Training exposes at most 
+
+M = 8 soft candidates. Let Wm denote the current se-lector window for candidate m. A temperature-controlled distribution over that window is 
+
+pm(i, j ) = exp( Sm(i, j )/τ )
+
+P 
+
+> (a,b )∈W m
+
+exp( Sm(a, b )/τ ) , (i, j ) ∈ W m.
+
+(49) The corrected continuous center is the probability-weighted expectation 
+
+μm = X
+
+> (i,j )∈W m
+
+pm(i, j )
+
+uri + ∆ U rij 
+
+utj + ∆ U tij 
+
+
+
+. (50) After each candidate, a Gaussian penalty with width 0.8
+
+grid cells and logit penalty 8.5 suppresses its neighborhood before the next soft candidate is formed. This encourages different slots to cover distinct regions. A sigmoid activity 
+
+αm ∈ (0 , 1) controls the contribution of candidate m, and 
+
+bKsoft =
+
+> 8
+
+X
+
+> m=1
+
+αm
+
+is the differentiable estimate of the retained path count. For the anchor (im, j m) associated with candidate m, the training atom is 
+
+Bm = Dimjm + ∆ ur,m Drimjm + ∆ ut,m Dtimjm . (51) Exact steering vectors are not generated inside this differen-tiable path. Let 
+
+h = vec( Hnorm ), B = [vec( B1), . . . , vec( B8)] .
+
+Differentiable complex ridge LS uses ηtrain = 10 −4:
+
+bg =  BHB + ηtrain I−1 BHh, bhsoft = B (α ⊙ bg) .
+
+(52) 
+
+Objective. The complete one-stage objective used by the reference model is 
+
+L = EH
+
+"
+
+log ∥h − bhsoft ∥22
+
+∥h∥22 + ϵ + ϵ
+
+!# 
+
++ 0 .04 Lrate 
+
++ 0 .02 Ldup + 10 −4Loff + 10 −4Lscore . (53) Here 
+
+Lrate = EH
+
+" 8X
+
+> m=1
+
+αm
+
+#
+
+.Table 5: Optimization settings for the ASU reference run.                       
+
+> Setting Value Initialization Random; no checkpoint Optimizer Adam Batch size 128 Adam (β1, β 2)(0 .9,0.999)
+> Adam ϵ10 −8
+> Weight decay 10 −6
+> Global/local learning rate 3×10 −4/10 −4
+> Gradient clipping Global norm 5
+> Mixed precision Disabled Matrix-multiplication precision High Training ridge 10 −4
+> Maximum soft candidates 8Configured epoch ceiling 78 Realized controller trajectory 71 epochs Selected paper checkpoint Epoch 42
+
+Table 6: Realized selector-window curriculum.                               
+
+> Phase Window Epochs LR τ
+> Global 28 ×28 30 3×10 −40.035 Local 1 21 610 −40.08 Local 2 15 610 −40.08 Local 3 9710 −40.08 Local 4 514 10 −40.08 Local 5 3810 −40.08
+
+The duplicate term Ldup is the activity-weighted coherence penalty between candidate atoms. The offset term Loff pe-nalizes receive and transmit corrections after normalization by the half-cell bound δu/2. The score term is the spatial mean of the sigmoid-activated score map, 
+
+Lscore = EH
+
+ 1
+
+R2
+
+X
+
+> i,j
+
+σ(Sij )
+
+ . (54) These terms respectively discourage unnecessary paths, re-peated atoms, cell-edge corrections, and broad score activa-tion. No label-derived quantity appears in any term. 
+
+Initialization and optimizer. The exact optimization set-tings are summarized in Table 5. Complex Chebyshev coef-ficients are initialized from a zero-mean normal distribution with scale 0.05 
+
+√24 · 16 .
+
+The offset-output weights and biases are initialized to zero. The final projections in the local and channel gates use a zero-mean normal initialization of scale 10 −3 with zero bias. The score-output bias is initialized to −1.45 .
+
+Localization curriculum. Training begins with global candidate selection and progressively narrows the selector window. The realized 71-epoch controller trajectory is shown in Table 6. Learning-rate changes are controlled by this phase schedule rather than by any label-dependent scheduler. The controller uses a relative-improvement threshold of 
+
+0.005 and patience three, subject to the listed phase dura-tions. The frozen paper checkpoint is the validation-selected epoch-42 state obtained in the 15-cell phase. The remain-ing controller epochs were executed but did not replace that validation-best state. Checkpoint and operating-point choices are made from label-free validation reconstruction and rate quantities. Test channels, ground-truth directions, gains, physical path counts, oracle reconstructions, angle errors, and path-matching scores do not select the model or any operating threshold. 
+
+B.8 Adaptive Deployment and LS Reconstruction 
+
+Deployment replaces the smooth training approximation with a deterministic UE-side procedure under no_grad . Let the corrected coordinate associated with grid cell (i, j ) be 
+
+eurij = uri + ∆ U rij , eutij = utj + ∆ U tij .
+
+The exact continuous atom used at deployment is 
+
+A(eur , eut) = aNr (eur )aNt (eut)H. (55) This exact atom is used only outside gradient flow. For each channel, the hard selector performs the following operations. 1. Sort all grid candidates in descending order of the GCNO score. 2. Apply the learned Taylor correction to each tested anchor. 3. Reject a candidate whose corrected pattern is numerically indistinguishable from an already admitted pattern. 4. Generate the candidate’s exact analytical steering atom. 5. Temporarily append the atom to the admitted set and jointly refit all complex gains by ridge LS. 6. Admit the candidate only when it produces the validation-selected normalized residual reduction and satisfies the numerical-conditioning safeguard. 7. Stop when no further meaningful reduction is obtained or the operating-point-specific cap is reached. 8. Jointly refit all final gains and form the transmitted tuple set. For an admitted set A, let 
+
+AA = vec( A1), . . . , vec( A|A| ) .
+
+The deployment fit uses 
+
+bgA =  AH
+
+> A
+
+AA + ηdep I−1 AH 
+
+> A
+
+vec( H), ηdep = 3 ×10 −5.
+
+(56) If bhA and bhA∪{ c} are the trial reconstructions before and after adding candidate c, its normalized improvement is 
+
+∆( c | A ) = ∥h − bhA∥22 − ∥ h − bhA∪{ c}∥22
+
+∥h∥22 + ϵ . (57) The candidate is retained only when this quantity exceeds the selected threshold. The LS-system condition number is capped at 10 4, and all reported ASU profiles enforce Kmin =1.After support admission, three optional local polishing rounds examine a 3×3 neighborhood around each coordinate Table 7: Adaptive support profiles and realized unquantized payloads.                              
+
+> Target Region Kmax ∆min Mean Median
+> −12 dB 1Single candidate 4.000 4
+> −14 dB 20.012 5.795 4
+> −16 dB 60.002 9.527 8
+> −18 dB 60.0005 13.889 12
+> −20 dB 70.0005 14.372 12
+
+using step fractions 1/2, 1/4, and 1/8. A non-worsening safeguard retains a proposed coordinate change only when it does not increase the jointly refitted residual. Polishing changes neither K nor the payload length. Table 7 gives the validation-locked ASU operating pro-files. The payload columns are the measured adaptive 4K
+
+distributions, not 4Kmax .The final UE message is 
+
+n 
+
+ℜbgk, ℑbgk, bψr,k , bψt,k 
+
+o Kk=1 
+
+.
+
+The BS does not run GCNO, repeat support selection, or refit the gains. It only dequantizes the tuple fields when nec-essary, computes bu = sin( bψ), and analytically synthesizes the reconstructed channel. 
+
+B.9 Quantization and Bit Accounting 
+
+Float-domain and bit-domain results are treated as separate operating points. The unquantized rate is the measured mean number of transmitted real values, 4E[K]. The quantized rate is the complete packet length after encoding the selected path count and every retained tuple field. It is not obtained by multiplying an unquantized payload by a fixed number of bits. The quantized packet uses a fixed three-bit header for K.For a profile with field allocations bℜg , bℑg , bψr , and bψt , the packet length for one sample is 
+
+Bpacket = 3 + 
+
+> K
+
+X
+
+> k=1
+
+(bℜg,k + bℑg,k + bψr ,k + bψt,k ) . (58) The scalar codebooks and profile-specific bit allocations are fitted on the validation set. The profile, codebooks, support threshold, and all associated ranges are then frozen before the test set is evaluated. No path annotation or test result is used to construct the quantizer. For comparison, dense storage of a 32 × 32 complex chan-nel using 32-bit real and imaginary components requires 
+
+Bdense = 2(32)(32)(32) = 65 ,536 bits . (59) The bit-domain compression ratio is consequently 
+
+CR bits = 65 ,536 
+
+E[Bpacket ] . (60) Because K is sample-dependent, the actual average packet length need not equal the nominal requested profile. The locked ASU packet means are reported in Table 8. Table 8: Nominal quantized profiles and measured mean packet lengths on ASU.      
+
+> Requested profile Mean transmitted bits 48 52.359 64 63.354 96 82.109 128 118.987
+
+Table 9: Frozen ASU model and software environment.           
+
+> Item Verified value GPU NVIDIA H100, 80 GB HBM3 Python 3.11.13 PyTorch 2.11.0+ cu128
+> CUDA runtime 12.8 NumPy 1.26.4 PyYAML 6.0.3 Matplotlib 3.10.8 Model-state tensors 54 Trainable parameters 95,253
+
+Only the quantized tuple fields and the path-count header are transmitted. Intermediate GCNO features, score maps, activity values, dictionary coefficients, and neural parame-ters are not part of the packet. After dequantization, the BS performs the same analytical reconstruction as in the unquan-tized setting. 
+
+B.10 Reproducibility and Computational Cost 
+
+Dataset and splits. The detailed reference record uses the DeepMIMO ASU Campus 3.5 GHz scenario with 32 × 32 
+
+half-wavelength arrays and a 75 ◦ field of view. Channel gen-eration uses 512 OFDM subcarriers over 10 MHz; the center subcarrier is retained for the narrowband experiment. The fixed disjoint split contains 10,000 training, 2,000 valida-tion, and 1,500 held-out test channels. Dallas and Seattle use the same split sizes and are trained separately. The training data interface exposes the normalized chan-nel and scale required by the method. Path directions, gains, masks, physical path counts, oracle values, and path-matching quantities are not loaded by the training objective. The held-out test set remains unused until the architecture, checkpoint, quantizer, and operating profiles have been fixed using validation-only quantities. 
+
+Frozen-model environment. Table 9 gives the verified en-vironment of the frozen ASU model. The reported parameter count includes only trainable model tensors. 
+
+Isolated timing reproduction. Runtime and memory were measured in a separate compute-only reproduction on an oth-erwise idle NVIDIA H100 with 80 GB HBM3. This bench-mark used Python 3.12.8, PyTorch 2.12.0+ cu130 , CUDA 13.0, and NumPy 2.2.6, while preserving the exact ASU 
+
+R = 28 configuration. The benchmark began from random initialization, used batch size 128 with AMP disabled, and executed the frozen 71-epoch controller trajectory. Ten disposable warmup opti-mizer steps initialized the CUDA kernels on a separate model instance. The synchronized full-fit measurement then pro-cessed 5,609 optimizer updates, corresponding to 710,000 sample presentations. The measurement-only final state was not used to replace or select the paper checkpoint. Table 10 gives the principal compute and memory mea-surements. Training wall time includes the required in-loop soft validation and the package’s normal checkpoint writes. The inference-memory reserved value includes CUDA al-locator cache remaining from the preceding training call; allocated and incremental peaks better represent the live in-ference footprint. Complete UE-encoder latency includes Frobenius normal-ization, matched-filter construction, GCNO inference, adap-tive support selection, exact steering generation, joint LS, and all three coordinate-polishing rounds. Batch-1 measurements use 50 warmups and 500 timed calls. Batch-128 throughput uses 10 warmups and 100 timed batches. Disk input/output, host-to-device transfer, quantization, plotting, validation se-lection, and external metric aggregation are excluded. The analytical operation count treats one real multiply– accumulate as one MAC and two FLOPs, and one complex multiply–accumulate as four real MACs and eight FLOPs. Nonlinearities, exponentials, divisions, square roots, sort-ing, linear solves, and condition-number evaluation are not included in these static MAC/FLOP totals. Because the adap-tive selector has data-dependent control flow, partial profiler attribution is not presented as a complete decoder FLOP count; measured end-to-end latency is the more appropriate deployment quantity. 
+
+## C Extended Results and Analysis 
+
+This appendix complements the main-paper results with-out reproducing their figures or tables. Main-paper Fig. 3 and Table 1 report the headline rate–distortion compari-son, while main-paper Fig. 4 and Table 2 report the back-bone, antenna-transfer, adaptive-rate, physical-diagnostic, and Taylor-ablation results. We provide only additional curves, controls, and analyses not shown there. All exper-iments use the same disjoint splits as the main paper, includ-ing 1,500 held-out test channels per environment. Training, model selection, and operating-point selection use label-free quantities; path annotations are used only for the post-hoc analysis in Sec. C.3. We use NMSE throughout. An unquan-tized GCNO payload contains 4K transmitted real values for 
+
+K retained paths. 
+
+C.1 Complete Rate–Distortion Curves 
+
+Main-paper Fig. 3 gives the complete ASU comparison, and main-paper Table 1 gives representative Seattle and Dallas operating points. Figure 5 adds the complete Seattle and Dallas curves for all eight paired encoder–decoder baselines. The ASU row is retained only to place the three environ-ments under one legend and visual scale, rather than as a separate repetition of the main-paper analysis. The broad ordering reported in the main paper persists across the full curves: GCNO is strongest over most of the evaluated range and separates more clearly at medium and larger payloads. Seattle is the closest comparison at the smallest unquantized budget, motivating the targeted seed analysis in Sec. C.7. The agreement across three distinct propagation maps indicates that the observed rate–distortion behavior is not specific to ASU. 
+
+Trainable parameter counts. Table 12 reports the number of trainable scalar parameters for one representative instanti-ated model of each evaluated method. Because some paired autoencoders change size with their instantiated input or bot-tleneck dimensions, these values characterize the reported model instances rather than configuration-independent ar-chitecture constants. Parameter count is provided only as model-size context and is distinct from transmitted payload. 
+
+C.2 Classical Grid Recovery and Extended Taylor Analysis 
+
+Grid-OMP control. We compare GCNO with Grid-OMP (Pati, Rezaiifar, and Krishnaprasad 1993b), which selects receive–transmit atoms from the same fixed direction grid and refits their complex gains by LS. Its stopping profiles are fixed on validation data, and its payload follows the same 
+
+4K real-value accounting. Table 13 shows that Grid-OMP improves monotonically as more atoms are retained but re-mains substantially less accurate under this protocol. Near 16 transmitted values, it obtains −4.582 dB NMSE at 14.949 mean values, whereas the fixed-four-path GCNO control ob-tains −16 .511 dB at 16 values. This GCNO row deliberately disables adaptive-K operation: every channel is forced to retain exactly K = 4 paths, giving an identical 16-value payload for every sample. It is therefore distinct from the adaptive ASU operating point with a mean 16-value pay-load in main-paper Table 2, which obtains −20 .08 dB. The fixed-K restriction intentionally lowers GCNO’s attainable accuracy to −16 .511 dB and thereby makes the comparison more favorable to Grid-OMP; the two reported GCNO val-ues correspond to different evaluation protocols and are not contradictory. This diagnostic indicates that the fixed dic-tionary and LS fit alone do not explain GCNO’s result; it is not intended as a general ranking of all sparse-recovery algorithms. 
+
+Runtime and comparison scope. NR configures CSI re-porting in slot units and specifies UE CSI-computation delays in OFDM symbols; the corresponding wall-clock intervals depend on the numerology and report configuration (3GPP 2025c,a,b). These requirements motivate low UE-side pro-cessing latency, but they do not impose a universal inference deadline. In our batch-1 H100 timing study, Grid-OMP re-quired approximately 67 ms per channel. For reference, Ta-ble 9 reports 15.425 ms for GCNO’s mid profile and 20.690– 23.830 ms for the approximately 16-value profiles closest to the comparison in Table 10. We therefore include Grid-OMP as a lightweight greedy grid-based control rather than claiming that it is universally the fastest classical method. More elaborate off-grid procedures can add repeated de-tection and refinement steps, as in NOMP (Mamandipoor, Ramasamy, and Madhow 2016b); a fair broader comparison would require implementation- and hardware-matched pro-filing. Their omission is therefore a scope decision, not a Table 10: Isolated H100 compute and memory profile. 
+
+Quantity Measurement Scope Full training wall time 178.441 s 71 epochs, 5,609 updates, including in-loop validation and normal checkpoint writes Full-fit throughput 3,978.9 samples/s Complete synchronized training call Warmed training step 27.212 ms mean Batch 128; matched filter, network, soft selection, LS loss, back-ward pass, clipping, and Adam update Warmed-step throughput 4,703.8 samples/s 100 CUDA-event measurements after 10 warmups Training CUDA peak 3.173 GB allocated Maximum live allocation during the full training call Inference CUDA peak 0.339 GB allocated Maximum across network, adaptive selector, exact steering, LS, and complete-encoder scopes Inference incremental peak 0.226 GB Increase above the resident allocation during inference Maximum process CPU RSS 2.262 GB Maximum observed host memory for the benchmark process Parameter storage 381,012 bytes 95,253 float32 trainable parameters Serialized model state 396,865 bytes Model state dictionary without optimizer state Paper checkpoint storage 1,216,541 bytes Serialized training checkpoint GCNO network compute 334.285M MACs / 668.569M FLOPs One neural forward with precomputed evidence, including the fixed channel-branch projection Matched-filter preprocessing 3.211M MACs / 6.423M FLOPs One 28 × 28 complex evidence map from a 32 × 32 channel 
+
+Table 11: End-to-end UE-encoder latency across bundled adaptive operating profiles. Payload entries are measured 4K distri-butions. 
+
+Profile Payload mean/med./P95 Mean Median P95 P99 Batch-128 throughput Low 4.000 / 4 / 4 10.131 ms 9.930 ms 10.666 ms 15.341 ms 7,996.6 samples/s Mid 8.094 / 8 / 16 15.425 ms 15.027 ms 20.803 ms 26.702 ms 3,042.3 samples/s High variant 15.297 / 16 / 32 20.690 ms 20.317 ms 31.973 ms 32.480 ms 1,098.3 samples/s High 15.297 / 16 / 32 23.830 ms 23.390 ms 35.908 ms 36.773 ms 1,055.2 samples/s Maximum 31.922 / 32 / 32 32.789 ms 32.183 ms 35.053 ms 44.715 ms 1,528.4 samples/s 
+
+Table 12: Trainable parameter counts for representative in-stantiated models. Method Trainable parameters CsiNet 302,956 CRNet 450,150 CLNet 449,270 TransNet 1,026,224 MNet 445,200 CSITransformer 563,520 StarCANet 459,688 SwinCFNet 10,956,544 GCNO 95,253 claim that every classical estimator is categorically unsuit-able for latency-constrained CSI feedback. 
+
+Taylor refinement beyond the main operating point. 
+
+Main-paper Table 2 already reports the absolute Taylor on/off results at 16 transmitted values, so we do not reproduce them here. Instead, Table 14 reports the additional NMSE im-provement at 4, 8, and 32 values, using a separately retrained no-Taylor control with the same support-selection and pay-load rules. The improvement is positive in all nine additional comparisons and is at least 6.628 dB. These measurements show that the off-grid correction remains useful across the evaluated payload range; we do not interpret the variation with payload as a general scaling law. Table 13: Grid-OMP operating points and a fixed-four-path GCNO control. 
+
+Method Mean values NMSE (dB) Grid-OMP @ 4 values 4.000 −2.607 
+
+Grid-OMP @ 8 values 8.000 −3.791 
+
+Grid-OMP @ 16 values 14.949 −4.582 
+
+Grid-OMP @ 32 values 32.000 −5.152 
+
+GCNO ( K = 4 ) 16.000 −16 .511 
+
+Table 14: NMSE improvement from Taylor refinement be-yond the 16-value result in main-paper Table 2. Positive val-ues favor Taylor refinement. Environment 4 values 8 values 32 values ASU 10.729 13.649 20.439 Dallas 6.628 13.672 17.732 Seattle 10.819 12.176 18.529 
+
+C.3 Physical Multipath Fidelity 
+
+Main-paper Fig. 4(c) already shows how the selected path count changes with the requested accuracy, and main-paper Fig. 4(d) reports GCNO’s behavior as the number of strong diagnostic paths increases. We therefore do not repeat those plots. Figure 6 instead asks whether the final reconstructions preserve dominant multipath structure relative to the two closest neural baselines. A diagnostic path is considered strong when its ampli-18              
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> Seattle Median NMSE (dB)
+> (bit-domain, quantized)
+> 22.5
+> 20.0
+> 17.5
+> 15.0
+> 12.5
+> 10.0
+> 7.5
+> 5.0
+> 2.5
+> Median NMSE (dB)
+> (float-domain)
+> 20
+> 18
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> ASU Median NMSE (dB)
+> 25
+> 20
+> 15
+> 10
+> 5
+> 0
+> Median NMSE (dB)
+> 40 60 80 100 120 140 160 180 200 Payload (bits/sample) 20
+> 18
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> Dallas Median NMSE (dB)
+> 510 15 20 25 30 Payload (floats/sample) 20
+> 15
+> 10
+> 5
+> Median NMSE (dB)
+> CRNet CLNet TransNet M-Net CSITransformer StarCANet SwinCFNet CsiNet GCNO
+
+Figure 5: Complete cross-scene rate–distortion curves. Rows correspond to Seattle, ASU, and Dallas; columns correspond to quantized bits and transmitted real values. This figure extends main-paper Fig. 3 and Table 1 rather than repeating their selected operating points. Lower and farther left is better. tude is within 10 dB of the strongest annotated path in the channel. Receive–transmit direction pairs are matched jointly within 3◦. GCNO is evaluated directly from its transmitted tuples. Because StarCANet and SwinCFNet output dense channels rather than paths, a single frozen offline path probe is applied to their reconstructed channels solely for this di-agnostic; it does not change their transmitted payloads or NMSE. Under this protocol, GCNO reaches 0.832 strong-path F1 and 0.225 ◦ median joint effective-angle error, com-pared with 0.757 and 0.276 ◦ for StarCANet and 0.748 and 
+
+0.262 ◦ for SwinCFNet. GCNO’s weighted strong-path re-call is 0.916. These results support the narrower conclusion that the compact tuple representation preserves dominant re-solvable structure well under this matching protocol; they do not imply recovery of every annotated ray or that the neural baselines internally represent channels as paths. 
+
+C.4 Protocol for the Array-Size Results in Main-Paper Fig. 4(b) 
+
+Main-paper Fig. 4(b) reports the complete numerical com-parison; here we specify the corresponding evaluation proto-col. The experiment uses seven receive–transmit array con-Full GCNO StarCA-Net SwinCFNet 0.650 0.675 0.700 0.725 0.750 0.775 0.800 0.825 0.850 Strong-path F1 
+
+> Strong-path recovery
+> Full GCNO StarCA-Net SwinCFNet 0.00 0.05 0.10 0.15 0.20 0.25 Median joint angular error (degrees)
+> Angular fidelity
+
+Figure 6: Post-hoc multipath fidelity. Strong-path F1 mea-sures joint support recovery, while median joint effective-angle error measures directional accuracy. Higher is better for F1 and lower is better for angular error. figurations: 16 × 16 , 16 × 32 , 32 × 16 , 24 × 24 , 32 × 32 ,
+
+32 × 64 , and 48 × 48 . The renderings are paired so that a given test index represents the same physical link at every array shape. Each shape uses the same locked split of 10,000 training, 2,000 validation, and 1,500 test channels. Evalua-tion is performed on the ordered, unshuffled 1,500-channel test split. No target-shape test sample is used for training, fine-tuning, calibration, or operating-point selection. 
+
+GCNO transfer. The GCNO checkpoint trained at 32 ×32 
+
+is applied directly to every target shape without updating any learned parameter. For each (Nr , N t), we recompute the fixed steering and derivative dictionaries, matched-filter evidence, sample-specific receive and transmit Gramians, and analytical reconstruction responses at the target dimen-sions. The learned feature-mixing weights, Chebyshev co-efficients, support head, and Taylor-offset head remain un-changed. GCNO is therefore evaluated natively at each target resolution, rather than by resizing the target channel to the training dimensions. 
+
+Frozen neural baselines. The eight paired neural baselines—CsiNet, CRNet, CLNet, TransNet, MNet, CSI-Transformer, StarCANet, and SwinCFNet—use their exist-ing ASU 75 ◦-field-of-view checkpoints trained at 32 × 32 
+
+with a fixed latent length of M = 16 real values. Each model remains in its original 32 × 32 form: no layer, learned tensor, running statistic, latent dimension, or resolution-dependent architectural component is changed. Models are evaluated in inference mode, and each retains its training-split RMS normalization 
+
+gm =
+
+"
+
+1
+
+|T | 
+
+X
+
+> x∈T
+
+∥x∥22
+
+2 · 32 · 32 
+
+#−1/2
+
+, (61) where T is the 10,000-channel training split and m indexes the baseline. The input is multiplied by gm, and the decoder output is divided by the same fixed value. No normalization statistic is recomputed at a target array size. 
+
+Common deterministic baseline adapter. Let Hnorm ∈
+
+CNr ×Nt be the normalized target channel and define its cen-tered two-channel angular representation as 
+
+XN = stack ℜ,ℑ {fftshift [ F2,ortho (Hnorm )] } , N = ( Nr , N t).
+
+(62) For source shape a = ( ar , a t) and destination shape b =(br , b t), the external adapter is 
+
+Aa→b(X) = 
+
+r ar at
+
+br bt
+
+Ba→b(X), (63) where B bilinearly interpolates the real and imaginary chan-nels with align_corners=False . Antialiasing is en-abled whenever a dimension is downsampled. If a = b, the implementation returns an exact clone, with no interpolation or antialiasing. The square-root factor compensates for the change in angular-grid size, and the reverse adapter uses its reciprocal. For baseline m, the complete frozen inference path is 
+
+zm = Em
+
+ gm ifftshift AN →(32 ,32) (XN ) , (64) 
+
+bXN = A(32 ,32) →N
+
+ fftshift g−1 
+
+> m
+
+Dm(zm) , (65) where Em and Dm are the unchanged encoder and decoder. The reconstructed angular representation is finally mapped back to the channel domain using the inverse centered or-thonormal two-dimensional DFT. Table 15 lists the resulting size factors and antialiasing operations. “Forward” denotes target-to-32 × 32 adaptation, and “reverse” denotes 32 × 32 -to-target adaptation. The adapter is deterministic, parameter-free, and carries no side information. The baseline payload is always 16 real values, giving compression 2Nr Nt/16 . At the native 32 ×32 
+
+shape, both adapter directions are exact identities, provid-ing the source-resolution control. Thus, the comparison in main-paper Fig. 4(b) evaluates reuse of frozen models under one common nonlearned dimension-matching rule, rather than models retrained separately for each array configura-tion. Its scope is limited to the seven tested uniform-linear-array shapes and does not imply invariance to arbitrary array layouts or calibration changes. 
+
+C.5 Cross-Scene Transfer Without Retraining 
+
+We further test whether a compressor trained in one propa-gation scene remains useful in another (Table 16). For each ordered source–target pair among Dallas, Seattle, and ASU, each model is trained only on the source scene and evaluated on the held-out target-scene test split with all learned pa-rameters frozen. No target-scene retraining or fine-tuning is performed. All methods use the nominal 16-value operating point. GCNO reconstructs only from its transmitted path tu-ples and LS gains, whereas SwinCFNet and StarCANet use their unchanged paired decoders. GCNO obtains the lowest median NMSE in all six transfer directions, improving over SwinCFNet by 0.166 –8.439 dB. This supports the narrower conclusion that its physics-aligned support representation and analytical reconstruction transfer more robustly under the tested scene shifts than the paired latent-code baselines. The result is consistent with, but does not by itself prove, reduced dependence on scene-specific statistics; it does not imply invariance to arbitrary propagation environments. Table 15: Deterministic input/output adapter used for every frozen neural baseline in main-paper Fig. 4(b). AA denotes antialiasing. The latent payload remains 16 real values for every array shape. Target shape Forward scale Forward AA Reverse scale Reverse AA Payload Compression 
+
+16 × 16 1/2 No 2 Both dimensions 16 32 ×
+
+16 × 32 1/√2 No √2 Receive dimension 16 64 ×
+
+32 × 16 1/√2 No √2 Transmit dimension 16 64 ×
+
+24 × 24 3/4 No 4/3 Both dimensions 16 72 ×
+
+32 × 32 1 Exact identity 1 Exact identity 16 128 ×
+
+32 × 64 √2 Transmit dimension 1/√2 No 16 256 ×
+
+48 × 48 3/2 Both dimensions 2/3 No 16 288 ×
+
+Table 16: Cross-scene median NMSE (dB) at the nominal 16-value operating point. Lower is better.                                    
+
+> Source →target GCNO SwinCFNet StarCANet Dallas →Seattle −14 .203 −14 .037 −11 .799
+> Dallas →ASU −14 .815 −10 .490 −9.747
+> Seattle →Dallas −14 .197 −7.146 −6.572
+> Seattle →ASU −15 .191 −9.560 −9.522
+> ASU →Dallas −15 .401 −6.962 −6.308
+> ASU →Seattle −15 .821 −12 .932 −11 .092
+
+C.6 Beamforming Utility 
+
+We next test whether the reconstructed channel preserves the dominant transmit subspace used in a standard beam-forming calculation. Channels are normalized to unit Frobe-nius norm. For one stream, the precoder is the dominant right singular vector of the reconstructed channel. For two streams, the two dominant right singular vectors are as-signed equal power. In both cases, the receiver uses the optimal combiner for the original effective channel. Per-fect CSI is included only as a dense reference. GCNO uses 14.636/12/32 mean/median/95th-percentile transmitted val-ues, whereas each neural comparator uses 16 values for every channel. Table 17 reports mean spectral efficiency. At 20 dB, GCNO obtains 6.5319 bit/s/Hz for one stream, within approximately 0.004 bit/s/Hz of perfect CSI and above both compressed baselines. For two streams, GCNO obtains 6.8240 bit/s/Hz, compared with 6.9644 bit/s/Hz for perfect CSI. The squared alignment of the dominant right singular vector has mean 0.9973, median 0.9995, and fifth percentile 0.9901. These re-sults support preservation of the dominant transmit subspace under this single-user, narrowband, optimal-combiner pro-tocol; they do not establish the same behavior for multiuser scheduling, other precoders, receiver mismatch, or imperfect channel estimation. 
+
+C.7 Seattle Seed Stability under a Baseline-Favorable Envelope 
+
+Seattle has the smallest separation between GCNO and the strongest neural baseline in the main comparison. We there-fore use it for a targeted seed-sensitivity check rather than re-peating the experiment in every environment. Three GCNO runs, using seeds 43, 44, and 45, are evaluated on the same fixed 1,500-channel test split (Table 18. Table 17: Mean spectral efficiency (bit/s/Hz). Bold marks the strongest compressed method; perfect CSI is a dense reference.                                     
+
+> Method 0 dB 10 dB 20 dB 30 dB One stream GCNO 0.9411 3.3452 6.5319 9.8395
+> StarCANet 0.9204 3.2864 6.4447 9.7381 SwinCFNet 0.9212 3.2875 6.4488 9.7480 Perfect CSI 0.9428 3.3488 6.5360 9.8437 Two streams GCNO 0.5871 2.7846 6.8240 12 .0669
+> StarCANet 0.5665 2.6629 6.3938 11.1730 SwinCFNet 0.5725 2.7050 6.5858 11.6554 Perfect CSI 0.5906 2.8101 6.9644 12.4959
+
+Table 18: GCNO seed-level median NMSE across three seeds. All values are in dB.                         
+
+> Payload Seed 43 Seed 44 Seed 45 μ±σ
+> 8−15 .5861 −15 .0772 −15 .1942 −15 .2858 ±0.2666
+> 16 −18 .6382 −17 .1041 −17 .6077 −17 .7833 ±0.7820
+> 32 −22 .4733 −20 .3709 −19 .9455 −20 .9299 ±1.3534
+
+We construct a deliberately baseline-favorable compari-son (Table 19). For each baseline and nominal payload target, we retain the single lowest NMSE obtained across its three evaluated seeds. The selected baseline seed may therefore change independently at each operating point. By contrast, each GCNO seed represents one trained model evaluated across all three payload targets. Because the realized adap-tive GCNO payloads differ slightly within a nominal target, we also retain the most favorable baseline value among the corresponding matched-payload comparisons. This protocol is stricter than either averaging the baseline seeds or retaining one baseline seed over the full curve. Here, ∆ = NMSE baseline − NMSE GCNO , so a positive value indicates lower NMSE for GCNO, and min ∆ is the smallest margin over the three GCNO runs. The ordering remains unchanged for every GCNO seed, payload target, and comparator, despite allowing each baseline to use its strongest seed independently at every operating point. The smallest observed margin is 0.6463 dB over SwinCFNet and 
+
+2.9808 dB over StarCANet. At the 16- and 32-value targets, the minimum margins over SwinCFNet increase to 2.4028 
+
+and 4.1635 dB, respectively. This targeted check indicates Table 19: Baseline-favorable best-seed results at each target payload. All values are in dB.                      
+
+> Target Comparator Best NMSE min ∆
+> 8SwinCFNet −14 .4309 +0 .6463
+> 8StarCANet −12 .0964 +2 .9808
+> 16 SwinCFNet −14 .7013 +2 .4028
+> 16 StarCANet −14 .0868 +3 .0173
+> 32 SwinCFNet −15 .7820 +4 .1635
+> 32 StarCANet −14 .7140 +5 .2315
+
+that the Seattle ordering is not attributable to one favorable GCNO initialization within the evaluated runs; it is not in-tended as an exhaustive characterization of all possible ran-dom seeds.

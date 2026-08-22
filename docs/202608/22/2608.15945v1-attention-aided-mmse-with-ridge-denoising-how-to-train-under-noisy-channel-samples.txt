@@ -1,0 +1,716 @@
+Title: Attention-Aided MMSE with Ridge Denoising: How to Train under Noisy Channel Samples
+
+URL Source: https://arxiv.org/pdf/2608.15945v1
+
+Published Time: Tue, 18 Aug 2026 01:50:09 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+> 1
+
+# Attention-Aided MMSE with Ridge Denoising: How to Train under Noisy Channel Samples 
+
+TaeJun Ha, Hyeji Kim, and Jeonghun Park 
+
+Abstract —Deep neural channel estimators are typically trained with clean channel state information (CSI), which is unavailable in practical orthogonal frequency-division multiplexing (OFDM) systems. In pilot-based OFDM, naive noisy-target training is structurally biased because the pilot input and noisy full-grid tar-get share the same noise realization, driving the estimator toward identity copying. To address this for Attention-aided MMSE (A-MMSE), we propose a ridge-regularized objective that penalizes the generated filter directly. In a stylized fixed-filter model, this penalty induces scalar shrinkage and recovers the scalar MMSE gain at an explicit penalty value. We further construct surrogate training targets by estimating the channel covariance via eigenvalue clipping of the noisy empirical second-moment matrix, without requiring clean CSI labels. On COST 2100 channels, the proposed Ridge-A-MMSE consistently outperforms the Noise2Noise (N2N) baselines considered in this paper, and the combination of ridge regularization and covariance shrinkage approaches the same network trained with clean CSI labels at high signal-to-noise ratios (SNRs). 
+
+Index Terms —Attention mechanism, Channel estimation, Deep learning, Noisy labels, OFDM, Ridge regression 
+
+I. I NTRODUCTION 
+
+In orthogonal frequency-division multiplexing (OFDM) communication systems, accurate channel estimation is crucial as it underpins coherent demodulation. The classical linear minimum mean squared error (LMMSE) estimator requires explicit knowledge of the channel’s second-order statistics, which are difficult to obtain in practice. Deep neural network (DNN)-based methods circumvent this limitation by learn-ing the channel directly from data. These estimators have evolved from end-to-end networks [1] and convolutional super-resolution networks [2] to attention-based estimators [3]– [5] and to deep generative priors [6], [7]. Across these ar-chitectural advances, however, the training methodology has remained the same: clean channel state information (CSI) labels, or clean channel realizations for fitting a generative prior, are assumed available during training. This assumption 
+
+This work was supported in part by the 6GARROW project, which has re-ceived funding from the Smart Networks and Services Joint Undertaking (SNS JU) under the European Union’s Horizon Europe research and innovation programme (Grant Agreement No. 101192194), and in part by the Institute for Information & Communications Technology Planning & Evaluation (IITP) grants funded by the Korea government (MSIT): (No. RS-2024-00435652), (No. RS-2024-00395824, Development of Cloud Virtualized RAN (vRAN) System Supporting Upper-Midband), and (No. IITP-2025-RS-2024-00428780, 6G Cloud Research and Education Open Hub). T. Ha and J. Park are with the School of Electrical and Elec-tronic Engineering, Yonsei University, Seoul, South Korea (e-mail: 
+
+tjha@yonsei.ac.kr, jhpark@yonsei.ac.kr ). H. Kim is with the Department of Electrical and Computer Engineer-ing at the University of Texas at Austin, Austin, TX, USA (e-mail: 
+
+hyeji.kim@austin.utexas.edu ). 
+
+is difficult to justify in practical deployments, where only noisy observations of the channel are available through received pilot signals. Thus, the relevant problem is clean-label-free training: only received pilot observations and noisy full-grid channel samples, collected offline in dedicated sounding slots, are available during training, while the desired objective remains clean-channel mean squared error (MSE) minimization. Networks trained on synthetically designed channels, for which exact labels are available by construction, have been shown to generalize robustly to unseen channels [8], [9]. This paper targets the complementary measurement-driven regime, in which site-specific channel statistics must be learned from noisy over-the-air observations. In this regime, a representative label-free baseline is the Noise2Noise (N2N) principle from image restoration [10]: two independent noisy observations of the same scene serve as input and target, yielding unbiased training when the noise realizations are independent. In pilot-based OFDM, however, only a single noisy snapshot is available per slot [11], so reusing it as both the training input and the training target makes the input noise and the target noise identical at every pilot position, violating the independence condition required by N2N. A recent label-free approach beyond N2N [12] restores input–target noise inde-pendence by injecting synthetic noise into a complete noisy channel estimate. In our pilot-based setting, by contrast, the target coincides with the input at every pilot coordinate, and estimation requires interpolation rather than mere denoising. The noisy-target loss is therefore structurally misaligned with clean-channel MSE minimization: it encourages copying the noisy pilot input rather than denoising it, motivating a training methodology that requires neither clean nor independently observed target labels. Among DNN-based OFDM channel estimators, Attention-aided MMSE (A-MMSE) is a model-based framework that employs an Attention Transformer to learn a linear MMSE fil-ter, rather than directly mapping pilots to channel estimates [4]. Attention captures the global, non-stationary grid correlation that the local, shift-invariant kernels of convolutional super-resolution networks [2] recover only implicitly. Crucially for clean-label-free training, the network output is the linear filter itself rather than a channel estimate. The filter is thus an explicit, interpretable object that a training objective can penalize directly—a handle that end-to-end convolutional esti-mators do not expose. At inference, channel estimation reduces to a single matrix–vector multiplication with no nonlinear activations. Despite these advantages, A-MMSE still requires clean CSI labels for training. In this paper, building on A-MMSE’s linear inference struc-arXiv:2608.15945v1 [eess.SP] 16 Aug 2026 2
+
+ture, we propose Ridge-A-MMSE for clean-label-free OFDM channel estimation under noisy channel samples. Section II formalizes the noisy-target bias described above. The proposed method combines two complementary mechanisms. First, on the filter side, Ridge-A-MMSE augments the A-MMSE train-ing objective with a Frobenius-norm penalty on the generated linear filter. We show that, in the stylized fixed-filter model of Section III, this penalty recovers the scalar MMSE gain at an explicit penalty value. Second, on the target side, we introduce eigenvalue-clipped covariance shrinkage to construct LMMSE-style plug-in surrogate targets from the noisy full-grid corpus, requiring no clean CSI. Numerical results on COST 2100 channels [13] demonstrate that the proposed Ridge-A-MMSE consistently outperforms the considered N2N baselines [10] across both semi-urban and high-speed railway scenarios over the full 0–35 dB signal-to-noise ratio (SNR) range. Against the N2N-trained counterpart with the identical backbone, the normalized MSE (NMSE) reduction is 57 .3% 
+
+at 20 dB and reaches 86 .5% at 35 dB. Since the N2N baselines reuse the same observation as input and target at 35 dB (Section V), the 86 .5% margin is measured directly against naive same-slot training, the biased regime analyzed in Section II. At high SNR, the proposed method approaches the network trained with clean CSI labels. 
+
+Notations : (·) T and (·) H denote transpose and Hermitian transpose. E[·] denotes the expectation operator. Operators 
+
+vec (·) and diag (·) denote matrix vectorization and the di-agonal matrix formed from a vector, respectively. ∥·∥ 𝐹 and 
+
+∥·∥ 2 represent the Frobenius norm and ℓ2-norm. I𝑁 is the 
+
+𝑁 × 𝑁 identity matrix, and e𝑖 denotes the 𝑖 th standard basis vector. A ⪰ 0 indicates that A is positive semidefinite, and 
+
+𝑥 ∼ CN ( 0, Σ) denotes a complex Gaussian vector with zero mean and covariance matrix Σ.II. P ROBLEM SETUP AND LEARNING OBJECTIVE 
+
+A. System Model and A-MMSE Inference 
+
+We consider an OFDM slot with 𝑁 subcarriers and 𝑀 
+
+symbols. The full channel is h = vec (H) ∈ C𝑁 𝑀 , where 
+
+H ∈ C( 𝑁 × 𝑀 ) collects the channel coefficients. Let P =
+
+{𝑝 1, . . . , 𝑝 𝐿 } denote the fixed set of pilot coordinates, let 
+
+h𝑝 ∈ C𝐿 be the pilot-restricted channel vector, and let 
+
+x𝑝 ∈ C𝐿 collect the transmitted pilot symbols. With the known pilot matrix D𝑝 = diag (x𝑝 ) and additive pilot noise 
+
+z𝑝 ∼ CN ( 0, 𝜎 2 
+
+> 𝑛
+
+I𝐿 ), the received pilot vector is 
+
+y𝑝 = D𝑝 h𝑝 + z𝑝 . (1) For unit-modulus pilots, we equivalently use the de-rotated pilot observation r𝑝 = DH 
+
+> 𝑝
+
+y𝑝 = h𝑝 + ¯z𝑝 , where ¯z𝑝 ≜ DH 
+
+> 𝑝
+
+z𝑝 ∼
+
+CN (0, 𝜎 2 
+
+> 𝑛
+
+I𝐿 ). A-MMSE generates a linear filter W𝜃 (y𝑝 ) ∈ 
+
+C𝑁 𝑀 ×𝐿 and forms 
+
+ˆh = W𝜃 (y𝑝 ) y𝑝 . (2) The filter in (2) is generated by the A-MMSE attention network of [4], depicted in the attention detail of Fig. 1. The real and imaginary parts of y𝑝 are embedded into 2𝐿 tokens. Learned projections yield Q, K ∈ R2𝐿 ×𝑑 𝑘 and V ∈ R2𝐿 ×𝑑 𝑣 .The attention map A = softmax  QK T/√𝑑 𝑘 
+
+ ∈ R2𝐿 ×2𝐿 scores pairwise correlation among these pilot components. It is thus a learned, input-adaptive counterpart of the pilot-domain second-order statistics that LMMSE filtering requires. The attended features AV , after the output projection W𝑂 , are decoded into the filter W𝜃 (y𝑝 ) penalized in Section III. Following [4], this block is applied in two stages to capture frequency and temporal correlations. 
+
+B. Clean-Label-Free Setting and the Noisy-Target Bias 
+
+In the clean-label-free setting considered in this paper, the training stage has access only to 
+
+D = {( y(𝑖 ) 
+
+> 𝑝
+
+, ˜h(𝑖 ) )} 𝐾 𝑖 =1, ˜h(𝑖 ) = h(𝑖 ) + n(𝑖 ) , (3) where n(𝑖 ) ∼ CN ( 0, 𝜎 2 
+
+> 𝑛
+
+I𝑁 𝑀 ). The noise variance 𝜎 2 
+
+> 𝑛
+
+is assumed known throughout; unlike the channel statistics, it can be estimated reliably at the receiver. Such full-grid samples can be collected in an offline phase in which every resource element carries a known pilot (e.g., dedicated sounding slots): de-rotating the received full-grid observation then yields ˜h(𝑖 ) =
+
+h(𝑖 ) + n(𝑖 ) , while at deployment only the sparse pilot set P is transmitted. In the corpus of (3), the pilot input is the sounding observation restricted to P, so the label noise at the pilot coordinates is the pilot-noise realization itself; equivalently, 
+
+˜h(𝑖 ) 
+
+> 𝑝
+
+= h(𝑖 ) 
+
+> 𝑝
+
++ ¯z(𝑖 ) 
+
+> 𝑝
+
+= r(𝑖 ) 
+
+> 𝑝
+
+. (4) Although only noisy training samples are available, the desired estimator is the one that minimizes the clean-channel MSE. In population form, the ideal A-MMSE learning objec-tive is the clean risk 
+
+𝜃 ★ = arg min  
+
+> 𝜃
+
+Rclean (𝜃 ), Rclean (𝜃 ) = E
+
+h
+
+h − W𝜃 (y𝑝 )y𝑝 22
+
+i
+
+.
+
+(5) Since h(𝑖 ) is unavailable, the problem is to construct a trainable surrogate objective from D that remains aligned with (5). A natural surrogate replaces the unavailable clean label h
+
+with the noisy observation ˜h:
+
+Lnaive (𝜃 ) = E ∥ ˜h − W𝜃 (y𝑝 )y𝑝 ∥22
+
+ . (6) However, Lnaive (𝜃 ) is not simply a noisy estimate of Rclean (𝜃 ).By (4), at pilot coordinate 𝑝 𝑖 ,
+
+𝑟 𝑖 = ℎ𝑝 𝑖 + ¯𝑧 𝑝 𝑖 , ˜ℎ𝑝 𝑖 = ℎ𝑝 𝑖 + ¯𝑧 𝑝 𝑖 = 𝑟 𝑖 . (7) Thus, the noisy target equals the input itself at pilot coordi-nates. For the scalar same-coordinate estimator ˆℎ𝑝 𝑖 = 𝛼𝑟 𝑖 , the naive noisy-target objective gives 
+
+𝛼 naive = arg min  
+
+> 𝛼
+
+E
+
+h
+
+𝛼𝑟 𝑖 − ˜ℎ𝑝 𝑖 
+
+> 2
+
+i
+
+= arg min  
+
+> 𝛼
+
+E |𝛼𝑟 𝑖 − 𝑟 𝑖 |2 = 1.
+
+(8) In contrast, the clean-MSE-optimal scalar gain is 
+
+𝛼 MMSE = arg min  
+
+> 𝛼
+
+E
+
+h
+
+𝛼𝑟 𝑖 − ℎ𝑝 𝑖 
+
+> 2
+
+i
+
+= 𝜎 2
+
+> ℎ
+
+𝜎 2 
+
+> ℎ
+
++ 𝜎 2
+
+> 𝑛
+
+< 1. (9) The naive objective thus favors identity copying 𝛼 naive = 1,whereas clean MSE minimization requires shrinkage. This motivates the filter-side ridge penalty in Section III and the target-side covariance-shrinkage surrogate in Section IV. 3
+
+III. R IDGE -R EGULARIZED A-MMSE Ridge-A-MMSE counters the identity-copying bias of Sec-tion II-B with a filter-side correction: it penalizes the generated A-MMSE filter itself while preserving the inference rule in (2). For the raw noisy-target case, this gives 
+
+Lridge (𝜃 ) = E ∥ ˜h − W𝜃 (y𝑝 )y𝑝 ∥22
+
+| {z }   
+
+> Lnaive (𝜃 )
+
++𝜆 E ∥W𝜃 (y𝑝 )∥ 2
+
+> F
+
+ ,
+
+(10) where 𝜆 > 0 is the ridge parameter. This is a Tikhonov-style regularization [14], [15] applied directly to the generated filter, not to internal DNN weights; it supplies the shrinkage pressure that the naive objective lacks. To gain analytical insight into this filter-side correction, we analyze a stylized setting that deliberately abstracts away the sample dependence of the learned filter: a fixed linear filter 
+
+W ∈ C𝑁 𝑀 ×𝐿 , independent of y𝑝 , a single pilot coordinate 
+
+𝑝 𝑖 ∈ P , and isotropic de-rotated pilot covariance. The analysis is stated in the de-rotated domain; both the channel estimate and the ridge penalty are invariant to this choice, as shown in Section IV. Let wH 
+
+> 𝑘
+
+denote row 𝑘 of W, and let r ≜ r𝑝 =
+
+h𝑝 + ¯z𝑝 be the de-rotated pilot vector. From (7), the noisy target at pilot coordinate 𝑝 𝑖 satisfies ˜ℎ𝑝 𝑖 = 𝑟 𝑖 , so the ridge objective at this row reduces to 
+
+min 
+
+> w𝑘
+
+E
+
+h
+
+|wH 
+
+> 𝑘
+
+r − 𝑟 𝑖 |2i
+
++ 𝜆 ∥w𝑘 ∥22. (11) The following proposition shows that, in this stylized setting, the ridge penalty induces scalar shrinkage and recovers the scalar MMSE gain at an explicit penalty value 𝜆 ★.
+
+Proposition 1 (Scalar shrinkage in a fixed-filter model) .
+
+Assume E[ℎ𝑘 ] = E[𝑛 𝑘 ] = 0, E[ℎ𝑘 𝑛 ∗ 
+
+> 𝑘
+
+] = 0, E[| ℎ𝑘 |2] = 𝜎 2 
+
+> ℎ
+
+,
+
+E[| 𝑛 𝑘 |2] = 𝜎 2 
+
+> 𝑛
+
+, and isotropic de-rotated pilot covariance 
+
+Rrr = 𝜎 2 
+
+> 𝑦
+
+I𝐿 , with 𝜎 2 
+
+> 𝑦
+
+≜ 𝜎 2 
+
+> ℎ
+
++ 𝜎 2 
+
+> 𝑛
+
+. For the pilot-output row 
+
+𝑘 = 𝑝 𝑖 and any 𝜆 > 0, the minimization in (11) admits the unique minimizer w𝑝 𝑖 ,𝜆 = 𝛼 𝜆 e𝑖 , where 𝛼 𝜆 = 𝜎 2 
+
+> 𝑦
+
+/( 𝜎 2 
+
+> 𝑦
+
++ 𝜆 ). In this same-coordinate scalar case, the corresponding test MSE is 
+
+𝐽 (𝛼 ) = E |𝛼𝑟 𝑖 − ℎ𝑝 𝑖 |2 = (1 − 𝛼 )2𝜎 2 
+
+> ℎ
+
++ 𝛼 2𝜎 2 
+
+> 𝑛
+
+. (12) 
+
+Hence 𝐽 (𝛼 𝜆 ) < 𝜎 2 
+
+> 𝑛
+
+for every 𝜆 > 0 when 𝜎 2 
+
+> ℎ
+
+≤ 𝜎 2 
+
+> 𝑛
+
+; when 
+
+𝜎 2 
+
+> ℎ
+
+> 𝜎 2 
+
+> 𝑛
+
+, the same improvement holds for 
+
+0 < 𝜆 < ¯𝜆, ¯𝜆 ≜ 2𝜎 2 
+
+> 𝑛
+
+(𝜎 2 
+
+> ℎ
+
++ 𝜎 2 
+
+> 𝑛
+
+)
+
+𝜎 2 
+
+> ℎ
+
+− 𝜎 2
+
+> 𝑛
+
+. (13) 
+
+The scalar MMSE point 𝛼 MMSE = 𝜎 2 
+
+> ℎ
+
+/( 𝜎 2 
+
+> ℎ
+
++ 𝜎 2 
+
+> 𝑛
+
+) is recovered at 
+
+𝜆 ★ = 𝜎 2 
+
+> 𝑛
+
+(𝜎 2 
+
+> ℎ
+
++ 𝜎 2 
+
+> 𝑛
+
+)
+
+𝜎 2
+
+> ℎ
+
+. (14) 
+
+Proof sketch. For the stylized fixed-filter problem with W
+
+independent of y𝑝 , the quadratic objective is separable across the rows of W; thus the analysis reduces to the pilot-output row associated with 𝑝 𝑖 . With Rrr = 𝜎 2 
+
+> 𝑦
+
+I𝐿 , the first-order condition 
+
+(Rrr + 𝜆 I𝐿 )w𝑘 = E[rr ∗ 
+
+> 𝑖
+
+] = 𝜎 2 
+
+> 𝑦
+
+e𝑖 yields the unique minimizer 
+
+w𝑘,𝜆 = 𝛼 𝜆 e𝑖 . The closed form in (12) follows by expanding Denoised surrogate target  
+
+> A-MMSE: Attention detail Noisy training corpus
+> Ridge-A-MMSE training
+> Learned filter
+> Stage 2. Ridge-A-MMSE training Offline training Test pilot obs.
+> Channel estimate
+> Inference Compute second-moment
+> Eigenvalue clipping Stage 1. Covariance shrinkage
+> Fig. 1. Overview of the proposed Ridge-A-MMSE training and inference pipeline.
+
+the expectation and using E[ℎ𝑝 𝑖 ¯𝑧 ∗ 
+
+> 𝑝 𝑖
+
+] = 0 to eliminate the cross-term. Evaluating 𝐽 (𝛼 𝜆 )− 𝜎 2 
+
+> 𝑛
+
+establishes the improvement range, and solving 𝛼 𝜆 = 𝛼 MMSE for 𝜆 yields 𝜆 ★.
+
+■
+
+Without the penalty ( 𝜆 = 0), the minimizer w𝑝 𝑖 = e𝑖 
+
+copies the noisy pilot and attains 𝐽 (1) = 𝜎 2 
+
+> 𝑛
+
+from (12), reproducing the identity bias of Section II. For any 𝜆 ∈ ( 0, ¯𝜆 ),the shrinkage 𝛼 𝜆 < 1 strictly improves on this baseline, and the scalar MMSE gain 𝛼 MMSE is recovered exactly at 𝜆 ★. Since 
+
+𝜆 ★/ ¯𝜆 = (𝜎 2 
+
+> ℎ
+
+− 𝜎 2 
+
+> 𝑛
+
+)/( 2𝜎 2 
+
+> ℎ
+
+) < 1/2, the MMSE point lies well inside the improvement range, so, within this stylized model, tuning 𝜆 near 𝜆 ★ helps rather than hurts on this row. 
+
+Remark 1. Proposition 1 is a mechanism-level explanation of why the Frobenius penalty counteracts the identity-copying bias of Section II. It provides no optimality guarantee for the learned architecture. In Ridge-A-MMSE, W𝜃 (y𝑝 ) is generated by the attention network and varies with the pilot observation, and the de-rotated pilot covariance is in general correlated. The penalty is applied per sample, so the shrinkage pressure acts on every generated filter, although its closed-form char-acterization holds only in the stylized model. The effect of the penalty under correlated covariances and learned filters is assessed empirically in Section V. During training, 𝜃 is optimized by minimizing (10), with 
+
+y𝑝 as the input and ˜h as the label; at inference, the channel estimate is formed exactly as in (2), confining the ridge mod-ification to the training stage. A label-free rule for choosing 
+
+𝜆 , derived from this mechanism, is given in Section V. IV. S URROGATE TARGETS VIA COVARIANCE SHRINKAGE 
+
+The ridge penalty of Section III discourages identity copy-ing but does not remove the noise in ˜h itself. We therefore introduce a complementary target-side correction that con-structs an LMMSE-style plug-in surrogate target from the noisy full-grid corpus. As illustrated in Fig. 1, Stage 1 builds the surrogate targets via (15) – (20), and Stage 2 trains A-MMSE under the ridge-regularized objective (21). The channel is assumed zero-mean in this section; in practice, the sample mean is subtracted before forming S.4
+
+From the noisy corpus, we form the sample second-moment matrix 
+
+S = 1
+
+𝐾 
+
+> 𝐾
+
+∑︁ 
+
+> 𝑖 =1
+
+˜h(𝑖 ) ˜h(𝑖 )H. (15) Assuming that h and n are uncorrelated, 
+
+E[S] = Mhh + 𝜎 2 
+
+> 𝑛
+
+I𝑁 𝑀 , Mhh ≜ E 
+
+h
+
+hh Hi
+
+. (16) Now let S = U diag (𝜇 1, . . . , 𝜇 𝑁 𝑀 )UH be the eigendecom-position of S. Since (16) is an expectation-level identity, subtracting the nominal noise floor 𝜎 2 
+
+> 𝑛
+
+from the empirical eigenvalues is a plug-in shrinkage step rather than an exact sample-wise correction. Empirically, smaller eigenvalues of S
+
+are more likely noise-dominated and may become negative after the subtraction; clipping them to zero enforces positive semidefiniteness: 
+
+bMhh = U diag 
+
+
+
+(𝜇 1 − 𝜎 2 
+
+> 𝑛
+
+)+, . . . , (𝜇 𝑁 𝑀 − 𝜎 2 
+
+> 𝑛
+
+)+
+
+
+
+UH, (17) where (𝑥 )+ = max (𝑥, 0). The construction is consistent with classical eigenvalue-shrinkage covariance estimators [16], [17]. We now use bMhh to build the surrogate target that replaces 
+
+˜h in the training objective. With the de-rotated pilot vector 
+
+r𝑝 = h𝑝 +¯z𝑝 from Section II, the MMSE linear map is obtained as 
+
+W★ 
+
+> pre
+
+= arg min  
+
+> W
+
+E ∥h − Wr 𝑝 ∥22
+
+ , (18) which leads to 
+
+W★ 
+
+> pre
+
+= Mhh 𝑝 
+
+
+
+Mh𝑝 h𝑝 + 𝜎 2 
+
+> 𝑛
+
+I𝐿 
+
+ −1
+
+, (19) where Mhh 𝑝 and Mh𝑝 h𝑝 denote the corresponding cross- and pilot-domain blocks of Mhh . Since only the noisy samples in 
+
+D from (3) are available, the true Mhh is unknown; plugging in bMhh from (17) produces a surrogate target of the LMMSE form evaluated at the estimated covariance: 
+
+ˆhpre = bMhh 𝑝 
+
+ bMh𝑝 h𝑝 + 𝜎 2 
+
+> 𝑛
+
+I𝐿 
+
+ −1
+
+r𝑝 . (20) We write cWpre for the plug-in filter in (20); ˆhpre = cWpre r𝑝 
+
+is thus a deterministic linear function of the pilot input, yet unlike the raw target of (7) it steers the generated filter toward a denoising map rather than identity copying. The ridge term in (21) excludes an exact copy of this map as the mini-mizer, while W𝜃 (y𝑝 ) remains input-adaptive. No sample-wise denoising guarantee is claimed; for a fixed W independent of the noise, E Wr 𝑝 − h 22 = E Wh 𝑝 − h 22 + 𝜎 2 
+
+> 𝑛
+
+∥W∥2F <
+
+E ˜h − h 22 = 𝑁 𝑀𝜎 2 
+
+> 𝑛
+
+once 𝜎 2
+
+> 𝑛
+
+ 𝑁 𝑀 − ∥ W∥2F
+
+ exceeds the pilot interpolation error—a condition more easily met for noisier corpora. The final Ridge-A-MMSE training objective with covariance-shrinkage surrogate targets is therefore 
+
+𝜃 RA = arg min 
+
+> 𝜃
+
+1
+
+𝐾 
+
+> 𝐾
+
+∑︁ 
+
+> 𝑖 =1
+
+
+
+ˆh(𝑖 ) 
+
+> pre
+
+− W𝜃 (y(𝑖 ) 
+
+> 𝑝
+
+) y(𝑖 ) 
+
+> 𝑝
+> 22
+
++ 𝜆 W𝜃 (y(𝑖 ) 
+
+> 𝑝
+
+) 2
+
+> 𝐹
+
+
+
+.
+
+(21) The surrogate (20) is stated in the de-rotated domain of (18)–(19), while the objective (21) keeps the raw input y𝑝 ,matching (2) and (10); for unit-modulus pilots D𝑝 is unitary, so W𝜃 (y𝑝 )y𝑝 = W𝜃 (y𝑝 )D𝑝 
+
+ r𝑝 and ∥W𝜃 (y𝑝 )D𝑝 ∥𝐹 =
+
+∥W𝜃 (y𝑝 )∥ 𝐹 , making both the estimate and the penalty in-variant to the domain choice. 
+
+Remark 2. The clipping in (17) is the Frobenius-norm pro-jection of S − 𝜎 2 
+
+> 𝑛
+
+I𝑁 𝑀 onto the positive semidefinite cone [18]. Three properties hold at every corpus size 𝐾 . First, (16) gives E[S] − 𝜎 2 
+
+> 𝑛
+
+I𝑁 𝑀 = Mhh , so the construction is exact at the population level. Second, the projection is non-expansive, 
+
+∥ bMhh − Mhh ∥𝐹 ≤ ∥S − E[S] ∥ 𝐹 , and clipping does not amplify the finite-sample error of S. Third, bMhh ⪰ 0 gives 
+
+bMh𝑝 h𝑝 + 𝜎 2 
+
+> 𝑛
+
+I𝐿 ⪰ 𝜎 2 
+
+> 𝑛
+
+I𝐿 , so the inverse in (20) exists and has spectral norm at most 𝜎 −2 
+
+> 𝑛
+
+.
+
+Remark 3 (Complexity) . The additional computation of Ridge-A-MMSE relative to A-MMSE [4] is confined to offline training. In Stage 1, forming S in (15) costs O( 𝐾 (𝑁 𝑀 )2), and its eigendecomposition costs O(( 𝑁 𝑀 )3). Both are performed once per training corpus. Constructing the plug-in filter in (20) costs O(( 𝑁 𝑀 )2 𝐿 + 𝐿 3), and generating the 𝐾 surrogate targets costs O( 𝐾 𝑁 𝑀 𝐿 ). For larger grids, the eigendecomposition can be replaced by a truncated decomposition without altering the training pipeline. In Stage 2, the ridge penalty in (21) adds O( 𝑁 𝑀 𝐿 ) per sample, negligible compared with the attention forward and backward passes. At inference, the estimator is identical to (2). The filter is generated by the unchanged A-MMSE backbone and applied through a single 
+
+O( 𝑁 𝑀 𝐿 ) matrix–vector product. Ridge-A-MMSE thus incurs no additional inference-time complexity, latency, or memory relative to A-MMSE. V. S IMULATION RESULTS 
+
+Setup and baselines: The proposed Ridge-A-MMSE is eval-uated on two COST 2100 single-user channel scenarios [13]. The semi-urban (SU) scenario is configured at 3.5 GHz carrier frequency, 30 kHz subcarrier spacing, 1000 ns delay spread, 40 
+
+km/h user speed, and Rician factor of 3 dB (maximum Doppler shift ≈ 129 .6 Hz). The high-speed railway (HSR) scenario operates at 5 GHz carrier frequency with 60 kHz subcarrier spacing, 100 ns delay spread, 350 km/h user speed, and Rician factor of 13 dB (maximum Doppler shift ≈ 1620 .4 Hz). Both scenarios use an OFDM slot of 𝑁 = 72 subcarriers and 𝑀 = 14 
+
+symbols, with 𝐿 = 72 pilots following the pilot pattern of [4], whose temporal train-validation-test split of 36000 /4000 /4000 
+
+slots is also adopted. All models are trained with Adam [19] on a corpus of 𝐾 = 36000 noisy slots per scenario and operating SNR, on a single NVIDIA RTX 4090 GPU. Fig. 2 reports the NMSE, defined as E∥ ˆh − h∥22 / E∥h∥22 over the test set, for 0–
+
+35 dB SNR in both scenarios. The proposed Ridge-A-MMSE uses the A-MMSE backbone with both the ridge penalty and the eigenvalue-clipped surrogate targets. Two categories of reference methods are considered. Oracle LMMSE serves as a classical linear benchmark that assumes perfect knowledge of the true channel statistics, while Ground-Truth A-MMSE represents the clean-label reference, i.e., the 50 5 10 15 20 25 30 35           
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> NMSE
+> COST2100 - SU : NMSE performance of Proposed Method vs. N2N Benchmarks
+> Oracle LMMSE Ground-Truth A-MMSE N2N ChannelNet N2N Channelformer N2N A-MMSE Ridge-A-MMSE
+> (a) NMSE performance on SU scenario. 0510 15 20 25 30 35
+> SNR (dB)
+> 10 -3
+> 10 -2
+> NMSE
+> COST2100 - HSR : NMSE performance of Proposed Method vs. N2N Benchmarks
+> Oracle LMMSE Ground-Truth A-MMSE N2N ChannelNet N2N Channelformer N2N A-MMSE Ridge-A-MMSE (b) NMSE performance on HSR scenario. Fig. 2. NMSE comparison of the proposed Ridge-A-MMSE and the N2N baselines on COST 2100 channels. N2N baselines require 35 dB target observations, whereas Ridge-A-MMSE trains only on the noisy corpus at each operating SNR.
+
+same backbone trained with clean CSI labels; both are ideal-ized and unavailable in practice. Three N2N baselines — N2N ChannelNet [2], N2N Channelformer [3], and N2N A-MMSE — are trained following the N2N principle [10]. The two end-to-end deep-learning (DL) baselines are faithful implementa-tions of the original architectures, and N2N Channelformer follows the original offline version. Only the input–output dimensions are adapted to the resource grid and pilot pattern of this paper. Each N2N training pair combines the operating-SNR pilot input with a 35 dB full-grid observation of the same channel realization: the 35 dB level reflects that target observations would be gathered offline under favorable conditions, while the independent second observation of each realization is an idealization granted to these baselines. Below 35 dB, the input and target noise are thus statistically independent, as N2N requires, making the loss unbiased in expectation, although the residual target noise still inflates its finite-sample variance; at 
+
+35 dB, the same observation necessarily serves as both, and N2N reduces to the same-slot regime of Section II-B. Ridge-A-MMSE is instead trained at each operating SNR, using the noisy corpus observed at that SNR for both the pilot inputs and the surrogate-target construction; no separately collected observation is required at any operating point. 
+
+Ridge parameter: The ridge parameter is set per scenario and operating SNR; a label-free rule follows from Proposi-tion 1, aggregated over the filter rows. The penalty trades a first-order gain on the pilot rows against a second-order cost elsewhere. On the 𝐿 pilot-output rows, the raw target of (10) coincides with the input by (7), so a small penalty reduces the clean risk at a rate proportional to 𝜎 2 
+
+> 𝑛
+
+per row – the derivative of (12) at 𝛼 = 1. On the remaining rows, the target noise is independent of the input, so the objective is already aligned with the clean risk. The penalty there inflicts only a second-order loss, weighted by the squared row norms. Balancing the two at high SNR and unit channel power gives ˆ𝜆 = 𝐿𝜎 2 
+
+> 𝑛
+
+/∥ cWpre ∥2 
+
+> 𝐹
+
+, a plug-in rule of the classical Hoerl–Kennard–Baldwin form [20] computed from Stage-1 statistics alone. The values in Fig. 2 match ˆ𝜆 within a small constant factor, and the NMSE varies by less than 1 dB over more than a decade of 𝜆 around them. 
+
+Results: In the SU scenario in Fig. 2(a), the proposed method yields improvements over all N2N baselines across the entire SNR range. Compared with N2N A-MMSE, which shares the same network architecture, Ridge-A-MMSE achieves 53 .5% lower NMSE at 10 dB, 57 .3% at 20 dB, and 
+
+86 .5% at 35 dB. Against the end-to-end DL baselines, Ridge-A-MMSE improves over N2N ChannelNet by 69 .0% at 10 
+
+dB and 67 .7% at 20 dB, while the corresponding gains over N2N Channelformer are 62 .5% and 64 .1% . At 35 dB, the proposed method reaches an NMSE of 8.094 × 10 −5, slightly better than the Ground-Truth A-MMSE value of 9.642 × 10 −5,which we attribute to the implicit regularization provided by the covariance-shrinkage surrogate target and the ridge penalty. In the HSR scenario in Fig. 2(b), the proposed method outperforms all N2N baselines, though the relative margins are narrower than in the SU case. Ridge-A-MMSE achieves 20 .1% 
+
+and 13 .0% lower NMSE than N2N A-MMSE at 10 dB and 20 
+
+dB, respectively, with the improvement increasing to 34 .4% at 
+
+35 dB. Compared with N2N Channelformer, relative gains of 
+
+33 .8% at 20 dB and 50 .9% at 35 dB are obtained. These gains hold under a stricter training regime that requires no independently drawn target observation. Because N2N A-MMSE shares the identical backbone, the gap to it isolates the effect of the training methodology alone; the mar-gins over the end-to-end DL baselines additionally include the contribution of the A-MMSE architecture. In the SU channel the proposed method approaches the clean-label reference at high SNR, and in the HSR channel it attains the lowest NMSE among the methods trained exclusively from noisy observations. 
+
+Ablation and convergence: Under the settings of Fig. 2 at 6
+
+the full corpus size 𝐾 = 36000 , over both scenarios and all operating SNRs, the ridge penalty alone yields 23 .8–47 .9% 
+
+lower NMSE than naive same-slot noisy-target training, and the surrogate targets alone up to 74 .1% lower. The full method yields 24 .8–47 .8% lower NMSE than the better single mechanism at every point from 0 to 30 dB. At 35 dB it remains below the better single mechanism in SU and ties the ridge-only arm in HSR, where the surrogate advantage has narrowed. Removing the eigenvalue clipping increases the measured NMSE by up to 204 .8% at 0 dB, while the clipping is inactive at 35 dB. A further ablation removes the attention encoder from the A-MMSE backbone of [4], with all other components and the entire training procedure unchanged. The full method attains 58 .5–93 .0% (SU) and 25 .2–64 .1% (HSR) lower NMSE than the resulting FC-only (fully connected only) variant across the entire SNR range. Against a parameter-matched variant, in which each attention encoder is replaced by residual fully connected blocks at the total parameter count of the full backbone under identical training, the margin remains 40 .7–90 .3% (SU) and 15 .3–39 .8% (HSR). The training and validation losses of the proposed method converge stably at 35 dB in both scenarios, with a final train–validation gap below 4% . The converged validation loss, measured against the clean channel, is 86 .3% (SU) and 35 .3% 
+
+(HSR) lower than that of naive same-slot noisy-target train-ing. Re-evaluated against the surrogate target – the reference computable in the field – the converged validation loss agrees with its clean-referenced value within about 12% (SU) and 
+
+1.2% (HSR), so convergence can be monitored without clean labels. 
+
+Computational cost: The recurring computational cost of the proposed method matches that of the A-MMSE backbone. One training epoch over the 36000 -slot corpus takes approxi-mately 30 s for the A-MMSE variants, 26 s for N2N Channel-Net, and 18 s for N2N Channelformer. Stage 1 of the proposed method adds a one-time preprocessing cost on the order of seconds per corpus. At inference, every A-MMSE variant applies the trained filter through the single matrix–vector product in (2). The measured runtime is approximately 0.37 
+
+ms per slot on the RTX 4090, versus approximately 26 ms and 21 ms for N2N ChannelNet and N2N Channelformer. The complete experimental results, including the per-arm ablation and the full set of ridge parameters, are available online [21]. VI. C ONCLUSION 
+
+We proposed Ridge-A-MMSE for clean-label-free DNN-based OFDM channel estimation, where training must rely on pilot observations and noisy full-grid channel samples alone. The method addresses the resulting noisy-target bias from two complementary directions. On the filter side, ridge regularization penalizes the generated A-MMSE filter and, in a stylized fixed-filter pilot-coordinate model, induces scalar shrinkage that recovers the scalar MMSE gain at an explicit penalty value. On the target side, eigenvalue-clipped covari-ance shrinkage constructs LMMSE-style plug-in surrogate targets from the noisy corpus without requiring clean CSI labels. Simulations on COST 2100 channels showed that the combination of ridge regularization and covariance shrink-age consistently outperforms the considered N2N baselines across all SNRs and approaches Ground-Truth A-MMSE at high SNR. Future work includes a theoretical characterization of the label-free ridge rule beyond the stylized setting of Proposition 1, and an extension of the framework to multi-antenna and multi-user MIMO settings. Another direction is a generalization study across channel families, combining designed-data pre-training [8], [9] with the proposed clean-label-free on-site refinement. REFERENCES [1] H. Ye, G. Y. Li, and B.-H. Juang, “Power of deep learning for channel estimation and signal detection in OFDM systems,” IEEE Wireless Commun. Lett. , vol. 7, no. 1, pp. 114–117, 2018. [2] M. Soltani, V. Pourahmadi, A. Mirzaei, and H. Sheikhzadeh, “Deep learning-based channel estimation,” IEEE Commun. Lett. , vol. 23, no. 4, pp. 652–655, 2019. [3] D. Luan and J. S. Thompson, “Channelformer: Attention based neural solution for wireless channel estimation and effective online training,”

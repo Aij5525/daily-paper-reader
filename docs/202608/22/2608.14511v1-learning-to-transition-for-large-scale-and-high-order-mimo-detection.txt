@@ -1,0 +1,713 @@
+Title: Learning-to-Transition for Large-scale and High-Order MIMO Detection
+
+URL Source: https://arxiv.org/pdf/2608.14511v1
+
+Published Time: Mon, 17 Aug 2026 01:04:40 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+> 1
+
+# Learning-to-Transition for Large-scale and High-Order MIMO Detection 
+
+Yubo Zhang, Yiyao Liu, and Xiaodong Wang 
+
+Abstract —High-order multiple-input multiple-output (MIMO) detection requires efficient search over a large discrete symbol space while producing reliable soft information for channel decoding. This paper develops a learning-to-transition (L2T) framework that formulates MIMO detection as a stochastic sequence of complete-vector transitions. At each transition, a channel-coupled Transformer updates both the instance embed-ding and the sampling policy, while a blockwise autoregressive factorization captures inter-stream dependence with moderate sequential complexity. For hard-output detection, a transition network is applied recursively and trained through a residual-to-BER curriculum, which first learns the MIMO search geometry from the exact residual metric and then aligns the policy with transmitted-bit accuracy. For soft-output reception, the well-trained hard policy is cloned at the parameter level into every layer of an untied soft-input soft-output iterative detection and decoding (IDD) receiver. This tied-to-untied transfer preserves the learned zero-prior search dynamics while enabling layer-and round-specific specialization under decoder feedback. Within each IDD round, decoder priors tilt candidate generation accord-ing to Bayes’ rule, and likelihood-weighted terminal hypotheses produce posterior and extrinsic log-likelihood ratios for LDPC decoding. A multi-stage training strategy further stabilizes the hard-to-soft transfer by progressively exposing the receiver to synthetic and in-loop decoder-generated priors. 
+
+Index Terms —MIMO detection, high-order QAM, learning to optimize, Transformer, reinforcement learning, iterative detection and decoding. 
+
+I. I NTRODUCTION 
+
+Multiple-input multiple-output (MIMO) transmission im-proves spectral efficiency by multiplexing several data streams, but joint detection becomes increasingly difficult as the system loading and modulation order grows. With perfect channel state information (CSI), maximum-likelihood (ML) detection must search over QNt possible transmit vectors for Nt streams and a Q-ary constellation. This exponential complexity is prohibitive for large or square high-order MIMO systems, whereas low-complexity linear detectors may suffer substantial performance loss under strong inter-stream interference or ill-conditioned channels [1]. Approximate message passing (AMP), orthogonal AMP, expectation propagation (EP), and model-driven unfolding methods provide useful performance-complexity tradeoffs. Learned receivers, including OAMP-Net2, RE-MIMO, and the Soft Graph Transformer (SGT), further improve robustness or better capture dense inter-stream interactions [2]–[4]. Nev-ertheless, most existing neural detectors either inherit a pre-scribed inference recursion or directly map a received instance to symbol estimates or marginals. As a result, they do not explicitly learn how to traverse the discrete space of complete high-order MIMO transmit vectors. Related combinatorial and Ising formulations expose the same discrete structure, but typically rely on specialized optimization procedures rather than an amortized transition policy [5], [6]. Reinforcement learning for combinatorial optimization of-fers a complementary perspective. Constructive policies gen-erate a solution one component at a time, whereas learned improvement heuristics usually apply a prescribed local mod-ification [14], [18]. In contrast, we learn the stochastic transi-tion rule itself. Across search steps, the same Transformer is applied recursively to map the current complete MIMO vector to a distribution over the next complete vector; within each step, the next vector is generated in a blockwise autoregressive manner across transmit streams. The sampled candidates are then evaluated by the exact channel metric. Therefore, the term “complete-vector transition” refers to the search state before and after each transition, while the decisions within a transition can still follow a structured autoregressive factorization. A second difficulty is objective alignment. The residual energy provides a model-based cost for every sampled vector, but minimizing the residual alone does not necessarily mini-mize the transmitted-bit BER. We therefore adopt a residual-to-BER curriculum for hard-detector training. The policy is first trained with a residual-driven policy-gradient objective, which teaches the coupled MIMO search geometry, and is then smoothly shifted to a transmitted-bit binary cross-entropy (BCE) objective, which directly aligns the learned policy with bit-error-rate performance [21]. Soft-output reception further requires reliable uncertainty quantification, not merely a strong hard estimate. Iterative detection and decoding (IDD) needs posterior and extrinsic soft information, together with competing hypotheses for both values of each coded bit. Classical SISO and variational detectors make this posterior/extrinsic distinction explicit [19], [20]. We follow this principle by transferring the hard policy to a prior-conditioned soft detector. Specifically, the well-trained tied hard policy is cloned at the parameter level into every transition layer of every IDD round, and the resulting copies are then optimized independently. This tied-to-untied transfer preserves the learned zero-prior search dynamics at initializa-tion, while allowing each soft layer to specialize to its position in the search trajectory and to the decoder-prior distribution of its IDD round. During soft-output inference, decoder priors tilt candidate sampling according to Bayes’ rule; a likelihood-weighted terminal mixture produces detector posterior LLRs; and explicit prior subtraction yields the extrinsic LLRs passed to the decoder. The main contributions are summarized as follows: arXiv:2608.14511v1 [cs.IT] 14 Aug 2026 2 
+
+> •
+
+We formulate high-order MIMO detection as a complete-vector transition process and develop a channel-coupled Transformer policy for this process. Instead of con-structing a transmit vector component by component or applying a prescribed local update, the detector learns to map the current complete vector to a distribution over the next complete vector. The Transformer jointly updates the instance embedding and the sampling policy, while a blockwise autoregressive factorization captures inter-stream dependence within each transition.  
+
+> •
+
+We train the hard-output detector through trajectory-level reinforcement learning with a residual-to-BER curricu-lum. The residual-driven policy-gradient objective first exploits the exact channel metric to learn the coupled MIMO search geometry, and the later transmitted-bit BCE objective directly aligns the policy with bit-error-rate performance.  
+
+> •
+
+We extend the hard detector to a soft-input soft-output IDD receiver via tied-to-untied hard-to-soft transfer. The well-trained tied hard policy is cloned at the parame-ter level into every independently trainable soft-detector layer, providing a common zero-prior search initializa-tion while allowing specialization across transition depth and IDD rounds. The soft receiver further incorporates Bayesian prior-tilted sampling, likelihood-weighted pos-terior LLR computation, explicit extrinsic LLR genera-tion, and staged training for drifting decoder priors. II. P ROBLEM STATEMENT 
+
+A. MIMO Detection 
+
+Consider a point-to-point spatial-multiplexing MIMO chan-nel with Nt transmit antennas and Nr receive antennas. For each channel use, 
+
+y = Hx + n, n ∼ CN (0, σ 2INr ), (1) where H ∈ CNr ×Nt is the channel matrix, following the distribution H ∼ pH , and σ2 is the noise variance at each receive antenna. Let AQ denote a unit-energy, Gray-coded quadrature-amplitude modulation (QAM) constellation with order Q. Each QAM symbol contains B = log 2 Q coded bits, with B/ 2 bits on each pulse-amplitude modulation (PAM) axis. The corresponding constellation mapping is depicted in Fig. 1, demonstrating how QAM scheme exploits the two-dimensional space to separate modulated symbols. Let μQ : {0, 1}B → A Q be the prescribed Gray mapping. We collect the bits assigned to all transmit antennas and define the modulated symbol as follows: 
+
+x = MQ(b) = μQ(b1), . . . , μ Q(bNt )T, (2) where b = [bT 
+
+> 1
+
+, . . . , bT 
+
+> Nt
+
+]T belongs to B = {0, 1}NtB .Traditional maximum-likelihood (ML) detection then adopts the following exhaustive search: 
+
+ˆbML (y, H) = arg min  
+
+> b∈B
+
+|y − HMQ(b)∥22. (3) Note that the entire space now contains 2NtB feasible solu-tions, hence the ML detection in (3) becomes computationally  
+
+> Fig. 1. Constellation for Gray-coded data symbols.
+
+prohibitive under the large system size (i.e., Nt increases) and high-order QAM (i.e., B increases). Moreover, it is inefficient to repeatedly solve similar detection problems as the channel 
+
+H frequently varies. To tackle these issues, we aim to train a single neural network that solves the symbol detection problems for channel instances across the entire distribution H ∼ pH . This follows the essence of learning-to-optimize (L2O)/ amortized opti-mization, which shifts the computational burden from online iterative optimization to offline training. Instead of solving each problem instance from scratch, L2O learns an optimizer from the data, exploiting recurring task structures for fast inference. Specifically, denote the residual function of the symbol detection as follows: 
+
+f (b; y, H) = ∥y − HMQ(b)∥22. (4) Then the L2O solver aims to minimize this metric in the population level: let ˆbθ (y, H) denotes its final output, where 
+
+θ denotes the learnable parameters of the neural solver, the amortized learning problem becomes 
+
+min  
+
+> θ
+
+EH∼pH
+
+h
+
+f  ˆbθ (y, H); y, Hi
+
+. (5) This formulation remains challenging, since symbol detection is inherently an NP-hard combinatorial optimization problem, which lacks a high-quality general-purpose solver. 
+
+B. Learning to Transition 
+
+Based on the objective in (5), we seek to train a neural network that learns an effective transition policy over the entire solution space B. Similar to the prior graph optimization work, learning an expressive channel embedding is crucial to the detection performance in this work. Note that the residual function in (4) can be rewritten as 
+
+∥y − Hx ∥22 = xHRx − 2 Re {xHz} + ∥y∥22, (6) where x ≜ MQ(b) ∈ CNt represents the modulated symbol, 
+
+R ≜ HHH ∈ RNt×Nt represents the Gram/correlation matrix of channel H, and z ≜ HHy ∈ CNt represents the corresponding matched filter output. Inspired by [13], the effective channel features can be learned by drawing an analogy with graph-embedding generation . Specifically, the matched-filter entries, i.e., z, and all diagonal entries of Gram 3
+
+matrix, i.e., diag (R), form the node-wise inputs (each node relates to one transmit antenna); while all off-diagonal entries of Gram matrix, i.e., offdiag (R), form the edge-wise inputs (which reflects the complex inter-stream couplings). Then a graph neural network (GNN) encoder Gφ maps these sufficient input statistics to the initial channel embedding, i.e., 
+
+Z(0) = Gφ
+
+ z, diag (R), offdiag (R) ∈ RD×Nt , (7) where D is the feature dimension of each node (transmit side). To reduce the difficulty of learning the transition policy, inspired by the recursive optimization process in [10], [11], we consider a Learning-to-transition (L2T) scheme consisting of 
+
+T updates, therefore amortizing the searching task across all steps. Importantly, a static embedding cannot reflect which parts of the search space have already been explored by the evolving candidate. We therefore keep updating the channel embedding across the transition steps, inspired by the works in [7], [16]. Assume that the transition process at each step is performed by a neural network with learnable parameters θ0.Hence the forward process at each transition step t is given by h
+
+p(t), Z(t)i
+
+= Π θ0
+
+
+
+b(t−1) , Z(t−1) 
+
+, (8) for t = 1, . . . , T . The first output undergoes a bit-wise sampling process to obtain the next solution, i.e., b(t) ∼ p(t),while the second output is the updated feature embedding at transition step t.III. H ARD -D ECISION RECEIVER 
+
+We now design a non-iterative receiver where the transmit-ted bits are directly obtained via hard decisions. Equivalently, a learning-based solver is trained to address the NP-hard combinatorial optimization problem in a population level. To achieve this, we first propose the policy network design and then provide the policy gradient-based training scheme. 
+
+A. Transformer-based Policy Network 
+
+The transition policy Πθ0 in (8) can be parameterized by a Transformer network [12]. In particular, the previous sam-pled solution is reshaped as b(t−1) = [ b(t−1) 1 , . . . , b(t−1)  
+
+> Nt
+
+] ∈
+
+RB×Nt , and then concatenated with the corresponding channel embedding Z(t−1) ∈ RD×Nt in a top-down manner, which yields the input token sequence to the next layer: 
+
+C(t) = [ b(t−1) ; Z(t−1) ] ∈ R(B+D)×Nt . (9) Let ¯C(t) = LayerNorm (C(t)). For each attention head h,
+
+h = 1 , . . . , H , the query, key, and value projections are 
+
+Q(t,h ) = ( ¯C(t))⊤W (h) 
+
+> Q
+
+∈ RNt×Dk /H ,
+
+K(t,h ) = ( ¯C(t))⊤W (h) 
+
+> K
+
+∈ RNt×Dk /H ,
+
+V (t,h ) = ( ¯C(t))⊤W (h) 
+
+> V
+
+∈ RNt×Dv /H . (10) The corresponding attention output is 
+
+A(t,h ) = softmax Q(t,h )K(t,h )⊤
+
+pDk/H 
+
+!
+
+V (t,h ). (11) The H attention outputs are concatenated and projected to 
+
+Y (t) = Wo[A(t, 1) , . . . , A(t,H )]⊤ = [ Y (t) 
+
+> p
+
+; Y (t) 
+
+> f
+
+], (12) where Wo ∈ R(B+D)×Dv , Y (t) 
+
+> p
+
+∈ RB×Nt represents the solution logits and Y (t) 
+
+> f
+
+∈ RD×Nt contains the channel embedding residuals. Then the solution at the next transition step is sampled as follows: 
+
+P (t) = sigmoid (Y (t) 
+
+> p
+
+) = [ p(t)1 , . . . , p(t) 
+
+> Nt
+
+],
+
+b(t) 
+
+> i
+
+∼ Bernoulli( p(t) 
+
+> i
+
+), i = 1 , . . . , N t. (13) In parallel, the channel embedding is updated through residual connections and an MLP: 
+
+˜Z(t) = Z(t−1) + Y (t) 
+
+> f
+
+,
+
+Z(t) = ˜Z(t) + MLP 
+
+
+
+LayerNorm( ˜Z(t))
+
+
+
+. (14) (13) and (14) are the two output branches of the same Transformer layer. Unrolling this layer over T transitions re-cursively refines both the discrete solution and the continuous embedding. 
+
+B. Blockwise Autoregressive Sampling 
+
+In principle, the mean-field sampling for each solution (i.e., every bit is sampled in parallel in the process b(t) ∼ p(t))is fast but ignores conditional correlations among N bits. At the other extreme, bit-by-bit autoregressive sampling captures every conditional dependence but requires a large mount of se-quential forward processes. We therefore introduce blockwise autoregressive sampling [17] as an efficient tradeoff between these two extreme cases, to generate the complete solution b(t)
+
+at each transition step. In this work, each block represents a B-bit QAM symbol from each transmit antenna. The dependence is retained across those Nt symbols because the dense off-diagonal entries in the Gram matrix R couple the symbol detections at different antennas. In contrast, the bits within each QAM symbol are generated in parallel. This mean-field factorization avoids a bit-by-bit chain of length NtB while preserving the dominant inter-symbol dependence. The block ordering n = 1 , 2, . . . , N t may be randomized during training to avoid imposing a persistent ordering bias. Define bmask as an all-zero vector with length B, which can be regarded as each undetermined data symbol during a sequential sampling process. Then we define the following partial solution before sampling each data symbol b(t) 
+
+> n
+
+at transition step t:
+
+b(t) 
+
+> <n
+
+≜ [b(t)1 , . . . , b(t)
+
+> n−1
+
+, bmask , . . . , bmask 
+
+| {z } 
+
+> Nt−n+1 copies
+
+] (15) Conditioned on b(t)
+
+> <n
+
+, the complete prior solution b(t−1) , and the current channel embedding Z(t)
+
+> n−1
+
+, the policy samples all variables in the next block in parallel: 
+
+[p(t) 
+
+> n
+
+, Z(t) 
+
+> n
+
+] = Π θ0
+
+
+
+· | b(t)
+
+> <n
+
+, b(t−1) , Z(t)
+
+> n−1
+
+
+
+,
+
+b(t)
+
+> n
+> parallel
+
+∼ Bernoulli( p(t) 
+
+> n
+
+), (16) 4
+
+with Z(t)0 = Z(t−1) and Z(t) = Z(t) 
+
+> Nt
+
+. After Nt blockwise samplings, we obtain the complete solution b(t). Note that the special case M = 1 reduces to a mean-field sampler, whereas 
+
+M = N reduces to a bit-by-bit autoregressive sampler. 
+
+C. Policy-Gradient Training Scheme 
+
+Implementing the above T -step stochastic transition pro-cess yields a complete L2T solution trajectory τ ≜
+
+(b(0) , b(1) , . . . , b(T )). Its sampling probability can be com-puted as 
+
+pθ0 (τ | y, H) = p(b(0) )
+
+> (t)
+
+Y
+
+> t=1
+
+Πθ0
+
+
+
+b(t) | b(t−1) , Z(t−1) ; y, H
+
+
+
+.
+
+(17) where p(b(0) ) does not depend on θ0. Denote the step-wise objective function as g(b(t); y, H). Similar to the GCO paper, the following trajectory-wise objective function with entropy regularization is proposed: 
+
+g(τ ; y, H) = 
+
+> T
+
+X
+
+> t=1
+
+g(b(t); y, H),Jλ(θ0; τ, y, H) = g(τ ; y, H) + λ log pθ0 (τ | y, H). (18) Since Eτ [log pθ0 (τ | y, H)] is the negative entropy term, the coefficient λ > 0 encourages explorations at the early stage. The corresponding distribution-level learning objective is then given as follows: 
+
+Jλ(θ0) = EH∼pH Eτ ∼pθ0 (·| y,H) [Jλ(θ0; τ, y, H)] , (19) and the ultimate learning problem becomes 
+
+min 
+
+> θ0
+
+Jλ(θ0), (20) which is solved using a gradient-based method. Note that (19) contains two nested expectations. The outer expecta-tion EH∼pH arises because we aim to learn a population-based solver whose policy generalizes across the channel distribution; The inner expectation Eτ ∼pθ0 (·| y,H) accounts for the stochasticity of the learned transition policy because each trajectory is sampled from the probability distributions output by the network. For each detection instance (y, H),this expectation is approximated by averaging over multi-ple sampled trajectories {τ1, . . . , τ K }. Although the ultimate interest is f (b(T ); y, H) at the final step, aggregating the objective values along the trajectory encourages progressive improvement throughout the search process. At inference, for a new instance (y, H), we expect the recursive application of the trained policy network to produce a near-optimal result 
+
+b(T ). Since each update only requires a feedforward mapping and a sampling operation, the resulting solver can be executed repeatedly with low latency, making real-time deployment feasible. We next show how the step-wise objective function 
+
+g(b(t); y, H) is constructed. Note that the ultimate goal is to reduce the detection bit-error-rate (BER), and the true trans-mitted bits are assumed to be known during training. Hence the BER-oriented binary cross-entropy (BCE) can be regarded as an effective step-wise loss function: specifically, let Nb = NtB
+
+denote the entire codeword length; if the ground truth is b∗
+
+> j
+
+for every jth bit, while the network produces probabilities 
+
+p(t) 
+
+> j
+
+≜ P (r) 
+
+> θ0
+
+(bj = 1) at transition step t, j = 1 , . . . , N b, the BER-oriented BCE loss for this codeword is 
+
+ℓBCE  
+
+> t
+
+= − 1
+
+NbNbX
+
+> j=1
+
+h
+
+b∗ 
+
+> j
+
+log p(t) 
+
+> j
+
++ (1 − b∗ 
+
+> j
+
+) log(1 − p(t) 
+
+> j
+
+)
+
+i
+
+.
+
+(21) In practice, the residual loss function in (4) is also utilized as a smooth surrogate in the early-stage training. Hence the following hybrid step-wise loss function is proposed 
+
+g(b(t); y, H) = ρs · f (b(t); y, H) + (1 − ρs) · ℓBCE  
+
+> t
+
+, (22) where the coefficient ρs gradually decreases from 1 to 0, explicitly reflecting a schedule shifts from the smooth residual loss to the BER-oriented BCE loss. As a result, substituting (22) into (18) yields the trajectory-wise loss function. According to (19), when computing the population-level loss, for each instance (y, H), K solution trajectories are sam-pled, which accounts for the expectation term Eτ ∼pθ0 (·| y,H).The initializations of those K trajectories (denoted as 
+
+b(0) 1 , . . . , b(0)  
+
+> K
+
+) are all randomly-generated valid solutions. Fi-nally, the policy network Πθ0 is trained according to (20). During inference, for each (y, H), we recursively employ the trained policy network Πθ∗ 
+
+> 0
+
+for T transitions based on the random initializations (b(0) 1 , . . . , b(0)  
+
+> K
+
+), and obtain the final solution set (b(T )1 , . . . , b(T ) 
+
+> K
+
+). The hard decision result is the final solution b(T ) 
+
+> k∗
+
+with the smallest residual loss, i.e., 
+
+b(T ) 
+
+> k∗
+
+: k∗ = arg min  
+
+> k=1 ,...,K
+
+f (b(T ) 
+
+> k
+
+; y, H). (23) IV. S OFT -I NPUT SOFT -O UTPUT RECEIVER 
+
+A. Iterative Detection and Decoding 
+
+Iterative detection and decoding (IDD) exchanges soft in-formation between the MIMO detector and a soft-output low-density parity-check (LDPC) decoder. An interleaver dis-tributes one LDPC codeword over a batch of MIMO obser-vations; after detection, their LLRs are simply reassembled in codeword order before decoding. We use the convention 
+
+L(b) = log 
+
+ P (b=0)  
+
+> P(b=1)
+
+
+
+, so P (b = 1) = sigmoid( −L(b)) . Let 
+
+Γ denote the code interleaver. At the mth IDD round, the complete turbo exchange uses the LDPC belief-propagation (BP) mapping DBP , given as follows: 
+
+LE,(m) = LP,(m) − LA,(m), (24) 
+
+Lin ,(m)D = Γ −1(LE,(m)), LP,(m)D = DBP (Lin ,(m)D ), (25) 
+
+LA,(m+1) = Γ 
+
+
+
+LP,(m)D − Lin ,(m)D
+
+
+
+, (26) where the subscripts (A, P, E ) in the above equations repre-sent the a-priori, posterior, and extrinsic LLR. The exchange is initialized with LA,(0) = 0. The two subtractions are essential: each module passes only information newly created from its own observation or parity constraints, rather than feeding its input prior back as if it were new evidence. 5
+
+B. LLR Computations 
+
+For a bit b, Bayes’ rule gives 
+
+P (b | F , L A) ∝ Pnet (b | F )P A(b), (27) where F contains the detection instance and previously gener-ated bits. With LA = log 
+
+ P A(0)  
+
+> PA(1)
+
+
+
+and equal-prior LLR output by the policy network: 
+
+anet = log Pnet (b = 1 | F )
+
+Pnet (b = 0 | F ) , (28) the posterior LLR and the sampling probability are given as 
+
+P (b = 1 | F , L A)
+
+P (b = 0 | F , L A) = exp( anet − LA), (29) 
+
+psample = sigmoid( anet − LA). (30) Thus an a-priori LLR induces a bias into the sampling proba-bilities of the detector’s output. At LA = 0, the policy reduces to the previous hard-decision detector. After the final transition, let qk,j be trajectory k’s probability that bit j is one and let b(T ) 
+
+> k
+
+be its sampled vector. We use the exact normalized residual to combine the K trajectories: 
+
+wk = exp[ −f (b(T ) 
+
+> k
+
+; ξ)/τ w]
+
+PKk′=1 exp[ −f (b(T ) 
+
+> k′
+
+; ξ)/τ w] , (31) 
+
+¯qj =
+
+> K
+
+X
+
+> k=1
+
+wkqk,j . (32) Because f is normalized by Nr σ2, the complex-Gaussian likelihood satisfies p(y | b, H) ∝ exp[ −Nr f (b; ξ)] . Con-sequently, τw = 1 /N r is the physically matched value in (31); any other value is an explicit likelihood-tempering choice rather than a new estimate of the noise variance. The detector posterior and extrinsic LLRs are 
+
+LP 
+
+> j
+
+= log 1 − ¯qj
+
+¯qj
+
+, LE 
+
+> j
+
+= LP 
+
+> j
+
+− LA 
+
+> j
+
+. (33) This is a Rao–Blackwellized terminal-mixture estimator: qk,j 
+
+retains the final head’s bit uncertainty instead of replacing it by the sampled bit, while the exact likelihood favors candidates that fit the observation. Only the terminal Bernoulli is Rao– Blackwellized: the mixture weight wk is evaluated at the single sampled vector b(T ) 
+
+> k
+
+rather than as an expectation under the terminal head, so (32) is a likelihood-weighted terminal-marginal mixture rather than a fully marginalized posterior; the two are equal when each trajectory is nearly deterministic. The extrinsic subtraction in (33) is exact for a single mean-field trajectory. With qk,j = sigmoid( anet  
+
+> k,j
+
+− LA 
+
+> j
+
+), (29) gives log((1 − qk,j )/q k,j ) = LA 
+
+> j
+
+− anet  
+
+> k,j
+
+, so the per-trajectory extrinsic −anet  
+
+> k,j
+
+carries only the network evidence and is free of the prior. After the residual-weighted mixture (32), however, the logit of a convex combination of prior-tilted marginals is no longer an affine function of LA 
+
+> j
+
+, and the weights wk themselves depend on LA 
+
+> j
+
+through the sampled vectors. Consequently LE 
+
+> j
+
+= LP 
+
+> j
+
+− LA 
+
+> j
+
+removes the bit’s own prior only approximately, with a residual dependence that shrinks as the trajectories agree. We therefore measure this residual prior dependence, rather than assume it is zero, through the prior-sensitivity diagnostic in Section V-B. 
+
+C. IDD Training Scheme 
+
+The main training difficulty introduced by the soft IDD learning scheme is that the detector input prior (i.e., the feedback from LDPC decoder) at each round is not stationary. As detector parameters evolve across the iterations, the distri-bution of the prior LA,(m) also drifts across IDD rounds. Note that the training scheme for the hard-decision receiver assumes equal prior for every transmitted bit and cannot adapt to the practical IDD settings; Moreover, starting from the random initializations (at all IDD rounds) usually renders unstable convergence and overconfident feedback. To address these issues, we propose the following multi-stage training scheme tailored to the soft IDD learning problem. 
+
+1) Hard-decision initialization: Note that for the hard-decision receiver in Sec. III, the same policy Πθ∗ 
+
+> 0
+
+is recursively adopted at all T transitions. This parameter sharing is useful for learning a stable transition rule, but it also constrains the overall expressive power. In contrast, soft-IDD receiver admits a more expressive construction. We unfold the detector across both the T transition steps and the M IDD rounds [8]. The resulting parameter family ΘS = {θ(m,t )S }m,t is untied, so each layer can adapt to its position in the search and to the reliability of the decoder prior received in its round. Crucially, the hard policy provides the common initialization for every untied soft layer, i.e., 
+
+h
+
+P (m,t ) 
+
+> k
+
+, Z(m,t )
+
+> k
+
+i
+
+= Π θ(m,t )S
+
+
+
+b(m,t −1)  
+
+> k
+
+, Z(m,t −1) 
+
+> k
+
+
+
+,
+
+θ(m,t )S init 
+
+= θ⋆ 
+
+> 0
+
+, m=0 ,...,M −1,t=1 ,...,T .
+
+(34) Parameter sharing is released only after initialization: sub-sequent soft training lets different IDD rounds adapt to in-creasingly informative decoder feedback. This gives a direct continuation from the stable, parameter-efficient hard-decision solver to the higher-capacity iterative soft receiver. 
+
+2) Synthetic-prior training: The detector is next trained without invoking the LDPC decoder. We draw synthetic priors from the classical Gaussian LLR model in [9]. For a sampled reliability σA and εj ∼ N (0 , 1) ,
+
+LA 
+
+> j
+
+= (1 − 2b∗ 
+
+> j
+
+) σ2A
+
+2 + σAεj ,LA 
+
+> j
+
+| b∗ 
+
+> j
+
+∼ N 
+
+
+
+(1 − 2b∗ 
+
+> j
+
+) σ2A
+
+2 , σ 2A
+
+
+
+. (35) Hence the mean has the correct sign for the transmitted bit and its magnitude increases with reliability. In practice, we sample the target a priori mutual information and obtain 
+
+σA = J−1(IA). Covering the required reliability range ex-poses the detector to uninformative, moderate, and confident priors without decoder-induced drift. 
+
+3) In-loop training: The fixed LDPC decoder is inserted in the forward pass, and the exchange in (24)-(26) is unrolled from LA,(0) = 0. The resulting priors are exactly those encountered by the deployed receiver, closing the remaining gap from synthetic-prior training. For training, only the posterior probability from the final transition of each IDD-round network enters the loss. Let Nc6
+
+be the number of coded bits in the interleaved codeword. The round-m posterior BCE is 
+
+L(m)post = − 1
+
+NcNcX
+
+> j=1
+
+b∗ 
+
+> j
+
+log ¯ qm,j + (1 − b∗ 
+
+> j
+
+) log(1 − ¯qm,j ) .
+
+(36) The ultimate soft-IDD training loss is then given by 
+
+Lsoft = 
+
+> M−1
+
+X
+
+> m=0
+
+ωmL(m)post , ωm ≥ 0. (37) The forward pass uses the actual 5G NR LDPC decoder configured according to the Sionna link-level implementation [22]. The module passed to the next detector is the decoder’s 
+
+extrinsic mapping EBP (l) = DBP (l) − l. During backpropa-gation, the straight-through rule is applied to this composite mapping: ∂EBP (l)
+
+∂l ≈ I. (38) The true decoder posterior and the subtraction are therefore both retained in the forward pass, whereas the backward pass copies the gradient through the whole extrinsic module. V. P ERFORMANCE EVALUATION 
+
+A. Simulation Settings 
+
+We consider a downlink MIMO system with perfect CSI available at the receiver. Each channel sample follows the Rayleigh distribution, with [H]ij 
+
+> i.i.d.
+
+∼ CN (0 , 1/N t), and Gray-coded 64-QAM or 256-QAM symbols are normalized to unit average energy. Unless otherwise stated, the L2O framework uses T = 8 transitions, embedding dimension d = 256 ,eight attention heads, feed-forward dimension dff = 256 ,and K = 16 trajectories. One trajectory is initialized by the LMMSE estimate and the remaining trajectories by its randomized perturbations. Residual-only post-processing is disabled so that the reported gain is attributable to the learned transition policy. The hard detector is trained at 20 dB for 10 4 AdamW up-dates with learning rate 10 −4. The residual-to-BER curriculum uses s0 = 10 3 and s1 = 5 × 10 3, and the batch sizes are 64 and 16 for 64-QAM and 256-QAM, respectively. For soft reception, every unrolled detector layer is initialized from the same hard checkpoint according to (34) and then follows the synthetic-prior and decoder-in-the-loop stages in Section IV-C. Soft training uses 7 × 10 3 updates, learning rate 3 × 10 −5, and batch size 16, with K = 32 for 64-QAM and K = 16 for 256-QAM. The coded link uses the 5G NR LDPC implementation in Sionna [22], code rate 1/2, ten belief-propagation iterations, and three IDD rounds. Each codeword packs P = 8 indepen-dently detected MIMO vectors, giving rate-matched codeword lengths of 384 and 512 bits for 64-QAM and 256-QAM, respectively. Every reported SNR point is averaged over at least five random seeds until either 200 frame errors or 10 7
+
+information bits are observed. For the hard detector, we compare LMMSE, QR-domain K-best, OAMP-Net2, RE-MIMO, and SGT [2]–[4]. For soft IDD, the comparisons are soft LMMSE, MMSE-PIC, K-best list-MAP, SGT, and DUIDD [8]. All methods use the same channel realizations, modulation, code, decoder iterations, and SNR definition. Uncoded BER is the primary hard-decision metric. Post-decoding BLER is the primary soft-receiver metric, with information-bit BER, generalized mutual information (GMI), and Brier score used to diagnose the quality of the detector LLRs. Parameter count and batch-one latency are measured under identical hardware, software, precision, and synchro-nization settings; detector and decoder latency are reported separately. 
+
+B. Ablation Studies 
+
+We first isolate the residual-to-BER curriculum at one representative 64-QAM SNR near the BER waterfall. The proposed smooth schedule is compared with residual-only training, BCE-only training, and an abrupt residual-to-BCE switch. For each variant, we report final BER, normalized residual, and the standard deviation over five seeds. For the full model, BER, residual, and normalized Hamming distance between consecutive vectors are also plotted against the tran-sition index. This compact experiment tests both roles of the curriculum: the residual phase should establish a stable search direction, whereas the BCE phase should align the terminal policy with the transmitted bits. Across transitions, a useful learned policy should reduce BER and residual without collapsing immediately to identical trajectories. The soft-receiver ablation is performed at one SNR near the coded waterfall and is summarized in a single table. Starting from the complete three-stage training scheme, we separately (i) remove the hard-checkpoint initialization, (ii) retain hard-style parameter tying across all soft-detector layers after the common initialization, (iii) remove prior tilting from candidate generation, (iv) omit the synthetic-prior stage, (v) omit decoder-in-the-loop fine-tuning, and (vi) stop the gradient at the LDPC decoder instead of using (38). We report BLER after each IDD round together with final-round GMI and Brier score. To check that prior subtraction in (33) does not leave excessive self-information, we additionally vary one bit’s input prior while holding the channel observation and all other priors fixed. We then report the sensitivity of that bit’s extrinsic LLR and the rate at which its sign changes. This targeted test diagnoses the approximation in (33) without requiring a full EXIT characterization. 
+
+C. Overall Performance 
+
+The first main experiment reports uncoded BER versus SNR for 64-QAM and 256-QAM in two panels. This comparison determines whether the learned complete-vector transitions improve upon linear detection and existing neural detectors, and whether they approach the K-best performance obtained with an explicit tree search. The second main experiment reports post-LDPC BLER versus SNR for both modulation orders. Curves after one, two, and three IDD rounds are shown for the proposed receiver; the baselines are shown after the same number of decoder iterations and, when applicable, the same number of 7
+
+detector–decoder exchanges. Final-round information-bit BER and detector GMI are reported in a small companion table. The round-by-round curves directly test whether Bayesian prior-tilted sampling converts decoder feedback into increasingly informative candidate sets rather than merely recalibrating a fixed hard decision. REFERENCES [1] S. Yang and L. Hanzo, “Fifty years of MIMO detection: The road to large-scale MIMOs,” IEEE Commun. Surveys Tuts. , vol. 17, no. 4, pp. 1941-1988, 2015. [2] H. He, C.-K. Wen, S. Jin, and G. Y. Li, “Model-driven deep learning for MIMO detection,” IEEE Trans. Signal Process. , vol. 68, pp. 1702-1715, 2020. [3] K. Pratik, B. D. Rao, and M. Welling, “RE-MIMO: Recurrent and permutation equivariant neural MIMO detection,” IEEE Trans. Signal Process. , vol. 69, pp. 459-473, 2021. [4] J. Hong, L. Liu, X. Bian, W. Wang, and Z. Zhang, “Soft graph Transformer for MIMO detection,” arXiv:2509.12694 , 2025. [5] M. Norimoto, R. Mori, and N. Ishikawa, “Quantum algorithm for higher-order unconstrained binary optimization and MIMO maximum-likelihood detection,” IEEE Trans. Commun. , vol. 71, no. 4, pp. 1926-1940, Apr. 2023. [6] S. Sreedhara, J. Roychowdhury, J. Wabnig, and P. K. Srinath, “MU-MIMO detection using oscillator Ising machines,” in Proc. IEEE/ACM ICCAD , 2023. [7] E. Khalil, H. Dai, Y. Zhang, B. Dilkina, and L. Song, “Learning combinatorial optimization algorithms over graphs,” in Advances in Neural Information Processing Systems , vol. 30, 2017. [8] R. Wiesmayr, C. Dick, J. Hoydis, and C. Studer, “DUIDD: Deep-unfolded interleaved detection and decoding for MIMO wireless sys-tems,” arXiv:2212.07816 , 2022. [9] S. ten Brink, “Convergence behavior of iteratively decoded parallel concatenated codes,” IEEE Trans. Commun. , vol. 49, no. 10, pp. 1727-1737, Oct. 2001. [10] Y. Zhang, X.-Y. Liu, and X. Wang, “A semi-amortized lifted learning-to-optimize masked (SALLO-M) transformer model for scalable and generalizable beamforming,” arXiv preprint arXiv:2510.13077 , 2025. [11] J. Johnston, X.-Y. Liu, S. Wu, and X. Wang, “A curriculum learning approach to optimization with application to downlink beamforming,” 
+
+IEEE Trans. Signal Process. , 2023. [12] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, “Attention is all you need,” in Advances in Neural Information Processing Systems , 2017. [13] E. B. Khalil, H. Dai, Y. Zhang, B. Dilkina, and L. Song, “Learning combinatorial optimization algorithms over graphs,” in Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 30, 2017, pp. 6348–6358. [14] I. Bello, H. Pham, Q. V. Le, M. Norouzi, and S. Bengio, “Neural com-binatorial optimization with reinforcement learning,” arXiv:1611.09940 ,2016. [15] R. J. Williams, “Simple statistical gradient-following algorithms for connectionist reinforcement learning,” Mach. Learn. , vol. 8, pp. 229-256, 1992. [16] J. Schulman, N. Heess, T. Weber, and P. Abbeel, “Gradient estimation using stochastic computation graphs,” in Advances in Neural Information Processing Systems , vol. 28, 2015. [17] M. Stern, N. Shazeer, and J. Uszkoreit, “Blockwise parallel decoding for deep autoregressive models,” in Advances in Neural Information Processing Systems , vol. 31, 2018. [18] Y. Wu, W. Song, Z. Cao, J. Zhang, and A. Lim, “Learning improvement heuristics for solving routing problems,” arXiv:1912.05784 , 2019. [19] C. Studer and H. B¨ olcskei, “Soft-input soft-output sphere decoding,” in 
+
+Proc. IEEE Int. Symp. Inf. Theory , 2008, pp. 2007-2011. [20] D. D. Lin and T. J. Lim, “A variational inference framework for soft-in-soft-out detection in multiple access channels,” arXiv:0809.0032 , 2008. [21] R. Wiesmayr, G. Marti, C. Dick, H. Song, and C. Studer, “Bit error and block error rate training for ML-assisted communication,” in Proc. IEEE ICASSP , 2023. [22] J. Hoydis, S. Cammerer, F. Ait Aoudia, A. Vem, N. Binder, G. Marcus, and A. Keller, “Sionna: An open-source library for next-generation physical layer research,” arXiv:2203.11854 , 2022. [23] T. Gneiting and A. E. Raftery, “Strictly proper scoring rules, prediction, and estimation,” J. Amer. Stat. Assoc. , vol. 102, no. 477, pp. 359–378, 2007.

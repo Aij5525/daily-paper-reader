@@ -1,0 +1,1099 @@
+Title: Standard-Compliant Neuromorphic Integrated Sensing and Communications Aided by an Intelligent Reflecting Surface
+
+URL Source: https://arxiv.org/pdf/2608.13985v1
+
+Published Time: Mon, 17 Aug 2026 00:31:39 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Standard-Compliant Neuromorphic Integrated Sensing and Communications Aided by an Intelligent Reflecting Surface 
+
+Jiho Park, Graduate Student Member, IEEE , Jiechen Chen, Member, IEEE , Joonhyuk Kang, Member, IEEE , and Osvaldo Simeone, Fellow, IEEE 
+
+Abstract —Neuromorphic computing enables event-driven, low-power inference and is therefore an attractive technology for jointly carrying out communication, sensing, and processing at resource-constrained wireless devices. Impulse radio ultra-wideband (IR-UWB) signaling, which is standardized in the IEEE 802.15.4 family and widely deployed for ranging and short-range communication, is naturally matched to neuromorphic processing, since both operate through sparse temporal events, or spikes. In this context, this paper studies a standard-compliant neuromorphic integrated sensing and communications (N-ISAC) system in which a single spiking neural network (SNN) receiver jointly demodulates digital data and detects a passive radar target directly from a common IEEE 802.15.4z high-rate-pulse-repetition-frequency (HRP) UWB waveform. Unlike prior N-ISAC work, which assumed a basic pulse-position-modulation interface and a simplified multipath channel, we consider the full standardized physical layer together with a realistic ray-traced channel aided by a reconfigurable intelligent surface (RIS). The model accounts for the frequency-selective response of a metamaterial-based RIS, which disperses the wideband IR-UWB pulses and can degrade both communication and sensing. Numerical experiments quantify the impact of RIS frequency selectivity on UWB ISAC and characterize the trade-off between ISAC performance and receiver computation energy. 
+
+Index Terms —Neuromorphic computing, spiking neural net-works, integrated sensing and communications, intelligent reflect-ing surface. 
+
+I. I NTRODUCTION 
+
+Neuromorphic computing is an emerging brain-inspired technology that processes information through sparse, asyn-chronous spikes rather than dense clocked arithmetic. Imple-mented via spiking neural networks (SNNs), neuromorphic processors carry out computation only when input events oc-cur, enabling event-driven inference with low latency and low energy consumption at resource-constrained edge devices [1], 
+
+This work was partly supported by the Institute of Information & Com-munications Technology Planning & Evaluation (IITP)-ITRC (Information Technology Research Center) grant funded by the Korea government (MSIT) (IITP-2026-RS-2020-II201787, contribution rate: 50%); in part by the Institute of Information & Communications Technology Planning & Evaluation (IITP) under 6G·Cloud Research and Education Open Hub grant funded by the Korea government (MSIT) (IITP-2026-RS-2024-00428780, contribution rate: 50%). 
+
+(Corresponding authors: Joonhyuk Kang and Osvaldo Simeone.) 
+
+J. Park and J. Kang are with the Department of Electrical Engineering, Korea Advanced Institute of Science and Technology, Daejeon 34141, South Korea (email: phw5150@kaist.ac.kr; jhkang@ee.kaist.ac.kr). J. Chen is with the Department of Engineering, King’s College London, London, WC2R 2LS, UK (email: jiechen.chen@kcl.ac.uk). O. Simeone is with the Institute for Intelligent Networked Systems, Northeastern University London, One Portsoken Street, London, E1 8PH, UK (email: o.simeone@northeastern.edu). 
+
+[2]. This efficiency has motivated the integration of neuromor-phic computing with Impulse radio ultra-wideband (IR-UWB) transmission, giving rise to neuromorphic communications , in which sparse IR pulses are processed natively by an SNN for low-power remote inference and semantic communication in wireless Internet-of-Things (IoT) networks [3], [4]. The appeal of this approach stems from a structural match between IR signaling and neuromorphic processing, as both operate through sparse temporal events and thereby support efficient event-driven inference [3], [5], [6]. 
+
+Fig. 1. Illustration of the neuromorphic ISAC (N-ISAC) system under study in which a neuromorphic receiver equipped with a spiking neural network (SNN) performs simultaneous data demodulation and target detection. The system implements a standard-compliant UWB radio interface (see Fig. 2), and the channel is modeled via ray tracing (RT) while accounting for the presence of a RIS. 
+
+IR-UWB signaling also provides a suitable waveform for integrated sensing and communication (ISAC) because of its high temporal resolution, low power consumption, and low implementation cost. In addition to their original use in radar sensing systems, IR-UWB signals have been extensively studied for communication applications [7]. In particular, com-munication and ranging functionalities have been standardized within the IEEE 802.15.4 family of low-rate wireless networks [8]–[10]. IEEE 802.15.4z-compliant secure fine-ranging radios are now embedded in mainstream smartphones, automotive digital keys, and consumer tags for accurate localization and access control, making standard-compliant UWB transceivers a high-volume, low-power platform on which neuromorphic ISAC could be deployed at scale. Most recently, the IEEE 802.15.4ab amendment has reflected the emerging trend of incorporating sensing capabilities into conventional communi-cation and ranging applications [11]. arXiv:2608.13985v1 [eess.SP] 14 Aug 2026 2
+
+Reconfigurable intelligent surfaces (RISs) have in parallel emerged as a key enabler for next-generation communication and sensing, since they can shape the propagation environment by establishing controllable non-line-of-sight (NLoS) links, improving coverage, and enhancing target illumination for ISAC [12]. However, the frequency-dependent response of the metamaterial used in the design of the RIS must be taken into account for wideband transmissions such as IR-UWB [13]. Away from the resonance frequency, the RIS imposes amplitude attenuation and phase dispersion that broaden and distort the received pulses, potentially degrading both the time-of-arrival resolution required for sensing and the demodulation of the data symbols. Hence, while an RIS can be beneficial by creating additional reflected paths, its inherent dispersion may be detrimental to standard-compliant UWB ISAC and must be explicitly modeled. To preserve electromagnetic consistency, ray-tracing-based RIS implementations have been adopted to capture NLoS propagation with large deflection angles in urban environments [14], [15]. In particular, the macroscopic reradiation models in [16], [17] have been integrated into the open-source Sionna Ray Tracing (RT) framework to realize a physically consistent RIS model in building-canyon environments, in which the RIS is not treated as a simple reflecting object [18]. Motivated by these observations, the goal of this paper is to study a standard-compliant neuromorphic ISAC system oper-ating over a realistic RIS-aided channel. As illustrated in Fig. 1, we adopt the full IEEE 802.15.4z high-rate-pulse-repetition-frequency (HRP) UWB physical layer at the transmitter, a ray-traced ISAC channel that includes a frequency-selective meta-material RIS, and an SNN receiver that jointly performs data demodulation and target detection while explicitly controlling its spike-driven computation energy. 
+
+A. Related Work 
+
+The N-ISAC concept was introduced in [5], where a com-mon IR waveform and a single SNN receiver were shown to support efficient online data decoding and radar target detection, revealing synergies and trade-offs between the two functionalities. That work, however, assumed a basic pulse-position-modulation (PPM) interface and a simplified statis-tical multipath channel, and did not consider standardized signaling or RIS-aided propagation. More broadly, SNN-based receivers have been developed for digital communication, including spiking demodulation and detection [3], spiking belief-propagation decoding of short channel codes [19], and spiking receiver architectures derived from neural counterparts [20], while event-driven semantic communication and split inference have been explored for remote and low-power appli-cations [4], [21]. These works confirm the energy advantages of neuromorphic processing but target communication or infer-ence in isolation rather than standard-compliant joint sensing and communication. A complementary line of research has investigated the de-coupling of communication and sensing information in UWB-ISAC systems, where both data demodulation and target or environment sensing rely on accurate time-of-arrival (ToA) estimation of nanosecond-scale impulses. As a result, ToA information is coupled with the modulated data symbols in the delay or phase domains, depending on the UWB mod-ulation format, such as PPM or binary phase-shift keying (BPSK). Decoupling strategies have been proposed using various methodologies [22]–[24]. For example, for PPM-based UWB-ISAC, simultaneous channel sensing and delay-Doppler sensing can be achieved via differential demodulation with soft-information enhancement [23]. On the propagation side, accurate RIS modeling for wide-band systems has motivated frequency-selective element re-sponses, such as the Lorentzian model that links the reflection coefficient to the resonant behavior of the metamaterial [13], as well as ray-traced and physically consistent reradiation models [16]–[18]. In parallel, 3GPP has standardized ISAC channel descriptions that decompose the received signal into back-ground and target-induced components and that concatenate target-illumination and target-receiver links with direction-dependent radar cross-section terms [25]–[27]. Finally, channel-adaptive neural receivers based on hyper-networks, which generate the parameters of a second network from observed pilots, have been used to acquire channel state information and to adapt receivers to varying channels [4], [28]–[30]. To the best of our knowledge, none of these strands has been combined into a standard-compliant neuromorphic ISAC receiver operating over a frequency-selective RIS-aided channel. 
+
+B. Contributions 
+
+This paper studies a standard-compliant N-ISAC system in which a single SNN receiver jointly demodulates digital data and detects a passive radar target from an IEEE 802.15.4z HRP UWB waveform propagating over a ray-traced, RIS-aided ISAC channel. In contrast to the original N-ISAC formulation [5], which assumed a basic PPM interface and a simplified multipath model, the present work addresses a fully standardized radio interface and a realistic dispersive propa-gation environment. The main contributions are summarized as follows. 
+
+• Standard-compliant neuromorphic ISAC. We develop an N-ISAC system based on the complete IEEE 802.15.4z HRP UWB physical layer (see Fig. 2). This replaces the basic PPM signaling and simplified channel of [5] with standardized framing, enabling neuromorphic ISAC to be assessed under a commercially relevant interface. 
+
+• Frequency-selective RIS-aided ISAC channel. We adopt a ray-traced ISAC channel, aligned with 3GPP TR 38.901 ISAC modeling, that comprises background, dynamic-clutter, and target-induced components with both direct and RIS-assisted target-interaction paths. The model incorporates a frequency-selective metamaterial RIS through a resonance-normalized Lorentzian response. This model allows us to analyze how the resulting dispersion broadens the IR-UWB pulses and affects joint communication and sensing over the UWB band. 
+
+• Preamble-driven channel-adaptive SNN receiver. Unlike [5], which adopted a joint training approach [30], we propose a neuromorphic receiver in which a hypernetwork generates per-frame neuron-wise scaling coefficients for the SNN backbone directly from the synchronized standardized SYNC preamble 3         
+
+> Fig. 2. High-rate pulse repetition frequency (HRP) UWB frame structure compliant with IEEE 802.15.4z [10]. The information-bit sequence is encoded and mapped to burst-position modulation and binary phase-shift keying (BPM-BPSK) payload symbols, and each transmitted frame consists of a synchronization header (SHR) followed by a PHY payload.
+
+observations (see Fig. 1). This provides adaptation to current channel conditions without explicit channel estimation, inver-sion, or equalization. 
+
+• Energy-aware training and computation-energy model. We formulate an energy-aware training objective that jointly op-timizes communication and sensing performance while asparsity-promoting regularizer controls the spike-driven synap-tic activity, exposing a tunable trade-off between ISAC perfor-mance and event-driven computation energy. 
+
+• Comprehensive evaluation. Through extensive experiments with a standard-compliant transmitter and a ray-traced RIS-aided channel, we demonstrate the gains of preamble-driven channel adaptation, characterize the impact of RIS frequency selectivity on UWB ISAC, study the role of the standardized payload parameters, and assess the energy efficiency of the proposed neuromorphic receiver. II. S YSTEM MODEL 
+
+As shown in Fig. 1, we study a neuromorphic integrated sensing and communication (N-ISAC) system [5], which con-sists of a single-antenna impulse radio ultra-wideband (UWB) transmitter (Tx), a single-antenna receiver (Rx), and a passive target. The same impulse radio UWB waveform is used for 
+
+digital communication and radar sensing of the passive target at the Rx, which carries out both tasks using a single SNN [5]. In contrast to the prior N-ISAC study in [5], which introduced N-ISAC assuming a basic PPM scheme and a simplified multipath channel model, here we adopt a standard-compliant radio interface [10] and we consider a realistic ray-traced channel model aided by a reconfigurable intelligent surface (RIS). 
+
+A. UWB Transmission 
+
+In the considered system, the Tx conveys a D-bit infor-mation sequence x = [ x0, x 1, . . . , x D−1], with xd ∈ { 0, 1},to the Rx during each transmitted frame. As illustrated in Fig. 2, we adopt the IEEE 802.15.4z high-rate pulse repe-tition frequency (HRP) UWB PHY as the standard-compliant radio interface under study. The information bits are encoded through a forward error correction (FEC) chain and mapped to burst-position modulation (BPM) and binary phase-shift key-ing (BPSK) payload symbols. The resulting IR-UWB frame consists of a synchronization header (SHR) followed by a PHY payload: the SHR provides repeated known waveform observations for synchronization and frame-wise channel-dependent processing, while the PHY payload provides coded  
+
+> Fig. 3. HRP UWB frame and symbol structure from IEEE 802.15.4z [10]. The SHR contains SYNC and SFD preamble symbols generated from a spread ternary preamble code, while the PHY payload is composed of BPM-BPSK symbols. In each payload symbol, the BPM bit selects the active burst interval and the BPSK bit determines the burst polarity.
+
+BPM-BPSK observations for joint data decoding and target detection. Within the HRP UWB frame, the mean pulse repetition fre-quency (PRF) controls the temporal density of the transmitted impulses through standard-defined parameters. In the SHR, the mean PRF is set by the spreading length δp, which determines the chip spacing of the known preamble code and hence the temporal structure of the preamble observation. In the PHY payload, the mean PRF determines the temporal density of the transmitted pulses and, together with the payload mode, determines the symbol duration and bit rate [10]. As illustrated in Fig. 3, the SHR is composed of a SYNC field and a start-of-frame delimiter (SFD), both of which are constructed from known preamble symbols. We define Mp as the total number of SHR preamble symbols. Each preamble symbol is generated from a standard-defined ternary preamble code a = [ a0, . . . , a Cp−1]T , where al ∈ {− 1, 0, +1 } and Cp is the preamble code length. The resulting preamble symbols are weighted by the polarity sequence e = [ e0, e 1, . . . , e Mp−1]T ,where em = 1 for m = 0 , 1, . . . , M sync  
+
+> p
+
+− 1, and em ∈{− 1, 0, +1 } for m = M sync  
+
+> p
+
+, . . . , M p − 1. The subsequence 
+
+{em}Mp−1  
+
+> m=Msync
+> p
+
+is referred to as the SFD sequence. The pream-ble code a is spread by inserting δp − 1 zero-valued chips between consecutive ternary code entries, so that the total number of chips per preamble symbol is given by N pc = Cpδp
+
+[10]. Accordingly, the transmitted SHR waveform is modeled as 
+
+sp(t) = 
+
+> Mp−1
+
+X
+
+> m=0
+
+emCp−1
+
+X
+
+> l=0
+
+alp  t − mT p 
+
+> sym
+
+− lδ pTc
+
+ , (1) where p(t) is the pulse waveform with bandwidth B = 1 /T c,
+
+Tc is the chip interval, and T p 
+
+> sym
+
+= N pc Tc is the preamble symbol duration. For the PHY payload, the information sequence x is pro-cessed by the standard-aligned FEC chain shown in Fig. 2. For payload modes with Viterbi rate 0.5, the Reed-Solomon (RS) coded bits are passed through a convolutional encoder before BPM-BPSK mapping. For modes with Viterbi rate 1.0,4
+
+the convolutional encoder is bypassed, and the RS coded bits are directly mapped to BPM and BPSK bits. Let c = [ c0, c 1, . . . , c 2Md−1] denote the coded payload-bit sequence produced by this FEC chain, where Md is the number of BPM-BPSK payload symbols. As illustrated in Fig. 3, the two coded bits assigned to the mth BPM-BPSK symbol are given by d(0)  
+
+> m
+
+= c2m and d(1)  
+
+> m
+
+= c2m+1 . The BPM bit d(0)  
+
+> m
+
+∈ { 0, 1} selects the active burst interval, whereas the BPSK bit d(1)  
+
+> m
+
+∈ { 0, 1} determines the burst polarity. Let 
+
+ζm,n ∈ {− 1, +1 } denote the chip-sign coefficient applied to the nth chip of the active burst in the mth payload symbol, and let ηm ∈ { 0, 1, . . . , N dg − 1} denote the corresponding burst-hopping address within the selected BPM interval. Ac-cordingly, the transmitted payload waveform is modeled as [10] 
+
+sd(t) = 
+
+> Md−1
+
+X
+
+> m=0
+
+(−1) d(1)   
+
+> m
+> Ndb−1
+
+X
+
+> n=0
+
+ζm,n 
+
+× p
+
+
+
+t − mT d 
+
+> sym
+
+−
+
+
+
+2d(0)  
+
+> m
+
+N dg N db + ηmN db + n
+
+
+
+Tc
+
+
+
+,
+
+(2) where T d 
+
+> sym
+
+= N dc Tc is the payload symbol duration. The chip-sign sequence and burst-hopping address are generated according to the HRP UWB scrambling and burst-hopping rules. The burst-hopping sequence randomizes the active burst location within the selected BPM interval, whereas the chip-sign sequence controls the polarity of the chips in the active burst. The pulse p(t) is modeled using the standard-aligned im-pulse response of an eighth-order Butterworth filter with 3-dB bandwidth B ≃ 500 MHz [10]. For each field f ∈ { p, d }, we impose the symbol-level energy constraint Efs , where Eps and 
+
+Eds are the maximum symbol energies for the SHR preamble symbols and payload symbols, respectively. 
+
+B. Frequency-Selective RIS-Aided Channel 
+
+The modulated waveform sf (t), with f ∈ { p, d }, is trans-mitted to the Rx through a RIS-assisted multipath channel. The channel depends on the possible presence of a radar target at a known delay cell. Let v ∈ { 0, 1} denote the target state, where 
+
+v = 0 and v = 1 correspond to the absence and presence of the target, respectively. Following the standard ISAC channel description in 3GPP TR 38.901 [25], the propagation channel is decomposed as 
+
+hv (t) = hbg (t) + vh tar (t), (3) where hbg (t) accounts for target-unrelated background clutter, and htar (t) accounts for target-induced echoes. To account for static and dynamic clutter in the multipath environment, we adopt a hybrid model for the background channel [31] that is implemented via RT. The static clutter is induced by fixed interaction objects, such as buildings, ground, and other stationary scatterers, whereas the dynamic clutter represents time-varying scattering due to moving objects. Accordingly, the background channel is modeled as 
+
+hbg (t) = 
+
+s
+
+Kbg 
+
+Kbg + 1  
+
+> PD
+> bg
+
+X
+
+> p=1
+
+αD
+
+> bg ,p
+
+δ t − τ D
+
+> bg ,p
+
+
+
++
+
+s
+
+1
+
+Kbg + 1  
+
+> PD
+> bg
+
+X
+
+> p=1
+> Bbg
+
+X
+
+> b=1
+
+αD
+
+> bg ,p
+
+√wp,b ej(θp,b +2 πf c∆τp,b )
+
+× δ t − τ D 
+
+> bg ,p
+
+− ∆τp,b 
+
+ +
+
+> N
+
+X
+
+> n=1
+
+αR
+
+> bg ,n
+
+ψ t − τ R
+
+> bg ,n
+
+ .
+
+(4) where the three terms, representing the static background component, the dynamic-clutter component, and the RIS-assisted component, respectively, are defined by the following quantities: the number of static paths P D
+
+> bg
+
+; the number of stochastic sub-rays generated from each static path Bbg ; and the number of RIS elements N ; the complex amplitude and delay {αD
+
+> bg ,p
+
+, τ D
+
+> bg ,p
+
+} of the pth static path; the corresponding pair {αR
+
+> bg ,n
+
+, τ R
+
+> bg ,n
+
+} for the RIS-assisted paths associated with the nth RIS element; the local excess-delay perturbation and random scattering phase ∆τp,b and θp,b of the bth stochastic sub-ray generated from the pth non-RIS background path, respectively; the weights wp,b ≥ 0, satisfying PBbg  
+
+> b=1
+
+wp,b = 1 ,that account for the power of the stochastic sub-rays; the deterministic-to-stochastic power ratio Kbg of the non-RIS background channel. The RIS response ψ(t) is described later in this section. Following the 3GPP-aligned ISAC target-channel model [26], [27], the target-induced channel htar (t) in (3) is mod-eled through two target-interaction classes, namely the direct-incident class, denoted by D, and the RIS-incident class, denoted by R. For each path, the radar cross section (RCS) is decomposed into a mean term, a deterministic directional-pattern term, and a residual fluctuation term [26]. Specifically, we write σDp,q = σDmσDd,p,q σDf and σRp,n = σRmσRd,p,n σRf , where 
+
+σbm, σbd, ·, and σbf denote the mean RCS level, direction-dependent term, and residual fluctuation term for b ∈ { D, R },respectively. The path-pair-dependent directional term ac-counts for the incident and scattering directions at the target [27]. The corresponding target-interaction factors are given by 
+
+ξD 
+
+> tar ,p,q
+
+=
+
+q
+
+4πσ Dp,q /λ and ξR 
+
+> tar ,p,n
+
+=
+
+q
+
+4πσ Rp,n /λ , where λ is the carrier wavelength [26]. With these definitions, the target-induced channel is mod-eled as 
+
+htar (t) =  
+
+> PD
+> out
+
+X 
+
+> p=1
+> PD
+> in
+
+X
+
+> q=1
+
+ξD 
+
+> tar ,p,q
+
+αD
+
+> out ,p
+
+αD 
+
+> in ,q
+
+δ  t − τ D 
+
+> out ,p
+
+− τ D
+
+> in ,q
+
+
+
++ 
+
+> PD
+> out
+
+X
+
+> p=1
+> N
+
+X
+
+> n=1
+
+ξR
+
+> tar ,p,n
+
+αD
+
+> out ,p
+
+αR
+
+> in ,n
+
+ψ  t − τ D 
+
+> out ,p
+
+− τ R
+
+> in ,n
+
+ ,
+
+(5) where the first term represents the direct-incident target echo, while the second term represents the RIS-incident target echo shaped by the dispersive RIS response. The latter is accounted for by the Lorentzian model [13] 
+
+Ψ( ω) = 
+
+ ω
+
+2πf c
+
+2 jκ (2 πf c)(2 πf c)2 − ω2 + jκω , (6) 5
+
+where κ is the damping factor. The quality factor Q ≜ 2πf c/κ 
+
+determines the bandwidth of the resonant response. Smaller values of Q yield flatter frequency responses, while larger values of Q yield narrower resonant profiles [13]. The cor-responding time-domain dispersive response is given by the inverse Fourier transform ψ(t) = F−1{Ψ( ω)}. In (5), the symbols P D 
+
+> in
+
+and P D 
+
+> out
+
+denote the numbers of resolvable non-RIS incoming and outgoing target paths, respectively; the pair 
+
+{αD 
+
+> in ,q
+
+, τ D 
+
+> in ,q
+
+} denotes the complex amplitude and delay of the 
+
+qth non-RIS incoming Tx-target path; {αR
+
+> in ,n
+
+, τ R
+
+> in ,n
+
+} denotes the corresponding pair for the RIS-assisted incoming Tx-RIS-target path associated with the nth RIS element; the pair 
+
+{αD
+
+> out ,p
+
+, τ D
+
+> out ,p
+
+} denotes the complex amplitude and delay of the pth outgoing target-Rx path. 
+
+C. Received Signal Processing 
+
+For field f ∈ { p, d }, the signal obtained by the single-antenna Rx is given by 
+
+yf (t) = sf (t) ∗ hv (t) + zf (t), (7) where sf (t) is the transmitted waveform of field f ; hv (t)
+
+is the effective ISAC channel in (3); zf (t) is additive white Gaussian noise with power spectral density N0; and ∗ denotes convolution. The channel is assumed to remain constant over one transmitted frame. Sampling signal (7) on the UWB chip grid at chip rate 1/T c
+
+yields the discrete-time received sequence yi,f ≜ yf (iT c) and the corresponding transmitted chip sequence si,f ≜ sf (iT c)
+
+for i = 0, 1, . . . , M f N fc − 1, where Mf and N fc denote the number of symbols and the number of chips per symbol in field f , respectively. The samples in the mth symbol interval are collected as ym,f = {yi,f }i∈I fm , where Ifm ≜
+
+{mN fc , . . . , (m + 1) N fc − 1}.For a maximum excess delay Th, the effective channel has Lh = ⌈Th/T c⌉ taps and is represented by hv =[hv (0) , h v (Tc), . . . , h v (( Lh − 1) Tc)] T . Accordingly, the ith chip-rate sample of field f ∈ { p, d } is written as 
+
+yi,f = hTv si,f + zi,f , (8) where si,f = [ si,f , s i−1,f , . . . , s i−Lh+1 ,f ]T stacks the current and Lh −1 preceding transmitted chip samples, with the causal initialization si,f = 0 for i < 0. The additive noise sample is given by zi,f = zf (iT c) ∼ CN (0 , N 0/T c), where N0 denotes the noise power spectral density. For performance evaluation, we define the signal-to-noise ratio (SNR) after propagation through the channel. Since the AWGN sample in (8) has variance N0/T c, the average received per-chip SNR of field f ∈ { p, d } is given by 
+
+γfc ≜ E[|hTv si,f |2]
+
+N0/T c
+
+, (9) where the expectation is taken over the transmitted symbols, channel realizations, and target states used for evaluation. In conventional coherent IR-UWB processing, the preamble timing is first acquired, the received SYNC samples are aligned with the known ternary preamble code, and the SFD is detected to determine the payload boundary [32], [33]. Following this Rx operation, we assume that the SHR timing and payload boundary are available at the Rx. Accordingly, the synchronized SYNC observations {ym,p }M sync   
+
+> p−1
+> m=0
+
+and the payload observations {ym,d }Md−1 
+
+> m=0
+
+constitute the receiver-side interface for both the preamble-based coherent front end described in Section III and the neuromorphic Rx introduced in Section IV. III. P REAMBLE -B ASED COHERENT UWB F RONT -E ND 
+
+We next describe a preamble-based coherent UWB front end that uses the standardized SHR structure for channel-dependent receiver processing. In HRP UWB systems, the known SYNC field provides repeated preamble observations after timing acquisition and SFD detection, and these obser-vations can be used to form correlation statistics, channel estimates, and equalized payload samples [32]–[34]. Since the SYNC field of the SHR waveform in (1) consists of repeated unit-polarity preamble symbols, the waveform of one known SYNC symbol is written as 
+
+rp(t) = 
+
+> Cp−1
+
+X
+
+> l=0
+
+alp (t − lδ pTc) , (10) where al ∈ {− 1, 0, +1 } is the standard-defined ternary preamble code. Sampling this waveform on the chip grid gives ri,p ≜ rp(iT c) for i = 0, . . . , N pc − 1. Since all SYNC symbols have unit polarity, the known SYNC chip sequence is obtained by repeating the one-symbol template 
+
+rp = [ r0,p , r 1,p , . . . , r N pc −1,p ]T over the M sync  
+
+> p
+
+SYNC sym-bols. In particular, the transmitted chip in the mth SYNC symbol is given by smN pc +i,p = ri,p .Let Sp ≜ M sync  
+
+> p
+
+N pc , and collect the synchronized SYNC samples as ys = [ y0,s , y 1,s , . . . , y Sp−1,s ]T . The transmission of the known SYNC sequence through the effective channel produces a channel-sensing observation that can be expressed in convolution-matrix form as 
+
+ys = Pshs + zs, (11) where hs = [h0,s , h 1,s , . . . , h N pc −1,s ]T denotes the ef-fective chip-domain channel response represented over one preamble-symbol observation interval, and zs =[z0,s , z 1,s , . . . , z Sp−1,s ]T is the corresponding noise vector. The convolution matrix Ps ∈ CSp×N pc constructed from the complete known SYNC chip sequence uses entries [Ps]i,n =
+
+si−n,p , with si−n,p = 0 whenever the chip index i−n falls out-side the SYNC field. Based on the channel-sensing observation in (11), the correlation vector between the synchronized SYNC samples and the known SYNC sequence is defined as cs =
+
+PHs ys, where (·)H denotes Hermitian transpose. Specifically, the nth element of cs is given by csn = PSp−1 
+
+> i=0
+
+s∗
+
+> i−n,p
+
+yi,s ,where (·)∗ denotes complex conjugation. Following the conventional UWB channel estimators, we consider least-squares (LS) and statistical linear minimum mean-square error (LMMSE) channel estimation, with empir-ical channel mean and covariance estimated offline from the training channel realizations [34]. For the channel-estimation-based reference front ends, a causal payload convolution matrix ˆHd ∈ CN dc ×N dc is constructed from either the LS or LMMSE channel estimate. Specifically, the matrix is formed 6
+
+from the estimated channel coefficients that contribute within one BPM-BPSK payload-symbol interval. We adopt the con-ventional MMSE equalizer for UWB communication systems [34]. IV. N EUROMORPHIC ISAC R ECEIVER 
+
+We now describe the proposed neuromorphic Rx for the RIS-aided N-ISAC system described in Section II. Building on the same standardized SHR observations used by the coherent front end in Section III, the proposed Rx replaces explicit channel estimation and payload equalization with preamble-driven hypernetwork adaptation. Prior to hypernetwork adap-tation and payload processing, the synchronized SYNC and payload observations are sparsified in the chip domain as described in Section IV-B. As illustrated in Fig. 1, the Rx implements an SNN that adapts to the current channel con-dition via a hypernetwork operating on the sparsified SYNC observation. The channel-adapted SNN processes the sparsi-fied BPM-BPSK payload observations and has task-specific readouts that produce coded-bit soft information for standard-aligned FEC decoding, as well as a frame-level target-presence indicator. In addition to optimizing communication and sens-ing performance, the proposed Rx design explicitly controls the sparsity of its spike-driven synaptic activity, enabling a tunable trade-off between joint ISAC performance and event-driven computation energy. 
+
+A. Spiking Neural Network Backbone 
+
+For the SNN backbone, we adopt the standard discrete-time spike response model (SRM) to describe the neuron dynamics [1]. To elaborate, let νk,m ∈ { 0, 1} denote the output spike of neuron k at time step m, where νk,m = 1 represents spike emission and νk,m = 0 an idle state. Each neuron maintains a membrane potential uk,m , which evolves as a function of the spikes received from presynaptic neurons and of its own past spikes. Accordingly, denoting (·)m as the mth element of the argument signal, the membrane potential is modeled as [4] 
+
+uk,m = X
+
+> j∈P k
+
+wk,j (α ∗ νj )m + ( β ∗ νk)m , (12) where Pk is the set of presynaptic neurons connected to neuron 
+
+k; wk,j is the synaptic weight from neuron j to neuron k;and ∗ denotes convolution over the time index. The filter α
+
+denotes the synaptic response to incoming spikes, while the filter β denotes the feedback response induced by the spike history of neuron k. Following the standard SRM description, the filter α accounts for temporal integration of presynaptic spikes, whereas the filter β models the reset or refractory effect after spike emission [1]. In the proposed implementation, we use a first-order leaky integrate-and-fire (LIF) realization of the SRM. Specifically, the membrane potential of hidden neuron k is updated over the payload-symbol index m as [20] 
+
+uk,m = ηuuk,m −1 + X
+
+> j∈P k
+
+wk,j νj,m + bk − ϑν k,m −1, (13) where ηu ∈ [0 , 1) is the membrane decay factor; wk,j is the synaptic weight from presynaptic neuron j to neuron k; νj,m is the spike emitted by presynaptic neuron j at step m; bk is the bias current; and ϑ is the firing threshold. The first term in (13) implements the leaky memory of the membrane potential, the second and third terms define the instantaneous synaptic input current, and the last term implements the reset-by-subtraction induced by the previous spike of neuron k.A spike is generated when the membrane potential crosses a threshold ϑ, i.e., 
+
+νk,m = Θ( uk,m − ϑ), (14) where Θ( ·) is the Heaviside step function. Accordingly, the hidden spiking neurons perform nonlinear event-driven pro-cessing while preserving temporal memory across successive received observations. Since synaptic computations are acti-vated by presynaptic spike events, the computational activity of the SNN Rx depends on the spikes generated while pro-cessing the payload observations. 
+
+B. Chip-Domain Sparse Input Encoding 
+
+Preamble-driven adaptation and neural payload processing operate on continuous-valued chip-rate observations. Although the transmitted HRP UWB waveform is pulse based, the synchronized observations are generally dense owing to pulse shaping, multipath propagation, RIS-induced dispersion, and additive noise. We therefore sparsify the SYNC and pay-load observations prior to hypernetwork adaptation and neu-ral inference. Magnitude-based sparsification suppresses low-magnitude entries while retaining the dominant observations corresponding to the most relevant information about the tim-ing of the transmitted pulses [35]. Following ratio-controlled magnitude sparsification [36], the sparsification threshold is selected to retain a prescribed fraction of the largest-power chips. Since the SYNC field consists of repeated unit-polarity preamble symbols, the corresponding observations are first coherently combined as 
+
+yp =  
+
+> Msync
+> p−1
+
+X
+
+> m=0
+
+ym,p , (15) where, for relative chip position n = 0 , . . . , N pc − 1, the nth entry of yp is given by [yp]n = PM sync   
+
+> p−1
+> m=0
+
+ymN pc +n,p . Let 
+
+ρ ∈ (0 , 1] denote the prescribed fraction of retained chips. The SYNC sparsification threshold τp(ρ) denotes the ⌈ρN pc ⌉th largest among the chip powers |[yp]n|2. The sparse SYNC observation at relative chip position n is given by 
+
+[ysp]n =
+
+(
+
+[yp]n, |[yp]n|2 ≥ τp(ρ),
+
+0, otherwise , (16) where ysp ∈ CN pc retains the original complex values at the selected chip positions. For the mth payload symbol, the sparsification threshold 
+
+τm,d (ρ) is the ⌈ρN dc ⌉th largest among the N dc received chip powers |yi,d |2 for i ∈ I dm. The corresponding sparse sample at chip index i ∈ I dm is given by 
+
+ysi,d =
+
+(
+
+yi,d , |yi,d |2 ≥ τm,d (ρ),
+
+0, otherwise , (17) 7
+
+where ysm,d = {ysi,d }i∈I dm ∈ CN dc collects the sparse chip observations corresponding to the mth payload symbol. The same retained fraction ρ is used for the SYNC and payload observations, while the corresponding thresholds are evaluated separately for the combined SYNC observation and for each payload symbol. Setting ρ = 1 recovers the unsparsified observations. 
+
+C. Hypernetwork-Based Channel Adaptation 
+
+In a manner similar to [4], [29], in order to adapt the SNN Rx to the frame-dependent effective ISAC channel in (3), we introduce a hypernetwork that controls the synaptic weights of the SNN Rx based on the sparsified SYNC observation. Hy-pernetworks are neural networks whose outputs determine the parameters or parameter transformations of another network [28]. We first construct a real-valued representation of the spar-sified SYNC observation ysp in (16). The corresponding real-valued hypernetwork input is 
+
+¯ysp = ℜ{ ysp}T , ℑ{ ysp}T T ∈ R2N pc , (18) where ℜ{·} and ℑ{·} denote the element-wise real and imag-inary parts, respectively. Let N RL denote the number of inter-layer connections in the SNN Rx, and let N Rℓ denote the number of units in its 
+
+ℓth layer. For the connection from layer ℓ to layer ℓ + 1 ,let ˜WRℓ ∈ RN Rℓ+1 ×N Rℓ denote the corresponding trainable channel-independent template weight matrix, and collect these matrices as ˜WR = { ˜WRℓ }N RL
+
+> ℓ=1
+
+. Following the neuron-wise adaptation approach in [4], the hypernetwork maps the real-valued representation ¯ysp to the collection of layer-wise scaling vectors according to 
+
+wR = HΦH
+
+ ¯ysp
+
+ , (19) where wR = [( wR 
+
+> 1
+
+)T , . . . , (wRN RL
+
+)T ]T and wRℓ ∈ RN Rℓ
+
+contains one frame-dependent scaling coefficient for each unit in the ℓth layer. The channel-adapted weight matrix for the connection from layer ℓ to layer ℓ + 1 is then given by 
+
+WRℓ = ˜WRℓ · diag  wRℓ
+
+ , (20) where diag( wRℓ ) ∈ RN Rℓ ×N Rℓ is the diagonal matrix formed from wRℓ . Accordingly, the coefficient wRℓ,k jointly scales all outgoing weights from the kth unit in layer ℓ to the units in layer ℓ + 1 . We collect the resulting channel-adapted weight matrices as WR = {WRℓ }N RL
+
+> ℓ=1
+
+.Since the effective channel remains constant over one frame, the layer-wise scaling vectors collected in wR and the adapted weight matrices collected in WR are generated once from the sparsified SYNC observation and used for all payload symbols in the frame. During training, the hypernetwork parameters 
+
+ΦH and the channel-independent template matrices ˜WR are jointly optimized. During inference, these trainable parameters remain fixed, while wR and WR are generated separately for each received frame. 
+
+D. Joint Neuromorphic ISAC Inference 
+
+Following the neuromorphic ISAC receiver architecture in [5], in which a common SNN jointly processes the received IR waveform for data decoding and target detection, the channel-adapted SNN Rx parameterized by WR sequentially processes the sparsified BPM-BPSK payload observations to produce communication and sensing outputs. For the mth payload symbol, the Rx constructs the real-valued SNN input from the sparsified payload observation ysm,d in (17) as 
+
+¯ysm,d = ℜ{ ysm,d }T , ℑ{ ysm,d }T T ∈ R2N dc (21) where ℜ{·} and ℑ{·} denote the element-wise real and imaginary parts, respectively, and m = 0 , . . . , M d − 1. The input sequence {¯ysm,d }Md−1 
+
+> m=0
+
+is provided to the SNN Rx in payload-symbol order, allowing its internal membrane and spike states to evolve as successive observations are received. For each payload symbol, the readout layer associated with the final adapted weight matrix WRN RL
+
+produces the readout membrane potentials u(0)  
+
+> m
+
+, u(1)  
+
+> m
+
+, and u(v) 
+
+> m
+
+. The first two mem-brane potentials are associated with the BPM and BPSK coded bits, respectively, whereas the third provides target-presence information. In the following, q = 0 and q = 1 index the BPM and BPSK communication outputs, respectively. For communication, the readout membrane potential u(q) 
+
+> m
+
+is converted into the coded-bit soft probability as ˆp(q) 
+
+> m
+
+= σ(u(q) 
+
+> m
+
+),where σ(x) = (1 + e−x)−1 is the sigmoid function, and ˆp(q)
+
+> m
+
+represents the estimated probability that the coded bit d(q)
+
+> m
+
+is equal to one. To provide soft information compatible with the standard-aligned FEC decoder, we adopt the sigmoid-logit relation used for soft-output receiver processing in [20] and define the corresponding coded-bit log-likelihood ratio (LLR) as 
+
+L(q) 
+
+> m
+
+= log ˆp(q)
+
+> m
+
+1 − ˆp(q)
+
+> m
+
+!
+
+= u(q) 
+
+> m
+
+, (22) where L(0)  
+
+> m
+
+and L(1)  
+
+> m
+
+denote the LLRs associated with the BPM and BPSK coded bits, respectively. Hence, the com-munication readout membrane potentials are directly used as coded-bit soft information without forming intermediate hard BPM or BPSK decisions. The symbol-wise LLRs are arranged according to the coded payload-bit order as Lc =[L(0) 0 , L (1) 0 , . . . , L (0) 
+
+> Md−1
+
+, L (1) 
+
+> Md−1
+
+]T ∈ R2Md where L(q) 
+
+> m
+
+corre-sponds to the coded payload bit d(q) 
+
+> m
+
+= c2m+q . The decoded information-bit sequence is then obtained as 
+
+ˆx = RFEC (Lc) ∈ { 0, 1}D , (23) where RFEC (·) denotes the standard-aligned FEC decoder cor-responding to the encoding chain described in Section II. For the configurations with Viterbi rate 0.5, the decoder performs soft-input convolutional decoding followed by RS decoding, whereas the convolutional decoding stage is bypassed for the rate 1.0 configurations. For sensing, the third readout membrane potential is con-verted into a symbol-wise target-presence probability as ˆp(v) 
+
+> m
+
+=
+
+σ(u(v) 
+
+> m
+
+), where ˆp(v) 
+
+> m
+
+represents the target-presence evidence available after processing the mth payload symbol. Motivated 8
+
+by the symbol-wise sensing outputs in [5], the probabilities obtained over the payload duration are averaged to form the frame-level detection statistic expressed as 
+
+ˆp(v) = 1
+
+MdMd−1X
+
+> m=0
+
+ˆp(v) 
+
+> m
+
+, (24) where ˆp(v) ∈ [0 , 1] summarizes the target-presence evidence collected throughout the payload duration. The frame-level target decision is then given by 
+
+ˆv =
+
+
+
+1, ˆp(v) ≥ 12 ,
+
+0, otherwise 
+
+(25) where ˆv = 1 and ˆv = 0 indicate target presence and absence, respectively. 
+
+E. Energy-Aware Training Problem 
+
+In this subsection, we formulate the offline supervised training of the proposed channel-adaptive SNN Rx by jointly accounting for communication and sensing performance and spike-driven synaptic activity. The set of trainable parameters is given by Θ = { ˜WR, ΦH }, where ˜WR denotes the channel-independent template weights in (20) and ΦH denotes the hypernetwork parameters in (19). We assume the availability of a training dataset D = {(xn, v n)}Ntrain  
+
+> n=1
+
+containing Ntrain 
+
+examples, where xn ∈ { 0, 1}D and vn ∈ { 0, 1} denote the information-bit sequence and target-presence label of the nth training example, respectively. For each xn, the standard-aligned FEC encoding and BPM-BPSK mapping described in Section II-A produce the coded-bit labels d(q)
+
+> n,m
+
+, where q = 0 
+
+and q = 1 correspond to the BPM and BPSK bits of the mth payload symbol, respectively. For each training pair (xn, v n), a realization of the effective channel in (3), conditioned on vn, and the corresponding ad-ditive noise samples are drawn to generate the received frame according to (8). The synchronized SYNC observations are coherently combined according to (15), sparsified according to (16), and converted into the real-valued hypernetwork input in (18), while each payload observation is sparsified according to (17) and converted into the corresponding symbol-wise SNN input according to (21). The resulting communication and sensing probabilities ˆp(q) 
+
+> n,m
+
+and ˆp(v) 
+
+> n,m
+
+are obtained as described in Section IV-D. Through the hypernetwork-based adaptation in (19) and (20), these probabilities depend on the trainable parameters Θ, as well as on the sampled channel and noise realization. Following the joint neuromorphic communication-and-sensing criterion in [5], the communication performance for the nth training example is measured by the cross-entropy loss 
+
+L(n) 
+
+> c
+
+(Θ) = − 12MdMd−1X
+
+> m=0 1
+
+X
+
+> q=0
+
+h
+
+d(q) 
+
+> n,m
+
+log ˆ p(q)
+
+> n,m
+
+(Θ)+
+
+
+
+1 − d(q)
+
+> n,m
+
+
+
+log 
+
+
+
+1 − ˆp(q)
+
+> n,m
+
+(Θ)
+
+i 
+
+,
+
+(26) where the loss is averaged over the BPM and BPSK coded bits of all payload symbols. Similarly, the sensing performance is measured by the cross-entropy loss 
+
+L(n) 
+
+> s
+
+(Θ) = − 1
+
+MdMd−1X
+
+> m=0
+
+h
+
+vn log ˆ p(v)
+
+> n,m
+
+(Θ)+ (1 − vn) log 
+
+
+
+1 − ˆp(v)
+
+> n,m
+
+(Θ)
+
+i 
+
+,
+
+(27) where the same target-presence label vn supervises the sensing readout at every payload-symbol step, since the target state remains constant over the frame. The communication and sensing losses are combined into the joint ISAC training loss 
+
+L(n)ISAC (Θ) = χL(n) 
+
+> c
+
+(Θ) + (1 − χ)L(n) 
+
+> s
+
+(Θ), (28) where χ ∈ [0 , 1] determines the relative priority between communication and target detection. Since spike-triggered synaptic operations constitute the activity-dependent computation of the SNN Rx, we introduce a sparsity-promoting regularizer to control the spiking activ-ity while preserving joint communication-and-sensing perfor-mance. Following the membrane-potential sparsity regulariza-tion approach in [21], let u(n) 
+
+> ℓ,k,m
+
+denote the membrane potential of the kth unit in hidden spiking layer ℓ when processing the mth payload symbol of the nth training example. For layer ℓ and payload-symbol step m, the corresponding sparsity regularizer is given by 
+
+R(n)
+
+> ℓ,m
+
+(Θ) = 
+
+ 
+
+> NRℓ
+
+X
+
+> k=1
+
+ˆu(n)
+
+> ℓ,k,m
+
+ 
+
+> 2
+> NRℓ
+
+X
+
+> k=1
+
+ˆu(n)
+
+> ℓ,k,m
+> 2
+
+, (29) where ˆu(n) 
+
+> ℓ,k,m
+
+= max 
+
+ u(n) 
+
+> ℓ,k,m
+> ϑ
+
+, 0
+
+
+
+denotes the threshold-normalized positive membrane potential. The ratio in (29) is scale-invariant and takes smaller values when the positive membrane-potential activity is concentrated in fewer units, thereby promoting sparse spiking activity. Combining (28) and (29), the resulting energy-aware train-ing objective is given by 
+
+min 
+
+> Θ
+> Ntrain
+
+X
+
+> n=1
+
+E
+
+"
+
+L(n)ISAC (Θ) + λr
+
+MdMd−1X
+
+> m=0
+
+X
+
+> ℓ∈S R
+
+R(n)
+
+> ℓ,m
+
+(Θ)
+
+#
+
+, (30) where SR denotes the set of hidden spiking layers in the SNN Rx, regularization coefficient λr ≥ 0 controls the trade-off between neuromorphic ISAC performance and sparse spiking activity, and the expectation is taken over the target-dependent channel and additive noise realizations. In practice, the ex-pectation in (30) is approximated by sampling channel and noise realizations, and the resulting problem is addressed via stochastic gradient descent. To address the nondifferentiable Heaviside function in (14), we adopt the surrogate-gradient approach [37] by using the derivative of the differentiable unit-slope sigmoid function σ(x) = (1+exp( −x)) −1 as a surrogate during backpropagation. 9
+
+V. E XPERIMENTS 
+
+In this section, we present numerical results to evaluate the performance and energy efficiency of the proposed standard-compliant N-ISAC system relative to reference receiver ar-chitectures. We consider a site-specific urban deployment in which an Rx-focused frequency-selective RIS assists a shad-owed UWB link, while the same IEEE 802.15.4z HRP UWB waveform is used for data decoding and passive-target detec-tion. The experiments characterize the impact of preamble-driven channel adaptation, RIS frequency selectivity, and standardized SHR and BPM-BPSK payload configurations, and assess the performance-energy trade-off enabled by chip-domain sparse input encoding, event-driven SNN processing, and spike-sparsity regularization. 
+
+A. Experimental Setting  
+
+> Fig. 4. Site-specific path-gain maps generated using Sionna RT [18]: (a) without the RIS and (b) with an Rx-focused RIS. The Tx, Rx, RIS, and target locations are indicated in both panels, which cover the same area and use a common color scale.
+
+We consider the site-specific urban propagation environment illustrated in Fig. 4. The Tx, Rx, target center, and RIS center are located at ctx = (140 .5, 33 .5, 1.5) m, crx = (180 , 0.5, 1.5) 
+
+m, ctar = (175 , 30 , 1) m, and cris = (180 , 40 , 5) m, re-spectively. The Rx-focused RIS increases the path gain at the shadowed Rx from −111 .6 dB to −85 .1 dB, corre-sponding to a 26 .5 dB gain and enabling the evaluation of the communication-sensing trade-off induced by RIS-assisted propagation. Using the OpenStreetMap-derived scene and Sionna RT [18], we generate 1200 ray-traced channel realizations for training and 200 disjoint realizations for testing. Each non-RIS path is augmented with Bbg = 4 stochastic sub-rays with Kbg = 1 , while the target orientation and residual RCS fluctuation are resampled for each target-present frame, with the latter following a unit-mean lognormal distribution with 
+
+6-dB standard deviation [38]. Each run uses 60 000 training frames and 10 000 test frames per SNR, with results averaged over five independent runs. Unless stated otherwise, we adopt IEEE 802.15.4z HRP UWB channel 5 with fc = 6 .4896 GHz and B = 499 .2
+
+MHz [10]. The SHR uses the high-mean-PRF configuration with δp = 16 , N pc = 496 , M sync  
+
+> p
+
+= 16 , and M sfd  
+
+> p
+
+= 8 ,while the BPM-BPSK payload uses N dc = 512 , N db = 16 , and 
+
+N dg = 8 , corresponding to 0.85 Mb/s. We set Eps = Eds = 1 ,
+
+D = 80 , and v ∼ Bern(1 /2) . Unless varied, the RIS comprises N = 2500 elements with quality factor Q = 20 ,while the SNN and hypernetwork have N R 
+
+> 1
+
+= 128 and 1024 
+
+hidden units, respectively. To isolate the effects of receiver processing, the standard-compliant UWB waveform configuration, and RIS frequency selectivity from those of the sparsity mechanisms, all ex-periments preceding the energy-efficiency analysis use the unsparsified and unregularized setting, i.e., ρ = 1 and 
+
+λr = 0 . In the energy-efficiency analysis, we vary the input-retention ratio as ρ ∈ { 0.5, 0.7, 0.9, 1} for the HNet SNN and ANN receivers, while fixing the regularization coefficient to 
+
+λr = 10 −4 for the SNN receivers. We further evaluate the effect of the coefficient λr for HNet SNN at ρ = 0 .7 over 
+
+{0, 10 −5, 5 × 10 −5, 10 −4, 5 × 10 −4, 10 −3}. Throughout, we set χ = 0 .5 in (28). To obtain a single Rx that operates over a range of channel conditions, we train each neural Rx once over the received per-chip SNR set Γtrain = {− 10 , −5, 0, 5, 10 } dB. Specifically, the SNR of each training frame is drawn independently and uniformly from Γtrain , with γpc = γdc = γc, and the corre-sponding noise variances are set according to (9) while Eps
+
+and Eds remain fixed. The same trained Rx is then evaluated at each test SNR without retraining. 
+
+B. Baseline Schemes 
+
+We evaluate the proposed HNet SNN Rx against two classes of reference configurations designed to isolate the roles of preamble-driven adaptation and RIS-assisted propagation. The first class follows the coherent front end in Section III, forming an explicit channel estimate and an equalized payload repre-sentation before neural inference. The second considers the corresponding no-RIS deployment while retaining the same transmitter and receiver-processing architecture. Unless other-wise stated, all SNN-based reference receivers in the following experiments use the same SNN backbone and communication and sensing readouts as the proposed Rx. In detail, the baseline schemes are as follows: 
+
+• LS/LMMSE SNN: We consider two channel-estimation-based variants using LS and statistical LMMSE channel estima-tion, respectively, followed by MMSE payload equalization as described in Section III. The resulting equalized payload observations are processed by an SNN with parameters fixed across channel realizations. No hypernetwork-based adaptation is performed, and the chip-domain sparse input encoding in Section IV-B is not applied. 
+
+• No-RIS: For each receiver architecture considered in the corresponding experiment, we also evaluate a no-RIS con-figuration in which the RIS-assisted background and target-interaction components in (4) and (5), respectively, are removed. The transmitter, receiver-processing architecture, standard-compliant waveform configuration, and evaluation procedure are otherwise unchanged. This reference configura-tion is used to isolate the impact of RIS-assisted propagation on communication, target detection, and receiver computation energy. The proposed HNet SNN Rx instead performs preamble-driven adaptation without explicit channel estimation or pay-load equalization. For energy-efficiency evaluation, we ad-ditionally consider ANN counterparts of HNet SNN and 10 
+
+LS/LMMSE SNN, obtained by replacing the binary spiking activation with a continuous sigmoid activation while retaining the corresponding receiver architecture. 
+
+C. Receiver Computation Energy Model 
+
+We evaluate the computation energy required by each Rx to process one received HRP UWB frame using the operation-based model in [20]. The total energy is computed as 
+
+ERx = εMAC NMAC + εAC NAC , (31) where NMAC and NAC are the total numbers of multiply-accumulate (MAC) and accumulation (AC) operations, respec-tively, and we use εMAC = 4 .6 pJ and εAC = 0 .9 pJ for 32-bit floating-point operations in 45-nm CMOS [2]. The oper-ation counts include receiver-dependent front-end processing, payload projection, and neural inference. For HNet, the front end comprises chip-domain sparse input encoding, preamble feature extraction, hypernetwork inference, and frame-wise adaptation, while LS and LMMSE include channel estimation and MMSE payload equalization. The ANN evaluates the payload projection densely, whereas the SNN skips zero-valued encoded inputs for ρ < 1, using graded input events consistent with Loihi 2 [39], [40]. For neural processing, synaptic operations triggered by binary hidden spikes are counted as AC operations, consis-tently with event-driven neuromorphic processing [41]. The corresponding activity is characterized by the empirical firing rate of hidden layer ℓ, defined as 
+
+Rs(ℓ) = 1
+
+Ntest MdN RℓNtest X
+
+> n=1
+> Md−1
+
+X 
+
+> m=0
+> NRℓ
+
+X
+
+> k=1
+
+ν(n)
+
+> ℓ,k,m
+
+, (32) where Ntest is the number of evaluated frames, Md is the num-ber of payload symbols per frame, N Rℓ is the number of neu-rons in hidden layer ℓ, and ν(n) 
+
+> ℓ,k,m
+
+∈ { 0, 1} denotes the spike emitted by neuron k at payload-symbol step m for test frame 
+
+n. Accordingly, Rs(ℓ) gives the empirical probability of spike emission at a payload-symbol step, and the corresponding spike-dependent AC count scales as MdRs(ℓ)N Rℓ (N Rℓ+1 + 1) ,where N Rℓ+1 accounts for postsynaptic accumulations and the additional unit for the reset operation. The firing rate is evaluated separately for each SNN Rx, the input-retention ratio ρ, the sparsity regularization coefficient λr , and the RIS deployment. Training, channel-statistics precomputation, memory access, RF-front-end processing, RIS control and operation, and FEC decoding are excluded. 
+
+D. Preamble-Driven Channel Adaptation 
+
+We first investigate whether the IEEE 802.15.4z SYNC field can provide an effective interface for frame-wise task-oriented adaptation. Unlike prior hypernetwork-based wireless receivers relying on generic or jointly optimized pilots [4], [29], HNet SNN directly reuses the synchronized SYNC observations already available in the SHR, without additional pilot signaling. Fig. 5 compares HNet SNN with channel-estimation-based LS and LMMSE SNN receivers under the high- and low-mean-PRF SHR configurations. The comparison is carried out for both the RIS-aided deployment and the corresponding no-RIS configuration.                   
+
+> Fig. 5. (Top) Communication BLER and (Bottom) target-detection error versus received per-chip SNR γcin (9) for preamble-driven hypernetwork adaptation and channel-estimation-based equalized SNN Rxs across the RIS-aided and no-RIS deployments under the high- and low-mean-PRF SHR configurations; i.e., δp= 16 and δp= 64 , respectively ( Q= 20 ,Ndc= 512 ,
+> Ndb= 16 ,ρ= 1 , and λr= 0 ).
+
+As shown in Fig. 5, HNet SNN provides the most favorable joint communication and sensing performance, achieving a BLER of approximately 10 −2 at per-chip SNR γc = −5
+
+dB and reducing the target-detection error below 0.1 at high SNR under the RIS-aided deployment. LS SNN and LMMSE SNN can outperform HNet SNN in terms of BLER at high SNR, but their target-detection errors remain close to the chance level of 0.5. This result indicates that the equalized payload representation, although effective for data recovery, is not an effective input for the target-detection task in the considered setting. Comparing the RIS-aided and no-RIS de-ployments reveals a communication-sensing trade-off. The Rx-focused RIS substantially improves communication reliability for all considered receivers, but increases the target-detection error of HNet SNN at low and moderate SNR. Since the two deployments are compared at the same received per-chip SNR γc, this trade-off can be attributed to the RIS-induced channel structure: the strengthened target-independent background facilitates data recovery while masking target-dependent variations. Comparing the high- and low-mean-PRF configurations, we note that the low-mean-PRF SHR generally improves both communication and sensing performance for HNet SNN by increasing the separation between nonzero preamble pulses, and hence reducing the overlap among multipath replicas. The more pronounced improvement under the RIS-aided deploy-11                   
+
+> Fig. 6. (Top) Communication BLER and (Bottom) target-detection error versus received per-chip SNR γcfor RIS quality factors Q∈ { 1,20 ,100 }
+> (δp= 16 ,Ndc= 512 ,Ndb= 16 ,ρ= 1 , and λr= 0 ).
+
+ment indicates that the increased pulse separation is particu-larly useful for mitigating the overlap among RIS-dispersed replicas. This improvement, however, increases the number of chips per preamble symbol N pc from 496 to 1984 and the SYNC duration from 15 .9 μs to 63 .6 μs, thereby increasing both adaptation latency and preamble-processing cost. 
+
+E. Impact of RIS Deployment 
+
+Fig. 6 shows the BLER and the target detection error as a function of per-chip SNR γc for different values of the RIS quality factor Q. The figure shows that a larger RIS frequency selectivity induces opposite trends for communication and target detection. A low-Q RIS provides a broadband response that better preserves the Rx-focused RIS-assisted component, yielding the lowest communication BLER. Moreover, as the quality factor Q increases, off-resonant attenuation and tem-poral dispersion progressively degrade data decoding. Target detection instead improves with the RIS quality factor Q,since suppressing the target-unrelated RIS-assisted background makes the weaker target-dependent component more distin-guishable and causes the detection error to approach that of the no-RIS case. Fig. 7 shows that the RIS frequency selectivity also affects the energy consumption of the Rx through the empirical firing rate in (32). With N R 
+
+> 1
+
+= 8 hidden units, the SNN maintains a high and irregular firing rate with no systematic dependence on the quality factor Q. In contrast, wider SNNs exhibit lower firing rates and a more systematic variation with the quality factor Q. For example, with N R 
+
+> 1
+
+= 128 , the firing                         
+
+> Fig. 7. Empirical firing rate Rs(1) in (32) versus RIS quality factor Qfor HNet SNNs with the number of hidden-layer units set to NR
+> 1∈ { 8,32 ,128 }
+> (γc= 5 dB, δp= 16 ,Ndc= 512 ,Ndb= 16 ,ρ= 1 , and λr= 0 ).
+
+rate decreases from approximately 0.24 to 0.19 as the RIS becomes strongly selective, following a modest increase at small Q. This behavior is consistent with the suppression of off-resonant RIS-assisted components, while the absence of a comparable trend for the narrow SNN indicates that the event-driven response to RIS selectivity is capacity dependent. Overall, these results reveal a coupling between RIS fre-quency selectivity and neuromorphic processing. Increasing the quality factor Q of the RIS improves target-detection performance at the expense of communication reliability, with a corresponding reduction in firing activity for sufficiently wide SNNs. The RIS response and neural capacity should therefore be co-designed to balance joint ISAC performance and event-driven computation. 
+
+F. Standard-Compliant Payload Configuration 
+
+Fig. 8 evaluates the impact of high-mean-PRF payload modes of the HRP UWB PHY. For the considered modes corresponding to transmission rates 0.11 , 0.85 , and 6.81 Mb/s, the Viterbi coding rate remains fixed at 1/2, so that the performance variation is primarily due to a variation in symbol duration. As symbol duration decreases, and thus the rate increases, the ratio of the channel delay spread to the symbol duration grows, resulting in stronger overlap among delayed replicas of the dominant RIS-assisted component and a higher communication BLER. Over the same rate range, the target-detection error decreases moderately, showing that shorter symbols provide a modest sensing advantage. The 27 .24 Mb/s mode deviates from this trend because it bypasses convo-lutional coding. For this mode, severe temporal interference degrades both communication and sensing. 
+
+G. Receiver Computation Energy 
+
+We now move on to evaluating computation energy and ISAC performance as a function of the Rx architecture. As shown in Fig. 9, both the SNN and ANN implementations of the LS and LMMSE receivers require more than 4.2 mJ per frame owing to explicit channel estimation and payload equal-ization, while providing no corresponding advantage in joint ISAC performance. By adapting directly from the synchro-nized chip-domain SYNC observations, the HNet receivers 12                                       
+
+> Fig. 8. (Top) Communication BLER and (Bottom) target-detection er-ror versus received per-chip SNR γcfor the standard-compliant payload bit rates {0.11 ,0.85 ,6.81 ,27 .24 }Mb/s, corresponding to (Ndb, N dc)∈{(128 ,4096) ,(16 ,512) ,(2 ,64) ,(1 ,32) }(δp= 16 ,Ndg= 8 ,Q= 20 ,
+> ρ= 1 , and λr= 0 ).
+
+reduce the computation energy to below 91 μJ per frame, while attaining the most favorable joint operating region. Chip-domain sparse input encoding provides an additional energy reduction for HNet SNN. In particular, for the RIS-aided deployment, decreasing the input-retention ratio from 
+
+ρ = 1 to ρ = 0 .5 reduces the computation energy of HNet SNN from approximately 89 μJ to 51 μJ per frame, while maintaining a BLER of around 5 × 10 −3 and incurring only a moderate increase in target-detection error. In contrast, the computation energy of HNet ANN remains nearly unchanged with ρ, since its dense input projection does not exploit the zero-valued encoded samples. These results show that the dominant receiver-level energy savings are obtained by avoiding explicit channel estimation and payload equalization, while sparse input encoding further reduces the cost of event-driven SNN processing. The energy-efficiency gains enabled by sparse input encod-ing can be further complemented by controlling the spiking activity through the regularization coefficient λr . As shown in Fig. 10, for the RIS-aided deployment at the input-retention ratio ρ = 0 .7, increasing the coefficient λr from 0 to 10 −4
+
+reduces the empirical firing rate from approximately 0.21 to 
+
+0.15 , with negligible variations in communication BLER and target-detection error. Increasing the coefficient λr further to 
+
+10 −3 reduces the firing rate to approximately 0.05 , corre-sponding to a reduction of about 74% relative to the unregular-                                         
+
+> Fig. 9. (Top) Communication BLER and (Bottom) target-detection error versus computation energy for HNet, LS, and LMMSE receivers with SNN and ANN backbones across the RIS-aided and no-RIS deployments. For HNet receivers, the curves are obtained by varying the input-retention ratio as ρ∈ { 0.5,0.7,0.9,1}(γc= 5 dB, λr= 10 −4for the SNN receivers,
+> Q= 20 for the RIS-aided deployment, δp= 16 ,Ndc= 512 , and Ndb= 16 ).
+> Fig. 10. Empirical firing rate Rs(1) in (32) versus the sparsity regularization coefficient λrfor HNet SNN across the RIS-aided and no-RIS deployments at
+> ρ= 0 .7. The dashed horizontal lines correspond to the unregularized setting
+> λr= 0 (γc= 5 dB, Q= 20 for the RIS-aided deployment, δp= 16 ,
+> Ndc= 512 , and Ndb= 16 ).
+
+ized case, although a moderate degradation in communication reliability is observed. A similar but smaller reduction is observed for the no-RIS deployment, which exhibits lower firing rates across all values of the coefficient λr . Since the coefficient λr affects only spike-dependent neural operations, its impact on the total Rx computation energy is smaller than that of chip-domain sparsification. Thus, the ratio ρ and the coefficient λr provide complementary means of controlling input sparsity and internal spiking activity, respectively. 13 
+
+VI. C ONCLUSION 
+
+This paper studied a standard-compliant N-ISAC system based on the IEEE 802.15.4z HRP UWB PHY over a ray-traced frequency-selective RIS-aided channel. The proposed HNet SNN adapts directly from standardized SYNC observa-tions without additional pilots or explicit channel estimation and payload equalization, while chip-domain sparse input en-coding and spike-sparsity regularization reduce receiver com-putation. The results reveal a communication-sensing trade-off induced by RIS frequency selectivity and show that the proposed receiver achieves favorable joint ISAC performance with substantially lower computation energy than channel-estimation-based baselines. REFERENCES [1] H. Jang, N. Skatchkovsky, and O. Simeone, “Spiking neural networks— Part I: Detecting spatial patterns,” IEEE Commun. Lett. , vol. 25, no. 6, pp. 1736–1740, 2021. [2] M. Horowitz, “1.1 computing’s energy problem (and what we can do about it),” in Proc. IEEE Int. Solid-State Circuits Conf. (ISSCC) , 2014, pp. 10–14. [3] N. Skatchkovsky, H. Jang, and O. Simeone, “Spiking neural networks— Part III: Neuromorphic communications,” IEEE Commun. Lett. , vol. 25, no. 6, pp. 1746–1750, 2021. [4] J. Chen, N. Skatchkovsky, and O. Simeone, “Neuromorphic wireless cognition: Event-driven semantic communications for remote inference,” 
+
+IEEE Trans. Cognit. Commun. Netw. , vol. 9, no. 2, pp. 252–265, 2023. [5] ——, “Neuromorphic integrated sensing and communications,” IEEE Wireless Commun. Lett. , vol. 12, no. 3, pp. 476–480, 2023. [6] J. Chen, S. Park, P. Popovski, H. V. Poor, and O. Simeone, “Neuromor-phic split computing with wake-up radios: Architecture and design via digital twinning,” IEEE Trans. Signal Process. , vol. 72, pp. 4635–4650, 2024. [7] M. Win and R. Scholtz, “Impulse radio: how it works,” IEEE Commun. Lett. , vol. 2, no. 2, pp. 36–38, 1998. [8] P. Sedlacek, M. Slanina, and P. Masek, “An overview of the IEEE 802.15.4z standard its comparison and to the existing uwb standards,” in 
+
+Proc. 29th Int. Conf. Radioelektronika (RADIOELEKTRONIKA) , 2019, pp. 1–6. [9] D. Coppens, A. Shahid, S. Lemey, B. Van Herbruggen, C. Marshall, and E. De Poorter, “An overview of UWB standards and organizations (IEEE 802.15.4, FiRa, Apple): Interoperability aspects and future research directions,” IEEE Access , vol. 10, pp. 70 219–70 241, 2022. [10] “IEEE standard for low-rate wireless networks,” IEEE Std 802.15.4-2024 (Revision of IEEE Std 802.15.4-2020) , pp. 1–967, 2024. [11] “IEEE draft standard for low-rate wireless network amendment 1: Enhanced ultra wide-band (UWB) physical layers (PHYs) and associated medium access and control (MAC) sublayer enhancements,” IEEE P802.15.4ab/D04, December 2025 , pp. 1–275, 2026. [12] T. Ma, Y. Xiao, X. Lei, W. Xiong, and Y. Ding, “Indoor localization with reconfigurable intelligent surface,” IEEE Commun. Lett. , vol. 25, no. 1, pp. 161–165, 2021. [13] K. D. Katsanos, N. Shlezinger, M. F. Imani, and G. C. Alexandropoulos, “Wideband multi-user MIMO communications with frequency selective RISs: Element response modeling and sum-rate maximization,” in Proc. IEEE Int. Conf. Commun. Workshops (ICC Workshops) , 2022, pp. 151– 156. [14] S. Beyraghi, J. Shabanpour, G. Geraci, P. Almasan, and A. Lozano, “Data-driven deployment of reconfigurable intelligent surfaces in cellu-lar networks,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 2938–2951, 2026. [15] A. E. G¨ unes ¸er et al. , “RIS optimization algorithms for urban wireless scenarios in Sionna RT,” in Proc. IEEE Veh. Technol. Conf. (VTC-Spring) , 2025, pp. 1–6. [16] V. Degli-Esposti, E. M. Vitucci, M. D. Renzo, and S. A. Tretyakov, “Reradiation and scattering from a reconfigurable intelligent surface: A general macroscopic model,” IEEE Trans. Antennas Propag. , vol. 70, no. 10, pp. 8691–8706, 2022. [17] E. M. Vitucci, M. Albani, S. Kodra, M. Barbiroli, and V. Degli-Esposti, “An efficient ray-based modeling approach for scattering from reconfigurable intelligent surfaces,” IEEE Trans. Antennas Propag. ,vol. 72, no. 3, pp. 2673–2685, 2024. [18] J. Hoydis et al. , “Sionna RT: Differentiable ray tracing for radio prop-agation modeling,” in Proc. IEEE Global Commun. Conf. Workshops (GC Wkshps) , 2023, pp. 317–321. [19] A. von Bank, E.-M. Edelmann, S. Miao, J. Mandelbaum, and L. Schmalen, “Spiking neural belief propagation decoder for short block length LDPC codes,” IEEE Commun. Lett. , vol. 29, no. 1, pp. 45–49, 2025. [20] A. Gupta, O. Dizdar, Y. Chen, F. Emre Kadan, A. Sattarzadeh, and S. Wang, “NeuromorphicRx: From neural to spiking receiver,” IEEE Trans. Wireless Commun. , vol. 25, pp. 10 161–10 174, 2026. [21] D. Wu, J. Chen, H. V. Poor, B. Rajendran, and O. Simeone, “Neuro-morphic wireless split computing with resonate-and-fire neurons,” IEEE Trans. Cognit. Commun. Netw. , pp. 1–1, 2026. [22] C. Xu et al. , “Two-tier frequency-domain equalization for ultra-wideband integrated sensing and communication,” IEEE Trans. Veh. Technol. , vol. 75, no. 4, pp. 6059–6074, 2026. [23] F. Liu, T. Zhang, Z. Zhang, Y. Shen, and Q. Zhang, “ISAC with UWB: Reliable decoupling and target sensing,” IEEE Trans. Wireless Commun. ,vol. 23, no. 11, pp. 15 957–15 972, 2024. [24] F. Liu, T. Zhang, Z. Zhang, B. Cao, Y. Shen, and Q. Zhang, “Fundamen-tal limits of pulse-based UWB ISAC systems: A parameter estimation perspective,” IEEE Internet Things J. , vol. 12, no. 23, pp. 49 387–49 401, 2025. [25] 3GPP, “Study on channel model for frequencies from 0.5 to 100 ghz,” 3rd Generation Partnership Project, Sophia Antipolis Cedex, France, Technical Report TR 38.901, Feb. 2026, version 19.2.0. [26] W. Hong et al. , “Integrated sensing and communication (ISAC) channel model toward 3GPP 6G standardization: Modeling, validation, and application,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 3459–3472, 2026. [27] ¨O. T. Demir and E. Bj¨ ornson, “RIS-assisted ISAC: Precoding and phase-shift optimization for mono-static target detection,” in Proc. IEEE Global Commun. Conf. (GLOBECOM) , 2024, pp. 5423–5428. [28] D. Ha, A. Dai, and Q. V. Le, “Hypernetworks,” 2016, arXiv:1609.09106. [29] Y. Liu and O. Simeone, “HyperRNN: Deep learning-aided downlink CSI acquisition via partial channel reciprocity for FDD massive MIMO,” in Proc. IEEE Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , 2021, pp. 31–35. [30] M. Zecchin, T. Raviv, D. Kalathil, K. Narayanan, N. Shlezinger, and O. Simeone, “In-context learning for gradient-free receiver adaptation: Principles, applications, and theory,” IEEE BITS Inf. Theory Mag. , pp. 1–12, 2026. [31] T. Qi et al. , “A novel 6G dynamic channel map based on a hybrid channel model,” IEEE Trans. Veh. Technol. , vol. 75, no. 2, pp. 2628– 2643, 2026. [32] S. Kwon, S. Lee, and J. Kim, “A joint timing synchronization, channel estimation, and SFD detection for IR-UWB systems,” J. Commun. Netw. ,vol. 14, no. 5, pp. 501–509, 2012. [33] X. Hu, X. Cui, Z. Sha, and M. Lu, “A novel start-of-frame delimiter detection algorithm for IEEE 802.15.4a ultra-wideband,” IEEE Commun. Lett. , vol. 28, no. 6, pp. 1387–1391, 2024. [34] M. U. Zia, W. Xiang, T. Huang, and I. Haider Naqvi, “Deep learning-aided TR-UWB MIMO system,” IEEE Trans. Commun. , vol. 70, no. 10, pp. 6579–6588, 2022. [35] R. Jin, X. He, C. Zhong, Z. Zhang, T. Q. S. Quek, and H. Dai, “Mag-nitude matters: Fixing signsgd through magnitude-aware sparsification and error feedback in the presence of data heterogeneity,” IEEE Trans. Signal Process. , vol. 72, pp. 5140–5155, 2024. [36] H. Sun, X. Ma, and R. Q. Hu, “Adaptive federated learning with gradient compression in uplink noma,” IEEE Trans. Veh. Technol. , vol. 69, no. 12, pp. 16 325–16 329, 2020. [37] E. O. Neftci, H. Mostafa, and F. Zenke, “Surrogate gradient learning in spiking neural networks: Bringing the power of gradient-based optimization to spiking neural networks,” IEEE Signal Process. Mag. ,vol. 36, no. 6, pp. 51–63, 2019. [38] K. F. Nieman, O. Kanhere, R.-K. Shiu, W.-J. Xu, C.-Y. Duan, and S. S. Ghassemzadeh, “An adaptive cmwave/fr3 channel sounder for integrated sensing and communication,” in Proc. IEEE Global Commun. Conf. (GLOBECOM) , 2025, pp. 2886–2891. [39] S. B. Shrestha, J. Timcheck, P. Frady, L. Campos-Macias, and M. Davies, “Efficient video and audio processing with loihi 2,” in Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP) , 2024, pp. 13 481–13 485. [40] B. H. Theilman et al. , “Spiking physics-informed neural networks on loihi 2,” in Proc. Neuro Inspired Comput. Elements Conf. (NICE) , 2024, pp. 1–6. [41] M. Davies et al. , “Loihi: A neuromorphic manycore processor with on-chip learning,” IEEE Micro , vol. 38, no. 1, pp. 82–99, 2018.

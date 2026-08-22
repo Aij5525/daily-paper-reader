@@ -1,0 +1,450 @@
+Title: Synchronization and Channel Estimation of OTFS with RF Impairments
+
+URL Source: https://arxiv.org/pdf/2608.20257v1
+
+Published Time: Fri, 21 Aug 2026 01:09:58 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Synchronization and Channel Estimation of OTFS with RF Impairments 
+
+(Invited Paper) Sanoopkumar P. S. ∗, Mohsen Bayat †, Stephen McWade ‡ and Arman Farhang ‡∗ Department of Electronics and Communication Engineering, South Eastern Technological University, Ireland 
+
+†Department of Computing Science and Mathematics, Dundalk Institute of Technology, Ireland 
+
+‡Department of Electronic and Electrical Engineering, Trinity College Dublin, Ireland Email: Sanoopkumar.Pungayilsasindran@setu.ie, Mohsen.Bayat@dkit.ie, {smcwade,arman.farhang}@tcd.ie 
+
+Abstract—Orthogonal Time Frequency Space (OTFS) mod-ulation is a promising waveform for future wireless net-works. However, its resilience to RF impairments remains relatively understudied. Low-cost RF front ends are crucial for next-generation wireless systems, yet their performance is often degraded by RF impairments such as transmit IQ imbalance (IQI), phase noise (PN), timing offset (TO), and carrier frequency offset (CFO). Hence, this paper addresses the estimation and compensation of these RF impairments in OTFS systems under high mobility. A unified system model is developed that incorporates TO, CFO, PN, IQI and other channel effects into an effective channel representation. Using the pilot with cyclic prefix (PCP), a low-peak to average power ratio (PAPR) pilot suitable for OTFS, we propose a pilot-aided synchronization and estimation framework. The dual periodicity of PCP is exploited in our proposed TO estimation technique. A maximum-likelihood-based technique is also proposed to jointly estimate the CFO and effective channel using a complex exponential basis expansion model (CE-BEM). Finally, a linear detection model is formulated in the delay-Doppler domain to mitigate residual interference caused by RF impairments. Our simulation results corroborate the efficacy of our proposed synchronization and channel estimation techniques. 
+
+I. Introduction Orthogonal time-frequency space (OTFS) modulation has emerged as a promising candidate waveform for future wireless networks, owing to its resilience to high-Doppler channels. OTFS spreads the delay-Doppler (DD) domain data symbols across the entire time-frequency plane, thereby achieving full diversity offered by the doubly selective wireless channels [1]. The majority of OTFS literature thus far has been on the theoretical aspects of the waveform and there is only a small body of literature that considers practical aspects such as RF impairments [2], [3]. Most modern wireless communication systems use simple low-cost direct conversion transceiver (DCT) 
+
+This publication has emanated from research conducted as part of the MULTIPLY-6G project. MULTIPLY-6G project has received funding from the Smart Networks and Services Joint Undertaking (SNS JU) under the European Union’s Horizon Europe research and innovation programme under Grant Agreement No 101290342. This research was also supported by Research Ireland under the US-Ireland R&D Partnership Programme Grant Numbers 21/US/3757 and 24/US/4013. 
+
+architecture. However, DCTs are highly susceptible to in-phase and quadrature signal mismatch, commonly referred to as IQ imbalance (IQI) [4]. Additionally, low-cost radios are prone to time-varying oscillator phase noise (PN) and carrier frequency offset (CFO). These impairments further complicate timing and frequency synchronization, which is essential for reliable communication, particularly in time-varying channels. In OTFS literature, each of the aforementioned impair-ments has been investigated in isolation. There have been several studies which consider OTFS with IQI [2], [5]. However, these use a high peak to average power ratio (PAPR) impulse pilot for IQI estimation. Meanwhile, the authors of [3] demonstrate resilience of OTFS to PN while considering perfect knowledge of PN at the receiver. A common-phase-error (CPE) estimation method for OTFS was proposed in [6]. However, this method performs poorly due to the high level of inter-Doppler interference. In OTFS literature on synchronization, several works, e.g., [7] and [8], address TO or CFO estimation separately, whereas other studies, including [9] and [10], consider joint TO and CFO estimation using an impulse pilot. In [11], a low PAPR pilot with cyclic prefix (PCP), [12], is used to jointly estimate the TO and CFO. Although these works achieve high TO and CFO estimation accu-racy, they neglect the impact of IQI and PN. However, IQI and PN distort the periodic structure of PCP and introduce additional impairments to the signal, hindering synchronization. To the best of our knowledge, no prior work has investigated the joint estimation and compensation of synchronization errors and RF impairments in OTFS. Hence, in this paper, we propose practical synchronization and channel estimation techniques for OTFS using the low PAPR PCP pilot, while accounting for TO, transmitter IQI (T-IQI), CFO and PN. We present a unified formu-lation that incorporates TO, CFO, PN, IQI and physi-cal channel effects into an effective channel. Using this formulation and a complex exponential basis expansion model (CE-BEM) to approximate the effective channel, we propose a maximum-likelihood (ML) based technique to jointly estimate the CFO and BEM coefficients. Finally, arXiv:2608.20257v1 [eess.SP] 20 Aug 2026 simulation results verify the effectiveness of the proposed techniques, achieving a bit error rate (BER) close to that of a system with perfect synchronisation and channel knowledge. Notations: Superscripts (·)T and (·)H denote transpose and Hermitian transpose, respectively. Bold lower-case characters denote vectors and bold upper-case characters denote matrices. x[n] and X[m, n ] denote the n-th and 
+
+(m, n )-th elements of x and X, respectively. The function 
+
+vec( X) vectorizes X by stacking its columns to form a single column vector and vec −1(x) denotes the inverse operation that forms the matrix X from x. diag( x) denotes a diagonal matrix with the elements of x on its main diagonal. diag( X) denotes a column vector formed by the diagonal elements of X. The p×p identity matrix and p×q
+
+all-zero matrix are denoted by Ip and 0p×q , respectively. The operators (( ·)) N , ⊙ and ⊗ represent Modulo −N ,element-wise multiplication and the Kronecker product operations, respectively. The operator rcolshift( X, l ) de-notes the matrix obtained by circularly right-shifting the columns of X by l positions. Finally, j = √−1 represents the imaginary unit. II. System Model In this paper, we consider a single-user OTFS system with M delay bins and N Doppler bins with a delay resolution of Ts seconds and Doppler resolution of 1
+
+> M N T s
+
+Hz, where Ts is the sampling rate. At the transmitter, the information bits are mapped onto a quadrature amplitude modulation (QAM) symbol constellation and multiplexed with the pilot signal to form the DD domain symbol matrix, D ∈ CM ×N with the elements D[m, n ] for 
+
+m = 0 , 1, . . . M − 1 and n = 0 , 1, . . . N − 1. The PCP with length 2Lp − 1 is placed in Doppler bin np along the delay bins mp − Lp + 1 , . . . , m p − 1, m p, m p + 1 , . . . , m p + Lp − 1
+
+for synchronisation and channel estimation [12]. The DD domain frame structure is shown in Fig. 1. The DD domain signal is then transformed to the delay-time (DT) domain by taking N -point inverse discrete Fourier transform (IDFT) across the rows of D. Thus, the DT domain transmitted signal matrix X ∈ CM ×N can be expressed as, X = DF H 
+
+> N
+
+. After vectorising X and adding a cyclic prefix (CP) of length Lcp , the complex baseband signal 
+
+xcp is obtained, which is then fed to the transmitter RF front end. The complex baseband signal equivalent to the passband signal at the output of the transmitter can be expressed as 
+
+s(t) = μTxcp (t) + νTx∗
+
+> cp
+
+(t), (1) where xcp (t) is the complex baseband signal fed to the mixer. The I and Q distortion parameters are given, respectively by, μT = 12 (aTI ejθ TI + aTQ ejθ TQ ) and νT = 
+
+> 12
+
+(aTI ejθ TI − aTQ ejθ TQ ) with aTI , aTQ , θTI , and θTQ being the amplitudes and phases of I and Q branch carriers, respectively. At the receiver, the received passband signal is converted to baseband by the receive RF front end. The L′     
+
+> p
+> CP Lp
+> Delay Doppler
+> mp
+> np
+> PCP Data Guard
+> (a) Transmitted Signal Lp
+> Delay Doppler
+> mp
+> np
+> ×××××××××××××××××××××××××××××××××
+> mp
+> Estimation ×Data Guard (b) Received Signal
+
+Fig. 1: The frame structure complex baseband signal at the output of the receiver RF front end can be expressed as, 
+
+r(t) = ejϕ (t)+ j2πf ∆ty(t − t0) + η(t), (2) where η(t) is the complex additive white Gaussian noise (AWGN) with variance σ2, t0 denotes the TO between the transmitter and receiver, ϕ(t) is the continuous-time phase noise at time t and f∆ is the CFO, which is caused by the frequency mismatch between the transmitter and receiver local oscillators [13]. In (2), y(t) = ∫ hDT (t, τ )s(t − τ )dτ is the complex baseband signal at the input of the receiver RF front end while ignoring the AWGN and hDT (t, τ ) is the time-varying impulse response of the channel in DT domain. The output of the matched filter at the receiver RF front end is sampled at intervals of Ts seconds to obtain the discrete-time signal samples, which are given by, 
+
+r[κ] = ej(ϕ[κ]+ 2πε M N κ) Lch −1∑
+
+> ℓ=0
+
+hDT [κ, ℓ ](μTxcp [κ − ℓ − ξ]+ νTx∗
+
+> cp
+
+[κ − ℓ − ξ]) + η[κ], (3) for κ = 0 , 1, . . . , N s − 1 where Ns = M N + Lcp + ξ and 
+
+Lcp ≥ Lch − 1, with Lch denoting the channel length. Additionally, ϕ[κ], ε = f∆ 
+
+> 1/(M N T s)
+
+and ξ = t0 
+
+> Ts
+
+denote the PN sample, the normalized CFO and TO, respectively. Furthermore, the discretized DT domain channel impulse response is represented as 
+
+hDT [κ, ℓ ] = 
+
+> Pch −1
+
+∑
+
+> i=0
+
+ρiej2πν i(κ−ℓ)δ[ℓ − ℓi], (4) where Pch , ρi, ℓi and νi = νmax cos( αi) are the number of paths, complex gain, delay and Doppler shift of the 
+
+i-th channel path, respectively. Additionally, νmax is the maximum Doppler shift and αi is the angle of arrival of the ith path. By stacking the received signal samples r[κ] for κ =0, . . . , N s − 1 into the received signal vector r ∈ CNs×1,(3) can be expressed in vector-matrix form as 
+
+r = ˜Φ ˜Ψ ˜Ξ ˜HDT 
+
+(μTxcp + νTx∗
+
+> cp
+
+) + ˜η, (5) where ˜HDT is the Nw × Nw Toeplitz matrix formed from the DT domain channel coefficients in (4), with Nw =
+
+M N + Lcp . Additionally, ˜Ξ = [ 0ξ×Nw , INw ] ∈ RNs×Nw
+
+and ˜Ψ = diag (ej 2πε (0)  
+
+> M N
+
+, e j 2πε (1)  
+
+> M N
+
+, . . . , e j 2πε (Ns−1) 
+
+> M N
+
+) ∈ CNs×Ns
+
+represent the TO and CFO matrices, respectively. Fur-thermore, ˜Φ = diag (ejϕ [0] , e jϕ [1] , . . . , e jϕ [Ns−1] ) ∈ CNs×Ns
+
+denotes the PN matrix and ˜η is AWGN vector. Although the effects of CFO, TO and PN can be incorporated into an effective channel and corresponding compensation methods can be applied, the presence of TO can significantly degrade system performance. Therefore, precise TO estimation is essential prior to CFO and PN estimation and compensation. Moreover, as shown in (2), T-IQI introduces conjugate interference in the received signal, which is not addressed by existing synchronisation and channel estimation methods. Consequently, in the following sections, we develop a TO estimation technique, followed by a joint estimation approach for CFO, channel, PN and T-IQI. III. Proposed Synchronization and Channel Estimation Techniques As discussed earlier, RF impairments such as IQI and PN in practical OTFS systems distort the periodic structure of the PCP. This poses significant challenges to synchronization and channel estimation [11]. Therefore, in this section, we propose novel TO, CFO and channel estimation techniques for OTFS in presence of T-IQI and PN. A. Proposed TO Estimation Technique PCP exhibits a dual periodicity property in the DT domain. The periodicity in the delay dimension is intro-duced by CP, whereas the periodicity in time dimension arises from spreading each Doppler domain pilot sample along time through IDFT operation. In our proposed time synchronization technique, we exploit this dual periodicity in both the delay and time dimensions to estimate the TO. To construct PCP, we employ a ZC sequence, defined as 
+
+p0[m] = 
+
+√
+
+N σ 2pe−j πμm (m+1)  
+
+> Lp
+
+, m = 0 , . . . , L p −1, where μ is the root index satisfying gcd( Lp, μ ) = 1 and N σ 2p denotes the pilot power. The last Lp − 1 samples of this sequence are then prepended at the beginning of the sequence as a CP, denoted by p ∈ C(2 Lp−1) ×1. This pilot is inserted at the Doppler bin np and the delay bins mp − Lp + 1 
+
+to mp + Lp − 1 along data symbols with mp ∈ { Lp −
+
+1, . . . , M − Lp} and np ∈ { 0, . . . , N − 1}, see Fig. 1 (a). After transmitting and receiving the data, includ-ing the PCP, the first M N samples of the re-ceived vector r in (5) are used to construct R =vec −1(r) ∈ CM ×N in the DT domain. The matrix 
+
+P = [0N ×(mp−Lp+1) , (PF H 
+
+> N
+
+)T, 0N ×(M −mp−Lp)
+
+]T, rep-resents the transmitted DT pilot signal, where P =[0(2 Lp−1) ×np , p, 0(2 Lp−1) ×(N −np−1) 
+
+]. The proposed tech-nique exploits the aforementioned dual periodicity of the m′0 10 20 30           
+
+> λ[m′]
+> 00.05 0.1 0.15
+> m′010 20 30
+> λ[m′]
+> 00.05 0.1 0.15
+> κ0100 200
+> x[κ]
+> 0123
+> κ0100 200
+> r[κ]
+> 012345
+> κ0100 200
+> r[κ]
+> 012Maximum Peak First Peak
+> TO
+> (c) Received signal with TO, CFO, T-IQI, PN (a) Transmit signal in the DT domain (d) Correlation function with TO and CFO (e) Correlation function with TO, CFO, T-IQI, PN (b) Received signal with TO, CFO
+> First Peak Maximum Peak Pilot in one delay block Pilot in one delay block Pilot in one delay block
+
+Fig. 2: T-IQI, TO, CFO and PN effect on the received signal and the correlation function in the absence of AWGN PCP in the DT domain to estimate the TO. To this end, the correlation between the received signal and the transmitted DT pilot signal is computed within each delay block of an OTFS frame. The resulting correlation values are then accumulated over all delay blocks in the time dimension to obtain the correlation function 
+
+λ[m′] = 1
+
+M N  
+
+> N−1
+
+∑
+
+> k=0
+
+∣∣∣ 
+
+> M−1
+
+∑
+
+> m=0
+
+R[m, k ]P ∗[(( m − m′)) M , k ]
+
+∣∣∣, (6) where m′ = 0 , . . . , M − 1.As shown in (5), the matrix R represents the received signal that is affected by T-IQI, TO, CFO, and PN. These RF impairments, as illustrated in Figs. 2(a)-(c) for 
+
+M = 64 , N = 32 , and Lcp = 9 , significantly disrupt the periodicity of the pilot signal across delay blocks in the DT domain. Consequently, the correlation function differs from that of an ideal OTFS system. The three-peak structure in Figs. 2(d) and 2(e) follows from the PCP construction. The maximum peak arises when the received PCP is fully aligned with its template. The two adjacent peaks, located Lp samples apart, stem from partial over-lapping of the template with the received pilot in the CP part. Under T-IQI and PN, all peaks are attenuated, but the first peak is the most affected and, as labeled in Fig. 2(e), may become indistinguishable from the side peaks. Therefore, the first peak, as proposed in [14], does not provide a reliable estimation accuracy in practical systems under RF impairments. In contrast, since the maximum peak accumulates the largest correlation energy, it remains dominant and the most robust to the RF impairments. Hence, we propose to estimate the TO by detecting the maximum peak, whose lag corresponds to the received PCP displacement, as follows ̂
+
+ξ = (( arg max 
+
+> m′
+
+{|λ[m′]|} − Lcp 
+
+))  
+
+> M
+
+. (7) Since the pilot position mp is embedded in the template 
+
+P [(( m − m′)) , k ], the lag index m′ represents the dis-placement of the received PCP relative to its transmitted position. This displacement equals the TO plus the CP length Lcp , since the CP precedes the frame within the correlation window. Hence, the correlation metric in (6) is maximized at m′ = (( ξ + Lcp )) M , where the received PCP aligns with its template. Since 0 ≤ ξ ≤ M − 1, this mapping is one-to-one and subtracting Lcp while taking modulo M , as in (7), uniquely recovers the TO. Besides degrading TO estimation, RF impairments also affect CFO and channel estimation. Therefore, the next subsection proposes a joint CFO and channel estimation technique for OTFS systems under T-IQI and PN. B. Joint CFO and Effective Channel Estimation Tech-nique After correcting the TO and removing CP, the received signal can be expressed as, 
+
+r = ΦΨH DT (μTx + νTx∗) + η. (8) where, Ψ = ej 2πε (̂ ξ+Lcp)  
+
+> M N
+
+diag (1, e j 2πε (1)  
+
+> M N
+
+, . . . , e j 2πε (M N −1) 
+
+> M N
+
+)
+
+and ˜Φ = diag (ejϕ [̂ ξ+Lcp ], . . . , e jϕ [̂ ξ+Lcp +M N −1] ). In addi-tion, the channel matrix is HDT = Rcp ˜HDT Acp , and 
+
+η = Rcp ˜η. Here, Acp = [ JTcp , IT 
+
+> M N
+
+]T ∈ RNw ×M N is the CP addition matrix, Rcp = [ 0M N ×Lcp , IM N ] is the CP removal matrix and Jcp is formed by the last Lcp rows of 
+
+IM N . The received signal in DD domain, Z, is obtained by taking the discrete Zak transform (DZT) of r, i.e., 
+
+Z = RF N, where R = vec −1(r).The DT domain received signal in (8) can be expressed as, 
+
+r = Ψ (GDT ,1x + GDT ,2x∗) + η
+
+= X h1 + X ∗h2 + η, (9) where GDT ,1 =μTΦH DT , GDT ,2 =νTΦH DT . Considering 
+
+gp 
+
+> DT ,l
+
+= diag (rcolshift ( GDT ,p , l )) for p = 1, 2 and l =0, . . . , L − 1, hp = [( gp
+
+> DT ,0
+
+)T, (gp
+
+> DT ,1
+
+)T, . . . , (gp
+
+> DT ,L −1
+
+)T]T
+
+and X = [X 0, X 1, . . . , X L−1] where X l =diag ( x[((0 − l)) N ], x [((1 − l)) N ], . . . , x [(( M N − 1 − l)) N ]) .Using CE-BEM with Q basis coefficients and an oversampling factor K, we can approximate gp 
+
+> DT ,l
+
+as 
+
+gp 
+
+> DT ,l
+
+≈ Bc p,l , where the basis function B is defined by B[κ, q ] = e j2π(q−Q/ 2) κKM N , for q = 0, 1, . . . , Q − 1 and 
+
+κ = Lcp +0 , L cp +1 ,. . . , N s, and cp,l ∈ CQ×1 denotes the basis coefficient vector corresponding to the l-th channel tap. Hence, (9) is reformulated as, 
+
+r ≈ X (IL ⊗ B) c1 + X ∗ (IL ⊗ B) c2 + η = X c + η,
+
+(10) where cp = [ cT
+
+> p, 0
+
+, . . . , cT
+
+> p,L −1
+
+]T and c = [ cT1 , cT2 ]T. At the receiver, the received samples with time indices ΓEst p =
+
+{Lcp +nm p, L cp + nm p +1 , . . . , L cp +nm p +Lp −1}, n =0, 1, . . . , N − 1, are used for pilot aided channel estimation [12]. Thus, the the received pilot vector, rp is formed by stacking the samples r[n], ∀n ∈ ΓEst  
+
+> p
+
+. Using the CE-BEM approximation of the effective channel rp is expresssed as, 
+
+rp= Ψp,ε X p(IN ⊗(ILp⊗Bp)) c+ηp = Ψp,ε X pc + ηp,
+
+(11) where X p = [( X p,0)T, (X p,1)T, . . . , (X p,N −1)T]T, X p,n =rcolshift (diag ( x[nm p], x [nm p +1] , . . . , x [nm p + Lp −1]) , l ),
+
+Bp ∈ CLp×Q denotes the submatrix formed by stacking the rows of B with the indices in 
+
+ΓEst p , Ψp,ε = diag (ej2π εκ M N 
+
+) , ∀κ ∈ ΓEst p and 
+
+X p = X p(IN ⊗ (ILp ⊗ Bp)) . Furthermore, ηp includes AWGN noise samples at the received pilot indices on its entries. From (11), the ML joint estimation of ε and c
+
+can be formulated as (̂ c,̂ ε) = arg max c,ε 
+
+{ln (f (r; c, ε ))} ,where f (r; c, ε ) is the probabilty density function of rp
+
+conditioned on ε and c,
+
+f (rp; c, ε ) = 1
+
+(πσ 2
+
+> η
+
+)N L p e− 1 
+
+> σ2
+> η
+
+[r−Ψp,ε X pc]H
+
+[r−Ψp,ε X pc].
+
+(12) Using (12) and removing the constant terms independent of the parameters to be estimated, the estimation problem can be reformulated as, 
+
+(̂ c,̂ ε) = arg max 
+
+> c,ε
+
+{
+
+− 1
+
+σ2
+
+> η
+
+[rp −Ψp,ε X pc]H[rp −Ψp,ε X pc]
+
+}
+
+.
+
+(13) Let ε′ be the value of ε which maximises the cost function in (13). Since, c and ε are independent variables, ̂ c(ε′) can be obtained as ̂
+
+c(ε′) = X †
+
+> p
+
+ΨHp,ε ′ rp, (14) where X † 
+
+> p
+
+= (X Hp X p
+
+)−1X Hp . Substituting, (14) back to (13), the CFO can be estimated as ̂
+
+ε = arg max  
+
+> ε
+
+g(ε), (15) where g(ε) = rHp Ψp,ε X pX †
+
+> p
+
+ΨHp,ε rp. Using the estimated CFO, the BEM coefficients are obtained from (14). C. Equalization and Data Detection The received signal after compensating the TO and CFO can be expressed in DD domain as, 
+
+z = GDD ,1d + GDD ,2(d#)∗ + ηDD , (16) where GDD ,1 = ( FN ⊗ IM )GDT ,1(FH 
+
+> N
+
+⊗ IM ) and GDD ,2 =(FN ⊗IM )GDT ,2(FH 
+
+> N
+
+⊗IM ). In (16), d# = vec( D#) where 
+
+D#[m, n ] = D[m, (( N − n)) N ] for m = 0 , 1, . . . , M − 1
+
+and n = 0, 1, . . . , N − 1. Thus, each transmit symbol experiences interference from the symbol in the same delay bin and the corresponding mirror Doppler bin. This IDI is called mirror Doppler interference (MDI). Due to MDI, the received signal is widely linear as it is a linear combination of d and (d#)∗. Hence, widely linear filtering methods can be used for compensating IQI [4]. In particular, we can construct a new signal vector, z = [ zT, (z∗)T]T, given by 
+
+z = Wd + ηDD , (17) where, W =
+
+[ GDD ,1 GDD ,2
+
+(G#DD ,2)∗ (G#DD ,1)∗
+
+]
+
+, d = [ dT, (d∗)T]T
+
+and ηDD = [ ηTDD , (η∗
+
+> DD
+
+)T]T. Then, we can use (17) for data detection using linear techniques like minimum mean square error (MMSE) or iterative techniques [15]. IV. Numerical results In this section, we numerically analyze the performance of the proposed estimation techniques under RF impair-ments. Simulations were carried out using a sampling period of 1.0417 μs, a carrier frequency of 5.9 GHz, 
+
+M ∈ {32 , 64 } delay bins and N = 16 Doppler bins per frame. The PCP spans the delay dimension over 
+
+mp = M − 2Lp + 1 , . . . , M − 1 at np = 1 , with Lp = 7 
+
+and the pilot power of 30 dB. The PN is generated as a first-order autoregressive process with increment variance 
+
+4πβ 3dB Ts, where β3dB = 400 Hz is the 3 dB bandwidth [16]. The amplitude imbalance, phase imbalance, TO and CFO, were uniformly distributed within the ranges 
+
+[0 , 2] dB, [0 , 5] ◦, [0 , M − 1] and (−0.5, 0.5] , respectively. For the BEM, Q = 7 and K = 2 were used. We employ the extended vehicular A (EVA) channel model, [16], with Doppler spread of 2.7 kHz. Fig. 3 shows the mean absolute error (MAE) of the TO estimation error versus the signal-to-noise ratio (SNR) for two different OTFS frame sizes with M = {32 , 64 }. As observed, the proposed TO estimation technique, based on detecting the maximum peak of the correlation function, achieves an accuracy with an error of less than one sample for all SNRs, which can be effectively absorbed by the CP. The results also indicate that increasing the number of delay bins deteriorates the accuracy of the TO estimates. Increasing M increases the spacing between pilot samples in different delay blocks in the time domain, thereby exposing the pilot to rapid time variation of the channel. This degrades the TO estimation accuracy. The mean squared error (MSE) of CFO estimation is shown in Fig. 4. It can be observed from the figure that the proposed CFO estimation provides an accurate CFO estimate with a mean squared error in the order of 10 −4.Fig. 5 shows the normalized MSE (NMSE) of the proposed channel estimation technique. Both Figs. 4 and 5 show that increasing the number of delay bins leads to more accurate estimates of the CFO and the effective channel. This improvement is attributed to the higher Doppler resolution achieved as M increases. Finally, we have evaluated the effectiveness of the proposed synchronization and joint estimation techniques, as well as the equalization method based on the widely linear system model in (17). We used the equalization method in [15] and evaluated the BER performance as shown in Fig. 6. The results show that the proposed synchronization and joint estimation techniques incur a less than a 2 dB loss compared to the perfect-CSI case. V. Conclusion In this paper, we investigated the joint estimation and compensation of RF impairments, namely T-IQI, PN, TO and CFO, in OTFS systems under high mobility. We developed a comprehensive system model that combines the effects of PN, channel and IQI into an effective channel. Furthermore, we used PCP to develop pilot-aided TO synchronization, joint CFO and effective chan-nel estimation. The proposed TO estimation technique leverages the dual periodicity of the PCP to develop a correlation metric that provides an accurate estimate even in the presence of RF impairments. Moreover, the effective channel coefficients were approximated using CE-BEM to develop a joint CFO and channel estimation technique based on the maximum-likelihood criterion. Finally, awidely linear system model was developed for the received signal in the DD domain to compensate for interference caused by RF impairments. The presented BER and estimation performance analyses demonstrate that the proposed method is suitable for practical low-cost radios in high-mobility scenarios. References                                                        
+
+> [1] R. Hadani, S. Rakib, M. Tsatsanis, A. Monk, A. J. Goldsmith, A. F. Molisch, and R. Calderbank, “Orthogonal time frequency space modulation,” in IEEE WCNC, 2017, pp. 1–6. [2] S. G. Neelam and P. R. Sahu, “Channel estimation and data de-tection of otfs system in the presence of receiver IQ imbalance,” in Proc. Natl. Conf. Comm. (NCC), 2021, pp. 1–6. [3] G. D. Surabhi, M. K. Ramachandran, and A. Chockalingam, “OTFS modulation with phase noise in mmWave communica-tions,” in IEEE Veh. Tech. Conf., 2019, pp. 1–5. [4] Y. Yoshida, K. Hayashi, H. Sakai, and W. Bocquet, “Analysis and compensation of transmitter IQ imbalances in OFDMA and SC-FDMA systems,” IEEE Trans. Signal Proc., vol. 57, no. 8, pp. 3119–3129, 2009. [5] S. G. Neelam and P. R. Sahu, “Analysis, estimation and compensation of hardware impairments for CP-OTFS systems,” IEEE Wireless Comm. Lett., vol. 11, no. 5, pp. 952–956, 2022. [6] Y. Bello, S. Barnola, D. Demmer, and J.-B. Doré, “OTFS waveform with phase noise in sub-THz,” in IEEE Veh. Tech. Conf., 2022, pp. 1–5. [7] C.-D. Chung, M.-Z. Xu, and W.-C. Chen, “Initial time synchro-nization for OTFS,” IEEE Trans. Veh. Tech., vol. 73, no. 12, pp. 18 769–18 786, 2024. [8] S. Li, M. Zhang, C. Ju, D. Wang, W. Chen, P. Zhou, and D. Wang, “Downlink carrier frequency offset estimation for OTFS-based LEO satellite communication system,” IEEE Comm. Lett., vol. 28, no. 1, pp. 163–167, 2024. [9] S. S. Das, V. Rangamgari, S. Tiwari, and S. C. Mondal, “Time-domain channel estimation and equalization of CP-OTFS un-der multiple fractional Dopplers and residual synchronization errors,” IEEE Access, vol. 9, pp. 10 561–10 576, 2021. [10] M. Bayat and A. Farhang, “Time and frequency synchronization for OTFS,” IEEE Wireless Comm. Lett., vol. 11, no. 12, pp. 2670–2674, 2022. [11] M. Bayat, S. P. Sanoopkumar, and A. Farhang, “Practical synchronization for OTFS,” in Proc. IEEE Int. Conf. Comm., 2023, pp. 735–740. [12] S. P. S. and A. Farhang, “A Practical Pilot for Channel Estima-tion of OTFS,” in ICC 2023 - IEEE International Conference on Communications, 2023, pp. 1319–1325. 0510 15 20 25 30 SNR (dB) 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> MAE of TO Estimation
+> M=32 M=64
+
+Fig. 3: TO estimation MAE 0 5 10 15 20 25 30 SNR (dB) 10 -5  
+
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> MSE of CFO Estimation
+> M=64 M=32
+
+Fig. 4: CFO estimation MSE 0 5 10 15 20 25 30 SNR (dB) 10 -4 
+
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> NMSE of Effective Channel Estimation
+> M=64 M=32
+
+Fig. 5: Channel NMSE 0 5 10 15 20 25 SNR (dB) 10 -4  
+
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> M=32, Perfect, CSI and Synchronisation M=32, Estimated M=64, Perfect CSI and Synchronisation M=64, Estimated
+
+Fig. 6: BER performance 
+
+[13] M. Bayat, S. P.S., and A. Farhang, “Time and frequency synchronization for multiuser OTFS in uplink,” IEEE Trans. on Veh. Technol., vol. 75, no. 4, pp. 6173–6190, 2026. [14] A. Farhang and M. Bayat, “SC-FDMA as a delay-Doppler domain modulation technique,” in IEEE Int. Conf. on Comm. Workshops, 2024, pp. 69–74. [15] H. Qu, G. Liu, L. Zhang, S. Wen, and M. A. Imran, “Low-complexity symbol detection and interference cancellation for OTFS system,” IEEE Trans. on Comm., vol. 69, no. 3, pp. 1524–1537, 2021. [16] 3GPP, “LTE; Evolved universal terrestrial radio access (E-UTRA); base station (BS) radio transmission and reception,” 3GPP TS 36.104 version 15.3.0 Release 15, Tech. Rep., 2018.
