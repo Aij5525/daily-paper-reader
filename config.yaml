@@ -25,3 +25,65 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: wireless-llm
+      description: 无线通信、大模型、信道、通信与感知、基础模型、Transformer注意力
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: large language model
+          keyword_cn: 大语言模型
+          query: large language model for wireless communication
+        - keyword: wireless communication
+          keyword_cn: 无线通信
+          query: wireless communication system design with machine learning
+        - keyword: wireless channel
+          keyword_cn: 无线信道
+          query: wireless channel characteristics and modeling
+        - keyword: communication and sensing
+          keyword_cn: 通信与感知
+          query: joint communication and sensing in wireless networks
+        - keyword: foundation model
+          keyword_cn: 基础模型
+          query: foundation model pre-training for wireless applications
+        - keyword: transformer attention
+          keyword_cn: Transformer注意力
+          query: transformer self-attention for wireless signal processing
+      intent_queries:
+        - query: use of large language models in wireless communication
+          query_cn: 大模型在无线通信中的应用
+          enabled: true
+          source: manual
+          note: ''
+        - query: physical layer design with large language models
+          query_cn: 大模型用于物理层设计
+          enabled: true
+          source: manual
+          note: ''
+        - query: What is the role of transformer attention in wireless channel modeling?
+          query_cn: Transformer注意力在无线信道建模中的作用是什么？
+          enabled: true
+          source: manual
+          note: ''
+        - query: How is integrated sensing and communication implemented with foundation models?
+          query_cn: 如何利用基础模型实现通信与感知一体化？
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-08-22T07:44:16.208Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
