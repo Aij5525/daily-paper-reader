@@ -1,0 +1,1155 @@
+Title: Joint Beamforming and Phase Shifts Design for RIS-Enabled RSMA-ISAC Systems
+
+URL Source: https://arxiv.org/pdf/2608.18458v1
+
+Published Time: Thu, 20 Aug 2026 00:25:40 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Joint Beamforming and Phase Shifts Design for RIS-Enabled RSMA-ISAC Systems 
+
+Xuejun Cheng, Graduate Student Member, IEEE, Qian Zhang, Member, IEEE, Yuhui Jiao, Yufei Zhao, Member, IEEE, Zheng Dong, Member, IEEE, Ju Liu, Senior Member, IEEE 
+
+Abstract —This paper investigates the sensing-centric design of reconfigurable intelligent surface (RIS)-enabled rate-splitting multiple access-integrated sensing and communication (RSMA-ISAC) systems. Specifically, we propose a new beam-gain ap-proximation method to enhance the sensing beam gain while satisfying communication quality-of-service (QoS) constraints. Since the joint optimization of the beamforming vectors and RIS phase shifts is highly coupled and non-convex, existing methods typically rely on generic optimization solvers involving substantial computational complexity. To address this issue, we propose an efficient constraints-separation-based alternating optimization algorithm (CS-AO). Our proposed algorithm effectively decouples the optimization variables and yields closed-form solutions for all subproblems, thereby significantly reducing the computational burden. Simulation results show that the proposed algorithm achieves sensing beam-gain performance comparable to succes-sive convex approximation (SCA) and semidefinite relaxation (SDR) benchmarks, while achieving more than 120-fold and 50-fold runtime reductions. In addition, compared with conventional space-division multiple access (SDMA) schemes, the proposed design exhibits substantial sensing beam gain. 
+
+Index Terms —Reconfigurable intelligent surfaces, rate-splitting multiple access, proximal distance, closed form. 
+
+I. I NTRODUCTION 
+
+In recent years, with the rapid advancement of wireless communication technologies, numerous vertical applications have continuously emerged, including urban air mobility, aerial logistics, and intelligent transportation [1]. These ap-plications require both high-throughput data transmission and high-resolution sensing capabilities. Integrated sensing and communication (ISAC) has been regarded as a promising technology to improve spectrum efficiency by sharing wireless hardware and spectrum resources [2]. However, the perfor-mance of ISAC systems is essentially constrained by wire-less propagation environments, particularly when line-of-sight (LoS) links are obstructed. Reconfigurable intelligent surface (RIS) provides an effective solution by reconfiguring wireless channels through dynamic phase-shift adjustment, thereby enhancing communication and sensing performance [3]. In ISAC systems, communication and sensing performances are intrinsically coupled, and the resulting mutual interference                   
+
+> This research was supported in part by the Shandong Provincial Natural Science Foundation under Grant ZR2023LZH003; The corresponding authors: Ju Liu; Zheng Dong. E-mail: {juliu, zhengdong }@sdu.edu.cn. Xuejun Cheng, Yuhui Jiao, Zheng Dong, and Ju Liu are with School of Information Science and Engineering, Shandong University, Qingdao, 266237, China. (email: {chengxuejun, yuhuijiao2024 }@mail.sdu.edu.cn; {zhengdong, juliu }@sdu.edu.cn.) Qian Zhang is with School of Computer and Communication Engineering, Northeastern University at Qinhuangdao, Qinhuangdao 066004, China (e-mail: zhangqian@neuq.edu.cn). Yufei Zhao is with School of Electrical and Electronic Engi-neering, Nanyang Technological University, Singapore 639798 (e-mail: yufei.zhao@ntu.edu.sg).
+
+makes it challenging to optimize both simultaneously. To address this issue, existing ISAC frameworks primarily rely on space division multiple access (SDMA) technology to separate communication and sensing signals, which implicitly treats all interference as noise, exhibiting limitations in interference management [4]. Fortunately, rate-splitting multiple access (RSMA) can be employed as an effective interference manage-ment technique by splitting user messages into common and private streams [5], [6]. Its unique advantage lies in enabling both interference decoding and treating interference as noise, thereby achieving more flexible interference management. Building on this advantage, recent research has introduced RSMA into RIS-ISAC systems to enhance performance in coupled communication-and-sensing scenarios. In [7], Zhang 
+
+et al. jointly designed communication and radar precoders and optimized RIS phase shifts to maximize the minimum secrecy rate in downlink RIS-ISAC systems. In [8], Salem 
+
+et al. jointly optimized transmit beamforming, artificial noise, RIS phase shifts, and radar receive beamforming to enhance robust security while ensuring sensing performance. Although existing studies have investigated RIS-RSMA-ISAC systems from the perspectives of secure transmission, energy efficiency optimization, and sensing performance enhancement, their solution procedures mostly rely on general-purpose convex optimization tools, such as CVX, resulting in high computa-tional complexity. Meanwhile, closed-form or low-complexity beamforming designs have been proposed for conventional ISAC systems without RIS [9]. However, these methods are difficult to directly extend to RIS-aided scenarios, since RIS introduces additional unit-modulus phase-shift constraints and cascaded-channel coupling. Therefore, designing a low-complexity closed-form algorithm for RIS-enabled RSMA-ISAC systems remains challenging. To tackle these challenges, we propose a sensing-centric design for RIS-enabled RSMA-ISAC systems. Specifically, 1) we introduce a new beam-gain approximation method to enhance the sensing beam gain by jointly optimizing the beamforming vectors, RIS phase shifts, and beam phases. 2) we develop a constraint-separation-based alternating opti-mization (CS-AO) algorithm based on the proximal distance algorithm (PDA), to efficiently solve the resulting non-convex optimization problem, and we derive closed-form solutions for all optimization variables. 3) simulation results demonstrate that the proposed CS-AO algorithm achieves sensing beam-gain comparable to successive convex approximation (SCA) and semidefinite relaxation (SDR) benchmarks with signifi-cantly lower runtime, while the proposed design outperforms conventional SDMA schemes in sensing beam gain. arXiv:2608.18458v1 [cs.IT] 19 Aug 2026 2
+
+RIS         
+
+> User-1 User-2 Target
+> Decode
+> Splitter
+> Decode
+> SIC User-K
+> mcMm,c k M
+> mkM
+> m,p k M
+> Transmitter
+> Message Combiner cs
+> 1s
+> 2s
+> 1M
+> 2M
+> 
+> KM
+> ,1 cM
+> , 2 cM
+> ,c K M
+>   
+> cM
+> ,1 pM
+> , 2 pM
+> ,p K M
+>  Ks  
+> Message Splitter
+> Encoder
+> Linear Precoder Message Combiner
+> 
+> Common st re am Private stream s
+
+BS 
+
+> 1x
+> 2x
+> Mx
+> 
+> ky
+> 1f
+> 2f
+> Kf
+> tf
+> G
+
+Fig. 1: The model of RIS-enabled RSMA-ISAC system. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+We consider a RIS-enabled downlink RSMA-ISAC system, as shown in Fig. 1. The system consists of a dual-functional M
+
+transmit antennas base station (BS), a RIS equipped with N =
+
+N1 ×N2 reflecting elements, K single-antenna communication users indexed by K = {1, 2, . . . , K }, and a point-like target. 
+
+1) Communication model: We employ RSMA at the BS to serve multiple communication users. Specifically, the message 
+
+Mk of the k-th user is split into a common part Mc,k and a private part Mp,k . The common parts of all users are jointly encoded into a single common stream sc, while each private part is independently encoded into its corresponding private stream sk. Define s = [ s1, . . . , s K , s c]T ∈ C(K+1) ×1
+
+as the transmitted data stream vector, where E [ss H] = I.Consequently, the transmitted signal at the BS can be ex-pressed as x = Ws = wcsc + ∑ 
+
+> i∈K
+
+wisi, where W =[w1, . . . , wK , wc] ∈ CM×(K+1) , wc and wk denote the linear precoding vectors for the common stream and the private stream of user-k. The direct BS-users links are obstructed. Therefore, the received signal yk at the user-k is expressed as 
+
+yk = hH 
+
+> k
+
+wcsc + hH 
+
+> k
+
+wksk + ∑
+
+> i∈K ,i 6=k
+
+hH 
+
+> k
+
+wisi+ nk, (1) where hH 
+
+> k
+
+= f H 
+
+> k
+
+ΘG , G ∈ CN ×M and fk ∈ CN ×1
+
+represent the channels from the BS to RIS, from RIS to user-k,respectively. Θ = diag (θH) ∈ CN ×N denotes the phase-shift matrix of RIS, where θ = [ θ1, θ 2, . . . , θ N ]T, θn = ejφ n , and 
+
+φn ∈ [0 , 2π]. nk ∼ CN (0, σ 2
+
+> k
+
+) denotes the additive white Gaussian noise (AWGN) at the user-k.Each user initially treats all private streams as interference and then decodes the common stream sc. After successful decoding, sc is removed by successive interference cancel-lation (SIC), and user-k then decodes its private stream sk.Hence, the signal-to-interference-plus-noise ratio (SINR) for the common and private streams at user-k are given by 
+
+γc,k = |hH 
+
+> k
+
+wc|2
+
+∑ 
+
+> i∈K
+
+|hH 
+
+> k
+
+wi|2 + σ2
+
+> k
+
+, γ k = |hH 
+
+> k
+
+wk|2
+
+∑ 
+
+> i∈K ,i 6=k
+
+|hH 
+
+> k
+
+wi|2 + σ2
+
+> k
+
+.
+
+The achievable rate of user-k to decode sc is expressed as 
+
+Rc,k = log 2(1+ γc,k ). To ensure that all users can successfully decode sc, the achievable common rate is given by Rc =min k∈K Rc,k . Let rc denote the predefined transmission rate of the common stream, which satisfies rc ≤ Rc [10]. Following the equal common-rate allocation strategy in [10], [11], the common rate allocated to user-k is set as Ck = rc/K , such that ∑ 
+
+> k∈K
+
+Ck = rc. After SIC, the achievable rate of user-k to decode sk can be expressed as Rk = log 2(1+ γk). Accordingly, the overall achievable rate of user-k is given by Rk, tot =
+
+Ck +Rk. Then, the overall system sum rate is given by Rtotal =
+
+rc + ∑ 
+
+> k∈K
+
+Rk.
+
+2) Sensing model: In the proposed ISAC system, the transmitted signal simultaneously serves communication users while sensing a potential target in the region of interest [12]. Therefore, we enhance the RIS-reflected sensing beam toward the target direction by jointly designing the BS precoders and RIS phase shifts. To achieve this, we propose a beam-gain ap-proximation method, where both common and private streams contribute to the sensing beam. For notational convenience, the common stream is indexed as the (K +1) -th stream, and the approximation problem is formulated as 
+
+min 
+
+> w,θ,ϑ
+> K+1
+
+∑
+
+> k=1
+
+|θHdiag( f H 
+
+> t
+
+)Gwk − δkejϑ k |2, (2) where ft denotes the steering vector at the RIS with respect to the sensing direction, which is given by 
+
+ft =
+
+[
+
+1, e −jπ sin( θt) sin( ϕt), . . . , e −jπ (N1−1) sin( θt) sin( ϕt)
+
+]T
+
+⊗
+
+[
+
+1, e −jπ cos( θt), . . . , e −jπ (N2−1) cos( θt)
+
+]T
+
+/√N . θ t and ϕt de-note elevation and azimuth angles of the sensing direction, respectively. w = [ wT1 , . . . , wT 
+
+> K
+
+, wT 
+
+> c
+
+]T ∈ CM(K+1) ×1. δ k
+
+denotes the preset desired amplitude gain for the k-th stream, while ϑk denotes its corresponding beam phase variable. 
+
+Remark 1: Since E[ss H] = I, the cross terms among different data streams vanish after taking the expectation, and their power contributions to the average transmit beam gain are additive. Thus, equation (2) can be interpreted as a stream-wise response-matching criterion for enhancing the average transmit beam gain in the target direction, which may improve the sensing SNR under fixed receive conditions. Nevertheless, the adopted metric does not characterize the conventional beampattern MSE over the entire angular domain or complete radar detection performance. 
+
+B. Problem Formulation 
+
+We aim to jointly optimize the beamforming vector w at the BS, the phase shift vector θ of RIS, and the beam phase ϑ,with the objective of enhancing the sensing beam gain while satisfying the communication QoS constraints of all users. Accordingly, we formulate the following optimization problem 
+
+min  
+
+> w,θ,ϑ
+
+F =
+
+> K+1
+
+∑
+
+> k=1
+
+|θHdiag( f H 
+
+> t
+
+)Gwk − δkejϑ k |2, (3a) s.t. CBS : ‖wc‖22 + ∑
+
+> i∈K
+
+‖wi‖22 ≤ Pmax , (3b) 
+
+CQoS 1 : γc,k = |hH 
+
+> k
+
+wc|2
+
+∑ 
+
+> i∈K
+
+|hH 
+
+> k
+
+wi|2 +σ2
+
+> k
+
+≥ γth  
+
+> c
+
+, k ∈ K , (3c) 
+
+CQoS 2 : γk = |hH 
+
+> k
+
+wk|2
+
+∑i∈K 
+
+> i6=k
+
+|hH 
+
+> k
+
+wi|2 +σ2
+
+> k
+
+≥ γth 
+
+> p,k
+
+, k ∈ K , (3d) 
+
+CRIS : |θn| = 1 , n = 1 , 2, . . . , N, (3e) where ϑ = [ ϑ1, ϑ 2, . . . , ϑ K , ϑ c]T∈ R(K+1) ×1. γth  
+
+> c
+
+= 2 ∑ 
+
+> i∈K Ci
+
+−
+
+1 = 2 rc − 1, γ th  
+
+> p,k
+
+= 2 [Rmin   
+
+> k−Ck]+
+
+− 1. A detailed derivation of 
+
+γth  
+
+> c
+
+and γth  
+
+> p,k
+
+is provided in [13]. Constraint (3b) restricts the 3
+
+maximum transmit power at the BS; constraint (3c) ensures the decodability of the common stream at all users, while constraint (3d) guarantees that each user’s total achievable rate, composed of the allocated common-rate portion and the private-stream rate, satisfies the minimum rate requirement; constraint (3e) imposes the unit modulus RIS constraint. Problem (3) is intractable due to the non-convex constraints (3c), (3d), and (3e), as well as the coupling among the optimization variables. Existing SCA- or SDR-based methods usually rely on convex optimization tools such as CVX, which incurs high computational complexity. III. B EAMFORMING OPTIMIZATION 
+
+In this section, we propose an efficient constraints-separation-based AO (CS-AO) algorithm to iteratively solve problem (3). Specifically, problem (3) is decomposed into three subproblems by alternately optimizing the BS precoder 
+
+w, RIS phase-shift vector θ, and the beam phase vector ϑ.
+
+A. Precoding Vector Optimization 
+
+With θ and ϑ fixed, the problem (3) can be transformed as 
+
+min  
+
+> w
+
+F(w) s.t. CBS , CQoS 1 , CQoS 2 . (4) Since the constraints CQoS 1 , CQoS 2 are both non-convex, we propose a method to reformulate constraints CQoS 1 , CQoS 2 as 
+
+2R{ ˆwH 
+
+> c
+
+hkhH 
+
+> k
+
+wc} − R{ ˆwH 
+
+> c
+
+hk hH 
+
+> k
+
+ˆwc} − Λc,k ≥ 0,
+
+2R{ ˆwH 
+
+> k
+
+hkhH 
+
+> k
+
+wk} − R{ ˆwH 
+
+> k
+
+hk hH 
+
+> k
+
+ˆwk} − Λk ≥ 0, (5) where Λc,k = γth  
+
+> c
+
+σ2 
+
+> k
+
++ γth 
+
+> c
+
+∑ 
+
+> i∈K
+
+|hH 
+
+> k
+
+wi|2, Λk = γth 
+
+> p,k
+
+σ2 
+
+> k
+
++
+
+γth 
+
+> p,k
+
+∑ 
+
+> i∈K ,i 6=k
+
+|hH 
+
+> k
+
+wi|2.
+
+After the constraint reformulation, problem (4) becomes convex. Existing works typically employ CVX to solve such problems. To reduce computational complexity and obtain closed-form updates, we adapt the PDA framework to problem (4) through constraint decoupling and approximate it as 
+
+min  
+
+> w
+
+F(w)+ ρ
+
+> 2
+
+∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+dist 2(
+
+w, CQoS q,k 
+
+)
+
++ρ dist 2(w, CBS ), (6) where ρ is the penalty parameter that controls the weight of the distance-penalty terms, and dist (X , CY ) represents the Euclidean distance from point X to set CY ; As ρ → ∞ , the optimal solution of problem (6) has the same solution as the original problem (4). We initialize ρ with a small positive value and gradually increase it during the iterations, which follows homotopy optimization and progressively strengthens the penalty on constraint violations [14]. Given that dist (X , CY ) lacks a closed-form solution and poses computational challenges, majorization-minimization approach is employed to derive a tractable explicit formulation as dist (X , CY ) ≤ ‖X − ˜XCY ‖2, where ˜XCY = Π CY (w). Con-sequently, problem (6) can be reformulated as the following unconstrained quadratic programming problem. 
+
+min  
+
+> w
+
+F(w)+ ρ
+
+(
+
+‖w− ˜wBS ‖22+
+
+> 2
+
+∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+‖w− ˜wQoS q,k ‖22
+
+)
+
+, (7) where ˜wCY = Π CY (w) = arg min y∈C Y ‖y − w‖22.
+
+Through analytical calculations, the projection points re-quired in (7) can be obtained as 
+
+[ ˜ wQoS 1,k ]j =
+
+{
+
+wj , if γc,k ≥ γth  
+
+> c
+
+,
+
+[wQoS 1,k ]j , otherwise ,
+
+[ ˜ wQoS 2,k ]j =
+
+{
+
+wj , if γk ≥ γth 
+
+> p,k
+
+,
+
+[wQoS 2,k ]j , otherwise ,
+
+[ ˜ wBS ]j =
+
+
+
+wj , if ‖wc‖22 + ∑Ki=1 ‖wi‖22 ≤ Pmax ,
+
+√Pmax 
+
+‖w‖2
+
+wj , otherwise ,
+
+where 
+
+[wQoS 1,k ]j =
+
+
+
+wc + μc,k hkhH 
+
+> k
+
+ˆwc, if j = c, 
+
+(I + μc,k γth  
+
+> c
+
+hkhH 
+
+> k
+
+)−1wk, if j = k, 
+
+(I + μc,k γth  
+
+> c
+
+hkhH 
+
+> k
+
+)−1wj , otherwise ,
+
+[wQoS 2,k ]j =
+
+
+
+wc, if j = c, 
+
+wk + μp,k hkhH 
+
+> k
+
+ˆwk, if j = k, 
+
+(I + μp,k γth 
+
+> p,k
+
+hkhH 
+
+> k
+
+)−1wj , otherwise .
+
+The Lagrange multipliers μc,k and μp,k must sat-isfy 2R{ ˆwH 
+
+> c
+
+hkhH 
+
+> k
+
+[wQoS 1,k ]c} − γth 
+
+> c
+
+∑Ki=1 |hH 
+
+> k
+
+[wQoS 1,k ]i|2 −R{ ˆwH 
+
+> c
+
+hkhH 
+
+> k
+
+ˆwc} − γth  
+
+> c
+
+σ2 
+
+> k
+
+= 0 , 2R{ ˆwH 
+
+> k
+
+hkhH 
+
+> k
+
+[wQoS 2,k ]k} − 
+
+γth 
+
+> p,k
+
+∑Ki=1 ,i 6=k |hH 
+
+> k
+
+[wQoS 2,k ]i|2 − R{ ˆwH 
+
+> k
+
+hkhH 
+
+> k
+
+ˆwk} − γth 
+
+> p,k
+
+σ2 
+
+> k
+
+=0, which can be efficiently solved via bisection search. The derivation details of ˜wQoS q,k are provided in Appendix A. Substituting these projection points into (7), the final closed-form update of the precoding vector is given by 
+
+w⋆j =(GHΘHftf H 
+
+> t
+
+ΘG + ρ(1 + 2 K)I)−1(GHΘHftδj ejϑ j
+
++ ρ([ ˜ wBS ]j +
+
+> 2
+
+∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+[ ˜ wQoS q,k ]j
+
+)) . (8) 
+
+B. RIS Phase-Shift Vector Optimization 
+
+With w and ϑ fixed, the problem (3) can be transformed as 
+
+min  
+
+> θ
+
+F(θ) s.t. CQoS 1 , CQoS 2 , CRIS . (9) Following the same method as in (5), the non-convex QoS constraints CQoS 1 and CQoS 2 in problem (9) are transformed into g1(θ) ≥ 0 and g2(θ) ≥ 0, respectively, where 
+
+g1(θ) = 2 R{ ˆθHZc,k θ} − R{ ˆθHZc,k ˆθ} − ˜Λc,k ,g2(θ) = 2 R{ ˆθHZk,k θ} − R{ ˆθHZk,k ˆθ} − ˜Λk,
+
+Zi,k = diag( f H 
+
+> k
+
+)GwiwH 
+
+> i
+
+GHdiag( fk ),
+
+˜Λc,k = γth  
+
+> c
+
+σ2 
+
+> k
+
++ γth 
+
+> c
+
+∑ 
+
+> i∈K
+
+θHZi,k θ,
+
+˜Λk = γth 
+
+> p,k
+
+σ2 
+
+> k
+
++ γth 
+
+> p,k
+
+∑ 
+
+> i∈K ,i 6=k
+
+θHZi,k θ.
+
+(10) Following the PDA framework, the problem (9) can be approximated as 
+
+min  
+
+> θ
+
+F(θ) + ρ
+
+( 2∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+‖θ − ˜θQoS q,k ‖22 + ‖θ − ˜θRIS ‖22
+
+)
+
+, (11) where ˜θQoS q,k = Π CQoS q,k (θ), q = 1 , 2, ˜θRIS = Π CRIS (θ).Subsequently, after some algebraic manipulations, the final closed-form update of RIS phase-shift vector is given by 
+
+θ⋆ =
+
+(K+1 ∑
+
+> k=1
+
+diag( f H 
+
+> t
+
+)GwkwH 
+
+> k
+
+GHdiag( ft) + (2 K + 1) ρI
+
+)−1
+
+×
+
+(K+1 ∑
+
+> k=1
+
+diag( f H 
+
+> t
+
+)Gwkδke−jϑ k + ρc
+
+)
+
+, (12) where 
+
+c =
+
+> 2
+
+∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+˜θQoS q,k + ˜θRIS , bj,k = diag( f H 
+
+> k
+
+)Gwj wH 
+
+> j
+
+GHdiag( fk),
+
+˜θQoS 1,k =
+
+{ θ, if |θHdiag( f H    
+
+> k)Gwc|2
+> ∑Ki=1 |θHdiag( fH
+> k)Gwi|2+σ2
+> k
+
+≥ γth  
+
+> c
+
+,
+
+A−11,k (θ + μc,k bc,k ˆθ), otherwise ,4
+
+Algorithm 1 Proposed CS-AO Algorithm for Problem (3) 
+
+1: Input: Initialize w, θ, ϑ, ρw > 0, ρθ > 0, κ > 1; ℓ = 1 .
+
+2: repeat 
+
+3: Update wℓ+1 via (8) with ρ = ρw ; set ρw ← κρ w every 
+
+I iterations. 
+
+4: Update θℓ+1 via (12) with ρ = ρθ; set ρθ ← κρ θ every 
+
+I iterations. 
+
+5: ϑℓ+1 
+
+k = ∠ξℓ+1 
+
+k = ∠ (θℓ+1 ,H diag( f H
+
+t )Gwℓ+1 
+
+k
+
+);
+
+6: ℓ = ℓ + 1 ;
+
+7: until ∣∣F(ℓ) − F (ℓ−1) ∣∣ < 10 −4 is satisfied. 
+
+˜θQoS 2,k =
+
+
+
+θ, if |θHdiag( f H 
+
+> k
+
+)Gwk |2
+
+∑Ki=1 ,i 6=k |θHdiag( f H 
+
+> k
+
+)Gwi|2 +σ2
+
+> k
+
+≥ γth 
+
+p,k ,
+
+A−12,k (θ + μp,k bk,k ˆθ), otherwise ,
+
+A1,k = I + μc,k γth 
+
+cK∑
+
+i=1 
+
+bi,k , A2,k = I + μp,k γth 
+
+p,k K∑
+
+i=1 ,i 6=k
+
+bi,k ,
+
+[ ˜θRIS ]n = θn
+
+|θn| , n = 1 , 2, . . . , N. 
+
+It can be observed from (8) and (12) that ρ balances the minimization of the original objective and the enforcement of the separated constraints in the closed-form updates. 
+
+C. Beam Phase Optimization 
+
+With w and θ fixed, the problem (3) can be transformed as 
+
+min 
+
+ϑk
+
+F(ϑ) = 
+
+K+1 ∑
+
+k=1 
+
+|θHdiag( f H
+
+t )Gwk − δkejϑ k |2,
+
+s.t. ϑk ∈ [0 , 2π).
+
+(13) Define ξk = θH diag( f H
+
+t )Gwk. Since ∥∥ξk − δkejϑ k
+
+∥∥22 =
+
+|ξk|2 + |δk|2 − 2δk|ξk | cos( ϑk − ∠ξk), the problem (13) can be solved by max 
+
+ϑk ∈[0 ,2π) cos( ϑk − ∠ξk). (14) It is evident that the optimal solution is given by ϑ⋆k = ∠ξk.The proposed CS-AO algorithm is summarized in Algorithm 1. 
+
+D. Convergence and Computational Complexity Analysis 
+
+According to the PDA convergence result in [14], [15], when the inner PDA iterations converge to feasible solutions, the updates of w and θ do not increase the corresponding block objectives. Moreover, each beam-phase variable is updated to its global optimum as ϑk = ∠ξk . Hence, 
+
+F(wℓ+1 , θℓ+1 , ϑℓ+1 ) ≤ F (wℓ+1 , θℓ+1 , ϑℓ) ≤ F (wℓ+1 , θℓ, ϑℓ) ≤F(wℓ, θℓ, ϑℓ). Since F ≥ 0, the objective-value sequence is monotonically non-increasing and therefore convergent. The per-iteration complexity of the proposed CS-AO algorithm is 
+
+O(K2M 3 + K2N M + K2N 2 + KN 3). For comparison, the per-iteration complexities of the SCA and SDR benchmarks are O(K3M 3 + K2N M + K2N 2 + ( N + K)3) and 
+
+O
+
+(√KM (K2M 3 +K3M 2)+ √N +K(N 4 +KN 3 +K2N 2)
+
+)
+
+.
+
+IV. SIMULATION RESULTS 
+
+In this section, numerical results are presented to demon-strate the performance of the proposed algorithm for RIS-enabled RSMA-ISAC systems. The BS and RIS are located at (-20m, 0m, 25m) and (0m, 0m, 0m), respectively. The user-to-RIS distances are randomly distributed in [50, 100] meters. For the RIS-to-user channel, we adopt the channel model from [16]. The channel vector is modeled as fk ∼ CN (0 , β kR),   
+
+> 0510 15 2.9925 2.9935 2.9945 2.9955 2.9965 10 4
+
+Fig. 2: Convergence of different algorithms. M = 10 , K =2, P max = 30 dBm.     
+
+> 6810 12 14 20 25 30 35 40 45 50
+> Proposed Algorithm (N=64) SCA Algorithm (N=64) SDR Algorithm (N=64) Proposed Algorithm (N=100) SCA Algorithm (N=100) SDR Algorithm (N=100)
+
+(a) Sensing Beam Gain         
+
+> 6810 12 14 020 40 60 80 100 120 140
+> Proposed Algorithm (N=64) SCA Algorithm (N=64) SDR Algorithm (N=64) Proposed Algorithm (N=100) SCA Algorithm (N=100) SDR Algorithm (N=100) 6810 12 14 11.2 1.4 1.6 1.8
+
+(b) Average Runtimes 
+
+Fig. 3: Comparison between the proposed algorithm and ex-isting algorithms with different M . K = 2 , P max = 30 dBm. 
+
+> (-10,0,25) (-20,0,25) (-30,0,25) (-40,0,25) (-50,0,25) 010 20 30 40 50
+> Proposed Algorithm (N=64) SCA Algorithm (N=64) SDR Algorithm (N=64)
+
+(a) Different BS locations    
+
+> Corr. Rayleigh Ind. Rayleigh Rician 010 20 30 40 Proposed Algorithm (N=64) SCA Algorithm (N=64) SDR Algorithm (N=64)
+
+(b) Different RIS-user channels 
+
+Fig. 4: Comparison between the proposed algorithm and existing algorithms under different BS locations and RIS-user channel models. K = 2 , M = 10 , and Pmax = 30 dBm. where βk = 10 −3d−2
+
+k and dk represents the distance between the RIS and user-k. The large-scale fading of G is represented by PL = 37 .3 + 22 .0 log ( d), where d denotes the distance between devices, while the small-scale fading follows the Rician channel model [17]. We set λ = 0 .03 m, δ k = 100 , ρ w =
+
+ρθ = 1 , κ = 2 , I = 10 , γ th 
+
+c = γth 
+
+p,k = 1 , σ 2
+
+k = −100 dBm , θ t =90 ◦, φ t = 45 ◦. All algorithms are implemented in MATLAB R2024b and run on a desktop with an Intel(R) Core(TM) i5-7500 CPU and 16.0 GB RAM. As shown in Fig. 2, the proposed CS-AO algorithm con-verges within a few iterations, which verifies its convergence behavior. To verify the effectiveness of our proposed CS-AO algorithm, we compared it with the benchmark SCA and SDR algorithms. Fig. 3 shows that the proposed algorithm achieves sensing beam gain comparable to the two benchmarks under different numbers of BS antennas M , indicating that the closed-form updates can well preserve the sensing beam-gain performance. Meanwhile, the computational efficiency is significantly improved, with more than 120-fold and 50-fold runtime reductions compared with SCA and SDR, respectively. For the runtime results in Fig. 3(b), the proposed algorithm achieves standard deviations below 0.2 s and 0.35 s for N = 64 
+
+and N = 100 , respectively, confirming computational stability. To verify robustness, we consider different BS locations and RIS-user channel models. As shown in Fig. 4, the sensing 5    
+
+> 6810 12 14 10 15 20 25 30 35 40
+> RSMA-ISAC (N=64) RSMA-ISAC (N=100) SDMA-ISAC (N=64) SDMA-ISAC (N=100)
+
+(a) Impact of M , K = 8     
+
+> 46810 12 10 15 20 25 30 35 40
+> RSMA-ISAC (N=64) RSMA-ISAC (N=100) SDMA-ISAC (N=64) SDMA-ISAC (N=100)
+
+(b) Impact of K, M = 10 
+
+Fig. 5: Comparison of sensing beam gain between RSMA and SDMA. Pmax = 30 dBm.    
+
+> 510 15 20 10 15 20 25 30
+> RSMA-ISAC(K=2,N=64) RSMA-ISAC(K=8,N=64) RSMA-ISAC(K=12,N=64)
+
+Fig. 6: Trade-off performance between achievable rate and sensing beam gain. M = 10 , P max = 30 dBm. beam gain decreases as the BS moves away from the RIS due to increased BS-RIS path loss. Nevertheless, the proposed CS-AO algorithm achieves performance close to the SCA and SDR benchmarks in all considered cases, demonstrating its robustness under different geometries and channel settings. To further demonstrate the sensing beam-gain advantage of the proposed RSMA-ISAC scheme, we compare it with the conventional SDMA scheme. Fig. 5 shows that the proposed scheme achieves higher system performance, especially in the overloaded regime with 
+
+K > M . This is because SDMA can no longer sufficiently suppress inter-user interference under overloaded conditions. In contrast, RSMA encodes part of the information into a common stream, thereby providing a more flexible mech-anism for inter-user interference management and resulting in better sensing beam gain performance. In Fig. 6, we simulate the ISAC performance. As the number of users or the rate requirement increases, more power is allocated to communication links, leaving less power for sensing and thus reducing the sensing beam gain. This confirms the resource competition between rate enhancement and sensing beam-gain improvement in ISAC systems. V. C ONCLUSION 
+
+We investigated a sensing-centric design for RIS-enabled RSMA-ISAC systems and proposed a low-complexity struc-tured optimization framework. By introducing a new beam-gain approximation method and a constraint-separation mech-anism, the proposed algorithm effectively alleviated the high coupling and non-convexity of the original optimization prob-lem. Simulation results show that the proposed RSMA-ISAC scheme achieves higher sensing beam gain than SDMA, while the CS-AO algorithm maintains comparable sensing beam-gain performance to SCA and SDR with significantly lower runtime. Future research may consider more general and practical models and constraints, such as imperfect channel state information and cooperative multi-RIS deployment, to broaden its applicability to intelligent wireless sensing and communication networks. APPENDIX A: P ROOF OF ˜wQOS1,k 
+
+The projection ˜wQoS 1,k can be obtained by solving the following optimization problem 
+
+min  
+
+> w
+
+‖w − y‖22, s.t. g3(w) ≥ 0, (15) where w = [ wT1 , . . . , wT 
+
+> K
+
+, wT 
+
+> c
+
+]T denotes the projection point. 
+
+g3(w) = 2 R{ ˆwH 
+
+> c
+
+hkhH 
+
+> k
+
+wc} − R{ ˆwH 
+
+> c
+
+hkhH 
+
+> k
+
+ˆwc} − Λc,k ≥ 0
+
+Then, we derive the KKT conditions for problem (15) as 
+
+∂L/∂ w∗ 
+
+> c
+
+= wc −yc −μc,k hkhH 
+
+> k
+
+ˆwc = 0 , μ c,k ≥ 0, g 3(w) ≥ 0,∂L/∂ w∗ 
+
+> k
+
+= wk −yk +μc,k γth  
+
+> c
+
+hk hH 
+
+> k
+
+wk = 0 , μ c,k g3(w) = 0 ,∂L/∂ w∗ 
+
+> j
+
+= wj −yj +μc,k γth  
+
+> c
+
+hk hH 
+
+> k
+
+wj = 0 , j ∈ K , j 6 = k, 
+
+where μc,k is a dual variable. From stationarity conditions and Woodbury matrix identity, we obtain the closed-form solution 
+
+[w]j =
+
+
+
+yc + μc,k hk hH 
+
+> k
+
+ˆwc, if j = c, 
+
+(I + μc,k γth  
+
+> c
+
+hkhH 
+
+> k
+
+)−1yk, if j = k, 
+
+(I + μc,k γth  
+
+> c
+
+hkhH 
+
+> k
+
+)−1yj , otherwise .
+
+(16) By complementary slackness, μc,k = 0 if the constraint is inactive. For μc,k > 0, the constraint is active, and μc,k 
+
+satisfies γth 
+
+> c
+
+∑Ki=1 
+
+∣∣hH 
+
+> k
+
+[w]i
+
+∣∣2 + γth  
+
+> c
+
+σ2 
+
+> k
+
++ R{̂ wH 
+
+> c
+
+hkhH
+
+> k
+
+̂ wc
+
+} −
+
+2R{̂ wH 
+
+> c
+
+hkhH 
+
+> k
+
+[w]c
+
+} = 0 . The projection ˜wQoS 2,k follows analogous steps, with the detailed derivation provided in [13]. REFERENCES [1] X. Gao et al. , “Agentic satellite-augmented low-altitude economy and terrestrial networks: A survey on generative approaches,” IEEE Com-mun. Surv. Tutor. , vol. 28, pp. 4800–4841, Feb. 2026. [2] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas. Commun. , vol. 40, no. 6, pp. 1728–1767, Jun. 2022. [3] Q. Zhang et al. , “Multi-resolution codebook design and multiuser interference management for discrete XL-RIS-aided near-field MIMO systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 2826–2842, 2026. [4] Z. Chen et al. , “Optimization of weighted energy efficiency for RSMA-RIS-assisted ISAC system,” IEEE Trans. Veh. Technol. , vol. 74, no. 11, pp. 18 249–18 254, Nov. 2025. [5] B. Clerckx et al. , “A primer on rate-splitting multiple access: Tutorial, myths, and frequently asked questions,” IEEE J. Sel. Areas. Commun. ,vol. 41, no. 5, pp. 1265–1308, May 2023. [6] X. Cheng et al. , “Robust beamforming for practical RIS-aided RSMA systems with imperfect SIC under transceiver hardware impairments,” 
+
+IEEE Trans. Veh. Technol. , pp. 1–7, 2026. [7] C. Zhang et al. , “Robust secure beamforming design for downlink RIS-ISAC systems enhanced by RSMA,” IEEE Wireless Commun. Lett. ,vol. 14, no. 5, pp. 1271–1275, May 2025. [8] A. A. Salem et al. , “Robust secure ISAC: How RSMA and active RIS manage eavesdropper’s spatial uncertainty,” IEEE Trans. Veh. Technol. ,vol. 75, no. 3, pp. 4383–4398, Mar. 2026. [9] C. Xu et al. , “Rate-splitting multiple access for multi-antenna joint radar and communications,” IEEE J. Sel. Top. Sign. Proces. , vol. 15, no. 6, pp. 1332–1347, Nov. 2021. [10] H. Fu et al. , “Robust secure beamforming design for two-user downlink MISO rate-splitting systems,” IEEE Trans. Wireless Commun. , vol. 19, no. 12, pp. 8351–8365, Dec. 2020. [11] H. Xia et al. , “Security–spectral efficiency tradeoff in STAR-RIS RSMA: A max–min fairness framework,” IEEE Commun. Lett. , vol. 30, pp. 1890–1894, Apr. 2026. [12] J. Li and P. Stoica, “MIMO radar with colocated antennas,” IEEE Signal Process. Mag. , vol. 24, no. 5, pp. 106–114, Sep. 2007. [13] X. Cheng et al. , “Technical note on rate-coupled QoS constraints and PDA projection derivations for RIS-enabled RSMA-ISAC systems,” ht tps://github.com/C-XJ2000/RIS-RSMA-ISAC-Derivations, Jul. 2026. [14] C. Wang et al. , “STAR-RIS-enabled secure dual-functional radar-communications: Joint waveform and reflective beamforming optimiza-tion,” IEEE Trans. Inf. Forensics Secur. , vol. 18, pp. 4577–4592, 2023. [15] K. Lange and K. L. Keys, “The proximal distance algorithm,” arXiv preprint arXiv:1507.07598 , 2015. [16] E. Bj¨ ornson and L. Sanguinetti, “Rayleigh fading modeling and channel hardening for reconfigurable intelligent surfaces,” IEEE Wireless Com-mun. Lett. , vol. 10, no. 4, pp. 830–834, Apr. 2021. [17] W. Wang et al. , “Beamforming and jamming optimization for IRS-aided secure NOMA networks,” IEEE Trans. Wireless Commun. , vol. 21, no. 3, pp. 1557–1569, Mar. 2022.

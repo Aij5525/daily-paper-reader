@@ -1,0 +1,674 @@
+Title: Robust Near-Field Beam Focusing Under Imperfect Localization
+
+URL Source: https://arxiv.org/pdf/2608.19416v1
+
+Published Time: Fri, 21 Aug 2026 00:11:25 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Robust Near-Field Beam Focusing Under Imperfect Localization 
+
+Nima Mozaffarikhosravi, Amirhossein Azarbahram, Prathapasinghe Dharmawansa, and Italo Atzeni 
+
+Centre for Wireless Communications, University of Oulu, Finland E-mail: {nima.mozaffari, amirhossein.azarbahram, prathapasinghe.kaluwadevage, italo.atzeni}@oulu.fi 
+
+Abstract —The transition to 6G-and-beyond wireless systems with large-scale antenna arrays and high-frequency deployments significantly extends the near-field region, where channels exhibit a strong dependence on user location. While this enables location-based beam focusing as a low-overhead alternative to conventional channel estimation, its performance is highly sensitive to localization errors. In this paper, we study robust near-field beam focusing under imperfect user localization. We explicitly characterize the impact of localization errors on the line-of-sight-dominated channel by deriving a tractable uncertainty model via a first-order Taylor approximation, which captures the coupled effects of distance and angle in near-field propagation. Building on this model, we formulate a max-min signal-to-interference-plus-noise ratio optimization problem that guarantees performance under worst-case channel realizations induced by bounded localization errors. The resulting problem is reformulated into a feasibility problem using semidefinite relaxation. Numerical results demonstrate that the proposed robust design significantly improves the worst-user rate compared to non-robust beam focusing, particularly under high total transmit power levels and large localization error ranges. 
+
+Index Terms —Localization, near-field communications, robust beam focusing, XL-MIMO. 
+
+I. I NTRODUCTION 
+
+Recent advances in 6G-and-beyond systems, prompted by applications such as virtual reality and autonomous driv-ing, have raised the demand for higher data rates, reliable communications, and balanced performance across users in wireless systems [1], [2]. A promising technology to meet these requirements is massive multiple-input multiple-output (MIMO), which improves performance by providing additional beamforming and spatial gain [3]. As wireless systems shift toward operating at higher frequency bands, antennas become physically smaller, which facilitates the deployment of ex-tremely large-scale (XL)-MIMO systems. When large arrays are employed at smaller wavelengths, the radiative near-field region, commonly characterized by the Fraunhofer distance, extends significantly and can reach hundreds of meters. In this regime, the channel explicitly depends on the location of the user through spherical wavefront propagation, making location information a useful means of channel state information (CSI) acquisition with lower signaling overhead than conventional pilot-based methods [4], [5]. Near-field beamforming (or beam focusing) inherently lever-ages user location information to achieve highly directional and 
+
+> This work was supported by the Research Council of Finland (336449 Profi6, 348396 HIGH-6G, and 369116 6G Flagship).
+
+spatially selective transmissions. However, to effectively exploit this information, accurate user localization becomes critical. Although modern localization techniques can achieve high accuracy, even small estimation errors may result in significant near-field channel mismatches due to the strong sensitivity to distance and, in particular, angle variations at high frequencies [6]. Therefore, instead of relying on near-perfect localization, it is more practical to design beam-focusing strategies that are inherently robust to location uncertainty. Such robust designs can maintain reliable performance without requiring extremely precise localization or exhaustive refinement of user locations, thereby reducing system complexity and signaling overhead. Robust beamforming under imperfect CSI has been ex-tensively studied in the literature. For instance, [7] investi-gates worst-case robust MIMO transmission by modeling CSI uncertainties within bounded sets and formulating signal-to-interference-plus-noise ratio (SINR)-constrained optimization problems, where techniques such as semidefinite relaxation (SDR) enable globally optimal solutions under specific con-ditions. Moreover, [8] extends robust beamforming design to cooperative cell-free mmWave MIMO networks, where hybrid beamformers are optimized under imperfect CSI to mitigate the performance degradation caused by channel uncertainty, while [9] incorporates user location uncertainty into a max-min fairness formulation, demonstrating how spatial errors directly impact multi-user performance. More recently, robustness has been revisited in the context of near-field and XL-MIMO systems. Specifically, in [10], a robust near-field CSI estimation framework is proposed by combining model-driven and data-driven approaches, including dual-stage optimization and residual refinement, to improve estimation accuracy under complex propagation conditions. Similarly, [11] studies robust near-field beams that focus on localization errors by formulating ergodic sum-rate maximization problems and solving them through deterministic and stochastic optimization, highlighting the importance of robustness against location-induced CSI inaccuracies. Despite these advances, several important gaps remain underexplored. Although robustness against channel uncer-tainty is well established for far-field beamforming, existing works typically rely on channel models where the impact of uncertainty is primarily angular. In contrast, near-field channels depend jointly on distance and angle, making the relationship between localization errors and channel mismatch significantly more intricate. To the best of our knowledge, there is no prior arXiv:2608.19416v1 [eess.SP] 19 Aug 2026 work that directly formulates and solves a robust beam-focusing problem in near-field systems by explicitly starting from user location uncertainty and designing robust beamformers based on the channel for the estimated locations. In this work, we consider a downlink (DL) XL-MIMO system in the near-field regime, where imperfect user local-ization leads to channel uncertainty at the transmitter. To address this challenge, we explicitly characterize the impact of localization errors on the channel by deriving a tractable worst-case channel model through linearizing the near-field channel with respect to localization errors within a bounded uncertainty set. This formulation captures the coupling between distance and angle in near-field propagation and enables a structured representation of the resulting channel uncertainty. Here, we focus on line-of-sight (LoS)-dominated propagation and an ellipsoidal uncertainty set, as they constitute a fundamental starting point for future extensions to multipath propagation scenarios and more practically accurate localization error models. Based on this formulation, we develop a beam-focusing design using SDR, which guarantees performance under the worst-case channel realizations induced by location uncertainty and total transmit power constraints. The resulting optimization problem is reformulated in a convex form that can be efficiently solved. The proposed approach is evaluated through a max-min SINR optimization framework, demonstrating its effectiveness in improving worst-user worst-case rate performance under varying transmit power levels and uncertainty set sizes, and highlighting its robustness against localization-induced channel mismatches. 
+
+Structure: Section II introduces the system model and the problem formulation. The proposed robust beam-focusing design is discussed in Section III, while Section IV provides the numerical results, and Section V concludes the paper. 
+
+Notations: Vectors and matrices are denoted by boldface lower and uppercase letters, respectively. The transpose and conjugate transpose operators are denoted by (·)T and (·)H,respectively. The identity matrix of dimension n and the all-zero matrix of proper dimension are denoted by In and 
+
+0, respectively, whereas Diag( ·) denotes a diagonal matrix formed from its arguments. A ≻ 0 (A ⪰ 0) denotes that 
+
+A is Hermitian positive (semi)definite, whereas A 12 is the positive definite square root of A. The Euclidean vector norm is denoted by ∥ · ∥ 2, the corresponding induced matrix norm by 
+
+∥A∥2 = max ∥v∥2≤1 ∥Av ∥2, and ∥ · ∥ F denotes the Frobenius norm. The real part and magnitude of a complex scalar are denoted by Re {·} and |·| , respectively, while j = √−1 denotes the imaginary unit. The trace operator is denoted by tr( ·).II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+In this section, we introduce the considered system model, including the channel and location uncertainty models. Building on these elements, we formulate a robust max-min SINR optimization problem that accounts for imperfect CSI at the base station (BS) caused by localization errors. We consider a DL XL-MIMO system where a BS equipped with M antennas simultaneously serves K single-antenna users, 
+
+> x-axis
+> y-axis
+> BS
+> •••••••
+> dD
+> ˆpk
+> Ek
+> Fig. 1. Considered system model with ellipsoidal location uncertainty sets.
+
+as depicted in Fig. 1. Linear precoding is employed at the BS, where U = [ u1, . . . , uK ] ∈ CM ×K denotes the beamforming matrix and uk ∈ CM ×1 is the beamforming vector dedicated to user k. The transmit power is constrained as ∥U∥2F ≤
+
+PBS , where PBS is the total transmit power budget. The DL channel of user k is denoted by hk ∈ CM ×1. Accordingly, the instantaneous SINR of user k is given by 
+
+γk(U) = |hH 
+
+> k
+
+uk|2
+
+P  
+
+> j̸=k
+
+|hH 
+
+> k
+
+uj |2 + σ2
+
+> k
+
+, (1) where σ2 
+
+> k
+
+is the additive white Gaussian noise (AWGN) power. We consider a two-dimensional Cartesian setting where the BS is located at (0 , 0) and the location of user k is denoted by pk = [ xk, y k]T ∈ R2.
+
+A. Near-Field Channel Model 
+
+We adopt a near-field propagation model where each channel depends explicitly on the user location. As an initial step towards understanding the impact of imperfect user localization, we focus on purely LoS propagation, which is representative of many high-frequency scenarios [12] and allows us to isolate the effect of location uncertainty on the channel; extensions to multipath propagation will be considered in future work. The BS is equipped with a uniform linear array (ULA) with antenna spacing d and total length D = ( M − 1) d. Let fc and λc = cfc
+
+denote the carrier frequency and the corresponding wavelength, respectively, where c is the speed of light in vacuum. We consider a common pathloss factor across all antennas and model the channel between the BS and a generic location 
+
+p = [ x, y ]T ∈ R2 as [4] 
+
+hLoS (p) = λc
+
+4π∥p∥2
+
+e−j 2πλc ∥p∥2 b(p) ∈ CM ×1, (2) where b(p) = [ b0(p), . . . , b M −1(p)] T ∈ CM ×1 denotes the near-field steering vector for the ULA. The mth element of 
+
+b(p) is given by 
+
+bm(p) = e−j 2πλc rm , (3) where 
+
+rm = p(x − δmd)2 + y2 (4) is the distance between p and the mth antenna at the BS, with δm = 2m−M +1 2 , ∀m = 0 , . . . , M − 1. Leveraging the second-order Fresnel approximation, which is accurate in the radiating near-field [13], (4) can be approximated as 
+
+rm ≈ ∥ p∥2 − x
+
+∥p∥2
+
+δmd + y2
+
+2∥p∥32
+
+δ2
+
+> m
+
+d2. (5) For notational simplicity, the true channel of user k located at the true location pk and the estimated channel of user k based on the estimated location ˆpk are denoted by hk = hLoS (pk)
+
+and ˆhk = hLoS (ˆ pk), respectively. 
+
+B. Location Uncertainty Model 
+
+Due to imperfect user localization, the BS has access only to an estimated location ˆpk ∈ R2 for each user k, expressed as 
+
+ˆpk = pk + ek ∈ R2, (6) where ek = [ ek,x , e k,y ]T ∈ R2 is the localization error vector capturing the uncertainty in the x- and y-coordinates. The estimated locations may be obtained at the BS through uplink localization or sensing, or reported by the users. We model imperfect localization using a bounded error model in which the true location of each user lies within a compact region around its estimate [9]. In particular, we use ellipsoidal uncertainty sets to capture the different localization accuracies in the radial and angular directions, as shown in Fig. 1. Accordingly, the localization error vector corresponding to user k belongs to the location uncertainty set 
+
+Ek = {ek ∈ R2 : eT 
+
+> k
+
+Q−1 
+
+> k
+
+ek ≤ 1}, Qk ≻ 0, (7) with size, shape, and orientation determined by Qk ∈ R2×2.The bounded ellipsoidal model adopted here provides atractable representation of the location uncertainty set, making it particularly suitable for robust optimization. The stochastic modeling of localization errors, which may provide a more realistic but less tractable characterization, will be investigated in future work. 
+
+C. Problem Formulation 
+
+Assuming that the BS has access only to the estimated user locations in (6), which results in imperfect CSI, our goal is to design the transmit beam-focusing vectors at the BS to maximize the worst-case SINR among all users. Since the near-field LoS channel is determined by the user location through the steering vector, localization errors translate into structured perturbations of the channel. Specifically, substituting (6) into the near-field channel model in (2) shows that the induced channel perturbation is generally a nonlinear function of the localization error due to the distance-dependent pathloss and spherical-wave phase terms. Since the location uncertainty enters the near-field channel model in a nonlinear manner, directly treating it in the location domain is analytically challenging. To obtain a more tractable formulation, we instead describe the uncertainty in the channel domain by expressing the estimated channel as [7] 
+
+ˆhk = hk + zk ∈ CM ×1, (8) where zk ∈ CM ×1 represents the channel estimation error induced by imperfect user localization. Accordingly, robustness is ensured for each user by considering all the channels that are consistent with the available estimated user location, i.e., all possible channels induced by the user’s location uncertainty set. The resulting channel uncertainty set of user k, centered at the estimated channel ˆhk, is given by 
+
+Hk = {hk ∈ CM ×1 : hk = ˆhk − zk, zk ∈ Z k}, (9) where the set Zk is implicitly induced by the location uncertainty set Ek defined in (7) through the nonlinear near-field channel mapping. Despite the convexity of Ek, the resulting channel uncertainty set in (9) is nonconvex. Therefore, in Section III-A, we derive a tractable approximation that yields an affine uncertainty representation in the channel domain, enabling a convex robust reformulation. Finally, the considered robust max-min SINR optimization problem, which maximizes the worst-user worst-case SINR, is formulated as 
+
+maximize  
+
+> U
+
+min  
+
+> k=1 ,...,K
+
+min  
+
+> hk∈H k
+
+γk(U)s.t. ∥U∥2F ≤ PBS . (10) III. R OBUST BEAM -FOCUSING DESIGN 
+
+In this section, we develop an efficient solution method for the robust max-min SINR optimization problem in (10). Specifically, we first introduce a tractable channel uncertainty model and then apply SDR to the resulting approximate problem. 
+
+A. Tractable Channel Uncertainty Model 
+
+Here, we develop a tractable approximation of the estimated channel in (8). The key difficulty is that the channel uncertainty set Hk is not given explicitly, but arises implicitly from errors in the estimated location of user k. As a result, the channels and corresponding SINR depend nonlinearly on the unknown user locations. To overcome this challenge, we proceed in two steps. First, we establish an explicit approximate relationship between localization errors and channel estimation errors by using a first-order Taylor expansion of (2). Second, since the resulting sensitivity matrix still depends on the underlying user location, we characterize a worst-case channel perturbation over the ellipsoidal location uncertainty set and use it to define a conservative, location-independent uncertainty model for robust beam-focusing design. We begin by linearizing the channel around the true user location pk = [ xk, y k]T, corresponding to ek = 0. Based on (2), a first-order Taylor expansion of the channel with respect to the generic location p = [ x, y ]T yields 
+
+hLoS (p) ≈ hk + ∂hLoS (p)
+
+∂x (x − xk) + ∂hLoS (p)
+
+∂y (y − yk).
+
+(11) Defining r = ∥p∥2 = px2 + y2, the partial derivative of the channel with respect to x is given by 
+
+gx(p) = ∂hLoS (p)
+
+∂x (12) 
+
+= λc
+
+4πr e−j 2πλc r
+
+ 
+
+− 1
+
+r − j 2πλc
+
+ xr IM
+
++ j 2πλc
+
+
+
+d y2
+
+r3 ∆ + d2 3xy 2
+
+2r5 ∆2
+
+ 
+
+b(p), (13) with ∆ = Diag( δ0, . . . , δ M −1) ∈ RM ×M . Similarly, the partial derivative with respect to y is given by 
+
+gy (p) = ∂hLoS (p)
+
+∂y (14) 
+
+= λc
+
+4πr e−j 2πλc r
+
+ 
+
+− 1
+
+r − j 2πλc
+
+ yr IM
+
+− j 2πλc
+
+
+
+d xy r3 ∆ + d2
+
+ yr3 − 3y3
+
+2r5
+
+
+
+∆2
+
+ 
+
+b(p).
+
+(15) Then, (13) and (15) are used to construct the sensitivity matrix 
+
+Gk(p) = gx(p), gy (p) ∈ CM ×2. (16) Recalling the relation ˆpk − pk = ek, we substitute ˆpk into (16) to approximate the estimated channel in (8) as 
+
+ˆhk ≈ hk + Gk(ˆ pk)ek
+
+| {z }
+
+> ≈zk
+
+, (17) which establishes an approximate affine mapping from the localization error ek to the channel perturbation zk. The neglected Taylor remainder is of order O(∥ek∥22), making the approximation accurate for small bounded localization errors. Although (17) provides an affine perturbation model, the sensitivity matrix still depends on the estimated user location 
+
+ˆpk, which yields an approximate perturbation model that depends on the true user location pk. This dependence prevents a direct characterization of the channel uncertainty set (9) in a form that is independent of the underlying user location, which is required to express the objective in (10) solely in terms of the channels and enable a tractable worst-case reformulation. To address this issue, we next characterize the worst-case channel perturbation induced by the ellipsoidal location uncertainty set in (7) and use it to identify a conservative evaluation point for the sensitivity matrix. 
+
+Proposition 1. Under the first-order approximation in (17) ,the worst-case magnitude of the channel estimation error of user k over the ellipsoidal location uncertainty set in (7) is given by 1
+
+max  
+
+> ek∈E k
+
+Gk(p)ek 2 = Gk(p)Q 12 
+
+> k2
+
+. (18) 
+
+Proof. Given Qk ≻ 0, we express the localization error vector as ek = Q 12 
+
+> k
+
+vk such that 
+
+eT 
+
+> k
+
+Q−1 
+
+> k
+
+ek = vT 
+
+> k
+
+vk = ∥vk∥22. (19) Hence, the constraint eT 
+
+> k
+
+Q−1 
+
+> k
+
+ek ≤ 1 is equivalent to ∥vk∥2 ≤
+
+1, which yields 
+
+max  
+
+> ek∈E k
+
+∥Gk(p)ek∥2 = max   
+
+> ∥vk∥2≤1
+
+∥Gk(p)Q 12 
+
+> k
+
+vk∥2. (20) Finally, (18) follows directly from the definition of the induced matrix 2-norm. Building on Proposition 1, we define a conservative evalua-tion point for the sensitivity matrix by selecting the location 
+
+> 1Note that the left- and right-hand sides of (18) are expressed in terms of the Euclidean vector norm and the corresponding induced matrix norm, respectively.
+
+within the location uncertainty set that maximizes the mag-nitude of the channel perturbation in (17). Such worst-case location for user k is defined as 
+
+pwc  
+
+> k
+
+= argmax   
+
+> p: (ˆ pk−p)∈E k
+
+Gk(p)Q 12 
+
+> k2
+
+, (21) and evaluating the sensitivity matrix at pwc  
+
+> k
+
+yields the location-independent, worst-case sensitivity matrix Gwc  
+
+> k
+
+= Gk(pwc  
+
+> k
+
+).Consequently, the channel estimation error in (17) is replaced by Gwc  
+
+> k
+
+ek, resulting in a worst-case additive uncertainty model that depends only on the bounded error vector ek. Then, the corresponding worst-case channel uncertainty set is defined as 
+
+Hwc  
+
+> k
+
+= {hk ∈ CM ×1 : hk = ˆhk − Gwc  
+
+> k
+
+ek, eT 
+
+> k
+
+Q−1 
+
+> k
+
+ek ≤ 1}.
+
+(22) In the following, we replace the channel uncertainty set in (9) with its worst-case counterpart in (22). 
+
+B. SDR-Based Reformulation 
+
+Consider the robust max-min SINR optimization problem in (10) with Hk replaced by Hwc  
+
+> k
+
+in (22), ∀k = 1 , . . . , K . This can be rewritten in epigraph form as 
+
+maximize  
+
+> {U},γ
+
+γ (23a) 
+
+s.t. γk(U) ≥ γ, ∀hk ∈ H wc  
+
+> k
+
+, ∀k = 1 , . . . , K, (23b) 
+
+∥U∥2F ≤ PBS . (23c) This problem is quasi-convex in γ, since for any fixed γ
+
+the SINR constraints in (23b) define a convex feasibility set. Therefore, the optimal value of γ can be efficiently obtained via a bisection search, where at each iteration a convex feasibility problem is solved [14, Ch. 4.2.5]. Let us introduce Wk = ukuH 
+
+> k
+
+∈ CM ×M as the rank-one beam-focusing matrix of user k and rewrite the total transmit power constraint in (23c) as 
+
+> K
+
+X
+
+> k=1
+
+tr( Wk) ≤ PBS , Wk ⪰ 0. (24) Furthermore, for a given γ ≥ 0, let us define Sk(γ) = Wk −
+
+γ P  
+
+> j̸=k
+
+Wj ∈ CM ×M and express the SINR constraints in (23b) as 
+
+hH 
+
+> k
+
+Sk(γ)hk ≥ γσ 2
+
+> k
+
+, ∀hk ∈ H wc  
+
+> k
+
+, ∀k = 1 , . . . , K. (25) Using (22) and substituting the corresponding channels into (25) allows explicit characterization of the impact of im-perfect localization. Since Sk(γ) is Hermitian, expanding 
+
+(ˆhk − Gwc  
+
+> k
+
+ek)HSk(γ)( ˆhk − Gwc  
+
+> k
+
+ek) and collecting the terms with respect to the localization error vector ek yields a quadratic function of ek. Consequently, (25) can be rewritten as 
+
+eT 
+
+> k
+
+Ak(γ)ek + 2Re κk(γ)Hek + χk(γ) ≥ 0,
+
+∀ek ∈ E k, ∀k = 1 , . . . , K, (26) where we have defined 
+
+Ak(γ) = ( Gwc  
+
+> k
+
+)HSk(γ)Gwc  
+
+> k
+
+∈ C2×2, (27) 
+
+κk(γ) = −(Gwc  
+
+> k
+
+)HSk(γ)ˆhk ∈ C2×1, (28) 
+
+χk(γ) = ˆhH 
+
+> k
+
+Sk(γ)ˆhk − γσ 2 
+
+> k
+
+∈ R. (29) Now, since ek lies in an ellipsoidal set, (26) can be converted into a set of finite-dimensional linear matrix inequalities via Algorithm 1: Proposed robust beam-focusing design via SDR and bisection 
+
+Input: Estimated user locations {ˆpk }Kk=1 , uncertainty matrices {Qk }Kk=1 , noise powers {σ2 
+
+> k
+
+}Kk=1 , PBS ,bisection tolerance ϵ, initial SINR value γ0, growth factor ρ > 1, and upper limit γmax .
+
+Output: Beam-focusing vectors {uk }Kk=1 . 
+
+> 1
+
+for k = 1 , . . . , K do  
+
+> 2
+
+Compute estimated channel ˆhk using (2);  
+
+> 3
+
+Compute sensitivity matrix Gk (p) using (13)–(15);  
+
+> 4
+
+Determine worst-case sensitivity Gwc  
+
+> k
+
+;
+
+// Determine the initail SINR bracket  
+
+> 5
+
+Set γmin ← 0 and γ ← γ0; 
+
+> 6
+
+while γ ≤ γmax do  
+
+> 7
+
+Solve feasibility problem (31) for γ; 
+
+> 8
+
+if problem (31) is feasible then  
+
+> 9
+
+Set γmin ← γ and store {W⋆k }; 
+
+> 10
+
+Set γ ← min {ργ, γ max }; 
+
+> 11
+
+else  
+
+> 12
+
+Set γmax ← γ; 
+
+> 13
+
+break ;
+
+// Refine the bracket by bisection  
+
+> 14
+
+while γmax − γmin > ϵ do  
+
+> 15
+
+Set γ ← (γmin + γmax )/2; 
+
+> 16
+
+Solve feasibility problem (31);  
+
+> 17
+
+if problem (31) is feasible then  
+
+> 18
+
+Set γmin ← γ and store {W⋆k }; 
+
+> 19
+
+else  
+
+> 20
+
+Set γmax ← γ; 
+
+> 21
+
+for k = 1 , . . . , K do  
+
+> 22
+
+Recover beam-focusing vectors from W⋆k via Gaussian randomization;  
+
+> 23
+
+return {uk }Kk=1 ;
+
+the S-procedure [15]. Specifically, a sufficient condition is the existence of {νk ≥ 0}Kk=1 satisfying 
+
+Ak(γ) + νkQ−1 
+
+> k
+
+κk(γ)
+
+κk(γ)H χk(γ) − νk
+
+
+
+⪰ 0, ∀k = 1 , . . . , K. (30) As (30) is parameterized by the target SINR level γ, for a fixed 
+
+γ, the max-min SINR maximization problem can be solved through a feasibility check over the rank-one beam-focusing matrices. Specifically, for a fixed γ, the feasibility problem is formulated as 
+
+find {Wk ⪰ 0}Kk=1 , {νk ≥ 0}Kk=1 
+
+s.t.
+
+Ak(γ) + νkQ−1 
+
+> k
+
+κk(γ)
+
+κk(γ)H χk(γ) − νk
+
+
+
+⪰ 0, ∀k = 1 , . . . , K, 
+
+> K
+
+X
+
+> k=1
+
+tr( Wk) ≤ PBS ,
+
+rank( Wk) = 1 , ∀k = 1 , . . . , K, 
+
+(31) where the rank-one constraints make the problem nonconvex. By applying SDR, we drop these rank-one constraints, and the resulting problem becomes a semidefinite program that can be solved efficiently by first determining a feasible– infeasible interval for γ and then applying bisection within this interval to determine the optimal target SINR γ. Since the relaxed feasibility problem is convex for any fixed γ,bisection converges to the globally optimal value of the relaxed quasiconvex problem up to the chosen tolerance ϵ [14, Ch. 4.2.5]. After solving the relaxed problem, the beam-focusing vectors {uk}Kk=1 are recovered from {Wk}Kk=1 using Gaussian randomization. In our simulations, however, the obtained matrices are observed to be nearly rank-one, and the beam-focusing vectors can therefore be directly extracted from the principal eigenvectors (scaled by the square root of their corresponding eigenvalues) with negligible performance loss. The proposed robust beam-focusing design is summarized in Algorithm 1. IV. N UMERICAL RESULTS 
+
+In this section, we evaluate the performance of the proposed robust beam-focusing design, examining the impact of both the transmit power budget PBS and the level of location uncertainty. Since the proposed optimization maximizes the worst-user worst-case SINR, the reported performance is expressed in terms of the corresponding worst-user worst-case rate obtained from the optimized SINR. We adopt as the primary baseline the non-robust counterpart of (31), obtained by treating the estimated channels ˆhk as perfect, since existing robust beam-focusing methods such as [11] employ different objectives and uncertainty models and therefore do not permit a direct comparison under the same system model. We consider a BS equipped with M = 128 antennas spaced by d = λc 
+
+> 2
+
+, operating at carrier frequency fc = 16 GHz (within the upper mid-band) and serving K = 3 users. The users are located in the near-field region, with radial distances uniformly distributed in r ∈ RF 
+
+> 6
+
+, RF
+
+> 1.5
+
+ and angular locations in θ ∈ [− π 
+
+> 2
+
+, π 
+
+> 2
+
+], where RF = 
+
+> 2D2
+> λc
+
+denotes the Fraunhofer distance. A minimum separation constraint ∥pi − pj ∥2 ≥ RF 
+
+> 6
+
+is enforced between any pair of users i̸ = j. To vary the transmit power using a single normalized parameter, we set the AWGN power to σ2 = 1 
+
+and normalize the channel vectors and their sensitivities with respect to the root-mean-square channel norm across users. The value of PBS is then used in the optimization through the total transmit power constraint, and the resulting beam-focusing vectors implicitly determine how the available power is distributed among the users. The location uncertainty set of each user is modeled as an oriented ellipsoidal set. Specifically, the uncertainty covariance matrix is defined as 
+
+Qk = Rk
+
+ξ2 
+
+> major
+
+00 ξ2
+
+> minor
+
+
+
+RT 
+
+> k
+
+, ∀k = 1 , . . . , K, (32) where Rk is a rotation matrix whose first column is aligned with the radial direction from the BS to user k and the second column is tangential. The major-axis of the uncertainty set 
+
+ξmajor is specified directly in meters, while the minor-axis is set as ξminor = βξ major with β = 0 .5. Moreover, the localization error ek is drawn uniformly from the corresponding ellipsoidal location uncertainty set, and we plot the worst-user worst-case rate using Monte Carlo simulations with 50 user locations. Fig. 2 shows the worst-user worst-case rate versus the 0 5 10 15 20 25 30 012345
+
+PBS [dBW] Worst-user worst-case rate [bits/s/Hz]  Robust SDR Non-robust SDR 
+
+Fig. 2. Worst-user worst-case rate versus the transmit power budget 
+
+PBS with ξmajor = 1 m. 
+
+0 0.2 0.4 0.6 0.8 145678910 
+
+ξmajor [m] Worst-user worst-case rate [bits/s/Hz]  Robust SDR Non-robust SDR 
+
+Fig. 3. Worst-user worst-case rate versus location uncertainty level with PBS = 35 dBW. 
+
+transmit power budget. As expected, increasing PBS improves the achieved rates, as the system transitions from a noise-limited to a progressively more interference-limited regime. The robust design consistently outperforms the non-robust baseline across the entire power range, highlighting its ability to account for location uncertainty in the beam-focusing design. The performance gap becomes more pronounced at high transmit power, where the impact of mismatch between the estimated and true user locations leads to increased residual interference in the non-robust scheme. Fig. 3 plots the worst-user worst-case rate versus the uncertainty level controlled by ξmajor , with PBS = 35 dBW. As expected, increasing ξmajor degrades the achieved rates due to the growing mismatch between the estimated and true user locations. The proposed robust design also consistently outperforms the non-robust baseline, highlighting its ability to account for location uncertainty in the beam focusing. Moreover, the performance gap widens as ξmajor increases, since the non-robust scheme becomes increasingly sensitive to channel mismatch, whereas the robust design maintains better reliability under more challenging localization conditions. V. C ONCLUSION 
+
+In this work, we considered a DL XL-MIMO system in the near-field regime with user location uncertainty. In such systems, even small localization errors can significantly degrade performance due to the strong dependence of near-field channels on both distance and angle. Motivated by this, we developed a robust max-min SINR beam-focusing framework by linking localization errors to channel uncertainty via a first-order approximation, enabling a tractable worst-case formulation based on SDR. Numerical results showed that the proposed design consistently improves the worst-user rate over non-robust methods under different total transmit power levels and localization error ranges. Future work will extend this framework by considering multipath propagation and more realistic location uncertainty models that better capture practical system conditions, while also developing lower-complexity solution methods to reduce the computational burden associated with the semidefinite programming feasibility problem. REFERENCES [1] D. C. Nguyen et al. , “6G Internet of Things: A comprehensive survey,” 
+
+IEEE Internet Things J. , vol. 9, no. 1, pp. 359–383, 2022. [2] Z. Zhang et al. , “6G wireless networks: Vision, requirements, architecture, and key technologies,” IEEE Veh. Technol. Mag. , vol. 14, no. 3, pp. 28–41, 2019. [3] E. Björnson et al. , “Massive MIMO networks: Spectral, energy, and hardware efficiency,” Found. and Trends Signal Process. , vol. 11, no. 3–4, pp. 154–655, 2017. [4] N. Mozaffarikhosravi et al. , “Localization-based beam focusing in near-field communications,” IEEE Wireless Commun. Lett. , vol. 15, pp. 795– 799, 2026. [5] P. Ramezani et al. , Localization in Massive MIMO Networks: From Far-Field to Near-Field . John Wiley &Sons, Ltd, 2025, ch. 5, pp. 123–150. [Online]. Available: https://onlinelibrary.wiley.com/doi/abs/10.1002/9781394228331.ch5 [6] D. Acharya et al. , “Performance comparison of near-field focused and conventional phased antenna arrays at 140 GHz,” in Proc. Eur. Conf. Netw. and Commun. (EuCNC) & 6G Summit , 2021. [7] J. Wang and D. P. Palomar, “Worst-case robust MIMO transmission with imperfect channel knowledge,” IEEE Trans. Signal Process. , vol. 57, no. 8, pp. 3086–3100, 2009. [8] M. Jafri et al. , “Robust hybrid beamforming in cooperative cell-free mmWave MIMO networks relying on imperfect CSI,” IEEE Trans. Veh. Technol. , vol. 74, no. 8, pp. 12 590–12 602, 2025. [9] T. Ji et al. , “Robust max-min fairness transmission design for IRS-aided wireless network considering user location uncertainty,” IEEE Trans. Commun. , vol. 71, no. 8, pp. 4678–4693, 2023. [10] P. Wang et al. , “Robust near-field XL-MIMO channel estimation via dual-stage optimization and residual refinement,” IEEE Trans. Commun. ,vol. 74, pp. 6167–6181, 2026. [11] S. Uchimura et al. , “Deterministic and stochastic optimization for robust beamfocusing against positioning errors,” IEEE Trans. Wireless Commun. ,vol. 25, pp. 2811–2825, 2026. [12] I. Atzeni et al. , “Sub-THz communications: Perspective and results from the Hexa-X-II project,” IEEE Open J. Commun. Soc. , vol. 6, pp. 7495–7540, 2025. [13] M. Cui and L. Dai, “Near-field wideband beamforming for extremely large antenna arrays,” IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 13 110–13 124, 2024. [14] S. Boyd and L. Vandenberghe, Convex optimization . Cambridge university press, 2004. [15] E. Song et al. , “Robust SINR-constrained MISO downlink beamforming: When is semidefinite programming relaxation tight?” EURASIP J. Wireless Commun. and Netw. , vol. 2012, no. 1, p. 243, 2012.

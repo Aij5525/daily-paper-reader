@@ -1,0 +1,370 @@
+Title: Enhancing Sensing Privacy in ISAC Through Joint Signal and Artificial Noise Beamforming
+
+URL Source: https://arxiv.org/pdf/2608.15506v1
+
+Published Time: Tue, 18 Aug 2026 00:55:39 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Enhancing Sensing Privacy in ISAC Through Joint Signal and Artificial Noise Beamforming 
+
+Ahmad Musallam 
+
+School of Aeronautics and Astronautics Purdue University West Lafayette, IN, USA amusalla@purdue.edu 
+
+Husheng Li 
+
+School of Aeronautics and Astronautics Purdue University West Lafayette, IN, USA husheng@purdue.edu 
+
+Abstract—Integrated sensing and communications (ISAC) is a promising feature in 6G networks. It is envisioned to enhance spectral efficiency and provide sensing and communication services that meet the stringent requirements of future applica-tions. However, it also poses new security and privacy concerns by giving malicious attackers access to new information about the network. In this work, we focus on the sensing privacy of a monostatic ISAC system by investigating the capability of a sensing eavesdropper (EVE) with an unknown location, acting as a passive bistatic radar (PBR) to gain access to user location information. We then propose a joint transmit and artificial noise (AN) beamforming optimization problem to degrade EVE’s performance. Finally, we propose an iterative algorithm to solve the proposed optimization problem and evaluate its performance. Index Terms—Integrated sensing and communications, sens-ing privacy, artificial noise, beamforming. 
+
+I. Introduction The limited availability of radio spectrum has in-creasingly become a challenge in recent years [1], as communication and radar functions require a greater bandwidth allocation to meet data rate and sensing accuracy requirements for various applications, such as autonomous driving, smart factories, and UAV navigation in GPS-denied environments [2]. To address this challenge, significant research efforts have focused on innovative solutions. One promising paradigm is integrated sensing and communications (ISAC), which enables sensing and communication functionalities to share resources at var-ious levels of integration, ranging from sharing common hardware to full integration under a common waveform. The latter is achieved by utilizing waveforms that meet both the sensing and communication requirements of the system [3], [4], thus improving the spectrum and power efficiencies. However, ISAC’s design requirements introduce new security and privacy challenges for both communication and sensing functions [5], [6]. On the communication side, existing security threats are compounded by the risk of information leakage from the sensing link. Meanwhile, the favorable sensing characteristics of ISAC signals enable 
+
+This work was supported by the National Science Foundation under grants 2348826, 2343465, 2343469 and 2418106. 
+
+eavesdroppers (EVEs) to estimate channel state informa-tion (CSI) more accurately, granting them unauthorized access to sensitive user data, such as positions, movements, and actions. Addressing these combined challenges is essential for secure ISAC deployment in future networks. Recent works have focused on utilizing the accurate CSI provided by the ISAC system to improve communication security by employing physical layer security (PLS) mea-sures [7]–[11]. On the other hand, sensing privacy remains underexplored, despite being a major concern that needs to be addressed. Not only does it expose private user location information, but it also opens new avenues for active attacks against the ISAC network by allowing the malicious actor to gain better estimates of the CSI through access to the network geometry and better knowledge of the surrounding environment. In [12] the authors evaluated the sensing capability of an internal adversary in a multi-static cell-free ISAC network and then proposed a transmit precoder design that jointly optimizes the sensing and communication requirements. Since sensing is a physical phenomenon, the most natural approach to ensuring sensing privacy would be through PLS measures. For example, the authors in [13] considered a bistatic ISAC system where a single-antenna communication UE acts as a sensing EVE. They then proposed a mutual information (MI)-based optimization problem in order to maximize the legitimate receiver’s MI and minimize the MI at EVE. Furthermore, they considered artificial noise-aided beamforming to further reduce EVE’s performance based on knowledge of EVE’s location and its CSI. In [14], the authors proposed a method based on generative artificial intelligence (GAI) to generate safeguarding signals that are modulated into the pilots at the transmitter in order to mask human activity from unauthorized listeners in an indoor environment. Jointly designing communication and sensing privacy and security measures is an approach that fits within the ISAC paradigm because one needs to consider both the sensing performance of the system and the communication rate at the UE. To this end, the authors in [15] formulated an optimization problem where they tried to maximize the probability of target detection subject to a minimum signal-to-interference-arXiv:2608.15506v1 [eess.SP] 16 Aug 2026 plus-noise ratio (SINR) at the UE in the presence of a sensing and communications EVE. In this work, we consider a monostatic ISAC system where an ISAC base station (BS) simultaneously provides communication and sensing services to the UE, with the presence of an EVE with unknown location that is trying to gain illegitimate access to the UE’s position and actions. Specifically, we make the following contributions:  
+
+> •
+
+Investigate the ability of an EVE acting as a passive bistatic radar (PBR) to gain access to the UE position through interception of the signal reflected by the UE and a reference signal from the direct link between the BS and the EVE.  
+
+> •
+
+formulate a joint signal and artificial noise beam-forming optimization problem under a fixed power budget and ISAC system performance requirements to degrade the capability of a sensing EVE with an unknown location.  
+
+> •
+
+propose an iterative algorithm to solve the pro-posed optimization problem based on the Dinkelbach method and successive convex approximation (SCA) and then showcase the performance of the proposed algorithm through numerical results. The remainder of this paper is organized as follows. Section II describes the ISAC system model, the EVE sensing model, and the proposed problem formulation. In Section III, we formulate the optimization problem and its solution algorithm. Section IV presents the numerical results and discussion, and Section V concludes the paper. II. System Model and Problem Formulation We consider an ISAC BS, which simultaneously trans-mits a communication signal to a single-antenna UE and utilizes the reflected signal for monostatic radar sensing, with the goal of providing positioning services to the same UE. An unauthorized EVE, acting as a PBR, attempts to exploit the BS’s transmitted signal to determine the location of the UE. EVE employs two sets of antennas: one directed towards the BS to capture a reference signal and the other aimed at the area of interest to intercept signals reflected from surrounding targets, as shown in Fig. 1. In this scenario, we assume that the EVE is aware of its own position and that of the BS, while the BS does not have knowledge of EVE’s location. We also assume that the BS knows the direction of the UE, which can be obtained through uplink communication. A. Signal Model We assume that the BS is equipped with a uniform linear array (ULA) with Nt transmit antennas that trans-mit a common orthogonal frequency division multiplexing (OFDM) signal with N subcarriers and M data blocks per OFDM frame, and that the duration of each transmission block is Tsym = Tcp + T , where T and Tcp , respectively, denote the duration of the base OFDM symbol and the  
+
+> Fig. 1. System model of ISAC and EVE
+
+cyclic prefix (CP). The subcarrier spacing is ∆f = 1 /T ,and the total bandwidth is B = N ∆f . The transmit signal from the ith antenna element can be modeled as [16] 
+
+xi(t) =  
+
+> M−1
+
+∑ 
+
+> m=0
+> N−1
+
+∑
+
+> n=0
+
+wisn,m ej2πn ∆f (t−mT sym )q(t − mT sym ),
+
+(1) where sk,m is the data symbol on the nth subcarrier and 
+
+mth OFDM block, w = [ w1, w 2, · · · , w N t ]T is the transmit beamforming vector, and q(t) is the rectangular window that can be expressed as 
+
+q(t) = 
+
+{
+
+1, t ∈ [−Tcp , T ]0, otherwise . (2) The signal reflected by the target and received at EVE is given by 
+
+ysurv (t) = 
+
+> Nt−1
+
+∑
+
+> i=0
+
+αsurv a∗ 
+
+> i
+
+(θu)xi(t − τsurv )ej2πf D t + zsurv (t)
+
+(3) where αsurv , τsurv , and fD are the amplitude, delay, and Doppler frequency of the target signal, respectively. 
+
+zsurv (t) is the complex additive white Gaussian noise following CN (0 , σ 2), and a(θ) is the ULA steering vector, which is calculated at θu (the direction of the UE relative to the BS) and is given by a(θ) ≜ [1 , e −j2π dλ sin θ , . . . , e −j2π(Nrx −1) dλ sin θ ]T , (4) where d is the spacing of the ULA elements, and λ = c0/f c
+
+is the carrier wavelength, where c0 is the speed of light and fc is the carrier frequency. For the surveillance signal, 
+
+αsurv is the bistatic radar gain, which is defined as 
+
+αsurv =
+
+√
+
+λ2σRCS 
+
+(4 π)3R21R22
+
+, (5) where σRCS is the radar cross-section (RCS) of the UE, 
+
+R1 is the distance between the BS and the UE, and R2
+
+is the distance between the UE and EVE. Assuming that the BS and EVE are both stationary, the reference signal can be given by 
+
+yref (t) = 
+
+> Nt−1
+
+∑
+
+> i=0
+
+αref a∗ 
+
+> i
+
+(θe)xi(t − τref ) + zref (t), (6) where θe is the angle between the BS and EVE, τref is the reference signal delay, zref (t) is the complex additive white Gaussian noise following CN (0 , σ 2), and αref is the amplitude of the reference channel due to free path loss over the distance between the BS and EVE ( Rref ) and is given by 
+
+α =
+
+√
+
+λ2/(4 πR 2 
+
+> ref
+
+), (7) B. Signal Processing at the Eavesdropper Since EVE is acting as passive bistatic radar, Target detection is achieved by calculating the cross-correlation between reference and surveillance signals, resulting in the cross-ambiguity function (CAF) defined as [17] 
+
+β(τrel , f D ) = 
+
+∫ Ttot /2 
+
+> −Ttot /2
+
+yref (t) · ysurv (t − τrel ) · e−j2πf D tdt, 
+
+(8) where Ttot is the integration time, and τrel = τsurv − τref 
+
+is the relative delay between the reference and surveillance signals. Since the true target range and delay are unknown, the CAF is calculated for a span of bistatic delays and Doppler frequencies, where the target is expected. The signals are coherently integrated in the CAF, leading to an integration gain when calculating the CAF. The signal-to-noise ratio (SNR) at the output of the CAF is given by SNR out = SNR in BT tot , (9) which means that the integration gain is a function of the OFDM signal bandwidth B = N ∆f and the integration time Ttot = M T s. For a fixed bandwidth and integration time, the output SNR, which determines the capability of EVE to detect targets, is governed by the SNR of the reference and surveillance signals. Fig. 2 shows the effect of the signal-to-noise ratio in the reference channel (SNR ref ) and the surveillance channel (SNR surv ) on the output SNR of the CAF. It can be seen that as the SNR of the input signals decreases, the peak, which corresponds to the target, becomes lower until it reaches a point where the peak no longer corresponds to a target but rather to random noise. This is why the value becomes constant at around 6 dB. For simplicity and without loss of generality, we are only considering a single target without clutter in this work. Hence, the maximum likelihood estimator for the target position corresponds to the CAF peak [18] 
+
+(τ target rel , f target D ) = argmax  
+
+> (τrel ,f D)
+
+|β(τrel , f D )|−50 −40 −30 −20 −10 0 10 20 0510 15 20 25 30      
+
+> SNR ref (dB) SNR out  (dB)
+> SNR surv = -10 dB SNR surv = 0 dB SNR surv = 10 dB
+> Fig. 2. Output SNR against SINR ref for different values of SNR surv
+
+C. Artificial Noise Design In general, AN is designed to be randomly distributed to ensure that it is not correlated with the data signal. More specifically, it is designed to be an i.i.d. complex Gaussian random variable with zero mean and unit vari-ance CN (0 , I). Another approach for radar privacy would be to design the AN to either spoof the real target location or jam parts of the CAF. To spoof the target location by creating multiple false targets, the transmit noise signal needs to be comprised of the sum of delayed and Doppler shifted versions of the data signal, which can be modeled as 
+
+η(t) = 
+
+> K
+
+∑
+
+> k=1
+
+ξkx(t − τk)ej2πf kD t, (10) where ξk, τk, and f kD are the amplitude, delay, and Doppler shift of the kth false target. The other approach would be to mask a region in the CAF by creating a peak at each delay and Doppler bin of the region of interest in the CAF according to the following. 
+
+η(t) = 
+
+> Q
+
+∑
+
+> q=1
+> K
+
+∑
+
+> k=1
+
+x(t − τk)ej2πf qD t, (11) where k and q are the indices of the kth delay and qth 
+
+Doppler bin. Both approaches can be combined with uncorrelated artificial noise to further reduce the chance of target detection by EVE. D. Problem Formulation Since our goal is to prevent EVE from sensing the location of the UE, we need to employ physical layer measures to reduce the SNR of the reference and surveil-lance channels. However, since the location of the EVE is unknown, techniques such as zero-forcing to suppress the reference signal are infeasible. In addition, introducing artificial noise (AN) into the surveillance channel will degrade the performance of the ISAC system. Thus, our proposed approach is to introduce artificial noise into the reference channel while simultaneously reducing the power of the data signal in all possible EVE directions. In order to achieve this, we will modify our transmit signal to be the superposition of beamformed data symbols and artificial noise. The transmit signal on the ith antenna is now given by 
+
+xi(t) =  
+
+> M−1
+
+∑ 
+
+> m=0
+> N−1
+
+∑
+
+> n=0
+
+˜sin,m ej2πn ∆f (t−mT sym )q(t − mT sym ),
+
+(12) where ˜sin,m is the transmit symbol from the ith antenna on the nth subcarrier and mth OFDM block, given by 
+
+˜sin,m = wisn,m + viηn,m , (13) where sn,m and ηn,m are the data and artificial noise symbols, w = [ w1, w 2, · · · , w N t ]T is the data beamforming vector, and v = [ v1, v 2, · · · , v N t ]T is the artificial noise beamforming vector. III. Joint Beamforming Optimization In this section, we investigate the problem of jointly optimizing the signal and artificial noise beamforming vectors, w and v, under the assumption that the direction of EVE is unknown at the BS. To this end, we need to consider the worst-case scenario across all possible directions for EVE. We assume that the signal and artificial noise have unit power and that the transmit power is controlled by the beamforming vectors. This turns our problem into minimizing the maximum signal-to-artificial noise power ratio for all θe. Our optimization problem can be formulated as 
+
+min 
+
+v, w max 
+
+> θe
+
+|aH (θe)w|2
+
+|aH (θe)v|2 (14a) 
+
+s.t. ∥w∥2 + ∥v∥2 ≤ Ptotal , (14b) 
+
+|aH (θu)w|2 ≥ Puser , (14c) 
+
+|aH (θu)v|2 = 0 (14d) where (14b) ensures the total transmit power constraint, while (14c) guarantees that the sensing and communica-tion requirements for the user are met by specifying the transmit power in the direction of the user which can be either limited by the communication SNR at the UE or the sensing SNR at the BS, and (14d) ensures orthogonality between the UE direction and AN. Note that here we assumed that the noise figure (NF) for the EVE’s receiver is unknown. However, this will not be an issue since the overall system performance will be better than predicted. This is because the noise will be a constant term added to the denominator of the objective function, which will cause the overall SINR at EVE to be lower. In general, it is difficult to directly solve problem (12) due to the non-convexity of the objective function and the constraint (14c) as well as the equality constraint in (14d). Furthermore, the variable θe in the objective is continuous, making it more challenging to optimize. We start by addressing the objective function, where we discretize θe over the range of angles of potential eavesdropper directions. Next, we define a matrix A ≜
+
+[a(θe, 1), a(θe, 2), · · · , a(θe,L )] T , where each row represents the conjugate of the steering vector a(θ) at each discrete angle θe,i . Thus, our objective function can now be defined as 
+
+f (v, w) ≜ max 
+
+{
+
+(Aw ⊙ Aw ) ⊘ (Av ⊙ Av )
+
+}
+
+, (15) where ⊙ and ⊘ are, respectively, element-wise vector mul-tiplication and division. We can then use the Dinkelbach method [19] to turn the objective function into a difference of two convex functions as follows: 
+
+g(v, w, λ ) = max 
+
+{
+
+(Aw ⊙ Aw ) − λ(Av ⊙ Av )
+
+}
+
+, (16) where the problem becomes an iterative optimization problem in which we try to find the optimal w∗, v∗, and 
+
+λ∗ that satisfy 
+
+g(v∗, w∗, λ ∗) = 0 . (17) However, the problem remains non-convex. To ensure convexity, we apply successive convex approximation (SCA) by approximating the second term with its first-order Taylor series expansion [20]. This transforms our optimization subproblem into an iterative solution of a convex problem, where we solve a convex problem at each iteration. Our new objective function can now be written as 
+
+˜g(v, w, λ ) = max 
+
+{
+
+(Aw ⊙ Aw ) − λ
+
+(
+
+A˜ v ⊙ A˜ v+2 Re {A˜ v ⊙ A(v − ˜v)})} 
+
+,
+
+(18) where ˜w and ˜v are the values of w and v from the previous iteration. We can follow the same procedure to turn the constraint in (14c) into a convex constraint as follows: 
+
+|aH (θu) ˜w|2 + 2 Re {aH (θu)( w − ˜w)} ≥ Puser . (19) Finally, we can relax constraint (14d) by ensuring that the right-hand side is less than or equal to a small constant 
+
+ϵ.
+
+|aH (θu)v|2 ≤ ϵ. (20) The optimization subproblem can now be expressed as: 
+
+min 
+
+w, v ˜g(w, v, λ ) (21a) 
+
+s.t. (14b) , (19) , (20) , (21b) which can easily be shown to be convex, and can be used to iteratively solve for the optimal beamforming vectors 
+
+w and v. The iterative solution procedure for the problem in (21) is presented in Algorithm 1. Algorithm 1 Iterative Algorithm for Solving Problem (21) 
+
+1: initialize w(0) , v(0) , λ (0) < 1, i = 0 , δ 1, δ 2
+
+2: repeat 
+
+3: i ← i + 1 
+
+4: initialize j = 0 
+
+5: ˆw(0) , ˆv(0) ← w(i−1) , v(i−1) 
+
+6: repeat 
+
+7: j ← j + 1 
+
+8: ˜w(j), ˜v(j) ← ˆw(j−1) , ˆv(j−1) 
+
+9: Solve problem (21) to get the optimal ˆw(j), ˆv(j)
+
+10: until |f ( ˆ w(j), ˆv(j)) − f ( ˆ w(j−1) , ˆv(j−1) )| < δ 1
+
+11: w(i), v(i) ← ˆw(j), ˆv(j)
+
+12: λ(i) ← f (w(i), v(i))
+
+13: until g(w(i), v(i), λ (i)) < δ 2
+
+14: return w(i), v(i)
+
+We note that with each iteration of algorithm 1 it is guaranteed that the value of the objective function is less than or equal to the previous iteration (i.e. gi+1 ≤ gi); hence, the algorithm is guaranteed to converge to a local minimum. Furthermore, each inner loop iteration solves a convex optimization problem of size O(N 3.5 
+
+> t
+
+) and com-putes the function in (15) that has a size of O(LN t), where L is the number of discrete values of a(θe). Therefore, the total computational complexity of Algorithm 1 is 
+
+O(( N 3.5 
+
+> t
+
++LN t)·log (1 /δ 1)·log (1 /δ 2)) , where δ1 and δ2 are, respectively, the tolerance in the outer and inner loops. Therefore, assuming that L < N 2.5 
+
+> t
+
+, the final complexity of the algorithm is O(N 3.5 
+
+> t
+
+· log (1 /δ 1) · log (1 /δ 2)) .IV. Numerical Results In this section, we provide simulation results to evaluate the performance of the proposed algorithm in improving sensing privacy in a monostatic ISAC system under a fixed power budget and ISAC performance requirements. The parameters of the simulated ISAC system are shown in Table I. A. Random Artificial Noise 
+
+TABLE I parameters for the simulated ISAC system Parameter Value Bandwidth 50 MHz Carrier Frequency ( fc) 5.5 GHz number of OFDM subcarriers ( N ) 1024 number of OFDM blocks ( M ) 64 UE direction ( θu) ∈ [−π/ 2, π/ 2] 
+
+EVE direction ( θe) ∈ [−π/ 2, π/ 2] /θ u
+
+Puser 30 dBm 
+
+Fig. 3 shows the convergence performance of the pro-posed algorithm under different power budgets. It can be seen that all three cases converge in 6 or 7 iterations, which illustrates the fast convergence rate of the proposed algorithm. In addition, it shows that as the total transmit             
+
+> 12345678910
+> 00.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 Number of Iterations Maximum Signal to AN Ratio at EVE  Ptot = 18 dBm Ptot = 20 dBm Ptot = 22 dBm
+
+Fig. 3. Convergence of optimization algorithm indicated by change in objective function against number of iterations for different power budgets.                      
+
+> 16 17 18 19 20 21 22 23 24 25 00.10.20.30.40.50.60.70.80.91
+> Total Transmit Power (dBm) Probability of Target Detection (P d) at EVE
+> SNR s= 10 dB,SNR r= 10 dB SNR s= 10 dB,SNR r= 5 dB SNR s= 10 dB,SNR r= 0 dB SNR s= 0 dB,SNR r= 10 dB SNR s= 0 dB,SNR r= 5 dB SNR s= 0 dB,SNR r= 0 dB
+
+Fig. 4. Probability of target detection Pd at EVE against total transmit power for different SNR e and SNR r values. 
+
+power increases, the objective function value decreases. This is because, for a fixed performance requirement of the ISAC system, there is more power available to allocate to artificial noise, which improves the objective function value. Fig. 4 demonstrates the capability of EVE in detecting the UE under different power budgets and SNR in the reference and surveillance channels for fixed performance requirements of the ISAC system. It can be seen that, for a low power budget, EVE is still able to detect the UE with a high percentage because the SNR at the output of the CAF is still higher than the detection threshold. However, as the power budget increases, the probability of detection decreases. Additionally, we can see the effect of the SNR in the reference and surveillance channels on EVE’s target detection performance. It can be noted that an equal decrease in either SNR ref or SNR surv leads to the same degradation in EVE’s performance. Fig. 5 shows the impact of the number of transmit 16 18 20 22 24 26 28 30 32    
+
+> 00.05 0.10 0.15 0.20 0.25 0.30 0.35 Number of Transmit Antenna (N t)Probability of Target Detection (P d) at EVE  Ptot = 32 dBm Ptot = 34 dBm Ptot = 36 dBm
+
+Fig. 5. Probability of target detection Pd at EVE against number of transmit antenna ( Nt) at different transmit power for SNR ref =
+
+SNR surv = 10 dB. 
+
+antennas ( Nt) on EVE’s target detection probability. It can be seen that as the number of transmit antennas increases, the probability of detection of the target by EVE decreases. This is due to the increase in the degrees of freedom in the beamforming optimization, which allows the transmitter to produce a narrower main beam and further suppress the sidelobes in the data signal while, at the same time, having more control over the distribution of AN. B. Spoofing and Masking with AN We evaluated the performance of the various AN design approaches discussed in Section II-C, as illustrated in Fig. 6. In (a), the CAF without AN clearly shows the target position, while in (b) when a random AN is applied, the target peak becomes obscured. Figure (c) depicts a spoofing scenario in which AN was replaced with signals having artificial delays and Doppler shifts. We notice that multiple false targets have been detected by EVE. However, the true target position is still visible. Although the performance of random AN is better, we note that the total transmit power for this method is less; hence, if believable false targets are faked, it can make it difficult for EVE to distinguish true from false targets. Lastly, in (d), we tested masking ranges between 50 and 200 meters and relative velocities between -30 and 30 m/s. However, the actual mask was shifted to be centered around the target because the reference signal will be cross-correlated with the surveillance signal, which makes it possible to detect the target, despite the more challenges than in the case without AN. V. Conclusion In this work, we investigated the capability of a sensing EVE acting as a passive bistatic radar in a monostatic ISAC system. We then formulated an optimization prob-lem to limit its access to UE location information by jointly (a)                 
+
+> -40 -20 020 40
+> Relative Velocity (m/s)
+> 0100 200 300 400
+> Relative Range (m)
+> (b)
+> -40 -20 020 40
+> Relative Velocity (m/s)
+> 0100 200 300 400
+> Relative Range (m)
+> (c)
+> -40 -20 020 40
+> Relative Velocity (m/s)
+> 0100 200 300 400
+> Relative Range (m)
+> (d)
+> -40 -20 020 40
+> Relative Velocity (m/s)
+> 0100 200 300 400
+> Relative Range (m)
+
+Fig. 6. The cross ambiguity function plot for the case (a) without AN (b) with random AN (c) spoofing (d) masking. 
+
+optimizing the transmit and artificial noise beamforming vectors under a fixed power budget and ISAC system performance. Finally, we proposed an algorithm to solve the optimization problem and showed that the proposed algorithm converges to an optimal solution quickly and efficiently. The simulation results show that the proposed method is effective in reducing the EVE sensing capability. References 
+
+[1] H. Griffiths, “Where has all the spectrum gone?” in 2013 International Conference on Radar, 2013, pp. 1–5. [2] Y. Cui, F. Liu, X. Jing, and J. Mu, “Integrating sensing and communications for ubiquitous IoT: Applications, trends, and challenges,” IEEE Network, vol. 35, no. 5, pp. 158–167, 2021. [3] Y. Xiong, F. Liu, Y. Cui, W. Yuan, T. X. Han, and G. Caire, “On the fundamental tradeoff of integrated sensing and com-munications under Gaussian channels,” IEEE Transactions on Information Theory, vol. 69, no. 9, pp. 5723–5751, 2023. [4] A. Hassanien, M. G. Amin, E. Aboutanios, and B. Himed, “Dual-function radar communication systems: A solution to the spectrum congestion problem,” IEEE Signal Processing Magazine, vol. 36, no. 5, pp. 115–126, 2019. [5] S. Lu, F. Liu, Y. Li, K. Zhang, H. Huang, J. Zou, X. Li, Y. Dong, F. Dong, J. Zhu, Y. Xiong, W. Yuan, Y. Cui, and L. Hanzo, “Integrated sensing and communications: Recent advances and ten open challenges,” IEEE Internet of Things Journal, vol. 11, no. 11, pp. 19 094–19 120, 2024. [6] K. Qu, J. Ye, X. Li, and S. Guo, “Privacy and security in ubiquitous integrated sensing and communication: Threats, challenges and future directions,” IEEE Internet of Things Magazine, vol. 7, no. 4, pp. 52–58, 2024. [7] H. Jia, X. Li, and L. Ma, “Physical layer security optimization with cramér–rao bound metric in ISAC systems under sensing-specific imperfect CSI model,” IEEE Transactions on Vehicular Technology, vol. 73, no. 5, pp. 6980–6992, 2024. [8] N. Su, F. Liu, and C. Masouros, “Secure integrated sensing and communication systems with the assistance of sensing func-tionality,” in 2023 31st European Signal Processing Conference (EUSIPCO), 2023, pp. 690–694. [9] K. Hou and S. Zhang, “Optimal beamforming for secure in-tegrated sensing and communication exploiting target location distribution,” IEEE Journal on Selected Areas in Communica-tions, vol. 42, no. 11, pp. 3125–3139, 2024. [10] Y. Yang and M. Shikh-Bahaei, “Secure integrated sensing and communication for conventional and ISAC-dedicated receivers,” in 2023 IEEE 34th Annual International Symposium on Per-sonal, Indoor and Mobile Radio Communications (PIMRC), 2023, pp. 1–6. [11] W.-Y. Keung, H.-T. Wai, and W.-K. Ma, “Secure integrated sensing and communication downlink beamforming: A semidef-inite relaxation approach with tightness guaranteed,” in 2023 IEEE International Conference on Acoustics, Speech, and Signal Processing Workshops (ICASSPW), 2023, pp. 1–5. [12] I. W. G. Da Silva, D. P. M. Osorio, and M. Juntti, “Multi-static ISAC in cell-free massive MIMO: Precoder design and privacy assessment,” in 2023 IEEE Globecom Workshops (GC Wkshps), 2023, pp. 461–466. [13] J. Zou, C. Masouros, F. Liu, and S. Sun, “Securing the sensing functionality in ISAC networks: An artificial noise design,” IEEE Transactions on Vehicular Technology, pp. 1–6, 2024. [14] J. Wang, H. Du, Y. Liu, G. Sun, D. Niyato, S. Mao, D. I. Kim, and X. Shen, “Generative AI based secure wireless sensing for ISAC networks,” 2024. [15] Z. Ren, J. Xu, L. Qiu, and D. Wing Kwan Ng, “Secure cell-free integrated sensing and communication in the presence of information and sensing eavesdroppers,” IEEE Journal on Selected Areas in Communications, vol. 42, no. 11, pp. 3217– 3231, 2024. [16] C. R. Berger, B. Demissie, J. Heckenbach, P. Willett, and S. Zhou, “Signal processing for passive radar using OFDM wave-forms,” IEEE Journal of Selected Topics in Signal Processing, vol. 4, no. 1, pp. 226–238, 2010. [17] M. Malanowski, Signal Processing for Passive Bistatic Radar. Artech House, 2019. [18] R. Altes, “Target position estimation in radar and sonar, and generalized ambiguity analysis for maximum likelihood parameter estimation,” Proceedings of the IEEE, vol. 67, no. 6, pp. 920–930, 1979. [19] A. T. Phillips, Quadratic fractional programming: Dinkelbach method. Boston, MA: Springer US, 2009, pp. 3149–3153. [20] M. Razaviyayn, M. Hong, and Z.-Q. Luo, “A unified convergence analysis of block successive minimization methods for nonsmooth optimization,” SIAM Journal on Optimization, vol. 23, no. 2, pp. 1126–1153, 2013. [Online]. Available: https://doi.org/10.1137/120891009

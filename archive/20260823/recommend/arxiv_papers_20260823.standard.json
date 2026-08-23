@@ -1,0 +1,730 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-23T20:03:49.629837+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 16,
+    "deep_cap": 6,
+    "deep_selected": 8,
+    "quick_candidates": 15,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2608.15314v1",
+      "source": "arxiv",
+      "title": "Physics-informed VAE-EVT for Tail Aware Radio Map Prediction",
+      "abstract": "Ultra-reliable low-latency communication (URLLC) requires precise identification of spatial regions where the signal-to-noise ratio (SNR) falls below an outage threshold. In this context, an outage refers to instances in which SNR falls below a specified threshold, which, for URLLC, can be as stringent as the 0.1% quantile of the SNR distribution. Traditional generative radio map models tend to focus on reconstructing average signal levels, often overlooking the low SNR that is crucial for accurate outage prediction. To address this limitation, we introduce a physics- and tail-informed VAE-EVT (variational autoencoder-extreme value theory) framework that distinctly models both the bulk and tail distribution of SNR. Our approach begins with a physics-informed preprocessing stage that extracts deterministic features, including line-of-sight, shadowing, and distance, from the scene geometry. A dual-latent encoder then captures the bulk SNR using a Gaussian mixture and the tail using a generalized Pareto distribution (GPD). By employing a modified variational objective, the model is trained to jointly supervise both regimes, ensuring focused attention on extreme fading events. Evaluated on the RadioMapSeer dataset, our method achieves an SNR RMSE of 4.83 dB in the outage region defined by the low threshold of 0.1% SNR quantile. This significantly outperforms the state-of-the-art GAN-based model, which records an SNR RMSE of 21.90 dB, with the performance gap widening as the outage threshold becomes more stringent.",
+      "authors": [
+        "Amanda Sheron Gamage",
+        "Niloofar Mehrnia",
+        "James Gross"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-08-15T16:41:19+00:00",
+      "link": "https://arxiv.org/pdf/2608.15314v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "radio map SNR prediction, wireless channel modeling and outage characterization",
+      "llm_evidence_cn": "无线地图SNR预测与中断刻画，直接属于无线信道建模",
+      "llm_evidence": "无线地图SNR预测与中断刻画，直接属于无线信道建模",
+      "canonical_evidence": "无线地图SNR预测与中断刻画，直接属于无线信道建模",
+      "llm_tldr_en": "Introduces physics- and tail-informed VAE-EVT to separately model bulk and tail SNR distributions for outage-aware radio map prediction, targeting 0.1% quantile reliability.",
+      "llm_tldr_cn": "超可靠低时延通信需要精确识别SNR低于中断阈值的空间区域，而传统生成式无线地图只重建平均信号电平。本文提出物理信息与极值理论融合的VAE-EVT框架，分别对SNR的主体与尾部分布建模，能够精准预测0.1%分位等极端中断区域。该方法为URLLC中的链路可靠性评估提供了尾部感知的无线地图预测工具。",
+      "llm_tldr": "超可靠低时延通信需要精确识别SNR低于中断阈值的空间区域，而传统生成式无线地图只重建平均信号电平。本文提出物理信息与极值理论融合的VAE-EVT框架，分别对SNR的主体与尾部分布建模，能够精准预测0.1%分位等极端中断区域。该方法为URLLC中的链路可靠性评估提供了尾部感知的无线地图预测工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.15972v1",
+      "source": "arxiv",
+      "title": "CM-MAE: A Physics-Guided Cross-Modal Self-Supervised Learning Framework for Vision-Wireless Applications",
+      "abstract": "Synchronized camera and wireless measurements observe the same scene through different physical channels. The central difficulty is that a representation learned in one deployment can fail when viewpoint, traffic, illumination, and propagation geometry change. This paper presents CM-MAE, a self-supervised vision--wireless pretraining framework for cross-scenario representation transfer. The evaluated real-data model uses only RGB frames and the measured 64-beam received-power vector available in DeepSense 6G; it does not use ray-traced paths, calibrated depth, or beam-index labels during pretraining. Its central pretraining term is a \\emph{soft contrastive alignment loss}. Instead of making the synchronized image--wireless pair the only positive pair, this loss builds a target distribution from similarities between measured beam-power profiles, so nonidentical samples with similar directional responses are not forced apart as false negatives. A masked joint decoder provides the complementary local objective by reconstructing hidden visual patches and wireless angular clusters under modality dropout. After pretraining, a differential-rate fine-tuning rule lets a new fusion head adapt quickly while the encoders move slowly. Under a sequence-disjoint DeepSense 6G protocol, adding the soft alignment loss improves a matched linear-probe transfer average from 24.88\\% to 29.49\\%. Mild fusion fine-tuning reaches 77.38\\% Top-1 accuracy on unseen Scenarios 6--8, and optional transductive normalization adaptation reaches 78.69\\%. Since the fusion setting uses the contemporaneous 64-beam power vector at inference, these results should be read as representation-transfer diagnostics, not as proactive beam-prediction or reduced-sweeping claims.",
+      "authors": [
+        "Yubo Zhang",
+        "Yiyao Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-08-16T23:55:03+00:00",
+      "link": "https://arxiv.org/pdf/2608.15972v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "self-supervised cross-modal pretraining for vision-wireless, matches foundation model pre-training for wireless",
+      "llm_evidence_cn": "面向视觉-无线跨模态自监督预训练，直接匹配无线基础模型预训练需求",
+      "llm_evidence": "面向视觉-无线跨模态自监督预训练，直接匹配无线基础模型预训练需求",
+      "canonical_evidence": "面向视觉-无线跨模态自监督预训练，直接匹配无线基础模型预训练需求",
+      "llm_tldr_en": "Presents CM-MAE, a self-supervised pretraining framework for vision-wireless data using soft contrastive alignment to transfer representations across scenarios, evaluated on DeepSense 6G without ray-traced paths or labels.",
+      "llm_tldr_cn": "针对视觉与无线测量跨场景表示迁移难的问题，本文提出CM-MAE自监督跨模态预训练框架。核心是软对比对齐损失，仅使用RGB帧与64波束接收功率向量即可在DeepSense 6G上进行预训练，无需射线追踪路径或标签。实验表明该方法能提升跨场景表示迁移能力，为无线感知与通信应用提供了可复用的基础模型预训练范式。",
+      "llm_tldr": "针对视觉与无线测量跨场景表示迁移难的问题，本文提出CM-MAE自监督跨模态预训练框架。核心是软对比对齐损失，仅使用RGB帧与64波束接收功率向量即可在DeepSense 6G上进行预训练，无需射线追踪路径或标签。实验表明该方法能提升跨场景表示迁移能力，为无线感知与通信应用提供了可复用的基础模型预训练范式。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.16277v1",
+      "source": "arxiv",
+      "title": "Reliability-Constrained Hybrid Beamforming for Multistatic ISAC in Vehicular Networks",
+      "abstract": "This letter investigates reliability constrained hybrid beamforming for transceiver separated multistatic integrated sensing and communication in vehicular networks. A target position Cramer Rao bound minimization problem is formulated under outage probability, transmit-power, and analog constant modulus constraints. To handle the constrained non convex problem, we develop a proportional-integral Lagrangian proximal policy optimization algorithm. Simulation results show that the proposed algorithm keeps the average outage probability at or below the reliability threshold, around 8%-10%, improves constraint satisfaction, and achieves stable sensing performance.",
+      "authors": [
+        "Congcong Liu",
+        "Junhui Zhao",
+        "Xiaoming Wang",
+        "Dongming Wang"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-08-17T08:50:35+00:00",
+      "link": "https://arxiv.org/pdf/2608.16277v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multistatic ISAC in vehicular networks",
+      "llm_evidence_cn": "车载网络中的多基地集成感知与通信",
+      "llm_evidence": "车载网络中的多基地集成感知与通信",
+      "canonical_evidence": "车载网络中的多基地集成感知与通信",
+      "llm_tldr_en": "Addresses reliability-constrained hybrid beamforming for multistatic ISAC in vehicular networks, formulating a Cramer-Rao bound minimization problem and solving it with a proportional-integral Lagrangian proximal policy optimization algorithm that keeps outage probability near the threshold.",
+      "llm_tldr_cn": "针对车载网络中收发分离的多基地集成感知与通信（ISAC）系统，提出可靠性约束下的混合波束成形方案。通过构建目标位置CRB最小化问题，并设计比例积分拉格朗日近端策略优化算法求解非凸约束问题。仿真表明该算法可将平均中断概率保持在可靠性阈值附近（约8%-10%），并改善约束满足与感知稳定性。该方法为通信与感知联合设计提供了可行范例。",
+      "llm_tldr": "针对车载网络中收发分离的多基地集成感知与通信（ISAC）系统，提出可靠性约束下的混合波束成形方案。通过构建目标位置CRB最小化问题，并设计比例积分拉格朗日近端策略优化算法求解非凸约束问题。仿真表明该算法可将平均中断概率保持在可靠性阈值附近（约8%-10%），并改善约束满足与感知稳定性。该方法为通信与感知联合设计提供了可行范例。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.16290v1",
+      "source": "arxiv",
+      "title": "Beamforming and Filter Design for Bistatic ISAC under Known and Unknown Transmit Symbols",
+      "abstract": "This paper investigates the joint design of beamforming and radar receive filters in a multiuser bistatic integrated sensing and communications (ISAC) system, aiming to maximize the minimum radar signal-to-interference-plus-noise ratio (SINR) under communications SINR and transmit power constraints. We consider two scenarios: transmitted signals are either known or unknown at the radar receiver. We develop tractable solutions to the resulting non-convex optimization problems in both cases. For the known-signal case, we derive closed-form radar receive filters and iteratively design beamforming using fractional programming (FP) and successive convex approximation (SCA). For the unknown case, we adopt an alternating optimization (AO) approach to jointly design the beamforming and receive filters. Numerical results demonstrate that, while both approaches achieve comparable performance under per-slot optimization, knowledge of the transmitted symbols provides significant gains in multi-slot processing via coherent integration. Moreover, the proposed ISAC designs perform close to the radar-only benchmark under moderate communication requirements.",
+      "authors": [
+        "Mohammad Hatami",
+        "Nhan Thanh Nguyen",
+        "Markku Juntti"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-17T09:00:17+00:00",
+      "link": "https://arxiv.org/pdf/2608.16290v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Bistatic ISAC joint beamforming and radar receive filter design under known and unknown transmit symbols",
+      "llm_evidence_cn": "双基地ISAC中已知与未知发射符号下的波束成形与雷达接收滤波器联合设计",
+      "llm_evidence": "双基地ISAC中已知与未知发射符号下的波束成形与雷达接收滤波器联合设计",
+      "canonical_evidence": "双基地ISAC中已知与未知发射符号下的波束成形与雷达接收滤波器联合设计",
+      "llm_tldr_en": "Proposes joint beamforming and radar filter design for multiuser bistatic ISAC, maximizing min radar SINR under communication SINR and power constraints via FP, SCA, and AO.",
+      "llm_tldr_cn": "针对多用户双基地ISAC系统，研究雷达接收滤波器与波束成形联合设计，在通信SINR和发射功率约束下最大化最小雷达SINR。对发射符号已知和未知两种情况，分别采用分数规划、逐次凸近似和交替优化求解非凸问题。仿真验证了所提算法在不同场景下的有效性，为ISAC系统设计提供了稳健的优化方法。",
+      "llm_tldr": "针对多用户双基地ISAC系统，研究雷达接收滤波器与波束成形联合设计，在通信SINR和发射功率约束下最大化最小雷达SINR。对发射符号已知和未知两种情况，分别采用分数规划、逐次凸近似和交替优化求解非凸问题。仿真验证了所提算法在不同场景下的有效性，为ISAC系统设计提供了稳健的优化方法。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.17216v1",
+      "source": "arxiv",
+      "title": "Multi-Tag Collision Recovery in UHF-RFID Using Self-Attention Decoding",
+      "abstract": "Passive ultra high frequency (UHF) radio frequency identification (RFID) enables battery-free tags to communicate with a reader through backscatter. When multiple tags respond in the same time slot, their waveforms overlap at the reader, and a conventional reader that follows framed slotted ALOHA (FSA) discards the resulting collided slot. This limits the throughput of the overall protocol even though the received signal still contains recoverable information about the responding tags. To address this limitation, we propose Self-Attention Tag Recovery (SATR), a transformer-based decoding algorithm that operates directly on the baseband in-phase and quadrature (I/Q) samples received during a standard tag response. SATR uses self-attention to model the temporal structure of the modulated waveform and learns candidate tag representations. It jointly estimates the number of responding tags and, more importantly, decodes the bit sequence of each detected tag. We numerically evaluate the decoding and throughput performance of SATR over a range of collision sizes and recovery configurations, and validate it with measurements of commercial UHF-RFID tags. The results show that, with proper design and training, SATR can reliably decode collisions of up to four tags. It achieves a throughput of approximately $0.815$ tags per slot under single acknowledgment and $1.87$ tags per slot under full recovery, corresponding to $2.2$ and $5.1$ times the conventional FSA limit of $1/e \\approx 0.368$ tags per slot, while approaching optimal decoding performance and outperforming existing collision recovery methods.",
+      "authors": [
+        "Talha Akyildiz",
+        "Siva Aditya Gooty",
+        "Hessam Mahdavifar",
+        "Najme Ebrahimi"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-17T23:59:46+00:00",
+      "link": "https://arxiv.org/pdf/2608.17216v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Transformer self-attention decoding for RFID collision recovery from baseband I/Q samples",
+      "llm_evidence_cn": "基于Transformer自注意力对RFID碰撞信号进行基带I/Q解码",
+      "llm_evidence": "基于Transformer自注意力对RFID碰撞信号进行基带I/Q解码",
+      "canonical_evidence": "基于Transformer自注意力对RFID碰撞信号进行基带I/Q解码",
+      "llm_tldr_en": "Proposes SATR, a transformer-based decoding algorithm using self-attention to recover collided tag signals in UHF-RFID directly from baseband I/Q samples, improving throughput over discarding collisions.",
+      "llm_tldr_cn": "针对无源UHF RFID中多标签碰撞导致时隙被丢弃、吞吐量受限的问题，提出基于Transformer的Self-Attention Tag Recovery（SATR）解码算法。算法直接对标准标签响应的基带I/Q采样使用自注意力建模碰撞波形，在不改变协议的前提下恢复多个碰撞标签的信息。该方法能够充分利用碰撞信号中可恢复的信息，提升RFID系统吞吐量，展示了Transformer在无线信号处理中的应用潜力。",
+      "llm_tldr": "针对无源UHF RFID中多标签碰撞导致时隙被丢弃、吞吐量受限的问题，提出基于Transformer的Self-Attention Tag Recovery（SATR）解码算法。算法直接对标准标签响应的基带I/Q采样使用自注意力建模碰撞波形，在不改变协议的前提下恢复多个碰撞标签的信息。该方法能够充分利用碰撞信号中可恢复的信息，提升RFID系统吞吐量，展示了Transformer在无线信号处理中的应用潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.17301v1",
+      "source": "arxiv",
+      "title": "SignalReasoner: Assessing the Upper Bound of 3B Models for Signal Mathematical Reasoning",
+      "abstract": "Post-training with supervised chain-of-thought fine-tuning and reinforcement learning from verifiable rewards has substantially improved the mathematical reasoning capabilities of large language models (LLMs). However, their application to signal processing problems remains relatively under-explored. This report investigates reinforcement fine-tuning strategies for adapting Qwen2.5-3B-Base to graduate-level signal mathematical problems from WirelessMATHBench-XL, a comprehensive benchmark for mathematical reasoning in this domain. We examine two training paradigms: (i) direct reinforcement learning (RL) on WirelessMATHBench-XL with verifiable rewards; and (ii) supervised fine-tuning (SFT) on a distilled wireless-domain chain-of-thought corpus, followed by the same domain-specific RL stage. Across both paradigms, we benchmark Group Relative Policy Optimization (GRPO), Group Sequence Policy Optimization (GSPO), and Geometric-Mean Policy Optimization (GMPO). We aim to assess whether domain-aware CoT SFT serves as an effective initialization for subsequent RL, and whether GSPO or GMPO offer advantages in stability or accuracy over GRPO for signal reasoning tasks. Our best model achieves an overall accuracy of 39.12\\%, representing a more than threefold improvement over the untrained Base model (12.37\\%).",
+      "authors": [
+        "Guozheng Sun"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-08-18T02:52:41+00:00",
+      "link": "https://arxiv.org/pdf/2608.17301v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Uses LLMs for graduate-level wireless signal mathematical reasoning on WirelessMATHBench-XL",
+      "llm_evidence_cn": "在WirelessMATHBench-XL上利用大语言模型求解无线信号数学问题",
+      "llm_evidence": "在WirelessMATHBench-XL上利用大语言模型求解无线信号数学问题",
+      "canonical_evidence": "在WirelessMATHBench-XL上利用大语言模型求解无线信号数学问题",
+      "llm_tldr_en": "This report investigates reinforcement fine-tuning of Qwen2.5-3B on WirelessMATHBench-XL for graduate-level signal mathematical reasoning, assessing the upper bound of 3B models with RL and SFT strategies.",
+      "llm_tldr_cn": "报告基于WirelessMATHBench-XL基准，研究将Qwen2.5-3B基础模型通过强化学习（RL）和基于提炼链式思维的监督微调（SFT）用于无线信号数学问题求解，并评估两种训练范式。结果显示3B规模模型在信号数学推理中的能力上限和不同微调策略的效果，为LLM在无线通信域推理任务中的应用提供参考。",
+      "llm_tldr": "报告基于WirelessMATHBench-XL基准，研究将Qwen2.5-3B基础模型通过强化学习（RL）和基于提炼链式思维的监督微调（SFT）用于无线信号数学问题求解，并评估两种训练范式。结果显示3B规模模型在信号数学推理中的能力上限和不同微调策略的效果，为LLM在无线通信域推理任务中的应用提供参考。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "large language model for wireless communication",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.18458v1",
+      "source": "arxiv",
+      "title": "Joint Beamforming and Phase Shifts Design for RIS-Enabled RSMA-ISAC Systems",
+      "abstract": "This paper investigates the sensing-centric design of reconfigurable intelligent surface (RIS)-enabled rate-splitting multiple access-integrated sensing and communication (RSMA-ISAC) systems. Specifically, we propose a new beam-gain approximation method to enhance the sensing beam gain while satisfying communication quality-of-service (QoS) constraints.Since the joint optimization of the beamforming vectors and RIS phase shifts is highly coupled and non-convex, existing methods typically rely on generic optimization solvers involving substantial computational complexity. To address this issue, we propose an efficient constraints-separation-based alternating optimization algorithm (CS-AO). Our proposed algorithm effectively decouples the optimization variables and yields closed-form solutions for all subproblems, thereby significantly reducing the computational burden. Simulation results show that the proposed algorithm achieves sensing beam-gain performance comparable to successive convex approximation (SCA) and semidefinite relaxation (SDR) benchmarks, while achieving more than 120-fold and 50-fold runtime reductions. In addition, compared with conventional space-division multiple access (SDMA) schemes, the proposed design exhibits substantial sensing beam gain.",
+      "authors": [
+        "Xuejun Cheng",
+        "Qian Zhang",
+        "Yuhui Jiao",
+        "Yufei Zhao",
+        "Zheng Dong",
+        "Ju Liu"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-19T02:30:54+00:00",
+      "link": "https://arxiv.org/pdf/2608.18458v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "RIS-enabled RSMA-ISAC beamforming and phase shifts joint design",
+      "llm_evidence_cn": "RIS辅助RSMA-ISAC系统的波束成形与相移联合设计",
+      "llm_evidence": "RIS辅助RSMA-ISAC系统的波束成形与相移联合设计",
+      "canonical_evidence": "RIS辅助RSMA-ISAC系统的波束成形与相移联合设计",
+      "llm_tldr_en": "Presents sensing-centric design for RIS-enabled RSMA-ISAC, with beam-gain approximation and a constraints-separation alternating optimization for joint beamforming and phase shifts.",
+      "llm_tldr_cn": "研究RIS辅助的速率分割多址通感一体化（RSMA-ISAC）系统的感知为中心设计，提出新的波束增益近似方法并设计约束分离的交替优化算法（CS-AO），在保证通信服务质量的同时提升感知波束增益。算法有效解耦高度耦合的非凸优化变量，相比通用求解器显著降低计算复杂度，为通感一体化系统的低复杂度优化提供了可行方案。",
+      "llm_tldr": "研究RIS辅助的速率分割多址通感一体化（RSMA-ISAC）系统的感知为中心设计，提出新的波束增益近似方法并设计约束分离的交替优化算法（CS-AO），在保证通信服务质量的同时提升感知波束增益。算法有效解耦高度耦合的非凸优化变量，相比通用求解器显著降低计算复杂度，为通感一体化系统的低复杂度优化提供了可行方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.18902v1",
+      "source": "arxiv",
+      "title": "Towards Lawful ISAC in Cellular Networks",
+      "abstract": "Integrated sensing and communication (ISAC) enables the tracking and detection of passive objects, including the human body, by leveraging standard wireless communication signals. While already standardized in IEEE 802.11bf for Wi-Fi, ISAC is currently being defined by 3GPP for the upcoming generations of cellular networks. This transition scales the ISAC technology from localized, uncoordinated Wi-Fi deployments into a pervasive, centralized network deployment managed by mobile network operators. However, such nationwide coverage introduces critical user privacy challenges that must comply with stringent data protection legislative frameworks, most notably the General Data Protection Regulation in the European Union. This paper provides a comprehensive analysis of applicable norms to cellular ISAC, highlights the open technical challenges in its implementation, and explores potential mitigation strategies at both the architectural and signal processing levels, establishing tiered data access levels for various stakeholder categories and detailing how these protocols can be lawfully integrated into cellular network architectures.",
+      "authors": [
+        "Stefano Tomasin",
+        "Annalisa Volpato",
+        "Marco Centenaro"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-19T13:26:20+00:00",
+      "link": "https://arxiv.org/pdf/2608.18902v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Comprehensive analysis of legal and privacy norms governing ISAC in cellular networks, relevant to joint communication and sensing deployment",
+      "llm_evidence_cn": "对蜂窝网络中ISAC相关法律与隐私规范的全面分析，涉及通信与感知部署的合规性",
+      "llm_evidence": "对蜂窝网络中ISAC相关法律与隐私规范的全面分析，涉及通信与感知部署的合规性",
+      "canonical_evidence": "对蜂窝网络中ISAC相关法律与隐私规范的全面分析，涉及通信与感知部署的合规性",
+      "llm_tldr_en": "Discusses privacy and regulatory challenges of nationwide ISAC in cellular networks, analyzing applicable data protection frameworks such as GDPR and their implications for lawful ISAC deployment.",
+      "llm_tldr_cn": "该论文指出集成感知与通信（ISAC）使蜂窝网络能够利用标准无线信号追踪和检测包括人体在内的无源物体，但全国范围部署带来了严峻的隐私挑战，必须符合欧盟《通用数据保护条例》等法律框架。论文系统分析了适用于蜂窝ISAC的规范要求，探讨了如何在法律允许的范围内实现ISAC功能。该工作为蜂窝网络ISAC的合法合规设计提供了重要参考。",
+      "llm_tldr": "该论文指出集成感知与通信（ISAC）使蜂窝网络能够利用标准无线信号追踪和检测包括人体在内的无源物体，但全国范围部署带来了严峻的隐私挑战，必须符合欧盟《通用数据保护条例》等法律框架。论文系统分析了适用于蜂窝ISAC的规范要求，探讨了如何在法律允许的范围内实现ISAC功能。该工作为蜂窝网络ISAC的合法合规设计提供了重要参考。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.15256v1",
+      "source": "arxiv",
+      "title": "Decentralized Federated Learning for Heterogeneous Multi-Task Semantic Communication",
+      "abstract": "Collaborative training in distributed semantic communication (DSC) networks typically relies on decentralized federated learning (DFL). However, pushing topology-agnostic aggregation into heterogeneous, multi-task environments creates a fundamental bottleneck: it drives negative transfer and overconsensus bias (OCB). This paper introduces a personalized DSC framework that cuts off this cross-task interference. At the node level, a policy-driven multi-path routing mechanism separates task-specific features from shared representations to preserve local fidelity. Across the network, we deploy a \"communicationwhile- aggregation\" protocol. It calibrates a column-stochastic consensus matrix using task affinities. This limits the system to absorbing complementary knowledge while actively blocking mismatched parameter updates. To bound the convergence, we derive a unified Lyapunov drift analysis. We reveal a strict Ushaped trade-off: deeper topological mixing reduces variance but amplifies structural OCB. Resolving this tension yields a closed-form expression for the optimal aggregation depth. We evaluate the proposed framework on NYU-v2, where the results reveal a clear trade-off between insufficient aggregation and excessive topological mixing. At the analytically derived optimal aggregation depth, our method achieves a 4.77% global relative improvement over the no-aggregation baseline and outperforms decentralized FedAvg, FedAMP, and heuristic max aggregation. We further evaluate the framework on Taskonomy and imperfect wireless links to examine the effects of network-size variation and wireless-link reliability.",
+      "authors": [
+        "Lin Yin",
+        "Tiejun Lv",
+        "Weicai Li",
+        "Xi Yu",
+        "Xiaoyu He"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-08-15T14:22:58+00:00",
+      "link": "https://arxiv.org/pdf/2608.15256v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "decentralized federated learning for multi-task semantic communication",
+      "llm_evidence_cn": "面向多任务语义通信的去中心化联邦学习",
+      "llm_evidence": "面向多任务语义通信的去中心化联邦学习",
+      "canonical_evidence": "面向多任务语义通信的去中心化联邦学习",
+      "llm_tldr_en": "Proposes a personalized decentralized semantic communication framework that uses policy-driven multi-path routing to separate task-specific features and a communication-while-aggregation protocol to calibrate consensus, mitigating negative transfer and overconsensus bias in heterogeneous multi-task networks.",
+      "llm_tldr_cn": "针对分布式语义通信网络中异构多任务场景下联邦聚合导致的负迁移和过共识偏差，提出个性化去中心化框架。节点级策略驱动多路径路由机制将任务特定特征与共享表征分离，网络级“通信-聚合”协议利用任务亲和度校准共识矩阵。该方法有效抑制跨任务干扰，改善异构多任务语义通信的个性化性能，为去中心化协同训练提供了可行途径。",
+      "llm_tldr": "针对分布式语义通信网络中异构多任务场景下联邦聚合导致的负迁移和过共识偏差，提出个性化去中心化框架。节点级策略驱动多路径路由机制将任务特定特征与共享表征分离，网络级“通信-聚合”协议利用任务亲和度校准共识矩阵。该方法有效抑制跨任务干扰，改善异构多任务语义通信的个性化性能，为去中心化协同训练提供了可行途径。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.15160v1",
+      "source": "arxiv",
+      "title": "A Unified Backbone--Expert Framework with Relation-Token and Residual--Classifier Interfaces for Automatic Modulation Recognition",
+      "abstract": "Automatic modulation recognition (AMR) faces distinct representation bottlenecks under varying observation lengths, where a single model architecture often fails to excel. To address this, we propose a unified backbone-expert framework with a common convolutional state-space backbone and two specialized interfaces. For short sequences, we inject explicit lag-aware complex-plane descriptors as relation tokens before encoding to compensate for information loss. For long sequences, we design a gated multi-scale residual refinement module to correct the feature map, combined with a fixed-averaging classifier collaboration to harness complementary evidence. Our framework achieves overall average accuracies of 67.28 \\pm 0.14% on RML2016.10b and 87.19 \\pm 0.77% on HisarMod2019 (mean \\pm sample standard deviation over three runs), respectively. The framework's efficacy is further validated through three-seed ablations, native-length cross-configuration tests, and controlled window studies, confirming the benefit of expert-interface decoupling over one-size-fits-all architectures.",
+      "authors": [
+        "Zhixiang Deng",
+        "Houbiao Li",
+        "Zongyong Cui"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-08-15T10:26:42+00:00",
+      "link": "https://arxiv.org/pdf/2608.15160v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Unified machine-learning framework for automatic modulation recognition in wireless communications",
+      "llm_evidence_cn": "面向无线通信自动调制识别的统一机器学习框架",
+      "llm_evidence": "面向无线通信自动调制识别的统一机器学习框架",
+      "canonical_evidence": "面向无线通信自动调制识别的统一机器学习框架",
+      "llm_tldr_en": "Presents a unified backbone-expert framework for automatic modulation recognition, combining a convolutional state-space backbone with relation-token and residual-classifier interfaces to handle varying observation lengths.",
+      "llm_tldr_cn": "针对自动调制识别在变长观测下单一模型难以兼顾性能的问题，提出统一骨干-专家框架。短序列时注入滞后感知的复平面关系令牌，长序列时使用门控多尺度残差精修模块，并配合固定平均分类器协同。实验表明该框架在不同观测长度下均取得领先的识别精度，为无线信号智能感知提供通用方案。",
+      "llm_tldr": "针对自动调制识别在变长观测下单一模型难以兼顾性能的问题，提出统一骨干-专家框架。短序列时注入滞后感知的复平面关系令牌，长序列时使用门控多尺度残差精修模块，并配合固定平均分类器协同。实验表明该框架在不同观测长度下均取得领先的识别精度，为无线信号智能感知提供通用方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.18656v1",
+      "source": "arxiv",
+      "title": "FlashAttention for Scalable Vector Architectures",
+      "abstract": "Inference with transformer models on CPUs is increasingly important, especially for Small Language Models (SLMs), where vector architectures are emerging as a promising execution substrate. The attention module is a major bottleneck due to high memory bandwidth requirements; FlashAttention mitigates this by fusing operations to improve data locality and reduce intermediate memory traffic. In this paper, we present FlashAttention-V, a blocked FlashAttention for scalable vector architectures that adapts efficiently from short to very long vectors by exploiting parallelism across attention heads, inter-head packing to enable efficient utilization of vector lengths beyond the head dimension, and improving vector register utilization and memory access locality. We integrate FlashAttention-V into ggml within llama.cpp and evaluate it on TinyLlama, Llama 3.2, Qwen2.5, and Pythia-410M using gem5 and a Banana Pi BPI-F3. On the Banana Pi BPI-F3, we confirm that loop reordering and loop unrolling across attention heads are effective optimization principles, scaling performance gains with larger models and most pronounced with short contexts and during decoding. Simulation-based analysis shows that FlashAttention-V achieves 22x-42x speedup over scalar FlashAttention at 512-bit VL in prefill, with an additional 2x-2.5x gain scaling to 64 lanes and 4096-bit VL. During decode, FlashAttention-V achieves 8x-11x speedup using 512-bit vector lengths over scalar FlashAttention, with performance showing diminishing sensitivity to vector width and lane count due to single-token, memory-bound execution. We further identify structural bottlenecks in Q8_0 quantized linear layers that limit arithmetic amortization under long-vector execution, consistent across RVV and Arm SVE, indicating that current quantization formats pose a fundamental challenge to long-vector scalability.",
+      "authors": [
+        "Sonia Rani Gupta",
+        "Nikela Papadopoulou",
+        "Miquel Pericàs"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.PF"
+      ],
+      "published": "2026-08-19T08:02:17+00:00",
+      "link": "https://arxiv.org/pdf/2608.18656v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Blocked FlashAttention optimization for transformer attention on vector architectures, relevant to transformer self-attention acceleration",
+      "llm_evidence_cn": "面向向量架构的分块FlashAttention优化，用于加速Transformer自注意力",
+      "llm_evidence": "面向向量架构的分块FlashAttention优化，用于加速Transformer自注意力",
+      "canonical_evidence": "面向向量架构的分块FlashAttention优化，用于加速Transformer自注意力",
+      "llm_tldr_en": "Presents FlashAttention-V, a blocked FlashAttention implementation for scalable vector CPUs that improves memory locality and vector register utilization for transformer attention, relevant to efficient attention-based neural inference.",
+      "llm_tldr_cn": "该论文针对Transformer在CPU向量架构上推理时注意力模块内存带宽受限的问题，提出FlashAttention-V。该方法通过跨注意力头并行、头间打包等手段适配短到长向量，提高向量寄存器利用率和访存局部性。实验表明该实现能高效支持从小型语言模型到长序列的注意力计算。该工作为无线信号处理等领域部署Transformer自注意力提供了高效的底层支撑。",
+      "llm_tldr": "该论文针对Transformer在CPU向量架构上推理时注意力模块内存带宽受限的问题，提出FlashAttention-V。该方法通过跨注意力头并行、头间打包等手段适配短到长向量，提高向量寄存器利用率和访存局部性。实验表明该实现能高效支持从小型语言模型到长序列的注意力计算。该工作为无线信号处理等领域部署Transformer自注意力提供了高效的底层支撑。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.15271v1",
+      "source": "arxiv",
+      "title": "Bringing Environmental Enhancement Back to Its Physical Essence via Specular Reflecting Surfaces",
+      "abstract": "Intelligent control of wireless propagation environments is crucial for future network capacity and reliability. Unlike circuit-controlled reconfigurable intelligent surfaces (RIS), mechanically actuated specular reflecting surfaces (SRS) offer a simpler and potentially more cost-effective alternative. In this paper, based on the tractable ray-based cascaded channel model with power-projection correction, we investigate the fundamental operational behaviors of an ideal SRS in free space. Specifically, in the angle-aligned near field, edge reflections cause non-constructive combining, resulting in a damped oscillatory convergence of the gain to an aperture-independent constant. We further obtain the far-field behavior, unbounded-aperture asymptotics, an optimal aperture size and reflection angle, and a gain-based near/far-field boundary. For misalignment, we provide accurate approximations for small and large apertures via center-point and stationary-point analyses. We also define the SRS beam pattern, derive analytical 3-dB beamwidths, and quantify the effective region where a main lobe exists. Finally, we derive a closed-form achievable-rate for an SRS-aided communication system. Numerical results validate the proposed expressions, reveal distinct near-/far-field behaviors of specular reflection, and show that SRS can outperform RIS in the far field due to continuous aperture and angular-resolution control and stronger power projection.",
+      "authors": [
+        "Qingxiao Huang",
+        "Qianyao Ren",
+        "Yiqin Deng",
+        "Jun Huang",
+        "Yang Kun",
+        "Yuguang Fang"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-15T15:14:51+00:00",
+      "link": "https://arxiv.org/pdf/2608.15271v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "ray-based cascaded channel model for specular reflecting surfaces in wireless propagation",
+      "llm_evidence_cn": "为镜面反射表面提出基于射线的级联信道模型，研究无线传播特性",
+      "llm_evidence": "为镜面反射表面提出基于射线的级联信道模型，研究无线传播特性",
+      "canonical_evidence": "为镜面反射表面提出基于射线的级联信道模型，研究无线传播特性",
+      "llm_tldr_en": "Investigates mechanically actuated specular reflecting surfaces (SRS) for intelligent wireless propagation control, deriving near-field and far-field channel behaviors based on a ray-based cascaded model.",
+      "llm_tldr_cn": "本文研究机械驱动的镜面反射表面（SRS）对无线传播环境的智能调控。基于带功率投影修正的射线级联信道模型，分析了理想SRS在自由空间中的近场与远场行为，发现近场边缘反射导致非相长合并，增益呈阻尼振荡收敛；远场行为则无界增长。该工作为无源可重构环境提供物理一致的建模基础。",
+      "llm_tldr": "本文研究机械驱动的镜面反射表面（SRS）对无线传播环境的智能调控。基于带功率投影修正的射线级联信道模型，分析了理想SRS在自由空间中的近场与远场行为，发现近场边缘反射导致非相长合并，增益呈阻尼振荡收敛；远场行为则无界增长。该工作为无源可重构环境提供物理一致的建模基础。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.17774v1",
+      "source": "arxiv",
+      "title": "Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks",
+      "abstract": "Embodied intelligence is shifting artificial intelligence from passive digital perception toward active physical interaction. However, foundation-model-enabled embodied agents face a fundamental tension between open-world cognition and resource-constrained deployment. On-device models are limited by computation, memory, and energy budgets, whereas cloud-centric solutions introduce latency and reliability risks over dynamic wireless links. Edge general intelligence provides a promising cognitive backbone, but existing frameworks still lack physical grounding, action awareness, and mechanisms for actively acquiring useful physical experience. To address these limitations, this article introduces edge-native embodied intelligence (ENEI), an action-aware wireless edge framework that integrates embodied agents, the 6G communication and networking fabric, and edge cognitive services into a 6G-mediated bidirectional edge-embodiment loop. Along the edge-to-embodiment axis, confidence-aware assistance and edge-driven generative adaptation enhance local autonomy under out-of-distribution (OOD) conditions. Along the embodiment-to-edge axis, value-of-experience guided active embodied federated learning enables physical actions to generate informative experience for continuous edge model evolution. The 6G fabric supports both directions through goal-oriented transmission and programmable radio-resource allocation. Two case studies on OOD drone navigation and mobility-driven federated learning illustrate the feasibility and communication efficiency of the proposed mechanisms. ENEI provides a unified perspective in which edge cognition strengthens embodied action, while embodied agency actively enriches edge cognition, laying the foundation for scalable, adaptive, and self-evolving embodied wireless systems.",
+      "authors": [
+        "Yiru Wang",
+        "Chuanao Jiang",
+        "Jiahui Cui",
+        "Zide Fan",
+        "Lei Wang",
+        "Zehui Xiong",
+        "Dong In Kim"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "eess.SP"
+      ],
+      "published": "2026-08-18T13:39:12+00:00",
+      "link": "https://arxiv.org/pdf/2608.17774v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "foundation-model-enabled embodied agents in wireless edge networks",
+      "llm_evidence_cn": "无线边缘网络中基础模型赋能的具身智能体",
+      "llm_evidence": "无线边缘网络中基础模型赋能的具身智能体",
+      "canonical_evidence": "无线边缘网络中基础模型赋能的具身智能体",
+      "llm_tldr_en": "Introduces edge-native embodied intelligence (ENEI) to address the tension between foundation-model cognition and resource-constrained wireless edge deployment, proposing an action-aware framework for physically grounded and experience-acquiring agents at the edge.",
+      "llm_tldr_cn": "针对基础模型赋能的具身智能体在无线边缘部署时面临的开源认知与资源约束矛盾，提出边缘原生的具身智能（ENEI）框架。该框架以行动感知为核心，为边缘智能体提供物理锚定与主动获取物理经验的机制。通过将认知任务分布到边缘，缓解云中心方案在动态无线链路下的延迟与可靠性风险。ENEI为无线边缘网络中的基础模型落地与智能体部署提供了新思路。",
+      "llm_tldr": "针对基础模型赋能的具身智能体在无线边缘部署时面临的开源认知与资源约束矛盾，提出边缘原生的具身智能（ENEI）框架。该框架以行动感知为核心，为边缘智能体提供物理锚定与主动获取物理经验的机制。通过将认知任务分布到边缘，缓解云中心方案在动态无线链路下的延迟与可靠性风险。ENEI为无线边缘网络中的基础模型落地与智能体部署提供了新思路。",
+      "llm_tags": [
+        "query:wireless-llm:composite"
+      ],
+      "matched_query_tag": "query:wireless-llm:composite",
+      "matched_query_text": "Papers central to 无线通信、大模型、信道、通信与感知、基础模型、Transformer注意力, especially work that connects or combines: large language model for wireless communication; wireless communication system design with machine learning; wireless channel characteristics and modeling; joint communication and sensing in wireless networks; foundation model pre-training for wireless applications; transformer self-attention for wireless signal processing; use of large language models in wireless communication; physical layer design with large language models; What is the role of transformer attention in wireless channel modeling?; How is integrated sensing and communication implemented with foundation models?.",
+      "matched_requirement_id": "req-composite-wireless-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.19416v1",
+      "source": "arxiv",
+      "title": "Robust Near-Field Beam Focusing Under Imperfect Localization",
+      "abstract": "The transition to 6G-and-beyond wireless systems with large-scale antenna arrays and high-frequency deployments significantly extends the near-field region, where channels exhibit a strong dependence on user location. While this enables location-based beam focusing as a low-overhead alternative to conventional channel estimation, its performance is highly sensitive to localization errors. In this paper, we study robust near-field beam focusing under imperfect user localization. We explicitly characterize the impact of localization errors on the line-of-sight-dominated channel by deriving a tractable uncertainty model via a first-order Taylor approximation, which captures the coupled effects of distance and angle in near-field propagation. Building on this model, we formulate a max-min signal-to-interference-plus-noise ratio optimization problem that guarantees performance under worst-case channel realizations induced by bounded localization errors. The resulting problem is reformulated into a feasibility problem using semidefinite relaxation. Numerical results demonstrate that the proposed robust design significantly improves the worst-user rate compared to non-robust beam focusing, particularly under high total transmit power levels and large localization error ranges.",
+      "authors": [
+        "Nima Mozaffarikhosravi",
+        "Amirhossein Azarbahram",
+        "Prathapasinghe Dharmawansa",
+        "Italo Atzeni"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-19T20:03:31+00:00",
+      "link": "https://arxiv.org/pdf/2608.19416v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "near-field channel characterization and robust beam focusing under imperfect localization",
+      "llm_evidence_cn": "近场信道刻画与定位误差下的鲁棒波束聚焦",
+      "llm_evidence": "近场信道刻画与定位误差下的鲁棒波束聚焦",
+      "canonical_evidence": "近场信道刻画与定位误差下的鲁棒波束聚焦",
+      "llm_tldr_en": "Develops a first-order Taylor uncertainty model for near-field channels under localization errors and proposes robust beam focusing for 6G large-scale antenna systems.",
+      "llm_tldr_cn": "面向6G大规模天线阵列带来的近场区域扩展，本文研究定位误差下的鲁棒近场波束聚焦。利用一阶泰勒近似推导了直视占优信道的显式不确定性模型，刻画距离和角度耦合影响，并据此设计抗定位误差的波束赋形方案。结果证明所提方法能显著增强对用户定位不准确的鲁棒性，降低传统信道估计开销。",
+      "llm_tldr": "面向6G大规模天线阵列带来的近场区域扩展，本文研究定位误差下的鲁棒近场波束聚焦。利用一阶泰勒近似推导了直视占优信道的显式不确定性模型，刻画距离和角度耦合影响，并据此设计抗定位误差的波束赋形方案。结果证明所提方法能显著增强对用户定位不准确的鲁棒性，降低传统信道估计开销。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.15506v1",
+      "source": "arxiv",
+      "title": "Enhancing Sensing Privacy in ISAC Through Joint Signal and Artificial Noise Beamforming",
+      "abstract": "Integrated sensing and communications (ISAC) is a promising feature in 6G networks. It is envisioned to enhance spectral efficiency and provide sensing and communication services that meet the stringent requirements of future applications. However, it also poses new security and privacy concerns by giving malicious attackers access to new information about the network. In this work, we focus on the sensing privacy of a monostatic ISAC system by investigating the capability of a sensing eavesdropper (EVE) with an unknown location, acting as a passive bistatic radar (PBR) to gain access to user location information. We then propose a joint transmit and artificial noise (AN) beamforming optimization problem to degrade EVE's performance. Finally, we propose an iterative algorithm to solve the proposed optimization problem and evaluate its performance.",
+      "authors": [
+        "Ahmad Musallam",
+        "Husheng Li"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-16T03:19:10+00:00",
+      "link": "https://arxiv.org/pdf/2608.15506v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "ISAC sensing privacy with signal and artificial noise beamforming",
+      "llm_evidence_cn": "ISAC感知隐私保护与波束成形",
+      "llm_evidence": "ISAC感知隐私保护与波束成形",
+      "canonical_evidence": "ISAC感知隐私保护与波束成形",
+      "llm_tldr_en": "Studies sensing privacy in monostatic ISAC against a passive bistatic radar eavesdropper, proposing joint transmit and artificial-noise beamforming to degrade the eavesdropper's localization.",
+      "llm_tldr_cn": "ISAC在提升频谱效率的同时也带来感知隐私泄露风险。本文针对单站ISAC系统，考虑位置未知的感知窃听者利用双基雷达获取用户位置信息，提出联合发射与人工噪声波束成形优化，以降低窃听者性能。该工作在保障感知与通信服务的同时增强了系统安全性。",
+      "llm_tldr": "ISAC在提升频谱效率的同时也带来感知隐私泄露风险。本文针对单站ISAC系统，考虑位置未知的感知窃听者利用双基雷达获取用户位置信息，提出联合发射与人工噪声波束成形优化，以降低窃听者性能。该工作在保障感知与通信服务的同时增强了系统安全性。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.19649v1",
+      "source": "arxiv",
+      "title": "Differential Privacy in Feature Reconstruction Aided Federated Learning for Agent's Semantic Communication Model Update",
+      "abstract": "This paper proposes a differentially private federated learning (FL) framework built upon an FL algorithm with semantic feature reconstruction (FedSFR) for training semantic communication modules for image transmission. By allowing clients with unfavorable uplink capacity to transmit low-dimensional semantic feature vectors extracted from locally trained joint source-channel coding (JSCC) encoders, FedSFR enhances communication efficiency and training stability under heterogeneous wireless conditions. To protect client privacy, we incorporate the oneshot Laplace mechanism and theoretically demonstrate that feature-based transmission achieves strictly stronger differential privacy (DP) guarantees than gradient-based transmission under an identical communication budget. In addition, a model selection mechanism is introduced to alleviate performance degradation caused by privacy-preserving perturbations. Experimental results on multiple datasets show that the proposed DP-aided FedSFR outperforms DP-enabled FedAvg in training stability and image reconstruction quality in heterogeneous wireless systems.",
+      "authors": [
+        "Yoon Huh",
+        "Bumjun Kim",
+        "Wan Choi"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-20T05:35:16+00:00",
+      "link": "https://arxiv.org/pdf/2608.19649v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Federated learning for semantic communication model update under wireless conditions",
+      "llm_evidence_cn": "面向无线异构条件的语义通信模型联邦学习更新",
+      "llm_evidence": "面向无线异构条件的语义通信模型联邦学习更新",
+      "canonical_evidence": "面向无线异构条件的语义通信模型联邦学习更新",
+      "llm_tldr_en": "Combines feature-reconstruction federated learning with differentially private JSCC semantic communication, letting weak-uplink clients transmit compact semantic features while guaranteeing stronger privacy under heterogeneous wireless conditions.",
+      "llm_tldr_cn": "该文针对异构无线条件下语义通信模型更新效率与隐私保护不足的问题，提出基于特征重构的联邦学习框架FedSFR。上行受限客户端可仅传输从本地JSCC编码器提取的低维语义特征，在提升训练稳定性的同时降低通信开销。结合一次性拉普拉斯机制，理论证明基于特征的传输可获得更强的差分隐私保障。该工作为无线语义通信的隐私保护联邦训练提供了可行方案。",
+      "llm_tldr": "该文针对异构无线条件下语义通信模型更新效率与隐私保护不足的问题，提出基于特征重构的联邦学习框架FedSFR。上行受限客户端可仅传输从本地JSCC编码器提取的低维语义特征，在提升训练稳定性的同时降低通信开销。结合一次性拉普拉斯机制，理论证明基于特征的传输可获得更强的差分隐私保障。该工作为无线语义通信的隐私保护联邦训练提供了可行方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.19529v1",
+      "source": "arxiv",
+      "title": "When Machines Speak: A Unified Generative Framework for Integrating Machine-Native Symbols into Pretrained Large Language Models",
+      "abstract": "Many real-world AI systems represent entities, behaviors, and structured information using discrete machine-native symbols rather than natural language. While these representations are compact and preserve task-relevant structure, they lie outside the linguistic token space of pretrained large language models (LLMs), creating a fundamental divide between language modeling and structured prediction. We introduce UniLang, a unified generative framework that bridges this divide by extending pretrained LLMs to treat machine-native symbols as first-class generative units alongside natural-language tokens. UniLang expands the LLM's vocabulary and embedding space with grounded machine-native representations, enabling textual and symbolic tokens to be jointly modeled and generated under a single autoregressive objective. This unified interface allows pretrained LLMs to directly operate on machine-native representations without requiring them to be verbalized as natural language or relying on task-specific architectures. We evaluate UniLang on two structurally distinct tasks, sequential recommendation and legal precedent prediction, spanning different domains and types of structured prediction. Across both tasks, UniLang consistently outperforms strong baselines, demonstrating a path toward extending pretrained LLMs beyond language and using them as a common generative modeling backbone for heterogeneous machine-native representations.",
+      "authors": [
+        "Su Yan",
+        "Rakesh Iyer"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-08-20T00:54:36+00:00",
+      "link": "https://arxiv.org/pdf/2608.19529v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "extends pretrained LLMs to treat machine-native symbols as generative units, applicable to structured wireless signal representation",
+      "llm_evidence_cn": "扩展预训练大语言模型将机器原生符号视为生成单元，可应用于结构化无线信号表示",
+      "llm_evidence": "扩展预训练大语言模型将机器原生符号视为生成单元，可应用于结构化无线信号表示",
+      "canonical_evidence": "扩展预训练大语言模型将机器原生符号视为生成单元，可应用于结构化无线信号表示",
+      "llm_tldr_en": "Proposes UniLang, a unified generative framework that expands pretrained LLMs' vocabulary with machine-native symbols, bridging language modeling and structured prediction for domains like wireless signals.",
+      "llm_tldr_cn": "本文提出UniLang，一种统一的生成式框架，通过扩展预训练大语言模型的词表与嵌入空间，将机器原生符号（如实数、结构体等）与自然语言标记一起作为一等的生成单元。它弥合了语言建模与结构化预测之间的鸿沟，使LLM能够直接生成紧凑且保留结构的离散数据。该方法为将预训练模型应用于无线信号、协议等结构化无线领域提供了可迁移的预训练范式。",
+      "llm_tldr": "本文提出UniLang，一种统一的生成式框架，通过扩展预训练大语言模型的词表与嵌入空间，将机器原生符号（如实数、结构体等）与自然语言标记一起作为一等的生成单元。它弥合了语言建模与结构化预测之间的鸿沟，使LLM能够直接生成紧凑且保留结构的离散数据。该方法为将预训练模型应用于无线信号、协议等结构化无线领域提供了可迁移的预训练范式。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.16477v1",
+      "source": "arxiv",
+      "title": "Pallas: A Proactive KV Cache Migration Framework for LLM Inference in AI-RAN",
+      "abstract": "AI-RAN brings large language model (LLM) serving close to mobile users, but cellular handover can separate an active request from its inference state: the user attaches to a target base station (gNB) while the large and growing key-value (KV) cache remains at the source. Retaining inference at the source preserves service continuity but persistently increases inter-token latency (ITL), whereas recovering the state at the target restores serving locality but requires KV-cache transfer, recomputation, or a combination of both only after handover, directly prolonging service interruption time (SIT).   This work presents Pallas, a \\textit{proactive} KV-cache migration framework that prepares the inference state at the predicted target before handover, in parallel with ongoing source-side inference and token delivery. At the preparation trigger, Pallas partitions the token sequence into a stable historical prefix and an evolving suffix. The target reconstructs the prefix through local prefill, while the source streams the KV blocks generated for the suffix. At handover, the target assembles both portions into an up-to-date KV cache and resumes decoding locally, leaving only unfinished preparation to contribute to SIT. An online scheduler selects the \\textit{prefetching window}, which determines how early preparation begins before handover, based on mobility predictions and runtime telemetry. Across three LLMs and $100$--$500~\\mathrm{Mbps}$ inter-gNB links, our vLLM-based prototype reduces average SIT by factors of $2.28$--$89.68$ over target-side recovery approaches and lowers average ITL by $16.0\\%$--$50.0\\%$ compared with source-side forwarding.",
+      "authors": [
+        "Tianhang Ding",
+        "Jianchun Liu",
+        "Hongli Xu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-08-17T12:16:09+00:00",
+      "link": "https://arxiv.org/pdf/2608.16477v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM inference serving in wireless AI-RAN with proactive KV cache migration",
+      "llm_evidence_cn": "无线AI-RAN中LLM推理的主动KV缓存迁移",
+      "llm_evidence": "无线AI-RAN中LLM推理的主动KV缓存迁移",
+      "canonical_evidence": "无线AI-RAN中LLM推理的主动KV缓存迁移",
+      "llm_tldr_en": "Pallas addresses cellular handover splitting LLM inference state in AI-RAN by proactively migrating KV caches to predicted target gNBs, cutting service interruption time without sacrificing serving locality.",
+      "llm_tldr_cn": "AI-RAN在无线接入网中提供大语言模型服务，但蜂窝切换会使活跃请求与其KV缓存分离，导致服务中断或时延增加。Pallas提出在切换前预测目标基站并主动迁移KV缓存，将推理状态提前准备在目标gNB，从而在不牺牲服务局部性的前提下显著缩短服务中断时间。该框架为无线网络中大规模语言模型推理提供了高效的推理状态管理方案。",
+      "llm_tldr": "AI-RAN在无线接入网中提供大语言模型服务，但蜂窝切换会使活跃请求与其KV缓存分离，导致服务中断或时延增加。Pallas提出在切换前预测目标基站并主动迁移KV缓存，将推理状态提前准备在目标gNB，从而在不牺牲服务局部性的前提下显著缩短服务中断时间。该框架为无线网络中大规模语言模型推理提供了高效的推理状态管理方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "large language model for wireless communication",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.19881v1",
+      "source": "arxiv",
+      "title": "Interpretable Feature Learning for RF Fingerprinting via Polar MKANs",
+      "abstract": "Radio frequency (RF) fingerprinting authenticates wireless devices from hardware-induced I/Q impairments, typically with deep learning feature extractors that are accurate but opaque, limiting their use in security critical settings. We propose Polar Monotonic Kolmogorov-Arnold Networks (Polar MKAN), a block partitioned monotonic encoder on polar inputs in which each latent dimension depends exclusively on magnitude or phase, yielding channel separation and monotone responses by construction. On a synthetic gain and carrier frequency offset (CFO) benchmark, Polar MKAN reaches 57.2 percent DCI Disentanglement versus at most 12.9 percent for unpartitioned baselines. We further evaluate the detection accuracy trade off on real data and the sensitivity to blind CFO compensation.",
+      "authors": [
+        "Mikhail Krasnov",
+        "Ljupcho Milosheski",
+        "Carolina Fortuna"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-08-20T10:42:33+00:00",
+      "link": "https://arxiv.org/pdf/2608.19881v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep learning RF fingerprinting for wireless device authentication; uses Polar MKAN network",
+      "llm_evidence_cn": "用于无线设备认证的深度学习射频指纹识别，使用Polar MKAN网络",
+      "llm_evidence": "用于无线设备认证的深度学习射频指纹识别，使用Polar MKAN网络",
+      "canonical_evidence": "用于无线设备认证的深度学习射频指纹识别，使用Polar MKAN网络",
+      "llm_tldr_en": "Proposes Polar MKAN, a block-partitioned monotonic encoder that learns interpretable RF fingerprints from magnitude and phase, achieving high disentanglement on synthetic benchmarks while retaining accuracy on real data.",
+      "llm_tldr_cn": "该论文针对射频指纹识别中深度学习特征提取器不可解释的问题，提出基于极坐标单调Kolmogorov-Arnold网络（Polar MKAN）的分块单调编码器，使每个潜维度仅依赖幅度或相位，从而在结构上保证通道分离与单调响应。在合成增益与载波频偏基准上，该方法DCI解纠缠度达57.2%，显著高于未分区基线（最高12.9%），并在真实数据上验证了检测精度与解释性的权衡。该工作为安全关键场景下可解释的无线物理层认证提供了新途径。",
+      "llm_tldr": "该论文针对射频指纹识别中深度学习特征提取器不可解释的问题，提出基于极坐标单调Kolmogorov-Arnold网络（Polar MKAN）的分块单调编码器，使每个潜维度仅依赖幅度或相位，从而在结构上保证通道分离与单调响应。在合成增益与载波频偏基准上，该方法DCI解纠缠度达57.2%，显著高于未分区基线（最高12.9%），并在真实数据上验证了检测精度与解释性的权衡。该工作为安全关键场景下可解释的无线物理层认证提供了新途径。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

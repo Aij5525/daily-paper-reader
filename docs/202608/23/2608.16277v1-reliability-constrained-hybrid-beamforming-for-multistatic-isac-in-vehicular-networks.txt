@@ -1,0 +1,249 @@
+Title: Reliability-Constrained Hybrid Beamforming for Multistatic ISAC in Vehicular Networks
+
+URL Source: https://arxiv.org/pdf/2608.16277v1
+
+Published Time: Tue, 18 Aug 2026 01:47:44 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+> 1
+
+# Reliability-Constrained Hybrid Beamforming for Multistatic ISAC in Vehicular Networks 
+
+Congcong Liu, Junhui Zhao, Senior Member, IEEE , Xiaoming Wang, Dongming Wang 
+
+Abstract —This letter investigates reliability-constrained hybrid beamforming for transceiver-separated multistatic integrated sensing and communication in vehicular networks. A target-position Cram´ er–Rao bound minimization problem is formulated under outage-probability, transmit-power, and analog constant-modulus constraints. To handle the constrained non-convex prob-lem, we develop a proportional-integral Lagrangian proximal policy optimization algorithm. Simulation results show that the proposed algorithm keeps the average outage probability at or below the reliability threshold, around 8%–10%, improves constraint satisfaction, and achieves stable sensing performance. 
+
+Index Terms —Integrated sensing and communication, Internet of Vehicles, beamforming, deep reinforcement learning. 
+
+I. I NTRODUCTION 
+
+# INTEGRATED sensing and communication (ISAC) is re-garded as a promising candidate technology for sixth-generation mobile communication systems [1], [2]. By sharing spectrum, hardware, and signal waveforms, ISAC enables wireless communication and environmental sensing over a unified platform [3]. In vehicular networks, applications such as autonomous driving, cooperative sensing, blind-spot warn-ing, and road environment monitoring require both reliable data transmission and real-time sensing capability [4], [5]. However, high vehicle mobility, frequent road obstructions, and dynamic service demands make ISAC resource allocation and beamforming design challenging [6]. Communication and sensing tasks in vehicular ISAC sys-tems share limited spectrum, power, and spatial beam re-sources, but their performance objectives are different [7]. Communication focuses on link reliability and transmission rate, whereas sensing requires sufficient target-direction beam gain and estimation accuracy. Steering beams toward vehicular users can improve communication reliability but may weaken target illumination, while sensing-oriented beams may degrade vehicular links. Therefore, reliability-constrained beamform-ing is essential for balancing communication and sensing performance in vehicular ISAC. Existing studies on ISAC beamforming mainly focus on monostatic architectures, where the same node performs signal 
+
+This work was supported by the Fundamental Research Funds for the central Universities (2025JBZX060). Congcong Liu, and Junhui Zhao are with the School of Electronic and Information Engineering, Beijing jiaotong University, Beijing 100044, China (e-mail: 21111041@bjtu.edu.cn; junhuizhao@hotmail.com). Xiaoming Wang is with the College of Telecommunications and Infor-mation Engineering, Nanjing University of Posts and Telecommunications, Nanjing 210003, China (e-mail: xmwang@njupt.edu.cn). Dongming Wang is with the National Mobile Communications Re-search Laboratory, Southeast University, Nanjing 210096, China (e-mail: wangdm@seu.edu.cn). 
+
+transmission and target echo reception [8], [9]. Although simple to deploy, such architectures may suffer from transmit-receive coupling interference, restricted observation angles, and unfavorable reflection links in complex road environments. In contrast, transceiver-separated multistatic ISAC provides a feasible alternative, where the active access point transmits downlink signals and illuminates the target, while multiple passive access points receive target echoes from different perspectives [10], [11]. Motivated by the above, this letter investigates a reliability-constrained hybrid beamforming problem for transceiver-separated multistatic ISAC in vehicular networks. Specifi-cally, we consider a system consisting of one active ac-cess point, multiple passive access points, multiple vehic-ular users, and one point target. The active access point transmits downlink ISAC signals to serve vehicular users and illuminate the target, while the passive access points cooperatively receive target echoes for multistatic sensing. The objective is to improve target localization performance under outage-probability, transmit-power, and analog constant-modulus constraints. To handle the coupled communication reliability and sensing performance, as well as the continuous non-convex beamforming variables, we develop a reliability-aware beamforming optimization method. The contributions of this letter are summarized as follows: 1) We construct a transceiver-separated multistatic ISAC model, where active access point serves vehicular users and multiple passive access points receive target echoes. 2) We formulate a reliability-constrained hybrid beamform-ing problem to minimize the point-target CRB under outage-probability, transmit-power, and analog constant-modulus constraints. 3) We develop a proportional-integral Lagrangian proxi-mal policy optimization based method for feasible on-line beamforming. Simulations show that the proposed method achieves stable convergence, and higher con-straint satisfaction than baseline methods. II. S YSTEM MODEL 
+
+We consider a transceiver-separated multistatic ISAC system for vehicular networks, consisting of one active AP, multiple passive APs, K downlink vehicular users, U uplink users, and one point target. The active AP transmits ISAC signals to serve downlink users and illuminate the target, while the passive APs cooperatively receive target echoes from different spatial perspectives. The uplink users are regarded as external interference sources, and their transmit powers are treated as given parameters rather than optimization variables. arXiv:2608.16277v1 [eess.SY] 17 Aug 2026 2
+
+The active AP is equipped with Mt transmit antennas and 
+
+MRF RF chains, and adopts a hybrid beamforming archi-tecture. Each passive AP has Mr receive antennas, and all vehicular users are equipped with a single antenna. Let K =
+
+{1, 2, . . . , K }, U = {1, 2, . . . , U }, and Zp = {2, 3, . . . , Z }
+
+denote the sets of downlink users, interfering uplink users, and passive APs, respectively. 
+
+A. Signal Model 
+
+At time slot t, the active AP transmits the communication symbol vector x[t] ∈ CK×1 to K downlink vehicular users. Following the ISAC signal reuse principle, the communication symbols are also reused as sensing probing waveforms without introducing dedicated sensing signals. Let WRF [t] ∈ CMt×MRF and WBB [t] =[wBB ,1[t], . . . , wBB ,K [t]] ∈ CMRF ×K denote the analog and digital beamforming matrices, respectively. Then, the transmit signal is given by 
+
+X[t] = WRF [t]WBB [t]x[t]. (1) The transmit covariance matrix is expressed as 
+
+Rx[t] = WRF [t]WBB [t]WHBB [t]WHRF [t], (2) and the transmit power constraint is 
+
+tr( Rx[t]) ≤ Pmax . (3) 
+
+B. Communication Model 
+
+Let hk[t] ∈ CMt×1 denote the channel vector from the ac-tive AP to the k-th downlink vehicular user. Considering both multi-user downlink interference and cross-link interference from uplink users, the received SINR of the k-th vehicular user is given by 
+
+SINR k[t] = hH 
+
+> k
+
+[t]WRF [t]wBB ,k [t] 2
+
+P
+
+> i̸=k
+
+hH 
+
+> k
+
+[t]WRF [t]wBB ,i [t] 2 + pu[t] |Hk,u [t]|2 + σ2
+
+> k
+
+,
+
+(4) where pu[t] and Hk,u [t] denote the transmit power and cross-link channel of the u-th uplink user, respectively, and σ2 
+
+> k
+
+is the noise power. With normalized bandwidth, the downlink spectral effi-ciency is 
+
+SE DL  
+
+> k
+
+[t] = log 2 (1 + SINR k[t]) . (5) To characterize the reliability of short-packet vehicular communications, the finite blocklength normal approximation is adopted [12]. Given the target downlink rate RDL th and codeword length L, the outage probability of the k-th vehicular user is approximated as 
+
+P out  
+
+> k
+
+[t] = Q SE DL  
+
+> k
+
+[t] − RDL th 
+
+pVk[t]/L 
+
+!
+
+, (6) where Q(·) is the Gaussian Q-function, and Vk[t] is the channel dispersion term, given by 
+
+Vk[t] = 
+
+
+
+1 − (1 + SINR k[t]) −2
+
+(log 2 e)2 . (7) The average system outage probability is defined as 
+
+¯P out sys [t] = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+P out  
+
+> k
+
+[t]. (8) 
+
+C. Sensing Model 
+
+We consider a far-field point target, where the ISAC signal transmitted by the active AP is reflected by the target and received by multiple passive APs. For the z-th passive AP, the received echo depends on the transmit steering vector bt(θt),the receive steering vector br,z (θr,z ), and the bistatic reflection coefficient βz , where θt and θr,z denote the angle of departure and angle of arrival, respectively. Based on the point-target angle estimation model, the Fisher information associated with θr,z is proportional to the target-direction transmit beam gain. For compact notation, it is written as 
+
+Jz [t] = κz bH 
+
+> t
+
+(θt)Rx[t]bt(θt), (9) where κz collects the effects of the reflection coefficient, receiver noise, sensing snapshots, and receive steering vector derivative. Let pe = [ xe, y e]T and pz = [ xz , y z ]T denote the target position and the z-th passive AP position, respectively. Denote the Jacobian vector between the target position and the arrival angle by gz = ∂θ r,z /∂ pe. Since the observations from different passive APs are independent, the Fisher information matrix for target localization is 
+
+Fpe [t] = X
+
+> z∈Z p
+
+Jz [t]gz gT 
+
+> z
+
+. (10) Accordingly, the position CRB is given by 
+
+CRB( pe; t) = tr  F−1 
+
+> pe
+
+[t] . (11) Therefore, the point-target sensing performance is deter-mined by both the target-direction transmit beam gain and the spatial diversity of passive APs. By optimizing the transmit beamforming, the point-target CRB can be reduced to improve multistatic sensing accuracy. 
+
+D. Problem Formulation 
+
+We aim to optimize the hybrid beamforming matrices at the active AP to minimize the point-target CRB while guar-anteeing vehicular communication reliability. The reliability-constrained multistatic ISAC beamforming problem is formu-lated as 
+
+P : min  
+
+> WRF [t],WBB [t]
+
+CRB( pe; t)s.t. ¯P out sys [t] ≤ Pth ,
+
+tr ( Rx[t]) ≤ Pmax ,
+
+|[WRF [t]] i,j | = 1 , (i, j ) ∈ W RF ,
+
+(12) where Pth denotes the maximum allowable average outage probability. The constraints respectively ensure communica-tion reliability, limit the transmit power, and impose the constant-modulus requirement of the analog beamformer. 3
+
+Problem P is non-convex due to the coupling among out-age probability, transmit covariance, and hybrid beamforming variables. Therefore, a reliability-aware learning-based beam-forming method is developed in the next section. III. A LGORITHM DESIGN 
+
+The formulated problem involves coupled continuous beam-forming variables and communication reliability constraints, which makes direct optimization challenging. To enable ef-ficient online beamforming under time-varying channels, we recast it as a constrained Markov decision process and develop a PI-LPPO algorithm. 
+
+A. The proposed algorithm 
+
+In the formulated constrained Markov decision process, the system state contains the available communication channel and target sensing information, while the action corresponds to the beamforming variables generated by the policy network. The sensing objective is represented by the reward function, whereas the communication outage probability is incorporated into the cost function [13]. For a stochastic policy πθ , let Jr (πθ ) and Jc (πθ ) denote the expected cumulative sensing reward and communication cost, respectively. The constrained policy optimization problem is formulated as 
+
+max  
+
+> θ
+
+Jr (πθ )s.t. Jc (πθ ) ≤ Cmax , (13) where Cmax denotes the prescribed communication cost threshold. By introducing a nonnegative Lagrange multiplier λ, the constrained problem is transformed into the following La-grangian objective: 
+
+L (πθ , λ ) = Jr (πθ ) − λ [Jc (πθ ) − Cmax ] , (14) where λ ≥ 0 penalizes communication constraint violations. Conventional Lagrangian PPO (LPPO) updates the multi-plier according to the observed constraint violation, which may cause delayed response or oscillations near the constraint boundary. To improve constraint adaptation, we introduce a PI-inspired multiplier λPI  
+
+> m
+
+at the m-th policy update, which accounts for both the current constraint deviation and accu-mulated historical deviations. Two critic networks are used to separately estimate the sensing reward and communication cost value functions. The corresponding advantages are combined as 
+
+bAt = bA rt − λPI  
+
+> m
+
+bA ct , (15) where bA rt and bA ct denote the normalized reward and cost advantages, respectively. The probability ratio between the current and old policies is defined as 
+
+ρt (θ) = πθ (at | st)
+
+πθold (at | st) . (16) 0 20000 40000 60000 80000 100000        
+
+> Episode
+> 0.74 0.76 0.78 0.80 0.82 0.84 0.86
+> Reward
+> Reward
+> (a) Reward 020000 40000 60000 80000 100000
+> Episode
+> 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
+> Cost
+> Cost Cost Constraint (b) Cost
+> Fig. 1. Convergence behavior of the proposed algorithm.
+
+Based on the combined advantage, the policy network is updated using the clipped PPO surrogate objective: 
+
+Lclip (θ) = Et
+
+"
+
+min ρt (θ) bAt,
+
+clip ( ρt (θ) , 1 − ϵclip , 1 + ϵclip ) bAt
+
+!# 
+
+.
+
+(17) The clipping operation limits overly large policy updates, while the PI-adjusted multiplier dynamically balances sensing performance and communication reliability. 
+
+B. Algorithmic Procedure 
+
+During training, the agent observes the current communica-tion and sensing state and generates a continuous beamforming action through the policy network. The action is then projected to satisfy the constant-modulus hardware constraint and nor-malized to meet the transmit power constraint. The feasible beamforming solution is executed in the environment, which returns the sensing reward, communication cost, and next state. After collecting a batch of trajectories, the reward and cost critic networks are updated to estimate the corresponding advantages. The effective Lagrange multiplier is adjusted according to the observed constraint violation, and the policy network is updated using the clipped PPO objective. This process is repeated until convergence. During online execution, the active AP obtains a feasible beamforming solution through a single forward pass of the trained policy network. Thus, the nonconvex problem does not need to be solved repeatedly, which reduces online com-putational complexity. IV. SIMULATION ANALYSIS 
+
+Simulation experiments are conducted to evaluate the con-vergence and reliability-constraint satisfaction of the proposed PI-LPPO algorithm. The system average outage probability is adopted as the communication cost, and the cost threshold is set to Cmax = 0 .1. For comparison, LPPO, PPO, SAC, multi-head double deep Q-network, and random policy are implemented under the same system model and simulation parameters. Fig. 1 (a) shows the convergence behavior of the sensing reward of the proposed PI-LPPO algorithm. The reward fluctu-ates in the early stage due to policy exploration, then increases rapidly and gradually stabilizes at around 0.85-0.86 after 430 33 36 40 43 
+
+Maximum transmit power (dBm)      
+
+> 020 40 60 80 100
+> Constraint satisfaction rate (%)  Proposed LPPO PPO SAC MHDDQN Random
+
+Fig. 2. Communication constraint satisfaction rate vs. transmit power. 30 33 36 40 43 
+
+Maximum transmit power (dBm)      
+
+> 020 40 60 80
+> Average outage probability (%)  Proposed LPPO PPO SAC MHDDQN Random
+
+Fig. 3. Average communication outage probability vs. transmit power. 
+
+2 × 10 4 episodes. This indicates that the agent learns a stable beamforming policy with favorable sensing performance. Fig. 1 (b) shows the convergence behavior of the com-munication cost. The cost decreases from about 0.75 at the beginning of training and falls below the threshold of 0.1 after about 6 × 10 4 episodes, finally stabilizing at around 0.08– 0.09. Together with Fig. 2, this result shows that PI-LPPO can reduce the outage cost while maintaining stable sensing performance. Fig. 2 compares the communication reliability constraint satisfaction rates under different maximum transmit powers. PI-LPPO achieves the highest and most stable satisfaction rate among all schemes. This is because the proportional component enables fast responses to current constraint viola-tions, while the integral component helps suppress long-term accumulated violations. Fig. 3 compares the average outage probabilities of different algorithms. PI-LPPO keeps the outage probability at about 8%–10% and satisfies the prescribed reliability threshold, while other learning-based baselines show higher outage prob-abilities or occasional constraint violations. These results ver-ify the effectiveness of the proposed PI-Lagrangian mechanism in improving reliability constraint control. V. CONCLUSION 
+
+This letter studied reliability-constrained hybrid beamform-ing for a transceiver-separated multistatic ISAC system in vehicular networks. A target-position CRB minimization prob-lem was formulated under communication reliability, transmit power, and analog constant-modulus constraints. To solve this non-convex problem online, it was reformulated as a CMDP, and a PI-LPPO-based beamforming method was devel-oped. Simulation results showed that the proposed algorithm achieves stable convergence, keeps the average outage proba-bility below the reliability threshold, and outperforms baseline methods in outage probability and reliability-constraint satis-faction. REFERENCES [1] J. Zhao, R. Ren, D. Zou, Q. Zhang, and W. Xu, “IoV-oriented integrated sensing, computation, and communication: System design and resource allocation,” IEEE Transactions on Vehicular Technology , vol. 73, no. 11, pp. 16 283–16 294, Nov. 2024. [2] J. A. Zhang, M. L. Rahman, K. Wu, X. Huang, Y. J. Guo, S. Chen, and J. Yuan, “Enabling joint communication and radar sensing in mo-bile networks—a survey,” IEEE Communications Surveys & Tutorials ,vol. 24, no. 1, pp. 306–345, 2022. [3] R. Ren, J. Zhao, D. Zou, Q. Zhang, D. Wang, and W. Xu, “Collaborative computation in integrated sensing, communication, and computation system for autonomous driving,” IEEE Transactions on Intelligent Transportation Systems , vol. 27, no. 1, pp. 883–894, Jan. 2026. [4] X. Cheng, D. Duan, S. Gao, and L. Yang, “Integrated sensing and communications (isac) for vehicular communication networks (vcn),” 
+
+IEEE Internet of Things Journal , vol. 9, no. 23, pp. 23 441–23 451, 2022. [5] C. Liu, M. Xia, J. Zhao, H. Li, and Y. Gong, “Optimal resource allocation for integrated sensing and communications in internet of vehicles: A deep reinforcement learning approach,” IEEE Transactions on Vehicular Technology , vol. 74, no. 2, pp. 3028–3038, 2025. [6] D. Cong, S. Guo, S. Dang, and H. Zhang, “Vehicular behavior-aware beamforming design for integrated sensing and communication sys-tems,” IEEE Transactions on Intelligent Transportation Systems , vol. 24, no. 6, pp. 5923–5935, 2023. [7] F. Dong, F. Liu, Y. Cui, W. Wang, K. Han, and Z. Wang, “Sensing as a service in 6g perceptive networks: A unified framework for isac resource allocation,” IEEE Transactions on Wireless Communications ,vol. 22, no. 5, pp. 3522–3536, 2023. [8] I. Perera, N. T. Nguyen, P. Pirinen, and N. Rajatheva, “Bi-static isac beamforming design in multi-user mimo systems,” IEEE Transactions on Vehicular Technology , pp. 1–13, 2026, Early Access. [9] R. Ren, J. Zhao, Q. Zhang, D. Wang, and J. Li, “DRL beamforming in RIS-aided IoV for integrated-sensing-communication-computation,” 
+
+IEEE Internet of Things Journal , vol. 12, no. 14, pp. 28 201–28 213, Jul. 2025. [10] W. Mao, Y. Lu, G. Pan, J. An, B. Ai, and D. W. K. Ng, “Cram´ er–rao bound optimization for bistatic isac: Transceiver design and attention-based isacnet,” IEEE Journal on Selected Areas in Communications ,vol. 44, pp. 181–195, 2026. [11] T. Mao, J. Yang, L. Liang, and S. Jin, “Hybrid beamforming design for bistatic integrated sensing and communication systems,” IEEE Transac-tions on Communications , vol. 73, no. 11, pp. 10 360–10 376, 2025. [12] Y. Polyanskiy, H. V. Poor, and S. Verdu, “Channel coding rate in the finite blocklength regime,” IEEE Transactions on Information Theory ,vol. 56, no. 5, pp. 2307–2359, 2010. [13] C. Tian, A. Liu, and W. Luo, “Delay-aware stochastic resource manage-ment for mobile edge computing systems via constrained reinforcement learning,” IEEE Wireless Communications Letters , vol. 10, no. 12, pp. 2708–2712, 2021.
