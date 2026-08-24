@@ -1,0 +1,445 @@
+Title: From Sparse Probes to Sum-Rate Maximization: Electromagnetic Twin Beamforming
+
+URL Source: https://arxiv.org/pdf/2608.20846v1
+
+Published Time: Mon, 24 Aug 2026 00:32:53 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# From Sparse Probes to Sum-Rate Maximization: Electromagnetic Twin Beamforming 
+
+Tuo Wu, Kangda Zhi, Jie Tang, Jianchao Zheng, Naofal Al-Dhahir, Fellow, IEEE, 
+
+and Fumiyuki Adachi, Life Fellow, IEEE 
+
+Abstract —Probing every candidate location at each wireless-map update is costly. This letter develops electromagnetic-twin (ET) beamforming that converts sparse spatial probes into a sum-rate decision. The ET stores a location-dependent angular power spectrum, updates its innovation through graph-regularized estimation, and queries user covariances for projected beam optimization. A rate-sensitivity bound selects subsequent probes by query-weighted posterior-variance reduction. With 1% random probes, ET beamforming achieves 2.69 bit/s/Hz versus 
+
+1.12 for a static channel knowledge map; with 7% query-aware probes, it reaches 3.03 bit/s/Hz, within 3.4% of perfect-covariance beamforming. 
+
+Index Terms —Electromagnetic twin, channel state information, beamforming, sum-rate maximization, active channel probing. 
+
+I. I NTRODUCTION 
+
+# MULTIUSER beamforming depends on channel knowl-edge, but that knowledge does not evolve on a single time scale. Instantaneous channel state information (CSI) fol-lows fast fading, whereas dominant arrival directions, spatial covariance, and blockage regions often change more slowly. The slower quantities can be learned across multiple sounding epochs and reused at locations where current measurements are sparse. Radio maps and channel knowledge maps (CKMs) exploit this separation by storing site-specific propagation information for wireless resource management [1]–[4]. Such environmental knowledge is increasingly relevant to sixth-generation (6G) systems [5], [6]. Radio-map reconstruction infers unmeasured locations and exposes the completed map to communication algorithms [7]– [9]. These methods remain useful when a representative cur-rent data set is available. In repeated operation, however, reacquiring such a data set over the complete service area can consume substantial sounding resources. Digital twins offer a complementary cycle: retain a state, update it from new physical evidence, query it for a decision, and synchronize it again [10]–[13]. A CKM describes the wireless knowledge being stored; an electromagnetic twin (ET) adds the persistent 
+
+Corresponding author: J. Tang. T. Wu and J. Tang are with the School of Electronic and Information Engi-neering, South China University of Technology, Guangzhou 510640, China (E-mail: {wutuo , eejtang }@scut .edu .cn ). K. Zhi is with the School of Electri-cal Engineering and Computer Science, Technical University of Berlin, 10623 Berlin (E-mail: k.zhi@tu -berlin .de ). J. Zheng is with the School of Com-puter Science and Engineering, Huizhou University, Huizhou 516007, China (E-mail: zhengjch@hzu .edu .cn ). Naofal Al-Dhahir is with the Department of Electrical and Computer Engineering, The University of Texas at Dallas, Richardson, TX 75080 USA (E-mail: aldhahir@utdallas .edu ). F. Adachi is with the International Research Institute of Disaster Science (IRIDeS), Tohoku University, Sendai, Japan (E-mail: adachi@ecei .tohoku .ac .jp ). 
+
+update–query–measurement loop. Thus, the ET is not pro-posed as a replacement for CKM reconstruction, but as a way to operate and refresh that knowledge over time. Persistence alone does not determine where to measure. We call each discrete spatial bin in the service-area grid a cell ; a cell is a candidate probe location, not a cellular-network base station. Under a small budget, a probe far from active users may reduce global map error but contribute little to their beams, whereas a probe near a propagation change may improve the relevant covariances substantially. Therefore, minimizing a uniform reconstruction error and maximizing a communication utility are not equivalent measurement objec-tives. We ask: which cells should be probed so that the updated ET supports the largest next-round sum rate? 
+
+To answer this question, we store a location-dependent angular power spectrum (APS). A scalar gain map does not retain array directions, whereas a map of instantaneous complex channels changes too rapidly to be persistent. The APS provides a middle layer: selected uplink probes update its innovation, and a linear array query converts the updated APS into user channel covariances. These covariances en-ter power-constrained sum-rate maximization, while query-weighted update uncertainty selects the next probes. The ET therefore complements fast CSI with persistent second-order knowledge rather than replacing instantaneous channel tracking. Our contributions are summarized as follows.  
+
+> •
+
+We formulate a two-stage next-update sum-rate problem: probes are selected before their observations, and beams are optimized after those observations update the ET.  
+
+> •
+
+A graph-regularized estimator returns an APS and its uncertainty; APS queries return user covariances; and projected successive convex approximation (SCA) maxi-mizes the covariance-based sum rate.  
+
+> •
+
+A sum-rate sensitivity bound yields a rate-relevant probe rule. A nested Monte Carlo evaluation separates noisy map updates from fast fading and isolates memory, den-sity, and query-aware selection. II. E LECTROMAGNETIC -T WIN SYSTEM MODEL 
+
+Fig. 1 shows the chain in an indoor Wi-Fi site. At up-date epoch t, one M -antenna access point (AP) serves K
+
+single-antenna users over N candidate probe cells. The set 
+
+Ωt ⊆ { 1, . . . , N } contains the blue cells selected for sounding; gray cells are not measured. Probes at Ωt transmit mutually orthogonal uplink pilots of length at least |Ωt|, allowing the AP to separate their directional-power observations. The arXiv:2608.20846v1 [eess.SP] 21 Aug 2026 2                
+
+> Fig. 1. From sparse probes to ET beamforming in an indoor Wi-Fi site. Gray circles are candidate probe cells, blue pins are selected cells, and the users queried for downlink beamforming are shown in the right panel. AI-generated schematic; see Acknowledgment. TABLE I OPERATIONAL DIFFERENCE BETWEEN STATIC CKM AND ET
+> Static CKM Proposed ET Input current probes stored state + current probes Estimate complete current map state innovation Output reconstructed map APS, covariances, next probes Temporal role one-shot reconstruction persistent update–query loop
+
+observations update the stored ET, queries at the fixed user locations provide downlink covariances, and posterior uncer-tainty selects the next probe batch. In contrast, a static CKM reconstructs a map from current samples but neither retains the previous state nor closes this update–query–probe loop. 
+
+A. Persistent Propagation State 
+
+Divide the service area into N candidate probe cells and the angular domain into L directions {ϑℓ}Lℓ=1 . The entry St(n, ℓ )
+
+represents the average received power at cell n associated with direction ϑℓ. Collecting these entries gives the persistent ET state 
+
+St = St(n, ℓ ) 
+
+> n,ℓ
+
+∈ RN ×L 
+
+> +
+
+, (1) where row St(n, :) is the APS at cell n. Unlike a scalar power map, it preserves the directional information needed by an antenna array; unlike instantaneous complex CSI, it is suitable for storage across update intervals. Sparse observations update 
+
+bSt−1 to bSt, state queries determine the beam matrix Wt, and posterior uncertainty determines the next probe set. Let Pt ∈ {0, 1}|Ωt|× N select the APS rows indexed by Ωt. Each selected probe contributes one L-dimensional directional-power vector. After orthogonal-pilot separation and directional processing at the AP, the collected observations satisfy 
+
+Yt = PtSt + Nt, (2) where Yt, Nt ∈ R|Ωt|× L and Nt represents finite-pilot and directional-power extraction errors. Because the ET retains 
+
+bSt−1, the sparse current probes estimate only the innovation 
+
+∆t = St − bSt−1, (3) Subtracting the stored prediction from the new probes gives 
+
+Et = Yt − Pt bSt−1 = Pt∆t + Nt. (4) The desired innovation is zero in unchanged regions, so previ-ously learned knowledge is retained rather than reconstructed from a few current samples. A graph Laplacian L ⪰ 0
+
+represents correlation between neighboring cells [14] and allows a detected local change to influence nearby unobserved cells. 
+
+B. APS-to-Covariance Query 
+
+The AP serves the K users at cells n1, . . . , n K . With normalized array response a(ϑℓ) ∈ CM and dictionary 
+
+A = [ a(ϑ1), . . . , a(ϑL)] ∈ CM ×L, the APS powers weight the directional array responses. Querying the ET at user k
+
+therefore gives 
+
+Bk,t = A diag( bSt(nk, :)) AH ,
+
+bRk,t = Bk,t + ϵR
+
+tr( Bk,t )
+
+M IM , (5) where Bk,t , bRk,t ∈ CM ×M . The first term superposes the di-rectional covariance components. The second term is isotropic diagonal loading: it represents unresolved diffuse power and prevents a rank-deficient covariance from making the beam de-sign numerically fragile; the trace is evaluated before loading. The current channel follows hk,t ∼ CN (0, Rk,t ). Hence, the ET converts sparse physical observations into beamforming knowledge through Yt → bSt → bRk,t .At epoch t, let xk,t be a unit-power data symbol and let 
+
+Wt = [ w1,t , . . . , wK,t ] ∈ CM ×K be the downlink beam matrix. User k receives 
+
+yk,t = hHk,t wk,t xk,t + X 
+
+> j̸=k
+
+hHk,t wj,t xj,t + zk,t , (6) where zk,t ∼ CN (0 , σ 2) is receiver noise. Using the queried covariance as second-order channel knowledge gives the moment-based rate 
+
+¯rk,t (Wt) = log 2 1 + wHk,t bRk,t wk,t 
+
+σ2 + P  
+
+> j̸=k
+
+wHj,t bRk,t wj,t 
+
+!
+
+. (7) 3
+
+The operational objective is the sum rate rather than map normalized mean-square error (NMSE). For the state obtained from the current sparse probes, the AP solves 
+
+(P BF ) max 
+
+> Wt
+
+Ft(Wt; bSt) = 
+
+> K
+
+X
+
+> k=1
+
+¯rk,t (Wt)s.t. ∥Wt∥2 
+
+> F
+
+≤ P, 
+
+(8) Here, P is the AP’s total downlink transmit-power budget. Through (5), bSt determines every bRk,t . Thus, different probe observations produce different covariance estimates, beams, and achievable sum rates. The remaining question is which B cells should be probed next. Let Bt denote this new batch and let Ut(Bt) ≜
+
+U(bSt, Bt, Yt+1 ) denote the state produced from the stored ET and its future observations. Assuming that the queried users remain active over the next update interval, the ideal finite-budget problem is 
+
+(P loop ) max 
+
+> Bt
+
+EYt+1 
+
+h
+
+Ft+1 (W⋆t+1 ; bSt+1 )
+
+i
+
+s.t. Bt ⊆ { 1, . . . , N } \ Ωt,
+
+|B t| ≤ B, 
+
+bSt+1 = Ut(Bt),
+
+W⋆t+1 ∈ arg max  
+
+> ∥W∥2
+> F≤P
+
+Ft+1 (W; bSt+1 ). (9) Problem (P loop ) is a two-stage stochastic program. The first-stage decision Bt is made before Yt+1 is observed. After those measurements update the ET, the second-stage recourse W⋆t+1 
+
+maximizes the resulting sum rate. Problem (P BF ) exposes this beamforming stage. Since probe selection is discrete and future observations are unknown, we solve the update and beam layers directly and derive a deterministic rate-relevant surrogate for the first stage. This causal order prevents the estimator from using future observations noncausally to inflate the reported rate. III. F ROM SPARSE PROBES TO SUM -R ATE MAXIMIZATION 
+
+A. Updating the ET from Sparse Probes 
+
+We first instantiate Ut in (P loop ). Because the previous APS is retained, the current observations estimate the innovation through the graph-regularized convex quadratic problem [14] 
+
+b∆t = arg min  
+
+> ∆∈RN×L
+
+μ
+
+2 ∥Pt∆ − Et∥2 
+
+> F
+
++ λ
+
+2 tr( ∆T L∆ )+ η + ε
+
+2 ∥∆∥2 
+
+> F
+
+, (10) where μ > 0 is the assumed observation-noise precision (in-verse normalized variance), λ propagates an observed change over neighboring cells, η shrinks unsupported innovations toward zero and thereby favors persistence, and ε > 0 ensures strict positive definiteness. Thus, the first term fits the selected probes, the second enforces graph smoothness, and the third prevents sparse evidence from changing the entire stored map. The normal equations yield 
+
+Ht = μPTt Pt + λL + ( η + ε)IN , (11) 
+
+b∆t = H−1 
+
+> t
+
+μPTt Et, (12) 
+
+bSt = [ bSt−1 + b∆t]+. (13) The update also quantifies uncertainty for future probing. Let 
+
+δℓ and eℓ be column ℓ of ∆t and Et, and define Λ = λL +(η + ε)IN . Under the Gaussian working model with precision 
+
+μ and prior δℓ ∼ N (0, Λ−1),
+
+p(δℓ | eℓ) ∝ exp 
+
+
+
+− 12
+
+
+
+μ∥Ptδℓ − eℓ∥22 + δTℓ Λδℓ
+
+
+
+. (14) Thus, (12) is the posterior mean and maximum a posteriori (MAP) estimate, and Vt = H−1 
+
+> t
+
+is the covariance shared by all angular bins. Clipping enforces nonnegative power, while one factorization updates all L bins. This stage returns both the APS for beamforming and uncertainty for probing. The static CKM instead estimates St from (Pt, Yt) without memory. 
+
+B. Sum-Rate Maximization with ET Queries 
+
+After sparse probes fix bSt and its queried covari-ances, (P BF ) remains nonconvex but admits a projected SCA update. Within this subsection, the epoch index t is suppressed for readability. Define 
+
+Tk = σ2 +
+
+> K
+
+X
+
+> j=1
+
+wHj bRkwj , (15) 
+
+Ik = Tk − wHk bRkwk. (16) Here, Tk is user k’s total received signal-plus-interference-and-noise power, whereas Ik excludes the desired-stream power and is therefore its interference-plus-noise power. Since ¯rk =log 2 Tk − log 2 Ik, differentiating these two terms gives the Wirtinger gradient 
+
+gj = 1ln 2 
+
+> K
+
+X
+
+> k=1
+
+bRkwj
+
+ 1
+
+Tk
+
+− 1{j̸ =k}
+
+Ik
+
+
+
+. (17) Stack the user gradients as G = [ g1, . . . , gK ]. At iteration q,use the proximal minorizer 
+
+eFq (W) = F (W(q)) + 2 ℜ
+
+n
+
+tr 
+
+h
+
+(G(q))H (W − W(q))
+
+io 
+
+− τq ∥W − W(q)∥2 
+
+> F
+
+, (18) where backtracking increases τq > 0 until the candidate satisfies F (W) ≥ eFq (W). Maximizing this concave quadratic over the transmit-power ball is a convex subproblem. Complet-ing the square gives 
+
+W(q+1) = Π ∥W∥2 
+
+> F≤P
+
+
+
+W(q) + 1
+
+τq
+
+G(q)
+
+
+
+, (19) The projection rescales W only if its power exceeds P .Minorizer tightness and backtracking make the sum rate nondecreasing, with stationary limit points under standard majorization–minimization (MM)/SCA conditions [15]. Generalized-eigenvector beams initialize the method. 4
+
+Weighted minimum mean-square error (WMMSE) is another option, but the covariance-moment rate requires a tailored auxiliary-variable reformulation [16]; projected SCA exposes the ET covariance directly. 
+
+C. Selecting Rate-Relevant Probes 
+
+For the discrete outer decision Bt, a probe is useful when its uncertainty is large and relevant to an active user. Define 
+
+qi = max  
+
+> k
+
+exp 
+
+
+
+− ∥xi − uk∥22
+
+2r2
+
+> q
+
+
+
+,
+
+Qt = diag(1 + ρq 1, . . . , 1 + ρq N ). (20) where xi and uk are the coordinates of candidate probe cell 
+
+i and user k, respectively. Since (5) is linear in the APS and 
+
+σ2 > 0, the sum rate is locally Lipschitz over the compact power set. For finite ct,
+
+E|Ft(W; St) − Ft(W; bSt)|2 ≤ ctL tr( QtVt). (21) Thus, query-weighted uncertainty bounds communication-objective error, giving the surrogate 
+
+(P VR ) min 
+
+> Bt∩Ωt=∅
+> |B t|≤ B
+
+tr( QtVt(Bt)) , (22) where Vt(Bt) is the innovation covariance after adding batch 
+
+Bt. For a candidate cell i, the matrix inversion lemma gives the updated covariance and its exact one-probe reduction in (P VR ):
+
+V+ 
+
+> i
+
+= V − μVe ieTi V
+
+1 + μeTi Ve i
+
+, (23) 
+
+ai = tr[ Qt(V − V+ 
+
+> i
+
+)] = μeTi VQ tVe i
+
+1 + μeTi Ve i
+
+. (24) Select i⋆ = arg max i ai, set V ← V+ 
+
+> i⋆
+
+, and repeat B times. With diagonal covariance this reduces to query-weighted max-imum variance; otherwise, (24) includes uncertainty reduction at correlated cells. Equation (21) therefore ties each probe to the next sum-rate decision. IV. N UMERICAL RESULTS 
+
+A. Setup and Baselines 
+
+We use a normalized narrowband indoor model on a 20 ×15 
+
+grid with 1-m cells. At 5.2 GHz, a half-wavelength-spaced 
+
+M = 8 element ULA is fixed at AP coordinate (0 , 8) outside the left boundary. The K = 4 users remain at (7 , 6) , (10 , 12) ,
+
+(14 , 7) , and (17 , 10) for every method, and L = 15 angular bins span [−70 ◦, 70 ◦]. Each APS combines direct, reflected, and diffuse components, so propagation is not obstacle-free LoS. Between epochs, the region 10 ≤ x ≤ 17 , 5 ≤ y ≤ 11 
+
+attenuates its direct component and gains a shifted reflection; the last two users lie in this region. User cells are excluded from probe candidates to prevent trivial covariance observa-tion. The parameters are μ = 24 , (λ, η ) = (0 .8, 0.2) , static-CKM weight λs = 0 .72 , (ρ, r q ) = (50 , 1.5) , ϵR = 0 .01 , and 50 beam iterations. Unless stated otherwise, normalized downlink SNR P/σ 2 = 10 dB; large-scale path loss is absorbed into the 0 2 4 6 8 10 12         
+
+> Randomly probed cells (%)
+> 11.5 22.5 33.5
+> Average sum rate (bit/s/Hz)
+> Perfect covariance ET Static CKM Stale twin
+> Fig. 2. 500-realization average sum rate versus random probe percentage. 0246810 12
+> Randomly probed cells (%)
+> -10 -9 -8 -7 -6 -5 -4 -3 -2 -1 0
+> APS reconstruction NMSE (dB)
+> ET Static CKM Stale twin
+> Fig. 3. 20-update average APS NMSE versus random probe percentage.
+
+APS covariance scale, so this is an effective received-domain SNR rather than raw AP power. APS observations contain 10% signal-dependent Gaussian error plus a 2% floor to model finite-pilot and power-extraction errors. Each point uses 20 independent noisy APS updates and 25 fast-fading draws per update: 500 common Monte Carlo realizations, not a system parameter, shared by all methods. 
+
+Perfect covariance uses true user covariances. The ET 
+
+updates its APS by (10); the static CKM uses the same probes without memory; and the stale twin ignores new probes. A common beam solver isolates the value of propagation knowledge. 
+
+B. Sparse Probes and Persistent Wireless Knowledge 
+
+Fig. 2 uses random probing to isolate ET persistence. At 1%, ET beamforming achieves 2.69 bit/s/Hz versus 1.12 
+
+bit/s/Hz for static CKM, for which sparse current observations cannot reconstruct the complete field. ET remains close to the stale twin because uniform probes may reduce site-wide error without observing the changed users’ neighborhoods and improving their covariances. This motivates the query-aware probing in Fig. 5. APS NMSE is 10 log 10 (∥bSt − St∥2 
+
+> F
+
+/∥St∥2 
+
+> F
+
+). In Fig. 3, ET improves from −7.51 dB at 1% to −10 .02 dB at 12%, whereas the stale twin remains at −7.24 dB. Static CKM improves with dense current evidence; ET’s advantage is combining sparse new evidence with stored knowledge. 
+
+C. Sum-Rate Benefit of ET Covariances 
+
+Fig. 4 fixes the same four users and 7% query-aware probes for every method while normalized SNR varies from −5 to 20 dB. Covariance errors matter little in the noise-limited regime but create multiuser leakage at high SNR. At 20 dB, ET 5-5 0 5 10 15 20  
+
+> Normalized downlink SNR, P/ <2(dB)
+> 012345678
+> Average sum rate (bit/s/Hz)
+> Perfect covariance ET Static CKM Stale twin
+
+Fig. 4. 500-realization average sum rate versus normalized SNR after 7% query-aware probing. 1 2 3 4 5 6 7
+
+> Cumulative probed cells (%)
+> 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 33.1 3.2
+> Average sum rate (bit/s/Hz)
+> Perfect covariance ET: rate-relevant probing ET: random probing Static CKM Stale twin
+
+Fig. 5. 500-realization average closed-loop sum rate under rate-relevant and random probing. 
+
+attains 6.52 bit/s/Hz versus 5.17 bit/s/Hz for the stale twin, a 26.1% gain. Static CKM gives a similar queried-user sum rate because probes concentrate near those users, although Fig. 3 shows worse site-wide APS accuracy. 
+
+D. Sum-Rate-Driven Probe Selection 
+
+The closed loop starts from 1% observed cells and adds 2% per update. Each round appends new probes to earlier observations, recomputes the innovation and user covariances, and redesigns the beams; no weights are trained online. At 7% in Fig. 5, rate-relevant probing gives 3.03 bit/s/Hz, within 3.4% of perfect covariance, versus 2.70 for random probing. Static CKM reaches 3.00 because probes are query focused, but this local utility does not imply accurate full-field reconstruction. Fig. 6 confirms that the rate gain accompanies a better state: at 7%, rate-relevant probing gives −10 .24 dB APS NMSE, versus −9.36 , −7.24 , and −1.60 dB for random ET, stale twin, and static CKM. Together, Figs. 5 and 6 show the title’s progression from uncertainty-reducing probes to improved covariances and sum rate. 1 2 3 4 5 6 7
+
+> Cumulative probed cells (%)
+> -12 -10 -8 -6 -4 -2 0
+> APS reconstruction NMSE (dB)
+> ET: rate-relevant probing ET: random probing Static CKM Stale twin
+
+Fig. 6. 20-update average closed-loop APS NMSE under rate-relevant and random probing. 
+
+V. C ONCLUSION 
+
+This letter linked sparse probes to sum-rate maximization through ET beamforming. The ET retains an APS, updates its innovation, and queries user covariances; projected SCA designs the beams, while a rate-sensitivity bound selects the next probes. Results show the value of persistence under sparse evidence and the efficiency of rate-relevant probing. The loop thus specifies what wireless knowledge to retain, where to observe next, and how to use it for communication. REFERENCES 
+
+[1] D. Romero, S.-J. Kim, G. B. Giannakis, and R. L´ opez-Valcarce, “Spectrum cartography: From sensor measurements to radio maps,” IEEE Signal Process. Mag. , vol. 32, no. 3, pp. 24–36, May 2015. [2] S. Bi, J. Lyu, Z. Ding, and R. Zhang, “Engineering radio maps for wireless resource management,” IEEE Wireless Commun. , vol. 26, no. 2, pp. 133–141, Apr. 2019. [3] Y. Zeng and X. Xu, “Toward environment-aware 6G communications via channel knowledge map,” IEEE Wireless Commun. , vol. 28, no. 3, pp. 84–91, Jun. 2021. [4] Y. Zeng et al. , “A tutorial on environment-aware communications via channel knowledge map for 6G,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1478– 1519, third quarter 2024. [5] W. Saad, M. Bennis, and M. Chen, “A vision of 6G wireless systems: Applications, trends, technologies, and open research problems,” IEEE Netw. , vol. 34, no. 3, pp. 134–142, May/Jun. 2020. [6] T. Wu et al. , “Fluid antenna systems enabling 6G: Principles, applications, and research directions,” IEEE Wireless Commun. , early access, 2025, doi: 10.1109/MWC.2025.3629597. [7] R. Levie, C. Yapar, G. Kutyniok, and G. Caire, “RadioUNet: Fast radio map estimation with convolutional neural networks,” IEEE Trans. Wireless Commun. ,vol. 20, no. 6, pp. 4001–4015, Jun. 2021. [8] Y. Teganya and D. Romero, “Deep completion autoencoders for radio map estimation,” IEEE Trans. Wireless Commun. , vol. 21, no. 3, pp. 1710–1724, Mar. 2022. [9] X. Li et al. , “RadioGAT: A joint model-based and data-driven framework for multi-band radiomap reconstruction via graph attention networks,” IEEE Trans. Wireless Commun. , vol. 23, no. 11, pp. 17777–17792, Nov. 2024. [10] H. X. Nguyen, R. Trestian, D. To, and M. Tatipamula, “Digital twin for 5G and beyond,” IEEE Commun. Mag. , vol. 59, no. 2, pp. 10–15, Feb. 2021. [11] L. U. Khan, W. Saad, D. Niyato, Z. Han, and C. S. Hong, “Digital-twin-enabled 6G: Vision, architectural trends, and future directions,” IEEE Commun. Mag. , vol. 60, no. 1, pp. 74–80, Jan. 2022. [12] A. Alkhateeb, S. Jiang, and G. Charan, “Real-time digital twins: Vision and research directions for 6G and beyond,” IEEE Commun. Mag. , vol. 61, no. 11, pp. 128–134, Nov. 2023. [13] H. Wang et al. , “Digital twin channel for 6G: Concepts, architectures and potential applications,” IEEE Commun. Mag. , vol. 63, no. 3, pp. 24–30, Mar. 2025. [14] D. I. Shuman, S. K. Narang, P. Frossard, A. Ortega, and P. Vandergheynst, “The emerging field of signal processing on graphs: Extending high-dimensional data analysis to networks and other irregular domains,” IEEE Signal Process. Mag. ,vol. 30, no. 3, pp. 83–98, May 2013. [15] G. Scutari, F. Facchinei, L. Lampariello, and P. Song, “Parallel and distributed methods for constrained nonconvex optimization—Part I: Theory,” IEEE Trans. Signal Process. , vol. 65, no. 8, pp. 1929–1944, Apr. 2017. [16] S. S. Christensen, R. Agarwal, E. de Carvalho, and J. M. Cioffi, “Weighted sum-rate maximization using weighted MMSE for MIMO-BC beamforming design,” 
+
+IEEE Trans. Wireless Commun. , vol. 7, no. 12, pp. 4792–4799, Dec. 2008.

@@ -1,0 +1,267 @@
+Title: Electromagnetic Twin: Completing the Wireless World from Sparse Channel Evidence
+
+URL Source: https://arxiv.org/pdf/2608.20813v1
+
+Published Time: Mon, 24 Aug 2026 00:31:09 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Electromagnetic Twin: Completing the Wireless World from Sparse Channel Evidence 
+
+Tuo Wu, Jie Tang, Kangda Zhi, Junteng Yao, Maged Elkashlan, Kin-Fai Tong, Fellow, IEEE ,George K. Karagiannidis, Fellow, IEEE , and Jinhong Yuan, Fellow, IEEE 
+
+Abstract —Acquiring dense channel information over many locations and beams incurs considerable pilot and processing overhead. Radio maps and channel knowledge maps (CKMs) reduce this overhead by reusing site-specific channel information, but their contents must be refreshed when new measurements or environmental observations become available. This paper introduces an electromagnetic twin as an updatable digital representation that uses sparse channel evidence to reconstruct the wireless state requested by communication queries. Rather than replacing radio maps or CKMs, the twin uses a CKM as channel memory, combines it with registered scene information, and regenerates its outputs after each evidence update. We instantiate this idea by completing a two-dimensional channel-gain field from sparse samples and an incomplete floor plan. A learned RF completion backbone recovers the main propagation structure, and a lightweight residual adapter tests whether frozen CLIP features provide useful side information. With 4% measured locations and 55% missing semantic objects, the RF backbone attains 4.44 
+
+dB RMSE, compared with 8.29 dB for CKM interpolation and 
+
+8.38 dB for an incomplete physics prior. Residual adaptation reduces RMSE by a paired mean of 0.135 dB (95% confidence interval: 0.100 –0.169 dB), but a same-capacity random-feature control is statistically indistinguishable from the CLIP-conditioned adapter. The results therefore support the measurement–update– query loop and lightweight residual correction, while avoiding an unsupported attribution of the correction to visual semantics. 
+
+Index Terms —Electromagnetic twin, wireless digital twin, channel knowledge map, sparse channel evidence. 
+
+I. I NTRODUCTION 
+
+# ACQUIRING channel state information (CSI) over many locations, beams, and frequency resources requires sub-stantial pilot overhead. This is especially costly when the same site is repeatedly queried for coverage, beam selection, outage, or link adaptation. Reusing previously acquired measurements is therefore a central motivation for radio maps and channel knowledge maps (CKMs) [1], [2]. A radio map stores a spatial quantity such as received power or path loss, whereas a CKM generalizes this idea to location-indexed gain, delay, angle, path state, best beam, and other reusable descriptors. CKMs have supported hybrid beamform-ing and channel prediction [3], [4]. Their construction has also                 
+
+> T. Wu and J. Tang are with the School of Electronic and Information Engineering, South China University of Technology, Guangzhou 510640, China (E-mail: {wutuo ,eejtang }@scut .edu .cn ). K. Zhi is with the School of Electrical Engineering and Computer Science, Technical University of Berlin, 10623 Berlin (E-mail: k.zhi@tu -berlin .de ). J. Yao is with the Faculty of Electrical Engineering and Computer Science, Ningbo University, Ningbo 315211, China (E-mail: yaojunteng@nbu .edu .cn ). M. Elkashlan is with Queen Mary University of London, United Kingdom (E-mail:
+> maged .elkashlan@qmul .ac .uk ). K.-F. Tong is with the School of Science and Technology, Hong Kong Metropolitan University, Hong Kong SAR, China (E-mail: ktong@hkmu .edu .hk ). G. K. Karagiannidis is with the Department of Electrical and Computer Engineering, Aristotle University of Thessaloniki, 54124 Thessaloniki, Greece (E-mail: geokarag@auth .gr ). J. Yuan is with the School of Electrical Engineering and Telecommunications, University of New South Wales, Sydney, Australia (E-mail: j.yuan@unsw .edu .au ).
+
+progressed from sample-efficient measurement methods [5] to convolutional and graph reconstruction [6], [7], geometry-assisted ray tracing [8], and generative map construction [9]. These methods estimate or store wireless knowledge, but do not by themselves specify when new evidence changes a maintained state and regenerates a requested output. In deployment, stored information should evolve with the physical site. New pilots reduce channel uncertainty; a moved user or object changes blockage and reflection geometry; and a changed carrier, antenna, or beam codebook changes the channel quantity being queried. A digital twin provides the relevant operational principle: physical observations synchronize a maintained digital state, and the synchronized state supports prediction or control [10]. Digital-twin-channel architectures and radio-environment knowledge pools apply this principle to wireless propagation [11], [12]. We call the resulting signal-processing object an elec-tromagnetic twin : a registered scene/radio state and CKM memory, together with a synchronization model and declared communication queries. A radio map is therefore an output, a CKM supplies persistent location-indexed evidence, and the twin is the update–query process that connects them. It builds on these tools rather than renaming or replacing them. The title phrase wireless world is deliberately query-bounded: it denotes the channel quantities needed by the supported service, not every electromagnetic variable. Definition 1 formalizes this distinction. This paper instantiates the idea through one reproducible update–query cycle. Sparse gain pilots update CKM memory, an incomplete floor plan provides registered scene information, and the query returns a complete fixed-height gain map. The main reconstruction is produced by a convolutional– Transformer RF backbone; a frozen vision–language model (VLM) conditions a small residual adapter, and a same-capacity random-feature control tests whether any improvement is specifically attributable to visual semantics. Fig. 1 previews the observed evidence, learned update, and returned map. The contribution is thus not another stand-alone map estimator. It is a minimal evidence–completion–query–feedback interface with explicit scene, memory, update, and query variables; a concrete fusion model for sparse CKM samples, incomplete geometry, and a propagation prior; and a paired evaluation under nested pilots and missing objects that separates residual capacity from semantic conditioning. II. S YSTEM MODEL AND ELECTROMAGNETIC -T WIN 
+
+UPDATE 
+
+A. Wireless Environment and CKM Measurements 
+
+Consider a fixed-height receiver plane over an indoor wireless service area Ω ⊂ R2. It is discretized as P = {ph,w : 1 ≤ h ≤arXiv:2608.20813v1 [eess.SP] 21 Aug 2026 2 
+
+> Fig. 1. Electromagnetic-twin evidence and update flow. The left panels show sparse sounded points and the registered floor plan; the middle implements the fixed learned update; the right returns a gain-map query. The dashed path denotes later pilot or site evidence.
+
+H, 1 ≤ w ≤ W }, where H and W are the grid height and width. The registered scene/radio state Et contains the floor layout, object and material labels, base-station (BS) location, carrier and antenna configuration, and receiver height at update index t. Let gt(p) denote the channel gain from the BS to 
+
+p ∈ P . The left side of Fig. 1 illustrates the sparse sounded points and incomplete scene available to the receiver. Only locations in St ⊂ P are sounded at update t. A measured gain is 
+
+˜gt(p) = gt(p) + nt(p), p ∈ S t, (1) where nt(p) is measurement noise. The CKM memory is 
+
+Mt = {(i, p, ˜gi(p)) : p ∈ S i, i ≤ t}, (2) which retains the update index, location, and measured gain from successive soundings. This is the gain slice of a general CKM, which may instead store CSI, delay, angle, path state, or best beam. We study gain because the declared query is the matrix Gt ∈ RH×W with [Gt]h,w = gt(ph,w ). For a best-beam query, each scalar gain record would be replaced by a beam-indexed gain vector and the query would return its maximizing beam; that extension is not evaluated here. 
+
+B. From CKM Memory to an Updatable Twin 
+
+A CKM stores and retrieves site-specific channel knowledge. An electromagnetic twin adds an explicit update step: when new pilots or scene observations arrive, the stored evidence is incorporated and the requested wireless output is regenerated. 
+
+Definition 1 (Minimum electromagnetic twin) . At update index 
+
+t, an electromagnetic twin is 
+
+Tt = {E t, Mt, Fθ , Q} , (3) 
+
+where Et is the registered scene/radio state, Mt is CKM memory, Fθ is the reconstruction model with trained parame-ters θ, and Q is the set of supported query operators. Here, model weights are fixed during online updates and Q = {Q g }
+
+contains only the gain-map query. 
+
+Let ∆Et contain newly registered or changed object, material, or radio-configuration entries, and let ∆Mt contain the new indexed pilot records. The synchronization operator Uθ merges these increments with Et−1 and Mt−1 and reruns Fθ ; it does not retrain θ. The state update and gain-map query are 
+
+Tt = Uθ (Tt−1; ∆ Et, ∆Mt), (4) 
+
+ˆGt = Qg (Tt). (5) In plain terms, new evidence changes the registered state or CKM memory, the completion model is evaluated again, and the refreshed gain map becomes available to wireless applications. This update–query operation, rather than the map alone, is what makes the maintained object a twin. Table I summarizes the operational distinction: a radio map is a spatial output, a CKM is reusable channel memory, and an electromagnetic twin maintains those objects through explicit synchronization and query operations. 
+
+C. Gain-Map Update Studied in This Paper 
+
+For the considered update, the observed scene is a four-channel raster Sinc ,t ∈ RH×W ×4 containing walls, reflectors, the BS, and nominal wall loss. The binary pilot mask Mt,normalized measured-gain raster Yt, and normalized physics map Gphy ,t belong to RH×W . Unmeasured entries of Yt are zero but are distinguished from measured low gain by Mt.Concatenating these seven channels gives 
+
+Xt = [ Sinc ,t , Mt, Yt, Gphy ,t ], (6) 
+
+ˆGt = fθ (Xt), (7) the model reconstructs all H × W normalized gains, which are converted back to dB for root-mean-square error (RMSE) evaluation. When pilots arrive, the corresponding mask and gain entries are refreshed and the same fixed model regenerates ˆGt.This is a minimal, replayable synchronization event rather than online weight adaptation or a claim of real-time deployment.              
+
+> TABLE I ROLES OF RADIO MAP , CKM, AND ELECTROMAGNETIC TWIN .
+> Object Primary representation Defining operation Radio map Spatial field of RSS, gain, path loss, or spectrum occupancy Estimate or query one wireless field CKM Location-indexed channel de-scriptors and decisions Store, infer, and retrieve channel knowledge EM twin Registered scene/radio state, CKM memory, update model, and query interface Update stored state and regener-ate wireless outputs 3
+
+III. P ROPOSED ELECTROMAGNETIC -T WIN MAP UPDATE 
+
+The proposed update model uses three sources. Measured CKM samples tie the result to the current site, a simple propagation model supplies physical structure, and learned RF/visual features estimate the remaining spatial field. 
+
+A. Measurement and Physics Representations 
+
+For a data-only reference, let Smem  
+
+> t
+
+be the distinct locations represented in Mt and let ¯gt(s) be the latest stored gain at 
+
+s. Assign ws(p) = ( ∥p − s∥2 + ϵ)−1 so that nearby records receive larger weight. Inverse-distance CKM interpolation gives 
+
+ˆgCKM ,t (p) = 
+
+P
+
+> s∈S mem
+> t
+
+ws(p)¯ gt(s)
+
+P
+
+> s∈S mem
+> t
+
+ws(p) . (8) Thus, ˆgCKM ,t is the measurement-only gain estimate; ϵ = 0 .25 
+
+grid cell prevents a singularity. Independently, the incomplete floor plan produces a rough physics map. Let ¯g0,t (p) be the direct-path gain in dB and ¯gr,t (p) the gain of a candidate single-reflection path r ∈ R t(p):
+
+¯g0,t (p) = gref − 10 γ log 10 d0(p) − Lw, 0(p), (9) 
+
+¯gr,t (p) = gref − 10 γ log 10 dr (p) − Lex 
+
+− κ
+
+h
+
+L(1)  
+
+> w,r
+
+(p) + L(2)  
+
+> w,r
+
+(p)
+
+i
+
++ Gr , (10) 
+
+gphy ,t (p) = 10 log 10 
+
+10 ¯g0,t (p)/10 + X
+
+> r∈R t(p)
+
+10 ¯gr,t (p)/10 
+
+ .
+
+(11) Here gref and γ are the 1-m reference gain and path-loss exponent. The path lengths d0 and dr, reflector set Rt(p),and crossed-wall losses are computed geometrically from the registered raster: Lw, 0 is the direct-path wall loss, while L(1) 
+
+> w,r
+
+and L(2)  
+
+> w,r
+
+belong to the two reflected segments. The material values, reflector gain Gr, and excess loss Lex = 6 dB are the calibrated simulation parameters specified in Section IV-A. The effective factor κ = 0 .45 accounts for oblique reflected-segment interaction under the coarse raster/material model; it is not a universal material constant. Direct and reflected powers are summed in the linear domain. The normalized gphy ,t forms 
+
+Gphy ,t and becomes inaccurate when registered objects or material labels are missing. 
+
+B. Learned RF Completion Backbone 
+
+The RF backbone receives the previously defined input 
+
+Xt = [ Sinc ,t , Mt, Yt, Gphy ,t ], (12) The seven channels have already been defined in Section II-C. The mask lets the network distinguish an unmeasured zero from a measured low-gain value. The encoder uses width 72 and two stride-2 downsampling stages; four six-head Transformer layers process the quarter-resolution spatial tokens, and two transposed-convolution stages restore the grid. A one-channel head predicts the base map 
+
+ˆGRF ,t = fΘ(Xt). (13) The backbone is trained over randomized sites using 
+
+LRF (Θ) = ∥ ˆGRF − G∥1 + μ∥ ˆGRF − G∥22, μ = 0 .5.
+
+(14) The ℓ1 term is robust to localized shadow-boundary errors, whereas the squared ℓ2 term penalizes distributed bias and stabilizes optimization; μ = 0.5 fixes their relative scale. Training over randomized indoor sites makes fΘ reusable across the tested site distribution rather than fitted to one map. We call it an RF backbone, not a foundation model, because broad cross-domain pretraining is not evaluated. 
+
+C. Frozen CLIP Residual Adapter 
+
+The incomplete scene and pilot positions are rendered as a 
+
+224 × 224 floor-plan image Ifp ,t : gray intensity carries wall loss, orange marks reflectors, red marks the BS, and blue marks sounded locations. A frozen CLIP encoder [14] extracts 
+
+eclip ,t = CLIP img (Ifp ,t ). (15) The final prediction is 
+
+ˆGET ,t = ˆGRF ,t + α tanh rψ (Xt, ˆGRF ,t , eclip ,t ), α = 0 .25 ,
+
+(16) The 512-dimensional CLIP vector is projected to eight channels and broadcast over the grid. The adapter rψ concatenates those channels with Xt and ˆGRF ,t , applies two 48-channel convolu-tions, and outputs a one-channel correction. The fixed α = 0 .25 
+
+bounds this normalized residual. During adapter training, fΘ
+
+and CLIP are frozen and only rψ is optimized. CLIP therefore conditions, rather than solves, propagation; a same-capacity random-feature adapter tests whether conditioning contributes beyond residual capacity. Fig. 1 and Algorithm 1 separate offline learning from online synchronization. Offline, the backbone and then the residual adapter are trained. Online, their weights remain fixed: new pilots refresh CKM evidence, the physics raster is recomputed if the scene changes, and one forward pass regenerates ˆGET ,t 
+
+for the gain-map query.                                                 
+
+> ALGORITHM 1: EM-T WIN TRAINING AND ONLINE UPDATE
+> Input Training scenes; current CKM samples (Mt,Yt); incomplete scene
+> Sinc ,t .
+> Output Updated twin gain map ˆGET ,t .1Offline: train RF backbone fΘon randomized scenes using LRF .2Freeze fΘ/CLIP and train residual adapter rψon target maps. 3Online: append new pilots to CKM memory (Mt,Yt).4Compute Gphy ,t and build Xt= [ Sinc ,t ,Mt,Yt,Gphy ,t ].5Obtain base map ˆGRF ,t =fΘ(Xt)and frozen CLIP feature eclip ,t .6Predict residual ∆Gt=rψ(Xt,ˆGRF ,t ,eclip ,t ).7Update ˆGET ,t = ˆGRF ,t + 0 .25 tanh(∆ Gt)and answer queries.
+
+IV. S IMULATION AND DISCUSSION 
+
+A. Setup 
+
+We simulate a 36 m ×24 m indoor area on a fixed-height 1-m grid. Each scene contains one BS, 3–6 walls, 1–3 reflectors, and 12 beam sectors. The channel model uses a −34 dB reference gain at 1 m and 21 log 10 d dB distance loss. Each crossed wall adds 10 –23 dB loss. A reflected path includes 6-dB excess loss, reflector gain, and κ-scaled wall losses on both segments, with the same κ = 0 .45 used in the simulator and physics prior; LoS and reflected powers are summed in the linear domain. CKM measurements contain independent 0.8-dB Gaussian noise, and the observed floor plan is degraded by removing semantic objects. The 3,130 ,993 -parameter RF backbone is trained for 420 steps with batches of 18, corresponding to 7,560 procedurally 4
+
+(a) Ground truth. (b) Map-only CKM (9.49 dB). (c) Physics prior (9.71 dB). 
+
+(d) RF backbone (5.19 dB). (e) CLIP-conditioned ET (5.06 dB). Fig. 2. Representative fixed-height gain-map completion results. White circles mark pilots, black/orange contours mark walls/reflectors, and the red star marks the BS; parentheses report single-scene RMSE where applicable, and surface elevation denotes channel gain. 
+
+generated training scenes. The CLIP-conditioned and random-feature adapters each contain 95 ,513 trainable parameters and use 420 steps with batches of 14, or 5,880 generated scenes. All networks use AdamW with learning rate 2×10 −4, weight decay 
+
+10 −4, the loss weight μ = 0 .5, and mixed-precision CUDA. The openai/clip-vit-base-patch32 encoder and RF backbone are frozen during adapter training; training the CLIP adapter requires 68.54 s on an NVIDIA GeForce RTX 5080. Training, validation, and test scenes are generated from disjoint pseudorandom streams. The training realizations are not reused in the 192-scene validation set or the 192-scene test set, and the validation and test seed ranges are also disjoint. The number of optimization steps is fixed before evaluation; validation checks convergence and is not used for post-hoc checkpoint selection. All reported curves average the same 192 test scenes, and all method comparisons within a point use identical scenes, missing-object realizations, pilot locations, and measurement noise. Two tests are performed. The pilot-update test fixes the missing-object ratio at 55% and appends nested pilot sets from 1% to 8% of grid points. It tests whether the twin improves when CKM memory receives new measurements. This is iterative evidence assimilation in a static scene, not online weight adaptation or time-varying environment tracking. The scene-degradation test fixes pilots at 4% and removes 0% –
+
+75% of semantic objects. It tests whether measured channels can stabilize the update when the floor plan is incomplete. The compared methods are:  
+
+> •
+
+Map-only CKM: measurement-only interpolation, with-out scene information.  
+
+> •
+
+Incomplete physics prior: scene-only propagation calcu-lation, without learned completion.  
+
+> •
+
+RF backbone: learned fusion of pilots, scene raster, and physics map, without a residual adapter. 1% 2% 4% 8% 
+
+> Cumulative measured locations (%)
+> 45678910
+> Gain RMSE (dB)
+> Twin updates
+> Map-only CKM Physics prior RF backbone CLIP-conditioned ET
+
+Fig. 3. Gain RMSE versus cumulative measurements with 55% missing scene objects. 0 20 40 60 80 
+
+> Missing semantic objects (%)
+> 45678910
+> Gain RMSE (dB)
+> Scene degradation
+> Map-only CKM Physics prior RF backbone CLIP-conditioned ET
+
+Fig. 4. Gain RMSE versus missing scene objects with 4% measured locations.  
+
+> •
+
+Random-feature adapter: the same residual architecture as the CLIP variant, conditioned on independent normal-ized Gaussian features.  
+
+> •
+
+CLIP-conditioned ET: the complete update with frozen CLIP image features and residual correction. 
+
+B. Main Results 
+
+Table II reports the common operating point of 4% pilots and 
+
+55% missing objects. The data-only and scene-only baselines both exceed 8 dB RMSE. Fusing the two sources with the RF 5
+
+TABLE II RMSE AT 4% MEASURED LOCATIONS AND 55% MISSING OBJECTS ; CLIP 
+
+> VERSUS RANDOM FEATURES
+
+: p = 0 .993 .            
+
+> Method RMSE (dB) Std. (dB) Map-only CKM 8.29 2.36 Incomplete physics prior 8.38 4.51 RF backbone 4.44 1.63 Random-feature adapter 4.30 1.58 CLIP-conditioned ET 4.30 1.55
+
+backbone reduces RMSE to 4.44 dB, showing that the main gain comes from learned RF completion. Both residual variants reach 4.30 dB. Because every method is evaluated on the same scene realizations, the adapter contribution is tested on per-scene RMSE differences rather than by comparing two independent standard errors. Relative to the RF backbone, the CLIP-conditioned adapter improves RMSE by 0.135 dB on average, with a 95% Student-t confidence interval of [0 .100 , 0.169] dB and paired p = 8 .5 × 10 −13 . However, the CLIP-conditioned and random-feature adapters differ by less than 0.001 dB on average, with 95% confidence interval [−0.013 , 0.013] dB and paired p = 0 .993 . The statistically supported statement is therefore that the residual adapter improves the frozen RF backbone; this experiment does not isolate an additional benefit from CLIP semantics. Fig. 2 explains these RMSE trends spatially. CKM interpolation is smooth but misses sharp shadow regions; the physics prior creates geometry-dependent structure but uses incomplete objects. The RF backbone recovers the large-scale gain topology, and residual correction refines it. All panels share one 2D receiver plane; vertical relief denotes gain. Fig. 3 directly evaluates four update rounds. Each round retains all earlier pilots and appends new measurements. From 
+
+1% to 8% cumulative pilots, the CLIP-conditioned ET improves monotonically from 6.05 dB to 3.90 dB; CKM interpolation improves from 9.47 dB to 8.07 dB. The model weights are unchanged, so the gain comes from updating CKM evidence rather than retraining. The random-feature curve is omitted for clarity because it nearly coincides with the CLIP-conditioned curve. Fig. 4 isolates scene uncertainty. The physics prior degrades from 5.72 dB with complete geometry to 10.31 dB at 75% 
+
+missing objects. The learned methods remain near 4–5 dB because pilots still describe the current radio site. The residual variant stays close to the RF backbone across the sweep; together with the random-feature control, this behavior supports residual correction but not a separate semantic-gain claim. 
+
+C. Interpretation of the RF and Residual Components 
+
+The results support two conclusions. First, CKM pilots carry current site information and the RF backbone performs most of the spatial reconstruction. Second, a small residual stage can correct the frozen backbone, but the present CLIP representation is not demonstrably better than a random conditioning vector. This distinction matters: a pretrained visual encoder may still help under richer images, cross-layout transfer, or textual material descriptions, but such a semantic claim requires a control-separated gain. In the current study, the electromagnetic-twin update is driven primarily by wireless measurements, scene channels, and learned RF structure. V. C ONCLUSION 
+
+This paper presented electromagnetic twin as an updatable digital representation of site-specific wireless state. CKM stores successive channel measurements, registered scene information describes the physical site, and an update model regenerates radio maps or other communication outputs when new evidence arrives. We instantiated this measurement–update– query process through fixed-height gain-map reconstruction. Sparse pilots anchored the result to the current site, and the RF completion backbone supplied most of the accuracy improvement over measurement-only and scene-only baselines. A lightweight residual stage produced a statistically significant paired improvement over the frozen backbone; however, a same-capacity random-feature control showed that this gain cannot yet be attributed to CLIP semantics. The nested-pilot experiment further showed improvement without model retraining as CKM evidence accumulated, while the scene-degradation test demonstrated robustness to missing objects. These results turn electromagnetic twin from a general digital-twin idea into a concrete, reproducible, and appropriately bounded wireless-communication workflow. REFERENCES

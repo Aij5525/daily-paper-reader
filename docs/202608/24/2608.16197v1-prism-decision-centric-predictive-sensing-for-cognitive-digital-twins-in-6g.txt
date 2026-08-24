@@ -1,0 +1,288 @@
+Title: PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G
+
+URL Source: https://arxiv.org/pdf/2608.16197v1
+
+Published Time: Tue, 18 Aug 2026 01:42:07 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 1
+
+# PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G 
+
+Afan Ali, Member, IEEE , Daniel Benevides da Costa, Senior Member, IEEE , and Ali Arshad Nasir, Senior Member, IEEE 
+
+Abstract —Integrated sensing and communication (ISAC) and Digital Twin (DT) technology have emerged as complementary for future wireless networks that require autonomous operations involving continuous interaction between physical and digital worlds. However, existing DT-assisted ISAC frameworks sense continuously and indiscriminately while optimizing only a single task, leaving little room for persistent, multi-domain knowledge or proactive sensing control. This article proposes a Predictive, Reasoning-driven, Intelligent Sensing Module (PRISM) engine that transforms the DT from a passive, domain-specific optimizer into a persistent, network-wide reasoning system. PRISM enables decision-centric predictive perception, proactively directing sens-ing toward anticipated decisions needs rather than following fixed sensing schedules. Using an illustrative extremely large multiple-input multiple-output (XL-MIMO) deployment scenario with a mixed eMBB, URLLC, and mMTC device population, we show how this principle benefits visibility-region sensing for channel acquisition and supports slice-aware operation. Preliminary sim-ulations, including this deployment scenario and the resulting knowledge error, overhead, and latency results, confirm that this decision-centric approach substantially reduces sensing overhead while preserving decision reliability and latency, supporting the proposed architecture as a practical step toward self-aware, autonomously orchestrated 6G networks. 
+
+I. I NTRODUCTION 
+
+# SIXTH-GENERATION (6G) wireless networks are ex-pected to move beyond connectivity to support au-tonomous transportation, industrial automation, immersive ex-tended reality (XR), collaborative robotics, and large-scale cyber-physical systems, all of which demand continuous in-teraction between the physical and digital worlds. Realiz-ing this vision requires bringing perception, communication, computing, and intelligence together into a single operational framework [1]. As depicted in Fig. 1, two technologies have emerged as central enablers of this shift. Integrated sensing and communication (ISAC) equips wireless infrastructure with the ability to jointly communicate and perceive its surroundings using shared radio resources, enabling real-time localization, environmental mapping, and situational awareness [2], while Digital Twin (DT) technology provides continuously synchro-nized virtual representations that let operators monitor, predict, and validate network behavior before decisions are deployed physically. Their complementary strengths have driven rapid convergence of ISAC and DT as foundational building blocks for AI-native 6G. 
+
+> The authors are with the Interdisciplinary Research Center for Communica-tion Systems and Sensing (IRC-CSS), Department of Electrical Engineering, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran 31261, Saudi Arabia.
+
+Table I summarizes representative developments along this direction, spanning an ISAC-driven DT architecture for intelli-gent machine networks [1], a DT-assisted ISAC framework for predictive beamforming and vehicle association [3], a Radio Digital Twin (RDT) that fuses ISAC, computer vision, and wireless measurements for beam prediction [4], Holographic Digital Twins (HDT) for immersive communication [2], DT migration for adaptive edge service provisioning [5], and generative channel twins for statistical channel state infor-mation (CSI) generation, beam prediction or channel esti-mation [6]–[8]. A two-step goal-oriented access scheme is proposed in [9] in which high-value of information (VoI) sensors request resources via push-based random access before pull-based transmissions deliver ISAC sensory data to the DT, maximizing delivered VoI while localizing the sensors. Despite spanning different application domains, these works share a common architectural philosophy, i.e, ISAC acts as a sensing mechanism that keeps the virtual representation updated, while the DT is used to optimize one specific wireless task, such as beamforming, channel estimation, mo-bility management, or resource allocation. This leaves the DT behaving more like an application-specific optimization platform than a persistent knowledge system for autonomous operation, and little attention has gone into how a DT should interpret observations, retain knowledge across domains, or proactively guide future sensing. This architecture also leaves telecom operators outside the loop: existing frameworks treat operator objectives and service-level policies as external inputs applied after optimization rather than as signals that actively shape sensing and decision-making, so operators can neither inject intent in real time nor receive feedback on why the network chose a given action. This limits trust, auditability, and the network’s ability to align its behavior with commercial or regulatory priorities. The problem is compounded by the largely passive role ISAC continues to play throughout this literature, sensing observes the environment continuously and indiscriminately regardless of what the DT actually needs to know, inflating overhead while limiting the network’s ability to focus resources on the regions that matter most. This gap is set to widen as 6G networks adopt extremely large multiple-input multiple-output (XL-MIMO) transmission and split their resources across network slices, such as, enhanced mobile broadband (eMBB), ultra-reliable low-latency commu-nication (URLLC), and massive machine-type communication (mMTC), each with very different latency and bandwidth budgets. These requirements multiply the amount of state a passive DT would need to track. Motivated by this gap, this article proposes a new architec-arXiv:2608.16197v1 [eess.SP] 17 Aug 2026 JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 2Evolving Needs: Beyond Connectivity  
+
+> Continuous Interaction
+> Physical Digital World
+> Physical
+> World
+> Digital
+> World
+> Key Enablers
+> ISAC
+> Digital Twin
+> Real -Time
+> Awareness
+> Optimization
+> and
+> Simulation
+> Convergence
+> Main Challenge
+> Intelligent
+> health -care
+> Industrial
+> automation
+> Autonomous
+> transportation
+> Immersive
+> XR
+> Collaborative
+> robotics
+> Unknown
+> regions
+> Network
+> blind spots
+> Passive
+> data flow
+> Data
+> overhead
+> Passive ISAC increases overhead,
+> limits situational awareness
+> Beamforming
+> optimization
+> Channel
+> modeling
+
+Fig. 1: Emerging 6G requirements, the convergence of ISAC and digital twins as key enablers, and the challenges intro-duced by passive ISAC. tural framework for AI-native 6G in which ISAC, DTs, and AI operate as tightly coupled components of a continuous loop of perception, reasoning, action, and learning. The framework reshapes the DT from a passive, domain-specific optimizer into a persistent, network-wide Predictive, Reasoning-driven, Intelligent Sensing Module (PRISM) engine, built around a design principle we call decision-centric predictive perception, in which sensing is directed by anticipated decisions rather than driven on a fixed schedule. PRISM also addresses the operator-in-the-loop gap identified above by incorporating operator objectives directly into the reasoning process as first-class inputs, rather than treating them as post-hoc constraints. Moreover, PRISM establishes a bidirectional feedback loop in which decisions and their outcomes are communicated back to the operator, while sensing information flows to the DT, contrasting with existing pipelines that primarily rely on one-directional optimization. The main contributions of this article are as follows:  
+
+> •
+
+Decision-centric predictive perception: sensing is proactively guided by anticipated decisions rather than a predetermined schedules.  
+
+> •
+
+Persistent multi-domain cognitive memory: knowledge is persistently retained and reused across communication, sensing, mobility, computing, and services to support cross-domain reasoning.  
+
+> •
+
+Anticipatory orchestration: reasoning predicts future decisions, and proactively planning pre-stages candidate actions, enabling timely orchestration before those deci-sions arise.  
+
+> •
+
+Operator-in-the-loop bidirectional feedback: operator objectives directly guide reasoning process, while de-cisions and their outcomes are fed back for operator visibility. II. R ELATED WORK : F ROM DOMAIN -S PECIFIC DIGITAL 
+
+TWINS TO NETWORK COGNITION 
+
+A. From Domain-Specific Intelligence to Network Cognition 
+
+The concept of the cognitive digital twin (CDT) grew out of the realization that conventional DTs could move beyond pas-sive synchronization toward genuine decision support. Early work focused mainly on manufacturing, where cognition was introduced through capabilities such as perception, memory, reasoning, and learning to improve production efficiency and autonomous operation [13]. Similar ideas later found their way into healthcare and smart city applications, where CDTs support personalized diagnosis, predictive analytics, and in-telligent urban management through continuous data fusion and AI-driven decision making [14], [15]. With the rise of ISAC and AI-native networking, wireless communications have recently embraced the DT paradigm as well [1]–[6], [8]. However, existing DTs are almost always built around one specific network entity, such as wireless channels, radio environments, vehicle mobility, electromagnetic propagation, or edge services, and are then used to optimize the corre-sponding network function. Although these frameworks show increasingly sophisticated intelligence, their knowledge stays confined to a single application domain. 
+
+B. Why AI-Native 6G Requires Network Cognition 
+
+Domain-specific DTs have clearly improved individual wireless functions, but AI-native 6G brings requirements that go well beyond optimizing isolated communication tasks. Future wireless networks will operate as highly distributed cyber-physical ecosystems in which communication, sensing, computing, mobility, edge intelligence, and network services continuously interact across multiple spatial and temporal scales. This interaction only grows harder to manage as base stations move to extremely large antenna arrays for XL-MIMO transmission and as operators partition capacity across eMBB, URLLC, and mMTC network slices with sharply different la-tency and reliability targets, both of which increase the amount of state a DT must track. We approximate this challenge later in Sec. IV through a lightweight, system-level use case rather than a full physical-layer XL-MIMO or slice-differentiated evaluation, which we leave for future work. Decisions made in one domain inevitably ripple into others. Optimizing these functions in isolation can, therefore, no longer deliver globally efficient network operation. This growing interdependence also changes the role of both ISAC and the DT. Existing DT-assisted ISAC frame-works typically follow a sequential workflow: ISAC acquires environmental observations, the DT synchronizes its virtual representation, and an optimization algorithm decides the next network action. This has proven effective for application-specific problems such as channel estimation, beam manage-ment, mobility prediction, and edge service migration, but the DT remains a passive consumer of information, with little say in what should be sensed next or how knowledge gathered across domains should shape future operation. As Table I shows, this knowledge is also typically confined to a single domain, whether wireless channels, radio environments, vehicle mobility, or edge services. These specialized DTs perform their individual tasks well, but each offers only a partial view of the network. AI-native 6G instead calls for a DT that continuously brings together heterogeneous information into one unified representation. JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 3
+
+TABLE I: Comparison of representative DT-assisted ISAC frameworks and their architectural scope. ✓ = Fully supported, △
+
+= Partially supported, × = Not considered.                                        
+
+> Ref. DT Scope and Function Goal-Oriented Bidirectional Feedback Network-wide Cognition Operator-in-Loop
+> [1] Machine network state; comm./network optimization ×△××
+> [3], [10] Vehicle mobility & semantics; beamforming, resource allocation
+> △✓××
+> [4], [11] Radio/RF twin; environment reconstruction, channel modeling
+> ×△××
+> [6], [8] Channel/CSI generation; estimation and prediction ××××
+> [2] Holographic scene twin; immersive communication ×△××
+> [5] Edge service state; DT migration, orchestration △△××
+> [9], [12] VoI-driven sync; closed-loop beam management ✓△××
+> PRISM Persistent multi-domain knowledge (comm., sens-ing, compute, mobility, services, intent); network-wide orchestration
+> ✓✓✓✓
+
+C. Toward a Predictive, Reasoning-driven, Intelligent Sensing Module (PRISM): Our Approach 
+
+To close these gaps, this article reshapes the DT from a passive, domain-specific optimizer into a persistent, network-wide PRISM engine, shown in Fig. 2a. Instead of letting ISAC sense the environment continuously and indiscriminately, the PRISM engine treats perception as goal-driven, directing sens-ing toward whatever the knowledge base still needs to resolve instead of repeating it regardless of relevance. Rather than relying on isolated, task-specific representations, PRISM inte-grates communication, user, radio-environment, mobility, and network-resource information into one persistent multi-domain knowledge base, enabling knowledge to be retained and reused across tasks instead of being reconstructed for each task. Built on top of this knowledge base, an intelligent reasoning layer interprets the current network state and weighs competing objectives across domains, while an autonomous planning and continual-learning stage converts these decisions into control actions and feeds their outcomes back into the knowledge base. Perception, knowledge, reasoning, and planning are connected in a closed loop, so the engine keeps refining what it senses, what it knows, and what it does as the network evolves and as operator objectives shift. III. P ROPOSED PRISM A RCHITECTURE 
+
+A. Overview 
+
+Fig. 2a illustrates the PRISM engine, in which it sits at the core of the network and continuously exchanges infor-mation with six operational domains: communications, users and end-devices, the radio environment, computing and AI resources, mobility, and network services. Internally, it is organized around four tightly coupled blocks, an ISAC-based perception module, a persistent multi-domain knowledge base, an intelligent reasoning and decision-making module, and an autonomous planning and continual-learning module, arranged around the closed perception-knowledge-reasoning loop intro-duced in Section II. 
+
+B. Perception: Attention-Guided, Predictive ISAC Sensing 
+
+In conventional DT-assisted ISAC frameworks, perception is a one-way, bottom-up process, i.e., sensing runs on a fixed schedule or in response to raw uncertainty, and whatever it discovers is pushed upward to the rest of the system. The perception module in the PRISM engine instead operates under two combined signals, illustrated in Fig. 2b. A bottom-up signal still tracks how uncertain each part of the knowledge base currently is, but a second, top-down signal originates in the reasoning module and specifies which parts of the network state actually need refreshing to support the next anticipated decision. The two signals are combined into a single attention weight that governs how the available sensing budget, radio resources, and pilot overhead are distributed across the network at any given moment, closing the loop back to the knowledge base through structured updates. In the present prototype this combination follows a simple priority rule rather than a learned weight, regions tied to an anticipated decision are attended first, and any sensing budget left over is assigned to the regions with the highest bottom-up uncertainty, leaving a learned or continuously tuned weighting for later implementations. This attention-guided design pays off directly for XL-MIMO deployments, where large antenna apertures introduce near-field propagation and spatial non-stationarity, so different subarrays effectively see different scatterers and users within their own visibility regions, as shown in Fig. 2c. Estimating the full near-field channel on a fixed schedule is prohibitively expensive in pilot overhead and processing time. The proposed perception module indexes the array by visibility region rather than antenna element, and the attention mechanism refreshes only the regions tied to an active or anticipated decision, for instance the subarrays serving a fast-moving user about to need beam realignment. Regions with no pending decision keep their last known confidence level rather than being re-measured, which keeps near-field acquisition overhead roughly proportional to the number of decisions the network is making rather than to array size. Machine learning models embed-ded in the perception module translate these sparse, targeted measurements into structured updates the knowledge base can absorb directly, rather than raw signals reprocessed for every downstream task. 
+
+C. Persistent Multi-Domain Knowledge Base: Hierarchical and Slice-Aware 
+
+At the center of the PRISM engine sits a persistent multi-domain knowledge base that continuously aggregates informa-tion about communication links, users, the radio environment, JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 4ISAC -based   
+
+> Perception
+> PRISM ENGINE
+> Communications
+> Users/End -devices
+> Radio environment
+> Network services
+> Computing / AI
+> resources
+> Mobility Intelligent reasoning
+> and decision -making
+> Persistent multi -domain
+> knowledge base
+> eMBB
+> mMTC
+> URLLC
+> Autonomous planning and
+> continual learning
+> Perception
+> Knowledge
+> Reasoning
+> Operator input
+> Hierarchical
+> slice -aware memory
+> Domain
+> aggregated
+> knowledge
+> XL -MIMO
+> scalability
+> Network
+> slicing
+> Bandwidth
+> efficiency
+> Logical architecture in which functions can be distributed across
+> Edge/RAN/Cloud
+
+(a) Persistent Knowledge Base 
+
+> (per-region uncertainty)
+> Reasoning Module
+> (anticipated decisions, service level)
+> Bottom-up signal Top-down signal Attention weight
+> Perception Module
+> Sensing budget allocator Radio-resource & pilot allocator ML measurement encoder
+> Structured knowledge updates
+> closes the perception-knowledge loop governs sensing budget, radio resources, pilot overhead
+
+(b) XL-MIMO ARRAY velocity Fast-moving user, beam realignment imminent Near-field wavefronts: different subarrays see different scatterers  
+
+> Attended: sensed this step Stale: last known confidence kept
+
+(c) 
+
+Fig. 2: (a) PRISM: Predictive, Reasoning-driven, Intelligent Sensing Module engine. (b) Bottom-up uncertainty and top-down anticipated-decision signals combine into a single attention weight. (c) The XL-MIMO array indexed by visibility region: only regions tied to an active or anticipated decision, such as a fast-moving user needing beam realignment, are resensed. mobility, and network resources. Unlike the domain-specific DTs, which typically hold state for a single network entity, this knowledge base is designed to persist and accumulate across tasks, so knowledge learned while solving one problem, for example a beam prediction task, remains available and useful when the network later needs to reason about mobility management or service placement. Two structural choices distinguish this knowledge base from a conventional synchronized replica. First, spatial information, including the radio environment and XL-MIMO channel state, is organized hierarchically, ranging from coarse array-level regions to fine-grained visibility regions, so the attention mechanism can request updates at the granularity required by a given decision, thereby avoiding unnecessary full-aperture refresh. Second, the knowledge base is partitioned into slice-aware fragments, one for each active network slice such as URLLC, eMBB, or mMTC. Each fragment carries its own freshness target derived from the slice’s service level agreement, so a low-latency fragment is kept close to real time while a delay-tolerant fragment is allowed to age between updates. The knowledge base also absorbs information from the users and network-services domains, encoding service requirements and operator objectives that guide subsequent reasoning. This persistence, combined with hierarchical and slice-aware organization, transforms the DT from a task-specific optimization tool into a standing, differentiated mem-ory that PRISM can query at the resolution and freshness required by each decision. 
+
+D. Intelligent Reasoning and Decision-Making: Predictive and Slice-Aware 
+
+The reasoning module interprets the current state of the knowledge base and produces decisions that account for interactions across domains rather than optimizing a single function in isolation. Drawing on computing and AI resources, this module can weigh trade-offs such as the one between beamforming gain and sensing quality, or between aggressive mobility prediction and conservative resource reservation, and select actions that PRISM can query at the resolution and freshness required by each decision. What makes this reasoning predictive rather than purely reactive is that it does not wait for a decision to become urgent before acting on it. By tracking how quickly each slice fragment in the knowledge base is drifting toward its service level boundary, for example a rising handover probability for a high-mobility user on a low-latency slice, the reasoning module can identify decisions it is likely to face in the next few sensing cycles and issue the attention queries described earlier ahead of time. This is also where operator intent enters the loop, since service-level objectives and policies from the network-services domain are treated as inputs that shape which anticipated decisions receive priority attention, rather than as external constraints applied after an already-optimized network state has been produced. Since reasoning JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 5
+
+draws on persistent, multi-domain, slice-aware knowledge instead of a narrow, task-specific snapshot, it can also identify dependencies that a domain-specific optimizer would not see, for instance recognizing that a beamforming decision made to serve one user on an eMBB slice degrades sensing coverage needed by a URLLC slice in the same region. 
+
+E. Autonomous Planning and Continual Learning: Anticipa-tory Action Staging 
+
+The final block turns reasoning outputs into concrete control actions and closes the loop back to the physical network. This module handles autonomous planning, translating decisions from the reasoning module into actions across mobility man-agement, network services, and communication configuration, while a continual-learning component tracks how well previ-ous actions performed and updates the models used throughout the engine accordingly. Since reasoning already anticipates likely decisions before they become urgent, planning does not need to start from scratch when a triggering condition arises. Instead, the plan-ning module pre-computes and stages a small set of candidate actions, while the corresponding decision is still being formed. Examples include shortlisting candidate beam pairs for a user approaching a coverage boundary or pre-reserving resources for a network slice nearing its latency threshold. When the triggering condition is finally confirmed, the network only needs to commit one of the pre-staged actions rather than run the full perception, knowledge, and reasoning sequence from scratch, which collapses the critical path latency down to little more than the actuation step itself. This closes the perception-knowledge-reasoning loop at the center of the ar-chitecture: planning decisions change the physical network, the perception module observes the outcome, the knowledge base is updated, and reasoning adjusts its next decision and its next round of anticipated decisions based on this refreshed picture. Over time, continual learning improves the accuracy of these anticipations, so the models used to predict which decisions are coming, and which parts of the knowledge base will need attention, keep improving as the network encounters more traffic patterns, mobility behavior, and slice demand profiles. 
+
+F. Benefits for Ultra-Low Latency, Bandwidth Efficiency, XL-MIMO, and Network Slicing 
+
+The four design choices described above were not added as independent features. They compound to target four re-quirements that conventional passive, environment-centric DT-assisted ISAC frameworks struggle to meet at the same time.  
+
+> •
+
+Ultra-low latency. PRISM anticipates upcoming deci-sions and pre-stages candidate actions, avoiding a com-plete sense–reason–act cycle when a decision becomes urgent. This reduces response latency for URLLC and time-critical XL-MIMO beam realignment.  
+
+> •
+
+Bandwidth efficiency. PRISM refreshes only the regions and knowledge fragments relevant to active or anticipated decisions, while exchanging compact updates instead of raw measurements. This reduces signaling and fronthaul overhead compared with continuously synchronized DTs. TABLE II: Benchmark policies used in the use case, mapped to their architectural counterparts in Table I.          
+
+> Architectural Category Simulated Policy Reference
+> Periodic full-sync DT Fixed-schedule, full-grid sensing [1] Fixed-radius predictive DT Mobility lookahead, no un-certainty awareness [3] Goal-oriented /value-of-information (VoI) DT Senses the most uncertain cells each step [9] Closed-loop reactive DT Senses on demand exactly when a decision occurs [12]
+> •
+
+XL-MIMO scalability. PRISM organizes channel knowl-edge by subarray visibility regions and refreshes only those relevant to current decisions. This avoids repeated full-aperture estimation and keeps sensing overhead man-ageable as array size increases.  
+
+> •
+
+Network slicing. PRISM maintains slice-specific knowl-edge fragments with freshness targets aligned with their service-level requirements. This prioritizes near-real-time updates for latency-critical slices while conserving sens-ing and communication resources for delay-tolerant ones. Section IV provides preliminary use case evidence for the latency and bandwidth-efficiency benefits above, through the sensing overhead and decision latency results in Fig. 3d and Fig. 3e. The XL-MIMO and network-slicing benefits are argued from the architecture in this section and tested only at the level of visibility-region sensing overhead in that same use case, since a full channel-level and slice-differentiated evaluation is left for future work. 
+
+G. Toward Practical Deployment 
+
+PRISM is conceived as a logical architecture rather than being bound to a fixed location, enabling its functions to be flexibly distributed according to their latency and compu-tational requirements. Network-wide knowledge aggregation, long-term reasoning, policy handling, and model learning can reside at regional edge or cloud infrastructure, while latency-critical perception and control should remain closer to the radio access network (RAN). Such a hierarchical deployment also reduces the transport of raw ISAC measurements, since local perception can convert them into structured knowledge updates before they traverse the network. Open-RAN (O-RAN) provides one possible realization of this separation. Longer-timescale knowledge management, policy-driven reasoning, and learning could be implemented through RAN Applications associated with the Non-Real-Time RAN Intelligent Controller (Non-RT RIC), while latency-sensitive attention queries and control actions could be sup-ported through eXtended Applications (xApps) in the Near-Real-Time RIC. Operator policies and service-level objectives can consequently enter the reasoning loop from the man-agement layer, while resulting actions are executed through existing RAN control interfaces. PRISM is nevertheless in-dependent of O-RAN, similar functional placement could be realized through multi-access edge computing or operator-specific cloud-native architectures. JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 60 200 400 600 800 1000 1200 1400 x (m) 0200 400 600 800 1000 1200 1400 y (m) 
+
+> Same visibility regions re-sensed every cycle, obstacle or not
+> Decision Point (URLLC beam realign.) Outcome: Mismatch Fixed Full-Aperture Sensing (DT)
+> Never targeted by the fixed schedule, so this visibility region stays stale until the obstacle causes a problem.
+
+???       
+
+> 1234
+> 0200 400 600 800 1000 1200 1400 x (m) 0200 400 600 800 1000 1200 1400 y (m)
+> Sensing redirected only to regions that are uncertain or decision-critical
+> Decision Point (URLLC beam realign.) Outcome: Accurate
+> PRISM (Adaptive, Slice-Aware Sensing)
+> The PRISM anticipates the URLLC device's next visibility region and re-senses it just before the crossing.
+> 1234
+
+? 1         
+
+> Multi-slice device population
+> URLLC device (tracked) eMBB device (context) mMTC device (context)
+> Environment & sensing strategy
+> Parked vehicle / scatterer Fixed full-aperture sweep (DT) PRISM (Adaptive, slice-aware sensing)
+> Visibility-region state & reading order
+> Stale / mismatched region Re-sensed, aligned region Step badge (reading order 1 4)
+> Note: physical-layer details are abstracted; device count and icon size are stylized for legibility (the simulation itself uses 100 devices a mixed eMBB/URLLC/mMTC population over the same 15×15 grid of XL-MIMO visibility regions).
+
+(a) 0 25 50 75 100 125 150 175 200 Time step 0.00 0.05 0.10 0.15 0.20 0.25 0.30 Knowledge error at node locations All Policies (Full Scale)  
+
+> Periodic Full-Sync DT ([1]) Fixed-Radius Predictive DT ([3]]) Goal-Oriented / VoI DT ([9]) Closed-Loop Reactive DT ([12]]) PRISM (Proposed)
+
+(b) 0 25 50 75 100 125 150 175 200 Time step 0.01 0.02 0.03 0.04 0.05 0.06 0.07 Knowledge error at node locations Clustered Policies (Zoomed) 
+
+> Periodic Full-Sync DT ([1]) Goal-Oriented / VoI DT ([9]) Closed-Loop Reactive DT ([12]]) PRISM (Proposed)
+
+(c) 0.005 0.010 0.015 0.020 0.025 0.030 Network dynamics (event rate per cell per step) 10 20 30 40 50 60 70 Overhead to sustain 95\% decision success (cells sensed/step)  
+
+> Periodic Full-Sync DT ([1]) Fixed-Radius Predictive DT ([3]]) Goal-Oriented / VoI DT ([9]) Closed-Loop Reactive DT ([12]]) PRISM (Proposed)
+
+(d) 2.5 5.0 7.5 10.0 12.5 15.0 17.5 20.0 Node mobility (m/s) 020 40 60 80 100 Decision success rate (%)  
+
+> Periodic Full-Sync DT ([1]) Fixed-Radius Predictive DT ([3]]) Goal-Oriented / VoI DT ([9]) Closed-Loop Reactive DT ([12]]) PRISM (Proposed)
+
+(e) 
+
+Fig. 3: Preliminary evaluation of the proposed PRISM engine. (a) Illustrative deployment scenario. (b) Knowledge error at device locations across the array’s visibility regions. (c) Zoom on the four closely clustered policies, excluding the fixed-radius outlier. (d) Sensing overhead needed to sustain a 95% decision success rate as scatterer and blockage dynamics increase. (e) Decision success rate versus device mobility at a fixed sensing budget. TABLE III: Preliminary simulation results at a shared operat-ing point (moderate mobility, moderate event rate). 
+
+Policy Know. Err. Overhead Success (%) Latency 
+
+Periodic full-sync [1] 0.035 28.5 96.7 0.000 Fixed-radius predictive [3] 0.238 30.0 76.2 0.000 Goal-oriented / VoI [9] 0.033 30.0 96.8 0.000 Closed-loop reactive [12] 0.042 9.7 100.0 1.000 
+
+Proposed PRISM 0.026 30.0 100.0 0.009 
+
+IV. U SE CASE : PRISM E NGINE FOR XL-MIMO S ENSING AND MULTI -S LICE OPERATION IN A DENSE URBAN 6G DEPLOYMENT 
+
+A. Scenario and Simulation Methodology 
+
+The numerical study here validates decision-centric predic-tive perception, the adaptive sensing and knowledge-update mechanism at the core of PRISM, rather than the complete architecture. We consider a dense urban 6G deployment served by an XL-MIMO base station that multiplexes eMBB, URLLC, and mMTC traffic on shared radio resources. An unknown obstacle, for example a parked vehicle or a new scatterer, perturbs the near-field propagation seen by part of the array without warning. This scenario stress-tests decision-centric predictive perception, since it combines localized, unpredictable environmental change with continuously moving devices drawn from a mixed-slice population. It is depicted in Fig. 3a We build a lightweight system-level simulation that captures the information flow the architecture is designed around. The coverage area is a 15 × 15 grid of cells over a 1500 × 1500 
+
+meter urban region, each cell representing a visibility re-gion of the XL-MIMO array. The base station serves 100 devices representing eMBB, URLLC, and mMTC services, with device mobility modeled using the random-waypoint model. Unknown events occur at a configurable rate, flipping a visibility region’s true state and creating a mismatch with the DT’s last known estimate until that region is sensed again, representing a new scatterer or blockage entering the near-field environment. Every time a device crosses into a new cell, this is treated as a decision point, analogous to a beam realignment or handover decision, and is used to evaluate whether the DT’s knowledge was accurate at the moment it was needed. 
+
+B. Benchmarks and Metrics 
+
+This is a system-level simulation of information flow, implemented in Python, rather than a link-level simulation, so path loss, channel models, and waveform parameters are intentionally not modeled, consistent with the scope stated above. We compare the PRISM engine against four sensing and knowledge-update policies, each constructed to represent the architectural category of a corresponding entry in Table I rather than re-implementing its specific algorithm. Table II summarizes this mapping. For each policy, including the PRISM engine, we record four metrics: knowledge error at device locations, which measures visibility-region error where it matters for XL-MIMO channel acquisition rather than across the whole array; sensing overhead, the average number of visibility regions sensed per step, a proxy for pilot and signaling load; decision success rate, the fraction of slice-relevant decisions made with already-correct knowledge; and decision latency, the extra steps a policy spends re-sensing before a decision can be finalized, most consequential for URLLC reliability. JOURNAL OF L ATEX CLASS FILES, VOL. , NO. , MAY 2026 7
+
+C. Results 
+
+Fig. 3b tracks knowledge error at device locations over time at a moderate mobility and event-rate operating point. It shows that a fixed-radius predictive baseline with no uncertainty awareness drifts far from the true state as devices continue moving, since it keeps sensing wherever devices are heading regardless of whether that information is still needed. Fig. 3c zooms in on the remaining four policies, which move in a visibly tighter band. Averaged over six random seeds, the PRISM engine reaches a mean knowledge error of 0.026, compared with 0.033 for the goal-oriented baseline, 0.035 for periodic full-sync, 0.042 for closed-loop reactive, and 0.238 for fixed-radius prediction. Lower, more consistent knowledge error at device locations is what accurate XL-MIMO beam and CSI acquisition requires, since it is the local, per-device channel view that determines beamforming quality. Fig. 3d depicts how much sensing overhead each policy needs to sustain a 95% percent decision success rate as scat-terer and blockage dynamics increase. This is where decision-centric predictive perception pays off most clearly, and it is the result closest to the bandwidth efficiency and XL-MIMO scalability benefits. The PRISM engine sustains the target with a flat overhead of about five visibility regions per step across the entire tested range, since the regions it senses are tied to imminent device transitions rather than to how often the near-field environment changes. The periodic and goal-oriented baselines must instead increase overhead more than tenfold, from roughly 5 to 6 regions per step at low dynamics up to 50 
+
+and 56 at the highest tested event rate, while the fixed-radius baseline never becomes efficient at any dynamics level. The closed-loop reactive baseline stays flat at a low overhead of about 10 regions per step, since it only senses exactly where a decision is happening, but as the next figure shows, this comes at a latency cost the proposed architecture avoids. Fig. 3e reports decision success rate as device mobility in-creases, at a fixed sensing budget shared by the budget-limited policies. The PRISM engine and the closed-loop reactive baseline both sustain a full 100% success rate across the tested range, the periodic and goal-oriented baselines settle around 
+
+96% to 97% regardless of speed, and the fixed-radius baseline stays substantially degraded near 80% throughout. This figure alone omits that the proposed engine matches the reactive baseline’s success rate at a decision latency of 0.009 steps against 1.0 steps, roughly two orders of magnitude lower for the same reliability, since most decisions are already resolved before needed, the gap that matters most for millisecond-scale URLLC decisions. Table III summarizes all four metrics at the shared operating point used for Fig. 3b, averaged over multiple seeds. V. C ONCLUSION AND FUTURE DIRECTIONS 
+
+This article introduced a Predictive, Reasoning-driven, In-telligent Sensing Module (PRISM) engine, reshaping ISAC-assisted DTs from passive, domain-specific optimizers into a persistent, network-wide reasoning system built around decision-centric predictive perception. Sensing is directed toward anticipated decisions instead of a fixed schedule, targeting ultra-low latency, bandwidth-efficient sensing, XL-MIMO channel acquisition, and slice-aware operation across eMBB, URLLC, and mMTC services. Preliminary simulations show large overhead reductions and near-zero decision latency versus representative baselines. Future work includes link-level evaluation with realistic near-field models, slice-differentiated scheduling, and hardware validation toward self-aware 6G networks. REFERENCES [1] Z. Wei, Y. Du, Q. Zhang, W. Jiang, Y. Cui, Z. Meng, H. Wu, and Z. Feng, “Integrated Sensing and Communication Driven Digital Twin for Intelligent Machine Network,” IEEE Int. of Thgs. Mag. , vol. 7, no. 4, pp. 60–67, Jul. 2024. [2] H. Zhang, Z. Zhang, X. Liu, W. Li, H. Li, and C. Sun, “Integrated Sensing and Communication for 6G Holographic Digital Twins,” IEEE Wireless Comm. , vol. 32, no. 2, pp. 104–112, Apr. 2025. [3] W. Ding, Z. Yang, M. Chen, Y. Liu, and M. Shikh-Bahaei, “Joint Vehicle Connection and Beamforming Optimiziation in Digital-Twin-Assisted Integrated Sensing and Communication Vehicular Networks,” IEEE Int. of Thgs. Jour. , vol. 11, no. 20, pp. 32 923–32 938, Oct. 2024. [4] Y. Dai, W. Nam, L. Jain, S. Gaba, P. Kanade, S. Akkarakaran, T. Luo, and A. Kannan, “Scalable Sensing-Assisted Communication: Digital Twin Technologies and Experimental Study,” Ant.and Prop. IEEE Jour. of Selec. Top. in Elec. , vol. 1, no. 1, pp. 193–207, Sep. 2025. [5] W. Ma, Y. Yang, W. Sun, P. Wang, L. Liu, D. Niyato, and V. C. Leung, “AdaDT: Adaptive Service Provision and Digital Twin Migration for ISAC-Assisted Edge Intelligence,” IEEE Trans. on Mob. Comp. , vol. 25, no. 4, pp. 5775–5791, Apr. 2026. [6] X. Dong, X. Gong, A.-A. Lu, X. Gao, X.-G. Xia, Y. Zeng, and C.-X. Wang, “Accelerated LDM-Enabled Digital Twin of Channel for Massive MIMO Statistical CSI Generation,” IEEE Trans. on Wireless Comm. ,vol. 25, pp. 7148–7163, 2026. [7] J. Zhang, S. Xu, C. Li, Y. Huang, and L. Yang, “Efficient Beam Selection for ISAC in Cell-Free Massive MIMO via Digital Twin-Assisted Deep Reinforcement Learning,” IEEE Trans. on Wireless Comm. , vol. 25, pp. 9875–9890, 2026. [8] Y. Wang, J. Tang, B. Zheng, M. Davydov, P. Zhang, and K.-K. Wong, “Digital Twin-Assisted Spatio-Temporal Diffusion Transformer for Channel Estimation in Low-Altitude ISAC Systems,” IEEE Trans. on Comm. , vol. 74, pp. 11 017–11 032, 2026. [9] F. Saggese, F. Chiariotti, S. R. Pandey, H. Wymeersch, L. Sanguinetti, and P. Popovski, “Goal-Oriented Access Optimization for ISAC-Enabled Digital Twins,” Jun. 2026, arXiv:2603.01781 [eess.SP]. [Online]. Available: http://arxiv.org/abs/2603.01781 [10] Y. Yang, Y. Ding, J. Wang, Z. Yang, C. Zhu, Z. Zhang, D. Niyato, and M. Shikh-Bahaei, “Near-Field Integrated Sensing, Computing and Semantic Communication in Digital Twin-Assisted Vehicular Networks,” Apr. 2026, arXiv:2604.05797 [cs.IT]. [Online]. Available: http://arxiv.org/abs/2604.05797 [11] C. Montaner, S. Fenollosa, A. Ortega, H. Beltr´ an, and N. Cardona, “Deterministic Modeling of Dynamic ISAC Channels in RF Digital Twin Environments,” Mar. 2026, arXiv:2603.28736 [eess.SP]. [Online]. Available: http://arxiv.org/abs/2603.28736 [12] Y. Luo, T. Takahashi, L. Yu, Z. Yang, J. Zhang, and H. Ochiai, “Electromagnetic Digital Twin-Enabled Closed-Loop Beam Management in ISAC Systems,” May 2026, arXiv:2606.00977 [eess.SP]. [Online]. Available: http://arxiv.org/abs/2606.00977 [13] T. Mortlock, D. Muthirayan, S.-Y. Yu, P. P. Khargonekar, and M. Ab-dullah Al Faruque, “Graph Learning for Cognitive Digital Twins in Manufacturing Systems,” IEEE Trans. on Emerg. topics in Comp. ,vol. 10, no. 1, pp. 34–45, Jan. 2022. [14] T. Zhang, Z. Zhang, M. Tu, K. Agarwal, Y. Fu, and Y. Chen, “Enabling Consumer Centric Digital Twins in Healthcare 5.0: A Medical Image Fusion Framework With Edge Guidance,” IEEE Trans. on Cons. Elec. ,vol. 72, no. 1, pp. 2443–2453, Feb. 2026. [15] T. C. Shiraptini, K. Dhanushkodi, S. Sakthipriya, S. Akshaya, and S. Alphonse, “AI and Machine Learning-Enabled Cognitive Digital Twin for Crime Hotspot Detection and Analysis,” IEEE Access , vol. 14, pp. 16 792–16 801, 2026.

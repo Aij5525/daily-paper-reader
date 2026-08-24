@@ -1,0 +1,490 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-24T20:39:37.032694+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 11,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 6,
+    "quick_skim_target": 11,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2608.21021v1",
+      "source": "arxiv",
+      "title": "Free-Text Evaluation of LLMs for 5G Domain Knowledge and Fault Analysis using LLM-as-Judge",
+      "abstract": "Real-world fault analysis in 5G and emerging 6G networks demands domain expertise to analyze free-text diagnostics, including root-cause explanations and recommended actions. LLMs have emerged as a promising approach to automating this, yet whether lightweight, edge-deployable models are capable of performing in-depth free-text diagnostics remains an open question. While existing benchmarks rely on restrictive MCQs with fixed answer keys, this paper evaluates 5G domain understanding and fault analysis in a free-text generation format. Transitioning to this paradigm requires evaluating lightweight, edge-deployable AI models on open-ended diagnostic reasoning, alongside a dependable framework to validate these text outputs at scale. To address this we evaluate three lightweight LLMs, Claude-Haiku-4.5, GPT-5.4-Mini, and Gemini-3.1-Flash-Lite, on free-text 5G domain knowledge and fault-analysis tasks across three benchmarks, TeleQNA ORAN FT, 5G-Faults FT, and TeleInter FT. Three independent frontier judges score outputs, and pairwise inter-judge agreement is measured as an empirical test of the LLM-as-Judge methodology. All three models reach at least 90% accuracy on fault diagnosis, while zero-shot recall of 3GPP and O-RAN specifications remains the critical gap, with all models scoring below 60%. Mean inter-judge agreement is at least 0.90 across all runs, indicating that multi-judge LLM scoring produces consistent, reproducible grades for open-ended telecom responses. Operationally, Gemini-3.1-Flash-Lite offers the best efficiency trade-off, combining competitive accuracy with the lowest inference cost and latency, making it the most suitable candidate for production telecom deployments.",
+      "authors": [
+        "Rishiraj Sengupta",
+        "Sotiris Chatzimiltis",
+        "Mohammad Shojafar",
+        "Xiatian Zhu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.NI"
+      ],
+      "published": "2026-08-21T12:09:51+00:00",
+      "link": "https://arxiv.org/pdf/2608.21021v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLM for 5G domain knowledge and fault analysis",
+      "llm_evidence_cn": "大语言模型用于5G领域知识与故障分析",
+      "llm_evidence": "大语言模型用于5G领域知识与故障分析",
+      "canonical_evidence": "大语言模型用于5G领域知识与故障分析",
+      "llm_tldr_en": "LLMs can automate 5G fault analysis. This paper evaluates lightweight edge-deployable LLMs on free-text diagnostic reasoning for 5G using LLM-as-Judge, moving beyond fixed MCQ benchmarks and enabling scalable validation of domain knowledge.",
+      "llm_tldr_cn": "5G/6G网络的真实故障分析需要领域专家处理自由文本诊断，而现有基准用固定答题无法评估开放式推理。本文采用自由文本生成格式评估轻量级、可边缘部署模型在5G领域诊断中的表现，并借助LLM-as-Judge框架验证大规模文本输出。这项工作为5G领域大模型应用提供了可靠的评测方法，并探索了LLM在网络故障分析中的潜力。",
+      "llm_tldr": "5G/6G网络的真实故障分析需要领域专家处理自由文本诊断，而现有基准用固定答题无法评估开放式推理。本文采用自由文本生成格式评估轻量级、可边缘部署模型在5G领域诊断中的表现，并借助LLM-as-Judge框架验证大规模文本输出。这项工作为5G领域大模型应用提供了可靠的评测方法，并探索了LLM在网络故障分析中的潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "large language model for wireless communication",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.17760v1",
+      "source": "arxiv",
+      "title": "Learnware for CSI Feedback: Scene-specific Small Models Can Do Big",
+      "abstract": "Intelligent channel state information (CSI) feedback is essential for realizing the high capacity and spectral efficiency goals of future 6G systems, yet existing deep learning solutions face a trade-off between model generalization and scenario-specific performance. Large neural networks generalize well but incur high computational and tuning costs, while small models excel in particular environments but require repetitive costly end-to-end training for each base station (BS). To address these challenges, we introduce a model repository-based deployment framework in which a centralized AI data center maintains a catalog of scene-specific CSI models. The repository is enhanced with a Learnware-based framework, where each model is associated with a specification including semantic part (network architecture parameters) and statistical part (codeboo-fingerprint embeddings of training-data distributions). A BS submits only its local statistical specifications to retrieve the most relevant pre-trained model, enhancing data privacy by avoiding raw CSI transmission and drastically reducing retrieval latency and communication overhead. We further develop a data-driven search strategy that matches codebook fingerprints to model performance, achieving over 90% selection accuracy. In simulations, our scheme yields 18.8% and 57.7% performance improvements over the General Model in LOS and NLOS scenarios, respectively while reducing local fine-tuning by up to 1000 samples and 100 epochs. This Learnware-based approach minimizes redundant training, maximizes model reuse, and supports rapid,privacy-enhancing deployment of CSI feedback models.",
+      "authors": [
+        "Xiangyi Li",
+        "Jiajia Guo",
+        "Chao-Kai Wen",
+        "Xin Geng",
+        "Shi Jin",
+        "Zhi-Hua Zhou"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.AI",
+        "eess.SP"
+      ],
+      "published": "2026-08-18T13:26:34+00:00",
+      "link": "https://arxiv.org/pdf/2608.17760v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Deep learning based CSI feedback design for 6G wireless systems",
+      "llm_evidence_cn": "面向6G无线系统的深度学习CSI反馈设计",
+      "llm_evidence": "面向6G无线系统的深度学习CSI反馈设计",
+      "canonical_evidence": "面向6G无线系统的深度学习CSI反馈设计",
+      "llm_tldr_en": "Introduces Learnware-based model repository for CSI feedback, balancing generalization of large networks and scenario-specific performance of small models for future 6G systems.",
+      "llm_tldr_cn": "现有深度学习CSI反馈方案在大模型泛化与小模型场景性能之间存在权衡，且小模型逐站训练成本高。本文提出基于Learnware的模型仓库部署框架，由集中式AI数据中心维护场景特定CSI模型目录，并关联元信息以支撑自动匹配和复用。该方案能够在降低训练与调优开销的同时，兼顾不同基站场景下的反馈性能，为6G高容量通信提供可扩展的智能CSI反馈方案。",
+      "llm_tldr": "现有深度学习CSI反馈方案在大模型泛化与小模型场景性能之间存在权衡，且小模型逐站训练成本高。本文提出基于Learnware的模型仓库部署框架，由集中式AI数据中心维护场景特定CSI模型目录，并关联元信息以支撑自动匹配和复用。该方案能够在降低训练与调优开销的同时，兼顾不同基站场景下的反馈性能，为6G高容量通信提供可扩展的智能CSI反馈方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.19709v1",
+      "source": "arxiv",
+      "title": "RFWM: Physics-Guided World Model for Dynamic Wireless Radiance Field Generation",
+      "abstract": "Radio-frequency (RF) radiance-field modeling is essential for wireless network optimization and sensing, yet remains challenging in dynamic and unseen environments. Existing learning-based methods synthesize RF fields from sparse measurements, but most struggle to generalize to dynamic and unseen environments. To address this limitation, we propose RFWM, a physics-guided RF world model that maps multimodal physical conditions like visual dynamics and AP configurations to spatiotemporal RF fields. RFWM adopts a two-stage training strategy with physics-guided priors and constraints. In the first stage, RFWM adapts a pretrained visual diffusion backbone to RF trajectories to predict RF sequences from a few past RF inputs, while conditioning the backbone on a Friis-guided prior for coarse attenuation guidance. In the second stage, RFWM learns the physical-to-RF mapping by training a ControlNet from scratch and fine-tuning the RF-adapted backbone, while six physics-guided regularizers enforce fine-grained propagation consistency. Cross-height heads then jointly generate RF trajectories at queried receiver heights in one forward pass. We construct a new benchmark of 7,715 sequences averaging 33 frames across 115 environments for dynamic RF-field generation. Experimental results show that RFWM improves MSE by approximately 7 dB and 3 dB over the state of the art under in-distribution and out-of-distribution settings, respectively.",
+      "authors": [
+        "Zijiu Yang",
+        "Qianqian Yang"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-08-20T07:08:50+00:00",
+      "link": "https://arxiv.org/pdf/2608.19709v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Physics-guided world model generating dynamic wireless radiance fields for RF channel modeling, network optimization and sensing",
+      "llm_evidence_cn": "物理引导的世界模型用于动态无线辐射场和信道建模，服务无线网络优化与感知",
+      "llm_evidence": "物理引导的世界模型用于动态无线辐射场和信道建模，服务无线网络优化与感知",
+      "canonical_evidence": "物理引导的世界模型用于动态无线辐射场和信道建模，服务无线网络优化与感知",
+      "llm_tldr_en": "Proposes RFWM, a physics-guided RF world model mapping visual dynamics and AP configurations to spatiotemporal RF fields; it adapts a pretrained visual diffusion backbone with physics-guided priors to generalize to dynamic and unseen environments for wireless network optimization and sensing.",
+      "llm_tldr_cn": "针对现有射频辐射场建模在动态和未知环境中泛化不足的问题，本文提出物理引导的射频世界模型RFWM。RFWM将视觉动态、接入点配置等多模态物理条件映射为时空射频场，并采用两阶段训练策略：第一阶段迁移预训练视觉扩散骨干，从少量历史射频输入预测射频序列，同时通过物理引导先验与约束增强泛化。实验表明RFWM在动态和未见环境中能生成更准确的射频辐射场，为无线网络优化与感知提供了新的建模工具。",
+      "llm_tldr": "针对现有射频辐射场建模在动态和未知环境中泛化不足的问题，本文提出物理引导的射频世界模型RFWM。RFWM将视觉动态、接入点配置等多模态物理条件映射为时空射频场，并采用两阶段训练策略：第一阶段迁移预训练视觉扩散骨干，从少量历史射频输入预测射频序列，同时通过物理引导先验与约束增强泛化。实验表明RFWM在动态和未见环境中能生成更准确的射频辐射场，为无线网络优化与感知提供了新的建模工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.20486v1",
+      "source": "arxiv",
+      "title": "Wireless Physical-Layer Foundation Models: Architectures, Learning Paradigms, Applications, and Deployment",
+      "abstract": "Foundation models, i.e., large neural networks pretrained on broad unlabeled data and adapted to many downstream tasks, have reshaped natural language processing and computer vision and are now being explored for the wireless physical layer. Wireless Physical-Layer Foundation Models (WPFMs) aim to learn transferable representations of signals such as channel state information (CSI), in-phase and quadrature (IQ) samples, and spectrograms so that a single pretrained backbone can support tasks ranging from channel estimation and prediction to localization and sensing while using limited task-specific data. This paper provides a dedicated review of WPFMs from learning design to practical deployment. We first establish the theoretical background, covering the neural architectures used for wireless signals, the self-supervised pretraining paradigms of masked modeling, contrastive learning, and generative pretraining, and the fine-tuning strategies that adapt pretrained models to downstream tasks. We then introduce a taxonomy that organizes existing models along five dimensions: architecture family, input modality and tokenization, pretraining objective, model scale and deployment target, and generalization capability. Building on this basis, we review applications across telecommunications, localization, and sensing, and, for each domain, analyze deployment feasibility by mapping model size to the memory, compute, and latency budgets of representative wireless hardware. Finally, we discuss model compression and efficient deployment, summarize the cross-cutting challenges, and outline open research directions. Our goal is to provide a reference that connects pretraining, architecture, and fine-tuning with the practical constraints of wireless systems.",
+      "authors": [
+        "Mohammad Cheraghinia",
+        "Davide Buffelli",
+        "Liu Li",
+        "Mohammad Alhellani",
+        "Jaron Fontaine",
+        "Sattar Vakili",
+        "Mamoun Guenach",
+        "Eli De Poorter",
+        "Adnan Shahid"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-20T18:17:40+00:00",
+      "link": "https://arxiv.org/pdf/2608.20486v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reviews wireless physical-layer foundation models, covering pretraining of transferable signal representations for various wireless tasks",
+      "llm_evidence_cn": "综述无线物理层基础模型，涵盖面向多种无线任务的可迁移信号表示的预训练方法",
+      "llm_evidence": "综述无线物理层基础模型，涵盖面向多种无线任务的可迁移信号表示的预训练方法",
+      "canonical_evidence": "综述无线物理层基础模型，涵盖面向多种无线任务的可迁移信号表示的预训练方法",
+      "llm_tldr_en": "This review systematically covers wireless physical-layer foundation models, focusing on how large pretrained backbones learn transferable representations of CSI, IQ samples, and spectrograms, and how they are adapted to channel estimation, prediction, localization, and sensing with limited data.",
+      "llm_tldr_cn": "无线物理层基础模型（WPFM）旨在用大规模预训练骨干网络学习CSI、IQ样本和频谱图等信号的可迁移表示，以在较少任务数据下支持信道估计、预测、定位与感知等任务。该文从学习设计到实际部署对WPFM进行了系统综述，涵盖架构、预训练范式、下游适配及部署挑战。它为无线通信中基础模型的研究提供了完整的路线图，是该方向的重要参考。",
+      "llm_tldr": "无线物理层基础模型（WPFM）旨在用大规模预训练骨干网络学习CSI、IQ样本和频谱图等信号的可迁移表示，以在较少任务数据下支持信道估计、预测、定位与感知等任务。该文从学习设计到实际部署对WPFM进行了系统综述，涵盖架构、预训练范式、下游适配及部署挑战。它为无线通信中基础模型的研究提供了完整的路线图，是该方向的重要参考。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.20731v1",
+      "source": "arxiv",
+      "title": "Dispersion-aware Localization Network for Wideband OFDM Pinching-Antenna Integrated Sensing and Communication Systems",
+      "abstract": "Pinching-antenna systems (PASS) provide a large effective aperture and substantial path-loss reduction at low hardware cost, making them attractive for integrated sensing and communication (ISAC). Under wideband OFDM operation, however, the antennas on each waveguide impose nonlinear, position-dependent group delays on the same baseband signal, giving rise to waveguide dispersion that severely degrades range estimation. To this end, this paper proposes a two-stage ISAC framework comprising communication-aware beamforming and antenna placement followed by a dispersion-aware target localization stage. A fractional-programming beamformer and an element-wise coordinate-descent placement jointly maximize the downlink sum rate under a sensing beampattern-gain constraint, and the resulting optimized beamformer and placement determine the effective sensing channel used by the localization stage. The proposed DisPersion-aware Localization Network (DiPL-Net) detects targets from the received signal via a dispersion-aware score map built on a physics-derived range dictionary. Its convolutional backbone employs dual-kernel residual blocks, each pairing a short kernel matched to the OFDM main lobe with a long kernel matched to the dispersion tail, so as to deconvolve the dispersion and restore a sharp target peak at each true target. Simulation results show substantial localization gains over various sensing baselines while preserving the achievable communication rate.",
+      "authors": [
+        "Hyeonho Noh",
+        "Hyun Jong Yang"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-21T04:22:35+00:00",
+      "link": "https://arxiv.org/pdf/2608.20731v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Integrated sensing and communication with dispersion-aware localization",
+      "llm_evidence_cn": "一体化感知与通信，色散感知定位",
+      "llm_evidence": "一体化感知与通信，色散感知定位",
+      "canonical_evidence": "一体化感知与通信，色散感知定位",
+      "llm_tldr_en": "This paper proposes a two-stage ISAC framework for wideband OFDM pinching-antenna systems, combining communication-aware beamforming and antenna placement with dispersion-aware target localization. A fractional-programming beamformer and element-wise coordinate descent jointly optimize beamforming and placement, while the localization stage addresses waveguide-dispersion-induced range errors.",
+      "llm_tldr_cn": "针对宽带OFDM捏合天线系统在ISAC中因波导色散导致距离估计严重下降的问题，该文提出两阶段一体化感知与通信框架。第一阶段通过分数规划波束成形和逐元素坐标下降的天线布置联合优化通信性能；第二阶段采用色散感知的目标定位网络来补偿各天线位置相关群时延造成的测距偏差。该方法在实现通信与感知性能权衡的同时，显著改善了宽带场景下的目标定位精度，为捏合天线ISAC系统提供了有效方案。",
+      "llm_tldr": "针对宽带OFDM捏合天线系统在ISAC中因波导色散导致距离估计严重下降的问题，该文提出两阶段一体化感知与通信框架。第一阶段通过分数规划波束成形和逐元素坐标下降的天线布置联合优化通信性能；第二阶段采用色散感知的目标定位网络来补偿各天线位置相关群时延造成的测距偏差。该方法在实现通信与感知性能权衡的同时，显著改善了宽带场景下的目标定位精度，为捏合天线ISAC系统提供了有效方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.21050v1",
+      "source": "arxiv",
+      "title": "UW-OCDM for Low-Altitude UAV Communication and Cooperative Sensing",
+      "abstract": "Integrated sensing and communications (ISAC) is a key enabler for uncrewed aerial vehicles (UAVs) in the low-altitude economy. This paper proposes an ISAC waveform that embeds a unique word (UW) into orthogonal chirp division multiplexing (OCDM), termed UW-OCDM, together with corresponding communication reception and cooperative sensing schemes for high-mobility UAV scenarios. For communication, the embedded UW enables timing synchronization and Doppler estimation and compensation without requiring a separate synchronization sequence. A sparse spatio-temporal channel estimation method exploits the common channel support across multiple receive antennas and consecutive UW observations to support reliable data demodulation. For sensing, the deterministic UW serves as a shared prior that allows distributed base stations to construct sensing dictionaries locally without exchanging random payload symbols in real time. A hierarchical multi-target detection and tracking algorithm integrates direct-path interference suppression, kinematic prediction, multi-candidate screening, off-grid refinement, residual verification, and successive interference cancellation for robust localization with reduced search complexity. Simulation results demonstrate reliable communication and localization in highly dynamic UAV scenarios, while the proposed framework retains low-complexity frequency-domain equalization and reduces transmit-reference sharing overhead and multi-static localization complexity.",
+      "authors": [
+        "Yi Tao",
+        "Zhen Gao",
+        "Ziwei Wan",
+        "Yuezu Lv",
+        "Hua Wang",
+        "Kaibin Huang",
+        "Sheng Chen"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-21T12:47:35+00:00",
+      "link": "https://arxiv.org/pdf/2608.21050v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "ISAC waveform for UAV communication and cooperative sensing",
+      "llm_evidence_cn": "面向无人机通信与协同感知的一体化波形设计",
+      "llm_evidence": "面向无人机通信与协同感知的一体化波形设计",
+      "canonical_evidence": "面向无人机通信与协同感知的一体化波形设计",
+      "llm_tldr_en": "UW-OCDM embeds a unique word into orthogonal chirp division multiplexing, providing timing/Doppler synchronization and cooperative sensing for high-mobility UAV ISAC, with sparse spatio-temporal channel estimation.",
+      "llm_tldr_cn": "低空经济中无人机需要通信与感知一体化(ISAC)支持。作者提出UW-OCDM波形，将唯一字嵌入正交线性调频频分复用，使通信接收无需独立同步序列即可完成定时同步、多普勒估计与补偿，并利用多天线与连续观测的公共信道支撑实现稀疏空时信道估计。确定性UW还支持协同感知，为高机动UAV场景提供了高效的通信感知一体化方案。",
+      "llm_tldr": "低空经济中无人机需要通信与感知一体化(ISAC)支持。作者提出UW-OCDM波形，将唯一字嵌入正交线性调频频分复用，使通信接收无需独立同步序列即可完成定时同步、多普勒估计与补偿，并利用多天线与连续观测的公共信道支撑实现稀疏空时信道估计。确定性UW还支持协同感知，为高机动UAV场景提供了高效的通信感知一体化方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.16197v1",
+      "source": "arxiv",
+      "title": "PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G",
+      "abstract": "Integrated sensing and communication (ISAC) and Digital Twin (DT) technology have emerged as complementary for future wireless networks that require autonomous operations involving continuous interaction between physical and digital worlds. However, existing DT-assisted ISAC frameworks sense continuously and indiscriminately while optimizing only a single task, leaving little room for persistent, multi-domain knowledge or proactive sensing control. This article proposes a Predictive, Reasoning-driven, Intelligent Sensing Module (PRISM) engine that transforms the DT from a passive, domain-specific optimizer into a persistent, network-wide reasoning system. PRISM enables decision-centric predictive perception, proactively directing sensing toward anticipated decisions needs rather than following fixed sensing schedules. Using an illustrative extremely large multiple-input multiple-output (XL-MIMO) deployment scenario with a mixed eMBB, URLLC, and mMTC device population, we show how this principle benefits visibility-region sensing for channel acquisition and supports slice-aware operation. Preliminary simulations, including this deployment scenario and the resulting knowledge error, overhead, and latency results, confirm that this decision-centric approach substantially reduces sensing overhead while preserving decision reliability and latency, supporting the proposed architecture as a practical step toward self-aware, autonomously orchestrated 6G networks.",
+      "authors": [
+        "Afan Ali",
+        "Daniel Benevides da Costa",
+        "Ali Arshad Nasir"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-17T07:23:35+00:00",
+      "link": "https://arxiv.org/pdf/2608.16197v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "decision-centric predictive sensing for cognitive digital twins in 6G ISAC",
+      "llm_evidence_cn": "面向6G认知数字孪生的决策中心预测式感知，结合ISAC",
+      "llm_evidence": "面向6G认知数字孪生的决策中心预测式感知，结合ISAC",
+      "canonical_evidence": "面向6G认知数字孪生的决策中心预测式感知，结合ISAC",
+      "llm_tldr_en": "Proposes PRISM, an intelligent sensing module that transforms digital twins from passive optimizers into persistent network-wide reasoning systems, enabling decision-centric predictive perception while addressing indiscriminate sensing in DT-assisted ISAC.",
+      "llm_tldr_cn": "针对现有数字孪生辅助的ISAC框架连续无差别感知且仅优化单一任务的问题，本文提出PRISM引擎，将数字孪生从被动领域优化器转变为持续、全域推理系统。PRISM实现决策中心的预测式感知，主动将感知指向与决策相关的目标。该方法为6G网络自治提供了感知控制与多域知识融合的新思路，提升了ISAC的智能化水平。",
+      "llm_tldr": "针对现有数字孪生辅助的ISAC框架连续无差别感知且仅优化单一任务的问题，本文提出PRISM引擎，将数字孪生从被动领域优化器转变为持续、全域推理系统。PRISM实现决策中心的预测式感知，主动将感知指向与决策相关的目标。该方法为6G网络自治提供了感知控制与多域知识融合的新思路，提升了ISAC的智能化水平。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.20813v1",
+      "source": "arxiv",
+      "title": "Electromagnetic Twin: Completing the Wireless World from Sparse Channel Evidence",
+      "abstract": "Acquiring dense channel information over many locations and beams incurs considerable pilot and processing overhead. Radio maps and channel knowledge maps (CKMs) reduce this overhead by reusing site-specific channel information, but their contents must be refreshed when new measurements or environmental observations become available. This paper introduces an \\emph{electromagnetic twin} as an updatable digital representation that uses sparse channel evidence to reconstruct the wireless state requested by communication queries. Rather than replacing radio maps or CKMs, the twin uses a CKM as channel memory, combines it with registered scene information, and regenerates its outputs after each evidence update. We instantiate this idea by completing a two-dimensional channel-gain field from sparse samples and an incomplete floor plan. A learned RF completion backbone recovers the main propagation structure, and a lightweight residual adapter tests whether frozen CLIP features provide useful side information. With $4\\%$ measured locations and $55\\%$ missing semantic objects, the RF backbone attains $4.44$ dB RMSE, compared with $8.29$ dB for CKM interpolation and $8.38$ dB for an incomplete physics prior. Residual adaptation reduces RMSE by a paired mean of $0.135$ dB (95\\% confidence interval: $0.100$--$0.169$ dB), but a same-capacity random-feature control is statistically indistinguishable from the CLIP-conditioned adapter. The results therefore support the measurement--update--query loop and lightweight residual correction, while avoiding an unsupported attribution of the correction to visual semantics.",
+      "authors": [
+        "Tuo Wu",
+        "Jie Tang",
+        "Kangda Zhi",
+        "Junteng Yao",
+        "Maged Elkashlan",
+        "Kin-Fai Tong",
+        "George K. Karagiannidis",
+        "Jinhong Yuan"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-21T07:34:43+00:00",
+      "link": "https://arxiv.org/pdf/2608.20813v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "wireless channel reconstruction from sparse evidence",
+      "llm_evidence_cn": "基于稀疏证据的无线信道重建",
+      "llm_evidence": "基于稀疏证据的无线信道重建",
+      "canonical_evidence": "基于稀疏证据的无线信道重建",
+      "llm_tldr_en": "Introduces electromagnetic twin, an updatable digital representation reconstructing wireless states from sparse channel evidence, using a channel knowledge map as memory with scene information. It reduces dense channel acquisition overhead.",
+      "llm_tldr_cn": "场景中获取密集信道信息需要大量导频与处理开销，而传统无线测绘图和信道知识图需要频繁刷新。本文提出电磁孪生，将其作为可更新的数字表示，利用稀疏信道证据重建通信查询所需的无线状态；它把信道知识图当作信道记忆，并结合已注册的场景信息，在每次证据更新后重新生成输出。该方法展示了如何用有限测量完成无线环境重建。",
+      "llm_tldr": "场景中获取密集信道信息需要大量导频与处理开销，而传统无线测绘图和信道知识图需要频繁刷新。本文提出电磁孪生，将其作为可更新的数字表示，利用稀疏信道证据重建通信查询所需的无线状态；它把信道知识图当作信道记忆，并结合已注册的场景信息，在每次证据更新后重新生成输出。该方法展示了如何用有限测量完成无线环境重建。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.19730v1",
+      "source": "arxiv",
+      "title": "Proper Sea Surface Roughness Enhances the Performance of Near-Shore Maritime Networks",
+      "abstract": "Accurate performance analysis for near-shore maritime wireless communication is essential for ensuring robust and reliable operations. However, existing analytical models often rely on oversimplified propagation assumptions, such as a perfectly smooth sea surface, which fail to capture the full dynamics of the maritime channel. In this paper, we develop a physically grounded analytical framework using stochastic geometry that bridges this gap. The spatial distribution of vessels is modeled as a non-homogeneous Poisson point process to reflect realistic near-port densities. We replace the idealized smooth-sea assumption by deriving a novel reflection coefficient from the classical Rayleigh criterion, which explicitly links the path loss to the significant wave height. Integrating this roughness-aware channel model into the stochastic geometry framework, we derive new analytical expressions for the uplink coverage probability and average ergodic rate, providing the first tractable characterization of aggregate interference under such dynamic conditions. The analysis reveals a sea-state-dependent reliability--capacity trade-off: roughness-induced attenuation of the coherent specular reflection can suppress destructive-interference nulls and improve reliability-oriented coverage, while reducing high-SINR and average-rate performance. Available measurements support the underlying roughness-sensitive reflection mechanism, but direct VHF validation under rough sea conditions remains unavailable; the corresponding rough-sea results are therefore interpreted as model-based predictions. A cross-frequency ablation further confirms the wavelength dependence of the roughness effect and shows that the reflection coefficient must be evaluated for the operating frequency.",
+      "authors": [
+        "Wen-Yu Dong",
+        "Shaoshi Yang",
+        "Song Zhao",
+        "Jinyang Yu",
+        "Weiliang Xie",
+        "Rui-Si Han",
+        "Qi Bi",
+        "Sheng Chen"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-08-20T07:29:14+00:00",
+      "link": "https://arxiv.org/pdf/2608.19730v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Channel modeling for maritime wireless networks with sea surface roughness",
+      "llm_evidence_cn": "面向海事无线网络的海面粗糙度信道建模",
+      "llm_evidence": "面向海事无线网络的海面粗糙度信道建模",
+      "canonical_evidence": "面向海事无线网络的海面粗糙度信道建模",
+      "llm_tldr_en": "Develops a stochastic geometry framework for near-shore maritime channels, replacing the smooth-sea assumption with a Rayleigh-criterion-derived reflection coefficient to capture realistic propagation.",
+      "llm_tldr_cn": "该论文针对近岸海事无线通信中理想海面假设不准确的问题，提出基于随机几何的物理分析框架。模型采用非齐次泊松点过程描述船舶空间分布，并利用瑞利准则推导新的反射系数，将海面粗糙度显式纳入路径损耗。结果表明，恰当的海面粗糙度反而能提升网络性能。该工作为海事信道建模和网络部署提供了更贴近实际的工具。",
+      "llm_tldr": "该论文针对近岸海事无线通信中理想海面假设不准确的问题，提出基于随机几何的物理分析框架。模型采用非齐次泊松点过程描述船舶空间分布，并利用瑞利准则推导新的反射系数，将海面粗糙度显式纳入路径损耗。结果表明，恰当的海面粗糙度反而能提升网络性能。该工作为海事信道建模和网络部署提供了更贴近实际的工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2608.19730v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.20126v1",
+      "source": "arxiv",
+      "title": "RMWorld: Task-Aware Radio World Models with Value-of-Information Guided Multi-Trial Learning for Multi-UAV Communication Control",
+      "abstract": "Reliable multi-UAV communication control depends on predicting which aerial links will serve traffic before measurements are available. Radio world models (radio WMs) make such planning tractable, but their errors are nonuniform: a globally accurate model may still fail along high-demand corridors or association boundaries where rate errors reverse control decisions. This mismatch creates a learning challenge. Link queries must reduce decision-relevant channel uncertainty, while counterfactual trials must be filtered so that biased rollouts do not corrupt the policy. Existing acquisition and model-based control treat these budgets separately, valuing uncertainty, coverage, or optimistic return rather than risk reduction. We present RMWorld, a task-aware radio-WM framework that couples value-of-information channel calibration with credibility-diversity multi-trial selection. A biased propagation formula is corrected by a Bayesian residual, and each link is valued by its exact one-label reduction in locally linearized task-integrated posterior rate variance. Counterfactual branches are selected by a task-gated log-determinant objective, followed by conflict projection and fixed-batch validation. We derive the variance-reduction identity, prove posterior task-risk equivalence and the submodular greedy guarantee, and establish a scoped first-order non-interference result. Across 100 paired 3GPP trials RMWorld reaches 0.949~bit/s/Hz task-weighted RMSE, and across 30 severe-load DeepMIMO trials it reduces median backlog by 0.967 versus Ensemble UCB at 37.5\\% more offline rollouts.",
+      "authors": [
+        "Xiucheng Wang",
+        "Nan Cheng",
+        "Junxi Huan"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-20T14:54:09+00:00",
+      "link": "https://arxiv.org/pdf/2608.20126v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Machine learning world models for wireless link prediction and UAV communication control",
+      "llm_evidence_cn": "面向无线链路预测与无人机通信控制的机器学习世界模型",
+      "llm_evidence": "面向无线链路预测与无人机通信控制的机器学习世界模型",
+      "canonical_evidence": "面向无线链路预测与无人机通信控制的机器学习世界模型",
+      "llm_tldr_en": "Presents task-aware radio world models for multi-UAV communication control, using value-of-information guided multi-trial learning to reduce decision-relevant channel uncertainty.",
+      "llm_tldr_cn": "多无人机通信控制依赖于在测量前预测空中链路性能，而现有无线电世界模型的误差在决策关键区域往往不均匀。本文提出任务感知的无线电世界模型，通过价值信息引导的多试学习机制，让链路查询聚焦于降低决策相关的信道不确定性，并过滤有偏的反事实推演。该方法在规划与学习中统一处理不确定性与控制预算，提升了沿高需求走廊与关联边界处的控制决策质量，为基于模型的无线通信控制提供了新思路。",
+      "llm_tldr": "多无人机通信控制依赖于在测量前预测空中链路性能，而现有无线电世界模型的误差在决策关键区域往往不均匀。本文提出任务感知的无线电世界模型，通过价值信息引导的多试学习机制，让链路查询聚焦于降低决策相关的信道不确定性，并过滤有偏的反事实推演。该方法在规划与学习中统一处理不确定性与控制预算，提升了沿高需求走廊与关联边界处的控制决策质量，为基于模型的无线通信控制提供了新思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.20846v1",
+      "source": "arxiv",
+      "title": "From Sparse Probes to Sum-Rate Maximization: Electromagnetic Twin Beamforming",
+      "abstract": "Probing every candidate location at each wireless-map update is costly. This letter develops electromagnetic-twin (ET) beamforming that converts sparse spatial probes into a sum-rate decision. The ET stores a location-dependent angular power spectrum, updates its innovation through graph-regularized estimation, and queries user covariances for projected beam optimization. A rate-sensitivity bound selects subsequent probes by query-weighted posterior-variance reduction. With 1\\% random probes, ET beamforming achieves $2.69$ bit/s/Hz versus $1.12$ for a static channel knowledge map; with 7\\% query-aware probes, it reaches $3.03$ bit/s/Hz, within 3.4\\% of perfect-covariance beamforming.",
+      "authors": [
+        "Tuo Wu",
+        "Kangda Zhi",
+        "Jie Tang",
+        "Jianchao Zheng",
+        "Naofal Al-Dhahir",
+        "Fumiyuki Adachi"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-21T08:09:06+00:00",
+      "link": "https://arxiv.org/pdf/2608.20846v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Machine-learning-based electromagnetic twin beamforming from sparse probes for sum-rate maximization",
+      "llm_evidence_cn": "基于电磁孪生的波束成形，用稀疏探针实现和速率最大化",
+      "llm_evidence": "基于电磁孪生的波束成形，用稀疏探针实现和速率最大化",
+      "canonical_evidence": "基于电磁孪生的波束成形，用稀疏探针实现和速率最大化",
+      "llm_tldr_en": "Electromagnetic-twin beamforming converts sparse spatial probes into sum-rate decisions using graph-regularized estimation and query-weighted posterior-variance reduction, approaching perfect-covariance performance while probing few locations.",
+      "llm_tldr_cn": "无线地图更新时逐一探测候选位置代价高昂。作者提出电磁孪生(ET)波束成形，用电磁孪生存储位置相关角度功率谱，通过图正则化估计更新创新信息，并利用查询加权后验方差缩减选择后续探针。在仅1%随机探针时达到2.69 bit/s/Hz，7%查询感知探针时达3.03 bit/s/Hz，接近理想协方差波束成形的性能，大幅降低探测开销。",
+      "llm_tldr": "无线地图更新时逐一探测候选位置代价高昂。作者提出电磁孪生(ET)波束成形，用电磁孪生存储位置相关角度功率谱，通过图正则化估计更新创新信息，并利用查询加权后验方差缩减选择后续探针。在仅1%随机探针时达到2.69 bit/s/Hz，7%查询感知探针时达3.03 bit/s/Hz，接近理想协方差波束成形的性能，大幅降低探测开销。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.21064v1",
+      "source": "arxiv",
+      "title": "Privacy-Preserving Localization via Transmit Antenna Selection and Permutation",
+      "abstract": "Integrated sensing and communication (ISAC) has been identified as one primary usage scenario in the sixth-generation (6G) network. While techniques to preserve information privacy, such as cryptography, have been widely investigated, how to preserve sensing privacy is still an open problem in the literature. This paper makes an early attempt to tackle the above issue. Specifically, we consider a localization system consisting of a multi-antenna transmitter, termed Alice, a single-antenna legitimate receiver, termed Bob, and a single-antenna illegitimate receiver, termed Eve. To allow Bob to estimate Alice's angle-of-departure (AOD) but prevent Eve from performing this task based on Alice's signals, this paper proposes a novel antenna selection and permutation based transmission strategy for Alice. Under this scheme, Alice carefully selects a subset of antennas and permutes their indices to establish a specific pilot-antenna mapping for transmission. Similar to cryptography for information privacy, such a mapping will serve as the secret key to preserve localization privacy. In the special case without noise at Bob and Eve, we manage to find out all the antenna selection and permutation solutions such that with this key (knowledge about the exact pilot-antenna mapping), Bob can uniquely estimate Alice's AOD, while without this key, Eve can estimate multiple AODs of Alice that can lead to its received signals. In the noisy case, numerical results are provided to show that our scheme can confuse Eve to make inaccurate AOD estimation as well.",
+      "authors": [
+        "Yiyang Zhang",
+        "Yanmo Hu",
+        "Junyuan Gao",
+        "Shuowen Zhang",
+        "Jiannong Cao",
+        "Liang Liu"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.IT"
+      ],
+      "published": "2026-08-21T13:07:17+00:00",
+      "link": "https://arxiv.org/pdf/2608.21064v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "ISAC localization with transmit antenna selection and permutation to preserve sensing privacy, matching joint communication and sensing in wireless networks",
+      "llm_evidence_cn": "面向ISAC定位系统，通过发射天线选择与置换保护感知隐私，契合无线网络通感一体化需求",
+      "llm_evidence": "面向ISAC定位系统，通过发射天线选择与置换保护感知隐私，契合无线网络通感一体化需求",
+      "canonical_evidence": "面向ISAC定位系统，通过发射天线选择与置换保护感知隐私，契合无线网络通感一体化需求",
+      "llm_tldr_en": "Proposes a transmit antenna selection and permutation scheme for an ISAC localization system that lets a legitimate receiver estimate angle-of-departure while preventing an eavesdropper from localizing, addressing the open sensing-privacy problem in 6G.",
+      "llm_tldr_cn": "针对6G通感一体化(ISAC)中感知隐私保护这一开放问题，本文提出一种发射天线选择与置换方案。该系统包含多天线发射端Alice、合法接收者Bob和窃听者Eve，方案使Bob能估计Alice信号的离开角(AOD)，同时阻止Eve完成同样的定位任务。该方法为ISAC场景下的感知隐私安全提供了早期探索，并为天线选择在物理层隐私保护中的应用给出了新思路。",
+      "llm_tldr": "针对6G通感一体化(ISAC)中感知隐私保护这一开放问题，本文提出一种发射天线选择与置换方案。该系统包含多天线发射端Alice、合法接收者Bob和窃听者Eve，方案使Bob能估计Alice信号的离开角(AOD)，同时阻止Eve完成同样的定位任务。该方法为ISAC场景下的感知隐私安全提供了早期探索，并为天线选择在物理层隐私保护中的应用给出了新思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}

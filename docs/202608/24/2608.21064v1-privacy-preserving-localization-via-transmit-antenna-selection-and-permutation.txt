@@ -1,0 +1,831 @@
+Title: Privacy-Preserving Localization via Transmit Antenna Selection and Permutation
+
+URL Source: https://arxiv.org/pdf/2608.21064v1
+
+Published Time: Mon, 24 Aug 2026 01:00:02 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Privacy-Preserving Localization via Transmit Antenna Selection and Permutation 
+
+Yiyang Zhang, Yanmo Hu, Junyuan Gao, Shuowen Zhang, Senior Member, IEEE ,Jiannong Cao, Fellow, IEEE , and Liang Liu, Fellow, IEEE 
+
+Abstract —Integrated sensing and communication (ISAC) has been identified as one primary usage scenario in the sixth-generation (6G) network. While techniques to preserve informa-tion privacy, such as cryptography, have been widely investigated, how to preserve sensing privacy is still an open problem in the literature. This paper makes an early attempt to tackle the above issue. Specifically, we consider a localization system consisting of a multi-antenna transmitter, termed Alice, a single-antenna legitimate receiver, termed Bob, and a single-antenna illegitimate receiver, termed Eve. To allow Bob to estimate Alice’s angle-of-departure (AOD) but prevent Eve from performing this task based on Alice’s signals, this paper proposes a novel antenna selection and permutation based transmission strategy for Alice. Under this scheme, Alice carefully selects a subset of antennas and permutes their indices to establish a specific pilot-antenna mapping for transmission. Similar to cryptography for information privacy, such a mapping will serve as the secret key to preserve localization privacy. In the special case without noise at Bob and Eve, we manage to find out all the antenna selection and permutation solutions such that with this key (knowledge about the exact pilot-antenna mapping), Bob can uniquely estimate Alice’s AOD, while without this key, Eve can estimate multiple AODs of Alice that can lead to its received signals. In the noisy case, numerical results are provided to show that our scheme can confuse Eve to make inaccurate AOD estimation as well. 
+
+Index Terms —Integrated sensing and communication (ISAC), privacy-preserving localization, angle-of-departure (AOD) esti-mation, antenna selection, antenna permutation. 
+
+I. I NTRODUCTION 
+
+A. Background and Motivation 
+
+# RECENTLY, ITU-R has identified integrated sensing and communication (ISAC) as one of the six primary usage scenarios of the sixth-generation (6G) cellular network [2]. This motivates tremendous efforts from both academia and in-dustry to embed the sensing function into the communication-oriented cellular network [3]–[10]. Such a trend, however, gives rise to new sensing privacy issues. For example, when a transmitter emits wireless signals, illegitimate receivers can monitor vital signs [11] and recognize daily activities [12] of people from the signals reflected from them. Therefore, in the future ISAC network, we need to prevent illegitimate receivers from not only eavesdropping on the messages but also sensing the environment based on their received signals. 
+
+Yiyang Zhang, Yanmo Hu, Junyuan Gao, Shuowen Zhang, Jiannong Cao, and Liang Liu are with The Hong Kong Polytechnic University, Hong Kong SAR (e-mail: yiyang-eee.zhang@connect.polyu.hk, {yanmo.hu, junyuan.gao, shuowen.zhang, jiannong.cao, liang-eie.liu }@polyu.edu.hk). An earlier version of this paper was presented in part at the 2025 IEEE Globecom Workshops [1]. 
+
+Fig. 1. Our considered privacy-preserving localization system. Alice properly selects a subset of antennas and permutes their indices to form a pilot-antenna mapping. In this example, there are four pilot sequences, and four antennas (black ones) are selected, while the antenna in the first row and the second column will transmit the first pilot sequence and so on. This antenna selection and permutation strategy, which serves as the secret key for localization, is then shared with Bob over a secure channel based on the cryptography technique. At last, Alice transmits pilot signals over these selected and permuted antennas. Our goal is to allow Bob to accurately estimate Alice’s AOD with the secret key and prevent Eve from estimating Alice’s AOD without the key. 
+
+While information privacy preserving techniques, such as cryptography, have been widely investigated and applied [13], [14], the research about 6G sensing privacy preservation is still in its infancy. This motivates us to study privacy-preserving sensing techniques in this paper. Specifically, this paper focuses on the localization application. In our con-sidered localization system, as shown in Fig. 1, there exist a multi-antenna transmitter, named Alice, a single-antenna legitimate receiver, named Bob, and a single-antenna ille-gitimate receiver, named Eve. After Alice emits a transmit signal, both Eve and Bob can apply the existing algorithms, such as maximum likelihood estimation [15] and subspace-based methods [16], to estimate the angle-of-departure (AOD) information of Alice. We thus face the following problem: how to prevent Eve from localizing Alice based on Alice’s signal? Cryptography has been widely used to preserve informa-tion privacy. Note that cryptography is conducted at higher layers, not the physical layer. Specifically, an eavesdropper is able to recover the information bits based on physical-layer techniques such as demodulation and channel decoding. However, without the key, it is practically impossible for the arXiv:2608.21064v1 [eess.SP] 21 Aug 2026 2
+
+eavesdropper to decode the messages from these bits. In sharp contrast to encryption that breaks the link between bits and messages, the privacy-preserving technique for sensing has to be done at the physical layer. This is because if the illegitimate receiver can have full knowledge about the channel state information (CSI), there is nothing that we can do at the higher layer to prevent it from recovering the location information from CSI. As a result, to preserve sensing privacy, we need to prevent Eve from knowing CSI at the physical layer. Although higher-layer privacy-preserving techniques cannot be applied for localization, we do learn an important lesson from these techniques - we should use a secret key, which is some information that is known by Bob but unknown by Eve, to preserve localization privacy in our considered system. This gives rise to the following problem: what physical-layer information can serve as the key such that Bob can estimate Alice’s AOD with it but Eve cannot without it? 
+
+B. Related Works 
+
+Recently, some pioneering works have been done to pre-serve privacy at the physical layer for various sensing ap-plications [17]–[20]. In [17], secret time-varying phase shifts are applied to the pilot signals across transmit antennas to induce erroneous breathing and heart rate estimates at Eve, or to hide motion features against activity recognition by Eve. Similarly, [18] changes both the amplitudes and phases of the pilot signals across different antennas over time to pro-tect privacy-sensitive hand gesture recognition. Beyond signal manipulation, both [19] and [20] switch the transmit antenna based on a secret schedule to prevent unauthorized sensing in various applications, including human activity recognition and tracking. Essentially, the above physical-layer approaches all preserve sensing privacy by obfuscating the CSI estimated at eavesdroppers. With regard to privacy in localization, a fundamental ap-proach is to add random noise and phase shifts, thereby making the distorted CSI difficult to be associated with a specific location [21]. For instance, [22] proposes to alter the amplitude and phase of the transmit signal based on a secret random process, which mitigates privacy risks in indoor fingerprint-based localization. Moreover, because localization can also be performed based on explicit spatial parameters extracted from the CSI, such as range and angle, a more tar-geted defense is to directly obfuscate these spatial parameters. Along this line, in [23], Alice performs fake path injection via generating structured transmit signals, such that Eve finds it difficult to distinguish the true paths from the fake paths since the delay and angle information of these two kinds of paths are close. However, even if Eve believes that Alice’s signals are from the fake paths, the estimated location of Alice is only subject to a marginal error. This approach is thus extended in [24], where the true paths are virtually shifted to fake ones via delay-angle spoofing, such that Eve perceives Alice at an incorrect location that could be far from the true one. To preserve legitimate localization in [23], [24], a small secret message containing the fake path parameters is shared with Bob via a secure channel. 
+
+C. Main Contributions 
+
+In this paper, we consider a localization system consisting of Alice, Bob, and Eve, as shown in Fig. 1. Our goal is to design Alice’s transmission strategy together with the key such that Bob can estimate Alice’s AOD accurately based on its received signal and the key, but Eve cannot without the key. The main contributions of this paper are summarized as follows.  
+
+> •
+
+The first contribution is that this paper designs a transmit antenna selection and permutation strategy to achieve the above localization privacy preservation goal. Under this scheme, Alice first selects a subset of antennas for trans-mission, and then permutes the indices of these selected antennas to generate an ordered antenna sequence. The pre-designed pilot signals, which follow a fixed order, are sequentially paired to the selected antennas according to this ordered antenna sequence. This establishes an adaptive pilot-antenna mapping instead of a fixed one. Then, this antenna selection and permutation strategy will serve as the key and be only shared with Bob. Note that to estimate AOD information based on the existing algorithms [15], [16], we need knowledge about pilot signals and steering vectors. In [24], the pilot signals are changed such that they can serve as the key to prevent Eve from localizing Alice. However, standardized systems often require the use of predefined pilots [25]. Therefore, in this paper, we propose to hide the steering vector information from Eve.  
+
+> •
+
+Second, we present two criteria to evaluate the perfor-mance of sensing privacy preserving schemes - in the noiseless case, i.e., there is no noise at Bob and Eve, whether Bob can estimate Alice’s AOD uniquely with the key, and whether Eve can have multiple AOD estimations that all result in its received signals due to the lack of the key.  
+
+> •
+
+Third, we manage to characterize the set that consists of all the antenna selection and permutation strategies such that when an arbitrary strategy from this set is used by Alice for pilot transmission, Bob can always uniquely estimate Alice’s AOD in the noiseless case, based on its received signals and knowledge about this strategy. The key to achieve this goal is to mitigate the grating lobe issue [26], [27]. Improper antenna selection may result in excessively large inter-element spacing among the selected antennas, thereby introducing grating lobes such that distinct AODs lead to the same received signals. To avoid this, we establish a requirement on the index differences of the selected antennas that guarantees unique AOD estimation.  
+
+> •
+
+Fourth, we manage to rigorously prove that if any antenna selection and permutation strategy in the above set is applied, Eve, who does not know which strategy is applied, can estimate multiple AODs that lead to its received signal in the noiseless case. Therefore, Eve does not know which AOD among the estimated ones is the true AOD. Specifically, we reveal that the estimated AODs at Eve inherently occur in groups, each generally 3
+
+containing eight solutions. Given that any strategy in the above set causes Eve to estimate as few as one such group, we further construct a subset of antenna selection and permutation strategies to achieve enhanced privacy, such that when Alice applies an arbitrary strategy from this subset, Eve will always be confused by multiple groups of AODs, even when it knows this subset.  
+
+> •
+
+Last, we provide numerical results to verify that in the noisy case, Bob can reliably recover Alice’s AOD under our scheme, whereas Eve can easily mistake an incorrect AOD solution for the true one, resulting in a large estimation error even at high signal-to-noise ratios (SNRs). It is also shown that our proposed enhanced privacy design further reduces Eve’s estimation accuracy. Note that antenna selection has been widely studied for wireless communication [28]–[30]. Recently, the techniques of fluid antenna [31] and movable antenna [32] can also be viewed as new ways to realize antenna selection, because essentially all of them need to determine the locations of the transmit antennas. However, to our best knowledge, our work is an early work to utilize antenna selection to preserve localization privacy in ISAC systems. 
+
+Organization: The rest of this paper is organized as follows. Section II investigates the localization privacy issue and intro-duces transmit antenna selection and permutation strategy to preserve privacy. Section III clarifies the goals of the privacy design. Sections IV and V provide the guidelines to ensure uniqueness in Bob’s AOD estimation, and to induce ambiguity in Eve’s AOD estimation, respectively. Numerical results are shown in Section VI, and Section VII concludes the paper. 
+
+Notations: Throughout this paper, rank( ·) denotes the rank, and det( ·) denotes the determinant of a square matrix. The sum of two sets X and Y represents their Minkowski sum, i.e., X + Y = {x + y | x ∈ X , y ∈ Y} . GL( n, Z) = {M ∈
+
+Zn×n | det( M) = ±1} denotes the general linear group of degree n over Z.II. S YSTEM MODEL 
+
+A. Localization Privacy Issue 
+
+In this paper, we consider a privacy-preserving localiza-tion system, consisting of a legitimate transmitter (Alice), a legitimate receiver (Bob), and an illegitimate device (Eve), as shown in Fig. 1. Alice is equipped with a uniform planar array (UPA) that is placed on the xz -plane and composed of M = Mx × Mz antennas, where Mx and Mz denote the numbers of antennas at the x-axis domain and the z-axis domain, respectively. We index the antenna at the mx-th column and the mz -th row of the array as antenna (mx, m z ),
+
+mx = 1 , . . . , M x, mz = 1 , . . . , M z. Moreover, both Bob and Eve are equipped with one antenna. The AOD from Alice to Bob is denoted by the elevation angle θBob ∈ (−π/ 2, π/ 2) 
+
+and the azimuth angle φBob ∈ (0 , π ), while that from Alice to Eve is denoted by the elevation angle θEve ∈ (−π/ 2, π/ 2) 
+
+and the azimuth angle φEve ∈ (0 , π ).Suppose antenna spacing at Alice is half of the signal wavelength. Then, the steering vector of Alice’s UPA towards 
+
+(θ, φ ) is given as a(θ, φ ) = [ a1,1(θ, φ ), . . . , a 1,M z (θ, φ ), . . . , aMx ,1(θ, φ ), . . . , a Mx,M z (θ, φ )] T ∈ CM×1, where 
+
+amx,m z (θ, φ )= e−jπ (( mx−1) cos θ cos φ+( mz −1) sin θ), ∀mx, m z . (1) To focus on the localization privacy issue, this paper assumes that only line-of-sight (LOS) channels exist between Alice and Bob and between Alice and Eve. Then, the channels from Alice to Bob and from Alice to Eve are respectively given as 
+
+hBob (θBob , φ Bob ) = γBob a(θBob , φ Bob ) ∈ CM×1, (2) 
+
+hEve (θEve , φ Eve ) = γEve a(θEve , φ Eve ) ∈ CM×1, (3) where γBob and γEve denote the unknown complex channel coefficients from Alice to Bob and from Alice to Eve. In the above system, Alice transmits radio pilot sig-nals to Bob, who can then localize Alice by estimat-ing the AOD information about θBob and φBob . Under the conventional localization scheme, Alice will send pi-lot signals across all its antennas to Bob. Define S =[s1,1, . . . , s1,M z , . . . , sMx ,1, . . . , sMx,M z ] ∈ CG×M as the overall pilot signal transmitted by all the antennas of Al-ice, where G is the pilot sequence length, and smx,m z =[smx,m z ,1, . . . , s mx,m z ,G ]T ∈ CG×1 denotes the pilot signal transmitted by antenna (mx, m z ) of Alice, ∀mx, m z , with 
+
+smx,m z ,g denoting the g-th pilot symbol, g = 1 , 2, . . . , G .Then, the signals received by Bob and Eve are respectively expressed as 
+
+rBob = Sh Bob (θBob , φ Bob ) + nBob ∈ CG×1, (4) 
+
+rEve = Sh Eve (θEve , φ Eve ) + nEve ∈ CG×1, (5) where nBob and nEve denote the noise at Bob and Eve. There thus exists the localization privacy issue: although Bob can apply classic methods, such as [15], [16], [33], to estimate 
+
+θBob and φBob from (4), Eve can adopt the same approach to estimate θEve and φEve from (5) for localizing Alice when S is also known by Eve. This gives rise to the following question: can we design a clever transmission strategy for Alice such that only Bob can localize Alice based on its received signals? 
+
+B. Transmit Antenna Selection and Permutation Strategy 
+
+The lesson from the above example is that Eve can localize Alice when it perfectly knows Alice’s pilot signal. Therefore, we propose a transmit antenna selection and permutation strat-egy such that some randomness shared with Bob but unknown to Eve is added on the pilot signals from Alice. Specifically, Alice first randomly selects K ≤ M antennas out of all the M
+
+antennas for transmission. Define ˜S = [˜ s1, . . . , ˜sK ] ∈ CG×K
+
+as the collection of the pre-designed K pilot signals for the selected antennas. In this paper, we assume that G ≥ K,which is a challenging setup such that in the absence of any privacy-preserving measures, Eve has sufficient observations to reliably recover the channel hEve and thus estimate θEve 
+
+and φEve with high accuracy. Next, Alice randomly pairs each pilot in ˜S to one selected antenna. In other words, Alice permutes these K selected antennas to transmit ˜S. Define the 4
+
+index of the antenna to transmit ˜sk as (xk, z k), k = 1 , . . . , K ,and 
+
+Ω = ((x1, z 1), (x2 , z 2), . . . , (xK , z K )), (6) as the ordered sequence of the K selected antennas. Thus, the overall transmit pilot signal of all the M antennas, i.e., S, is given as 1
+
+smx,m z =
+
+{
+
+˜sk, if ( mx, m z ) = ( xk , z k), k = 1 , . . . , K, 
+
+0, otherwise .
+
+(7) Given the above antenna selection and permutation strategy, the received signals of Bob and Eve given in (4) and (5) can then be expressed as 
+
+˜rBob (Ω, θ Bob , φ Bob ) = ˜S ˜hBob (Ω, θ Bob , φ Bob ) + nBob , (8) 
+
+˜rEve (Ω, θ Eve , φ Eve ) = ˜S ˜hEve (Ω, θ Eve , φ Eve ) + nEve , (9) where 
+
+˜hBob (Ω, θ Bob , φ Bob ) = γBob 
+
+[ax1,z 1 (θBob , φ Bob ), . . . , axK ,z K (θBob , φ Bob )]T ∈ CK×1, (10) 
+
+˜hEve (Ω, θ Eve , φ Eve ) = γEve [ax1,z 1 (θEve , φ Eve ), . . . , axK ,z K (θEve , φ Eve )] T ∈ CK×1, (11) denote the channel vectors from the selected and permuted antennas of Alice to Bob and Eve, respectively. Under our proposed privacy-preserving scheme, the an-tenna selection and permutation strategy Ω as given in (6), which specifies both the selected antenna subset and their permutation order used for pilot transmission, is securely sent to Bob based on the cryptography technique, while it is unknown to Eve. In other words, which antenna transmits 
+
+˜sk, ∀k, i.e., x1, z 1, . . . , x K , z K in (10) and (11), is known by Bob but unknown by Eve. The other parameters, e.g., the UPA size Mx × Mz , the value of selected antennas K, and the pre-designed pilot signal ˜S, can be known by both Bob and Eve. In the rest of this paper, we show how to design the antenna selection and permutation strategy Ω to achieve privacy-preserving localization. III. P RIVACY DESIGN STATEMENT 
+
+Under cryptography for secure communication, the core is to design the key such that the legitimate receiver with the key can successfully decode the message, while the eavesdropper without the key cannot. In our considered privacy-preserving localization scheme, the transmit antenna selection and per-mutation strategy Ω serves as the role of key. Our goals are two-fold: when Ω is known, it is easy for Bob to uniquely estimate θBob and φBob from (8); while when Ω is unknown, it is infeasible for Eve to uniquely estimate θEve and φEve 
+
+from (9). In the following, we define these two goals more precisely.             
+
+> 1It is worth noting that when K=M, Alice uses all the antennas in the UPA for transmission as in the conventional scheme in Section II-A. However, the mappings between pilot signals and antennas differ. In Section II-A, these mappings are fixed, i.e., the pilot signal smx,m zis explicitly paired to antenna (mx, m z). In contrast, our proposed strategy applies an adaptive permutation Ωsuch that each pilot signal is no longer transmitted by a fixed antenna.
+
+Definition 1 (Uniqueness in Bob’s AOD Estimation): An antenna selection and permutation strategy Ω is defined to satisfy Bob’s estimation uniqueness requirement if and only if given any θBob , ˜θBob ∈ (−π/ 2, π/ 2) , and φBob , ˜φBob ∈
+
+(0 , π ), the following condition holds: 
+
+˜S ˜h(Ω, ˜θBob , ˜φBob ) 6 = ˜S ˜h(Ω, θ Bob , φ Bob )if ( ˜θBob , ˜φBob ) 6 = ( θBob , φ Bob ). (12) In other words, in the ideal case without noise, Bob can uniquely estimate Alice’s AOD information based on its received signal (8). Moreover, define 
+
+Λ = {Ω | Ω satisfies (12) }, (13) as the set consisting of all the antenna selection and permu-tation strategies to ensure unique AOD estimation of Bob. Not surprisingly, not all the transmit antenna selection and permutation strategies can satisfy requirement (12), as will be shown later in Section IV. This is because of the grating lobe effect [26], [27]. Specifically, selecting a subset of antennas from the UPA increases the effective spacing between the antenna elements. It is well established that if this inter-element spacing becomes excessive, it induces spatial aliasing, resulting in grating lobes and consequently leading to directional ambiguities [34]. In practice, we have to select Ω from Λ such that Bob can uniquely localize Alice. However, Eve also has the side information that Ω must be chosen from Λ, although the exact Ω is unknown. In the following, we define the requirement about Ω to prevent Eve from estimating Alice’s AOD information even with the above side information. 
+
+Definition 2 (Ambiguity in Eve’s AOD Estimation): An antenna selection and permutation strategy Ω ∈ Λ (we will characterize Λ later in Theorems 1 and 2) is defined to satisfy Eve’s estimation ambiguity requirement if and only if given any θEve ∈ (−π/ 2, π/ 2) and φEve ∈ (0 , π ), there exists at least an alternative solution of ˜Ω ∈ Λ, ˜θEve ∈ (−π/ 2, π/ 2) 
+
+and ˜φEve ∈ (0 , π ) with (˜θEve , ˜φEve ) 6 = ( θEve , φ Eve ) such that 
+
+˜S ˜hEve ( ˜Ω, ˜θEve , ˜φEve ) = ˜S ˜hEve (Ω, θ Eve , φ Eve ). (14) In other words, even if Eve knows that Alice must choose 
+
+Ω from the set Λ to satisfy Bob’s estimation uniqueness requirement, there are multiple solutions of Alice’s elevation angle and azimuth angle to make Eve get the same received signal in the ideal case without noise. Note that under the cryptography technique for secure communication, without the knowledge about the key, the eavesdropper is theoretically able to decode the messages, but of prohibitively high complexity. Under our considered privacy-preserving localization scheme, as shown in Defi-nitions 1 and 2, strict privacy can be preserved because theoretically speaking, distinct AODs of Alice can lead to the same received signal at Eve. 
+
+Remark 1: To define uniqueness for Bob’s estimation and ambiguity for Eve’s estimation, we assume that there is no noise at Bob and Eve. After some Ω is designed to satisfy the requirements of Definitions 1 and 2, it can be directly applied in practice with noise at Bob and Eve. As will be shown in 5
+
+Section VI, in the noisy case, our designed antenna selection and permutation strategy can still enable Bob to accurately estimate θBob and φBob , and Eve to encounter significant ambiguity in estimating θEve and φEve .For convenience, we introduce some notations that will be useful to show how to design the antenna selection and permutation strategy to satisfy the requirements in Definitions 1 and 2. First, define 
+
+uBob = cos( θBob ) cos( φBob ), v Bob = sin( θBob ), (15) 
+
+uEve = cos( θEve ) cos( φEve ), v Eve = sin( θEve ). (16) Note that (uBob , v Bob ) and (θBob , φ Bob ) are interchangeable when θBob ∈ (−π/ 2, π/ 2) , φBob ∈ (0 , π ), and 0 < u 2Bob +
+
+v2Bob < 1; (uEve , v Eve ) and (θEve , φ Eve ) are interchangeable when θEve ∈ (−π/ 2, π/ 2) , φEve ∈ (0 , π ), and 0 < u 2Eve +
+
+v2Eve < 1. This is because given any θBob ∈ (−π/ 2, π/ 2) and 
+
+φBob ∈ (0 , π ), (uBob , v Bob ) can be uniquely mapped based on (15) that satisfies 0 < u 2Bob + v2Bob < 1. Meanwhile, given any (uBob , v Bob ) with 0 < u 2Bob + v2Bob < 1, we can also uniquely obtain θBob = arcsin( vBob ) ∈ (−π/ 2, π/ 2) , and 
+
+φBob = arccos( uBob /√1 − v2Bob ) ∈ (0 , π ) according to (15). The case for Eve is analogous. Due to the above one-to-one mapping, we can also claim that Definitions 1 and 2 are to make Bob uniquely estimate uBob and vBob with 0 < u 2Bob +
+
+v2Bob < 1, and Eve have ambiguity in estimating uEve and 
+
+vEve with 0 < u 2Eve + v2Eve < 1, in the noiseless case. Second, given any antenna selection and permutation strat-egy Ω as defined in (6), define 
+
+x(Ω) = [0 , x 2 − x1, . . . , x K − x1]T , (17) 
+
+z(Ω) = [0 , z 2 − z1, . . . , z K − z1]T , (18) as the vectors consisting of the index differences between any antenna and the first antenna in Ω along the x-axis and the z-axis, respectively. Because AOD estimation is based on the phase difference among the transmit signals of Alice’s antennas, as will be shown later, all the requirements on Ω in Definitions 1 and 2 are on x(Ω) and z(Ω).Given the above notations, ˜hBob (Ω, θ Bob , φ Bob ) given in (10) and ˜hEve (Ω, θ Eve , φ Eve ) given in (11) can be expressed as 
+
+˜hBob (Ω, u Bob , v Bob ) = γBob e−jπ (( x1−1) uBob +( z1−1) vBob )
+
+×
+
+[
+
+1, . . . , e −jπ (( xK −x1)uBob +( zK −z1)vBob )]T
+
+, (19) 
+
+˜hEve (Ω, u Eve , v Eve ) = γEve e−jπ (( x1−1) uEve +( z1−1) vEve )
+
+×
+
+[
+
+1, . . . , e −jπ (( xK −x1)uEve +( zK −z1)vEve )]T
+
+. (20) Note that we replace θBob , φBob by uBob , vBob , and θEve ,
+
+φEve by uEve , vEve in the above, because of their one-to-one mapping. Then, in the following two sections, we respectively intro-duce how to characterize and obtain Ω based on Definition 1 to guarantee uniqueness in Bob’s AOD estimation, and based on Definition 2 to simultaneously guarantee ambiguity in Eve’s AOD estimation. IV. A NTENNA SELECTION AND PERMUTATION STRATEGY 
+
+DESIGN FOR BOB ’S ESTIMATION UNIQUENESS 
+
+Given any antenna selection and permutation strategy Ω,verifying whether it satisfies Bob’s estimation uniqueness requirement as in Definition 1 is highly challenging. Specif-ically, since the parameters θBob , ˜θBob , φBob and ˜φBob are all defined over continuous domains, it is computationally in-tractable to verify whether condition (12) holds for all possible pairs of distinct (˜θBob , ˜φBob ) and (θBob , φ Bob ). Therefore, in this section, we aim to provide an implementable approach to find all the antenna selection and permutation strategies that satisfy Definition 1. Given the notations established in the preceding section and by exploiting the periodicity of the complex exponential functions, the set Λ in (13) is characterized in the following proposition. 
+
+Proposition 1: In the regime of G ≥ K, i.e., the pilot sequence length is no smaller than the number of selected antennas, the set consisting of all the antenna selection and permutation strategies that satisfy (12) in Definition 1, i.e., Λ
+
+given in (13), is characterized as 
+
+Λ = {Ω | given any u and v with 0 < u 2 + v2 < 1,
+
+at least one element in the vector 
+
+ux(Ω) + vz(Ω) is not an integer }.
+
+(21) 
+
+Proof: See Appendix A. The antenna selection and permutation strategy character-ized in Proposition 1 can remove the grating lobe issue [27] for Bob. Actually, if we can find u and v such that all the elements in ux(Ω)+ vz(Ω) are integers, given uBob and vBob , the new solution of uBob +2 u and vBob +2 v will add a phase difference of 2π to all the elements in the channel ˜hBob (Ω, u Bob , v Bob )
+
+given in (19). This may lead to the same received signal be-cause of the periodicity of the complex exponential function. One example is as follows. Suppose the ordered sequence of selected antennas Ω = ((1 , 1) , (1 , 4) , (2 , 3)) such that 
+
+x(Ω) = [0 , 0, 1] T and z(Ω) = [0 , 3, 2] T . In this case, there exist u = v = 1 /3 such that ux(Ω) + vz(Ω) = [0 , 1, 1] T .Suppose θBob = arcsin( −1/3) and φBob = arccos( −√2/4) 
+
+such that uBob = −1/3 and vBob = −1/3. We can construct a new solution of ˜uBob = uBob + 2 u = 1 /3 and ˜vBob = vBob +2v = 1 /3. Correspondingly, ˜θBob = arcsin(1 /3) = −θBob 
+
+and ˜φBob = arccos( √2/4) = π − φBob . It can be shown that 
+
+˜θBob , ˜φBob , θBob and φBob do not satisfy (12) in Definition 1. Therefore, Bob cannot uniquely estimate Alice’s AOD. For convenience, define 
+
+w = [ u, v ]T , (22) 
+
+P (Ω) = [ x(Ω), z(Ω)] ∈ ZK×2, (23) such that ux(Ω) + vz(Ω) = P (Ω)w. In the following, we will tackle the above challenge in obtaining the set Λ defined in (21) under the cases when K = 3 and K > 3, respectively. 
+
+A. Case When K = 3 
+
+Under the special case when K = 3, we are able to characterize Λ based on the following theorem. 6
+
+Theorem 1: In the case when K = 3 antennas are selected from M ≥ 3 antennas, the set Λ in (21) is characterized as 
+
+Λ = {Ω | | det([ P (Ω)] 2:3 ,:)| = 1 }, (24) where P (Ω) is defined in (23), and [P (Ω)] 2:3 ,: denotes the submatrix formed by the second and third rows of P (Ω).
+
+Proof: See Appendix B. The condition | det([ P (Ω)] 2:3 ,:)| = 1 in Theorem 1 implies that [P (Ω)] 2:3 ,: is unimodular. Geometrically, a unimodular transformation is lattice-preserving, meaning [P (Ω)] 2:3 ,: bi-jectively maps the integer lattice Z2 onto itself. Since the region {w ∈ R2 | 0 < ‖w‖2 < 1} contains no integer point, it follows that the region {[P (Ω)] 2:3 ,:w | w ∈ R2, 0 < ‖w‖2 <
+
+1} contains no integer point. 
+
+B. Case When K > 3
+
+Under the case when K > 3, in general, we do not have a closed-form solution to characterize Λ. In the following, we propose an efficient algorithm to obtain all Ω in Λ. We formulate the following feasibility problem: 
+
+find w (25a) 
+
+subject to P (Ω)w ∈ ZK×1, (25b) 
+
+0 < ‖w‖2 < 1. (25c) Given some Ω, if the above problem admits no solution, we can conclude that Ω ∈ Λ.First, any Ω with rank( P (Ω)) = 1 must satisfy Ω /∈ Λ,because we can always find some w with arbitrarily small norm power that makes P (Ω)w = 0.Second, given some Ω with rank( P (Ω)) = 2 , we solve the above feasibility problem as follows. Specifically, according to Cauchy-Schwarz inequality and (25c), we have 
+
+|[P (Ω)] k, :w| ≤ ‖ [P (Ω)] k, :‖‖ w‖
+
+< √(Mx − 1) 2 + ( Mz − 1) 2, (26) where [P (Ω)] k, : denotes the k-th row of P (Ω). Define 
+
+N = {[n1, . . . , n K ]T ∈ ZK×1 ||nk| < √(Mx − 1) 2 + ( Mz − 1) 2, ∀k}. (27) Then, problem (25) is equivalent to the following problem 
+
+find w (28a) 
+
+subject to P (Ω)w ∈ N , (28b) 
+
+(25c ). (28c) Different from (25b) where there are an infinite number of 
+
+K by 1 vectors in the set ZK×1, in (28b), there are a finite number of K by 1 vectors in the set N . This makes it possible to solve problem (28) via exhaustive search, as shown in Algorithm 1. To summarize, under the case when K > 3, we have the following theorem. 
+
+Theorem 2: In the case when K > 3 antennas are selected from M > 3 antennas, the set Λ in (21) is characterized as 
+
+Λ = {Ω | rank( P (Ω)) = 2 and Algorithm 1 claims that problem (28) is infeasible }. (29) 
+
+Algorithm 1 Algorithm for Solving Problem (28)                          
+
+> a) Given some Ωwith rank( P(Ω)) = 2 , for each n∈ N , solve for wsatisfying both P(Ω)w=nand (28c); b) If such wis obtained for at least one n∈ N , conclude that problem (28) is feasible; otherwise, if no such wexists for all
+> n∈ N , conclude that problem (28) is infeasible.
+
+V. A NTENNA SELECTION AND PERMUTATION STRATEGY 
+
+DESIGN FOR EVE ’S ESTIMATION AMBIGUITY 
+
+In this section, we first reveal that any antenna selection and permutation strategy that satisfies Bob’s estimation uniqueness requirement as in Definition 1, i.e., Ω ∈ Λ, inherently satisfies Eve’s estimation ambiguity requirement as in Definition 2. Then, we will show how to design the antenna selection and permutation strategy to confuse Eve’s AOD estimation to a higher level. 
+
+A. Eve’s Ambiguity Condition is Always Satisfied 
+
+First, we analyze the property of all the antenna selec-tion and permutation strategies in Λ that prevent Eve from knowing θEve and φEve as in Definition 2 in the following proposition. 
+
+Proposition 2: In the regime of G ≥ K, i.e., the pilot sequence length is no smaller than the number of selected an-tennas, an antenna selection and permutation strategy Ω ∈ Λ
+
+can satisfy (14) in Definition 2 if and only if given any uEve 
+
+and vEve with 0 < u 2Eve + v2Eve < 1, there always exists 
+
+˜Ω ∈ Λ, ˜uEve and ˜vEve with 0 < ˜u2Eve + ˜ v2Eve < 1 and 
+
+(˜ uEve , ˜vEve ) 6 = ( uEve , v Eve ) such that all the elements in the vector ˜uEve ˜x( ˜Ω) + ˜ vEve ˜z( ˜Ω) − uEve x(Ω) − vEve z(Ω) are even integers. 
+
+Proof: See Appendix C. Intuitively, if Eve can find ˜uEve , ˜vEve , and ˜Ω such that all the elements of ˜uEve ˜x( ˜Ω)+˜ vEve ˜z( ˜Ω)−uEve x(Ω)−vEve z(Ω)
+
+are even integers, this new solution will add a phase difference of 2π to all the elements in the channel ˜hEve (Ω, u Eve , v Eve )
+
+given in (20). This will lead to the same received signals at Eve and make Eve have ambiguity in AOD estimation. Notably, we show in the following that any antenna strategy 
+
+Ω ∈ Λ necessarily induces such estimation ambiguity at Eve. 
+
+Theorem 3: Any antenna selection and permutation strategy 
+
+Ω ∈ Λ, where Λ is characterized by (24) when K = 3 as in Theorem 1 and by (29) when K > 3 as in Theorem 2, can cause AOD estimation ambiguity to Eve as in Definition 2. Specifically, given any AOD from Alice to Eve as well as antenna strategy satisfying the following conditions: a) uEve and vEve satisfy uEve 6 = 0 and vEve 6 = 0 ;b) uEve and vEve satisfy |uEve | 6 = |vEve |;c) x(Ω) and z(Ω) satisfy max {x(Ω)} − min {x(Ω)} <Mz and max {z(Ω)} − min {z(Ω)} < M x,Eve, with Ω unknown, can estimate at least eight distinct AODs that lead to its received signal, which include: 
+
+(˜θEve , ˜φEve ) = ( θEve , φ Eve ), (30a) 
+
+(˜θEve , ˜φEve ) = ( θEve , π − φEve ), (30b) 
+
+(˜θEve , ˜φEve ) = ( −θEve , φ Eve ), (30c) 7
+
+(˜θEve , ˜φEve ) = ( −θEve , π − φEve ), (30d) 
+
+(˜θEve , ˜φEve ) = (arcsin uEve , arccos vEve √1−u2Eve 
+
+), (30e) 
+
+(˜θEve , ˜φEve ) = (arcsin uEve , π − arccos vEve √1−u2Eve 
+
+), (30f) 
+
+(˜θEve , ˜φEve ) = ( − arcsin uEve , arccos vEve √1−u2Eve 
+
+), (30g) 
+
+(˜θEve , ˜φEve ) = ( − arcsin uEve , π − arccos vEve √1−u2Eve 
+
+). (30h) If condition c) is satisfied and uEve = 0 , vEve 6 = 0 , Eve can estimate at least four distinct AODs as follows: 
+
+(˜θEve , ˜φEve ) = ( θEve , π/ 2) , (31a) 
+
+(˜θEve , ˜φEve ) = ( −θEve , π/ 2) , (31b) 
+
+(˜θEve , ˜φEve ) = (0 , arccos vEve ), (31c) 
+
+(˜θEve , ˜φEve ) = (0 , π − arccos vEve ). (31d) If condition c) is satisfied and uEve 6 = 0 , vEve = 0 , Eve can estimate at least four distinct AODs as follows: 
+
+(˜θEve , ˜φEve ) = (0 , φ Eve ), (32a) 
+
+(˜θEve , ˜φEve ) = (0 , π − φEve ), (32b) 
+
+(˜θEve , ˜φEve ) = (arcsin uEve , π/ 2) , (32c) 
+
+(˜θEve , ˜φEve ) = ( − arcsin uEve , π/ 2) . (32d) If condition c) is satisfied and |uEve | = |vEve |, the set of AODs given by (30e) to (30h) is equivalent to the set given by (30a) to (30d), and thus Eve can estimate at least four distinct AODs given by (30a) to (30d). Next, if condition c) is violated but condition a) is satisfied, no matter whether condition b) is satisfied, Eve can also estimate at least four distinct AODs given by (30a) to (30d). Moreover, if condition c) is violated and uEve = 0 , vEve 6 = 0 , Eve can estimate at least two distinct AODs given by (31a) and (31b). Finally, if condition c) is violated and uEve 6 = 0 , vEve = 0 , Eve can estimate at least two distinct AODs given by (32a) and (32b). 
+
+Proof: See Appendix D. In the above, Conditions a) and b) simply require that Eve does not stand on specific planes x = 0 , z = 0 and 
+
+x = ±z in the whole space, while Condition c) constrains the maximum distance between selected antennas along one axis to the total length of the other axis, tricking Eve into interpreting the x-axis phase differences as the z-axis ones, and vice versa. Moreover, the above eight AOD estimations correspond to eight symmetric propagation directions in the space, which are physically related through reflections with respect to the planes x = 0 , z = 0 and x = ±z. Regardless of how many distinct AODs remain from these eight estimations, the resulting AOD solutions constitute a basic solution set that can always confuse Eve as in Definition 2. 
+
+B. Enhanced Ambiguity 
+
+We have shown that given any antenna selection and permu-tation strategy Ω ∈ Λ, Eve gets confused among two, four, or eight AOD solutions from the basic solution set. Nevertheless, a larger number of AOD estimations at Eve is highly desirable. For example, more estimations impose higher cost for Eve to launch targeted attacks against all plausible candidate directions. Because many antenna selection and permutation strategies in Λ achieve the above goal, we are interested in the following enhanced privacy problem. Can we find a set 
+
+˜Λ ⊂ Λ such that even if this set is known by Eve, as long as Alice’s strategy Ω is limited to the set ˜Λ, Eve will always be confused by more AOD solutions beyond the basic solution set with two, four, or eight AODs as shown in Theorem 3? To this end, we first note that each AOD solution within the basic solution set is paired with a corresponding antenna strategy to yield the same received signal at Eve. For example, AOD in (30a) obviously corresponds to the true strategy Ω.These strategies constitute a basic strategy group , which must be included in ˜Λ to ensure that Eve is at least confused by the basic solution set. Next, suppose Eve can estimate an AOD outside the basic solution set that also leads to its received signal, under a specific strategy in ˜Λ. Then, it is guaranteed that this additional AOD estimation can also expand into an 
+
+enhanced solution set with two, four, or eight distinct AODs, analogous to the basic solution set shown in Theorem 3. Eve will also be confused by this enhanced solution set, as long as its corresponding enhanced strategy group is included in ˜Λ.Therefore, a higher privacy level can be achieved by including the basic strategy group and several enhanced strategy groups in ˜Λ, such that Eve will always be confused by multiple AOD solution sets, including the basic one and some enhanced ones. In the following, we define more precisely how ˜Λ achieves a higher level of privacy. 
+
+Definition 3 (Enhanced Ambiguity in Eve’s AOD Estima-tion): A set of antenna selection and permutation strategies 
+
+˜Λ achieves Q-level privacy if given any Ω ∈ ˜Λ and any AOD from Alice to Eve, ˜Λ contains at least Q strategy groups (one basic including Ω and at least Q − 1 enhanced), which, together with their corresponding AOD solution sets, all yield the same received signal at Eve. While Definition 3 provides the requirement of ˜Λ to achieve Q-level privacy, constructing such a set remains highly challenging. As with Definition 2, this requirement must be satisfied for every possible AOD from Alice to Eve. However, the AOD varies continuously, making exhaustive verification intractable. To tackle the above challenge, we reveal a hidden mechanism behind the existence of multiple AOD estimations at Eve, which is embedded in Proposition 2, but not fully recognized in the previous analysis. Specifically, Proposition 2 provides a condition on K-dimensional vectors 
+
+uEve x(Ω) + vEve z(Ω) and ˜uEve ˜x( ˜Ω) + ˜ vEve ˜z( ˜Ω) to satisfy Definition 2. An interesting observation is that these K-dimensional vectors actually reside in two-dimensional (2D) subspaces of RK , which are respectively spanned by spatial bases {x(Ω), z(Ω)} and {˜x( ˜Ω), ˜z( ˜Ω)}, while their continu-ous variation within these subspaces is dictated by 2D angular parameters (uEve , v Eve ) and (˜ uEve , ˜vEve ), respectively. Intuitively, for a vector uEve x(Ω) + vEve z(Ω) in one 2D subspace, it is not easy to find a vector ˜uEve ˜x( ˜Ω)+ ˜ vEve ˜z( ˜Ω)
+
+in another 2D subspace such that ˜uEve ˜x( ˜Ω) + ˜ vEve ˜z( ˜Ω) −
+
+(uEve x(Ω)+ vEve z(Ω)) ∈ 2ZK as in Proposition 2, especially under the continuous variation of (uEve , v Eve ). However, if these two vectors can be made to lie in the same 2D subspace, the original K-dimensional matching condition will simplify 8
+
+to a 2D mapping between (uEve , v Eve ) and (˜ uEve , ˜vEve ). To hold for all (uEve , v Eve ), this pointwise condition naturally becomes a 2D region-covering requirement. Excitingly, based on this insight, we manage to find a region-covering structure in the 2D plane that is sufficient to construct a set ˜Λ satisfying Definition 3, as shown in the following theorem. 
+
+Theorem 4: Suppose there exists a set T = {T 1, . . . , T P }
+
+with T 1 = I2 and T p ∈ GL(2 , Z), p = 2 , . . . , P , such that 
+
+T −1 
+
+> p1
+
+T p2 /∈ Σ, ∀1 ≤ p1 < p 2 ≤ P, (33) and the following region-covering condition holds: 
+
+∑  
+
+> Tp∈T
+
+1E0(T p )+2 Z2 (w) ≥ Q, ∀w ∈ [−1, 1] 2 \ (Z2 \ 2Z2) ,
+
+(34) where Σ = {Π ∈ Z2×2 | ΠΠ T = I2} denotes the set of all 
+
+2×2 signed permutation matrices, 1I is the indicator function for set I, and E0(T p) = {w ∈ R2 | ‖ T −1 
+
+> p
+
+w‖2 < 1} denotes the basic elliptic region associated with T p. Then, define R
+
+as the set of all strategies Ω ∈ Λ such that for every T p ∈ T ,at least one of the following two constraint sets is satisfied: 
+
+{ max {P (Ω)[ T p]:,1} − min {P (Ω)[ T p]:,1} < M x,
+
+max {P (Ω)[ T p]:,2} − min {P (Ω)[ T p]:,2} < M z . (35) 
+
+{ max {P (Ω)[ T p]:,1} − min {P (Ω)[ T p]:,1} < M z ,
+
+max {P (Ω)[ T p]:,2} − min {P (Ω)[ T p]:,2} < M x. (36) where [T p]:,1 and [T p]:,2 denote the first and second columns of T p, respectively. Finally, a strategy set satisfying Definition 3 can be constructed as 
+
+˜Λ = ⋃
+
+> Ω∈R
+
+⋃  
+
+> Tp∈T
+
+{ ˜Ω ∈ Λ | ˜P ( ˜Ω) = P (Ω)T pΠ, Π ∈ Σ
+
+}
+
+,
+
+(37) where ˜P ( ˜Ω) = [˜ x( ˜Ω), ˜z( ˜Ω)] ∈ ZK×2.
+
+Proof: See Appendix E. Theorem 4 provides a constructive way to realize the Q-level privacy requirement in Definition 3. Each transformation matrix T p ∈ T generates one physically realizable strategy group, while the signed permutations Π ∈ Σ enumerate all valid strategies within that group. Then, ˜Λ is constructed in (37) to simultaneously include all such P groups. The key idea behind this construction is to distribute the responsibility of confusing Eve among P strategy groups associated with a specific Ω ∈ ˜Λ. Each strategy group is effective in providing ambiguity only over a specific region of the continuous AOD domain, rather than all possible true AODs. Meanwhile, the region-covering condition (34) guarantees that every possible AOD is covered by at least Q such regions, so that Eve will always face ambiguity from at least Q strategy groups. All that remains to construct such ˜Λ is to find a set T
+
+that satisfies (34), which can be efficiently solved through a combinatorial search over the discrete space GL(2 , Z). Fig. 2 shows an example solution of T that satisfies (34) for a target covering multiplicity of Q = 2 . It is observed in Fig. 2(c) that the covering multiplicity by all the corresponding basic elliptic regions and their translations by 2Z2 is consistently at least two within the region [−1, 1] 2\ (Z2\2Z2).
+
+Remark 2: Note that ˜Λ in (37) becomes empty if R = ∅.This may occur when the target Q is set too high for a given                                  
+
+> (a) (b)
+> -1 -0.5 00.5 1-1 -0.5 00.5 1
+> 2345
+> (c) Fig. 2. Illustration of a solution set that satisfies (34) for Q= 2 :T={[ 1 0 0 1
+> ],[−10
+> −1−1
+> ],[01
+> −1−1
+> ],[11
+> −1 0
+> ],[−1 1
+> −1 0
+> ]} . (a) The corresponding basic elliptic regions E0(Tp), (b) Their translations by 2Z2, (c) The coverage multiplicity map of [−1,1] 2\(Z2\2Z2). The region [−1,1] 2is framed by a solid black box in (a) and (b).
+
+UPA size Mx × Mz . In particular, achieving a higher privacy level Q requires a larger set T , making it difficult to find Ω
+
+that consistently satisfies at least one of the constraint sets in (35) and (36) for all required spatial transformations T p.VI. N UMERICAL RESULTS 
+
+In this section, we provide numerical examples to verify the effectiveness of our proposed transmit antenna selection and permutation strategy in privacy-preserving localization. 
+
+A. Bob’s Uniqueness and Eve’s Ambiguity 
+
+First, we consider a UPA with Mx = 4 , Mz = 2 , and aim to select and permute K = 4 antennas out of all these 
+
+M = 8 antennas for transmission. The set of all the feasible antenna selection and permutation strategies Λ is obtained by applying the algorithm proposed in Section IV. For clarity, we only illustrate the resulting feasible combinations of the selected K = 4 antennas in Fig. 3, where the selected antennas are represented by solid circles. The complete set Λ is then formed by considering all K! permutations for each feasible combination. Then, Alice can arbitrarily choose a strategy from Λ to transmit pilot signals. In the following, we show the performance in both noiseless and noisy cases. In the noiseless case, we generate 10 5 locations of Alice relative to Bob and Eve, and check the AOD estimated by Bob and that estimated by Eve. In Fig. 4, we show several representative examples due to the space limitation. Under each realization, Bob performs exhaustive search over θBob 
+
+and φBob given its received signal and the applied Ω, while Eve performs exhaustive search of θEve , φEve and Ω based on its received signal. It is observed from Fig. 4 (and also many other numerical examples) that with known Ω, Bob is always able to uniquely estimate Alice’s AOD. However, Eve may see multiple possible solutions of Alice’s antenna strategy and AOD that lead to its received signal due to the lack of knowledge about Ω. Moreover, Fig. 4 validates the estimation ambiguity characterized in Theorem 3. Specifically, Fig. 4(a) shows two solutions given by (31a) and (31b). Figs. 4(b) and 4(c) show four solutions from (30a) to (30d) because the applied strategy violates condition c) in Theorem 3 for a 
+
+4×2 UPA. By contrast, when considering a 4×4 UPA in Figs. 4(d) and 4(e) where condition c) holds, Eve observes all the AOD solutions in (30a)–(30h). Note that in Fig. 4(e), the AOD 9
+
+1 2 3 4 121 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 121212 Selected Not selected 
+
+Fig. 3. All feasible combinations of the selected K = 4 antennas from a 4 × 2 UPA to form the strategy set Λ.      
+
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+
+(a)       
+
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+
+(b)       
+
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+
+(c)       
+
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+
+(d)       
+
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+
+(e) Fig. 4. AOD estimation by Bob and Eve in the noiseless case: (a) Ω = ((1 , 1) , (2 , 1) , (3 , 1) , (1 , 2)) , θBob = −67 .7◦, φBob = 153 .6◦ , θEve = 65 .9◦,
+
+φEve = 90 ◦; (b) Ω = ((1 , 1) , (4 , 1) , (1 , 2) , (3 , 2)) , θBob = 21 .3◦ , φBob = 70 .9◦ , θEve = 25 .0◦ , φEve = 126 .8◦ ; (c) Ω = ((1 , 1) , (4 , 1) , (1 , 2) , (3 , 2)) ,
+
+θBob = −45 .6◦, φBob = 57 .7◦, θEve = 15 .9◦ , φEve = 20 .7◦ ; (d) and (e) use the same Ω and true AODs to Bob and Eve as (b) and (c), respectively, but consider a 4 × 4 UPA.      
+
+> 12341234
+> 1234
+
+(a)    
+
+> 12341234
+> 1234
+
+(b)      
+
+> 12341234
+> 1234
+
+(c)    
+
+> 12341234
+> 1234
+
+(d)    
+
+> 12341234
+> 1234
+
+(e)    
+
+> 12341234
+> 1234
+
+(f)     
+
+> 123412341234
+
+(g)     
+
+> 123412341234
+
+(h)    
+
+> 12341234
+> 1234
+
+(i)    
+
+> 12341234
+> 1234
+
+(j)     
+
+> 123412341234
+
+(k)     
+
+> 123412341234
+
+(l)    
+
+> 12341234
+> 1234
+
+(m)    
+
+> 12341234
+> 1234
+
+(n)     
+
+> 123412341234
+
+(o)     
+
+> 123412341234
+
+(p) Fig. 5. The antenna selection and permutation strategies ˜Ω corresponding to the AOD estimations in Fig. 4: (a)–(h) constitute the basic strategy group corresponding to the 8 AOD solutions in Fig. 4(d) as well as those on the outer dashed curve in Fig. 4(e); (i)–(p) form the enhanced strategy group corresponding to the AOD solutions on the inner dashed curve in Fig. 4(e). Circled numbers 1, . . . , 4 represent the permutation order of selected antennas. 
+
+solutions given by (30a)–(30h) are those on the outer dashed curve, while those on the inner dashed curve form an enhanced AOD solution set introduced in Section V-B. Therefore, the comparison between Figs. 4(c) and 4(e) also demonstrates that expanding the UPA size along both dimensions (e.g., from a 
+
+4×2 to a 4×4 UPA) makes it possible, at least for specific true AODs, to induce additional AOD solutions for Eve beyond the basic solution set. In Fig. 5, we illustrate the corresponding strategies ˜Ω
+
+estimated by Eve that lead to the AOD estimations in Fig. 4. As observed from the results, the strategies within each group are essentially related to each other via spatial reflections and rotations, thereby generating the symmetric and structured AOD solutions in Fig. 4. Meanwhile, it is straightforward to see that only the four strategies in Figs. 5(a)–5(d) can phys-ically fit into a 4 × 2 UPA. Consequently, when considering a 4 × 2 UPA instead of a 4 × 4 UPA, the 8 and 16 AOD solutions shown in Figs. 4(d) and 4(e) inevitably collapse to the four solutions in Figs. 4(b) and 4(c), respectively. Next, we consider the noisy case. The SNR of Bob is fixed to be 20 dB , and that of Eve varies from 10 dB to 30 dB .We generate 10 5 realizations of Alice’s AOD relative to Bob and Eve. Under each realization, we utilize the maximum likelihood technique to estimate θBob , φBob with knowledge of Ω and θEve , φEve without knowledge of Ω.Fig. 6 shows the AOD estimation accuracy for Bob and Eve versus Eve’s SNR, where an estimated AOD is claimed to be accurate if its difference to the true AOD is within 5
+
+degrees. Here we consider a 4 × 2 UPA. It is observed that the applied strategy Ω = ((1 , 1) , (4 , 1) , (1 , 2) , (3 , 2)) (and also other strategies in Λ) can enable Bob to accurately estimate Alice’s AOD, but prevent Eve from eavesdropping on Alice’s AOD, in the noisy case. Fig. 7 presents the AOD estimation accuracy for Bob and Eve versus the number of selected antennas K in a 4×2 UPA, where the SNRs of both Bob and Eve are fixed to be 20 dB .Specifically, for K = 4 , the applied strategy is the same as that in Fig. 6, and antennas (2 , 2) , (3 , 1) , and (2 , 1) , (4 , 2) are 10               
+
+> 10 15 20 25 30 020 40 60 80 100
+> Fig. 6. AOD estimation accuracy versus SNR of Eve.
+> 96.15 96.31 97.15 98.04 5.31 10.84 12.65 23.10
+> 4568020 40 60 80 100
+> Fig. 7. AOD estimation accuracy versus the number of selected antennas K.
+
+sequentially added to realize the strategies for K = 5 , 6, and 
+
+8, respectively. As observed from the results, Bob maintains a consistently high estimation accuracy for all K, while Eve’s AOD estimation accuracy increases significantly as K
+
+increases. It is worth noting that the case of K = 8 means Alice does not perform antenna selection. In this case, Eve exhibits an accuracy of 23 .10% , which closely approaches the expected accuracy of 25% , since selecting all eight antennas from a 4×2 UPA generally leaves only the four AOD solutions given by (30a) to (30d) in Theorem 3, among which Eve can only make a random selection without additional prior information. This estimation accuracy is greatly higher than that with smaller K, which demonstrates the significance of transmit antenna selection in preserving localization privacy. 
+
+B. Enhanced Privacy 
+
+In this subsection, we validate the effectiveness of the scheme proposed in Section V-B to achieve enhanced privacy. First, in the noiseless case, we consider the following two setups: (a) 4 × 2 UPA, K = 4 , and (b) 3 × 3 UPA, K = 5 .Under each setup, we can obtain the set Λ, and also construct the subset ˜Λ ⊂ Λ as in Theorem 4 given Q = 2 . Due to the space limitation, we select one pair of strategies from each setup for comparison: (a) Ω1 = ((1 , 1) , (4 , 1) , (1 , 2) , (3 , 2)) ∈
+
+Λ \ ˜Λ, Ω2 = ((1 , 1) , (2 , 1) , (2 , 2) , (3 , 2)) ∈ ˜Λ, and (b) 
+
+Ω3 = ((1 , 1) , (2 , 1) , (2 , 2) , (2 , 3) , (1 , 3)) ∈ Λ \ ˜Λ, Ω4 =((1 , 1) , (2 , 1) , (2 , 2) , (2 , 3) , (3 , 3)) ∈ ˜Λ. We generate 10 5                                    
+
+> Fig. 8. Percentage of true AODs corresponding to different numbers of AOD solution sets at Eve for different strategies.
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+> (a)
+> 030 60 90 120 150 180 -90 -60 -30 030 60 90
+> (b) Fig. 9. AOD estimation by Bob and Eve in the noiseless case under Ω4:(a) θBob =−45 .6◦,φBob = 57 .7◦,θEve = 15 .9◦,φEve = 20 .7◦; (b)
+> θBob =−67 .7◦,φBob = 153 .6◦,θEve =−47 .6◦,φEve = 83 .5◦.
+
+realizations of Alice’s AOD relative to Eve, and check the number of AOD solution sets estimated by Eve under each realization. Note that Eve performs exhaustive search of Ω
+
+over the set Λ when Ω1 or Ω3 is applied, while searching over the subset ˜Λ ⊂ Λ for Ω2 and Ω4.Fig. 8 plots the percentage of the true AODs corresponding to different numbers of AOD solution sets for these applied strategies. It is observed that applying Ω1 and Ω3 results in cases with only a single AOD solution set at Eve. In sharp contrast, Ω2 and Ω4 completely eliminate the single-solution-set case, guaranteeing that Eve is always confused by at least two solution sets for any true AOD. Furthermore, Ω2 and 
+
+Ω4 exhibit remarkably similar percentage distributions across different numbers of solution sets, which stems from our structured construction in Theorem 4. This also demonstrates that our proposed enhanced privacy design is applicable to diverse UPA sizes and numbers of selected antennas. In Fig. 9, we present two examples of AOD estimation by Bob and Eve under Ω4. It is observed from Fig. 9(a) and Fig. 9(b) that Eve can estimate four and five AOD solution sets, respectively, which indicates that the applied strategy from ˜Λ
+
+achieves better privacy in the noiseless case. Next, we consider the noisy case. In Fig. 10, we compare the strategies Ω3 and Ω4 as considered in Fig. 8 and eval-uate Eve’s AOD estimation accuracy versus its SNR. It is observed that Ω4 consistently restricts Eve to a lower AOD 11         
+
+> 10 15 20 25 30 036912 15
+> Fig. 10. Eve’s AOD estimation accuracy versus SNR under Ω3and Ω4.
+
+estimation accuracy than Ω3 over the entire SNR range. More importantly, Eve’s accuracy under Ω4 gradually saturates as the SNR increases. This indicates that although increasing the SNR mitigates the impact of noise, it cannot eliminate the intrinsic estimation ambiguity induced by multiple AOD solution sets that exist in the noiseless case. Therefore, our proposed enhanced privacy design can maintain its privacy advantage even in the high-SNR regime. VII. C ONCLUSIONS 
+
+This paper proposed a transmit antenna selection and per-mutation scheme to preserve localization privacy. In analogy to cryptography in secure communication, the transmit an-tenna selection and permutation strategy serves as the secret key shared between the legitimate transmitter and receiver to prevent Eve from estimating Alice’s AOD. To guarantee unique AOD estimation in the noiseless case for legitimate lo-calization, we characterized the set of all the feasible antenna selection and permutation strategies that effectively eliminate grating lobes. Furthermore, we proved that any antenna se-lection and permutation strategy in the above set inherently induces AOD estimation ambiguity to Eve in the noiseless case, and revealed that the estimated AODs at Eve occur in groups. Therefore, we constructed a subset of strategies to achieve enhanced privacy by making Eve always confused by multiple groups of AODs. Numerical results demonstrated the effectiveness of our proposed scheme in the noisy case as well. We hope that this work can motivate more efforts to investigate sensing privacy issues in 6G ISAC. APPENDIX APROOF OF PROPOSITION 1Note that when G ≥ K, (12) is equivalent to 
+
+˜h(Ω, ˜θBob , ˜φBob ) 6 = ˜h(Ω, θ Bob , φ Bob ). (38) In the following, we prove the necessary and sufficient parts of Proposition 1. 
+
+1) Proof of Necessity: 
+
+Suppose there exist u and v with 0 < u 2 + v2 < 1 such that 
+
+ux(Ω) + vz(Ω) = k ∈ ZK×1. Given ˜uBob = u, ˜vBob = v,
+
+uBob = −u, and vBob = −v, it can be easily verified that 
+
+(˜ uBob , ˜vBob ) 6 = ( uBob , v Bob ) and 0 < ˜u2Bob + ˜ v2Bob = u2Bob +
+
+v2Bob < 1. Moreover, we observe that 
+
+˜uBob x(Ω)+ ˜ vBob z(Ω) = uBob x(Ω)+ vBob z(Ω)+2 k. (39) Using the complex exponential function and because γBob 
+
+is unknown, it follows from (39) that ˜h(Ω, ˜θBob , ˜φBob ) = ˜h(Ω, θ Bob , φ Bob ), which is a contradiction to (38). 
+
+2) Proof of Sufficiency: 
+
+Suppose (38) does not hold. This implies that there exists 
+
+k ∈ ZK×1 such that ˜uBob x(Ω) + ˜ vBob z(Ω) = uBob x(Ω) + 
+
+vBob z(Ω) + 2 k, due to the periodicity of the complex expo-nential function in (19). Let ∆u = ˜ uBob − uBob , and ∆v =˜vBob − vBob , then we have k = (∆ u/ 2) x(Ω) + (∆ v/ 2) z(Ω).It is easy to verify that 
+
+(∆ u/ 2) 2 + (∆ v/ 2) 2 (a)
+
+< 12 (1 − ˜uBob uBob − ˜vBob vBob )
+
+> (b)
+
+< 12 (1 + cos( ˜θBob + θBob )) (c)
+
+≤ 1, (40) where (a) is due to ˜u2Bob + ˜ v2Bob < 1 and u2Bob +v2Bob < 1, (b)
+
+is due to (15), the trigonometric identities, and the facts that 
+
+cos ˜φBob , cos φBob ∈ (−1, 1) , and cos ˜θBob , cos θBob ∈ (0 , 1] ,
+
+(c) follows from cos( ˜θBob + θBob ) ∈ [−1, 1] . From (40) and because ∆u and ∆v are not both zero, a solution of u and 
+
+v with 0 < u 2 + v2 < 1 such that ux(Ω) + vz(Ω) ∈ ZK×1
+
+can be readily found, i.e., u = ∆ u/ 2 and v = ∆ v/ 2. This contradicts the characterization of Λ in (21). Proposition 1 is proved. APPENDIX BPROOF OF THEOREM 1Given any Ω ∈ Λ, define the open elliptic region E(Ω) = 
+
+{ ˆP (Ω)w | w ∈ D} , where ˆP (Ω) = [ P (Ω)] 2:3 ,: and D =
+
+{w ∈ R2 | ‖ w‖2 < 1} denotes the open unit disk. Note that if 
+
+rank( ˆP (Ω)) < 2, we can always construct some w ∈ D such that ˆP (Ω)w = 0, which contradicts Proposition 1. Therefore, 
+
+rank( ˆP (Ω)) = 2 must hold, and the region E(Ω) will not degenerate into a line. Next, it is not difficult to see that ˆP (Ω)
+
+maps D \ { 0} bijectively onto E(Ω) \ { 0}. By Proposition 1, it thus suffices to prove that E(Ω) contains no integer point other than the origin if and only if | det( ˆP (Ω)) | = 1 . We prove the necessary and sufficient parts as follows: 
+
+1) Proof of Necessity: 
+
+Assume that E(Ω) contains no integer point other than the origin. By Minkowski’s theorem, the area of the region E(Ω)
+
+must be no greater than four, i.e., π| det( ˆP (Ω)) | ≤ 4. Since 
+
+det( ˆP (Ω)) is an integer and det( ˆP (Ω)) 6 = 0 , it follows that 
+
+| det( ˆP (Ω)) | = 1 .
+
+2) Proof of Sufficiency: 
+
+Assume that | det( ˆP (Ω)) | = 1 , and suppose, for contradic-tion, there exists a point e ∈ (Z2 \ { 0}) ∩ E (Ω). From the definition of E(Ω), it follows that ( ˆP (Ω)) −1e ∈ D , where 
+
+( ˆP (Ω)) −1 denotes the inverse of ˆP (Ω). Since ˆP (Ω) is an integer matrix with | det( ˆP (Ω)) | = 1 , ( ˆP (Ω)) −1 must also be an integer matrix. This implies ( ˆP (Ω)) −1e ∈ (Z2 \ { 0}) ∩ D .Due to the fact that D contains no integer point other than the origin, we have found a contradiction, implying that no such 
+
+e exists. Theorem 1 is proved. 12 
+
+APPENDIX CPROOF OF PROPOSITION 2Note that when G ≥ K, (14) is equivalent to 
+
+˜hEve ( ˜Ω, ˜θEve , ˜φEve ) = ˜hEve (Ω, θ Eve , φ Eve ). (41) In the following, we prove the necessary and sufficient parts of Proposition 2. 
+
+1) Proof of Necessity: 
+
+Suppose (41) holds. Then, e−jπ ((˜ xk−˜x1)˜ uEve +(˜ zk −˜z1)˜ vEve ) =
+
+e−jπ (( xk −x1)uEve +( zk −z1)vEve ), ∀k, according to (20). Due to the periodicity of the complex exponential function, it can be then verified that (˜ xk − ˜x1)˜ uEve + (˜ zk − ˜z1)˜ vEve − (xk −
+
+x1)uEve − (zk − z1)vEve is an even integer for all k.
+
+2) Proof of Sufficiency: 
+
+Given uEve , vEve , x(Ω), and z(Ω), suppose there exists an alternative solution of ˜uEve , ˜vEve , ˜x( ˜Ω), and ˜z( ˜Ω) such that 
+
+˜uEve ˜x( ˜Ω) + ˜ vEve ˜z( ˜Ω) = uEve x(Ω) + vEve z(Ω) + 2 k, (42) where k ∈ ZK×1. Using the complex exponential function, (42) can then be written as e−jπ ((˜ xk −˜x1)˜ uEve +(˜ zk −˜z1)˜ vEve ) =
+
+e−jπ (( xk −x1)uEve +( zk −z1)vEve ), ∀k. Note that γEve is un-known. It can be observed that there exists a feasible so-lution of ˜γEve to satisfy ˜γEve e−jπ ((˜ x1−1)˜ uEve +(˜ z1−1)˜ vEve ) =
+
+γEve e−jπ (( x1−1) uEve +( z1−1) vEve ). In this case, we can con-clude that (41) holds according to (20). Proposition 2 is proved. APPENDIX DPROOF OF THEOREM 3We first suppose conditions a), b), and c) on uEve , vEve , and 
+
+Ω in Theorem 3 are satisfied. Given any Ω ∈ Λ, uEve , and 
+
+vEve with 0 < u 2Eve + v2Eve < 1, multiple solutions of ˜uEve ,
+
+˜vEve , and ˜Ω can be easily obtained to satisfy the condition in Proposition 2. For example, there must exist a strategy ˜Ω
+
+such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [ −x(Ω), z(Ω)] . Specifically, it can be explicitly expressed as ˜Ω = ((˜ x1 , ˜z1), (˜ x1 −(x2 −x1), ˜z1 +(z2 − z1)) , . . . , (˜ x1 − (xK − x1), ˜z1 + ( zK − z1))) by selecting a valid reference antenna (˜ x1, ˜z1) within the UPA. Based on Proposition 1 and the fact that Ω ∈ Λ, it is not difficult to see ˜Ω ∈ Λ as well. Given ˜uEve = −uEve and ˜vEve = vEve ,it can then be easily verified that ˜uEve ˜x( ˜Ω) + ˜ vEve ˜z( ˜Ω) −
+
+uEve x(Ω) − vEve z(Ω) = 0. According to (16), this implies that (˜θEve , ˜φEve ) = (θEve , π − φEve ). To summarize, the AOD estimations at Eve inherently include the following eight solutions: 1) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [x(Ω), z(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (uEve , v Eve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( θEve , φ Eve );2) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [−x(Ω), z(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (−uEve , v Eve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( θEve , π − φEve );3) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [x(Ω), −z(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (uEve , −vEve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( −θEve , φ Eve );4) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [−x(Ω), −z(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (−uEve , −vEve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( −θEve , π − φEve );5) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [z(Ω), x(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (vEve , u Eve ), which implies that 
+
+(˜θEve , ˜φEve ) = (arcsin uEve , arccos vEve √1−u2Eve 
+
+);6) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [−z(Ω), x(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (−vEve , u Eve ), which implies that 
+
+(˜θEve , ˜φEve ) = (arcsin uEve , π − arccos vEve √1−u2Eve 
+
+);7) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [z(Ω), −x(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (vEve , −uEve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( − arcsin uEve , arccos vEve √1−u2Eve 
+
+);8) ˜Ω such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [−z(Ω), −x(Ω)] , and 
+
+(˜ uEve , ˜vEve ) = (−vEve , −uEve ), which implies that 
+
+(˜θEve , ˜φEve ) = ( − arcsin uEve , π − arccos vEve √1−u2Eve 
+
+).In this case, the AOD estimations (˜θEve , ˜φEve ) listed above, referred to as AODs 1 to 8, are all distinct. However, if condition c) is satisfied, but condition a) or b) is violated, AODs 1 to 8 numerically collapse to four distinct solutions. Three sub-cases are as follows. If condition c) is satisfied and uEve = 0 , vEve 6 = 0 , which implies that 
+
+φEve = π/ 2, then AOD 1 and AOD 2 collapse to (θEve , π/ 2) ,AOD 3 and AOD 4 collapse to (−θEve , π/ 2) , AOD 5 and AOD 7 collapse to (0 , arccos vEve ), and AOD 6 and AOD 8 collapse to (0 , π − arccos vEve ). Similarly, if condition c) is satisfied and uEve 6 = 0 , vEve = 0 , which implies that θEve = 0 ,then AOD 1 and AOD 3 collapse to (0 , φ Eve ), AOD 2 and AOD 4 collapse to (0 , π − φEve ), AOD 5 and AOD 6 collapse to (arcsin uEve , π/ 2) , and AOD 7 and AOD 8 collapse to 
+
+(− arcsin uEve , π/ 2) . Moreover, if condition c) is satisfied and 
+
+|uEve | = |vEve |, AODs 5 to 8 numerically coincide with AODs 1 to 4, respectively, so that the four distinct AODs can be given by AODs 1 to 4. Finally, if condition c) is violated, there exists no ˜Ω within the given UPA such that [˜ x( ˜Ω), ˜z( ˜Ω)] = [ s1z(Ω), s 2x(Ω)] 
+
+for any s1, s 2 ∈ {− 1, 1}. As a result, AODs 5 to 8 are not valid AOD estimations at Eve, regardless of whether condition a) or b) is satisfied. Note that condition b) does not determine whether AODs 1 to 4 are distinct. In this case, if condition a) is satisfied, AODs 1 to 4 are distinct; otherwise, AODs 1 to 4 collapse to two distinct solutions, as discussed above. Theorem 3 is thus proved. APPENDIX EPROOF OF THEOREM 4By the construction of ˜Λ in (37), given any Ω ∈ ˜Λ, there exist a strategy Ω0 ∈ R , a transformation matrix T 0 ∈ T ,and a signed permutation Π0 ∈ Σ such that 
+
+P (Ω) = P (Ω0)T 0Π0. (43) It is worth noting that the region-covering condition (34) implies a covering multiplicity of at least Q over the region 
+
+R2 \(Z2 \2Z2) due to the periodicity of 2Z2. Therefore, given any w with 0 < ‖w‖2 < 1, define 
+
+w0 = T 0Π0w, (44) and there always exist at least Q pairs of T q ∈ T and nq ∈
+
+2Z2 such that 
+
+∥∥T −1 
+
+> q
+
+(w0 + nq)∥∥2 < 1, q = 1 , . . . , Q. (45) 13 
+
+For each q, because Ω0 ∈ R satisfies at least one of the constraint sets in (35) and (36), there exist a strategy ˜Ωq in the given UPA and a signed permutation Πq ∈ Σ such that 
+
+˜P ( ˜Ωq) = P (Ω0)T q Πq . (46) Since T q ∈ GL(2 , Z) and Ω0 ∈ Λ, it can then be verified that ˜Ωq ∈ Λ based on Proposition 1. Consequently, ˜Ωq ∈ ˜Λ
+
+by the construction of ˜Λ in (37). Next, define 
+
+˜wq = Π−1 
+
+> q
+
+T −1 
+
+> q
+
+(w0 + nq). (47) Due to the fact that Πq ∈ Σ is an orthogonal matrix and using (45), it follows that ‖ ˜wq‖2 = ‖T −1 
+
+> q
+
+(w0 + nq )‖2 < 1.Because ‖w‖2 6 = 0 , it is easy to verify from (44) and (47) that 
+
+‖ ˜wq ‖2 6 = 0 . Hence, ˜wq corresponds to a valid AOD solution. Finally, we have 
+
+˜P ( ˜Ωq) ˜ wq − P (Ω)w (a)
+
+= ˜P ( ˜Ωq ) ˜ wq − P (Ω0)w0(b)
+
+= P (Ω0)T qΠq Π−1 
+
+> q
+
+T −1 
+
+> q
+
+(w0 + nq ) − P (Ω0)w0
+
+= P (Ω0)nq , (48) where (a) is from (43) and (44), and (b) is from (46) and (47). Due to the facts that P (Ω0) is an integer matrix and nq ∈
+
+2Z2, from (48) it follows that ˜P ( ˜Ωq ) ˜ wq − P (Ω)w ∈ 2ZK .According to Proposition 2, this guarantees that the strategy 
+
+˜Ωq and its corresponding AOD ˜wq for each q can lead to Eve’s received signal. Crucially, due to (33), these strategies 
+
+˜Ωq inherently belong to Q distinct strategy groups, including one basic and Q − 1 enhanced. Theorem 4 is thus proved. REFERENCES [1] Y. Zhang, Y. Hu, S. Zhang, J. Cao, and L. Liu, “Transmit antenna selec-tion for preserving 6G localization privacy,” in Proc. IEEE Globecom Workshops (GC Wkshps) , Taipei, Taiwan, Dec. 2025, pp. 1–6. [2] ITU-R, “The ITU-R framework for IMT-2030,” 2023, [Online]. Available: https://www.itu.int/en/ITU-R/study-groups/rsg5/rwp5d/imt-2030/Pages/default.aspx. [3] L. Liu, S. Zhang, and S. Cui, “Leveraging a variety of anchors in cellular network for ubiquitous sensing,” IEEE Commun. Mag. , vol. 62, no. 9, pp. 98–104, Sep. 2024. [4] L. Liu and S. Zhang, “A two-stage radar sensing approach based on MIMO-OFDM technology,” in Proc. IEEE Globecom Workshops (GC Wkshps) , Taipei, Taiwan, Dec. 2020, pp. 1–6. [5] Y. Hu, J. Andrew Zhang, K. Wu, W. Deng, and Y. Jay Guo, “Anchor points assisted uplink sensing in perceptive mobile networks,” IEEE Trans. Commun. , vol. 73, no. 2, pp. 904–920, Feb. 2025. [6] J. A. Zhang, M. L. Rahman, K. Wu, X. Huang, Y. J. Guo, S. Chen, and J. Yuan, “Enabling joint communication and radar sensing in mobile networks—a survey,” IEEE Commun. Surveys Tuts. , vol. 24, no. 1, pp. 306–345, 2022. [7] M. Rahal, B. Denis, M. F. Keskin, B. Uguen, and H. Wymeersch, “Ris-enabled nlos near-field joint position and velocity estimation under user mobility,” IEEE J. Sel. Topics Signal Process. , vol. 18, no. 4, pp. 633– 645, May 2024. [8] J. Gao, W. Zhu, S. Zhang, Y. Wu, J. Cao, G. Caire, and L. Liu, “Integrated massive communication and target localization in 6G cell-free networks,” IEEE Trans. Wireless Commun. , vol. 25, pp. 8498–8515, 2026. [9] Y. Hu, S. Zhang, R. Murch, and L. Liu, “SAR/ISAR imaging in 6G network,” 2026. [Online]. Available: https://arxiv.org/abs/2604.00583 [10] J. Gao, W. Zhu, Y. Hu, S. Zhang, J. Cao, Y. Wu, G. Caire, and L. Liu, “Multi-view imaging in networked sensing systems: A covariance-based approach,” IEEE Trans. Wireless Commun. , vol. 25, pp. 16 761–16 777, 2026. [11] X. Liu, J. Cao, S. Tang, J. Wen, and P. Guo, “Contactless respiration monitoring via off-the-shelf wifi devices,” IEEE Trans. Mob. Comput. ,vol. 15, no. 10, pp. 2466–2479, Oct. 2016. [12] L. Lu, M. Chen, J. Yu, Z. Ba, F. Lin, J. Han, Y. Zhu, and K. Ren, “An imperceptible eavesdropping attack on WiFi sensing systems,” 
+
+IEEE/ACM Trans. Networking , vol. 32, no. 5, pp. 4009–4024, Oct. 2024. [13] X. Yuan, J. Chen, N. Zhang, Q. J. Ye, C. Li, C. Zhu, and X. Sher-man Shen, “Low-cost federated broad learning for privacy-preserved knowledge sharing in the RIS-aided internet of vehicles,” Engineering ,vol. 33, pp. 178–189, Feb. 2024. [14] Z. Li, J. Shi, J. Si, L. Lv, L. Guan, B. Hao, Z. Tie, D. Wang, C. Xing, and T. Q. Quek, “Intelligent covert communication: Recent advances and future research trends,” Engineering , vol. 44, pp. 101–111, Jan. 2025. [15] A. Fascista, A. Coluccia, H. Wymeersch, and G. Seco-Granados, “Millimeter-wave downlink positioning with a single-antenna receiver,” 
+
+IEEE Trans. Wireless Commun. , vol. 18, no. 9, pp. 4479–4490, Sep. 2019. [16] W. Liao and A. Fannjiang, “MUSIC for single-snapshot spectral estima-tion: Stability and super-resolution,” Appl. Comput. Harmon. A. , vol. 40, no. 1, pp. 33–67, Jan. 2016. [17] Y. Wang, L. Sun, and Q. Du, “Multi-antenna signal masking and round-trip transmission for privacy-preserving wireless sensing,” IEEE Trans. Inf. Forensics Security , vol. 19, pp. 6305–6320, 2024. [18] J. Luo, H. Cao, H. Jiang, Y. Yang, and Z. Chen, “MIMOCrypt: Multi-user privacy-preserving Wi-Fi sensing via MIMO encryption,” in Proc. IEEE Symp. Secur. Privacy (SP) , San Francisco, CA, USA, May 2024, pp. 2812–2830. [19] S. M. Hernandez and E. Bulut, “Scheduled spatial sensing against adversarial WiFi sensing,” in Proc. IEEE Int. Conf. Pervasive Comput. Commun. (PerCom) , Atlanta, GA, USA, Mar. 2023, pp. 91–100. [20] X. Meng, J. Zhou, X. Liu, X. Tong, W. Qu, and J. Wang, “Secur-Fi: A secure wireless sensing system based on commercial Wi-Fi devices,” in Proc. IEEE Conf. Comput. Commun. (INFOCOM) , New York City, NY, USA, May 2023, pp. 1–10. [21] V.-L. Nguyen, R.-H. Hwang, B.-C. Cheng, Y.-D. Lin, and T. Q. Duong, “Understanding privacy risks of high-accuracy radio positioning and sensing in wireless networks,” IEEE Commun. Mag. , vol. 62, no. 5, pp. 104–111, May 2024. [22] L. Ghiro, M. Cominelli, F. Gringoli, and R. L. Cigno, “On the imple-mentation of location obfuscation in openwifi and its performance,” in 
+
+2022 20th Mediterranean Communication and Computer Networking Conference (MedComNet) . IEEE, Jun. 2022, pp. 64–73. [23] J. Li and U. Mitra, “Channel state information-free location-privacy enhancement: Fake path injection,” IEEE Trans. Signal Process. , vol. 72, pp. 3745–3760, Aug. 2024. [24] J. Li and U. Mitra, “Channel state information-free location-privacy enhancement: Delay-angle information spoofing,” in Proc. IEEE Int. Conf. Commun. (ICC) , Denver, CO, USA, Jun. 2024, pp. 3767–3772. [25] Y. Zhang, H. Chen, M. F. Keskin, A. Pourafzal, P. Zheng, H. Wymeer-sch, and T. Y. Al-Naffouri, “Privacy preservation in MIMO-OFDM lo-calization systems: A beamforming approach,” IEEE Wireless Commun. Lett. , vol. 14, no. 7, pp. 1979–1983, Jul. 2025. [26] R. Mailloux, Phased Array Antenna Handbook , ser. Artech House antennas and electromagnetics analysis library. Norwood, MA, USA: Artech House, 1994. [27] C. A. Balanis, “Arrays: Linear, planar, and circular,” in Antenna Theory: Analysis and Design . Hoboken, NJ, USA: Wiley, 2005, ch. 6, pp. 290– 398. [28] S. Sanayei and A. Nosratinia, “Antenna selection in MIMO systems,” 
+
+IEEE Commun. Mag. , vol. 42, no. 10, pp. 68–73, Oct. 2004. [29] D. Gore and A. Paulraj, “MIMO antenna subset selection with space-time coding,” IEEE Trans. Signal Process. , vol. 50, no. 10, pp. 2580– 2588, Oct. 2002. [30] E. Basar, M. Wen, R. Mesleh, M. Di Renzo, Y. Xiao, and H. Haas, “Index modulation techniques for next-generation wireless networks,” 
+
+IEEE Access , vol. 5, pp. 16 693–16 746, 2017. [31] K.-K. Wong, A. Shojaeifard, K.-F. Tong, and Y. Zhang, “Fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 1950–1962, Mar. 2021. [32] L. Zhu, W. Ma, and R. Zhang, “Movable antennas for wireless commu-nication: Opportunities and challenges,” IEEE Commun. Mag. , vol. 62, no. 2, pp. 114–120, Jun. 2024. [33] B. Van Veen and K. Buckley, “Beamforming: A versatile approach to spatial filtering,” IEEE ASSP Mag. , vol. 5, no. 2, pp. 4–24, Apr. 1988. [34] M. Bray, D. Werner, D. Boeringer, and D. Machuga, “Optimization of thinned aperiodic linear phased arrays using genetic algorithms to reduce grating lobes during scanning,” IEEE Trans. Antennas Propag. ,vol. 50, no. 12, pp. 1732–1742, Dec. 2002.

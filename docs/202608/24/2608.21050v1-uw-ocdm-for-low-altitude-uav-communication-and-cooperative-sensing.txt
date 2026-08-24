@@ -1,0 +1,1496 @@
+Title: UW-OCDM for Low-Altitude UAV Communication and Cooperative Sensing
+
+URL Source: https://arxiv.org/pdf/2608.21050v1
+
+Published Time: Mon, 24 Aug 2026 00:58:14 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+> 1
+
+# UW-OCDM for Low-Altitude UAV Communication and Cooperative Sensing 
+
+Yi Tao, Zhen Gao, Senior Member, IEEE, Ziwei Wan, Yuezu Lv, Senior Member, IEEE, Hua Wang, Member, IEEE, Kaibin Huang, Fellow, IEEE, and Sheng Chen, Life Fellow, IEEE 
+
+Abstract—Integrated sensing and communications (ISAC) is a key enabler for uncrewed aerial vehicles (UAVs) in the low-altitude economy. This paper proposes an ISAC waveform that embeds a unique word (UW) into orthogonal chirp division multiplexing (OCDM), termed UW-OCDM, together with cor-responding communication reception and cooperative sensing schemes for high-mobility UAV scenarios. For communication, the embedded UW enables timing synchronization and Doppler estimation and compensation without requiring a separate synchronization sequence. A sparse spatio-temporal channel estimation method exploits the common channel support across multiple receive antennas and consecutive UW observations to support reliable data demodulation. For sensing, the de-terministic UW serves as a shared prior that allows dis-tributed base stations to construct sensing dictionaries locally without exchanging random payload symbols in real time. A hierarchical multi-target detection and tracking algorithm integrates direct-path interference suppression, kinematic pre-diction, multi-candidate screening, off-grid refinement, residual verification, and successive interference cancellation for robust localization with reduced search complexity. Simulation results demonstrate reliable communication and localization in highly dynamic UAV scenarios, while the proposed framework retains low-complexity frequency-domain equalization and reduces transmit-reference sharing overhead and multi-static localiza-tion complexity. Index Terms—Integrated sensing and communications, un-crewed aerial vehicles, unique word, orthogonal chirp division multiplexing. 
+
+I. Introduction With advances in fifth-generation (5G) connectivity and low-altitude networking, the low-altitude economy has developed rapidly, with uncrewed aerial vehicles (UAVs) widely deployed in logistics, rescue operations, environmental monitoring, and as aerial base stations (BSs) [1]. As nodes for the upcoming sixth-generation (6G) space-air-ground integrated network [2], [3], UAVs leverage deployment flexibility and line-of-sight (LoS) advantages [4] to extend three-dimensional (3D) coverage and mitigate ground-network coverage blind spots. However, their high-speed mobility introduces severe Doppler shifts and fast time-varying channels, which not only challenge data transmission but also complicate accurate sensing and localization in low-altitude networks [5]. This dual demand on communication and sensing makes integrated sensing and communications (ISAC) a natural framework [6]–[8] for highly dynamic UAV scenarios. Recently, ISAC has emerged as a major focus in both academia and industry [9], [10], aiming to achieve the software and hardware integration of communication and sensing while significantly enhancing spectral efficiency and enabling novel services. In such ground-to-air (GA) scenarios, UAVs are required to support reliable com-munication and high-precision sensing in an integrated manner. However, severe doubly-selective fading shortens channel coherence time, destroys waveform orthogonality, and triggers inter-carrier interference, thereby degrading communication and sensing performance [11], [12]. In the face of rapidly varying doubly-selective channels, independent signal designs for synchronization, channel estimation (CE), demodulation, and localization would not only incur high reference signal overhead but also make the performance of each module difficult to guarantee. Consequently, UAV networks urgently require a waveform architecture or signal prior that can be shared across multiple tasks. Within such a framework, waveform design is funda-mental, since the performance of synchronization, CE, and subsequent sensing depends on the underlying signal structure. Several advanced waveforms have therefore been proposed [13]. Specifically, orthogonal time frequency space (OTFS) [14]–[16] achieves full diversity in the delay-Doppler domain, and its extension, orthogonal delay-Doppler multiplexing (ODDM) [17], further introduces strictly orthogonal basis functions. As a parallel alter-native, affine frequency division multiplexing (AFDM) [18] employs tunable chirp parameters via the discrete affine Fourier transform (DAFT). OTFS and ODDM require higher-complexity two-dimensional delay-Doppler detection or equalization, whereas AFDM requires appro-priate affine parameter configuration [18]. As another can-didate, orthogonal chirp division multiplexing (OCDM) [19] utilizes the discrete Fresnel transform (DFnT) to generate a chirp-based eigenbasis while retaining orthog-onal frequency division multiplexing (OFDM)-like low equalization complexity. More importantly, the quadratic-phase chirp structure of OCDM spreads information sym-bols over orthogonal chirp waveforms with time-varying instantaneous frequencies. This chirp-domain spreading enhances robustness against Doppler-induced interference and helps maintain reliable transmission under the severe time variation encountered in high-mobility UAV channels [12]. Although existing studies demonstrate the feasibility of OCDM-based ISAC [20], its systematic integration with synchronization, CE, and cooperative sensing under severe doubly selective UAV channels remains insufficiently stud-arXiv:2608.21050v1 [eess.SP] 21 Aug 2026 2
+
+ied. Beyond the core waveform, the guard interval (GI) design also plays a pivotal role in enabling joint commu-nication and sensing. Early zero-padding [21] avoids inter-symbol interference (ISI), but its guard interval provides no known reference for receiver processing. The widely adopted cyclic prefix (CP) simplifies frequency-domain equalization (FDE) via data redundancy [22], yet provides limited direct support for synchronization, CE, or sensing. Time-domain synchronous techniques use a known pseudo-random GI for synchronization and CE, but disrupt the cyclic structure and introduce data/sequence interference requiring iterative cancellation [23], [24]. While the chirp periodic prefix aligns naturally with ISAC due to its interference resilience [25], it requires appropriate configu-ration of prefix length and chirp parameters. In contrast, the unique word (UW) design [26] preserves the circular convolution structure required for low-complexity FDE, while its deterministic nature and favorable correlation properties make it attractive for synchronization, Doppler tracking, and CE. This also makes the UW a promising shared prior for cooperative sensing in highly dynamic environments. Building on this shared prior, the communication wave-form itself can be further exploited for high-precision localization in ISAC systems [27]. While early monos-tatic architectures suffer from limited accuracy and weak anti-interference capability [28], multi-static cooperative schemes significantly improve localization reliability and coverage [29]. Among algorithms, conventional time differ-ence of arrival (TDOA) localization [30] relies on accurate inter-station synchronization [31], whereas angle of ar-rival (AOA) localization requires reliable angle estimation and array-orientation knowledge [32]. To avoid explicit TDOA/AOA extraction and fusion, compressive sensing (CS) exploits target sparsity to achieve high-resolution and noise-resilient localization [33]. However, payload symbols are random and not naturally available as acommon sensing reference at spatially separated BSs, so data-bearing multi-static sensing may require additional signaling for consistent reference reconstruction [34]. In contrast, the deterministic UW is known a priori and locally reconstructible at all BSs, enabling lightweight cooperative localization without exchanging instantaneous payload symbols [35]. A. Contributions To provide reliable communication and high-precision sensing for low-altitude networks, we propose a UW-OCDM ISAC framework. The UW supports synchroniza-tion, Doppler compensation, and CE for communication reception, while serving as a deterministic shared reference for multi-static cooperative sensing with reduced transmit-reference sharing overhead. The main contributions are summarized as follows.  
+
+> •
+
+UW-OCDM ISAC Waveform Design: For UAV net-works, we propose a novel ISAC waveform by em-bedding a deterministic UW sequence into OCDM symbols. Owing to its quadratic-phase chirp struc-ture, OCDM provides improved Doppler robustness over conventional OFDM in high-mobility channels. Meanwhile, the deterministic UW serves as a shared signal reference that can be reused across multiple communication and sensing operations within the proposed framework.  
+
+> •
+
+UW-Assisted Time Synchronization, Doppler Com-pensation, CE, and FDE: Building on the proposed waveform, we develop a UAV receiver framework to overcome severe doubly-selective fading. The UW first enables timing synchronization via sliding cross-correlation. The phase differences between sepa-rated ISI-free UW segments are then jointly ex-ploited to estimate and compensate for the dominant Doppler shift, completing the time-frequency align-ment. Furthermore, by exploiting the spatio-temporal (ST) joint sparsity of multiple-input multiple-output (MIMO) GA channels, we formulate a multiple mea-surement vector (MMV) CS model. A joint CE method employing MMV-based orthogonal matching pursuit (MMV-OMP) estimates the channel impulse response (CIR) for each transmit-receive link, while the UW preserves the circular convolution structure that enables low-complexity FDE and data recovery.  
+
+> •
+
+Multi-Static Cooperative Localization for UAV Sens-ing: We further propose a low-overhead cooperative localization architecture across multiple BSs. Dis-tributed BSs locally construct sensing dictionaries using the known UW sequence and system parameters without real-time sharing of payload-dependent trans-mit references, thereby reducing real-time transmit-reference sharing overhead. Moreover, after direct-path interference (DPI) suppression, we develop a ro-bust off-grid hierarchical UAV detection and tracking algorithm. By integrating kinematic prediction, non-maximum suppression (NMS)-based multi-candidate coarse screening, adaptive region-of-interest (ROI) expansion, off-grid refinement, residual verification, and successive interference cancellation (SIC), the proposed localization method improves robustness while reducing search complexity. Notations: Boldface lowercase and uppercase letters denote column vectors and matrices, respectively, while calligraphic letters denote sets. R and C are the real and complex domains, and ȷ = √−1. (·)T , (·)∗, (·)H , and (·)−1
+
+denote the transpose, conjugate, conjugate transpose, and inverse, respectively. A hat denotes an estimate, while 
+
+(·)⋆ denotes an optimizer. ⟨a⟩2 denotes the remainder of a modulo 2. rect( x) equals 1 for x ∈ [0 , 1) and 0
+
+otherwise. |S| denotes the cardinality of set S, and |x|
+
+denotes the magnitude of scalar x. For a vector, | · | and 
+
+∠(·) operate elementwise. For indexing, a[n] and A[m, n ]
+
+are the n-th and (m, n )-th entries of vector a and matrix 
+
+A, respectively. A[I, :] and A[: , I] denote the submatrices with rows and columns indexed by I, respectively, and 
+
+a[I] is the corresponding subvector. ∥ · ∥ 2 is the ℓ2 norm. 3BS-2  BS-3     
+
+> BS-A
+> BS-1
+> UAV
+> Direct Path from BS-A to UAV
+> Reflect Path from UAV to BS-A
+> Scatter Path from BS-A to Other BS
+> Di rect Path Interference
+> Direct Path from BS-A to UAV Reflect Path from UAV to BS-A Scatter Path from BS-A to Other BS Di rect Path Interference
+> Fig. 1. Illustration of the proposed joint communication and multi-static cooperative sensing for the low-altitude UAV.
+
+IN is the N × N identity matrix. FN is the normalized unitary N × N discrete Fourier transform (DFT) matrix, so F−1 
+
+> N
+
+= FHN . δ[·] is the Kronecker delta. N (μ, σ 2)
+
+and CN (μ, σ 2) denote the real Gaussian and circularly symmetric complex Gaussian distributions, respectively. 
+
+Re {·} extracts the real part, and diag {·} constructs a diagonal matrix. c and λ denote the speed of light and carrier wavelength, respectively. ⊙ and ⊗ denote the Hadamard and Kronecker products, respectively. O(·) is the big-O notation. II. System Model As shown in Fig. 1, the primary BS (BS-A) transmits to a communication UAV, which may also act as asensing target, while BS-A and distributed BSs capture the UAV echoes for cooperative sensing. In this section, we first describe the doubly-selective MIMO GA downlink channel, then construct the corresponding multi-static sensing architecture. A. Doubly Selective MIMO Ground-to-Air Channel Mod-eling To fully capture the Doppler-induced fast time-variation and multipath-induced frequency selectivity in the highly dynamic UAV downlink [5] [36] (i.e., the blue BS-A-to-UAV link in Fig. 1), this subsection establishes adoubly-selective MIMO GA channel model. Consider a system where the BS-A is equipped with N (A) tx transmit antennas and the UAV is equipped with N (U) rx receive antennas. Let xt[nabs ] denote the sample at absolute index nabs of the continuous discrete time-domain ISAC transmit stream from the t-th antenna of BS-A, where 
+
+t ∈ { 1, . . . , N (A) tx }. Following digital-to-analog conversion and wireless propagation, the signal captured by the r-th UAV antenna for r ∈ { 1, . . . , N (U) rx } is formulated as 
+
+yr [nabs ] =  
+
+> N(A) tx
+
+∑
+
+> t=1
+> Lmax −1
+
+∑
+
+> l=0
+
+hr,t [nabs , l ]xt[nabs − l] + wr [nabs ],
+
+(1) where hr,t [nabs , l ] denotes the time-varying discrete CIR from the t-th transmit antenna to the r-th receive antenna at nabs and delay tap l ∈ {0, . . . , L max − 1}. Here, 
+
+Lmax represents the maximum number of delay taps, and 
+
+wr [nabs ] ∼ CN (0 , σ 2
+
+> w
+
+) is the additive white Gaussian noise. Since typical GA scenarios feature a dominant LoS path and weaker non-line-of-sight (NLoS) components [37]–[39], we model the MIMO GA channel as a wideband Rician fading process. Specifically, H[nabs , l ] ∈ CN (U) rx ×N (A) tx is the complete time-varying discrete baseband CIR matrix, where its (r, t )-th element is hr,t [nabs , l ]. With both the transmitter and receiver equipped with uniform linear arrays (ULAs), the LoS-dominated propagation character-istics [40], [41] allow H[nabs , l ] to be modeled as 
+
+H[nabs , l ] = 
+
+√ KRi 
+
+KRi + 1 HLoS [nabs , l ]+
+
+√ 1
+
+KRi + 1 HNLoS [nabs , l ],
+
+(2) where KRi denotes the Rician K-factor. The deterministic LoS matrix component is expressed as 
+
+HLoS [nabs , l ] = a(U) rx (θLoS rx )
+
+(
+
+a(A) tx (θLoS tx )
+
+)H
+
+× eȷ2πf D,LoS nabs Ts δ[l],
+
+(3) where a(U) rx (·) ∈ CN (U) rx ×1 and a(A) tx (·) ∈ CN (A) tx ×1 denote the steering vectors at the UAV receiver and BS-A transmitter, respectively. Here, θLoS rx and θLoS tx denote the LoS angles of arrival and departure, respectively, while δ[l] sets its delay to zero. fD,LoS represents the Doppler shift associated with the LoS path, and Ts is the discrete sampling interval. Thus, the LoS term captures the spatial response and Doppler evolution. The NLoS component, constituted by 
+
+Npath sparse scattering paths, can be modeled as 
+
+HNLoS [nabs , l ] = 
+
+> Npath
+
+∑
+
+> ι=1
+
+βιa(U) rx (θrx  
+
+> ι
+
+)
+
+(
+
+a(A) tx (θtx  
+
+> ι
+
+)
+
+)H
+
+× eȷ2πf D  
+
+> ιnabs Ts
+
+δ[l − lι],
+
+(4) where θrx  
+
+> ι
+
+and θtx  
+
+> ι
+
+are the arrival and departure angles of path ι, respectively, and βι ∼ CN (0 , σ 2 
+
+> ι
+
+) denotes the complex Gaussian random fading gain with σ2 
+
+> ι
+
+repre-senting its average power. Furthermore, f D 
+
+> ι
+
+represents the Doppler shift induced by the ι-th NLoS path, and 
+
+lι ∈ { 0, . . . , L max −1} is the discrete delay index associated with the ι-th NLoS path. B. Multi-Static Cooperative Sensing Model As illustrated in Fig. 1, BS-A transmits a downlink signal that also illuminates the UAV targets [42], [43]. The communication UAV may be included among these targets, while the remaining sensed UAVs need not be communication terminals. Their scattered echoes are re-ceived by BS-A, equipped with an N (A) rx -element ULA, and I distributed receiving BSs, each using a single omnidirectional antenna. Let i ∈ {1, . . . , I } index the distributed receiving BSs and define I = {A, 1, . . . , I },where i′ ∈ I indexes any sensing BS. For the q-th UAV target with q ∈ { 1, . . . , Q }, let pq = [ xq , y q , z q ]T denote its three-dimensional Cartesian position, where xq , yq , and zq
+
+are its coordinates along the three spatial axes. pA and 
+
+pi denote the coordinates of BS-A and distributed BS i,40 TTime -B 0BFrequency 0 TTime -B -B/2 0B/2 BFrequency 
+
+> Fig. 2. Time-frequency representation of the OCDM sub-chirps.
+
+respectively. The monostatic round-trip distance between BS-A and target q is represented as 
+
+RA(pq ) = 2 ∥pq − pA∥2. (5) For distributed BS i, the bistatic distance from BS-A to target q and then to receiving BS i is represented as 
+
+Ri(pq ) = ∥pq − pA∥2 + ∥pq − pi∥2. (6) The corresponding sample-domain delay is shown as 
+
+τi′ (pq ) = Ri′ (pq )fs
+
+c , (7) where fs is the sampling rate. Let ω(pq ) denote the target bearing relative to the BS-A array. When target 
+
+q is the communication UAV, ω(pq ) = θLoS tx under the same BS-A angular convention. Each sensing observation contains the superposed target echoes, the strong direct-path component, and receiver noise [44]. At each single-antenna distributed BS i, the target response is character-ized primarily by the bistatic delay τi(pq ). In contrast, the N (A) rx -antenna BS-A preserves both the monostatic delay τA(pq ) and the array spatial response associated with ω(pq ). Unless otherwise specified, the cooperative BSs are assumed to share a common timing reference [45], [46]. These delay and spatial signatures provide the measurement basis for the cooperative localization model developed in Section V. III. Proposed UW-OCDM ISAC Waveform To address the communication and sensing requirements formulated in Section II, this section introduces the OCDM modulation principles and develops the proposed UW-OCDM. A. OCDM Preliminaries OCDM is a multi-carrier modulation scheme based on the Fresnel transform [19]. Its core principle lies in utilizing a set of mutually orthogonal linear frequency modulation (chirp) signals to carry data [47], [48]. For an OCDM symbol with N orthogonal chirp subcarriers (which can also be called sub-chirps), where m denotes the sub-chirp index, the m-th time-domain analog sub-chirp signal ψm(˜ t)
+
+is given by 
+
+ψm(˜ t) = rect(˜ t/T )eȷ π 
+
+> 4
+
+e−ȷπ NT 2 (˜t− mN T )2
+
+, (8) where ˜t denotes the continuous-time variable and T
+
+denotes the duration of an OCDM symbol. Owing to the staggered instantaneous frequencies of the individual DATA UW DATA UW DATA           
+
+> OCDM Symbol
+> DATA CP1 CP2
+> OCDM/OTFS/OFDM Symbol copy copy
+> Fig. 3. Transmit data structure comparison: the proposed UW-OCDM and CP-OCDM, CP-OTFS, or CP-OFDM.
+
+sub-chirps, the total bandwidth of the synthesized analog OCDM signal, comprising N continuous sub-chirps, spans from −B to B, where B = N/T , as depicted in Fig. 2. Specifically, the lines with distinct colors and styles represent different orthogonal sub-chirps corresponding to distinct m. For practical digital implementations, the sampling rate is set to fs = N/T , with a discrete sampling interval of Ts = T /N . As illustrated in Fig. 2, due to the spectral folding effect [19], the baseband sub-chirps are naturally confined to the interval [−B/ 2, B/ 2) to satisfy bandwidth constraints. Consequently, the OCDM modu-lation can be formulated as a discrete-time process using DFnT, and the DFnT matrix Λ ∈ CN ×N is expressed as 
+
+Λ[n, m ] = 1
+
+√N e−ȷ π 
+
+> 4
+
+×
+
+{
+
+eȷ πN (n−m)2
+
+, ⟨N ⟩2 = 0 
+
+eȷ πN (n−m+ 12 )2
+
+, ⟨N ⟩2 = 1 , (9) where m, n ∈ { 0, . . . , N − 1}. For simplicity, the following discussion focuses on the case where ⟨N ⟩2 = 0 .Specifically, for the t-th transmit antenna, N modulated symbols are first grouped to construct the Fresnel-domain vector st = [ st[0] , s t[1] , . . . , s t[N − 1]] T ∈ CN ×1. Through uniform discrete sampling, the discrete-time OCDM signal 
+
+xt is derived as 
+
+xt [n] = 1
+
+√N 
+
+> N−1
+
+∑
+
+> m=0
+
+st[m]ψm
+
+(
+
+n TN
+
+)
+
+= 1
+
+√N eȷ π 
+
+> 4
+> N−1
+
+∑
+
+> m=0
+
+st[m]e−ȷ πN (n−m)2
+
+,
+
+(10) which effectively aligns with the definition of the inverse discrete Fresnel transform (IDFnT) ΛH . Consequently, the discrete time-domain OCDM symbol xt for the t-th transmit antenna can be formulated as 
+
+xt = ΛH st. (11) B. Proposed UW-OCDM Waveform Design To fulfill the dual requirements of communication and sensing in Section II, a novel UW-OCDM waveform design is proposed. As illustrated in Fig. 3, CP-OCDM mitigates ISI by prepending a data-dependent CP to the beginning of each symbol [49]. In contrast, for the t-th transmit antenna, the tail of the discrete time-domain UW-OCDM symbol is replaced by a deterministic UW sequence ut ∈
+
+CNUW ×1, where NUW is the time-domain UW sequence length. In this paper, a unit-power quadrature phase shift 5     
+
+> Fig. 4. The proposed UW-OCDM symbol structure for N= 2048 ,
+> NUW = 256 ,Ng= 384 . UW is a unit-power quadrature phase shift keying-modulated sequence.
+
+keying (QPSK) sequence 1 is adopted as the UW. The UW is embedded by reserving a subset of resources in the Fresnel domain. The complete sub-chirp index set 
+
+{0, . . . , N − 1} is partitioned into the data index set Id
+
+for allocating the data payload and the UW-generating index set Ig reserved for UW construction. The number of allocated UW-generating sub-chirps Ng ≥ NUW . Conse-quently, the cardinalities of the corresponding index sets are defined as |I d| = Nd = N − Ng and |I g| = Ng. As depicted in Fig. 4, these UW-generating sub-chirps are uniformly interleaved with the data sub-chirps within the Fresnel domain, which produces a distinct time-domain signal structure characterized by a random data payload followed by a deterministic UW. Based on this subset partition, the signal vector st can be naturally decomposed into an effective data vector dt = st[Id] ∈ CNd×1 and an undetermined UW-generating vector gt = st[Ig] ∈ CNg ×1.To satisfy the time-domain tail constraint of the UW, the last NUW samples of xt must exactly match ut. There-fore, let Itail = {N − NUW , . . . , N − 1} denote the index set of the tail rows. We extract the corresponding rows from ΛH to define the tail submatrix ˜Λtail = ΛH [Itail , :] ∈ CNUW ×N , which is further partitioned column-wise into a data block ˜Λtail ,d = ˜Λtail [: , Id] ∈ CNUW ×Nd and a UW-generating block ˜Λtail ,g = ˜Λtail [: , Ig] ∈ CNUW ×Ng .Accordingly, the UW constraint for the t-th antenna can be formulated as 
+
+ut = ˜Λtail ,ddt + ˜Λtail ,ggt. (12) By defining bt = ut − ˜Λtail ,ddt, the UW generation is transformed into solving ˜Λtail ,ggt = bt. Given that 
+
+Ng ≥ NUW , the matrix ˜Λtail ,g has more columns than 
+
+> 1The UW is not restricted to QPSK. Other deterministic sequences may be used if known to both ends and compatible with the UW-generation constraint. QPSK is a practical constant-modulus choice providing reliable aperiodic timing and multi-antenna separation under the adopted receiver. Other sequences require joint design of correlation properties and antenna assignments.
+
+rows. Consequently, the optimal UW-generating vector g⋆t
+
+is determined by finding the minimum ℓ2-norm solution, which is efficiently computed via the right Moore-Penrose pseudoinverse, yielding the closed-form expression 
+
+g⋆t = ˜ΛH
+
+> tail ,g
+
+( ˜Λtail ,g ˜ΛH
+
+> tail ,g
+
+)−1bt. (13) Finally, by mapping g⋆t back to its corresponding UW-generating index positions and multiplexing it with the data vector dt, xt that satisfies the UW constraint is generated. C. Implementation Considerations Computational Complexity: The UW sequence ut is pre-designed, while the pseudoinverse in (13) is only used to determine g⋆t . Since ˜Λtail ,g depends only on N , NUW , Itail ,and Ig, rather than on the channel or UAV mobility, its pseudoinverse is computed once offline and stored at the transmitter with complexity O(N 2UW Ng + N 3UW ). Online generation uses a fast IDFnT and the stored pseudoinverse with per-antenna and per-symbol complexity O(N log N +
+
+NgNUW ), without any matrix inversion or pseudoinverse update. Resource Trade-off: The choices of NUW and Ng jointly determine the processing gain and communication effi-ciency. Increasing NUW enlarges the ISI-free observation window, but may require a larger Ng to maintain feasible and well-conditioned UW synthesis. A larger Ng provides more synthesis freedom but leaves fewer data-bearing sub-chirps, thereby reducing net spectral efficiency. Peak-to-Average Power Ratio (PAPR) Considerations: UW-OCDM is generated and transmitted by BS-A, while the UAV acts as the communication receiver and illu-minated sensing target. Therefore, PAPR handling and power-amplifier (PA) linearization are performed in the BS-A transmit chain. OCDM generally exhibits PAPR characteristics comparable to those of OFDM [19]. Input power backoff and digital predistortion can mitigate PA nonlinear distortion in the BS-A transmit chain [50]. Clipping can reduce waveform peaks, while filtering limits the resulting out-of-band spectral regrowth. The clipping level must be selected to limit distortion of the deter-ministic UW. The deterministic UW constraint can alter PAPR relative to an unconstrained data tail. PAPR-aware generator-matrix optimization developed for related UW waveforms offers a relevant future extension [51]. IV. UW-Assisted Receiver Processing The UW is exploited at the receiver for timing synchro-nization and Doppler compensation. Based on the aligned observations, this section further develops ST joint CE, low-complexity FDE, and data demodulation [52]. A. UW-Assisted Timing Synchronization Although the delay taps in Section II are indexed relative to the dominant LoS arrival, the absolute arrival position of each UW-OCDM symbol in the continuous received stream remains unknown. To distinguish the UW contributions during synchronization, the N (A) tx transmit 6DATA UW DATA UW 
+
+> OCDM Symbol UW Sliding
+> Correlation
+> Synchronization Point Transmit
+> Receive
+> Fig. 5. Illustration of the UW-based sliding cross-correlation synchro-nization.
+
+antennas are assigned ut with low pairwise aperiodic cross-correlation and low autocorrelation sidelobes. The sliding-correlation synchronizer assumes that the channel remains approximately quasi-static within one UW. Under the LoS-dominated GA channel with static scatterers, the path-wise Doppler magnitude is bounded by fD,max = vmax fc/c ,and the corresponding phase drift over TUW = NUW Ts is 
+
+∆ϕmax = 2 πf D,max TUW . For fc = 5 GHz, fs = 40 MHz, 
+
+NUW = 256 , and vmax = 150 km/h, we obtain TUW =6.4 μs, fD,max ≈ 694 .4 Hz, and ∆ϕmax ≈ 0.028 rad. This small phase drift, together with the slowly varying path delays and amplitudes over this short interval, supports the quasi-static approximation used for UW correlation. As illustrated in Fig. 5, let ℓsyn denote a candidate starting index of the received UW window. The receiver evaluates the multi-antenna timing statistic as 
+
+C[ℓsyn ] =  
+
+> N(U) rx
+
+∑ 
+
+> r=1
+> N(A) tx
+
+∑
+
+> t=1
+
+∣∣∣∣∣∣ 
+
+> NUW −1
+
+∑
+
+> g′=0
+
+yr [ℓsyn + g′]u∗ 
+
+> t
+
+[g′]
+
+∣∣∣∣∣∣
+
+> 2
+
+, (14) which noncoherently accumulates the correlation energies across receive antennas and UWs. The strongest valid peak in C[ℓsyn ] is associated with the dominant-path UW arrival. Its sample-level starting index is estimated as 
+
+ˆℓUW = arg max 
+
+> ℓsyn
+
+C[ℓsyn ]. (15) The timing decision is accepted only when C[ˆℓUW ] ≥ γsyn .Therefore, the estimated starting index of the UW-OCDM symbol is represented as 
+
+ˆℓstart = ˆℓUW − (N − NUW ). (16) In Section II, nabs denotes the absolute sample index. After alignment, b ∈ { 0, 1, . . . } indexes the aligned UW-OCDM symbols, with nabs (b, n ) ≜ ˆℓstart +bN +n denoting the corresponding absolute index. The aligned samples are thus given by yr,b [n] ≜ yr [nabs (b, n )] , where consecutive UW observations are extracted for Doppler estimation. B. UW-Assisted Doppler Mitigation Following timing synchronization, the receiver selects 
+
+Xnum UWs indexed by χ ∈ { 0, . . . , X num − 1}, separated by D symbol intervals. Taking the first aligned symbol as the observation origin, bχ ≜ χD denotes the index of the aligned UW-OCDM symbol containing the χ-th selected UW. As shown in Fig. 6, the first Lmax 
+
+UW samples affected by data-induced ISI are discarded, leaving G = NUW − Lmax clean samples for each UW. Let yUW  
+
+> r,χ
+
+≜ [yr,b χ [N − NUW ], . . . , y r,b χ [N − 1]] T be the DATA  UW   
+
+> DATA UW
+> DATA UW
+> CIR
+> ISI -Free
+> Observation Window
+
+Lₘₐₓ 
+
+Lₘₐₓ 
+
+G  
+
+> Fig. 6. Illustration of the multipath delay spread effect and the construction of the ISI-free observation window. The maximum delay spread Lmax dictates the discarded portion of the UW to avoid data-induced ISI.
+
+NUW -sample UW observation. The ISI-free segment is 
+
+¯ur,χ ≜ TG{yUW  
+
+> r,χ
+
+} ∈ CG×1, where TG{·} retains its last 
+
+G entries and g ∈ { 0, . . . , G − 1} indexes the resulting samples. Since each BS-A transmit antenna repeats its assigned UW and the propagation response remains approximately unchanged over the span (Xnum − 1) DN T s, corresponding samples in adjacent observations differ primarily by the common LoS Doppler-induced phase rotation. Therefore, the pairwise Doppler-induced phase rotation can be for-mulated as 
+
+¯ur,χ +1 [g] ≈ ¯ur,χ [g]eȷφ + νr,χ [g], (17) where φ ≜ 2πf D,LoS DN T s denotes the accumulated phase difference between two adjacent UW observations, and 
+
+νr,χ [g] denotes the effective pairwise disturbance. Under the adopted independent and identically distributed com-plex Gaussian approximation, νr,χ [g] ∼ CN (0 , σ 2 
+
+> ν
+
+), while 
+
+φ is common to all antennas, UW pairs, and samples. Under this conditional pairwise model, the maximum-likelihood (ML) estimation of φ is obtained by minimizing the negative log-likelihood over all observations, which is equivalently 
+
+ˆφML = arg min 
+
+> φXnum −2
+
+∑ 
+
+> χ=0
+> N(U) rx
+
+∑
+
+> r=1
+> G−1
+
+∑
+
+> g=0
+
+|¯ur,χ +1 [g] − ¯ur,χ [g]eȷφ |2
+
+= arg max  
+
+> φ
+
+Re 
+
+
+
+> Xnum −2
+
+∑ 
+
+> χ=0
+> N(U) rx
+
+∑
+
+> r=1
+> G−1
+
+∑
+
+> g=0
+
+¯ur,χ +1 [g]¯ u∗
+
+> r,χ
+
+[g]e−ȷφ 
+
+ .
+
+(18) The global cross-correlation statistic is defined as 
+
+ρglobal =
+
+> Xnum −2
+
+∑ 
+
+> χ=0
+> N(U) rx
+
+∑
+
+> r=1
+> G−1
+
+∑
+
+> g=0
+
+¯ur,χ +1 [g] (¯ ur,χ [g]) ∗ . (19) With this coherently accumulated correlation statistic, the problem reduces to 
+
+ˆφML = arg max  
+
+> φ
+
+Re {ρglobal e−ȷφ } . (20) Writing ρglobal = |ρglobal |eȷ∠ρglobal , we can obtain 
+
+Re {ρglobal e−ȷφ } = |ρglobal | cos( ∠ρglobal − φ), which is maximized when φ = ∠ρglobal (mod 2π). Hence, under the adopted model, ∠ρglobal is the maximum-likelihood estimate of the accumulated phase difference, and the 7
+
+Doppler frequency offset is estimated as 
+
+ˆfD = ∠ρglobal 
+
+2πDN T s
+
+. (21) It is worth noting that while increasing Xnum enhances noise suppression through more accumulation, the maxi-mum Doppler estimation range is governed solely by the single-step interval. Since ∠(·) is defined modulo 2π, the accumulated phase must satisfy 2πf D,max DN T s < π to prevent phase ambiguity. Once ˆfD is obtained, the receiver de-rotates each symbol using the relative sample position bN + n = nabs (b, n ) −
+
+ˆℓstart . The compensated received signal is formulated as 
+
+˜yr,b [n] = yr,b [n]e−ȷ2π ˆfD(bN +n)Ts . (22) Similarly, let ˜yUW  
+
+> r,χ
+
+≜ [˜ yr,b χ [N − NUW ], . . . , ˜yr,b χ [N − 1]] T .The corresponding ISI-free segment ˜ur,χ ≜ TG{˜yUW  
+
+> r,χ
+
+} is passed to the subsequent ST joint CE. C. MMV-OMP-Based Joint Channel Estimation In the proposed MIMO UW-OCDM, the GA multipath channel exhibits inherent sparsity [53]. Furthermore, the physical propagation environment dictates that the multi-path delays remain virtually invariant across the receive antennas [41] and consecutive UW-OCDM symbols, even though their complex path gains may vary. To fully exploit this joint ST sparsity, we formulate the CE as an MMV CS problem [54]. Specifically, to fully exploit the correlation across the entire observation duration, we construct a global UW observation U ∈ CG×N (U) rx Xnum by concatenating all the Doppler-compensated ISI-free UW segments ˜ur,χ for all N (U) rx antennas, represented as 
+
+U =
+
+[
+
+˜u1,0, . . . , ˜u1,X num −1, . . . , ˜uN (U) rx ,0, . . . , ˜uN (U) rx ,X num −1
+
+]
+
+.
+
+(23) The reference UW matrix Ψ ∈ CG×N (A) tx Lmax is constructed by horizontally concatenating the antenna-specific UW convolution submatrices as Ψ = [ Ψ1, . . . , ΨN (A) tx 
+
+], where 
+
+Ψt ∈ CG×Lmax is Toeplitz and its (g, l )-th element is 
+
+[Ψt]g,l = ut[Lmax +g−l]. Accordingly, column (t−1) Lmax +
+
+l of Ψ corresponds to delay tap l of transmit antenna t.Therefore, the MMV CS problem can be expressed as 
+
+U = ΨH all + W, (24) where Hall ∈ CN (A) tx Lmax ×N (U) rx Xnum is the row-sparse channel coefficient matrix to be estimated, and 
+
+W collects effective noise and residual modeling errors. To relate the CE model to the CIR in Section II, define the Doppler-compensated CIR as 
+
+˜hr,t,b [n, l ] ≜ hr,t [nabs (b, n ), l ]e−ȷ2π ˆfD(bN +n)Ts . The phase referenced to ˆℓstart is constant over the aligned symbols and is absorbed into the estimated CIR. Over the ISI-free UW window, ˜hr,t,b χ [N − NUW + Lmax + g, l ] ≈ hr,t,χ [l].Accordingly, hr,t,χ = [hr,t,χ [0] , . . . , h r,t,χ [Lmax − 1] ]T ∈
+
+CLmax ×1 denotes the local CIR snapshot. By concatenating hr,t,χ , the composite vector 
+
+hr,χ = [hTr, 1,χ , hTr, 2,χ , . . . , hTr,N (A) tx ,χ 
+
+]T ∈ CN (A) tx Lmax ×1 is obtained. Consequently, Hall can be represented as Hall =[
+
+h1,0, . . . , h1,X num −1, . . . , hN (U) rx ,0, . . . , hN (U) rx ,X num −1
+
+]
+
+.Although the complex path gains may vary across antennas and UWs, the physical path delays remain approximately common over the considered observation duration. Hence, the columns of Hall share the same nonzero row support, exhibiting joint row-sparsity. To resolve this problem, we employ MMV-OMP to identify the joint support set and subsequently obtain the estimate 
+
+ˆHall .Finally, for each adjacent pair, the estimates ˆhr,χ and 
+
+ˆhr,χ +1 are phase-aligned to form a CIR estimate as 
+
+∆θ = ∠
+
+((ˆhr,χ 
+
+)∗ ⊙ ˆhr,χ +1 
+
+)
+
+, (25) 
+
+ˆhavg  
+
+> r,χ
+
+= 12
+
+(∣∣ˆhr,χ 
+
+∣∣ + ∣∣ˆhr,χ +1 
+
+∣∣)
+
+⊙ eȷ(∠ˆhr,χ + ∆θ 
+
+> 2
+
+). (26) D. Frequency-Domain Equalization and Data Demodula-tion For the χ-th UW pair, define Dχ ≜ {bχ + 1 , . . . , b χ+1 }.Under the quasi-static approximation, for a fixed b ∈ D χ,let ˆhavg  
+
+> r,χ
+
+= [(ˆhavg 
+
+> r, 1,χ
+
+)T , . . . , (ˆhavg   
+
+> r,N (A) tx ,χ
+
+)T ]T ∈ CN (A) tx Lmax ×1,where ˆhavg  
+
+> r,t,χ
+
+denotes the representative CIR for the t-th transmit antenna obtained from the χ-th UW pair. For notational simplicity, b and χ are omitted below when unambiguous. The receiver then performs FDE and data demodulation. In a continuous transmission stream, for each transmit antenna, the tail of every UW-OCDM symbol is constrained to the same UW. Provided that 
+
+NUW ≥ Lmax , the ISI originating from the preceding symbol’s UW is equivalent to the current symbol’s own tail UW cyclically wrapping around to its leading edge. Under the post-compensation symbol-wise quasi-static approximation, this CP-equivalent property allows the time-domain linear convolution to be represented as an N -point circular convolution, which enables low-complexity single-tap FDE [55] 2. Therefore, the equivalent frequency-domain MIMO channel matrix ˆHfreq [m] ∈ CN (U) rx ×N (A) tx for the m-th frequency bin is constructed, with its (r, t )-th element given by 
+
+ˆhfreq  
+
+> r,t
+
+[m] = 
+
+> Lmax −1
+
+∑
+
+> l=0
+
+ˆhavg  
+
+> r,t
+
+[l] · e−ȷ 2πN ml . (27) Concurrently, the compensated samples of the current aligned symbol are stacked as ˜yr,b ≜ [˜ yr,b [0] , . . . , ˜yr,b [N −
+
+1]] T ∈ CN ×1. For brevity, let ˜yr ≜ ˜yr,b . It is converted via yfreq  
+
+> r
+
+= FN ˜yr . By extracting the m-th frequency-bin components across all N (U) rx antennas, the observation vector is formulated as yfreq [m] =
+
+[yfreq 1 [m], y freq 2 [m], . . . , y freq  
+
+> N(U) rx
+
+[m]]T ∈ CN (U) rx ×1. In this pa-per, the minimum mean square error (MMSE) equalizer      
+
+> 2The low-complexity here refers to the equalization stage. The inverse DFT and DFnT retain O(Nlog N)transform complexity. The total receiver complexity is nevertheless higher than that of least-squares (LS)-based CP-OFDM mainly because MMV-OMP CE requires iterative dictionary correlations and support-restricted LS updates to exploit the common sparse support across antennas and UWs for improved CE accuracy. 8
+
+is employed. The equalization weight matrix WMMSE [m] ∈
+
+CN (A) tx ×N (U) rx for the m-th frequency bin is represented as 
+
+WMMSE [m] = 
+
+( ˆHH
+
+> freq
+
+[m] ˆHfreq [m] + σ2
+
+> w
+
+IN (A) tx 
+
+)−1 ˆHH
+
+> freq
+
+[m],
+
+(28) where σ2 
+
+> w
+
+is the noise variance. Consequently, the frequency-domain signal is then equalized by 
+
+ˆxfreq [m] = WMMSE [m]yfreq [m], (29) where ˆxfreq [m] ∈ CN (A) tx ×1 represents the equalized vector for all transmit antennas at the m-th frequency bin. For the t-th transmit antenna, the receiver extracts the corresponding element from ˆxfreq [m] across each frequency bin and concatenates them vertically in frequency order. Therefore, ˆxfreq  
+
+> t
+
+∈ CN ×1 can be obtained, which is then transformed back to the time-domain via an N -point inverse DFT and subsequently decoupled by the DFnT matrix Λ to recover the Fresnel-domain symbol vector 
+
+ˆst ∈ CN ×1, formulated as 
+
+ˆst = ΛF HN ˆxfreq  
+
+> t
+
+. (30) Finally, data extraction and demodulation are performed. According to the proposed resource partition strategy, the pure data payload vector is extracted from the data index set as ˆdt = ˆ st[Id]. Standard quadrature amplitude modulation (QAM) demodulation is then applied to ˆdt to recover the transmit binary bit stream. V. Multi-Static UAV Sensing and Localization Building on the multi-static sensing model in Section II-B, we construct a UW-based cooperative localization framework using the delay signatures at the distributed BSs and the ST signature at BS-A [56]. The processing pipeline comprises local sensing-dictionary reconstruction and DPI suppression, followed by hierarchical target extraction and SIC. A. Sensing Dictionary and Direct-Path Suppression For each sensing BS i′ ∈ I , let ˜uobs  
+
+> i′
+
+∈ CNi′ ×1 denote its local UW sensing observation extracted relative to the common BS-A transmit-block timing using the G-sample ISI-free window, where NA = GN (A) rx and Ni = G. In the dictionary, p denotes a candidate position. Each p
+
+determines τi′ (p) and ω(p) through the geometry defined in Section II-B. Assuming array spacing dA, the effective transmit UW toward p is represented as 
+
+ucomb (p) =  
+
+> N(A) tx
+
+∑
+
+> t=1
+
+ute−ȷ 2πd A  
+
+> λ(t−1) cos ω(p)
+
+. (31) By exploiting the Fourier time-shifting property, the delay atom at BS i′ is constructed as ϕi′ (p) ∈ CG×1, which is given by 
+
+ϕi′ (p) = TG
+
+{
+
+F−1
+
+> NUW
+
+((FNUW ucomb (p)) ⊙ ei′ (p))}
+
+, (32) where ei′ (p) ∈ CNUW ×1 applies the delay τi′ (p) to each frequency component, with its j-th element defined as 
+
+ei′ (p)[ j] = exp 
+
+(
+
+−ȷ 2πNUW 
+
+κ(j) · τi′ (p)
+
+)
+
+, (33) where κ(j) maps the standard DFT index to the zero-centered physical frequency, given by κ(j) = j for 
+
+0 ≤ j < N UW /2, and κ(j) = j − NUW otherwise. For each distributed BS i, ϕi(p) is its complete local atom. For BS-A, the full ST atom is ϕA,ST (p) = a(A) rx (ω(p)) ⊗ ϕA(p),where a(A) rx (·) ∈ CN (A) rx ×1 denotes the receive steering vector of BS-A. Because the deterministic UW and system configuration are pre-stored, each cooperative BS can reconstruct its local sensing atoms without acquiring per-symbol payload data. In contrast, a random-payload-based coherent sensing design requires the instantaneous trans-mit waveform to be obtained through real-time sharing or local decoding, incurring transmit-reference sharing overhead or a decoding burden, whereas introducing an additional deterministic reference instead reduces spectral and ISAC efficiency. However, in multi-static cooperative systems, receiving BSs typically lie within the LoS of BS-A. The resulting direct path (DP) energy can be tens of decibels (dB) stronger than the scattered UAV echoes, severely mo-nopolizing the receiver’s dynamic range. Therefore, DPI suppression is essential. For each BS i′, the DP atom 
+
+ϕDP  
+
+> i′
+
+is constructed from the known station geometry or a calibrated direct channel. At BS-A, it represents the calibrated self-interference ST signature. At distributed BS i, the DP atom is constructed using the sample-domain propagation delay τ DP  
+
+> i
+
+= ∥pi −pA∥2fs/c and the transmit-array phase determined by the known bearing from BS-A to BS i. The DP component is independently canceled at each BS i′ by projecting ˜uobs  
+
+> i′
+
+onto the orthogonal complement subspace of ϕDP  
+
+> i′
+
+. The cleaned residual signal 
+
+˜ures  
+
+> i′
+
+is thus obtained as 
+
+˜ures  
+
+> i′
+
+= P⊥ 
+
+> i′
+
+˜uobs  
+
+> i′
+
+=
+
+(
+
+INi′ − ϕDP  
+
+> i′
+
+(ϕDP  
+
+> i′
+
+)H
+
+∥ϕDP  
+
+> i′
+
+∥22
+
+)
+
+˜uobs  
+
+> i′
+
+. (34) Then, the system utilizes {˜ures  
+
+> i′
+
+}i′∈I as the inputs to sequentially execute the multi-target searches. To prevent subspace mismatch in subsequent processing, all ST and delay atoms generated hereafter must also be projected onto their respective local orthogonal subspaces, which is represented as ˜ϕi(p) = P⊥ 
+
+> i
+
+ϕi(p). (35) 
+
+˜ϕA,ST (p) = P⊥ 
+
+> A
+
+ϕA,ST (p). (36) B. Iterative Coarse-to-Fine Multi-Target Localization Since the total number of low-altitude UAV targets is typically unknown and much smaller than the number of spatial grids, the cooperative localization can be trans-formed into a dynamic sparse recovery problem [57]. A hierarchical algorithm performs at most Kmax extraction attempts, where k ∈ { 1, . . . , K max } indexes the processing attempt. At BS i′, the local residual and active dictionary of accepted projected atoms are initialized as r(0)  
+
+> i′
+
+= ˜ ures 
+
+> i′
+
+and ˜Φ(0)  
+
+> i′
+
+= ∅, respectively. If an attempt is rejected, both states are carried forward unchanged. 1) Kinematic Prediction and Target Prioritization: Before initiating the iteration, the system prioritizes actively tracked targets from previous symbols. For each 9
+
+established track q ∈ { 1, . . . , Q trk }, its expected position is extrapolated as 
+
+ppred ,q = plast ,q + vest ,q∆T, (37) where Qtrk is the number of existing tracks, plast ,q and 
+
+vest ,q are their previous position and velocity estimates, and ∆T is the tracking interval. The tracks are prioritized using the joint normalized matching score, represented as 
+
+Eq = ∣∣ ¯ϕH
+
+> A,ST
+
+(ppred ,q)¯ r(0) A
+
+∣∣ +
+
+> I
+
+∑
+
+> i=1
+
+∣∣ ¯ϕHi (ppred ,q)¯ r(0) 
+
+> i
+
+∣∣, (38) where an overbar denotes ℓ2 normalization in this section. Sorting {Eq } in descending order yields {ηk}Kmax  
+
+> k=1
+
+, where 
+
+ηk is the fixed scheduled-track index during attempt k,while ηk = 0 denotes a global-acquisition attempt after all existing tracks have been scheduled. This ordering prioritizes strong tracked targets before weak ones. 2) Prediction-Aided Coarse Candidate Acquisition: Candidate centers are acquired through two paths at attempt k. First, if ηk̸ = 0 , acquisition uses the predicted position as the candidate center. Denoting this center by 
+
+p(k)c,1 , we have p(k)c,1 = ppred ,η k and C(k) = {p(k)c,1 }, which directly enters local refinement without global coarse search. If this predicted candidate fails verification, global acquisition is invoked once as a fallback. Second, if ηk = 0 
+
+or the fallback is triggered, candidate centers are acquired from the global coarse grid. To avoid repeatedly detecting accepted targets, subse-quent global searches exclude their neighboring coarse grids. Let Pcoa = {pν }Nc 
+
+> ν=1
+
+be the Nc-point coarse 3D grid, and define the radius-d neighborhood centered at 
+
+p0 as B(p0, d ) = {p ∈ R3 : ∥p − p0∥2 ≤ d}. Let ̂ P(k−1) 
+
+contain the positions accepted in preceding attempts, with ̂
+
+P(0) = ∅, and let dNMS > 0 denote the spatial suppres-sion radius. Accordingly, global acquisition searches the available grid P(k)coa = Pcoa \ ⋃̂  
+
+> p∈̂P(k−1)
+
+B(̂ p, d NMS ).For global search, let e1 be the first column of IN (A) rx 
+
+and define SA,1 = eT 
+
+> 1
+
+⊗IG. It extracts ˜ϕA,1(p) = SA,1 ˜ϕA,ST (p)
+
+and r(k−1) A,1 = SA,1r(k−1) A . Their normalized versions follow the definition above. The coarse spectrum is represented as 
+
+J(k)(pν ) = 
+
+∣∣∣ ¯ϕH
+
+> A,1
+
+(pν )¯ r(k−1) A,1
+
+∣∣∣ +
+
+> I
+
+∑
+
+> i=1
+
+∣∣∣ ¯ϕHi (pν )¯ r(k−1) 
+
+> i
+
+∣∣∣ . (39) For a threshold γth > 0, if max pν ∈P (k)coa 
+
+J(k)(pν ) < γ th ,the current global acquisition returns no candidate, and Algorithm 1 applies the corresponding continuation or termination rule. Otherwise, NMS sequentially retains up to the prescribed maximum of Mc spatially separated peaks, where a ∈ { 1, . . . , M c} indexes the extraction order, which is shown as 
+
+p(k)c,a = arg max   
+
+> pν∈P (k)coa \
+> a−1
+
+⋃
+
+> a′=1
+
+B
+
+(
+
+p(k)c,a′ , d NMS 
+
+)
+
+J(k)(pν ), (40) where a′ indexes previously retained peaks. Extraction stops when the remaining set is empty or its largest score is below γth , yielding the actual candidate count M (k)c ≤ Mc.These candidates form C(k) = {p(k)c,a }M (k)c 
+
+> a=1
+
+.3) Candidate-Wise Fine Search and Off-Grid Refine-ment: Let dsea > 0 be the initial search radius and d(ℓ)sea the radius at refinement level ℓ ∈ { 0, . . . , L exp }, with d(0) sea =
+
+dsea and Lexp denoting the maximum expansion level. Because prediction or coarse-grid errors may place the spectral peak outside the initial ROI, ℓ indexes successive ROI expansions triggered by a boundary-adjacent local maximum. For each p(k)c,a ∈ C (k), the ROI is represented as B(k,ℓ ) 
+
+> a
+
+= B
+
+(
+
+p(k)c,a , d (ℓ)sea 
+
+)
+
+. Then, the fine-search spectrum explicitly uses the full BS-A ST atom as 
+
+J(k)ST (p) = 
+
+∣∣∣ ¯ϕH
+
+> A,ST
+
+(p)¯ r(k−1) A
+
+∣∣∣ +
+
+> I
+
+∑
+
+> i=1
+
+∣∣∣ ¯ϕHi (p)¯ r(k−1) 
+
+> i
+
+∣∣∣ . (41) At level ℓ, let P(k,ℓ )loc ,a ⊂ B (k,ℓ ) 
+
+> a
+
+denote the local 3D grid. Its maximizer is shown as 
+
+p⋆, (ℓ)loc ,a = arg max 
+
+> p∈P (k,ℓ )loc ,a
+
+J(k)ST (p). (42) Define the normalized boundary metric as 
+
+ζ(k,ℓ ) 
+
+> a
+
+= ∥p⋆, (ℓ)loc ,a − p(k)c,a ∥2
+
+d(ℓ)sea 
+
+. (43) If ζ(k,ℓ ) 
+
+> a
+
+≥ ρb, the radius is updated as d(ℓ+1) sea = κexp d(ℓ)sea 
+
+until the peak is no longer boundary-adjacent or ℓ = Lexp .Here, ρb ∈ (0 , 1] is the boundary threshold and κexp > 1
+
+is the radius-expansion factor. The grid position obtained when expansion terminates is denoted p⋆
+
+> loc ,a
+
+.The off-grid refinement is applied to reduce the residual spatial discretization error. For axis-wise parabolic inter-polation, let ς denote the axis displacement, ex = [1 , 0, 0] T
+
+the X-axis unit vector, and ϵ > 0 the interpolation step. Define f (k) 
+
+> x,a
+
+(ς) = J(k)ST (p⋆ 
+
+> loc ,a
+
++ ςex). The X-axis offset is 
+
+∆xa = ϵ
+
+2
+
+f (k) 
+
+> x,a
+
+(−ϵ) − f (k) 
+
+> x,a
+
+(ϵ)
+
+f (k) 
+
+> x,a
+
+(ϵ) + f (k) 
+
+> x,a
+
+(−ϵ) − 2f (k) 
+
+> x,a
+
+(0) . (44) The offsets ∆ya and ∆za follow analogously, yielding ̂
+
+p(k)fine ,a = p⋆ 
+
+> loc ,a
+
++ [∆ xa, ∆ya, ∆za]T . (45) 4) Candidate Verification and Interference Cancellation: After the candidate-wise ST refinement, each position must be verified before being formally introduced into the SIC. For the a-th candidate, its projected atom at BS i′
+
+is defined as 
+
+q(k) 
+
+> i′,a
+
+=
+
+
+
+˜ϕA,ST 
+
+(̂ 
+
+p(k)fine ,a
+
+)
+
+, i′ = A ,
+
+˜ϕi′
+
+(̂ 
+
+p(k)fine ,a
+
+)
+
+, i′ ∈ { 1, . . . , I }. (46) The candidate atom is temporarily appended to the current active dictionary as 
+
+˜Φ(k) 
+
+> i′,a
+
+=
+
+[˜Φ(k−1)  
+
+> i′
+
+, q(k)
+
+> i′,a
+
+]
+
+. (47) Using this temporary dictionary, the corresponding LS coefficients are defined as 
+
+˜α(k) 
+
+> i′,a
+
+=
+
+[(˜Φ(k)
+
+> i′,a
+
+)H
+
+˜Φ(k)
+
+> i′,a
+
+]−1 (˜Φ(k)
+
+> i′,a
+
+)H
+
+˜ures  
+
+> i′
+
+. (48) The corresponding transient residual is shown as 
+
+˜r(k) 
+
+> i′,a
+
+= ˜ ures  
+
+> i′
+
+− ˜Φ(k) 
+
+> i′,a
+
+˜α(k)
+
+> i′,a
+
+. (49) 10 
+
+To quantify how well each candidate explains the multi-BS observations, the aggregate residual energies before and after its temporary inclusion are compared. The joint residual-reduction ratio is defined as 
+
+ξ(k) 
+
+> a
+
+=
+
+∑
+
+> i′∈I
+
+∥∥∥r(k−1) 
+
+> i′
+
+∥∥∥22
+
+− ∑
+
+> i′∈I
+
+∥∥∥˜ r(k)
+
+> i′,a
+
+∥∥∥22
+
+∑
+
+> i′∈I
+
+∥∥∥r(k−1) 
+
+> i′
+
+∥∥∥22
+
+. (50) For the residual-reduction threshold ξth ∈ (0 , 1) , only candidates satisfying ξ(k) 
+
+> a
+
+≥ ξth are retained in the valid candidate set V(k) =
+
+{
+
+a : ξ(k) 
+
+> a
+
+≥ ξth 
+
+}
+
+. If V(k) = ∅, the corresponding fallback or termination procedure is applied as summarized in Algorithm 1. For a nonempty V(k), the final candidate index is shown as 
+
+a⋆ = arg max 
+
+> a∈V (k)
+
+ξ(k) 
+
+> a
+
+, (51) and the corresponding accepted position is finally obtained as ̂
+
+p(k)fine =̂ p(k)fine ,a⋆ . (52) Once accepted, the candidate is used for both track management and SIC. If the accepted position remains as-sociated with the scheduled track ηk, it updates that track. For the associated track, the superscript + denotes its updated state, the position is replaced by p+last ,η k =̂ p(k)fine ,and the velocity is updated using the smoothing factor 
+
+ρs ∈ [0 , 1] as 
+
+v+est ,η k = ρsvest ,η k + (1 − ρs)̂ p(k)fine − plast ,η k
+
+∆T . (53) Otherwise, it initializes a new track with the accepted position and zero velocity. For SIC, the temporary dictionary, LS coefficients, and residual associated with a⋆ in (47)–(49) are retained as the active quantities ˜Φ(k) 
+
+> i′
+
+,̂ α(k) 
+
+> i′
+
+, and r(k) 
+
+> i′
+
+, respectively. There-fore, only candidates that consistently reduce the multi-BS residual energy are allowed to enter the SIC process. The complete procedure is summarized in Algorithm 1. C. Computational Complexity Analysis To evaluate efficiency, we focus on pure localization-search operations. Let Ncoa = G(I + 1) and Nfine =
+
+G(N (A) rx + I) denote the observation dimensions used by coarse acquisition and full ST refinement, while Nc and 
+
+Nloc denote the numbers of global coarse and candidate-wise local grids, respectively, with Nloc including possible ROI expansion. Evaluating one local grid requires O(Nfine )
+
+operations, so refining one candidate costs O(Nfine Nloc ).In global acquisition, the coarse search uses the first BS-A receive antenna and the I distributed BSs, requiring 
+
+O(Ncoa Nc) operations, followed by at most Mc local refine-ments. If prediction fails and global fallback is triggered, at most Mc + 1 candidates are refined. Therefore, over at most Kmax attempts, a conservative upper bound is 
+
+O
+
+(
+
+Kmax 
+
+[Ncoa Nc + Nfine (Mc + 1) Nloc 
+
+])
+
+. However, during stable tracking, a prediction-based candidate that passes verification bypasses global acquisition. Updating Q veri-fied tracks in one frame therefore has dominant complexity 
+
+O(QN fine Nloc ).Algorithm 1 Coarse-to-Fine Multi-Static Cooperative UAV Localization                                                                                                           
+
+> Input: {˜uobs
+> i′,ϕDP
+> i′}i′∈I ,Pcoa , the parameters defined above, and established track states {plast ,q,vest ,q}Qtrk
+> q=1 .Output: Accepted target-position set ̂Pand updated track states. 1: Phase 1: DPI Suppression and Initialization 2: Compute ˜ures
+> i′via (34) and set r(0)
+> i′←˜ures
+> i′,˜Φ(0)
+> i′← ∅ , and ̂
+> P(0) ← ∅ for all i′∈ I .3: Phase 2: Kinematic Prediction and Priority Ordering 4: Predict and score all established tracks via (37) and (38), then sort them to obtain {ηk}Kmax
+> k=1 , with ηk= 0 after all tracks have been scheduled. 5: Phase 3: Robust Target Extraction and SIC 6: for k∈ { 1, . . . , K max }do 7: if ηk̸= 0 then 8: Set C(k)← { ppred ,η k}.9: else 10: Form P(k)coa and obtain C(k)by thresholding (39) and applying (40). 11: end if 12: Refine all centers in C(k), including ROI expansion, via (41)– (45). Verify the refined candidates via (46)–(50) and form V(k).13: if V(k)=∅and ηk̸= 0 then 14: Form P(k)coa , perform one global acquisition, and repeat the refinement and verification via (41)–(50). 15: end if 16: if V(k)=∅then 17: Set r(k)
+> i′←r(k−1)
+> i′,˜Φ(k)
+> i′←˜Φ(k−1)
+> i′, and ̂P(k)←̂P(k−1) .If ηk= 0 , break. Otherwise, continue. 18: end if 19: Select a⋆and ̂p(k)fine via (51) and (52). 20: Update the scheduled track via (53) only when the accepted position remains associated with it. Otherwise, initialize a new track. 21: Retain the temporary dictionary, LS coefficients, and residual for a⋆in (47)–(49) as ˜Φ(k)
+> i′,̂α(k)
+> i′, and r(k)
+> i′, and set ̂P(k)←̂
+> P(k−1) ∪ { ̂p(k)fine }.22: end for 23: return the latest accepted-position set as ̂Pand updated track states.
+
+VI. Simulation Results To evaluate the proposed MIMO UW-OCDM ISAC system, simulations are conducted for both communica-tion and sensing. As depicted in Fig. 1, BS-A transmits UW-OCDM to a UAV, which may also be one of the sensing targets, while BS-A and I = 3 geographically distributed sensing BSs, denoted by BS-1, BS-2, and BS-3, receive echoes from the UAV targets for cooperative multi-static sensing. The system operates at a carrier frequency fc = 5 GHz with a bandwidth B = 40 MHz (i.e., a baseband sampling rate fs = 40 MHz), employing 
+
+16 -QAM for payload data. Performance is evaluated over different signal-to-noise ratios (SNRs). The UW-OCDM symbol length is N = 2048 , and the QPSK UW of length 
+
+NUW = 256 is realized using Ng = 384 equispaced sub-chirps for each transmit antenna. With Lmax = 64 , the receiver retains an ISI-free observation window of length 
+
+G = NUW − Lmax = 192 . The delay margin provides a path-length budget of Rmax = cL max /f s = 480 m. A. UAV Communication Performance Evaluation For the communication link, the system employs aRician fading channel with KRi = 10 dB, comprising one LoS path and Npath = 6 NLoS scattering paths. The BS-A 11 SNR [dB]              
+
+> -10 -5 0510 15 20 25 30
+> NMSE [dB]
+> -35 -30 -25 -20 -15 -10 -5 0510 NMSE Performance versus SNR
+> Clip, A th =2 Clip, A th =4 Clip, A th =8 Clip, A th =16 Scale, A th =2 Scale, A th =4 Scale, A th =8 Scale, A th =16 PGD, A th =2 PGD, A th =4 PGD, A th =8 PGD, A th =16
+> 19.8 19.9 20 20.1 20.2 -27 -26.8 -26.6 -26.4
+
+Fig. 7. CE normalized mean-square error (NMSE) performance of different power-constraint strategies. 
+
+transmitter and UAV receiver are equipped with N (A) tx = 2 
+
+and N (U) rx = 4 antennas, respectively. To simulate a highly dynamic GA scenario, the velocity governing the LoS Doppler shift fD,LoS is fixed at 100 km/h, while the NLoS equivalent velocities are distributed between 0 and 100 
+
+km/h. The oscillator-induced carrier frequency offset is as-sumed perfectly compensated to focus on mobility-induced Doppler. Specifically, two adjacent UWs, i.e., Xnum = 2 
+
+and D = 1 , are used for Doppler estimation and MMV-OMP CE. Unless otherwise specified, all communication simulations adopt parameters as shown above. 1) UW Sub-Chirp Power Constraints: To evaluate the effect of limiting large UW-generating sub-chirp coef-ficients, we compare direct nonlinear clipping (Clip), overall linear scaling (Scale), and projected gradient de-scent (PGD) [58]. These are analyzed across truncation thresholds Ath ∈ {2, 4, 8, 16 }, defined as multiples of the normalized constellation’s peak amplitude. The Clip strategy nonlinearly restricts any threshold-exceeding UW-generating sub-chirp amplitude to Ath . The total energy of this clipped sequence establishes a baseline data-to-UW power ratio. To guarantee a fair comparison, the remaining two strategies strictly adhere to this baseline. Specifically, the Scale strategy uniformly attenuates the overall amplitude of the unconstrained sub-chirps to match this exact energy, while the PGD strategy constrains its ℓ2-norm not to exceed that of the clipped sequence. Consequently, Scale matches the clipped-sequence energy, while PGD does not exceed it for any Ath .As Fig. 7 illustrates, the severe amplitude limit at 
+
+Ath = 2 degrades CE performance, yielding a higher NMSE. The Clip strategy suffers the most from severe distortion, while the Scale and PGD strategies offer slight mitigation. Correspondingly, Fig. 8 shows that the BER for all strategies improves and converges as Ath increases. At Ath = 16 , the amplitude constraint is effectively inactive under the evaluated settings, yielding the best performance. Within the evaluated settings, relaxing the amplitude constraint provides the best NMSE and BER performance. Hence, the solution in (13) is adopted -10 -5 0 5 10 15 20 25 30     
+
+> SNR [dB]
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER) BER Performance versus SNR
+> Clip, A th =2 Clip, A th =4 Clip, A th =8 Clip, A th =16 Scale, A th =2 Scale, A th =4 Scale, A th =8 Scale, A th =16 PGD, A th =2 PGD, A th =4 PGD, A th =8 PGD, A th =16
+> 19.8 19.9 20 20.1 20.2 0.0214 0.0216 0.0218 0.022 0.0222 0.0224
+
+Fig. 8. Data demodulation bit error rate (BER) performance of different power-constraint strategies. -10 -5 0 5 10 15 20 25 30  
+
+> SNR [dB]
+> -40 -30 -20 -10 010 20 30
+> NMSE [dB] NMSE Performance versus SNR
+> OCDM - Equispaced OCDM - Perturbed Equispaced OCDM - Random OFDM - Equispaced OFDM - Perturbed Equispaced OFDM - Random
+> 20 20.2 -27.2 -27 -26.8
+
+Fig. 9. CE NMSE performance of different subcarrier/sub-chirp index allocation strategies. -10 -5 0 5 10 15 20 25 30 
+
+> SNR [dB]
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER) BER Performance versus SNR
+> OCDM - Equispaced OCDM - Perturbed Equispaced OCDM - Random OFDM - Equispaced OFDM - Perturbed Equispaced OFDM - Random
+> 10 0.492 0.494 0.496 0.498 0.5 0.502 15 0.08 0.085 0.09
+
+Fig. 10. Data demodulation BER performance of different subcarrier/sub-chirp index allocation strategies. 
+
+without additional clipping. 2) UW Resource Index Allocation: We investigate equi-spaced, pseudo-random (perturbed-equispaced), and fully random UW-generating resource allocations. UW-OCDM and UW-OFDM use the same UW, resource count, and 12 SNR [dB]          
+
+> -10 -5 0510 15 20 25 30
+> NMSE [dB]
+> -35 -30 -25 -20 -15 -10 -5 0510 15 20
+
+NMSE Performance versus SNR     
+
+> Single-UW LS Single-UW MMSE Single-UW Oracle-LS Single-UW Oracle-MMSE Single-UW MMV-OMP Two-UW LS Two-UW MMSE Two-UW Oracle-LS Two-UW Oracle-MMSE ST-MMV-OMP (proposed)
+> 19 19.5 20 20.5 21 -28 -26 -24
+
+Fig. 11. CE NMSE performance of different CE schemes. 
+
+average transmit power. As shown in Figs. 9 and 10, fully random allocation severely degrades the CE NMSE and BER of both UW-OCDM and UW-OFDM because its clusters and large gaps worsen the conditioning of the UW-generation matrix. The resulting larger mutually can-celling coefficients increase redundant-power consumption and reduce the payload power under equal total transmit power. The ideal UW autocorrelation is identical across allocations because the UW is fixed, so it cannot explain these performance differences. PAPR instead characterizes the complete transmit symbol and may vary with the generating coefficients, but it is not the criterion used to select the allocation. The structured allocations affect the waveforms differently. In UW-OFDM, equispaced indices [26] generate periodic time-domain repetitions and correla-tion ambiguity through the inverse DFT. Pseudo-random perturbations break this periodicity while retaining near-uniform coverage. In UW-OCDM, the index-dependent quadratic phase rotation introduced by the DFnT sup-presses this repetitive behavior even with equispaced sub-chirps. Consequently, equispaced allocation is adopted for UW-OCDM owing to its favorable performance, condi-tioning, and power efficiency. Additionally, all subsequent UW-OFDM simulations use pseudo-random allocation. 3) Channel Estimation Performance: We compare the proposed two-UW spatio-temporal MMV-OMP (ST-MMV-OMP) scheme with a single-UW spatial MMV-OMP ablation. The latter retains joint processing across receive antennas but excludes temporal coupling, thereby isolating the gain from the additional UW observation. Under each observation setting, full-dimensional LS and MMSE estimators and their known-support Oracle-LS and Oracle-MMSE counterparts are included as references. Fig. 11 shows that two-UW ST-MMV-OMP achieves lower NMSE than its single-UW counterpart, confirming the benefit of temporal coupling. Under either setting, MMV-OMP outperforms the full-dimensional estimators. Fig. 12 shows the same hierarchy. The two-UW scheme achieves lower BER than its single-UW counterpart, and MMV-OMP descends faster than the full-dimensional estimators. -10 -5 0 5 10 15 20 25 30 
+
+SNR [dB] 
+
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER)
+
+BER Performance versus SNR     
+
+> Single-UW LS Single-UW MMSE Single-UW Oracle-LS Single-UW Oracle-MMSE Single-UW MMV-OMP Two-UW LS Two-UW MMSE Two-UW Oracle-LS Two-UW Oracle-MMSE ST-MMV-OMP (proposed)
+> 14.8 14.9 15 15.1 15.2 0.092 0.094 0.096 0.098 0.1 0.102 0.104
+
+Fig. 12. Data demodulation BER performance of different CE schemes. -10 -5 0 5 10 15 20 25 30 
+
+> SNR [dB]
+> -40 -35 -30 -25 -20 -15 -10 -5 0510
+> NMSE [dB] NMSE Performance versus SNR at Different Velocities
+> UW-OFDM (v = 0 km/h) UW-OFDM (v = 100 km/h) UW-OFDM (v = 200 km/h) UW-OFDM (v = 300 km/h) UW-OCDM (v = 0 km/h) UW-OCDM (v = 100 km/h) UW-OCDM (v = 200 km/h) UW-OCDM (v = 300 km/h)
+
+Fig. 13. CE NMSE performance under different velocities. -10 -5 0 5 10 15 20 25 30   
+
+> SNR [dB]
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER) BER Performance versus SNR at Different Velocities
+> UW-OFDM (v = 0 km/h) UW-OFDM (v = 100 km/h) UW-OFDM (v = 200 km/h) UW-OFDM (v = 300 km/h) UW-OCDM (v = 0 km/h) UW-OCDM (v = 100 km/h) UW-OCDM (v = 200 km/h) UW-OCDM (v = 300 km/h)
+> 24.8 25 25.2 10 -3
+> 10 -2
+
+Fig. 14. Data demodulation BER performance under different veloc-ities. 
+
+Its advantage over the single-UW oracle references results from the additional temporal observation. Overall, tempo-ral coupling and joint support recovery improve CE and symbol recovery. 4) Performance under Different Velocities: To evaluate mobility robustness, we compare UW-OFDM and UW-OCDM at velocities from 0 to 300 km/h. As shown in 13 SNR [dB]                          
+
+> -10 -5 0510 15 20 25 30
+> NMSE [dB]
+> -30 -20 -10 010 20 30 NMSE Performance Comparison
+> UW-OCDM (proposed) UW-OFDM UW-AFDM UW-AFDM (non-opt.) CP-OCDM CP-OFDM CP-OTFS Ideal CP-OFDM
+> Fig. 15. CE NMSE performance of the proposed UW-OCDM and representative waveform, ablation, and reference schemes. -10 -5 0510 15 20 25 30
+> SNR [dB]
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER) BER Performance Comparison
+> UW-OCDM (proposed) UW-OFDM UW-AFDM UW-AFDM (non-opt.) CP-OCDM CP-OFDM CP-OTFS Ideal CP-OFDM
+> 20 0.02 0.03 0.05
+> Fig. 16. Data demodulation BER performance of the proposed UW-OCDM and representative waveform, ablation, and reference schemes.
+
+Fig. 13, at high SNRs, the NMSE gradually degrades with velocity because residual Doppler becomes more pronounced after dominant LoS compensation. The cor-responding UW-OFDM and UW-OCDM curves remain close, indicating that both schemes use UW-assisted CE effectively. Fig. 14 shows that both schemes maintain favorable BER across the evaluated velocities because the dominant LoS Doppler is estimated from two adjacent UWs and compensated before CE and data equalization. The tightly grouped UW-OFDM curves indicate small velocity-induced variation, although their high-SNR BER remains higher. UW-OCDM instead shows clearer high-SNR degradation with velocity because residual path-dependent Doppler remains after compensation. Despite this greater variation, UW-OCDM retains a lower high-SNR BER at corresponding velocities owing to the Doppler resilience of its chirp-based modulation. At 300 
+
+km/h, its BER continues to decrease without a pro-nounced error floor. 5) Waveform Performance Comparison: Figs. 15 and 16 compare the CE NMSE and BER of the proposed UW-OCDM with representative waveform, ablation, and reference schemes. UW-AFDM [18] and its non-optimized variant are included to evaluate the effect of UW-based affine waveform design. CP-OCDM preserves OCDM mod-ulation but replaces UW-based acquisition and CE with CP- and pilot-based processing, providing a direct ablation of the UW contribution. CP-OFDM and CP-OTFS serve as conventional and delay–Doppler baselines, respectively, while ideal CP-OFDM provides an upper reference under perfect synchronization. Resource usage is matched as closely as each waveform structure permits. Each UW-based waveform reserves 
+
+Ng = 384 of N = 2048 transform-domain resources, leaving N − Ng = 1664 resources for payload and an effective data-resource ratio of 81 .25% . CP-OFDM, CP-OCDM, and ideal CP-OFDM use a 64 -sample CP and 
+
+332 pilots to match this ratio. CP-OTFS retains its native 
+
+256 × 8 grid, 64 -sample block CP, and 384 pilot/guard elements, resulting in an effective rate only 3.03% lower. All schemes use the same bandwidth, sampling rate, 16-QAM payload modulation, MIMO configuration, channel realizations, and average transmit-sample power, while the UW-based schemes use the same QPSK UW. CP-OCDM and CP-OFDM employ delayed-CP correlation for synchronization, Doppler compensation, interpolated LS CE, and MMSE FDE. CP-OTFS adopts pilot correlation, delay–Doppler CE, and sparse LMMSE equalization. To relate AFDM and OCDM, we use TAFDM (c1, c 2) =
+
+Γ(c1)FHN Γ(c2), where Γ(c) = diag {e−ȷ2πcn 2
+
+}N −1 
+
+> n=0
+
+. For even N , ΛH = eȷπ/ 4TAFDM (1 /(2 N ), 1/(2 N )) , showing that OCDM is the symmetric AFDM point up to acommon phase. Therefore, we include AFDM with c1 =1/(2 N ), c 2 = √2/(2 N ) and a non-optimized setting c1 =1/16 , c 2 = 1 /8 as references. As shown in Figs. 15 and 16, among the UW-based waveforms, pseudo-random UW-OFDM attains CE NMSE close to UW-OCDM, but retains a higher BER. UW-AFDM achieves nearly the same BER as UW-OCDM, but exhibits slightly higher NMSE in Fig. 15. This can be explained by the fact that the dominant Doppler is compensated beforehand, while the adopted shared estimator and frequency-domain equalizer do not exploit DAFT-domain path separation. The non-optimized UW-AFDM produces clear error floors, indicating that AFDM parameters should be jointly selected with the UW constraint and receiver processing. CP-OCDM ablation then isolates the UW contribution because both schemes use the same OCDM modulation. UW-OCDM achieves substantially lower NMSE and lower BER, which is attributed to the deterministic UW reference and sparse MMV CE. Against the remaining references, UW-OCDM outperforms practical CP-OFDM and ideal CP-OFDM in both metrics. Although CP-OTFS improves steadily with SNR, UW-OCDM retains the best high-SNR NMSE and BER among the evaluated practical schemes. These results demonstrate that the OCDM and UW provide complementary gains. 14 020 40 0 
+
+> Z-axis [m]
+> 60 BS-3 (5, 195, 60) BS-1 (5, 10, 0)
+> 80 100
+> Target 2 Start Target 1 Start
+> 100
+> X-axis [m]
+> Target 2 End
+> 3D Multi-Target Tracking
+> BS-A (MIMO) (100, 100, 95) Target 1 End BS-2 (175, 185, 30)
+> 200 150 200 100
+> Y-axis [m]
+> 50 0
+> Target 1 ground truth Target 1 estimate Target 2 ground truth Target 2 estimate
+
+Fig. 17. Ground-truth and estimated 3D UAV trajectories of the proposed localization method at an SNR of 30 dB. 
+
+B. UAV Localization Performance Evaluation To evaluate sensing performance, we simulate a 3D target tracking scenario based on the aforementioned multi-static system. BS-A employs transmit and receive ULAs with dA = λ/ 2 and respective element counts 
+
+N (A) tx = 2 and N (A) rx = 8 , whereas the I = 3 distributed BSs are single-antenna receivers. The BS coordinates 3
+
+(in meters) are pA = [100 , 100 , 95] T , p1 = [5 , 10 , 0] T ,
+
+p2 = [175 , 185 , 30] T , and p3 = [5 , 195 , 60] T . We generate 
+
+Q = 2 dynamic UAV targets as the ground truth, each with an average radar cross-section (RCS) of 0.05 m 2 and random amplitude fluctuations. Their initial coordinates are randomly distributed within a core detection zone spanning 0 to 200 m horizontally and 0 to 100 m vertically, with initial velocities ranging from 0 to 30 m/s. To gener-ate nonuniform dynamic trajectories, collision avoidance and low-frequency sinusoidal wind drift are introduced. The observation process spans 80 tracking epochs with an update interval of ∆T = 0 .1 s. For the hierarchical target extraction, the coarse grid Pcoa employs step sizes of ∆xcoa = ∆ ycoa = 4 .0 m and ∆zcoa = 3 .0 m, bounded by 
+
+200 m along the X and Y axes, and 100 m along the Z axis. Furthermore, the kinematic velocity smoothing factor is set to ρs = 0 .5, and the axis-wise interpolation step is configured as ϵ = 0 .2 m. 1) 3D Trajectory Tracking Performance: As shown in Fig. 17, the estimated positions closely follow both ground-truth trajectories over the 80 tracking epochs without track loss. For visual clarity, markers on the estimated trajectories are displayed every 5 tracking epochs, while all 80 epochs are retained in the trajectory lines and perfor-mance evaluation. The close overlap is maintained through changes in direction and altitude, without evident error accumulation along either trajectory. The two estimated 
+
+> 3
+
+Multi-static localization accuracy depends on the BS-target geom-etry through the geometric dilution of precision and the conditioning of the localization problem [59]. The adopted topology is represen-tative rather than optimized. For another deployment, the sensing dictionary can be reconstructed using the updated BS coordinates, although the achieved accuracy will vary. Topology optimization is beyond the scope of this work. SNR [dB]          
+
+> -10 -5 0510 15 20 25 30
+> 3D Localization RMSE [m]
+> 0246810 12 14 16 3D Localization RMSE versus SNR
+> Proposed On-grid + SIC On-grid, no SIC Nrx =1 Nrx =2 Nrx =4
+
+Fig. 18. 3D localization root-mean-square error (RMSE) of the proposed localization method and its off-grid, SIC, and receive-array ablations. 
+
+tracks also remain correctly associated from their marked start to end points despite simultaneous target motion and random RCS fluctuations. These results demonstrate that the proposed localization method can maintain continuous 3D multi-target tracking under the simulated motion and interference conditions. 2) Ablation Study on Localization Performance: We evaluate the proposed localization method and five ab-lation variants, with all other simulation parameters unchanged. The “on-grid + SIC” variant disables the local fine search and off-grid interpolation, while the “on-grid, no SIC” variant further disables residual cancellation and its associated candidate-acceptance test. Three receive-array variants retain the complete processing chain while reducing N (A) rx to 1, 2, or 4. A target is successfully detected when its 3D localization error is below 6 m, and errors above 15 m are capped at 15 m when computing the RMSE. The vertical error bars represent two-sided 
+
+90% Student-t confidence intervals calculated over 15 
+
+independent trajectory–noise sequences. Figs. 18 and 19 show that the complete localization method reaches the reliable-tracking regime at a lower SNR. Its advantage over the on-grid variants demonstrates that local fine search and off-grid interpolation jointly alleviate grid mismatch and preserve the accuracy of residual reconstruction. The “on-grid + SIC” variant does not outperform its no-SIC counterpart, indicating that coarse-grid mismatch can produce inaccurate echo reconstruction and thereby degrade subsequent processing. As N (A) rx is reduced from 
+
+8 to 4, 2, and 1, the RMSE increases and the detection success rate consistently decreases, confirming the spatial-discrimination gain provided by the BS-A receive array. 3) Localization Baseline Comparison: To evaluate the proposed method, we consider ROI-based cooperative max-imum likelihood with successive interference cancellation (ROI-CML-SIC) and full-grid joint cooperative maximum likelihood (FG-JCML), both following the cooperative concentrated-likelihood objective in [60], together with sparse recovery and refinement (SRR) adapted from [61]. 15 SNR [dB]         
+
+> -10 -5 0510 15 20 25 30
+> Target Detection Success Rate [%]
+> 010 20 30 40 50 60 70 80 90 100
+> Target Detection Success Rate versus SNR
+> Proposed On-grid + SIC On-grid, no SIC Nrx =1 Nrx =2 Nrx =4
+
+Fig. 19. Target detection success rate of the proposed localization method and its off-grid, SIC, and receive-array ablations. SNR [dB]         
+
+> -10 -5 0510 15 20 25 30
+> 3D Localization RMSE [m]
+> 0510 15
+> 3D Localization RMSE Comparison
+> FG-JCML ROI-CML-SIC SRR Proposed
+> 20 1.5 22.5 33.5
+
+Fig. 20. 3D localization RMSE performance of the proposed method and representative localization baselines. 
+
+ROI-CML-SIC adds 3D multi-target search, sequential LS gain refitting, and residual cancellation to the single-target cooperative ML position objective. FG-JCML evaluates the objective over the complete 3D coarse grid, applies NMS, jointly scores candidate pairs, and performs local coordinate refinement. SRR retains alternating direction method of multipliers (ADMM) recovery, continuous re-finement, and successive cancellation, while the 3D multi-static adaptation adds group-sparse recovery, active-set screening, and joint gain refitting. All methods use iden-tical observations, trajectories, DPI preprocessing, global coarse-grid support, target count, evaluation rules, and a common output tracker. For complexity comparison, ROI-CML-SIC has pure-search cost Csearch ROI = O(QN fine (Nc +NROI )), while its joint gain refitting and residual reconstruction are additional estimation costs. For FG-JCML with Q = 2, Lc and 
+
+Hc count retained candidates and refined candidate pairs, 
+
+Npre and Nref count grids per pre-refinement and coor-dinate update, and Jcoord counts those updates, yielding 
+
+Csearch FG = O(Nfine [Nc + LcNpre + L2c + HcJcoord Nref ]). For SRR, A is the active-set size and Jref is the refinement iter-ation count, giving Csearch SRR = O(QN fine (Nc +A+Jref )). The SNR [dB]         
+
+> -10 -5 0510 15 20 25 30
+> Target Detection Success Rate
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1
+> Target Detection Success Rate Comparison
+> FG-JCML ROI-CML-SIC SRR Proposed
+> 20 0.88 0.92 0.96 1
+
+Fig. 21. Target detection success rate of the proposed method and representative localization baselines. 
+
+term O(Q ∑ 
+
+> i′∈I
+
+(A3 + JADMM A2)) is reported separately as ADMM recovery cost. Thus, ROI-CML-SIC repeats full-grid searches, FG-JCML adds candidate-pair process-ing, and SRR adds active-set screening. Stable tracking with the proposed method requires only O(QN fine Nloc ).Fallback uses the smaller dimension Ncoa .As shown in Figs. 20 and 21, noise dominates the target echoes in the low-SNR region, resulting in unreliable localization and no consistent performance ordering. As the SNR increases, the proposed method achieves a lower average RMSE and a higher average target detection success rate. This performance is consistent with the coordinated use of kinematic prediction, NMS-based multi-candidate screening, adaptive ROI expansion, off-grid refinement, residual verification, and SIC. Multi-candidate screening and ROI expansion reduce coarse-search ambi-guities, while off-grid refinement reduces spatial discretiza-tion errors and residual verification limits SIC mismatch. Together with the complexity analysis above, simulations demonstrate a favorable performance–complexity balance under the common observation model. 4) Robustness against Inter-BS Clock Offsets: Al-though the proposed localization method is not a con-ventional TDOA algorithm, residual inter-BS clock offsets perturb the geometry-dependent delays used by its sensing dictionary. For an offset ∆tclk  
+
+> i
+
+at the i-th receiving BS, the effective sample-domain delay is ˜τi(p) = τi(p) + ∆ tclk  
+
+> i
+
+/T s.We set BS-A as the time reference with ∆tclk A = 0 and in-dependently generate ∆tclk  
+
+> i
+
+∼ N (0 , σ 2clk ) for the other BSs. The observations contain these offsets, whereas the dictio-nary assumes ideal synchronization. At an SNR of 25 dB ,Fig. 22 shows negligible degradation for σclk ≤ 0.1Ts. The 90th-percentile curve reports the 90th percentile of the 3D localization error and shows that tail errors grow with σclk alongside the RMSE. Larger offsets weaken the joint dictionary match, increasing the localization error and reducing the success rate, with pronounced degradation near half a sampling interval. Because this transition depends on the sampling rate, SNR, and BS-target geometry, dominant offsets should be calibrated, 16 Clock Offset Std. [ns]      
+
+> 0510 15 20 25
+> Localization Error [m]
+> 0510 15 20 25 30 35
+> Success Rate [%]
+> 010 20 30 40 50 60 70 80 90 100
+> Robustness to Inter-BS Clock Offsets
+> 0.1Ts
+> RMSE 90th Percentile Error Success Rate
+
+Fig. 22. Multi-static cooperative localization performance versus the standard deviation of residual inter-BS clock offsets. 
+
+while fully asynchronous operation requires joint clock-position estimation [31]. VII. Conclusion This paper proposed a UW-OCDM ISAC framework for low-altitude UAV networks, jointly supporting high-mobility communication and multi-target sensing. At the waveform level, UW embedding established the circular convolution structure required for low-complexity FDE, while the quadratic phase rotation of OCDM enhanced Doppler resilience and mitigated the repetitive correlation ambiguity of UW-OFDM. Additionally, the known UW supported time synchronization, Doppler estimation and compensation, and sparse ST CE. For cooperative sensing, the UW was also utilized for multi-static UAV localization. Since the UW and system parameters were pre-stored at the cooperating BSs, sensing dictionaries were constructed locally without exchanging full payload data, thereby reducing transmit-reference sharing overhead. Combined with DPI suppression and hierarchical off-grid process-ing, the proposed localization method achieved robust multi-UAV localization under grid ambiguity and near-far interference. Numerical results demonstrated improved communication reliability and multi-target localization accuracy, confirming that the proposed UW-driven de-sign effectively supported both robust communication reception and cooperative sensing through their respective processing chains. Building on the demonstrated benefits of the UW-driven processing chain, future work will investigate its extension to other candidate waveforms and more general ISAC scenarios. Such extensions will require waveform-specific redesign of the UW embedding mechanism, parameter configuration, and receiver processing. The framework will also be further developed for distributed, multi-user, and learning-assisted ISAC systems under more practical synchronization, hardware, and environmental conditions. References 
+
+[1] Y. Tao et al., “Intelligent Multimodal Multi-Sensor Fusion-Based UAV Identification, Localization, and Countermeasures for Safeguarding Low-Altitude Economy,” Chinese J. Electron., vol. 35, no. 6, pp. 1–13, 2026. [2] H. Liu et al., “Near-space communications: The last piece of 6G space–air–ground–sea integrated network puzzle,” Space Sci. Technol., vol. 4, p. 0176, 2024. [3] X. Liu et al., “Toward near-space communication network in the 6G and beyond era,” Space Sci. Technol., vol. 5, p. 0337, 2025. [4] M. A. Ali and A. Jamalipour, “UAV placement and power allo-cation in uplink and downlink operations of cellular network,” IEEE Trans. Commun., vol. 68, no. 7, pp. 4383–4393, 2020. [5] S. Shen, K. Yang, K. Wang, and G. Zhang, “UAV-aided vehicular short-packet communication and edge computing sys-tem under time-varying channel,” IEEE Trans. Veh. Technol., vol. 72, no. 5, pp. 6625–6638, 2023. [6] F. Liu et al., “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun., vol. 40, no. 6, pp. 1728–1767, 2022. [7] K. Meng et al., “UAV-enabled integrated sensing and communi-cation: Opportunities and challenges,” IEEE Wireless Commun., vol. 31, no. 2, pp. 97–104, 2024. [8] Z. Li et al., “Unauthorized UAV countermeasure for low-altitude economy: Joint communications and jamming based on MIMO cellular systems,” IEEE Internet Things J., vol. 12, no. 6, pp. 6659–6672, 2025. [9] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Trans. Commun., vol. 68, no. 6, pp. 3834–3862, 2020. [10] Z. Li et al., “Large model enabled embodied intelligence for 6G integrated perception, communication, and computation network,” Chinese J. Electron., vol. 35, no. 5, pp. 1–25, 2026. [11] C. Xu et al., “Reconfigurable intelligent surface assisted multi-carrier wireless systems for doubly selective high-mobility Ricean channels,” IEEE Trans. Veh. Technol., vol. 71, no. 4, pp. 4023–4041, 2022. [12] H. Haif, S. E. Zegrar, and H. Arslan, “Novel OCDM transceiver design for doubly-dispersive channels,” IEEE Trans. Veh. Tech-nol., vol. 73, no. 8, pp. 11 237–11 248, 2024. [13] Z. Li et al., “Chirp Delay-Doppler domain modulation: Anew paradigm of integrated sensing and communication for autonomous vehicles,” IEEE Network, vol. 39, no. 6, pp. 119– 127, 2025. [14] Z. Wei et al., “Orthogonal Time-Frequency Space modulation: A promising next-generation waveform,” IEEE Wireless Commun., vol. 28, no. 4, pp. 136–144, 2021. [15] S. Li et al., “A novel ISAC transmission framework based on spatially-spread Orthogonal Time Frequency Space modu-lation,” IEEE J. Sel. Areas Commun., vol. 40, no. 6, pp. 1854– 1872, 2022. [16] S. Li, W. Yuan, Z. Wei, and J. Yuan, “Cross domain iterative detection for Orthogonal Time Frequency Space modulation,” IEEE Trans. Wireless Commun., vol. 21, no. 4, pp. 2227–2242, 2022. [17] H. Lin and J. Yuan, “Orthogonal Delay-Doppler division multi-plexing modulation,” IEEE Trans. Wireless Commun., vol. 21, no. 12, pp. 11 024–11 037, 2022. [18] A. Bemani, N. Ksairi, and M. Kountouris, “AFDM: A full diversity next generation waveform for high mobility communi-cations,” in Proc. IEEE Int. Conf. Commun. Workshops (ICC Workshops), 2021, pp. 1–6. [19] X. Ouyang and J. Zhao, “Orthogonal chirp division multiplex-ing,” IEEE Trans. Commun., vol. 64, no. 9, pp. 3946–3957, 2016. [20] X. Xia et al., “Three-stage super-resolution estimation of target parameter in OCDM ISAC systems,” IEEE Wireless Commun. Lett., vol. 14, no. 9, pp. 2947–2951, 2025. [21] J. Wang, J. Song, Z.-X. Yang, L. Yang, and J. Wang, “Frames theoretic analysis of zero-padding OFDM over deep fading wireless channels,” IEEE Trans. Broadcast., vol. 52, no. 2, pp. 252–260, 2006. [22] B. Muquet, Z. Wang, G. B. Giannakis, M. de Courville, and P. Duhamel, “Cyclic prefixing or zero padding for wireless multicarrier transmissions?” IEEE Trans. Commun., vol. 50, no. 12, pp. 2136–2148, 2002. [23] K. Ying et al., “Quasi-synchronous random access for massive MIMO-based LEO satellite constellations,” IEEE J. Sel. Areas Commun., vol. 41, no. 6, pp. 1702–1722, 2023. 17 
+
+[24] X. Zhou et al., “Active terminal identification, channel estima-tion, and signal detection for grant-free NOMA-OTFS in LEO satellite internet-of-things,” IEEE Trans. Wireless Commun., vol. 22, no. 4, pp. 2847–2866, 2023. [25] H. Yuan et al., “PAPR reduction with pre-chirp selection for affine frequency division multiplexing,” IEEE Wireless Commun. Lett., vol. 14, no. 3, pp. 736–740, 2025. [26] H. Steendam, “On the selection of the redundant carrier po-sitions in UW-OFDM,” IEEE Trans. Signal Process., vol. 61, no. 5, pp. 1112–1120, 2013. [27] S. Li et al., “Faster-than-Nyquist signaling is good for single-carrier ISAC: An analytical study,” IEEE Trans. Signal Process., vol. 73, pp. 3203–3219, 2025. [28] M. F. Keskin, H. Wymeersch, and V. Koivunen, “Monostatic sensing with OFDM under phase noise: From mitigation to exploitation,” IEEE Trans. Signal Process., vol. 71, pp. 1363– 1378, 2023. [29] E. Matricardi, L. Pucci, E. Favarelli, E. Paolini, and A. Gior-getti, “Multi-target acquisition in multistatic MIMO-OFDM joint sensing and communication,” in Proc. IEEE Int. Conf. Commun. Workshops (ICC Workshops), 2025, pp. 690–695. [30] P. Sinha and I. Guvenc, “Impact of antenna pattern on TOA based 3D UAV localization using a terrestrial sensor network,” IEEE Trans. Veh. Technol., vol. 71, no. 7, pp. 7703–7718, 2022. [31] T. Wang, H. Xiong, H. Ding, and L. Zheng, “TDOA-based joint synchronization and localization algorithm for asynchronous wireless sensor networks,” IEEE Trans. Commun., vol. 68, no. 5, pp. 3107–3124, 2020. [32] H. Jiang et al., “A novel 3D UAV channel model for A2G communication environments using AoD and AoA estimation algorithms,” IEEE Trans. Commun., vol. 68, no. 11, pp. 7232– 7246, 2020. [33] X. Lyu, D. Luo, Y. He, B. Liu, W. Fan, and Z. Quan, “Improved target localization with off-grid compressed sensing for multistatic MIMO-OFDM signals,” IEEE Internet Things J., vol. 12, no. 13, pp. 23 222–23 232, 2025. [34] A. Zhang, M. L. Rahman, X. Huang, Y. J. Guo, S. Chen, and R. W. Heath, “Perceptive mobile networks: Cellular networks with radio vision via joint communication and radar sensing,” IEEE Veh. Technol. Mag., vol. 16, no. 2, pp. 20–30, 2021. [35] J. Coon, M. Sandell, M. Beach, and J. McGeehan, “Channel and noise variance estimation and tracking algorithms for unique-word based single-carrier systems,” IEEE Trans. Wireless Com-mun., vol. 5, no. 6, pp. 1488–1496, 2006. [36] Y. Wang, Z. Gao, S. Wang, Y. Su, D. Zheng, K. Huang, T. Q. S. Quek, and M.-S. Alouini, “Unsourced and sourced massive con-nectivity for airship-borne low-altitude wireless MIMO network: Iterative detection or deep unfolding?” IEEE J. Sel. Topics Signal Process., pp. 1–14, 2026. [37] T. L. Nguyen, G. Kaddoum, T. N. Do, and Z. J. Haas, “Channel characterization of UAV-RIS-aided systems with adap-tive phase-shift configuration,” IEEE Wireless Commun. Lett., vol. 12, no. 12, pp. 2058–2062, 2023. [38] A. Liao et al., “Terahertz ultra-massive MIMO-based aeronau-tical communications in space-air-ground integrated networks,” IEEE J. Sel. Areas Commun., vol. 39, no. 6, pp. 1741–1767, 2021. [39] Z. Gao, S. Liu, Y. Su, Z. Li, and D. Zheng, “Hybrid knowledge-data driven channel semantic acquisition and beamforming for cell-free massive MIMO,” IEEE J. Sel. Topics Signal Process., vol. 17, no. 5, pp. 964–979, 2023. [40] J. Wang et al., “Estimation of Rice factor ratio for doubly selective fading channels,” IEEE Access, vol. 8, pp. 31 330– 31 340, 2020. [41] M. Ke, Z. Gao, Y. Wu, X. Gao, and R. Schober, “Compres-sive sensing-based adaptive active user detection and channel estimation: Massive access meets massive MIMO,” IEEE Trans. Signal Process., vol. 68, pp. 764–779, 2020. [42] C. Ji et al., “An experimental study on fine-grained bistatic sensing of UAV trajectory via cellular downlink signals,” IEEE Wireless Commun. Lett., vol. 15, pp. 1807–1811, 2026. [43] Y. Tao et al., “Pseudo-random TDM–MIMO FMCW-based millimeter-wave sensing and communication integration for UAV swarm,” IEEE Internet Things J., vol. 13, no. 1, pp. 549– 564, 2026. [44] Y. Tao, Z. Wan, Z. Li, Z. Gao, G. Chen, and R. Na, “MmWave-LoRadar empowered vehicular integrated sensing and com-munication systems: LoRa meets FMCW,” IEEE Trans. Veh. Technol., vol. 74, no. 10, pp. 16 477–16 482, 2025. [45] M. Delcourt and J.-Y. Le Boudec, “TDOA source-localization technique robust to time-synchronization attacks,” IEEE Trans. Inf. Forensics Security, vol. 16, pp. 4249–4264, 2021. [46] J. Friedrich, J. Tiemann, and C. Wietfeld, “Accurate multi-zone UWB TDOA localization utilizing cascaded wireless clock synchronization,” in Proc. Int. Conf. Indoor Positioning Indoor Navigation (IPIN), 2021, pp. 1–8. [47] L. Giroto de Oliveira, B. Nuss, M. B. Alabd, A. Diewald, M. Pauli, and T. Zwick, “Joint radar-communication systems: Modulation schemes and system design,” IEEE Trans. Microw. Theory Techn., vol. 70, no. 3, pp. 1521–1551, 2022. [48] Z. Wan et al., “Ultra-massive MIMO with orthogonal chirp division multiplexing for near-field sensing and communication integration,” IEEE Trans. Commun., vol. 74, pp. 10 155–10 172, 2026. [49] M. S. Omar and X. Ma, “Performance analysis of OCDM for wireless communications,” IEEE Trans. Wireless Commun., vol. 20, no. 7, pp. 4032–4043, 2021. [50] Y. Yu, L. Yu, R. Liu, X.-W. Zhu, P. Chen, and C. Yu, “Digital predistortion of millimeter-wave GaN power amplifiers for 6G integrated communication, sensing, and power transfer scenarios,” IEEE Trans. Microw. Theory Techn., vol. 73, no. 1, pp. 26–37, 2025. [51] M. Rajabzadeh and H. Steendam, “Precoding for PAPR reduc-tion in UW-OFDM,” IEEE Commun. Lett., vol. 25, no. 7, pp. 2305–2308, 2021. [52] Y. Zhang et al., “AI empowered channel semantic acquisition for 6G integrated sensing and communication networks,” IEEE Network, vol. 38, no. 2, pp. 45–53, 2024. [53] Z. Gao et al., “Integrated sensing and communication with mmWave massive MIMO: A compressed sampling perspective,” IEEE Trans. Wireless Commun., vol. 22, no. 3, pp. 1745–1762, 2023. [54] Z. Li, Z. Gao, and T. Li, “Sensing user’s channel and location with terahertz extra-large reconfigurable intelligent surface un-der hybrid-field beam squint effect,” IEEE J. Sel. Topics Signal Process., vol. 17, no. 4, pp. 893–911, 2023. [55] M. Huemer, A. Onic, and C. Hofbauer, “Classical and Bayesian linear data estimators for unique word OFDM,” IEEE Trans. Signal Process., vol. 59, no. 12, pp. 6073–6085, 2011. [56] Z. Gao, X. Zhou, B. Ning, Y. Su, T. Qin, and D. Niyato, “In-tegrated location sensing and communication for ultra-massive MIMO with hybrid-field beam-squint effect,” IEEE J. Sel. Areas Commun., vol. 43, no. 4, pp. 1387–1404, 2025. [57] J. Zheng et al., “An efficient strategy for accurate detection and localization of UAV swarms,” IEEE Internet Things J., vol. 8, no. 20, pp. 15 372–15 381, 2021. [58] D. P. Bertsekas, “On the Goldstein–Levitin–Polyak gradient projection method,” IEEE Trans. Autom. Control, vol. 21, no. 2, pp. 174–184, 1976. [59] N. H. Nguyen and K. Dogancay, “Optimal geometry analysis for multistatic TOA localization,” IEEE Trans. Signal Process., vol. 64, no. 16, pp. 4180–4193, 2016. [60] L. Pucci, T. Bacchielli, and A. Giorgetti, “Cooperative max-imum likelihood target position estimation for MIMO-ISAC networks,” IEEE Wireless Commun. Lett., vol. 14, no. 5, pp. 1531–1535, 2025. [61] X. Zhang, Y. Liang, F. Wang, and H. Li, “Direct multi-target localization with cooperative automotive radar,” IEEE Trans. Veh. Technol., vol. 74, no. 10, pp. 15 456–15 467, 2025.

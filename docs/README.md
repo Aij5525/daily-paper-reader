@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-08-23</span>
+      <span class="dpr-home-dashboard-kicker">2026-08-24</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 19 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 12 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>8</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>11</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>6</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-23 20:10:26 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-24 20:48:44 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日共筛读19篇论文，精读8篇、速读11篇，核心聚焦无线感知与通信的物理AI融合。最值得关注的是两篇9分精读：物理信息VAE用于无线地图尾部预测，以及跨模态自监督框架CM-MAE，均在物理约束与数据驱动结合上表现亮眼；速读中联邦语义通信与ISAC感知隐私也值得留意。建议普通读者优先从CM-MAE入手，理解视觉-无线跨模态表征的共享物理先验，再延伸到无线地图或隐私波束赋形场景。</p>
+<p>今日精读6篇、速读6篇，聚焦5G/6G通信与AI融合。</p>
+<p>最值得看：LLM-as-Judge评估5G故障分析（10分），以及场景化小模型提升CSI反馈效率（9分）。</p>
+<p>建议关注6G数字孪生感知、近海网络优化及多无人机通信控制方向。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +73,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">8 篇</strong>
+    <strong class="dpr-home-dashboard-count">6 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Physics-informed VAE-EVT for Tail Aware Radio Map Prediction">Physics-informed VAE-EVT for Tail Aware Radio Map Prediction</span></li><li><span class="dpr-home-dashboard-paper-title" title="CM-MAE: A Physics-Guided Cross-Modal Self-Supervised Learning Framework for Vision-Wireless Applications">CM-MAE: A Physics-Guided Cross-Modal Self-Supervised Learning Framework for Vision-Wireless Applications</span></li><li><span class="dpr-home-dashboard-paper-title" title="Reliability-Constrained Hybrid Beamforming for Multistatic ISAC in Vehicular Networks">Reliability-Constrained Hybrid Beamforming for Multistatic ISAC in Vehicular Networks</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Free-Text Evaluation of LLMs for 5G Domain Knowledge and Fault Analysis using LLM-as-Judge">Free-Text Evaluation of LLMs for 5G Domain Knowledge and Fault Analysis using LLM-as-Judge</span></li><li><span class="dpr-home-dashboard-paper-title" title="Learnware for CSI Feedback: Scene-specific Small Models Can Do Big">Learnware for CSI Feedback: Scene-specific Small Models Can Do Big</span></li><li><span class="dpr-home-dashboard-paper-title" title="RFWM: Physics-Guided World Model for Dynamic Wireless Radiance Field Generation">RFWM: Physics-Guided World Model for Dynamic Wireless Radiance Field Generation</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>8</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +86,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">11 篇</strong>
+    <strong class="dpr-home-dashboard-count">6 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Decentralized Federated Learning for Heterogeneous Multi-Task Semantic Communication">Decentralized Federated Learning for Heterogeneous Multi-Task Semantic Communication</span></li><li><span class="dpr-home-dashboard-paper-title" title="Bringing Environmental Enhancement Back to Its Physical Essence via Specular Reflecting Surfaces">Bringing Environmental Enhancement Back to Its Physical Essence via Specular Reflecting Surfaces</span></li><li><span class="dpr-home-dashboard-paper-title" title="Enhancing Sensing Privacy in ISAC Through Joint Signal and Artificial Noise Beamforming">Enhancing Sensing Privacy in ISAC Through Joint Signal and Artificial Noise Beamforming</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G">PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G</span></li><li><span class="dpr-home-dashboard-paper-title" title="Proper Sea Surface Roughness Enhances the Performance of Near-Shore Maritime Networks">Proper Sea Surface Roughness Enhances the Performance of Near-Shore Maritime Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="RMWorld: Task-Aware Radio World Models with Value-of-Information Guided Multi-Trial Learning for Multi-UAV Communication Control">RMWorld: Task-Aware Radio World Models with Value-of-Information Guided Multi-Trial Learning for Multi-UAV Communication Control</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>11</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
 </section>
 </div>
 
