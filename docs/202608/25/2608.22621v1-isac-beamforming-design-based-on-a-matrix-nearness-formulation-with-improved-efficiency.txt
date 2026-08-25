@@ -1,0 +1,519 @@
+Title: ISAC Beamforming Design Based on a Matrix Nearness Formulation With Improved Efficiency
+
+URL Source: https://arxiv.org/pdf/2608.22621v1
+
+Published Time: Tue, 25 Aug 2026 01:23:11 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# ISAC Beamforming Design Based on a Matrix Nearness Formulation with Improved Efficiency 
+
+Berkan Kilic, Kenan Turbic, Member, IEEE, and Sławomir Sta´ nczak, Senior Member, IEEE 
+
+Abstract —We propose an integrated sensing and communica-tion (ISAC) beamforming method that performs joint multiple-input multiple-output (MIMO) radar sensing and multi-user MIMO communication. Our approach builds on a matrix near-ness formulation of the MIMO radar problem and utilizes our recently proposed efficient solver, where the computational complexity is dominated by an eigenvalue decomposition (EVD) evaluation at each iteration. We extend this formulation to an ISAC scenario by incorporating minimum signal-to-noise ratio constraints as communication design criteria, only requiring statistical channel state information knowledge at base station. Furthermore, we propose a method to avoid the burdensome EVD evaluations in certain iterations, reducing the computation time by up to six times in a massive MIMO setting. 
+
+Index Terms —beamforming design, MIMO radar, MU-MIMO communication, massive MIMO, ISAC, matrix nearness. 
+
+I. I NTRODUCTION 
+
+# BEAMFORMING plays a critical role in achieving high performance and energy efficiency in wireless multi-antenna communication and radar systems [1]. Its primary objective is to shape the spatial distribution of the transmitted power by concentrating radiation toward the directions of inter-est, where radar targets or communication users are expected to be located, while suppressing radiation elsewhere [2]. This capability is essential for the efficient use of available power and spectral resources [3]. In integrated sensing and communication (ISAC) systems, designing computationally efficient beamforming techniques is an essential task. A widely adopted approach aims to ensure communication quality-of-service (QoS) with minimal degradation in sensing performance [4], [5]. The sensing objective is typically to maximize the effective radar target illumination while minimizing cross-correlations, following the state-of-the-art multiple-input multiple-output (MIMO) radar framework from [6]. This formulation, augmented with communication QoS constraints, serves as a foundation in many ISAC beamforming studies [7], [8]. However, the high computational complexity of this ap-proach renders it impractical for massive MIMO scenarios [9], [10]. Another fundamental limitation of many ISAC beam-forming methods is their reliance on perfect instantaneous 
+
+The authors acknowledge the financial support by the Federal Ministry of Research, Technology and Space (BMFTR) in Germany in the programme of “Souverän. Digital. Vernetzt.” Joint project 6G-RIC, project identification numbers: 16KISK020K and 16KISK030. ( Corresponding author: Berkan Kilic. )The authors are with the Wireless Communications and Networks Depart-ment, Fraunhofer Heinrich Hertz Institute (HHI), 10587, Berlin, Germany (e-mail: {berkan.kilic, kenan.turbic, slawomir.stanczak}@hhi.fraunhofer.de). S. Sta´ nczak is also with Technische Universität Berlin, 10587, Berlin, Germany. 
+
+channel state information (CSI) knowledge at the transmitter (Tx) [7], [8]. However, accurate estimation of instantaneous CSI is particularly difficult in frequency division duplexing (FDD) systems due to frequency separation between uplink and downlink channels [11]. Moreover, it necessitates frequent feedback from users to base station (BS), leading to sig-nificantly increased communication overhead. Consequently, more practical and robust beamforming approaches assume only statistical CSI knowledge at the Tx [12], leading to the development of long-term beamforming strategies, which need to adapt only to the changes in the large-scale fading parameters [13]. In this letter, we present a covariance matrix design ap-proach for long-term ISAC beamforming that extends our previous matrix nearness-based MIMO radar design method [9], [10]. We propose a novel reformulation of this method, with two major contributions. First, we include minimum required signal-to-noise ratio (SNR) levels for communica-tion users as additional design constraints, thereby providing a mechanism to incorporate QoS requirements for reliable multi-user MIMO (MU-MIMO) communication. Second, we propose a new solver, leveraging the Courant-Fischer theorem [14] to relax the computational burden by avoiding evaluation of eigenvalue decompositions (EVDs) in the initially proposed algorithm. Numerical results demonstrate the ability of the proposed method to design beampatterns that satisfy both communication and sensing requirements, while significantly reducing the computation time required for their synthesis. The rest of this letter is structured as follows. Section II presents the system model, Section III defines the adopted communication and sensing design metrics, and Section IV presents the proposed beamforming approach. Numerical re-sults are presented in Section V and the concluding remarks are given in Section VI. The following notation is adopted. Matrices and vectors are represented by uppercase and lowercase bold letters, respec-tively. The i-th entry of a vector x is xi, while xj denotes the 
+
+j-th column of a matrix X, with Xij being its ij -th entry. The 
+
+ℓ2-norm of x is ∥x∥, and the Frobenius norm of X is ∥X∥F .The transpose and Hermitian transpose of X are XT and XH ,respectively. The trace of X is Tr( X), and ( X ⪰ 0) X ≻ 0
+
+indicates that X is positive (semi-)definite. The identity matrix of size N is IN , and E[ · ] denotes statistical expectation. 
+
+©2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. 
+
+II. S YSTEM MODEL 
+
+We consider a single-cell ISAC system employing a uniform linear array (ULA) with MT antennas and half-wavelength inter-element spacing. The ISAC BS operates in the far-field and performs MIMO radar sensing while simultaneously arXiv:2608.22621v1 [eess.SP] 23 Aug 2026 2ISAC  
+
+> Base
+> Station
+
+⋮
+
+> i-th
+> User
+
+⋮
+
+> +
+> +
+> +
+> Sensing target direction
+
+Fig. 1: Illustration of the considered system model. serving KC < M T users, where each user is equipped with 
+
+MR antennas. Let x[n] ∈ CMT ×1 denote the baseband dual-functional Tx signal vector at the n-th discrete time instance within the block length of Nt, (i.e., 1 ≤ n ≤ Nt), used to simultaneously perform sensing and communication. From a sensing perspective, the Tx beampattern describes how the radiated power is spatially distributed as a function of the azimuth direction ϕ, and can be expressed as [3] 
+
+P (ϕ) = aHT (ϕ)Ra T (ϕ), (1) where R := E x[n]xH [n] is the waveform covariance matrix, and aT (ϕ) denotes the Tx array steering vector, given by: 
+
+aT (ϕ) := [1 ejπ sin ϕ ... e j(MT −1) π sin ϕ]T . (2) The Tx signal x[n] is also used for MU-MIMO communi-cation, and the corresponding complex baseband signal at the 
+
+i-th communication user’s receiver (Rx) can be written as [1] 
+
+yi[n] = Hix[n] + wi[n], (3) where Hi ∈ CMR×MT denotes the MIMO channel matrix between the BS and i-th user, and wi[n] ∼ CN (0, σ 2 
+
+> i
+
+IMR )
+
+are i.i.d. additive white Gaussian noise samples. A simplified illustration of the considered system model is given in Fig. 1. Although the beamforming framework proposed in this work is not constrained to any specific structure of channel matrix, for the analysis, we adopt the Rician channel model, given by [1] 
+
+Hi =
+
+r βi
+
+K + 1 
+
+√Ke jψ i aR(ϕi)aHT (ϕi) + Hsc 
+
+
+
+, (4) where K is the Rician factor, ϕi ∈ [−π/ 2, π/ 2] denotes the azimuth angle at which the BS observes the user (i.e., communication line-of-sight (LoS) direction), βi is the path-loss coefficient, ψi ∼ U [0 , 2π] is the uniformly distributed random phase, aR(ϕi) ∈ CMR×1 is the corresponding Rx ar-ray steering vector, and Hsc accounts for the multipath fading effects with the entries assumed to be i.i.d. with CN (0 , 1) .III. D ESIGN OPTIMIZATION CRITERIA 
+
+A. Beamforming Optimization for Sensing 
+
+The main objective of MIMO radar systems is to focus the available signaling energy towards the regions where radar targets are anticipated [3]. To formulate this objective, we define the full grid Φg = { ¯ϕi}Nϕ
+
+> i=1
+
+, Nϕ ≫ MT , that ensures dense sampling for accurate beampattern approximation across all angles, with Φm ⊆ Φg defining the mainlobe region where sensing targets are expected to be present. By assuming that every ¯ϕi ∈ Φm is given the same priority, the ideal normalized Tx beampattern is defined as 
+
+Pd( ¯ϕi) := 
+
+(
+
+1, if ¯ϕi ∈ Φm,ε, otherwise , (5) where ε ≥ 0 is a sufficiently small constant, corresponding to the desired peak sidelobe level (PSL). The objective of MIMO radar is to construct R such that 
+
+P ( ¯ϕi) is as close as possible to ηP d( ¯ϕi), for every ¯ϕi ∈ Φg ,where η > 0 is introduced for power normalization since 
+
+P (ϕ), as seen in (1), scales with Tx power. At the same time, for improved radar Rx processing, the cross-correlations between signals transmitted in different directions should be low. This implies that |aHT ( ¯ϕi)Ra T ( ¯ϕj )| should be sufficiently small for ¯ϕi̸ = ¯ϕj [6]. In our recent work [9], we unified these two objectives based on the following matrix nearness 
+
+formulation 
+
+Js(R) := ∥DH RD − ηT ∥2 
+
+> F
+
+, (6) where the columns of D contain steering vectors correspond-ing to all grid points (array manifold), i.e., 
+
+D := 1
+
+pNϕ
+
+aT ( ¯ϕ1) aT ( ¯ϕ2) ... aT ( ¯ϕNϕ ) , (7) and 
+
+Tij := 
+
+(
+
+Pd( ¯ϕi), if i = j, 
+
+0, otherwise , (8) whose diagonals determine the desired beampattern, with zero off-diagonals introduced to suppress cross-correlations. When the grid points ¯ϕi are obtained by uniformly sampling the electrical angle domain, π sin ϕ ∈ [−π, π ), for the considered ULA configuration, DD H = IMT holds and, as shown in our prior work [9], we can rewrite (6) as 
+
+Js(R) = ∥R − ˜T ∥2 
+
+> F
+
++ C, (9) where ˜T := ηDT D H , and the term C does not depend on 
+
+R and is therefore irrelevant to the optimization over R.
+
+B. Beamforming Optimization for Communication 
+
+We adopt the SNR experienced by each user as the commu-nication QoS metric [2]. By considering the standard assump-tion of independent Hi and x [15], the SNR experienced by the i-th user can be written as 1
+
+SNR i = E[∥Hix∥2]
+
+E[∥wi∥2] = Tr( ΩiR)
+
+σ2 
+
+> i
+
+MR
+
+, (10) where Ωi := E[HHi Hi] is the covariance matrix of the channel, which is assumed to be known by the BS. Since Ωi
+
+> 1The multi-user interference is not explicitly considered here; its suppres-sion is assumed to be addressed in the successive waveform design step [10]. 3
+
+changes much slower than the fast fading channel matrix Hi,acquiring the knowledge of Ωi entails a significantly lower overhead than the CSI feedback of individual channel real-izations Hi. The resulting approach is often called long-term beamforming [13]. Imposing the SNR requirements means that the following inequalities need to be satisfied 
+
+Tr( ΩiR) ≥ ˜Γiσ2 
+
+> i
+
+MR, 1 ≤ i ≤ KC , (11) where ˜Γi ≥ 0 is the minimum tolerable SNR for the i-th user. IV. W AVEFORM COVARIANCE DESIGN METHODOLOGY 
+
+A. Proposed Problem Formulation 
+
+Following the design criteria described in Sections III-A and III-B, we can formulate an optimization problem admitting (9) as the sensing cost function and including communication constraints (11). For practical feasibility, R must also satisfy additional conditions. Let PT denote the total power budget of the system. Assuming that the energy budget is to be fully utilized ( Tr( R) = PT ), under the equal per-antenna power constraint, we must have Rjj = PT /M T , 1 ≤ j ≤ MT . More-over, as a covariance matrix, R must be positive semidefinite by definition. We can now formulate a convex optimization framework for waveform covariance matrix design in ISAC systems: 
+
+min 
+
+> R
+
+12 ∥R − ˜T ∥2
+
+> F
+
+s.t. Tr( ΩiR) ≥ Γi, 1 ≤ i ≤ KC ,
+
+Tr( Ej R) = PT /M T , 1 ≤ j ≤ MT ,
+
+R ⪰ 0, (12) where Γi := ˜Γiσ2 
+
+> i
+
+MR and Ej is a matrix with 1 at its j-th diagonal and zeros otherwise. We note that by removing the communication constraints from (12), we obtain our previ-ously proposed sensing covariance matrix design approach [9]. 
+
+B. Solution via Direct Eigendecomposition 
+
+Assuming that the Slater’s condition holds, i.e., there exists an R ≻ 0 satisfying the affine constraints in (12), strong duality holds and the problem can be optimally solved via its dual. Here we extend our dual problem formulation from [9] by additionally considering the communication constraints. As these constraints are affine, the extension is straightforward. The reader is referred to [9], [10] for the full derivation. The solution is based on the approach proposed in [16], acceler-ated with adaptively restarted momentum terms [17]–[19] for improved convergence. Its outline is provided as follows. Let μj ∈ R, and νi ≥ 0 be the Lagrange multipliers associ-ated with the affine equality and inequality constraints, respec-tively. The corresponding terms with momentum updates are denoted by ¯μj and ¯νi. If μ⋆ and ν⋆ are the optimal Lagrange multipliers, which can be found according to Algorithm 1, then the optimal covariance matrix is R⋆ := R(μ⋆, ν⋆) where R
+
+at the k-th iteration is computed as 
+
+R( ¯ μk, ¯νk) = 
+
+h ˜T − B( ¯ μk) + C(¯ νk)
+
+i
+
+> +
+
+, (13) 
+
+Algorithm 1 Procedure to solve (12), based on accelerated projected gradient method with adaptive momentum restart 
+
+Input: ˜T , {Ωi}KC
+
+> i=1
+
+, {Γi}KC
+
+> i=1
+
+, PT , MT
+
+Output: μ⋆, ν⋆ 
+
+> 1:
+
+Initialize ν0 = ν−1 = 0, μ0 = μ−1 = 0, t0 = t−1 = 1  
+
+> 2:
+
+for k ≥ 0 do  
+
+> 3:
+
+tk =  1 + p1 + 4( tk−1)2/2 
+
+> 4:
+
+¯νk = νk +  (tk−1 − 1) /t k(νk − νk−1) 
+
+> 5:
+
+¯μk = μk +  (tk−1 − 1) /t k(μk − μk−1) 
+
+> 6:
+
+νk+1  
+
+> i
+
+=  ¯νki + γ(−Tr( ΩiR(¯μk, ¯νk)) + Γ i) 
+
+> +
+> 7:
+
+μk+1  
+
+> j
+
+= ¯ μkj + γ(Tr( Ej R(¯μk, ¯νk)) − PT /M T ) 
+
+> 8:
+
+if (¯νk − νk+1 )T (νk+1 − νk) + ( ¯μk − μk+1 )T (μk+1 −
+
+μk) > 0 
+
+> 9:
+
+¯νk = νk, ¯μk = μk 
+
+> 10:
+
+νk+1  
+
+> i
+
+=  ¯νki + γ(−Tr( ΩiR(¯μk, ¯νk)) + Γ i) 
+
+> +
+> 11:
+
+μk+1  
+
+> j
+
+= ¯ μkj + γ(Tr( Ej R(¯μk, ¯νk)) − PT /M T ) 
+
+> 12:
+
+if ∥¯νk − νk+1 ∥/K C + ∥¯μk − μk+1 ∥/M T ≤ ϵ 
+
+> 13:
+
+report μ⋆ = μk+1 and ν⋆ = νk+1 
+
+with 
+
+B( ¯ μk) := 
+
+> MT
+
+X
+
+> j=1
+
+¯μkj Ej , (14) 
+
+C(¯ νk) := 
+
+> KC
+
+X
+
+> i=1
+
+¯νki Ωi. (15) In (13), the operator [M ]+ projects a Hermitian matrix M
+
+onto the positive semidefinite cone, i.e, 
+
+[M ]+ := X
+
+> i
+
+(λi)+qiqHi , (16) where λi and qi denote the eigenvalues and eigenvectors of 
+
+M , respectively, and (λi)+ := max( λi, 0) .The evaluation of (13) is required for the gradient computa-tions in Steps 6 and 7 (and also in Steps 10 and 11 if the restart condition holds) of Algorithm 1. In these steps, γ = 1 /L 
+
+denotes the step-size, where L is the Lipschitz constant for the mapping from ( ν, μ ) to these gradients, which can be computed as [16] 
+
+L =
+
+> MT
+
+X
+
+> j=1
+
+λ2max (Ej ) + 
+
+> KC
+
+X
+
+> i=1
+
+λ2max (Ωi) = MT +
+
+> KC
+
+X
+
+> i=1
+
+λ2max (Ωi),
+
+(17) where λmax (.) denotes the maximum eigenvalue. 
+
+C. Derivation of a Condition to Avoid Eigendecomposition 
+
+The computationally dominant operation in Algorithm 1 is the evaluation of the EVD as part of the projection in (13), with complexity of O(M 3 
+
+> T
+
+). While Algorithm 1 remains significantly more efficient than alternative interior-point meth-ods, which have a per-iteration complexity of O(M 6 
+
+> T
+
+) when applied to solve (12) [16], its computational load can be further reduced by avoiding the projection step if the argument of [.]+
+
+in (13) is already positive semidefinite, i.e., 
+
+λmin 
+
+ ˜T − B( ¯ μk) + C(¯ νk)
+
+
+
+≥ 0, (18) 4
+
+where λmin (.) denotes the minimum eigenvalue. Here, we de-rive a simple condition to verify (18) to avoid the unnecessary EVD computations. For Hermitian matrices A1 and A2, according to the Courant-Fischer theorem [14, p. 783, Thm. 20.A.1], we have 
+
+λmin (A1 + A2) ≥ λmin (A1) + λmin (A2). (19) Since ˜T , B(¯μk) and C(¯νk) are all Hermitian matrices, we can apply (19) to (18), i.e., 
+
+λmin 
+
+ ˜T − B(¯μk) + C(¯νk)
+
+
+
+≥ λmin ( ˜T ) + λmin (−B(¯μk)) + λmin (C(¯νk)) . (20) Since B(¯μk) is a diagonal matrix by definition (14), we write 
+
+λmin (−B(¯μk)) = −λmax (B(¯μk)) = − max  
+
+> i
+
+¯μki . (21) On the other hand, since ¯νki ≥ 0 and λmin (Ωi) ≥ 0, from (19) we have, 
+
+λmin (C(¯νk)) = λmin 
+
+> KC
+
+X
+
+> i=1
+
+¯νki Ωi
+
+!
+
+≥
+
+> KC
+
+X
+
+> i=1
+
+¯νki λmin (Ωi).
+
+(22) By combining (20), (21) and (22), we obtain 
+
+λmin 
+
+ ˜T − B(¯μk) + C(¯νk)
+
+
+
+≥ λmin ( ˜T ) − max  
+
+> j
+
+¯μkj +
+
+> KC
+
+X
+
+> i=1
+
+¯νki λmin (Ωi). (23) By combining (18) and (23), we finally obtain a sufficient condition to avoid the EVD computation in (13), i.e., 
+
+λmin ( ˜T ) − max  
+
+> j
+
+¯μkj +
+
+> KC
+
+X
+
+> i=1
+
+¯νki λmin (Ωi) ≥ 0, (24) which guarantees the positive semidefiniteness of the argument of [.]+ in (13). Moreover, λmin ( ˜T ) and λmin (Ωi) need to be computed only once, therefore, their computation does not increase the computational complexity of Algorithm 1. V. S IMULATION RESULTS 
+
+A. Considered Simulation Scenario and Performance Metrics 
+
+To evaluate the performance of the proposed method, we consider a long-term beamforming scenario under the Ri-cian channel model, i.e., Ωi = E[HHi Hi] where Hi is modeled according to (4) with Rician factor K = 5. We simulate KC = 5 communication users with LoS directions 
+
+{− 60 ◦, −40 ◦, 0◦, 30 ◦, 55 ◦}. The numbers of antennas at the BS and at each user are set to MT = 128 and MR = 2 ,respectively. The path loss and noise standard deviation pa-rameters of all users are fixed to unity, i.e., βi = σi = 1 for all 1 ≤ i ≤ KC . The total BS power budget is PT = 43 
+
+dBm. The grid size is Nϕ = 2048 . Although the method supports different SNR thresholds per user, we set ˜Γi = ˜Γ
+
+for all 1 ≤ i ≤ KC for simplicity. To generate the desired beampattern, we set ε = 0 .01 in (5). We fix ϵ = 10 −10 in Step 12 of Algorithm 1 for the stopping condition. We set 
+
+η = PT /Tr( DT D H ) in (9), resulting in Tr( ˜T ) = Tr( R).0 5 10 15 20 25 
+
+˜Γ [dB] 
+
+35 45 55 65 75 85 95 
+
+> Pm/P T [%]
+
+-12.5 -10.0 -7.5 -5.0 -2.5 0.0 
+
+> PSL [dB]
+
+Fig. 2: Sensing performance under different communication SNR constraints. We consider a scenario with a single sensing mainlobe located at 0◦, with a desired beamwidth of 20 ◦. To evaluate the beampattern quality for sensing, we calculate the PSL and the fraction of the total Tx power transmitted towards mainlobe directions, i.e., Pm/P T [9]. In Section V-B, we investigate the sensing performance of the beampatterns obtained based on the framework (12) under different communication SNR constraints. In Section V-C, we analyze the effectiveness of the conditioned acceleration method from Section IV-C. 
+
+B. Sensing and Communication Trade-off 
+
+We examine the sensing performance under different SNR requirements for communication users by changing ˜Γ in (11). Fig. 2 shows that when higher SNRs are required, the obtained 
+
+Pm/P T values decrease and the PSL increases, i.e., the sensing performance deteriorates. This is expected since more power for communication must be allocated to meet higher communication SNR requirements. This can also be observed from Fig. 3, showing the beam-patterns generated for ˜Γ = 10 dB and ˜Γ = 25 dB. The figure clearly shows that stronger beams are formed in the LoS directions of users for the minimum required SNR of 25 dB. For the LoS direction at ϕ = 0 ◦, which is in the sensing region of the mainlobe, for ˜Γ = 25 dB, we observe a peak, which is not present when ˜Γ = 10 dB, since in the latter case the sensing power along ϕ = 0 ◦ already satisfies the SNR constraint for the corresponding user. 
+
+C. The Effectiveness of Algorithm Acceleration 
+
+To analyze the effect of implementing the condition (24), Table I summarizes the computation times obtained with the Conditioned Algorithm 1 (C-Alg. 1), i.e., implementing the acceleration method described in Section IV-C, together with those obtained with the (non-accelerated) Algorithm 1. We report results for ˜Γ between 10 dB and 25 dB, with 2.5 dB increment. The reported execution times are evaluated on a personal computer, with an Intel i7-1365U CPU and 16 GB RAM. As we observe from the table, C-Alg. 1 avoids all EVD computations 2 for ˜Γ ≤ 15 dB. For these scenarios, C-Alg. 1 
+
+> 2The number of iterations required for convergence together with the number of momentum restarts give the total number of EVD evaluations. 5
+
+−90 ◦ −60 ◦ −30 ◦ 0◦ 30 ◦ 60 ◦ 90 ◦
+
+φ
+
+−40 
+
+−35 
+
+−30 
+
+−25 
+
+−20 
+
+−15 
+
+−10 
+
+−50
+
+> P (φ) [dB]
+
+˜Γ = 25 [dB] ˜Γ = 10 [dB] 
+
+Fig. 3: Normalized beampatterns under communication con-straints ˜Γ = 10 dB and ˜Γ = 25 dB. Blue lines denote the communication LoS directions and the gray region denotes the desired sensing beampattern. TABLE I: Comparison of computation times and the number of required EVD evaluations across different SNR values. 
+
+SNR [dB] 10.0 12.5 15.0 17.5 20.0 22.5 25.0 Elapsed Time [s] Alg. 1 12.59 13.77 14.86 49.74 61.12 65.55 73.77 C-Alg. 1 2.16 2.37 2.44 39.02 52.06 57.93 63.96 Number of Required EVD Evaluations Alg. 1 1620 1756 1812 4085 4996 5366 5738 C-Alg. 1 0 0 0 2841 4044 4593 5057 
+
+reduces the computation time by around six times, where it takes only around 2 s to get the final covariance matrix output. When ˜Γ increases, the effectiveness of the acceleration method in C-Alg. 1 reduces. For ˜Γ = 17 .5 dB, C-Alg. 1 avoids 
+
+30% of the required EVD computations, while this ratio is 
+
+19% , 14% , and 11% when ˜Γ = 20 dB, ˜Γ = 22 .5 dB, and 
+
+˜Γ = 25 dB, respectively. However, C-Alg. 1 always reduces the number of required EVD evaluations and hence the compu-tation time. Interestingly, C-Alg. 1 successfully avoids all un-necessary EVDs in all scenarios considered here, i.e., the con-dition (24) successfully detects all the cases where (18) holds. Finally, we note that although (12) is a convex optimiza-tion problem and can, in principle, be solved using general-purpose solvers, practical implementation poses significant challenges. Specifically, when the problem is formulated in CVXPY [20] and solved using the modern interior-point solver Clarabel [21], the solver fails on the personal computer used for this analysis, due to an excessive memory consumption caused by the high problem dimensionality. VI. C ONCLUSIONS 
+
+In this letter, we propose a novel ISAC beamforming method for joint MIMO radar sensing and MU-MIMO com-munication. The contribution of this work is twofold. First, we extend our previous beamforming problem formulation [9] for ISAC systems, by incorporating additional communication SNR constraints. Second, we propose an acceleration method to reduce the required computation time, by avoiding the time-consuming EVD evaluations playing the central role in the solution algorithm. Unlike most of the existing approaches, our method only requires CSI statistics at BS, thereby enhancing its practical feasibility and reducing the overhead of CSI feedback required from users to BS. Based on numerical simulations, we demonstrate that the proposed method can synthesize beampatterns meeting both communication and sensing requirements. Moreover, the pro-posed acceleration method is observed to reduce the overall computation time by up to six times, by effectively avoiding unnecessary EVD evaluations in the considered scenarios. REFERENCES [1] D. Tse and P. Viswanath, Fundamentals of Wireless Communication .Cambridge, UK: Cambridge University Press, 2005. [2] A. B. Gershman, N. D. Sidiropoulos, S. Shahbazpanahi, M. Bengtsson, and B. Ottersten, “Convex optimization-based beamforming,” IEEE Signal Process. Mag. , vol. 27, no. 3, pp. 62–75, May 2010. [3] J. Li and P. Stoica, Eds., MIMO Radar Signal Processing . Hoboken, NJ, USA: Wiley, 2008. [4] D. Wen, Y. Zhou, X. Li, Y. Shi, K. Huang, and K. B. Letaief, “A survey on integrated sensing, communication, and computation,” IEEE Commun. Surveys Tut. , 2025, early access. [5] B. Tang, D. Li, W. Wu, A. Saini, P. Babu, and P. Stoica, “Dual-function beamforming design for multi-target localization and reliable communications,” IEEE Trans. Signal Process. , vol. 73, pp. 559–573, 2025. [6] P. Stoica, J. Li, and Y. Xie, “On probing signal design for MIMO radar,” 
+
+IEEE Trans. Signal Process. , vol. 55, no. 8, pp. 4151–4161, Aug. 2007. [7] X. Liu, T. Huang, N. Shlezinger, Y. Liu, J. Zhou, and Y. C. Eldar, “Joint transmit beamforming for multiuser MIMO communications and MIMO radar,” IEEE Trans. Signal Process. , vol. 68, pp. 3929–3944, 2020. [8] H. Hua, J. Xu, and T. X. Han, “Optimal transmit beamforming for integrated sensing and communication,” IEEE Trans. Veh. Technol. ,vol. 72, no. 8, pp. 10 588–10 603, Aug. 2023. [9] B. Kilic, K. Turbic, M. Kasparick, and S. Sta´ nczak, “Beampattern synthesis with a computationally efficient matrix nearness approach,” in Proc. IEEE Global Commun. Conf. (GLOBECOM) Workshops , Cape Town, South Africa, Dec. 2024. [10] B. Kilic, K. Turbic, and S. Sta´ nczak, “Waveform design for simultaneous MIMO radar sensing and multi-user communication,” IEEE J. Sel. Areas Commun. , 2025, early access. [11] M. Bengtsson and B. Ottersten, “Optimum and suboptimum transmit beamforming,” in Handbook of Antennas in Wireless Communications ,L. C. Godara, Ed. Boca Raton, FL, USA: CRC Press, 2002, ch. 18. [12] X. Huang, J. Zhang, W. Xia, S. Cai, F. Fan, and C. Yuen, “Statistical CSI assisted beamforming for co-existence of MIMO radar and MIMO communication system,” IEEE Trans. Veh. Technol. , 2025, early access. [13] A. Lozano, “Long-term transmit beamforming for wireless multicast-ing,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP) ,vol. 3, Honolulu, HI, USA, Apr. 2007. [14] A. W. Marshall, I. Olkin, and B. C. Arnold, Inequalities: Theory of Majorization and Its Applications , 2nd ed. New York, NY, USA: Springer, 2011. [15] E. Telatar, “Capacity of multi-antenna gaussian channels,” Eur. Trans. Telecommun. , vol. 10, no. 6, pp. 585–595, Nov. 1999. [16] S. Boyd and L. Xiao, “Least-squares covariance matrix adjustment,” 
+
+SIAM J. Matrix Anal. Appl. , vol. 27, no. 2, pp. 532–546, 2005. [17] A. Beck and M. Teboulle, “A fast iterative shrinkage-thresholding algorithm for linear inverse problems,” SIAM J. Imag. Sci. , vol. 2, no. 1, pp. 183–202, 2009. [18] P. Giselsson and S. Boyd, “Monotonicity and restart in fast gradient methods,” in Proc. IEEE Conf. Decis. Control (CDC) , Los Angeles, USA, Dec. 2014. [19] B. O’Donoghue and E. Candes, “Adaptive restart for accelerated gradient schemes,” Fond. Comp. Math , vol. 15, pp. 715–732, Jul. 2015. [20] S. Diamond and S. Boyd, “CVXPY: A python-embedded modeling language for convex optimization,” J. Mach. Learning Res. , vol. 17, no. 83, pp. 1–5, 2016. [21] P. J. Goulart and Y. Chen, “Clarabel: An interior-point solver for conic programs with quadratic objectives,” 2024, arXiv:2405.12762.

@@ -1,0 +1,470 @@
+Title: Deep Learning-Based Multi-User Communication Design for Dense IoT Networks: Interference-Aware Finite-Blocklength Communication and Preliminary MIMO Extensions
+
+URL Source: https://arxiv.org/pdf/2608.22923v1
+
+Published Time: Tue, 25 Aug 2026 01:44:15 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Deep Learning-Based Multi-User Communication Design for Dense IoT Networks: Interference-Aware Finite-Blocklength Communication and Preliminary MIMO Extensions 
+
+Arkadeep Sinha *, Shubham Paul *, R. Manivasakan *
+
+Email: paulshubham96@outlook.com, arkadeepsinha98@gmail.com 
+
+> *
+
+Indian Institute of Technology Madras 
+
+Abstract —Dense IoT networks require reliable communication despite limited spectrum and substantial multi-user interference while maintaining manageable receiver complexity. This work introduces a deep-learning-based end-to-end multi-user commu-nication design for interference-limited finite-blocklength IoT scenarios, focusing on short and medium blocklengths. We extend a prior 2-user SiameseNet transceiver framework to accommodate 2, 4, and 8 users, leveraging learned redundancy for interference suppression and noise robustness. Compared to conventional non-orthogonal access baselines, our method demon-strates strong Block Error Rate (BLER) performance across various scenarios without resorting to joint detection; the per-user decoder scales roughly linearly with the number of users. Further, we examine the robustness under interference mis-match and unequal interference strengths, critical for practical deployments with heterogeneous devices. The Latent-space anal-ysis reveals that the learned codeword distance increases as the effective per-user rate decreases, corroborating with the observed BLER improvements. In addition, we also present preliminary results for a 2X2 MIMO setup under fixed-channel CSIT and CSIR, indicating potential for extending the framework to IoT gateways with multiple antennas. 
+
+Index Terms —Internet of Things (IoT), Multi-user interference, End-to-End learning, Interference-aware Communication, Short-blocklength coding, MIMO. 
+
+I. I NTRODUCTION 
+
+In dense Internet of Things (IoT) networks, a large num-ber of connected devices transmit finite-blocklength packets while managing a stringent spectrum, latency, and reliability constraints. These packets, often short, may also differ in blocklength depending on payload size and access conditions. Consequently, multi-user interference emerges as a signifi-cant bottleneck, which requires communication strategies that enhance noise robustness, manage interference, and reduce decoding complexity in finite blocklengths. Conventional methods limit the interference by orthogonalis-ing resources (TDMA, FDMA, CDMA) and employing robust Forward Error Correction (FEC) like Polar [1], LDPC [2] and Turbo codes to meet error targets. While these approaches are effective, these strategies can re-duce spectral efficiency . Alternatives such as Non-Orthogonal Multiple Access (NOMA [3]) and Rate-Splitting Multiple Ac-cess (RSMA) [4]–[6] enhance spectral efficiency but often introduce complexities in joint detection [7]–[12], presenting scalability challenges, especially within low-complexity, scal-able IoT environments. DL allows End-to-End (E2E) physical-layer optimisation, integrating modulation, coding, and decoding, along with ro-bustness techniques such as variational inference and back-propagation through non-differentiable channels [13], [14]. For NOMA, DL has supported joint detection and MIMO-SIC optimisation [15], [16]. However, prior work has not focused on E2E optimisation in high-interference regimes. For Z-interference channels, a deep autoencoder (DAE-ZIC) was benchmarked in [17]. TwinNet and SiameseNet [18] leveraged interference for performance gains but were limited to two users. Our research work targets scenarios relevant to dense IoT connectivity, where multiple devices simultaneously compete for reliable transmission amid mutual interference. We assess Block Error Rate (BLER) performance as well as ro-bustness against incorrect interference assumptions and varying interference strengths, analysing learned codeword geometry for insights into performance behaviour. The main contributions of this paper are as follows:  
+
+> •
+
+We generalise the SiameseNet transceiver model in [18], from 2-user scenario to 4-user and 8-user interference-limited settings and provide a systematic BLER evaluation across these regimes.  
+
+> •
+
+We investigate the robustness against practical mis-matches, including mismatched interference strength and unequal interference strength assumptions.  
+
+> •
+
+We analyse learned latent codeword geometry through minimum-distance and correlation measures to elucidate observed BLER trends.  
+
+> •
+
+We compared our proposed approach and results to both orthogonal and non-orthogonal baselines, discussing asso-ciated decoding complexity trade-offs.  
+
+> •
+
+We also provide preliminary 2×2 MIMO results under fixed-channel assumptions as a foundational step beyond single-input single-output (SISO) contexts. The paper is structured as follows: Section II presents the System Model, Section III details the Siamese architecture and 
+
+979-8-3195-4565-7/26/$31.00 © 2026 IEEE arXiv:2608.22923v1 [cs.IT] 24 Aug 2026 Encoder 1  
+
+> Encoder N
+> Decoder 1
+> Decoder N
+> Noise
+> Encoder 2 Decoder 2
+
+Fig. 1. Multi-user interference system model for N users. 
+
+Decoding Complexity, Section IV reports BLER Performance, Section V provides preliminary Results with MIMO, and Section VI Analyses the Latent Codewords and Conclusions are drawn in Section VII. II. S YSTEM MODEL 
+
+The Siamese network of [18] considered two users with symmetric interference. Here we extend it for N ∈ { 4, 8} users. The interference model is shown in Fig. 1. The dashed lines indicate interferers not explicitly drawn. The interference from user j to user i has magnitude αij , with αij = αji .As in [18], user i maps a k-bit message Mi ∈ { 0, 1}k to a real n-length codeword zi via 
+
+Ei ≡ Fθi : Mi → zi, i ∈ { 1, 2, . . . , N }, (1) 
+
+E∥zi∥22
+
+ = n, (2) where θi are the encoder parameters. The received vector at 
+
+Rx i is 
+
+yi = zi +
+
+> N
+
+X 
+
+> j=1
+> j̸=i
+
+αij zj + wi, wi ∼ N (0 , σ 2). (3) where wi denotes white noise samples. Decoder Di estimates 
+
+ˆMi from yi:
+
+Di ≡ Gϕi : yi → ˆMi, i ∈ { 1, 2, . . . , N }, (4) 
+
+Pe = 1
+
+N
+
+> N
+
+X
+
+> j=1
+
+Pr 
+
+ ˆMj̸ = Mj
+
+
+
+, (5) where ϕi are decoder parameters. III. S IAMESE ARCHITECTURE AND DECODING 
+
+COMPLEXITY 
+
+A. Model Structure and Design 
+
+Following the algorithm given in [18], interfering users learn from errors observed at both decoders. We modify the algorithm given in [18] to allow interference from all users. The autoencoder comprises an encoder, a non-trainable chan-nel layer (latent perturbations), and a decoder. As shown in Fig. 2, the encoder processes a one-hot input through a ReLU dense layer, a linear layer, batch normalisation, and an additive Gaussian layer (AWGN surrogate). The decoder uses a ReLU Encoder 
+
+Input Layer 
+
+Dense, ReLu 
+
+Dense, Linear 
+
+BatchNorm 
+
+Decoder 
+
+Input Layer 
+
+Dense, Linear 
+
+Dense, ReLu 
+
+Softmax 
+
+Fig. 2. Encoder and Decoder Structure Encoder 1  
+
+> Training message
+> Codeword
+> Decoder 1
+> Decoded message
+> Categorical Cross Entropy Loss
+> Noise
+> Interference from (N-1) users
+> Back-propagation from (N-1) users
+> Categorical Cross Entropy Loss from
+> 2nd User
+> Categorical Cross Entropy Loss from N th
+> User
+> Decoder 2
+> Decoder N
+
+Fig. 3. The Siamese Network Architecture and Training (extended to N users). 
+
+hidden layer, a linear layer, and a softmax output. Interference is added at the channel input. For N users and blocklength L, the hidden and encoder output (BatchNorm) sizes are N L . The decoder has one ReLU hidden layer of size N L , followed by a linear layer and softmax. Interference from other users is injected at the current user’s channel input. We encourage the reader to refer [18] for further details about the model. Fig. 3 shows the Siamese network architecture extended to N users. A small change in θi affects all costs {Cj }Nj=1 , enabling joint encoder learning, as demonstrated in Algorithm 1. In contrast, small perturbations in ϕi only affect Ci, so decoders are learned independently. This is indicated by backpropagation arrows: losses from User 2 feed only Decoder 2 and Encoder 1, not Decoder 1 or Decoder N .
+
+B. Decoder Complexity 
+
+The decoder for user i operates exclusively on yi ∈ Rn with a single hidden layer of size proportional to N n (n is the length of the codeword), yielding forward-pass complexity O(N n ),Algorithm 1 Training the Siamese network  
+
+> 1:
+
+while epoch < maxepochs do   
+
+> 2: Eb
+> N0
+
+← Uniform[1 , 12] dB  
+
+> 3:
+
+wi ← AWGN 
+
+
+
+σ
+
+ Eb
+
+> N0
+
+ 
+
+for i = 1 , . . . , N  
+
+> 4:
+
+zi ← Eθi (Mi) for i = 1 , . . . , N  
+
+> 5:
+
+yi ← zi + P  
+
+> j̸=i
+
+αij zj + wi 
+
+> 6:
+
+ˆMi ← Dϕi (yi) 
+
+> 7:
+
+Ci ← −L [ ˆMi, M i] 
+
+> 8:
+
+ϕi ← ϕi − η ∇ϕi Ci for i = 1 , . . . , N  
+
+> 9:
+
+θi ← θi − η PNj=1 ∇θi Cj for i = 1 , . . . , N  
+
+> 10:
+
+end while                       
+
+> TABLE I PER -RECEIVER DECODING COMPLEXITY .
+> Method Decoder Type Per-receiver Complexity
+> SiameseNet (Proposed) Per-user MLP O(n)
+> Joint MLD Exhaustive joint search O n2kN 
+> NOMA SIC over user streams O(N C dec (n) + N n )
+> RSMA Common-stream SIC + private decoding O(( N+ 1) Cdec (n) + ( N+ 1) n)
+> TDMA / OMA Single-user decoding per slot O(Cdec (n))
+
+which scales linearly with N . In contrast, joint maximum-likelihood detection over all users requires O(2 kN ) evaluations (e.g., 264 for N = 4 , k = 16 ), and NOMA-SIC requires N
+
+successive stages with inter-stage error propagation. Table I summarises representative operation counts for N ∈ { 2, 4, 8}.IV. BLER P ERFORMANCE 
+
+In this section, we carry out experiments on the sys-tems mentioned in the aforementioned section. We study the BLER performances of our models under different scenarios. Our experiments use the following combinations (k, n ) :(4 , 8) , (16 , 64) , (256 , 2048) , for N = 2 , 4 and 8 respectively. These settings place the study in the finite-blocklength regime and span both short and medium blocklengths, allowing us to evaluate performance across a broader operating range rather than only the ultra-short regime. We vary, Eb/N 0 from 0 to 8 dB, and allow each transmitter to interfere with all other receivers given by (3). For fair spectral efficiency, we compare with a TDMA baseline where N users transmit uncoded BPSK symbols per block at a coding rate of 
+
+1/N (Both systems have an overall rate of 1bps/Hz). 
+
+A. Benchmarks and Baselines 
+
+We compare the proposed SiameseNet design against two SIC-based reference schemes: power-domain non-orthogonal multiple access (NOMA) and rate-splitting multiple access (RSMA). In both baselines, the total transmit power is nor-malised as NX
+
+> u=1
+
+pu = N, (6) where u denotes the user and pu denotes the transmit power of the uth user. We use the shorthand 
+
+hi,j =
+
+(
+
+1, j = i, α, j̸ = i, (7) so that the desired signal arrives with unit gain, while interfer-ing users are scaled by the interference factor α.For fairness, each user transmits k information bits and the baselines are configured to match the effective rate used by the SiameseNet design, R = 1 /N .
+
+a) NOMA baseline:: For the NOMA benchmark, the received signal at receiver i is 
+
+yi =
+
+> N
+
+X
+
+> j=1
+
+hi,j 
+
+√pj xj + wi, wi ∼ N (0 , σ 2), (8) where xj denotes the coded BPSK symbol stream of user 
+
+j. Under perfectly symmetric received powers (Experiment I later in this section), a deterministic SIC order is not naturally defined. Therefore, for the NOMA baseline, we use a random SIC order over the interfering users. We note that this choice removes one of NOMA’s principal advantages: an optimised decoding order derived from channel or power asymmetry [8]. This also implies that the optimal deployment of NOMA is contingent on a significant power differential between the 2 users, but our system is not constrained by such limitations. Un-der symmetric power conditions, no such ordering is naturally available, and the random order may underestimate NOMA’s true performance relative to settings where a power differential exists and a greedy decoding order can be applied. Let πi(1) , π i(2) , . . . , π i(N − 1) denote a random ordering of the interfering users at receiver i. Receiver i successively decodes these interference streams, subtracts their reconstructed contributions, and then decodes its own stream. After cancelling the first m−1 decoded interference streams, the residual signal is 
+
+y(m) 
+
+> i
+
+= yi −
+
+> m−1
+
+X
+
+> r=1
+
+hi,π i(r)
+
+√pπi(r) ˆxπi(r). (9) After cancelling all N −1 interfering streams, the desired stream is decoded from 
+
+˜yi = yi − 
+
+> N−1
+
+X
+
+> r=1
+
+hi,π i(r)
+
+√pπi(r) ˆxπi(r). (10) The Log Likelihood Ratio (LLR) for the current BPSK symbol is then calculated from the residual signal, followed by channel decoding. 
+
+b) RSMA baseline:: For the RSMA benchmark, each user splits its message into a common part and a private part. The transmitted signal of user u is written as 
+
+su = pβp u xu,c + p(1 − β)pu xu,p , 0 ≤ β ≤ 1, (11) where xu,c and xu,p denote the coded BPSK common and private streams, respectively, and β controls the power split. The received signal at receiver i is 
+
+yi =
+
+> N
+
+X
+
+> j=1
+
+hi,j sj + wi. (12) Each user still transmits a total of k information bits, now split as k = kc + kp between common and private parts, with 0 1 2 3 4 5 6 7 8
+
+> SNR (dB)
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Block Error Rate (BLER)
+> TDMA Siamese Rate=1/2 Siamese Rate=1/4 Siamese Rate=1/8 PPV Rate=1/2 PPV Rate=1/4 PPV Rate=1/8 RSMA Rate = 1/4 NOMA Rate = 1/4
+
+Fig. 4. BLER versus SNR for N ∈ { 2, 4, 8} under equal interference. 
+
+the overall effective rate matched to the SiameseNet design. At receiver i, the common streams are decoded first using SIC. Un-der symmetric power conditions, the common-stream decoding order is also taken to be random. Let ρi(1) , ρ i(2) , . . . , ρ i(N )
+
+denote the decoding order of the common streams. After cancelling the decoded common streams, the residual signal is 
+
+¯yi = yi −
+
+> N
+
+X
+
+> r=1
+
+hi,ρ i(r)
+
+q
+
+βp ρi(r) ˆxρi(r),c . (13) Receiver i then decodes its own private stream from 
+
+¯yi = p(1 − β)pi xi,p +α
+
+> N
+
+X 
+
+> j=1 , j ̸=i
+
+q
+
+(1 − β)pj xj,p +wi. (14) As with the NOMA baseline, the LLRs for the BPSK symbols are computed from the residual signal and passed to the channel decoder. Thus, the NOMA baseline performs full SIC over the interfering users before decoding the desired stream, while the RSMA baseline first removes the common parts and then decodes the desired private stream in the presence of residual private-user interference. NOMA and RSMA are more suited to cases with unequal interference strengths, thus, for Experiment I, this should be treated as an indicative baseline. For Experiment I, we plot the Polyanskiy-Poor-Verd´ u (PPV) [19] normal approximation for an equivalent single-user AWGN channel as a finite-blocklength benchmark, which helps contex-tualise the performance gap introduced by multi-user interfer-ence. We limit ourselves to only using PPV as an indicative bound, but a detailed quantitative analysis is not possible without a thorough information theoritic study of the system, but this is currently beyond the scope of the paper. 
+
+B. Experiment I: Equal Interference from All Interferers 
+
+In this case, we assume all the signals are equally powerful and thus the interference strengths ( αij s) are equal for all users (αij = α for all i̸ = j). Fig. 4 shows that for N ∈ { 2, 4, 8}0 1 2 3 4 5 6 7 8
+
+> SNR (dB)
+> 10 -8
+> 10 -6
+> 10 -4
+> 10 -2
+> 10 0
+> Block Error Rate (BLER)
+> alpha = 0.1 alpha = 1 aplha = 10 Rate 1/4th Conv Code
+
+Fig. 5. Per-user BLER for the 4-user case. 0 1 2 3 4 5 6 7 8
+
+> SNR (dB)
+> 10 -8
+> 10 -6
+> 10 -4
+> 10 -2
+> 10 0
+> Block Error Rate (BLER)
+> alpha = 0.1 alpha = 1 aplha = 10 Rate 1/8th Conv Code
+
+Fig. 6. Per-user BLER for the 8-user case. 
+
+the Siamese network outperforms TDMA. A standard TDMA, SiameseNet 2 user with rate 1/2, 4 user with rate 1/4 and 8 user with rate 1/8 all have the same overall rate of 1 bps/Hz. Increasing N lowers the per-user rate (from 1/2 to 1/8), implicitly increasing the minimum distance and improving BLER beyond a crossover SNR. For 2 users we observe about 
+
+0.5 dB gain; for 4 users the gain is about 2.5 dB; the 8-user case improves further when compared with TDMA. We discuss the mechanism of this behaviour in Section VI. We also plot the corresponding PPV for Rates 1/2 (2-user case), 1/4 (4-user case) and 1/8 (8-user case) and compare it with our results. Against the Rate= 1/2 PPV, the performance is around 0.5 dB worse for 2-User, 1.5 dB worse for 4-User (Rate= 1/4 PPV) and much worse for the 8-User. This highlights that our system is more suited to short blocklength systems than larger blocklength systems. 
+
+C. Experiment II: Mismatched α: A Test for Robustness 
+
+In this scenario, we explore the impact of a mismatch in 
+
+α. We use the model trained for α = 1 and test it with different values of α. Fig. 7 shows the BLER performance with 0 2 4 6 8
+
+SNR (dB) 
+
+> 10 -6
+> 10 -4
+> 10 -2
+> 10 0
+> Block Error Rate (BLER)
+> alpha=0.1 mismatched alpha=10 mismatched alpha = 0.1 alpha = 1 alpha = 10
+
+Fig. 7. BLER with mismatched α (trained at α=1 ). 0 1 2 3 4 5 6 7 8
+
+> SNR (dB)
+> 10 -8
+> 10 -6
+> 10 -4
+> 10 -2
+> 10 0
+> Block Error Rate (BLER)
+> SiameseNet High SiameseNet Low NOMA High NOMA Low RSMA High RSMA Low
+
+Fig. 8. BLER with unequal interference strengths. 
+
+mismatched values of interferences. The BLER performance of the model (denoted by the solid blue line) is worse than what would be obtained with the correct model for α = 0 .1 (dashed blue line) , but the gap narrows with increasing SNR. On the other hand, for α = 10 , the mismatched model performance (denoted by the solid red line) performs as good as the true model (dashed red line). This implies that our model has the ability to accommodate moderate errors in the estimation of the interference strength. A more detailed analysis of the performance is presented in Sec VI. 
+
+D. Experiment III: Unequal Interference Strengths 
+
+In this experiment, we examine the case when the interferers have different/unequal interference strengths. We consider a scenario where α12 = α21 = 1 , but α13 = α14 = α23 =
+
+α24 = α34 = 0 .1, that is, user 2 has a stronger interference with User 1 compared to users 3 and 4. Fig. 8 demonstrates the BLER performance of the users in this scenario. We Plot the high and low interferers for every scheme and compare it with our model. As we can observe, our model outperforms both NOMA and RSMA. A Further analysis of this ability needs a 0 1 2 3 4 5 6 7 8
+
+> SNR (dB)
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate (BER)
+> MIMO CSIT 1 MIMO CSIT 2 STBC BPSK uncoded (no diversity) BPSK uncoded (diversity = 4) MIMO Uncoded MIMO CSIR 1 MIMO CSIR 2
+
+Fig. 9. BER for 2 × 2 MIMO under CSIT/CSIR compared to baselines. Encoder 1 
+
+Decoder 1 
+
+Message  Channel(s) 
+
+Encoder 2 
+
+Decoder 2 
+
+Message 
+
+Fig. 10. Model variant for MIMO with CSIT (encoder knows the channel). 
+
+more thorough discussion, which is beyond the scope of this work and it will be explored in future. V. P RELIMINARY RESULTS WITH MIMO The results in this section are intended only as a proof-of-concept extension of the proposed framework to MIMO and do not constitute a general performance study over randomly vary-ing channel ensembles. We study a 2 × 2 MIMO interference channel with i.i.d. complex Gaussian (Rayleigh) links and α=1 .Channels are drawn once and held fixed during training. The Models are trained for 50 epochs (batch size 64) over 50000 messages using categorical cross-entropy to reduce BER. For a 2-user MIMO scenario, the input is a 4-bit message at rate 1/2,mapped to 8 symbols over two spatial streams (4 uses each), giving 1 bpcu per stream. Fig. 9 reports BER under CSIT and CSIR. 
+
+Scenario I: CSIT. Channel matrices are available at the transmitters. We implement a model similar to [18] with an ad-ditional encoder input for the channel (Fig. 10), enabling beam-forming and coded spatial multiplexing (akin to STBC [20]). We compare with single-user 2 × 2 Alamouti STBC [21] (fourth-order diversity) and single-user 2 × 2 MIMO with ML decoding (second-order). STBC has 1 bpcu; our learned code Encoder 1  
+
+> Decoder 1
+> Message
+> Channel 1
+> Encoder 2
+> Decoder 2
+> Message
+> Channel 2 Fig. 11. Model variant for MIMO with CSIR (decoder knows the channel).
+
+achieves 1 bpcu per user (8 bits over 2 TX and 8 uses) for two simultaneous users and exhibits diversity behaviour consistent with fourth order under the fixed-channel setup. Within this setting, CSIT trends outperform STBC and are within ≈ 0.5 dB of uncoded BPSK with fourth-order diversity (Fig. 9). 
+
+Scenario II: CSIR. Channels are provided only to the de-coders (Fig. 11). The end-to-end model learns channel-agnostic codewords and suppresses cross-user interference via increased inter-user separation while retaining redundancy for coding. Under the fixed-channel experiments, diversity behaviour is consistent with second order, with about 2 dB improvement over uncoded 2 × 2 MIMO (Fig. 9). 
+
+Caveat (applies to all MIMO results in Section V): Channels were drawn once and held fixed throughout training and evaluation. Therefore, the MIMO observations are preliminary and should not be interpreted as general performance over fading ensembles. In follow-up work, we will train and test over ensembles of randomly drawn Rayleigh realisations to evaluate channel-agnostic performance, diversity, and spectral efficiency.                                                                                     
+
+> TABLE II
+> dmin FOR α∈ { 0.1,1}VERSUS USER COUNT AND EFFECTIVE RATE .
+> User count, R 2-user, 1/2 4-user, 1/4 8-user, 1/8
+> α= 1 2.97 3.91 5.51
+> α= 0 .13.58 5.02 7.15 TABLE III RANGE OF ψii FOR THE α= 0 .1AND α= 1 CASES .
+> User Count, R 2-user, 1/2 4-user, 1/4 8-user, 1/8
+> Mean Range Mean Range Mean Range
+> α= 1 89.99 19-149 89.99 18-152 89.99 10-140
+> α= 0 .189.99 22-146 89.97 76-104 89.88 65-115
+> Fig. 12. Correlation for 4 users α= 1 SiameseNet.
+> Fig. 13. Correlation for 4 users α= 1 SiameseNet. TABLE IV RANGE OF ψij FOR THE α= 0 .1AND α= 1 CASES .
+> User Count, R 2-User, 1/2 4-User, 1/4 8-user, 1/8
+> Mean Range Mean Range Mean Range
+> α= 1 89.99 89-91 90.00 88-92 89.99 88-92
+> α= 0 .189.99 37-142 89.98 60-118 90.00 70-115
+
+VI. L ATENT SPACE ANALYSIS 
+
+We analyse the encoders’ latent codewords to explain BLER via pairwise distances and correlations. The observed BLER trends are consistent with the learned inter-codeword separa-tion, with the minimum distance dmin emerging as the most informative geometric indicator in our experiments. Table II shows that dmin increases as the effective per-user rate de-creases (e.g., from 2 to 8 users), with a stronger effect at α=0 .1,indicating that coding gain outweighs added interference. Angles cluster near 90 ◦ on average but depend on α: same-user angles ψii are closer to 90 ◦ for α=0 .1, while cross-user angles ψij approach 90 ◦ more at α=1 (Tables III, IV). Consistent with Section IV, performance remains robust as interference scales because the model reduces cross-user correlation (Fig. 13). Orthogonalisation is selective : in Sec-tion IV-D (Fig. 12), user 1 approaches orthogonality relative to the dominant interferer (user 2; α=1 ) but not to weaker interferers (users 3–4), instead keeping redundancy for coding. We do not design the model to explicitly reduce the correla-tion neither do we claim any guarantees on such a behaviour. More detailed research is necessary to make concrete claims on this behaviour. But that is beyond the scope of the current paper. VII. C ONCLUSIONS 
+
+This paper demonstrated that end-to-end deep learning can effectively address multi-user interference in finite-blocklength IoT networks. By extending the two-user SiameseNet frame-work to 4 and 8 users, we showed that the approach scales gracefully while retaining the per-user decoder complexity, which scales logarithmically, whereas for joint detection, it scales exponentially. The framework also exhibits strong practical robustness: the performance degrades gracefully under interference-strength mismatch and outperforms both NOMA and RSMA under un-equal interference strengths, scenarios directly relevant to het-erogeneous IoT deployments. Latent-space analysis provides a principled geometric insight into these gains, with the minimum distance increasing as the effective per-user rate decreases, confirming that coding gain outweighs added interference as the number of users grows. Preliminary 2 × 2 MIMO results further suggest that the framework extends naturally towards multi-antenna IoT gate-ways, with CSIT results outperforming Alamouti STBC and CSIR results achieving second-order diversity behaviour. These results establish a strong foundation for end-to-end learned transceivers in dense, interference-limited IoT scenar-ios. Future work will pursue fading-ensemble MIMO evalu-ation, adaptive interference-strength estimation, stronger IoT-oriented baselines, and an information-theoretic analysis of the learned code geometry. VIII. A CKNOWLEDGMENTS 
+
+The authors of this paper would like to thank Prof Nambi Seshadri of UC San Diego and Prof R David Koilpillai of IIT Madras for their guidance and support. REFERENCES [1] E. Arikan, “A performance comparison of polar codes and reed-muller codes,” IEEE Communications Letters , vol. 12, no. 6, pp. 447–449, 2008. [2] R. Gallager, “A simple derivation of the coding theorem and some applications,” IEEE Transactions on Information Theory , vol. 11, no. 1, pp. 3–18, 1965. [3] Y. Saito, Y. Kishiyama, A. Benjebbour, T. Nakamura, A. Li, and K. Higuchi, “Non-orthogonal multiple access (noma) for cellular future radio access,” in 2013 IEEE 77th Vehicular Technology Conference (VTC Spring) , 2013, pp. 1–5. [4] Y. Mao, B. Clerckx, and V. O. Li, “Rate-splitting multiple access for downlink communication systems: bridging, generalizing, and outperforming sdma and noma,” EURASIP Journal on Wireless Communications and Networking , vol. 2018, no. 1, May 2018. [Online]. Available: http://dx.doi.org/10.1186/s13638-018-1104-7 [5] S. Bhattacharyya, S. Darshi, and Z. Lin, “Outage analysis of downlink rsma in vehicular cluster: A copula-based approach,” IEEE Wireless Communications Letters , vol. 14, no. 5, pp. 1486–1490, 2025. [6] B. Clerckx, Y. Mao, E. A. Jorswieck, J. Yuan, D. J. Love, E. Erkip, and D. Niyato, “A primer on rate-splitting multiple access: Tutorial, myths, and frequently asked questions,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 5, pp. 1265–1308, 2023. [7] X. Su, H. Yu, W. Kim, C. Choi, and D. Choi, “Interference cancellation for non-orthogonal multiple access used in future wireless mobile net-works,” EURASIP Journal on Wireless Communications and Networking ,2016. [8] Y. Qit and M. Vaezi, “Noma decoding: Successive interference cancella-tion or maximum likelihood detection?” in 2024 58th Annual Conference on Information Sciences and Systems (CISS) , 2024, pp. 1–6. [9] P. Herath, A. Haghighat, and L. Canonne-Velasquez, “A low-complexity interference cancellation approach for noma,” in 2020 IEEE 91st Vehic-ular Technology Conference (VTC2020-Spring) , 2020, pp. 1–5. [10] Y. Zhang, H. Zhang, H. Zhou, and W. Li, “Interference cooperation based resource allocation in noma terrestrial-satellite networks,” in 2021 IEEE Global Communications Conference (GLOBECOM) , 2021, pp. 01–05. [11] H. Jafarkhani, H. Maleki, and M. Vaezi, “Modulation and coding for noma and rsma,” Proceedings of the IEEE , vol. 112, no. 9, pp. 1179– 1213, 2024. [12] G. Arora and A. Jaiswal, “Zero sic based rate splitting multiple access technique,” IEEE Communications Letters , vol. 26, no. 10, pp. 2430– 2434, 2022. [13] V. Raj and S. Kalyani, “Design of communication systems using deep learning: A variational inference perspective,” IEEE Transactions on Cognitive Communications and Networking , vol. 6, no. 4, pp. 1320–1334, 2020. [14] ——, “Backpropagating through the air: Deep learning at physical layer without channel models,” IEEE Communications Letters , vol. 22, no. 11, pp. 2278–2281, 2018. [15] A. Emır, F. Kara, and H. Kaya, “Deep learning-based joint symbol detection for noma,” in 2019 27th Signal Processing and Communications Applications Conference (SIU) , 2019, pp. 1–4. [16] J.-M. Kang, I.-M. Kim, and C.-J. Chun, “Deep learning-based mimo-noma with imperfect sic decoding,” IEEE Systems Journal , vol. 14, no. 3, pp. 3414–3417, 2020. [17] X. Zhang and M. Vaezi, “Deep autoencoder-based z-interference chan-nels,” in 2023 IEEE Wireless Communications and Networking Confer-ence (WCNC) , 2023, pp. 1–6. [18] S. Paul, S. Senthil, P. Seshadri, N. Seshadri, and R. D. Koilpillai, “Learning robust representations for communications over interference-limited channels,” in 2025 IEEE Wireless Communications and Network-ing Conference (WCNC) , 2025, pp. 01–06. [19] Y. Polyanskiy, H. V. Poor, and S. Verdu, “Channel coding rate in the finite blocklength regime,” IEEE Transactions on Information Theory , vol. 56, no. 5, pp. 2307–2359, 2010. [20] D. Gore and A. Paulraj, “Space-time block coding with optimal antenna selection,” in 2001 IEEE International Conference on Acoustics, Speech, and Signal Processing. Proceedings (Cat. No.01CH37221) , vol. 4, 2001, pp. 2441–2444 vol.4. [21] S. Alamouti, “A simple transmit diversity technique for wireless commu-nications,” IEEE Journal on Selected Areas in Communications , vol. 16, no. 8, pp. 1451–1458, 1998.

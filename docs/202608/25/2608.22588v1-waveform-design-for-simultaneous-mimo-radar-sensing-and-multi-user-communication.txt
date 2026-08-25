@@ -1,0 +1,1366 @@
+Title: Waveform Design for Simultaneous MIMO Radar Sensing and Multi-User Communication
+
+URL Source: https://arxiv.org/pdf/2608.22588v1
+
+Published Time: Tue, 25 Aug 2026 01:21:28 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# Waveform Design for Simultaneous MIMO Radar Sensing and Multi-User Communication 
+
+Berkan Kilic, Kenan Turbic, Member, IEEE, and Sławomir Sta´ nczak, Senior Member, IEEE 
+
+©2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. 
+
+Abstract —This paper proposes a novel two-stage joint wave-form design framework for multi-antenna Integrated Sensing and Communication (ISAC) systems that simultaneously enable Multiple-Input Multiple-Output (MIMO) radar sensing and Multi-User MIMO communication. First, a transmit waveform covariance matrix is designed by solving a convex matrix nearness problem for beampattern synthesis that simultaneously maximizes transmit power in desired directions and minimizes cross-directional correlations, while accommodating independent antenna power constraints and supporting interference sup-pression through radiation null steering. Second, a waveform conforming to the designed covariance is synthesized while additionally enforcing inter-user interference suppression via the zero-forcing approach and imposing practical implementation constraints, notably limiting the peak-to-average-power-ratio on the individual antenna elements. Simulation results demonstrate that the approach significantly enhances ISAC waveform design flexibility, performance, and computational efficiency compared to the alternative methods in the literature. 
+
+Index Terms —ISAC, MIMO radar, MU-MIMO communica-tion, beamforming, PAPR, matrix nearness 
+
+I. I NTRODUCTION 
+
+# IN Integrated Sensing and Communication (ISAC) systems, the distinct requirements of sensing and communication are unified within a single joint waveform design frame-work, allowing for a controllable trade-off between sensing and communication goals [1]. These requirements generally include better target detection and estimation performance for sensing [2], and reliable communication between users [3]. The desirable waveform properties can be understood from the individual treatment of radar and communication systems. Multiple-Input Multiple-Output (MIMO) technology is one of the key elements in both modern wireless communication and radar systems [2], [3]. In mobile Multi-User MIMO (MU-MIMO) systems, a multi-antenna base station (BS) typically serves multiple users simultaneously in the same frequency band. Due to low computational power available at the end-user devices, the interference suppression should be imple-mented at the BS [4], making transmitter (Tx) precoding design in the downlink crucial for reliable communication [5]. Due to their lower complexity and good performance, linear 
+
+The authors acknowledge the financial support by the Federal Ministry for Research, Techonology and Space (BMFTR) in Germany in the programme of “Souverän. Digital. Vernetzt.” Joint project 6G-RIC, project identification numbers: 16KISK020K and 16KISK030. ( Corresponding author: Berkan Kilic. )The authors are with the Wireless Communications and Networks De-partment, Fraunhofer Institute for Telecommunications, Heinrich Hertz In-stitute (HHI), 10587, Berlin, Germany (e-mail: {berkan.kilic, kenan.turbic, slawomir.stanczak}@hhi.fraunhofer.de). S. Sta´ nczak is also with Technische Universität Berlin, 10587, Berlin, Germany. 
+
+zero-forcing (ZF) and minimum mean square error (MMSE) precoders are typically employed in practice [1]. To enhance target detection and estimation performance, the main goal of MIMO radars is to transmit high signal power toward directions of interest, thereby ensuring strong illumination of anticipated targets and, consequently, improved target signal-to-noise ratio (SNR). On the other hand, the cross-correlations between signals transmitted towards differ-ent targets should be low for better performance of radar re-ceiver (Rx) signal processing algorithms [2]. Moreover, a radar system should support null steering in interference directions to increase resilience against jammers and clutter [6]. Waveform design for MIMO radar systems is performed us-ing either a two-stage or a one-stage approach. In the two-stage approach, a waveform covariance matrix producing a desired radiation pattern is constructed first, leveraging the fact that the Tx beampattern is fully determined by this matrix [7]. In the subsequent stage, a waveform conforming to the designed covariance matrix is synthesized [8]. In contrast, one-stage approaches aim to design the Tx waveforms directly, without the intermediate covariance matrix construction step [9], [10]. While one-stage designs offer a more direct formulation, two-stage approaches typically provide a greater flexibility to incorporating practical constraints on the waveform [2]. Both one-stage and two-stage approaches measure the quality of the synthesized Tx beampattern using metrics such as integrated sidelobe level (ISL), peak sidelobe level (PSL), integrated sidelobe to mainlobe ratio (ISMR), and magnitudes of the ripples within the illumination region. These metrics are commonly adopted as optimization objectives in various MIMO radar and ISAC beamforming studies [11]–[16]. An alternative approach is to specify a desired Tx beampattern and minimize the deviation of the synthesized solution from this reference. This approach, commonly referred to as beampattern matching (BPM) [17], does not directly optimize the classical quality metrics such as ISL or PSL. However, it offers better versatility by allowing the designer to freely define the desired Tx radiation pattern according to system-level requirements. Therefore, the BPM criterion is extensively adopted in MIMO radar waveform design [7], [14], [18]–[21] and in ISAC beamforming applications [22]–[24]. Several studies further enhance the BPM framework by in-corporating cross-correlation minimization for improved radar Rx performance [17], [25], [26]. While originally developed for MIMO radar, the waveform covariance design method-ology introduced in [17] is widely adopted in ISAC beam-forming studies, with necessary adaptations to accommodate communication constraints, such as, user-specific minimum signal-to-interference-plus-noise ratio (SINR) thresholds [27], arXiv:2608.22588v1 [eess.SP] 23 Aug 2026 2
+
+[28]. The standard formulation typically results in a quadratic semidefinite programming problem (SDP), with solution meth-ods relying on general-purpose interior-point solvers. Conse-quently, the key drawback of these approaches lies in their high computational burden and limited scalability to high-dimensional problem instances [29]. Another common approach is to design a reference sensing waveform yielding the desired Tx radiation characteristics and defining the distance to the reference sensing waveform, i.e., similarity metric [30], [31], as the objective of minimization. The typical communication performance objective introduced to this approach is the minimization of multi-user interference (MUI) energy [16], [30]–[33], representing a special case of the MMSE precoder for MU-MIMO communication [34]. However, these approaches [30], [31] still require a waveform covariance input from [7] to generate the reference sensing waveform for MIMO radar capabilities, which still relies on computationally intensive solvers. Other sensing performance criteria have also been adopted for ISAC waveform design, such as Cramer-Rao Bound (CRB) for target estimation [35], [36] and radar SINR [32], [37]. However, these approaches do not directly synthesize the desired beampattern, leading to a reduced flexibility in incor-porating the expected target position uncertainty, which should be reflected in the beamwidth of the desired beampattern [17]. Finally, the Tx waveforms must also comply with practical constraints, namely, the available Tx power and the limita-tions of the radio-frequency (RF) front-end. To this end, it is desirable to enforce equal power distribution across all antennas by imposing a per-antenna power constraint [38], and the Tx signal should be confined to the limited dynamic range supported by the power amplifier (PA) and digital-to-analog converter (DAC), to avoid non-linear distortion [39]. In addition to the operational constraints of the front-end, individual array elements can also fail [40], requiring the adaptation of the precoding algorithms to minimize the impact on the performance. All of these factors make the adjustable peak-to-average-power-ratio (PAPR) and flexible control over individual antenna elements desirable for Tx waveform design. Although some previous ISAC studies incorporated the PAPR constraints [36], [37], [41], none of them can support control over individual antenna elements. This paper presents a comprehensive end-to-end waveform design framework for multi-antenna ISAC systems, combining MU-MIMO communication and MIMO radar sensing. We adopt a two-stage design approach: the first stage focuses on the design of a Tx waveform covariance matrix for MIMO radar operations, followed by the synthesis of an ISAC wave-form in the second stage. In the first stage, we address the waveform covariance matrix design for MIMO radar by introducing a novel convex matrix nearness formulation. This formulation aims to synthesize a desired spatial Tx power distribution while minimizing cross-correlations between Tx signals in different sensing directions. It also enables interference suppression via null steering to mitigate jammer and clutter effects. Additionally, it allows for explicit lower and upper bounds on the Tx power of each antenna, thereby subsuming commonly used power constraints such as per-antenna and total power constraints as special cases. The resulting optimization problem is a quadratic SDP. While general-purpose SDP solvers can be employed to obtain a solution [42], their computational complexity and poor scalability present limitations on practical feasibility [29]. To address this, we exploit the problem’s inherent structure to de-velop a more efficient solution methodology. Specifically, we first establish a connection between the structure of the optimal covariance matrix and the dual variables of the problem. By exploiting the obtained result, we derive a computationally efficient first-order algorithm with the optimal convergence rate to solve the dual problem. The proposed algorithm also scales to large problem dimensions, rendering it suitable for massive MIMO scenarios. To the best of our knowledge, the proposed approach is the most computationally efficient co-variance matrix design method supporting the aforementioned MIMO radar objectives. Finally, we propose a joint waveform design approach, in which the optimized covariance matrix serves as the foun-dation for MIMO radar operations. For the communication functionality, ZF-based MU-MIMO precoding is employed for the suppression of inter-user interference. The proposed joint waveform design framework facilitates an explicit trade-off between radar and communication performance, while simultaneously incorporating key practical constraints. Most notably, in contrast to existing methods, the framework permits independent control of the PAPR on each antenna, thereby providing greater flexibility for hardware implementation and system integration. This work significantly extends and unifies our previous preliminary work on beamforming covariance matrix design [43] and waveform synthesis [34]. The proposed beamforming methodology is generalized to support arbitrary antenna array responses, flexible power allocation, and interference suppres-sion through radiation null steering for improved robustness against jammer and clutter effects. This unified approach not only consolidates the individual aspects addressed in our preliminary work but also introduces substantial improvements in performance and flexibility. The remainder of this paper is organized as follows. Section II presents the system model, defines implementation con-straints and describes the adopted communication and sensing design metrics. In Section III, we present the overall proposed methodology. Numerical results are presented in Section IV and the concluding remarks are given in Section V. The following notational convention is adopted in the paper. 
+
+C𝑀 × 𝑁 and R𝑀 × 𝑁 denote the sets of 𝑀 × 𝑁 complex and real matrices, respectively. Matrices and vectors are denoted by upper- and lower-case bold letters, respectively. 𝑥 𝑖 denotes the 
+
+𝑖 -th element of a vector 𝒙 , 𝒙 𝑗 denotes the 𝑗 -th column of a matrix 𝑿 , ˜𝒙 𝐻 𝑗 denotes its 𝑗 -th row, while 𝑋 𝑖 𝑗 denotes the element in the 𝑖 -th row and 𝑗 -th column of 𝑿 . ∥𝒙 ∥ denotes the 
+
+ℓ2-norm of 𝒙 , and ∥𝒙 ∥∞ = max 𝑖 |𝑥 𝑖 | denotes the ℓ∞-norm of 
+
+𝒙 . ∥ 𝑿 ∥𝐹 and ∥ 𝑿 ∥ denote the Frobenius norm and the spectral norm of 𝑿 , respectively. Transpose, conjugate and conjugate-transpose (Hermitian) of 𝑿 are denoted by 𝑿 𝑇 , 𝑿 ∗ and 𝑿 𝐻 ,respectively, while its trace is denoted by Tr ( 𝑿 ). H𝑁 is the set 3Radar 
+
+> Targets
+> Communication
+> Users
+> ISAC
+> Base Station
+
+Fig. 1: Illustration of the considered ISAC system. of Hermitian matrices of size 𝑁 . 𝑿 ⪰ 0 denotes the positive semi-definiteness of a (Hermitian) matrix 𝑿 . 𝑰 𝑁 is the identity matrix of size 𝑁 . |𝑐 | is the modulus of 𝑐 ∈ C. diag 
+
+
+
+{𝑥 𝑖 }𝑁 𝑖 =1
+
+
+
+denotes an 𝑁 × 𝑁 diagonal matrix with 𝑖 -th diagonal 𝑥 𝑖 . E[ . ]
+
+denotes statistical expectation. II. S YSTEM MODEL 
+
+In this section, we outline the signal model, describe the practical constraints on the design variables and present the adopted design goals for sensing and communication. 
+
+A. Signal Model 
+
+We consider a single-carrier, narrowband ISAC system, where a BS deploys a linear array with 𝑀 𝑇 Tx-antennas. Let 
+
+𝐾 𝐶 denote the number of communication users. As illustrated in Fig. 1, BS employs MIMO radar capabilities while simul-taneously performing MU-MIMO downlink communication with 𝐾 𝐶 < 𝑀 𝑇 single-antenna users. Let 𝒙 [𝑛 ] ∈ C𝑀 𝑇 ×1 denote dual-functional waveform emitted by the BS antenna array at time instance 𝑛 within the signaling block with length of 𝑁 𝑡 , 1 ≤ 𝑛 ≤ 𝑁 𝑡 , with 𝑁 𝑡 > 𝑀 𝑇 . We note that 𝒙 [𝑛 ] denotes the Tx signal, which is to be designed to jointly support both communication and sensing functionali-ties. The corresponding complex baseband Rx signal at the 
+
+𝑖 -th communication user can be written as [3] 
+
+𝑦 𝑖 [𝑛 ] =√︁ 𝛽 𝑖 ˜𝒉 𝐻 𝑖 𝒙 [𝑛 ] + 𝑤 𝑖 [𝑛 ], (1) where √𝛽 𝑖 ˜𝒉 𝑖 ∈ C𝑀 𝑇 ×1 denotes the vector channel between the BS and the user, where the large-scale fading effects are embedded in √𝛽 𝑖 , and 𝑤 𝑖 [𝑛 ] ∼ CN ( 0, 𝜎 2 
+
+> 𝐶
+
+) are i.i.d. additive white Gaussian noise samples. We also assume that the channel state information (CSI) is available at the Tx, e.g., obtained through feedback from the Rx. By jointly considering all 𝐾 𝐶 users, we can write 
+
+𝒚 𝐶 [𝑛 ] = 𝚪 𝑯𝒙 [𝑛 ] + 𝒘 𝐶 [𝑛 ], (2) where 𝚪 = diag 
+
+
+
+{√𝛽 𝑖 }𝐾 𝐶 
+
+> 𝑖 =1
+
+
+
+, 𝑯 = [ ˜𝒉 1 ... ˜𝒉 𝐾 𝐶 ]𝐻 , and 
+
+𝒚 𝐶 [𝑛 ], 𝒘 𝐶 [𝑛 ] ∈ C𝐾 𝐶 ×1 are obtained by stacking samples 
+
+{𝑦 𝑖 [𝑛 ]} 𝐾 𝐶  
+
+> 𝑖 =1
+
+and {𝑤 𝑖 [𝑛 ]} 𝐾 𝐶  
+
+> 𝑖 =1
+
+, respectively. By considering a sig-nal block length 𝑁 𝑡 much shorter than the channel coherence time, the CSI is practically constant and (2) can be extended as 
+
+𝒀 𝐶 = 𝚪 𝑯 𝑿 + 𝑾 𝐶 , (3) where 𝒀 𝐶 , 𝑾 𝐶 ∈ C𝐾 𝐶 × 𝑁 𝑡 and 𝑿 ∈ C𝑀 𝑇 × 𝑁 𝑡 are obtained by a column-wise concatenation of vectors 𝒚 𝐶 [𝑛 ], 𝒘 𝐶 [𝑛 ], and 
+
+𝒙 [𝑛 ], respectively. Different communication channel models can be adopted depending on the propagation scenario [3]. If the line-of-sight (LoS) path between the BS and the 𝑖 -th user is obstructed, only scattered signal components arrive at the Rx and Rayleigh fading channel model is adopted, i.e. 
+
+˜𝒉 𝑖 = ˜𝒉 𝑠𝑐 ∼ CN ( 0, 𝑰 𝑀 𝑇 ). (4) If the LoS is unobstructed, Rician channel model is used, i.e. 
+
+˜𝒉 𝑖 =√︂ 𝐾 𝐾 + 1 𝑒 𝑗 𝜓 𝑖 𝒂 (𝜙 𝑖 ) + √︂ 1
+
+𝐾 + 1 ˜𝒉 𝑠𝑐 , (5) where 𝐾 is the Rician factor, 𝜓 𝑖 ∼ 𝑈 [0, 2𝜋 ] is the random phase of the LoS component, and 𝜙 𝑖 ∈ [− 𝜋 /2, 𝜋 /2] denotes the azimuth angle, i.e., relative to the array boresight, at which the BS observes the user, and 𝒂 (𝜙 𝑖 ) is the corresponding array steering vector 1.With an appropriate calibration of the Tx array assumed, 
+
+𝒂 (𝜙 𝑖 ) is known for a given 𝜙 𝑖 . For the widely considered special case of Uniform Linear Arrays (ULAs) with half-wavelength inter-element spacing and no mutual coupling between the elements, it has the following form 
+
+𝒂 (𝜙 𝑖 ) = [1 𝑒 𝑗 𝜋 sin 𝜙 𝑖 ... 𝑒 𝑗 ( 𝑀 𝑇 −1) 𝜋 sin 𝜙 𝑖 ]𝑇 . (6) From the radar perspective, the Tx beampattern character-izes the spatial distribution of radiated power as a function of the direction 𝜙 , defined as [2] 
+
+𝑃 (𝜙 ) = 𝒂 𝐻 (𝜙 ) 𝑹𝒂 (𝜙 ), (7) where 𝑹 = E 𝒙 [𝑛 ]𝒙 𝐻 [𝑛 ] is the waveform covariance matrix, often represented by its sample covariance surrogate, i.e., 
+
+ˆ𝑹 = 1
+
+𝑁 𝑡 
+
+𝑿 𝑿 𝐻 . (8) For colocated Tx and Rx with identical antenna array structures, the signal backscattered from 𝐾 𝑅 point targets at angular directions 𝜙 𝑖 , 𝜙 2, ..., 𝜙 𝐾 𝑅 located in the same range bin, can be written as [2] 
+
+𝒚 𝑅 [𝑛 ] =
+
+> 𝐾 𝑅
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑞 (𝜙 𝑖 ) 𝒂 ∗ (𝜙 𝑖 ) 𝒂 𝐻 (𝜙 𝑖 )𝒙 [𝑛 ] + 𝒘 𝑅 [𝑛 ], (9) where 𝑞 (𝜙 𝑖 ) ∈ C includes propagation and scattering losses for 𝑖 -th target, and 𝒘 𝑅 [𝑛 ] ∼ CN ( 0, 𝜎 2 
+
+> 𝑅
+
+𝑰 𝑀 𝑇 ) denotes the i.i.d. additive complex Gaussian noise samples. Assuming that 
+
+> 1In this work we assume that signals propagate in the horizontal plane, which is a reasonable assumption when the propagation distances are much larger than the antenna heights. We further assume that scatterers in the communication channel (and radar targets) are in the far fields of the BS antenna array. 4
+
+𝑞 (𝜙 𝑖 )’s remain practically fixed within the signaling block 𝑁 𝑡 ,(9) can be extended to the whole signaling block as 
+
+𝒀 𝑅 =
+
+> 𝐾 𝑅
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑞 (𝜙 𝑖 ) 𝒂 ∗ (𝜙 𝑖 ) 𝒂 𝐻 (𝜙 𝑖 ) 𝑿 + 𝑾 𝑅 , (10) where 𝒀 𝑅 , 𝑾 𝑅 ∈ C𝑀 𝑇 × 𝑁 𝑡 are obtained by a column-wise concatenation of vectors 𝒚 𝑅 [𝑛 ], 𝒘 𝑅 [𝑛 ], respectively. 
+
+B. Hardware Implementation Constraints 
+
+Apart from the goal to satisfy communication and sens-ing design criteria discussed in Sections II-C and II-D, the signal waveform also has to meet some practical constraints discussed as follows. Let R and X denote the sets of 𝑹 and 
+
+𝑿 satisfying the given constraints, respectively. With the reasonable goal to utilize all available energy, the most general constraint set for 𝑹 would assign lower and upper Tx power bounds on each antenna element [44], i.e., 
+
+R𝑔𝑒𝑛 ={𝑹 ∈ H𝑀 𝑇 | 𝑹 ⪰ 0, Tr ( 𝑹 ) = 𝑃 𝑇 ,𝑙 𝑖 ≤ 𝑅 𝑖𝑖 ≤ 𝑢 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 }, (11) where 𝑢 𝑖 ≥ 𝑙 𝑖 ≥ 0 and Í𝑀 𝑇  
+
+> 𝑖 =1
+
+𝑙 𝑖 ≤ 𝑃 𝑇 ≤ Í𝑀 𝑇  
+
+> 𝑖 =1
+
+𝑢 𝑖 , with 𝑃 𝑇 > 0
+
+denoting the total available Tx power. When the last constraint is removed from R𝑔𝑒𝑛 , we obtain the total Tx power constraint set R𝑡𝑜𝑡 . If all Tx antenna array elements are constrained to transmit with equal power 𝑃 𝑒 = 𝑃 𝑇 /𝑀 𝑇 , we set 𝑢 𝑖 = 𝑙 𝑖 = 𝑃 𝑒 in (11) to obtain the equal per-antenna power constraint set R 𝑝𝑎 .Albeit stricter, the equal per-antenna power constraint is practically more desirable than the total power constraint [7]. The per-antenna power constraint can be relaxed to allow for a pre-defined tolerable deviation factor 𝛿 > 0 resulting in the constraint set R𝑟 𝑒𝑙 [13], obtained as the special case of R𝑔𝑒𝑛 
+
+by setting 𝑙 𝑖 = (1 − 𝛿 )𝑃 𝑒 and 𝑢 𝑖 = (1 + 𝛿 )𝑃 𝑒 in (11). The temporal variation characteristic of the signal waveform is not considered by the previous sets, while being very important in practice due to the impacts on the efficiency and robustness of the amplifying stage in the Tx. An important practical constraint is that on the PAPR [2], defined as the ratio of the maximum Tx power to the average one, i.e. 
+
+PAPR ( ˜𝒙 𝑖 ) = ∥ ˜𝒙 𝑖 ∥2
+
+> ∞
+
+∥ ˜𝒙 𝑖 ∥2/𝑁 𝑡 
+
+, (12) where ˜𝒙 𝐻 𝑖 denotes the 𝑖 -th row of 𝑿 . By combining the con-straints on PAPR and on individual antenna powers, imposed as ∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 where 𝑃 𝑖 is the power allocated for 𝑖 -th an-tenna satisfying Í𝑖 𝑃 𝑖 = 𝑃 𝑇 , the corresponding set is given as 
+
+X𝑝𝑎 𝑝𝑟 = {𝑿 = [ ˜𝒙 1 ... ˜𝒙 𝑀 𝑇 ]𝐻 ∈ C𝑀 𝑇 × 𝑁 𝑡 |∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 , ∥ ˜𝒙 𝑖 ∥2 
+
+> ∞
+
+≤ 𝜌 𝑖 𝑃 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 }. (13) We note that 1 ≤ PAPR ( ˜𝒙 𝑖 ) ≤ 𝑁 𝑡 , as ∥ ˜𝒙 𝑖 ∥∞ ≤ ∥ ˜𝒙 𝑖 ∥ ≤√𝑁 𝑡 ∥ ˜𝒙 𝑖 ∥∞ for any ˜𝒙 𝑖 , and lower PAPR is desirable for higher power efficiency and/or lower signal distortion. This ensures 
+
+PAPR ( ˜𝒙 𝑖 ) ≤ 𝜌 𝑖 , where 𝜌 𝑖 ∈ [ 1, 𝑁 𝑡 ] is the maximum PAPR supported by 𝑖 -th antenna’s RF chain. In the limit when 
+
+𝜌 𝑖 = 1, X𝑝𝑎 𝑝𝑟 reduces to constant-modulus (CM) constraint, i.e., | ˜𝑥 𝑖 [𝑛 ]| 2 = 𝑃 𝑖 is constant for all 1 ≤ 𝑛 ≤ 𝑁 𝑡 . On the other hand, by removing the ℓ∞ constraint from X𝑝𝑎 𝑝𝑟 (12) 
+
+Fig. 2: Illustration of the desired illumination directions (gray-shaded area) and generated beampattern (blue lines). and setting 𝑃 𝑖 = 𝑃 𝑒 for all 1 ≤ 𝑖 ≤ 𝑀 𝑇 , we obtain the equal per-antenna power constraint set X𝑝𝑎 , which is the waveform counterpart of R 𝑝𝑎 . Since the temporal information is lost in 𝑹 , PAPR and CM constraints are not relevant for R.
+
+C. Design Metrics for Sensing 
+
+We can observe from (7) that the Tx beampattern is de-termined by 𝑹 . The typical goal in MIMO radar sensing is to first design the waveform covariance matrix 𝑹 ∈ R
+
+matching the desired beampattern and then synthesizing the waveform 𝑿 ∈ X . To formulate the covariance matrix design problem, we define the set of grid points Φ𝑔 = { ¯𝜙 𝑖 }𝑁 𝜙  
+
+> 𝑖 =1
+
+over the supported angular range [− 𝜋 /2, 𝜋 /2] with 𝑁 𝜙 > 𝑀 𝑇 denoting the grid size. The mainlobe region set, Φ𝑚 , is defined as the subset of Φ𝑔 in which we expect sensing targets to be located. This prior information can be obtained in adaptive radar applications, e.g., using the previous estimates of target locations [45]. Hence, higher Tx power is desired to be directed towards ¯𝜙 𝑖 ∈ Φ𝑚 . The sidelobe region is represented by Φ𝑠 , where Φ𝑚 ∪ Φ𝑠 = Φ 𝑔 and Φ𝑚 ∩ Φ𝑠 = ∅.Assume that every ¯𝜙 𝑖 ∈ Φ𝑚 is of the same importance, then the (normalized) desired beampattern 𝑃 𝑑 (𝜙 ) is defined as 
+
+𝑃 𝑑 ( ¯𝜙 𝑖 ) =
+
+(
+
+1, if ¯𝜙 𝑖 ∈ Φ𝑚 ,
+
+0, otherwise , (14) i.e., ideally we want to direct Tx signal exclusively towards mainlobe regions. Since the goal is to design 𝑹 such that the generated 𝑃 (𝜙 ) is close to 𝑃 𝑑 (𝜙 ), the following cost function can be adopted for BPM 
+
+𝐽 𝑠  
+
+> bpm
+
+( 𝑹 , 𝜂 ) =
+
+> 𝑁 𝜙
+
+∑︁ 
+
+> 𝑖 =1
+
+
+
+𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑖 ) − 𝜂𝑃 𝑑 ( ¯𝜙 𝑖 )
+
+2
+
+, (15) where the scaling factor 𝜂 is introduced as 𝑃 (𝜙 ) and 𝑃 𝑑 (𝜙 )
+
+are scaled differently. Fig. 2 shows an example of generated and desired beampatterns. In many ISAC studies, (15) is adopted as the sensing cost to be minimized jointly over 𝑹 and 𝜂 , e.g., see [23], [24]. As (15) is defined based on the least squares (LS) metric, it is referred to as LS approach throughout the manuscript. Another common approach is based on the weighted least squares (WLS) metric, where 𝑃 𝑑 ( ¯𝜙 𝑖 ) in (15) is weighted with the corresponding cos ¯ 𝜙 𝑖 and minimized over 𝑹 [7], adopted, e.g., in [30], [31]. Both formulations are solved 5
+
+via standard-interior point methods, resulting in 𝑂 (𝑀 6 
+
+> 𝑇
+
+) per-iteration complexity [27], [29]. Apart from BPM performance quantified by the cost (15), as elaborated in Section I, the cross-correlations between signals transmitted in different directions are desired to be small in magnitude. Hence, the cross-correlation beampattern 
+
+𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑗 ) should have low-magnitude values for ¯𝜙 𝑖 ≠ ¯𝜙 𝑗 
+
+[17], and the following cost function can be specified 
+
+𝐽 𝑠  
+
+> cc
+
+( 𝑹 ) =
+
+> 𝑁 𝜙
+
+∑︁ 
+
+> 𝑖 =1
+> 𝑁 𝜙
+
+∑︁ 
+
+> 𝑗 =1, 𝑗 ≠𝑖
+
+𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑗 ) 2 . (16) It is also typical to adopt the weighted average of 𝐽 𝑠  
+
+> bpm
+
+( 𝑹 , 𝜂 )
+
+and 𝐽 𝑠  
+
+> cc
+
+( 𝑹 ) as the sensing cost in the ISAC literature [27], [28], [46], and the resulting problem is again solved using standard interior-point methods, typically via general-purpose solvers. Additionally, it is desirable to have deep notches in the Tx beampattern at directions where interfering sources, such as jammers and clutters, are located [10], [47]. Let Φ𝐽 ⊆ Φ𝑔 
+
+denote the subset of (known) interference directions, then 
+
+|𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑖 )| is desired to be very small when ¯𝜙 𝑖 ∈ Φ𝐽 ,motivating the following cost 
+
+𝐽 𝑠  
+
+> is
+
+( 𝑹 ) =∑︁  
+
+> ¯𝜙 𝑖 ∈Φ𝐽
+
+𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑖 ), (17) which is defined to be linear in 𝑹 , unlike 𝐽 𝑠  
+
+> cc
+
+( 𝑹 ) (16), since 
+
+𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑖 ) ≥ 0 by the positive semidefiniteness of 𝑹 .For the waveform design optimization, an appropriate cost function evaluates how closely the waveform 𝑿 matches the designed 𝑹 0. One obvious choice is to use ∥ 𝑿 𝑿 𝐻 /𝑁 𝑡 − 𝑹 0 ∥2 
+
+> 𝐹
+
+,which is quartic in 𝑿 and hence difficult to work with in general [31]. However, the class of 𝑿 ’s satisfying 𝑿 𝑿 𝐻 /𝑁 𝑡 =
+
+𝑹 0 can be written as 
+
+𝑿 =√︁ 𝑁 𝑡 𝑹 1/20 𝑼 , (18) where 𝑼 ∈ C𝑀 𝑇 × 𝑁 𝑡 is a semi-unitary matrix, i.e., 𝑼𝑼 𝐻 = 𝑰 𝑀 𝑇 .Hence, the following cost is proposed in [8] 
+
+𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ) = ∥ 𝑿 −√︁ 𝑁 𝑡 𝑹 1/20 𝑼 ∥2 
+
+> 𝐹
+
+, (19) where 𝑼 is defined as an additional optimization variable. We can interpret 𝑼 as the semi-unitary factor adapting to the constraints imposed on 𝑿 as 𝑿 ∈ X must be incorporated in the sequel. A simpler cost on sensing waveform can be defined based on the similarity metric, i.e., 
+
+𝐽 𝑠  
+
+> ref
+
+( 𝑿 ) = ∥ 𝑿 − 𝑿 0 ∥2 
+
+> 𝐹
+
+, (20) where 𝑿 0 is a selected reference sensing waveform [32], [41]. 
+
+𝑿 0 can also be selected using BPM criterion [30], [31], e.g., as in (18), however, adopting 𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ) (19) fits better for the synthesis of 𝑹 0, due to the introduction of the additional optimization variable 𝑼 adapting to 𝑿 ∈ X [34]. 
+
+D. Design Metrics for Communication 
+
+Let 𝒔 [𝑛 ] ∈ C𝐾 𝐶 ×1 denote the symbol vector which we want to transmit to the users at time instance 𝑛 , with symbols drawn from an arbitrary constellation, e.g., M-QAM. Each user estimates the Tx symbol from the Rx signal as 
+
+ˆ𝑠 𝑖 = 𝑔𝑦 𝑖 = 𝑠 𝑖 +
+
+
+
+𝑔 √︁ 𝛽 𝑖 ˜𝒉 𝐻 𝑖 𝒙 − 𝑠 𝑖 
+
+
+
++ 𝑔𝑤 𝑖 , (21) with 𝑔 ∈ R denoting the Rx gain, assumed to be the same for all users here [48]. The goal of the precoder is to design the Tx signal vector 𝒙 and scalar 𝑔 , such that the estimated symbols are close to the desired communication symbols, i.e., 𝑔 𝒚 ≈ 𝒔 .Assuming that 𝒘 𝐶 is uncorrelated with 𝒔 and 𝒙 , also assigning equal weights to each user [49], the sum mean square error (MSE) for all users can be written as 
+
+E ∥𝑔 𝒚 − 𝒔 ∥2 = E[∥ 𝑔 𝚪 𝑯𝒙 − 𝒔 ∥2] + 𝑔 2𝜎 2 
+
+> 𝐶
+
+𝐾 𝐶 , (22) which defines the cost for the well-known Wiener filter (WF) approach [5]. If 𝑔 is restricted to be the same within the whole block length, by replacing E ∥𝑔 𝚪 𝑯𝒙 − 𝒔 ∥2 with its sample-based average, the following objective can be adopted for communication 
+
+𝐽 𝑐  
+
+> wf
+
+( 𝑿 , 𝑔 ) = ∥𝑔 𝚪 𝑯 𝑿 − 𝑺 ∥2 
+
+> 𝐹
+
++ 𝑔 2𝜎 2 
+
+> 𝐶
+
+𝐾 𝐶 𝑁 𝑡 , (23) where 𝑺 ∈ C𝐾 𝐶 × 𝑁 𝑡 is obtained by the column-wise concatena-tion of vectors 𝒔 [𝑛 ], 1 ≤ 𝑛 ≤ 𝑁 𝑡 . The introduction of 𝑔 requires the users to estimate that parameter when the constellation is not constant-modulus (e.g., 16-QAM) [48] 2. Since 𝑔 is restricted to be constant during the whole signaling block in the given formulation, pilot signals can be used to transmit 𝑔 
+
+to the users at the cost of a communication overhead, or 𝑔 can be estimated by the users blindly [48]. Some studies adopt (23) as the communication cost in the ISAC literature [50], [51], by defining 𝑔 as an additional optimization variable. However, most studies tacitly assume 
+
+𝑔 = 1 [37] and hence adopt ∥𝚪 𝑯 𝑿 − 𝑺 ∥2 
+
+> 𝐹
+
+, often referred to as the MUI cost, e.g., see [16], [30]–[33]. Note that by fixing 
+
+𝑔 = 1, ∥𝚪 𝑯 𝑿 − 𝑺 ∥2 
+
+> 𝐹
+
+can be very large even though 𝚪 𝑯 𝑿 
+
+is perfectly proportional to 𝑺 [52], resulting in significant performance losses [34], [37]. In ZF approach, channel inversion is performed at Tx to null the interference, which is obtained by setting 𝐽 𝑐  
+
+> wf
+
+( 𝑿 , 𝑔 ) = 0
+
+for 𝜎 𝐶 = 0. In the unconstrained case, this results in 
+
+𝑿 = 𝑔 −1 𝑯 †𝚪 −1 𝑺 , (24) where 𝑯 † = 𝑯 𝐻 (𝑯𝑯 𝐻 )−1. Therefore, the following cost can be adopted 
+
+𝐽 𝑐  
+
+> zf
+
+( 𝑿 ) = ∥ 𝑿 − 𝑔 −1 𝑯 †𝚪 −1 𝑺 ∥2 
+
+> 𝐹
+
+. (25) When we impose 𝑿 ∈ X 𝑡𝑜𝑡 , we achieve 𝐽 𝑐  
+
+> zf
+
+( 𝑿 ) = 0 when 
+
+𝑿 = 𝑯 †𝚪 −1 𝑺 
+
+∥𝑯 †𝚪 −1 𝑺 ∥𝐹 √︁ 𝑁 𝑡 𝑃 𝑇 , 𝑔 = ∥𝑯 †𝚪 −1 𝑺 ∥𝐹 
+
+√𝑁 𝑡 𝑃 𝑇 
+
+. (26) Note that if 𝑔 = 1 were assumed a priori, it would not be possible to achieve 𝐽 𝑐  
+
+> zf
+
+( 𝑿 ) = 0 while satisfying 𝑿 ∈ X 𝑡𝑜𝑡 .In general, WF approach outperforms ZF given that 𝑔 in (23) is optimized properly [5]. On the other hand, as elaborated in Section III-C, (25) enables individual control over each     
+
+> 2When the constellation is constant-modulus such as quadrature phase shift keying (QPSK), 𝑔 should still be optimized by the Tx, however, the users do not require that parameter for decoding. 6Waveform
+> Covariance Design
+> Joint
+> Waveform Design
+
+𝑹 
+
+> Zero -Forcing
+
+𝑿  
+
+> MIMO Radar ISAC
+
+Fig. 3: Simplified flowchart of the proposed methodology. antenna unlike (23) due to the decoupled structure of 𝚪 𝑯 and 
+
+𝑿 , also making it possible to incorporate adjustable PAPR constraints. III. P ROPOSED METHODOLOGY 
+
+A. Overview 
+
+In this section, we present the overall proposed method-ology. As outlined in Section I, we first design a waveform covariance matrix tailored for MIMO radar operations. This matrix then serves as the input to a subsequent joint waveform design stage, which incorporates both radar and communica-tion performance metrics. In Section III-B, we present our waveform covariance design procedure, which targets three key objectives: beampat-tern synthesis, cross-correlation minimization, and null steer-ing for interference suppression. Accordingly, we formulate the overall cost function by combining the corresponding objective terms: the BPM cost 𝐽 𝑠  
+
+> bpm
+
+( 𝑹 , 𝜂 ) (15), the cross-correlation penalty 𝐽 𝑠  
+
+> cc
+
+( 𝑹 ) (16), and the interference sup-pression term 𝐽 𝑠  
+
+> is
+
+( 𝑹 ) (17). We impose the constraint 𝑹 ∈R𝑔𝑒𝑛 , where R𝑔𝑒𝑛 is defined in (11). This formulation allows for flexible control over the Tx power of each antenna by specifying individual lower and upper bounds. As discussed in Section II-B, the commonly used total power and equal per-antenna power constraints arise as special cases of this generalized hardware implementation constraint set. In Section III-C, we introduce our joint waveform design strategy, which addresses two primary objectives: synthesizing the covariance matrix designed for sensing in the prior step and mitigating inter-user interference through ZF-based precoding. Accordingly, we define the overall cost function by combining the waveform synthesis cost 𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ) (19) and the ZF cost 
+
+𝐽 𝑐  
+
+> zf
+
+( 𝑿 ) (25). We impose the constraint 𝑿 ∈ X 𝑝𝑎 𝑝𝑟 , as defined in (12). This formulation allows control over the PAPR on each antenna. As discussed in Section II-B, commonly used CM and equal per-antenna power constraints are special cases of this hardware implementation constraint set. The overall procedure is illustrated with a simple diagram in Fig. 3. 
+
+B. Waveform Covariance Design 
+
+Based on the beamspace representation of MIMO channels [53], we define the matrix 𝑫 as by concatenating the steering vectors corresponding to the selected angular grid points column-wise, i.e., 
+
+𝑫 = 𝒂 ( ¯𝜙 1) 𝒂 ( ¯𝜙 2) ... 𝒂 ( ¯𝜙 𝑁 𝜙 ) ∈ C𝑀 𝑇 × 𝑁 𝜙 , (27) assumed to be full-rank, which holds unless multiple grid points are assigned to the same angular direction. Beyond this, we impose no additional assumptions on 𝑫 . Consequently, the columns of 𝑫 can represent the steering vectors of an arbitrary array with any spatial sampling (grid selection) configuration. We also define the diagonal matrix 𝑻 ∈ R𝑁 𝜙 × 𝑁 𝜙 
+
+𝑻 = 𝜂 × diag 
+
+
+
+{𝑃 𝑑 ( ¯𝜙 𝑖 )} 𝑁 𝜙 
+
+> 𝑖 =1
+
+
+
+, (28) whose diagonals define the ideal Tx radiation pattern, while the off-diagonals correspond to the ideal zero cross-correlation case, allowing us to write 
+
+𝐽 𝑠  
+
+> bpm
+
+( 𝑹 , 𝜂 ) + 𝐽 𝑠  
+
+> cc
+
+( 𝑹 ) = ∥ 𝑫 𝐻 𝑹𝑫 − 𝑻 ∥2 
+
+> 𝐹
+
+, (29) which defines the joint cost function for BPM and the mini-mization of cross-correlations. As discussed in our preliminary work [43], 𝜂 in (28) can be used to control the importance of low cross-correlations between signals transmitted in different directions. By also incorporating (17), we define the overall cost as 
+
+𝐽 𝑠 ( 𝑹 ) = 12 ∥ 𝑫 𝐻 𝑹𝑫 − 𝑻 ∥2 
+
+> 𝐹
+
++ 𝜔𝐽 𝑠  
+
+> is
+
+( 𝑹 ), (30) where 𝜔 ≥ 0 is the weight assigned to interference suppression that should be selected based on the power of the interfering source, i.e., deeper notches are formed as 𝜔 gets larger. Considering the general constraint set R𝑔𝑒𝑛 (11), we formu-late covariance design as the following optimization problem 
+
+min  
+
+> 𝑹
+
+𝐽 𝑠 ( 𝑹 )
+
+s.t. Tr (𝑬 𝑖 𝑹 ) ≤ 𝑢 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+− Tr (𝑬 𝑖 𝑹 ) ≤ − 𝑙 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+Tr ( 𝑹 ) = 𝑃 𝑇 , 𝑹 ⪰ 0. (31) In (31), 𝑹 ∈ R 𝑔𝑒𝑛 is expressed explicitly by defining the di-agonal matrix 𝑬 𝑖 whose 𝑖 -th diagonal is equal to one and zero elsewhere. By writing the singular value decomposition (SVD) of 𝑫 as 𝑫 = 𝑼 𝐷 𝚺 𝐷 𝑽 𝐻 𝐷 , where 𝑼 𝐷 𝑼 𝐻 𝐷 = 𝑼 𝐻 𝐷 𝑼 𝐷 = 𝑰 𝑀 𝑇 ,
+
+𝑽 𝐻 𝐷 𝑽 𝐷 = 𝑰 𝑀 𝑇 and 𝚺 𝐷 ∈ R𝑀 𝑇 ×𝑀 𝑇 , we define 
+
+˜𝑹 = (𝑼 𝐷 𝚺 𝐷 )𝐻 𝑹 (𝑼 𝐷 𝚺 𝐷 ), (32) due to the full-rank assumption on 𝑫 , we can express 𝑹 as 
+
+𝑹 = 𝑼 𝐷 𝚺 −1 
+
+> 𝐷
+
+˜𝑹 𝚺 −1 
+
+> 𝐷
+
+𝑼 𝐻 𝐷 . (33) As shown in Appendix A, an equivalent problem to (31) is 
+
+min 
+
+> ˜𝑹
+
+ 12 ∥ ˜𝑹 − ˜𝑻 ∥2 
+
+> 𝐹
+
++ Tr  𝚿 ˜𝑹 
+
+s.t. Tr ( ˜𝑬 𝑖 ˜𝑹 ) ≤ 𝑢 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+− Tr ( ˜𝑬 𝑖 ˜𝑹 ) ≤ − 𝑙 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+Tr (𝑪 ˜𝑹 ) = 𝑃 𝑇 , ˜𝑹 ⪰ 0, (34) where 
+
+˜𝑻 = 𝑽 𝐻 𝐷 𝑻𝑽 𝐷 , (35) 
+
+𝑪 = 𝚺 −2 
+
+> 𝐷
+
+, (36) 
+
+˜𝑬 𝑖 = 𝚺 −1 
+
+> 𝐷
+
+𝑼 𝐻 𝐷 𝑬 𝑖 𝑼 𝐷 𝚺 −1 
+
+> 𝐷
+
+, (37) 
+
+𝚿 = 𝜔 𝚺 −1 
+
+> 𝐷
+
+𝑼 𝐻 𝐷 
+
+©«∑︁ ¯𝜙 𝑖 ∈Φ𝐽 
+
+𝒂 ( ¯𝜙 𝑖 ) 𝒂 𝐻 ( ¯𝜙 𝑖 )ª®¬
+
+𝑼 𝐷 𝚺 −1 
+
+> 𝐷
+
+. (38) 7
+
+The scaling of ˜𝑹 depends on 𝑃 𝑇 , while ˜𝑻 and 𝚿 may not. However, by setting 𝜂 in (28) and 𝜔 in (30) proportional to 
+
+𝑃 𝑇 , the solution of (34) becomes independent of 𝑃 𝑇 (up to a scaling constant). For the special case of 𝚿 = 0, ˜𝑬 𝑖 = 𝑬 𝑖 , 𝑪 = 𝑰 𝑀 𝑇 ,and 𝑢 𝑖 = 𝑙 𝑖 = 𝑃 𝑒 , (34) resembles the well-known nearest correlation matrix problem, widely encountered in finance applications [29], [54], [55]. The problem (34) has a strictly convex objective and hence admits a unique minimizer. More-over, Slater condition automatically holds for (31), therefore, there is no duality gap and we can obtain the optimal solution with a dual approach. To proceed, we define the operator 
+
+[.]+ which projects its argument onto the positive semidefinite cone, i.e, [𝑴 ]+ = Í𝑖 max (0, 𝜆 𝑖 )𝒒 𝑖 𝒒 𝐻 𝑖 where 𝑴 = Í𝑖 𝜆 𝑖 𝒒 𝑖 𝒒 𝐻 𝑖 
+
+is obtained via the eigendecomposition of 𝑴 .As derived in Appendix B, the dual of (34) can be written as 
+
+min   
+
+> 𝝂 ≥0,𝜆
+
+𝑓 (𝝂 , 𝜆 ) (39) where 
+
+𝑓 (𝝂 , 𝜆 ) = 12 ˜𝑹 (𝝂 , 𝜆 ) 2 
+
+> 𝐹
+
+− 12 ∥ ˜𝑻 ∥2 
+
+> 𝐹
+
++ 𝝂 𝑇 𝒃 + 𝜆𝑃 𝑇 , (40) and 
+
+˜𝑹 (𝝂 , 𝜆 ) =  ˜𝑻 − 𝑬 (𝝂 ) − 𝑪 (𝜆 ) − 𝚿 
+
+> +
+
+, (41) 
+
+¯𝑬 𝑖 =
+
+( ˜𝑬 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+− ˜𝑬 𝑖 , 𝑀 𝑇 + 1 ≤ 𝑖 ≤ 2𝑀 𝑇 , (42) 
+
+𝑬 (𝝂 ) =
+
+> 2𝑀 𝑇
+
+∑︁ 
+
+> 𝑖 =1
+
+𝜈 𝑖 ¯𝑬 𝑖 , 𝑪 (𝜆 ) = 𝜆 𝑪 , (43) 
+
+𝑏 𝑖 =
+
+(
+
+𝑢 𝑖 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 ,
+
+−𝑙 𝑖 , 𝑀 𝑇 + 1 ≤ 𝑖 ≤ 2𝑀 𝑇 . (44) The objective 𝑓 (𝝂 , 𝜆 ) in (39) is (non-strongly) convex and also (once) differentiable with the following gradients [55] 
+
+(∇ 𝝂 𝑓 )𝑖 = 𝑏 𝑖 − Tr   ˜𝑹 (𝝂 , 𝜆 ) ¯𝑬 𝑖 
+
+ ,
+
+∇𝜆 𝑓 = 𝑃 𝑇 − Tr   ˜𝑹 (𝝂 , 𝜆 )𝑪  . (45) Therefore, we can use a first-order method [56] to solve (39), which are appealing for their simplicity and low per-iteration complexity, yet constant step-size gradient schemes exhibit a convergence rate of 𝑂 (1/𝑘 ) [56]. Accelerated gradient (Nesterov’s momentum) methods mitigate this limitation by achieving the optimal 𝑂 (1/𝑘 2) rate, albeit without amonotonicity guarantee [57]. A widely adopted remedy is restarting the momentum upon detecting non-monotonic behavior, which enhances stability and performance across various applications [58], [59]. To apply accelerated gradient updates with restart within our framework, we rewrite (39) in the standard composite form as 
+
+min  
+
+> 𝝂 ,𝜆
+
+{ 𝑓 (𝝂 , 𝜆 ) + I ( 𝝂 )} , (46) where I ( 𝝂 ) is the indicator function of the nonnegative orthant 
+
+I ( 𝝂 ) =
+
+(
+
+0 if 𝝂 ≥ 0,
+
+∞ otherwise . (47) 
+
+Algorithm 1 Procedure to solve (39), based on accelerated projected gradient method with adaptive restart. 
+
+Input: ˜𝑻 , 𝑪 , { ˜𝑬 𝑖 }𝑀 𝑇  
+
+> 𝑖 =1
+
+, 𝚿 , 𝒃 , 𝑃 𝑇 
+
+Output: 𝝂 ★, 𝜆 ★ 
+
+> 1:
+
+Initialize 𝝂 0 = 𝝂 −1 = 0, 𝜆 0 = 𝜆 −1 = 0, 𝑡 0 = 𝑡 −1 = 1 
+
+> 2:
+
+For 𝑘 ≥ 0 
+
+> 3:
+
+𝑡 𝑘 =  1 +√︁ 1 + 4(𝑡 𝑘 −1)2/2 
+
+> 4:
+
+¯𝝂 𝑘 = 𝝂 𝑘 +  (𝑡 𝑘 −1 − 1)/ 𝑡 𝑘  (𝝂 𝑘 − 𝝂 𝑘 −1) 
+
+> 5:
+
+¯𝜆 𝑘 = 𝜆 𝑘 +  (𝑡 𝑘 −1 − 1)/ 𝑡 𝑘  (𝜆 𝑘 − 𝜆 𝑘 −1) 
+
+> 6:
+
+𝝂 𝑘 +1 =   ¯𝝂 𝑘 − 𝛾 ∇𝝂 𝑓 ( ¯𝝂 𝑘 , ¯𝜆 𝑘 ) 
+
+> +
+> 7:
+
+𝜆 𝑘 +1 = ¯𝜆 𝑘 − 𝛾 ∇𝜆 𝑓 ( ¯𝝂 𝑘 , ¯𝜆 𝑘 ) 
+
+> 8:
+
+if ( ¯𝝂 𝑘 − 𝝂 𝑘 +1)𝑇 (𝝂 𝑘 +1 − 𝝂 𝑘 ) + ( ¯𝜆 𝑘 − 𝜆 𝑘 +1)( 𝜆 𝑘 +1 − 𝜆 𝑘 ) > 0 
+
+> 9:
+
+¯𝝂 𝑘 = 𝝂 𝑘 , ¯𝜆 𝑘 = 𝜆 𝑘  
+
+> 10:
+
+𝝂 𝑘 +1 =   ¯𝝂 𝑘 − 𝛾 ∇𝝂 𝑓 ( ¯𝝂 𝑘 , ¯𝜆 𝑘 ) 
+
+> +
+> 11:
+
+𝜆 𝑘 +1 = ¯𝜆 𝑘 − 𝛾 ∇𝜆 𝑓 ( ¯𝝂 𝑘 , ¯𝜆 𝑘 )
+
+Furthermore, 𝑓 is 𝐿 -smooth with [55] 
+
+𝐿 =
+
+> 2𝑀 𝑇
+
+∑︁ 
+
+> 𝑖 =1
+
+∥ ¯𝑬 𝑖 ∥2 + ∥ 𝑪 ∥2. (48) Let 𝛾 denote the step size, then the proximal gradient update (without acceleration) for 𝝂 and the gradient update for 𝜆 at iteration number 𝑘 is 
+
+𝝂 𝑘 +1 = prox 𝛾 I
+
+
+
+𝝂 𝑘 − 𝛾 ∇𝝂 𝑓 (𝝂 𝑘 , 𝜆 𝑘 )
+
+
+
+, (49) 
+
+𝜆 𝑘 +1 = 𝜆 𝑘 − 𝛾 ∇𝜆 𝑓 (𝝂 𝑘 , 𝜆 𝑘 ), (50) where the prox operator is defined as [56] 
+
+prox 𝛾 I (𝒗 ) = arg min  
+
+> 𝒖
+
+I ( 𝒖 ) + 12𝛾 ∥𝒖 − 𝒗 ∥2. (51) As I ( .) is an indicator function defined in (47), prox operator in (51) reduces to projection onto the nonnegative orthant and 
+
+𝝂 update in (49) becomes the projected gradient update [55] 
+
+𝝂 𝑘 +1 =
+
+
+
+𝝂 𝑘 − 𝛾 ∇𝝂 𝑓 (𝝂 𝑘 , 𝜆 𝑘 )
+
+ 
+
+> +
+
+, (52) where (.)+ projects its argument onto the nonnegative orthant. We summarize the solution procedure in Algorithm 1, where Steps 3, 4, and 5 implement the momentum setup and the accelerated projected gradient updates are given in Steps 6 and 7. The restart scheme adopted in Step 8 of Algorithm 1 is based on the gradient mapping for 𝝂 𝑘 +1 and 𝜆 𝑘 +1 updates [58], i.e., Steps 6 and 7 of Algorithm 1. Algorithm 1 is guaranteed to converge for 𝛾 = 1/𝐿 [56]. When we restart the momentum, we do not restart 𝑡 𝑘 as opposed to some studies on adaptive restart schemes, e.g., [58]. This modification ensures 𝑂 (1/𝑘 2) convergence rate for our formulation [59] since 𝑓 (𝝂 , 𝜆 ) in (46) is convex but not strongly convex. The stopping criterion for Algorithm 1 can be set as 
+
+∥ ¯𝝂 𝑘 − 𝝂 𝑘 +1 ∥/ 2𝑀 𝑇 + | ¯𝜆 𝑘 − 𝜆 𝑘 +1 | ≤ 𝜀, (53) where 𝜀 > 0 is the stopping tolerance. After the optimal 𝝂 ★
+
+and 𝜆 ★ are found by Algorithm 1, the optimal ˜𝑹 ★ = ˜𝑹 (𝝂 ★, 𝜆 ★)
+
+is found by (41) and then the optimal desired waveform 8
+
+covariance matrix 𝑹 ★ is computed using (33). Therefore, the optimal covariance matrix 𝑹 ★ has the following structure 
+
+𝑹 ★ = 𝑼 𝐷 𝚺 −1
+
+> 𝐷
+
+ ˜𝑻 − 𝑬 (𝝂 ★) − 𝑪 (𝜆 ★) − 𝚿 
+
+> +
+
+𝚺 −1 
+
+> 𝐷
+
+𝑼 𝐻 𝐷 . (54) Algorithm 1 can be simplified under the total power ( 𝑹 ∈R𝑡𝑜𝑡 ) and equal per-antenna power ( 𝑹 ∈ R 𝑝𝑎 ) constraints. In these special cases, (34) does not include any inequality constraints and the associated dual problem (39) consequently reduces to an unconstrained convex optimization problem. For instance, when the covariance matrix 𝑹 is subject only to the total power constraint 𝑹 ∈ R 𝑡𝑜𝑡 , all computations involving 𝝂 
+
+can be omitted from Algorithm 1. The computationally dominant operation in Algorithm 1 is the evaluation of the gradients in Steps 6 and 7, requiring the projection of  ˜𝑻 − 𝚿 − 𝑬 (𝝂 ) − 𝑪 (𝜆 ) onto the positive semidefinite cone, which can be computed via the direct eigen-decomposition with complexity 𝑂 (𝑀 3 
+
+> 𝑇
+
+) [60]. Compared to the 𝑂 (𝑀 6 
+
+> 𝑇
+
+) per-iteration complexity of alternative approaches solved via standard interior-point methods, the proposed ap-proach here provides significant computational gains. 
+
+C. Joint Waveform Design 
+
+The goal of joint waveform design is the unification of both communication and sensing criteria within a single cost. This joint cost can be a weighted average of the sensing and communication costs described in Sections II-C and II-D. To synthesize the waveform, we formulate the following non-convex optimization problem combining the sensing cost (19) and the communication cost (25) as 
+
+min   
+
+> 𝑿 ,𝑼
+
+𝐽 ( 𝑿 , 𝑼 )
+
+s.t. 𝑿 ∈ X 𝑝𝑎 𝑝𝑟 , 𝑼𝑼 𝐻 = 𝑰 𝑀 𝑇 , (55) where 
+
+𝐽 ( 𝑿 , 𝑼 ) = 𝛼𝐽 𝑐  
+
+> zf
+
+( 𝑿 ) + ( 1 − 𝛼 )𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ), (56) and 𝛼 ∈ [0, 1] controls the trade-off between sensing and communication performance 3.To solve (55), we adopt the alternating minimization (AM) algorithm by applying minimization over each variable by fixing the other [56]. The minimization of 𝐽 ( 𝑿 , 𝑼 ) over 𝑼 is equivalent to solving the following non-convex problem 
+
+min    
+
+> 𝑼𝑼 𝐻 =𝑰 𝑀 𝑇
+
+∥ 𝑿 −√︁ 𝑁 𝑡 𝑹 1/20 𝑼 ∥2 
+
+> 𝐹
+
+, (57) which is closely related with the orthogonal Procrustes prob-lem [60]. We can equivalently write (57) as 
+
+max    
+
+> 𝑼𝑼 𝐻 =𝑰 𝑀 𝑇
+
+Re {Tr (√︁ 𝑁 𝑡 𝑿 𝐻 𝑹 1/20 𝑼 )} , (58) admitting the following closed-form solution 
+
+𝑼 ★ = U𝐻 , (59)             
+
+> 3For 𝛼 =1and 𝛼 =0,the cost function becomes exclusively communication- and sensing-oriented, respectively.
+
+where U ∈ C𝑁 𝑡 ×𝑀 𝑇 is the semi-unitary factor of the polar decomposition of √𝑁 𝑡 𝑿 𝐻 𝑹 1/20 [60, Ch. 8]. The minimization of 𝐽 ( 𝑿 , 𝑼 ) over 𝑿 is equivalent to solving 
+
+min  
+
+> 𝑿 ∈ X 𝑝𝑎 𝑝𝑟
+
+𝛼 ∥ 𝑿 − 𝑔 −1 𝑯 †𝚪 −1 𝑺 ∥2
+
+> 𝐹
+
++( 1 − 𝛼 )∥ 𝑿 −√︁ 𝑁 𝑡 𝑹 1/20 𝑼 ∥2 
+
+> 𝐹
+
+. (60) For the simplicity of notation, we define 𝒁 = 𝑔 −1 𝑯 †𝚪 −1 𝑺 and 
+
+𝑮 = √𝑁 𝑡 𝑹 1/20 𝑼 , which allows us to rewrite (60) as 
+
+min  
+
+> 𝑿 ∈ X 𝑝𝑎 𝑝𝑟
+
+𝛼 ∥ 𝑿 − 𝒁 ∥2 
+
+> 𝐹
+
++ ( 1 − 𝛼 )∥ 𝑿 − 𝑮 ∥2 
+
+> 𝐹
+
+. (61) Due to proper normalizations of 𝑮 and 𝒁 in (61), the value of 𝑃 𝑇 only introduces a scaling factor to the solution. Further-more 𝛽 𝑖 in (1) can be scaled by a common positive constant, without affecting the optimal solution. This property allows generalization of the proposed method to diverse scenarios [34]. Let ˜𝒈 𝐻 𝑖 ∈ C1× 𝑁 𝑡 and ˜𝒛 𝐻 𝑖 ∈ C1× 𝑁 𝑡 , 1 ≤ 𝑖 ≤ 𝑀 𝑇 , denote 
+
+𝑖 -th row of 𝑮 and 𝒁 , respectively. Given the row-separability of the objective function of (61) and the constraint set X𝑝𝑎 𝑝𝑟 
+
+(13), the optimization problem (61) can be decoupled into 𝑀 𝑇 
+
+independent subproblems, i.e., 
+
+min 
+
+> ˜𝒙 𝑖
+
+{𝛼 ∥ ˜𝒙 𝑖 − ˜𝒛 𝑖 ∥2 + ( 1 − 𝛼 )∥ ˜𝒙 𝑖 − ˜𝒈 𝑖 ∥2 }
+
+s.t. ∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 , ∥ ˜𝒙 𝑖 ∥2 
+
+> ∞
+
+≤ 𝜌 𝑖 𝑃 𝑖 . (62) This decoupling enables parallel optimization such that ˜𝒙 𝑖 ,representing the Tx signal by the 𝑖 -th antenna, can be opti-mized independently. As ∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 is constant, (62) is equivalent to [61] 
+
+max 
+
+> ˜𝒙 𝑖
+
+Re { ˜𝒙 𝐻 𝑖 𝜸 𝑖 } s.t. ∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 , ∥ ˜𝒙 𝑖 ∥2 
+
+> ∞
+
+≤ 𝜌 𝑖 𝑃 𝑖 , (63) where 
+
+𝜸 𝑖 = 𝛼 ˜𝒛 𝑖 + ( 1 − 𝛼 ) ˜𝒈 𝑖 . (64) If the ℓ∞-norm constraint is removed from (63), we obtain 
+
+max 
+
+> ˜𝒙 𝑖
+
+Re { ˜𝒙 𝐻 𝑖 𝜸 𝑖 } s.t. ∥ ˜𝒙 𝑖 ∥2 = 𝑃 𝑖 𝑁 𝑡 , (65) yielding the following closed-form solution 
+
+˜𝒙 ★𝑖 =√︁ 𝑃 𝑖 𝑁 𝑡 
+
+𝜸 𝑖 
+
+∥𝜸 𝑖 ∥ , (66) which can be obtained via the Cauchy-Schwarz inequality. When 𝑿 ∈ X 𝑝𝑎 , the solution for this special case is obtained by replacing 𝑃 𝑖 = 𝑃 𝑒 in (66) for all 𝑖 .When the entries of ˜𝒙 𝑖 are restricted to be of the same magnitude, which is the special case of PAPR constraint for 
+
+𝜌 𝑖 = 1, i.e., 𝑿 ∈ X 𝑐𝑚 , (63) becomes 
+
+max 
+
+> ˜𝒙 𝑖
+
+Re { ˜𝒙 𝐻 𝑖 𝜸 𝑖 } s.t. | ˜𝑥 𝑖 [𝑛 ]| 2 = 𝑃 𝑖 , (67) where the closed-form solution can be obtained by aligning the phases of ˜𝒙 𝑖 and 𝜸 𝑖 with a proper scaling, i.e., 
+
+˜𝒙 ★𝑖 =√︁ 𝑃 𝑖 𝑒 𝑗 ∠𝜸 𝑖 , (68) where ∠ returns the entry-wise phases of its argument. 9
+
+Algorithm 2 Procedure to solve (55), based on alternating minimization method. 
+
+Input: 𝑹 0, 𝑯 , 𝑺 , 𝛼 , X
+
+Output: 𝑿 ★ 
+
+> 1:
+
+Initialize 𝑿 0 and set 𝑔 as given in (26); and for 𝑘 ≥ 0 
+
+> 2:
+
+Given 𝑿 𝑘 , update 𝑼 𝑘 +1 using (59)  
+
+> 3:
+
+Given 𝑼 𝑘 +1, update ˜𝒙 𝑘 +1 
+
+> 𝑖
+
+for all 𝑖  
+
+> 4:
+
+If X = X𝑝𝑎 𝑝𝑟 , solve (63) using [61, Alg. 2]  
+
+> 5:
+
+If X = X𝑐𝑚 , use (68)  
+
+> 6:
+
+If X = X𝑝𝑎 , use (66) for 𝑃 𝑖 = 𝑃 𝑒  
+
+> 7:
+
+Set 𝑿 𝑘 +1 =
+
+h
+
+˜𝒙 𝑘 +11 ... ˜𝒙 𝑘 +1
+
+> 𝑀 𝑇
+
+i 𝐻 
+
+While the special cases of (63) yield closed-form solutions, the original problem itself does not have a closed-form solu-tion. However, it can optimally be solved using the efficient recursive algorithm given in [61, Alg. 2], which is widely adopted in radar applications [2]. The proposed joint waveform design method is summarized in Algorithm 2, where the stopping condition can be set as 
+
+∥ 𝑿 𝑘 +1 − 𝑿 𝑘 ∥2
+
+> 𝐹
+
+𝑁 𝑡 𝑃 𝑇 
+
+≤ 𝜀. (69) The computationally dominant operation in this algorithm is the one in Step 2, involving the computation of the polar decomposition of √𝑁 𝑡 𝑿 𝐻 𝑹 1/20 , which is 𝑂 (𝑀 2 
+
+> 𝑇
+
+𝑁 𝑡 ) [60]. IV. S IMULATION RESULTS 
+
+In this section we evaluate the performance of the proposed methods based on simulations, We limit our analysis to the ULA to facilitate easier interpretation of results as it is the standard setup in the literature. To this end, a ULA consisting of 𝑀 𝑇 = 16 antennas with half-wavelength spacing is consid-ered. A grid size of 𝑁 𝜙 = 2048 is adopted (see Section II-C), with grid points uniformly sampling the angular domain, i.e., the angle resolution is less than 0.1◦. The total power budget 4.is set to 𝑃 𝑇 = 10 W
+
+A. Performance Metrics 
+
+For evaluation of the quality of solutions obtained by the proposed method, we adopt several standard metrics. For the proposed covariance matrix design method described in Section III-B, we adopt the widely-used PSL and ISMR metrics to measure the beampattern quality. The level of power dissipation in unintended directions is typically measured by the PSL, evaluated relative to the maximum mainlobe power [13]. The efficiency of synthesized patterns in focusing the available energy towards the desired directions is quantified by ISMR, computed as 
+
+ISMR =
+
+Í ¯𝜙 𝑖 ∈Φ𝑠 𝑃 ( ¯𝜙 𝑖 )
+
+Í ¯𝜙 𝑗 ∈Φ𝑚 𝑃 ( ¯𝜙 𝑗 ) . (70) For visualization, we also present the normalized generated beampatterns, denoted as ˆ𝑃 (𝜙 ), for sample scenarios where   
+
+> 4As discussed, the obtained waveform covariance matrix and waveform outputs of our proposed methods can simply be scaled for any 𝑃 𝑇 .
+
+each beampattern is normalized by the maximum beampattern value across all methods, ensuring that 0 dB corresponds to the peak value of the generated beampatterns. Apart from the beampattern synthesis performance, we also investigate the cross-correlation between signals transmitted in different mainlobe directions, defined as 
+
+𝜌 𝑖, 𝑗 = |𝒂 𝐻 ( ¯𝜙 𝑖 ) 𝑹𝒂 ( ¯𝜙 𝑗 )| ∥ 𝑹 1/2 𝒂 ( ¯𝜙 𝑖 )∥∥ 𝑹 1/2 𝒂 ( ¯𝜙 𝑗 )∥ , ¯𝜙 𝑖 , ¯𝜙 𝑗 ∈ Φ𝑚 , (71) and report the average value ¯𝜌 calculated over all 𝑖 ≠ 𝑗 .The convergence of Algorithm 1 is analyzed by evaluating the rate at which the objective function approaches its optimal value, measured using the metric 
+
+𝜀 𝑓 (𝑘 ) = 𝑓 (𝝂 ★, 𝜆 ★) − 𝑓 (𝝂 𝑘 , 𝜆 𝑘 )
+
+𝑓 (𝝂 ★, 𝜆 ★) . (72) In Section IV-C, we present the performance of the dual-functional waveform design described in Section III-C. For sensing, the waveform matrix is designed to match a reference covariance matrix, e.g., under PAPR constraints, which can be quantified by the following cost 
+
+𝜀 CM = ∥ 𝑿 𝑿 𝐻 /𝑁 𝑡 − 𝑹 0 ∥2
+
+> 𝐹
+
+∥ 𝑹 0 ∥2
+
+> 𝐹
+
+, (73) where 𝑹 0 is the reference covariance matrix, designed as described in Section III-B. For communication, we adopt symbol error rate (SER) as the performance evaluation metric. 
+
+B. Beampattern Synthesis Performance 
+
+We start by evaluating the beamforming performance achieved by covariance matrices designed in the first stage of the proposed method. The performance is compared against the most popular alternative approaches from the literature, namely the least squares (LS) [17] and weighted least squares (WLS) [7] methods, which are described in Section II-C. To implement the former, we use the general-purpose solver SCS [42], [62], while for the latter, we adopt the official Matlab implementation [63], which is based on a standard interior-point method. To obtain the results presented in Sections IV-B1, IV-B2 and IV-B3, we set the tuning parameter to 𝜂 = 2.5 ¯ 𝜂 in (28), where ¯𝜂 is defined as 
+
+¯𝜂 = 𝑃 𝑇 /Tr 
+
+
+
+𝚺 −2 
+
+> 𝐷
+
+𝑽 𝐻 𝐷 diag 
+
+
+
+{𝑃 𝑑 ( ¯𝜙 𝑖 )} 𝑁 𝜙 
+
+> 𝑖 =1
+
+
+
+𝑽 𝐷 
+
+
+
+. (74) Here, setting 𝜂 = ¯𝜂 would determine the scaling of ˜𝑻 in the unrealistic case where ˜𝑹 = ˜𝑻 in (34). The effect of 𝜂 on the beampattern synthesis performance and cross-correlations is investigated in Section IV-B4. In all of these scenarios, we do not assume any undesired interfering source and 𝑹 is constrained to satisfy 𝑹 ∈ R 𝑝𝑎 . In Section IV-C2, we examine the interference suppression performance of the proposed method where 𝑹 is constrained to satisfy 𝑹 ∈ R 𝑟 𝑒𝑙 .10 10 ◦ 30 ◦ 50 ◦ 70 ◦ 90 ◦ 110 ◦              
+
+> Beamwidth -18 -15 -12 -9 -6 -3 0ISMR [dB]
+> LS WLS Proposed
+> (a) Integrated sidelobe to mainlobe ratios. 10 ◦30 ◦50 ◦70 ◦90 ◦110 ◦
+> Beamwidth -15 -13 -11 -9 PSL [dB]
+> LS WLS Proposed (b) Peak sidelobe levels. −90 ◦−60 ◦−30 ◦0◦30 ◦60 ◦90 ◦
+> φ
+> −25
+> −20
+> −15
+> −10
+> −50ˆP (φ) [dB]
+> LS WLS Proposed (c) Synthesized beampattern ( 60 ◦beamwidth).
+
+Fig. 4: Synthesized beampattern quality as a function of desired beamwidth, when the mainlobe direction is 𝜙 = 0◦.−30 ◦ −10 ◦ 10 ◦ 30 ◦ 50 ◦
+
+φ
+
+-12 -10 -8 -6 -4 ISMR [dB] 
+
+> LS WLS Proposed
+> (a) Integrated sidelobe to mainlobe ratios.
+
+−30 ◦ −10 ◦ 10 ◦ 30 ◦ 50 ◦
+
+φ
+
+-15 -13 -11 -9 -7 PSL [dB]                 
+
+> LS WLS Proposed (b) Peak sidelobe levels. −90 ◦−60 ◦−30 ◦0◦30 ◦60 ◦90 ◦
+> φ
+> −25
+> −20
+> −15
+> −10
+> −50ˆP (φ) [dB]
+> LS WLS Proposed (c) Synthesized beampattern (mainlobes at 𝜙 =
+> 10 ◦and 𝜙 =−50 ◦).
+
+Fig. 5: Synthesized beampattern quality as a function of the scanning mainlobe direction 𝜙 , with an additional fixed mainlobe at −50 ◦; the desired beamwidth for both mainlobes is 20 ◦
+
+.
+
+1) Impact of Mainlobe Beamwidth: Depending on the uncertainty of prior information regarding the radar target locations, the ISAC system is desired to focus Tx power in wider or narrower regions. Therefore, the desired beamwidth can be small or large. Here we evaluate the performance of the proposed approach by changing the desired beamwidth from 
+
+10 ◦ to 110 ◦, with a 10 ◦ step size, where the central mainlobe direction is fixed to 0◦.Fig. 4a shows the changing ISMR as a function of the beamwidth. We observe that the proposed method allocates the available power budget more efficiently than the alternative approaches for all considered beamwidths. Compared to WLS and LS, the proposed method obtains 1.5 dB and 2.3 dB lower ISMR on average, respectively. Fig. 4b shows the changing PSL as a function of the beamwidth. The proposed method also attains lower PSL compared to the alternative approaches where it obtains 3.1 dB and 1.9 dB lower PSL on average compared to LS and WLS, respectively. Fig. 4c shows a typical synthesized beampattern obtained for a desired beamwidth of 
+
+60 ◦, with the gray area indicating the desired mainlobe region. As observed, the proposed method effectively conforms to the desired mainlobe region, illustrating its suitability for synthesizing beampatterns. 
+
+2) Impact of the Mainlobe Direction in Two-Mainlobe Case: A practical requirement for a beampattern synthesis algorithm is the ability to support multiple mainlobes. For instance, a radar system may need to illuminate a known target while simultaneously scanning other regions for unidentified ones. This section evaluates the performance of the proposed beampattern synthesis approach in a scenario featuring one fixed mainlobe at 𝜙 = −50 ◦ and another scanning from 
+
+𝜙 = −30 ◦ to 𝜙 = 50 ◦ in 10 ◦ steps. The desired beamwidth for both mainlobes is set to 20 ◦.Fig. 5a illustrates the ISMR as a function of the scanning mainlobe’s direction. The proposed method demonstrates su-perior power allocation to the mainlobes compared to the alternatives, outperforming WLS and LS by an average of 
+
+1.4 dB and 2.5 dB, respectively. The PSL obtained for this scenario is presented in Fig. 5b. The proposed method achieves the lowest PSL values among the approaches considered, with average reductions of 1.6 dB and 4 dB compared to the WLS and LS methods, respectively. Fig. 5c shows a typical synthesized beampattern for the case where the scan-ning mainlobe is fixed at 10 ◦. The proposed method also effectively allocates nearly equal Tx power to both mainlobes, despite their significant angular separation, demonstrating its capability to evenly illuminate two distinct target regions. 
+
+3) Convergence and Computation Time of Algorithm 1: 
+
+For the simulation scenario shown in Fig. 4c, we provide the convergence plot of Algorithm 1 in Fig. 6. We observe that 11 0 100 200 300 400 
+
+k
+
+10 −8
+
+10 −6
+
+10 −4
+
+10 −2
+
+10 0
+
+> εf (k)
+> PG APG Alg. 1
+
+Fig. 6: Convergence of Algorithm 1, with 𝑘 denoting the iteration counter. Standard and accelerated projected gradient methods are denoted by PG and APG, respectively. Algorithm 1 demonstrates much faster convergence compared to standard (constant step-size with 𝛾 = 1/𝐿 ) and accelerated projected gradient methods, achieving 𝜀 𝑓 (𝑘 ) < 10 −8 after 𝑘 =
+
+50 iterations, while the same accuracy can be obtained after 
+
+𝑘 = 400 and 𝑘 = 300 iterations of standard and accelerated projected gradient methods, respectively. For the scenarios described in Section IV-B2, the average beampattern synthesis times for WLS, LS, and the proposed method (Algorithm 1) are 38.8, 12.3, and 0.03 s, respectively, as measured on a computer with Intel i7-1365U CPU and 16 GB RAM. When 𝑀 𝑇 is increased from 16 to 64, for the same scenario, the LS solution requires over 7 hours, whereas the proposed method completes in just 1.3 s on the same hardware. The proposed formulation (34) can be also solved using a general-purpose interior-point solver. To this end, we utilize CVXPY [42] to obtain a solution with the modern interior-point solver Clarabel [64], under the same scenario and hardware conditions. For the case of 𝑀 𝑇 = 64 , the results show that Clarabel requires 82.8 s to converge, i.e., substantially higher than the 1.3 s achieved by the proposed method. When 
+
+𝑀 𝑇 = 128 , the proposed algorithm completes in approximately 
+
+13 .5 s, whereas Clarabel fails to produce a solution due to excessive memory usage. These results demonstrate the computational efficiency of the proposed method, while also highlighting its practicality for massive MIMO systems. 
+
+4) Impact of 𝜂 on Cross-Correlation and Beampattern: The effect of the tuning parameter 𝜂 in (28) on the cross-correlation and beampattern synthesis performnance is examined accord-ing to (71), by considering the scenario from Fig. 4c. Fig. 7 demonstrates that 𝜂 governs the trade-off between low cross-correlation and ISMR. As 𝜂 increases, ISMR decreases, but this comes at the expense of higher cross-correlation values. As a reference, the average cross-correlation values ( ¯𝜌 ) achieved by WLS and LS are about 0.39 in this scenario. With 𝜂 = 2.5 ¯ 𝜂 used in the previous scenarios, the proposed method achieves a lower average cross-correlation value of 
+
+¯𝜌 = 0.23 .0.5 2.5 4.5 6.5 8.5 10 .5 12 .5
+
+η/ ¯η
+
+-16 -12 -8 -4 ISMR [dB] 
+
+0.2 0.22 0.24 0.26 0.28 ¯ρ
+
+Fig. 7: The effect of 𝜂 on the synthesized beampattern quality and cross-correlations. 
+
+C. Communication and Sensing Performance 
+
+In this section, we investigate the performance of the proposed dual-functional waveform design described in Sec-tion III-C. In Section IV-C1, we demonstrate effect of the trade-off parameter 𝛼 in (55) on communication and sensing performance. In Sections IV-C2 and IV-C3, we set 𝛼 = 0 and 
+
+𝛼 = 1, to observe the sensing- and communication-only cases, respectively. For the communication channel, we assume a Rayleigh fading channel, where the SNR for each user is the same and defined as SNR 𝑖 = 𝛽 𝑖 𝑃 𝑇 /𝜎 2 
+
+> 𝑐
+
+, 1 ≤ 𝑖 ≤ 𝐾 𝐶 . We assume that the communication symbols are drawn from the QPSK alphabet. The block length is set to 𝑁 𝑡 = 2048 .
+
+1) Communication-Sensing Trade-off: Fig. 8 illustrates the impact of the tuning parameter 𝛼 on sensing and communica-tion performance. The results are obtained by averaging over 1000 independent channel realizations. The sensing scenario is based on the setup depicted in Fig. 5c, where the waveform is constrained to satisfy the per-antenna power constraint. As expected, increasing 𝛼 reduces the SER, indicating improved communication performance. However, this comes at the cost of higher ISMR values, signifying a decline in sensing per-formance. Additionally, the results reveal that increasing the number of communication users degrades the communication performance. For instance, in the high SNR regime, a SER of 
+
+1.5 × 10 −2 is observed for 𝐾 𝐶 = 9, compared to 2.5 × 10 −6
+
+for 𝐾 𝐶 = 3. We only report ISMR results for 𝐾 𝐶 = 5, as the ISMR remains largely unaffected by changes in 𝐾 𝐶 for this specific scenario. 
+
+2) Sensing-Only Performance: For the scenario depicted in Fig. 5c, we consider the presence of an interference source, e.g., a jammer located at 𝜙 = −15 ◦. By setting 𝜔 = 10 4𝜂 
+
+in (30), interference suppression of up to −60 dB can be achieved, as demonstrated by a typical solution shown in Fig. 9. Furthermore, improved beampattern synthesis performance is observed by relaxing the per-antenna power constraint with 
+
+𝛿 = 0.5 (𝑹 ∈ R 𝑟 𝑒𝑙 , see Section II-B), which is taken as the reference covariance matrix input 𝑹 0 to synthesize 𝑿 in the next step. We begin by evaluating the effectiveness of 𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ) (19) as a sensing cost. For that purpose, we design 𝑿 under various PAPR constraints. For comparison, we utilize 𝐽 𝑠  
+
+> ref
+
+( 𝑿 ) (20) 12 0 0.2 0.4 0.6 0.8 1
+
+α
+
+10 0
+
+10 −2
+
+10 −4
+
+10 −6    
+
+> SER
+> Kc= 3
+> Kc= 5
+> Kc= 7
+> Kc= 9
+
+630-3 -6 -9 ISMR [dB] 
+
+Fig. 8: The effect of the tuning parameter 𝛼 on SER and beampattern synthesis performance, for SNR of 10 dB. −90 ◦ −60 ◦ −30 ◦ 0◦ 30 ◦ 60 ◦ 90 ◦
+
+φ
+
+−60 
+
+−45 
+
+−30 
+
+−15 0ˆP (φ) [dB]   
+
+> δ= 0
+> δ= 0 .5
+
+Fig. 9: The synthesized beampatterns under the constraints 
+
+𝑹 ∈ R 𝑟 𝑒𝑙 for 𝛿 = 0.5 and 𝑹 ∈ R 𝑝𝑎 (𝛿 = 0) with a notch direction at 𝜙 = −15 ◦.with 𝑿 0 = √𝑁 𝑡 𝑹 1/20 𝑼 0, where the columns of the semi-unitary matrix 𝑼 0 are the right singular vectors of a Gaussian random 
+
+𝑀 𝑇 × 𝑁 𝑡 matrix, with i.i.d. entries drawn from CN ( 0, 1). This serves as a special case of 𝐽 𝑠  
+
+> syn
+
+( 𝑿 , 𝑼 ) (19) with a fixed 𝑼 = 𝑼 0.Fig. 10 shows that optimizing over 𝑼 yields significant performance enhancements. For instance, when 𝜌 = 1.6, 𝜀 CM 
+
+is on the order of 10 −15 when 𝑼 is treated as an optimization variable, compared to 10 −2 when it is fixed. As higher PAPR is allowed, the covariance matching performance of the gen-erated waveform improves. This result is expected, as lower PAPR imposes a stricter constraint. Furthermore, the substan-tial difference between the performance under 𝜌 = 1 (CM) and 𝜌 = 1.1 highlights that allowing 10% deviations from the mean power level yields significantly better performance. Fig. 11 presents the normalized angle estimation spectrum generated using the Bartlett beamforming algorithm for an SNR of 10 dB [6]. Here 𝑿 is designed under the PAPR constraint of 𝜌 = 1.1, where the reference covariance matrix is designed with and without considering the interference source 5
+
+in Fig. 9. The interference direction and the radar target directions are denoted by green and red lines, respectively. In this scenario, radar targets are modeled as 𝑞 (𝜙 1) =       
+
+> 5Neglecting the interference source corresponds to omitting 𝐽 𝑠
+> is (𝑹 )term in (30) by setting 𝜔 =0in the covariance matrix ( 𝑹 0) design stage.
+
+1.0 1.1 1.2 1.3 1.4 1.5 1.6
+
+ρ
+
+10 −16 
+
+10 −12 
+
+10 −8
+
+10 −4
+
+10 0  
+
+> εCM  Fixed U
+> Opt. U
+
+Fig. 10: Covariance matrix matching performance of the sens-ing waveform depending on the imposed PAPR constraints. −90 ◦ −60 ◦ −30 ◦ 0◦ 30 ◦ 60 ◦ 90 ◦
+
+φ
+
+> 0.00.20.40.60.81.0
+> ¯P (φ)
+> w/ IS w/o IS
+
+Fig. 11: Normalized angle estimation spectrums with and without interference suppression (IS). 
+
+𝑒 𝑗 𝜓 1 and 𝑞 (𝜙 2) = 𝑒 𝑗 𝜓 2 , located within mainlobe directions 
+
+𝜙 1 = −50 ◦ and 𝜙 2 = 10 ◦, respectively. An interference source is represented by 𝑞 (𝜙 3) = 100 𝑒 𝑗 𝜓 3 at 𝜙 3 = −15 ◦ (the signal-to-interference ratio is −40 dB). Random phase shift is incorporated into the model where 𝜓 𝑖 ∼ 𝑈 [0, 2𝜋 ]. When the known interference direction is suppressed by nulling, angle estimation can be performed reliably. Conversely, if suppression is not performed, the radar targets become indis-tinguishable. More advanced techniques, such as subspace-based and sparse methods [45], [65], can also be employed in Rx process-ing to improve performance. However, a detailed discussion of these techniques is beyond the scope of this work. 
+
+3) Communication-Only Performance: Fig. 12 illustrates SER as a function of SNR, under different hardware imple-mentation constraints. The presented results are obtained by averaging over 2500 independent channel realizations and for 
+
+𝐾 𝐶 = 5.All SER curves display an error floor for SNR values exceeding 30 dB, with the error floor levels determined by the imposed constraints. This residual SER arises from waveform distortion relative to the nominal waveform. The CM constraint proves to be the most restrictive one, leading to an error floor on the order of 10 −2, while the per-antenna constraint results in a significantly lower SER of 2.5 × 10 −6.13 0 10 20 30 40 50 SNR [dB] 10 −6
+
+10 −4
+
+10 −2
+
+10 0    
+
+> SER
+> ρ= 1 .0 (CM)
+> ρ= 1 .2
+> ρ= 1 .6
+> ρ= 2 .2Per-Ant
+
+Fig. 12: SER vs SNR for per-antenna power constraint, differ-ent constraints 𝜌 on PAPR, and the CM constraint, for 𝛼 = 1.When PAPR is limited to 2.2, only a minor performance degradation is observed compared to the per-antenna power constraint. However, further reducing the PAPR significantly deteriorates communication performance. This result aligns with the findings presented in Section IV-C2 and highlights that the adjustable PAPR enables a flexible trade-off between hardware complexity and performance optimization. V. C ONCLUSIONS 
+
+This paper presents a flexible and computationally efficient joint waveform design framework for MIMO ISAC systems, accommodating arbitrary antenna array responses and support-ing various important practical constraints. The waveform is synthesized in two main steps. The first one involves design of the Tx covariance matrix, formulated as a convex matrix nearness problem, incorporat-ing the desired radiation pattern and spatial cross-correlation characteristics for the improved sensing performance. The proposed method enables independent power control over in-dividual antennas and supports enforcement of deep radiation pattern notches at specified directions for interference suppres-sion. While ensuring global convergence, it is demonstrated that a highly-efficient solver can be implemented by leveraging the structure of the proposed problem formulation. The second step employs a waveform synthesis method to obtain Tx signal samples conforming to the covariance matrix produced in the previous step. The proposed method employs a ZF-based MU-MIMO approach to minimize the interference between communication users, while ensuring compliance with practical hardware constraints. Most notably, it enables incorporation of adjustable PAPR requirements individually on each antenna. Extensive simulation results presented in the paper validate the proposed framework’s ability to deliver superior flexibility, computational efficiency, and performance compared to the existing methods in the literature. APPENDIX ATo simplify (31), we rewrite ∥ 𝑫 𝐻 𝑹𝑫 − 𝑻 ∥2 
+
+> 𝐹
+
+as 
+
+∥ 𝑫 𝐻 𝑹𝑫 − 𝑻 ∥2
+
+> 𝐹
+
+= Tr (𝑫 𝐻 𝑹𝑫 𝑫 𝐻 𝑹𝑫 ) − 2Re {Tr (𝑫 𝐻 𝑹𝑫𝑻 )} + ∥ 𝑻 ∥2 
+
+> 𝐹
+
+. (75) Note that 
+
+Tr (𝑫 𝐻 𝑹𝑫 𝑫 𝐻 𝑹𝑫 )
+
+= Tr (( 𝑼 𝐷 𝚺 𝐷 )𝐻 𝑹 (𝑼 𝐷 𝚺 𝐷 )( 𝑼 𝐷 𝚺 𝐷 )𝐻 𝑹 (𝑼 𝐷 𝚺 𝐷 )) , (76) and 
+
+Tr (𝑫 𝐻 𝑹𝑫𝑻 ) = Tr (( 𝑼 𝐷 𝚺 𝐷 )𝐻 𝑹 (𝑼 𝐷 𝚺 𝐷 )𝑽 𝐻 𝐷 𝑻𝑽 𝐷 ). (77) By (32), we can express 
+
+min  
+
+> 𝑹
+
+∥ 𝑫 𝐻 𝑹𝑫 − 𝑻 ∥2 
+
+> 𝐹
+
+≡ min 
+
+> ˜𝑹
+
+∥ ˜𝑹 − 𝑽 𝐻 𝐷 𝑻𝑽 𝐷 ∥2 
+
+> 𝐹
+
+, (78) since 
+
+Tr ( ˜𝑹 2) − 2Re {Tr ( ˜𝑹𝑽 𝐻 𝐷 𝑻𝑽 𝐷 )} + ∥ 𝑻 ∥2
+
+> 𝐹
+
+= ∥ ˜𝑹 − 𝑽 𝐻 𝐷 𝑻𝑽 𝐷 ∥2 
+
+> 𝐹
+
++ const , (79) where the term const does not depend on ˜𝑹 . We can then modify the affine terms in (31) using the definition of ˜𝑹 given in (32). Also, ˜𝑹 ⪰ 0 if and only if 𝑹 ⪰ 0. Hence, (34) is obtained. APPENDIX BLet 𝜈 𝑖 ’s, 𝜆 and 𝑮 ⪰ 0 be the Lagrange multipliers associated with the affine inequality constraints, the affine equality constraint and the positive semidefiniteness constraint, respectively. By the definitions of ¯𝑬 𝑖 and 𝒃 given in (42) and (44), respectively, the Lagrangian associated with (34) can be written as 
+
+𝐿 ( ˜𝑹 , 𝑮 , 𝝂 , 𝜆 ) = 12 ∥ ˜𝑹 − ˜𝑻 ∥2 
+
+> 𝐹
+
+− 𝝂 𝑇 𝒃 − 𝜆𝑃 𝑇 
+
++Tr ˜𝑹 −𝑮 + 𝚿 +
+
+> 2𝑀 𝑇
+
+∑︁ 
+
+> 𝑖 =1
+
+𝜈 𝑖 ¯𝑬 𝑖 + 𝜆 𝑪 
+
+!! 
+
+. (80) We set the gradient of 𝐿 ( ˜𝑹 , 𝑮 , 𝝂 , 𝜆 ) with respect to ˜𝑹 to zero to minimize 𝐿 ( ˜𝑹 , 𝑮 , 𝝂 , 𝜆 ) over ˜𝑹 , i.e., 
+
+∇ ˜𝑹 𝐿 ( ˜𝑹 , 𝑮 , 𝝂 , 𝜆 ) = 0, (81) which gives 
+
+˜𝑹 (𝑮 , 𝝂 , 𝜆 ) = ˜𝑻 + 𝑮 − 𝚿 − 𝑬 (𝝂 ) − 𝑪 (𝜆 ), (82) where 𝑬 (𝝂 ) and 𝑪 (𝜆 ) are defined as in (43). Here we adopt the dual method proposed in [55]. Substitut-ing (82) in (80) gives 
+
+𝑔 (𝑮 , 𝝂 , 𝜆 ) = 12 ∥𝑮 − 𝚿 − 𝑬 (𝝂 ) − 𝑪 (𝜆 )∥ 2 
+
+> 𝐹
+
+− 𝝂 𝑇 𝒃 − 𝜆𝑃 𝑇 
+
++Tr  ( ˜𝑻 + 𝑮 − 𝚿 − 𝑬 (𝝂 ) − 𝑪 (𝜆 )) (− 𝑮 + 𝚿 + 𝑬 (𝝂 ) + 𝑪 (𝜆 )) , (83) which can be simplified as 
+
+𝑔 (𝑮 , 𝝂 , 𝜆 ) = − 12 ∥ ˜𝑻 + 𝑮 − 𝚿 −𝑬 (𝝂 ) − 𝑪 (𝜆 )∥ 2
+
+> 𝐹
+
++ 12 ∥ ˜𝑻 ∥2 
+
+> 𝐹
+
+− 𝝂 𝑇 𝒃 − 𝜆𝑃 𝑇 . (84) The dual problem of (34) can then be written as 
+
+max  
+
+> 𝑮 ,𝝂 ,𝜆
+
+𝑔 (𝑮 , 𝝂 , 𝜆 ) s.t. 𝑮 ⪰ 0, 𝝂 ≥ 0. (85) 14 
+
+We can analytically solve (85) over 𝑮 by [54] 
+
+𝑮 =  ˜𝑻 − 𝑬 (𝝂 ) − 𝑪 (𝜆 ) − 𝚿  
+
+> −
+
+, (86) where 
+
+[𝑴 ]− = [𝑴 ]+ − 𝑴 . (87) Then, by placing (86) into (84), we obtain 
+
+𝑓 (𝝂 , 𝜆 ) = −𝑔    ˜𝑻 − 𝑬 (𝝂 ) − 𝑪 (𝜆 ) − 𝚿  
+
+> −
+
+, 𝝂 , 𝜆 , (88) and by placing (86) into (82) and using (87), we simplify (88) as (40) and obtain (39). REFERENCES [1] F. Liu, L. Zheng, Y. Cui, C. Masouros, A. P. Petropulu, H. Griffiths, and Y. C. Eldar, “Seventy years of radar and communications: The road from separation to integration,” IEEE Signal Process. Mag. , vol. 40, no. 5, pp. 106–121, Jul. 2023. [2] H. He, J. Li, and P. Stoica, Waveform design for active sensing systems: A computational approach . Cambridge University Press, Aug. 2012. [3] D. Tse and P. Viswanath, Fundamentals of Wireless Communication .Cambridge University Press, 2005. [4] A. Wiesel, Y. C. Eldar, and S. Shamai, “Zero-forcing precoding and generalized inverses,” IEEE Trans. Signal Process. , vol. 56, no. 9, pp. 4409–4418, Sep. 2008. [5] M. Joham, W. Utschick, and J. A. Nossek, “Linear transmit processing in MIMO communications systems,” IEEE Trans. Signal Process. , vol. 53, no. 8, pp. 2700–2712, Aug. 2005. [6] B. D. Van Veen and K. M. Buckley, “Beamforming: A versatile approach to spatial filtering,” IEEE ASSP Mag. , vol. 5, no. 2, pp. 4–24, Apr. 1988. [7] D. R. Fuhrmann and G. San Antonio, “Transmit beamforming for MIMO radar systems using signal cross-correlation,” IEEE Trans. Aerosp. Electron. Syst. , vol. 44, no. 1, pp. 171–186, Jan. 2008. [8] P. Stoica, J. Li, and X. Zhu, “Waveform synthesis for diversity-based transmit beampattern design,” IEEE Trans. Signal Process. , vol. 56, no. 6, pp. 2593–2598, Jun. 2008. [9] S. Ahmed and M.-S. Alouini, “MIMO radar transmit beampattern design without synthesising the covariance matrix,” IEEE Trans. Signal Process. , vol. 62, no. 9, pp. 2278–2289, May 2014. [10] Y. Li and S. A. Vorobyov, “Fast algorithms for designing unimodular waveform (s) with good correlation properties,” IEEE Trans. Signal Process. , vol. 66, no. 5, pp. 1197–1212, Mar. 2017. [11] G. Hua and S. S. Abeysekera, “MIMO radar transmit beampattern design with ripple and transition band control,” IEEE Trans. Signal Process. ,vol. 61, no. 11, pp. 2963–2974, Jun. 2013. [12] H. Xu, R. S. Blum, J. Wang, and J. Yuan, “Colocated MIMO radar waveform design for transmit beampattern formation,” IEEE Trans. Aerosp. Electron. Syst. , vol. 51, no. 2, pp. 1558–1568, Apr. 2015. [13] A. Aubry, A. De Maio, and Y. Huang, “MIMO radar beampattern design via PSL/ISL optimization,” IEEE Trans. Signal Process. , vol. 64, no. 15, pp. 3955–3967, Aug. 2016. [14] W. Fan, J. Liang, and J. Li, “Constant modulus MIMO radar waveform design with minimum peak sidelobe transmit beampattern,” IEEE Trans. Signal Process. , vol. 66, no. 16, pp. 4207–4222, Jun. 2018. [15] E. Raei, S. Sedighi, M. Alaee-Kerahroodi, and M. R. Bhavani Shankar, “MIMO radar transmit beampattern shaping for spectrally dense en-vironments,” IEEE Trans. Aerosp. Electron. Syst. , vol. 59, no. 2, pp. 1007–1020, Apr. 2023. [16] B. Guo, J. Liang, T. Wang, H. C. So, and J. Xu, “Transmit hardware impairment aware waveform design for MIMO DFRC,” IEEE Trans. Signal Process. , vol. 72, pp. 2858–2873, 2024. [17] P. Stoica, J. Li, and Y. Xie, “On probing signal design for MIMO radar,” 
+
+IEEE Trans. Signal Process. , vol. 55, no. 8, pp. 4151–4161, Aug. 2007. [18] T. Aittomaki and V. Koivunen, “Signal covariance matrix optimization for transmit beamforming in MIMO radars,” in Proc. Asilomar Conf. on Signals, Syst., Comput. , Nov. 2007, pp. 182–186. [19] A. Khabbazibasmenj, A. Hassanien, S. A. Vorobyov, and M. W. Morency, “Efficient transmit beamspace design for search-free based DOA estimation in MIMO radar,” IEEE Trans. Signal Process. , vol. 62, no. 6, pp. 1490–1500, Jan. 2014. [20] X. Zhang, Z. He, L. Rayman-Bacchus, and J. Yan, “MIMO radar transmit beampattern matching design,” IEEE Trans. Signal Process. ,vol. 63, no. 8, pp. 2049–2056, Apr. 2015. [21] X. Zhang, X. Wang, H. C. So, A. M. Zoubir, and G. Cui, “Min-max optimization for MIMO radar waveform design with improved power efficiency,” IEEE Trans. Signal Process. , vol. 70, pp. 6112–6127, 2022. [22] F. Liu, C. Masouros, A. Li, H. Sun, and L. Hanzo, “MU-MIMO commu-nications with MIMO radar: From co-existence to joint transmission,” 
+
+IEEE Trans. Wireless Commun. , vol. 17, no. 4, pp. 2755–2770, Apr. 2018. [23] W. Wu, G. Han, Y. Cao, Y. Huang, and T.-S. Yeo, “MIMO waveform design for dual functions of radar and communication with space-time coding,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1906–1917, Jun. 2022. [24] H. Hua, J. Xu, and T. X. Han, “Optimal transmit beamforming for integrated sensing and communication,” IEEE Trans. Veh. Technol. ,vol. 72, no. 8, pp. 10 588–10 603, Aug. 2023. [25] Z. Cheng, Z. He, S. Zhang, and J. Li, “Constant modulus waveform design for MIMO radar transmit beampattern,” IEEE Trans. Signal Process. , vol. 65, no. 18, pp. 4912–4923, Sep. 2017. [26] C. Hammes, B. S. M. R., and B. Ottersten, “Generalized multiplexed waveform design framework for cost-optimized MIMO radar,” IEEE Trans. Signal Process. , vol. 69, pp. 88–102, 2021. [27] X. Liu, T. Huang, N. Shlezinger, Y. Liu, J. Zhou, and Y. C. Eldar, “Joint transmit beamforming for multiuser MIMO communications and MIMO radar,” IEEE Trans. Signal Process. , vol. 68, pp. 3929–3944, 2020. [28] H. Zhang, H. Zhang, B. Di, M. Di Renzo, Z. Han, H. V. Poor, and L. Song, “Holographic integrated sensing and communication,” IEEE J. Sel. Areas Commun. , vol. 40, no. 7, pp. 2114–2130, Jul. 2022. [29] J. Malick, “A dual approach to semidefinite least-squares problems,” 
+
+SIAM J. Matrix Anal. Appl. , vol. 26, no. 1, pp. 272–284, 2004. [30] F. Liu, L. Zhou, C. Masouros, A. Li, W. Luo, and A. Petropulu, “To-ward dual-functional radar-communication systems: Optimal waveform design,” IEEE Trans. Signal Process. , vol. 66, no. 16, pp. 4264–4279, Aug. 2018. [31] S. Wang, W. Dai, H. Wang, and G. Y. Li, “Robust waveform design for integrated sensing and communication,” IEEE Trans. Signal Process. ,vol. 72, 2024. [32] C. G. Tsinos, A. Arora, S. Chatzinotas, and B. Ottersten, “Joint transmit waveform and receive filter design for dual-function radar-communication systems,” IEEE J. Sel. Topics Signal Process. , vol. 15, no. 6, pp. 1378–1392, Nov. 2021. [33] X. Zhang, X. Wang, H. So, A. M. Zoubir, J. A. Zhang, and Y. J. Guo, “Transmit waveform design for integrated wideband MIMO radar and bi-directional communications,” IEEE Trans. Veh. Tech. , vol. 73, no. 9, Sep. 2024. [34] B. Kilic, K. Turbic, M. Kasparick, and S. Sta´ nczak, “Joint waveform design for communication and sensing with adjustable PAPR,” in Proc. IEEE Veh. Technol. Conf. (VTC-Fall) , Washington DC, USA, Oct. 2024. [35] F. Liu, Y.-F. Liu, A. Li, C. Masouros, and Y. C. Eldar, “Cramér-Rao bound optimization for joint radar-communication beamforming,” IEEE Trans. Signal Process. , vol. 70, pp. 240–253, 2022. [36] R. Yang, H. Jiang, and L. Qu, “Waveform design for MIMO dual-functional radar-communication system using MUI energy minimization with PAPR and CRB constraints,” IEEE Commun. Lett. , vol. 27, no. 5, pp. 1417–1421, May 2023. [37] C. Wen, Y. Huang, and T. N. Davidson, “Efficient transceiver design for MIMO dual-function radar-communication systems,” IEEE Trans. Signal Process. , vol. 71, pp. 1786–1801, 2023. [38] W. Yu and T. Lan, “Transmitter optimization for the multi-antenna downlink with per-antenna power constraints,” IEEE Trans. Signal Process. , vol. 55, no. 6, pp. 2646–2660, Jun. 2007. [39] L. K. Patton and B. D. Rigling, “Modulus constraints in adaptive radar waveform design,” in Proc. IEEE Radar Conf. IEEE, 2008. [40] A. K. Agrawal and E. L. Holzman, “Active phased array design for high reliability,” IEEE Trans. Aerosp. Electron. Syst. , vol. 35, no. 4, pp. 1204–1211, Oct. 1999. [41] A. Bazzi and M. Chafii, “On integrated sensing and communication waveforms with tunable PAPR,” IEEE Trans. Wireless Commun. , vol. 22, no. 11, pp. 7345–7360, Nov. 2023. [42] S. Diamond and S. Boyd, “CVXPY: A python-embedded modeling language for convex optimization,” J. Mach. Learning Res. , vol. 17, no. 83, pp. 1–5, 2016. [43] B. Kilic, K. Turbic, M. Kasparick, and S. Sta´ nczak, “Beampattern synthesis with a computationally efficient matrix nearness approach,” in Proc. IEEE Global Commun. Conf. (GLOBECOM) Workshops , Cape Town, South Africa, Dec. 2024. [44] X. Song, T. Kühne, and G. Caire, “Fully-/partially-connected hybrid beamforming architectures for mmWave MU-MIMO,” IEEE Trans. Wireless Commun. , vol. 19, no. 3, pp. 1754–1769, Mar. 2020. 15 
+
+[45] B. Kilic, A. Güngör, M. Kalfa, and O. Arıkan, “Adaptive measurement matrix design in direction of arrival estimation,” IEEE Trans. Signal Process. , vol. 70, pp. 4742–4756, Oct. 2022. [46] R. Tang, L. Yang, L. Lv, Z. Zhang, Y. Liu, and J. Chen, “Dual-functional artificial noise (DFAN) aided robust covert communications in integrated sensing and communications,” IEEE Trans. Commun. , 2024, early access. [47] P. Stoica, H. He, and J. Li, “Optimization of the receive filter and transmit sequence for active sensing,” IEEE Trans. Signal Process. ,vol. 60, no. 4, pp. 1730–1740, Apr. 2011. [48] S. Jacobsson, G. Durisi, M. Coldrey, T. Goldstein, and C. Studer, “Nonlinear 1-bit precoding for massive MU-MIMO with higher-order modulation,” in Proc. Asilomar Conf. on Signals, Syst., Comput. , 2016, pp. 763–767. [49] Y. Khorsandmanesh, E. Björnson, and J. Jaldén, “Optimized precoding for MU-MIMO with fronthaul quantization,” IEEE Trans. Wireless Commun. , vol. 22, no. 11, pp. 7102–7115, Nov. 2023. [50] X. Liu, T. Huang, Y. Liu, and J. Zhou, “Constant modulus waveform design for joint multiuser MIMO communication and MIMO radar,” in 
+
+Proc. IEEE Wireless Commun. Netw. Conf. Workshops , Mar. 2021. [51] Z. Cheng, S. Shi, Z. He, and B. Liao, “Transmit sequence design for dual-function radar-communication system with one-bit DACs,” IEEE Trans. Wireless Commun. , vol. 20, no. 9, pp. 5846–5860, Sep. 2021. [52] D. Li, B. Tang, and L. Xue, “Waveform design for MIMO DFRC systems: Finer sensing and safer communications,” IEEE Trans. Signal Process. , pp. 4509–4524, 2024. [53] R. W. Heath, N. Gonzalez-Prelcic, S. Rangan, W. Roh, and A. M. Sayeed, “An overview of signal processing techniques for millimeter wave MIMO systems,” IEEE J. Sel. Topics Signal Process. , vol. 10, no. 3, pp. 436–453, Apr. 2016. [54] N. J. Higham, “Computing the nearest correlation matrix—a problem from finance,” IMA J. Numer. Anal. , vol. 22, no. 3, pp. 329–343, 2002. [55] S. Boyd and L. Xiao, “Least-squares covariance matrix adjustment,” 
+
+SIAM J. Matrix Anal. Appl. , vol. 27, no. 2, pp. 532–546, 2005. [56] A. Beck, First-Order Methods in Optimization . SIAM, 2017. [57] A. Beck and M. Teboulle, “A fast iterative shrinkage-thresholding algorithm for linear inverse problems,” SIAM J. Imag. Sci. , vol. 2, no. 1, pp. 183–202, 2009. [58] B. O’Donoghue and E. Candes, “Adaptive restart for accelerated gradient schemes,” Fond. Comp. Math , vol. 15, pp. 715–732, Jul. 2015. [59] P. Giselsson and S. Boyd, “Monotonicity and restart in fast gradient methods,” in Proc. IEEE Conf. Decis. Control (CDC) , Los Angeles, USA, Dec. 2014, pp. 5058–5063. [60] N. J. Higham, Functions of Matrices: Theory and Computation . SIAM, 2008. [61] J. A. Tropp, I. S. Dhillon, R. W. Heath, and T. Strohmer, “Designing structured tight frames via an alternating projection method,” IEEE Trans. Inf. Theory , vol. 51, no. 1, pp. 188–209, Jan. 2005. [62] B. O’Donoghue, E. Chu, N. Parikh, and S. Boyd, “Conic optimization via operator splitting and homogeneous self-dual embedding,” J. Optim. Theory Appl. , vol. 169, no. 3, pp. 1042–1068, Jun. 2016. [63] The MathWorks Inc., “Waveform Design for a Dual-Function MIMO RadCom System,” https://www.mathworks.com/help/phased/ ug/waveform-design-for-a-dual-function-mimo-radcom-system.html, accessed: 2023-12-7. [64] P. J. Goulart and Y. Chen, “Clarabel: An interior-point solver for conic programs with quadratic objectives,” 2024, arXiv:2405.12762. [65] H. Krim and M. Viberg, “Two decades of array signal processing research: the parametric approach,” IEEE Signal Process. Mag. , vol. 13, no. 4, pp. 67–94, 1996.

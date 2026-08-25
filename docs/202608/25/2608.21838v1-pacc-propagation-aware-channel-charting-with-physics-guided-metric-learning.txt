@@ -1,0 +1,352 @@
+Title: PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning
+
+URL Source: https://arxiv.org/pdf/2608.21838v1
+
+Published Time: Tue, 25 Aug 2026 00:29:52 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning 
+
+Binpu Shi, Ruihan Li, and Min Li 
+
+Abstract —Channel charting has emerged as a promising paradigm that maps high-dimensional channel state information into a low-dimensional latent space, facilitating tasks such as radio environment sensing and beam management. However, existing methods often rely on precise user locations or timestamp-based pseudo-labels, which are difficult to obtain in privacy-sensitive scenarios and rapidly varying wireless environments. To address these limitations, we propose propagation-aware channel charting with physics-guided metric learning (PACC), a location-free framework that constructs channel-domain supervision from propagation characteristics without requiring explicit geographic information. Specifically, PACC designs a propagation-aware dissimilarity metric that adapts to line-of-sight and non-line-of-sight propagation conditions, thereby preserving both local neighborhood relationships and the intrinsic geometry of the radio environment. Simulation results demonstrate that PACC consistently outperforms both classical dimensionality-reduction methods and state-of-the-art learning-based channel-charting approaches under diverse propagation conditions. 
+
+Index Terms —Channel charting, deep metric learning, propa-gation awareness, physics-guided learning. 
+
+I. I NTRODUCTION 
+
+Beyond-5G and sixth-generation (6G) wireless systems are expected to employ larger antenna arrays, wider bandwidths, and higher carrier frequencies, resulting in increasingly high-dimensional channel state information (CSI). Despite this complexity, CSI collected in a fixed environment is largely governed by a small set of physical factors, such as user-equipment (UE) locations and the surrounding propagation geometry [1]. Consequently, CSI samples tend to lie on a low-dimensional manifold that reflects the underlying radio environment. Learning this manifold can facilitate a wide range of wireless applications, including radio resource management, beam management, and channel prediction [1]. Channel charting (CC) aims to recover this manifold by map-ping high-dimensional CSI to a low-dimensional latent space while preserving spatial neighborhood relationships. Early CC studies have employed dimensionality-reduction techniques, such as principal component analysis (PCA), multidimensional scaling (MDS), t-distributed stochastic neighbor embedding (t-SNE), and uniform manifold approximation and projection (UMAP) [1], [2]. Although effective as unsupervised baselines, these methods often scale poorly and lack an explicit mapping for previously unseen CSI samples. Deep metric learning (DML) addresses these limitations by learning a parametric charting function using architectures such 
+
+The authors are with the College of Information Science and Electronic Engineering, the Zhejiang Provincial Key Laboratory of Multi-Modal Commu-nication Networks and Intelligent Information, and the National Key Laboratory of Millimeter-Wave and Terahertz Remote Sensing, Zhejiang University, Hangzhou 310027, China (e-mail: {bp.shi, ruihan.li, min.li }@zju.edu.cn). 
+
+as autoencoders [3], siamese networks [2], [4], [5], and triplet networks [6], [7]. Nevertheless, their performance critically depends on the side information or dissimilarity used to define sample similarity. Existing approaches inferred neighborhood relationships from temporal proximity [6], [7] or channel-domain metrics, including cosine similarity [4], channel-impulse-response amplitudes [5], angle-delay profiles [2], and Doppler measurements [8]. Other studies incorporated geodesic modeling, uncertainty estimates, access-point locations, or time-difference-of-arrival measurements to improve chart quality or recover global coordinates [9], [10]. However, these approaches either rely on timestamps, UE motion, or employ a fixed channel-domain dissimilarity that ignores the distinct physical characteristics of line-of-sight (LoS) and non-line-of-sight (NLoS) propagation. In practice, the physical interpretation of dominant-path parameters varies significantly with the propagation condition. Under LoS propagation, the dominant-path angle of arrival (AoA) and time of arrival (ToA) are directly related to the UE position and naturally define a geometric distance. In contrast, under NLoS propagation, the dominant path is governed by reflections or diffractions, making LoS-based geometry unreliable. Instead, the overall multipath energy distribution in the angle-delay domain provides a more robust measure of channel similarity. Motivated by these observations, we propose propagation-aware channel charting with physics-guided metric learning (PACC), which learns channel charts without requiring UE loca-tions or timestamp-based pseudo-labels. The main contributions of this paper are summarized as follows.  
+
+> •
+
+We propose a propagation-aware deep metric learning objective that constructs training triplets from CSI-derived AoA, ToA, and channel gain. The proposed loss combines AoA–ToA geometric constraints for LoS pairs with angle-delay map (ADM)-based similarity constraints for NLoS pairs, thereby preserving both neighborhood relationships and local geometric structure.  
+
+> •
+
+We develop a channel-charting network that combines a residual convolutional backbone, gain-conditioned feature modulation, and multi-head self-attention to jointly exploit multiscale channel multipath information, including the ADM and channel gain. The resulting model provides efficient out-of-sample embedding and consistently outper-forms both conventional and learning-based CC baselines under LoS- and NLoS-dominant propagation scenarios. 
+
+Notation: Scalars, vectors and matrices are denoted by italic letters, bold lowercase letters, and bold uppercase letters, respectively. The transpose and conjugate transpose are denoted arXiv:2608.21838v1 [eess.SP] 22 Aug 2026 by (·)T and (·)H, respectively. In addition, CN (0 , σ 2) represents a circularly symmetric complex Gaussian distribution with zero mean and variance σ2.II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+We consider a single-cell uplink OFDM system, where a BS equipped with an M -antenna uniform linear array (ULA) serves multiple single-antenna user equipments (UEs). The uplink channel from UE k to the BS on the n-th OFDM subcarrier is modeled as 
+
+hk[n] = √M
+
+> L
+
+X
+
+> l=1
+
+αlaBS (ϕl)e−j2πf n(τl−τ0), (1) where αl, ϕl and τl denote the complex gain, AoA, and ToA of the l-th propagation path respectively; fn and τ0 represent the frequency of the n-th subcarrier and the reference delay, respectively, while aBS (·) is the BS steering vector given by 
+
+aBS (ϕ) = 1
+
+√M [1 , e jπ cos (ϕ), ..., e j(M −1) πcos (ϕ)]T. (2) To estimate the channel, each UE transmits pilot symbol 
+
+sk[n] on the n-th subcarrier with the transmit power P , i.e., 
+
+E[|sk[n]|2] = P . Assuming a digital receiver at the BS, the received signal from UE k on subcarrier n is expressed as 
+
+yk[n] = hk[n]sk[n] + n, (3) where n ∈ CM ×1 ∼ CN (0 , σ 2I) denotes additive complex white Gaussian noise (AWGN) with variance σ2. The corre-sponding least-square (LS) channel estimate is obtained as 
+
+ˆhk[n] = yk[n]s−1 
+
+> k
+
+[n]. (4) Collecting the estimated channels overall Nsub subcarriers yields the frequency-domain CSI matrix for UE k:
+
+ˆHk = [ ˆhk[1] , ˆhk[2] , · · · , ˆhk[Nsub ]] T ∈ CNsub ×M . (5) 
+
+B. Channel Charting 
+
+In a quasi-static environment, the CSI observed at a fixed BS is primarily determined by the UE location and the surrounding propagation geometry. Therefore, nearby UEs tend to exhibit similar channel characteristics, and the corresponding CSI samples are expected to lie on a low-dimensional manifold that captures the underlying radio environment [1]. Given a set of estimated CSI samples { ˆHk}k∈S , where 
+
+S = {1, . . . , K }, channel charting thus aims to learn a forward charting function Zγ (·), parameterized by γ, that maps each high-dimensional CSI sample to a low-dimensional latent coordinate 
+
+Zγ : CNsub ×M → RD , Zγ ( ˆHk) = zk, (6) where D ≪ 2M N sub is typically chosen as two or three. The objective is to preserve the spatial geometry of the radio environment, such that physically nearby UEs are mapped to nearby latent coordinates, while physically distant UEs remain well separated. III. PACC: A RCHITECTURE AND KEY DESIGNS 
+
+This section presents the proposed PACC framework that consists of three key components: (i) extraction of propagation-aware features from CSI, including angle-delay information, channel gain and LoS/NLoS propagation classification; (ii) a deep metric learning objective that jointly preserves neigh-borhood relationships and enforces physics-based geometric consistency; and (iii) a neural network that fuses multiscale channel information and maps the extracted features into low-dimensional channel-chart coordinates. 
+
+A. Feature Extraction 
+
+To capture both dominant propagation paths and multipath structures, we extract three types of features from the estimated CSI for each UE: the channel gain ˆgk, an angle-delay map (ADM) ˆΩk, and the dominant path’s ToA and AoA. Specifically, the overall channel gain is estimated by the Frobenius norm of the estimated CSI, i.e., ˆgk = ∥ ˆHk∥F.Additionally, two DFT-based dictionaries, A ∈ CNsub ×G1 and 
+
+B ∈ CM ×G2 , are employed to transform the frequency-domain CSI into the delay and angular domains. The ADM is obtained as 
+
+ˆΩk = |AH ˆHkB| ∈ RG1×G2 , (7) where | · | denotes the element-wise magnitude, and G1 and 
+
+G2 are the numbers of delay and angular bins, respectively. The dominant propagation path is identified as 
+
+(ˆ i(τ ) 
+
+> k
+
+, ˆj(θ) 
+
+> k
+
+) = arg max 
+
+> (i,j )
+
+ˆΩk[i, j ], (8) where the corresponding physical ToA ˆτk and AoA ˆθk are obtained from the delay and angular grids (ˆ i(τ ) 
+
+> k
+
+, ˆj(θ) 
+
+> k
+
+).To remove less-informative delay components, the ADM is adaptively cropped into a fixed-size window ˜Ωk ∈ RNτ ×G2
+
+around the dominant path. Specifically, the starting delay index is set as τmin ,k = ˆ i(τ ) 
+
+> k
+
+− τw with boundary adjustment when necessary. This operation retains the dominant path and nearby multipath components while suppressing weak and less-informative components. Moreover, since the geometric interpretation of propagation paths differs between LoS and NLoS conditions, we identify the propagation condition of each CSI sample. Specifically, the root-mean-square (RMS) delay spread is extracted from the ADM. By aggregating the ADM power over all angular bins, the power-delay profile (PDP) is obtained as 
+
+pk[i] = 
+
+> G2
+
+X
+
+> j=1
+
+ˆΩk[i, j ] 2
+
+. (9) The corresponding RMS delay spread is calculated as 
+
+τRMS ,k =
+
+vuutPG1
+
+> i=1
+
+(τi − ¯τk)2pk[i]
+
+PG1 
+
+> i=1
+
+pk[i] , (10) where the mean excess delay is ¯τk =     
+
+> PG1
+> i=1 τipk[i]
+> PG1
+> i=1 pk[i]
+
+. Since LoS channels typically exhibit a more concentrated PDP than NLoS channels, the propagation label is determined as [11] 
+
+sk =
+
+(
+
+1, τRMS ,k ≤ τDS , LoS ,
+
+0, τRMS ,k > τ DS , NLoS , (11) where τDS is a threshold selected according to the empirical RMS delay-spread distribution of the training data. 
+
+B. Loss Function Design 
+
+The proposed DML objective jointly preserves neighborhood relationships and local geometric structure. Specifically, a triplet loss first learns the relative ordering of neighboring CSI samples, while a physics-guided loss further preserves their local geometric relationships. For each anchor CSI sample ˆHi, a positive sample ˆHj and a negative sample ˆHk are selected according to their physical features. Let ˆxp = (ˆ τp, ˆθp, ˆgp)T and define a threshold vector 
+
+ϵ = ( τth , θ th , g th )T. The training triplet set is constructed as 
+
+T ⊂ 
+
+
+
+(i, j, k ) ∈ S 3 
+
+> train
+
+s.t. |ˆxj − ˆxi| ≤ ϵ
+
+|ˆxk − ˆxi| ≰ ϵ
+
+
+
+, (12) where the inequalities are evaluated element-wise. Accordingly, the positive sample is similar to the anchor in terms of ToA, AoA, and channel gain, whereas the negative sample violates at least one of these criteria. The corresponding triplet loss is defined as [6] 
+
+Ltri = 1
+
+|T | 
+
+X
+
+> (i,j,k )∈T
+
+∥Z γ ( ˆHi) − Z γ ( ˆHj )∥− ∥Z γ ( ˆHi) − Z γ ( ˆHk)∥ + M+, (13) where [u]+ = max( u, 0) , and M is a margin parameter. Although the triplet loss above preserves neighborhood ordering, it does not explicitly constrain the relative distances among neighboring samples. To preserve the local geometry of the channel chart, we further define a propagation-aware dissimilarity di,j for each positive pair (i, j ).Specifically, for LoS propagation, the dominant-path ToA and AoA provide meaningful geometric information. The dissimilarity is therefore defined using the law of cosines as 
+
+d(LoS)  
+
+> i,j
+
+=
+
+q
+
+ˆτ 2 
+
+> i
+
++ ˆ τ 2 
+
+> j
+
+− 2ˆ τi ˆτj cos( |ˆθi − ˆθj |). (14) In contrast, under NLoS propagation, the dominant path no longer directly reflects the UE geometry. However, neighboring UEs tend to exhibit similar multipath structures, leading to the dissimilarity 
+
+d(NLoS)  
+
+> i,j
+
+= η 1 − vec ( ˆΩi)Tvec ( ˆΩj )
+
+∥ ˆΩi∥∥ ˆΩj ∥
+
+!
+
+, (15) where vec( ·) denotes vectorization, and the learnable parameter 
+
+η aligns the scales of the LoS and NLoS dissimilarities. The overall propagation-aware dissimilarity is given by 
+
+di,j = σ(i, j )d(LoS)  
+
+> i,j
+
++ (1 − σ(i, j )) d(NLoS)  
+
+> i,j
+
+, (16) where σ(i, j ) = 1 if the pair is classified as LoS and 0 otherwise according to Equation (11). CSI        
+
+> Crop
+> Channel Chart
+> Shared Weights
+> ADM ADM
+> 
+> 
+> 
+> 
+> AAD DM M
+> ADM
+> !"#|$ %&%'|
+> |$ %&%'|
+> Crop
+> ()
+> Cost function
+> *+
+> *,
+> *-
+> ℒ
+> *+
+> *,
+> *-/+,,
+> ,
+> Margin ℳ
+> , ! "#
+> ADM
+> Gain
+> Backbone Blocks (4x)
+> Conv 3×3 Conv 3×3 BatchNorm BatchNorm
+> +
+> Linear Linear
+> 灤
+> ++
+> …
+> MHSA Token [CC] ResNet Block FiLM Layer
+> QKV灅
+> …
+> Linear
+> "$%
+> &'(
+> ADM )*+
+> -(
+
+Fig. 1: Architecture of the proposed PACC triplet framework. Let P = {(i, j ) : ( i, j, k ) ∈ T } denote the set of positive pairs. The physics-guided loss is defined as 
+
+Lpg = 1
+
+|P| 
+
+X
+
+> (i,j )∈P
+
+
+
+∥Z γ ( ˆHi) − Z γ ( ˆHj )∥ − di,j 
+
+2
+
+. (17) Finally, the overall training objective is 
+
+L = λ1Ltri + λ2Lpg , (18) where parameters λ1 ≥ 0 and λ2 ≥ 0 balance neighborhood discrimination and local geometry preservation. 
+
+C. Proposed Charting Network Architecture 
+
+As illustrated in Fig. 1, the proposed charting network maps the normalized cropped ADM ˜Ωk and channel gain ˆgk to the channel-chart coordinate zk. The ADM provides a sparse representation of the propagation environment, where dominant and reflected paths appear as localized responses in the angle-delay domain, while the channel gain captures complementary large-scale propagation information. Accordingly, the network is designed to jointly exploit local multipath patterns, channel strength, and global dependencies among propagation compo-nents. The backbone consists of four cascaded residual blocks. Each block contains two 3 × 3 convolutional layers with a residual connection to extract local propagation patterns from adjacent angle-delay bins while facilitating stable deep feature learning. This hierarchical architecture progressively captures increasingly abstract multipath representations while preserving weak but informative propagation components [12]. To incorporate channel gain, each residual block is equipped with a gain-conditioned feature-wise linear modulation (FiLM) layer [13]. Specifically, two learnable transformations map the channel gain ˆgk to a channel-wise scaling vector γk and bias vector βk. The residual feature map is then modulated as 
+
+Fout = (1 + γk) ⊙ FRes + βk, (19) where ⊙ denotes element-wise multiplication. By conditioning intermediate feature maps rather than only the final embedding, FiLM enables the network to adapt its feature extraction to the received channel strength throughout the backbone. The final feature map is flattened into a sequence of angle-delay tokens, to which a learnable [CC] token is prepended. The resulting sequence is processed by a multi-head self-attention module, where each attention head computes 
+
+Attn( Q, K, V) = softmax 
+
+ QK T
+
+√dh
+
+
+
+V, (20) where dh is the dimension of each attention head. Unlike convolutional layers, which primarily capture local interactions, self-attention models long-range dependencies among propa-gation components in the angle-delay domain. A learnable [CC] token is prepended to the input token sequence to aggregate information from all tokens through the self-attention mechanism, thereby yielding a compact channel representation, which is finally projected to the D-dimensional coordinate 
+
+zk. Overall, the proposed architecture combines hierarchical multipath feature extraction, gain-conditioned modulation, and global dependency modeling, making it well suited for learning compact channel-chart representations from CSI. IV. S IMULATION RESULTS 
+
+A. Dataset and Simulation Setup 
+
+We evaluate the proposed PACC framework using channel data generated by the Wireless InSite ray-tracing simulator. As shown in Fig. 2, two urban propagation scenarios are considered: Scenario 1, dominated by LoS propagation, and Scenario 2, with more severe NLoS propagation. In both scenarios, the BS is deployed at a height of 15 m, while the UEs are randomly distributed at a height of 1 m within a diamond-shaped region of approximately 75 m width. The BS employs a ULA whose broadside points toward the center of the UE region at an azimuth angle of 120 ◦.For each scenario, 12 ,000 CSI samples are generated, of which 8,000 samples are used for training and 4,000 for testing. The BS is equipped with M = 64 antennas, and the OFDM system employs Nsub = 256 subcarriers. The carrier frequency and bandwidth are set to fc = 28 GHz and W = 100 MHz, respectively. The uplink pilot power is fixed at P = 30 dBm, and receiver noise power is calculated as σ2 = −174 + 10 lg W dBm. The delay-spread threshold 
+
+τDS is determined from the training-set frequency distribution by selecting the local minimum between its two peaks [11], and we set λ1 = λ2 = 1 . In addition, all methods produce a two-dimensional channel chart ( D = 2 ). We compare PACC with seven representative baselines, in-cluding four classical dimensionality-reduction methods (PCA, MDS, UMAP, and t-SNE) [1], [2], and three learning-based CC approaches: AE, Geodesic Siamese Network (GSN) [5], and ADP [2]. To evaluate the contribution of the proposed physics-guided constraint, we also consider a triplet-only variant, denoted by PACC-Ltri . For all learning-based methods, the batch size, initial learning rate, and training epochs are set to 128, 10 −3, and 120, respectively, with cosine annealing used for learning-rate scheduling.  
+
+> (a) Scenario 1 (b) Scenario 2
+
+Fig. 2: Wireless InSite ray-tracing environments: (a) LoS-dominant Scenario 1 and (b) NLoS-dominant Scenario 2. The red marker indicates the BS location, and the shaded area represents the UE sampling region. 
+
+B. Numerical Results 
+
+Following standard channel-charting evaluation criterion [2], [4]–[7], we evaluate both neighborhood preservation and global geometric consistency. Specifically, trustworthiness (TW) and continuity (CT) measure local neighborhood preservation, while Kruskal’s stress (KS) and Rajski’s distance (RD) quantify the discrepancy between pairwise distances in the learned chart and the physical space [14], [15]. Higher TW/CT and lower KS/RD indicate better chart quality. Tables I and II summarize the results for the two scenarios considered. Fig. 3 further visualizes the physical UE locations and the corresponding two-dimensional charts produced by PACC and representative baselines in Scenario 1. TABLE I: Performance Comparison in Scenario 1                                                   
+
+> Method TW ↑CT ↑KS ↓RD ↓out-of-sample PCA 0.8080 0.8789 0.7722 0.9526 !
+> MDS 0.7471 0.7484 0.5980 0.9877 #
+> UMAP 0.9232 0.9247 0.4692 0.9600 #
+> t-SNE 0.8561 0.9029 0.4353 0.9716 #
+> AE 0.6906 0.8997 0.7485 0.9634 !
+> GSN 0.6849 0.8804 0.6111 0.9837 !
+> ADP 0.9164 0.9025 0.3806 0.9602 !
+> PACC-L0.9597 0.9603 0.2922 0.8011 !
+> PACC-Ltri 0.8932 0.9229 0.4447 0.9452 !
+
+TABLE II: Performance Comparison in Scenario 2                                                   
+
+> Method TW ↑CT ↑KS ↓RD ↓out-of-sample PCA 0.7746 0.8029 0.7955 0.9868 !
+> MDS 0.7419 0.7389 0.6886 0.9923 #
+> UMAP 0.8991 0.9051 0.5104 0.9652 #
+> t-SNE 0.8895 0.9065 0.4613 0.9613 #
+> AE 0.7790 0.8622 0.6722 0.9720 !
+> GSN 0.7840 0.8467 0.6693 0.9832 !
+> ADP 0.8879 0.8617 0.5059 0.9721 !
+> PACC-L0.9011 0.9176 0.4218 0.9089 !
+> PACC-Ltri 0.8839 0.8889 0.5039 0.9423 !
+
+Specifically, in Scenario 1, PACC achieves the best perfor-mance across all four metrics, with TW, CT, KS, and RD values of 0.9597, 0.9603, 0.2922, and 0.8011, respectively. Compared with the strongest baseline, PACC improves TW and CT by (a) Real locations (b) PACC (c) UMAP (d) t-SNE (e) AE 
+
+Fig. 3: Visualization of physical user locations and the corresponding two-dimensional channel charts generated by different methods for Scenario 1. Colors indicate the physical locations of UEs. 0.0365 and 0.0356, while reducing KS and RD by 0.0884 and 0.1515, respectively. These improvements indicate that PACC better preserves both neighborhood relationships and global channel geometry. This advantage is mainly attributed to the proposed propagation-aware constraint, where dominant-path ToA and AoA provide reliable geometric cues under LoS propagation. Scenario 2 is more challenging because blockage and richer multipath propagation weaken the relationship between dominant-path parameters and UE locations. Nevertheless, PACC still achieves the best overall performance, with TW = 0.9011, CT = 0.9176, KS = 0.4218, and RD = 0.9089. Compared with the strongest baseline, it improves TW and CT by 0.0020 and 0.0111, while reducing KS and RD by 0.0395 and 0.0524, respectively. The consistent gains demonstrate the robustness of PACC under NLoS propagation. In this case, the ADM-based dissimilarity in (15) effectively captures multipath similarities, providing meaningful geometric supervision when dominant-path information is unreliable. We further evaluate the effect of the proposed physics-guided loss by comparing PACC with its triplet-only variant, PACC-Ltri . In Scenario 1, introducing the physics-guided constraint improves TW and CT by 0.0665 and 0.0374, while reducing KS and RD by 0.1525 and 0.1441, respectively. In Scenario 2, it improves TW and CT by 0.0172 and 0.0287, and reduces KS and RD by 0.0821 and 0.0334, respectively. These results confirm that triplet supervision can preserve neighborhood ordering but cannot fully determine the relative arrangement of neighboring samples. By explicitly constraining propagation-aware local geometry, the proposed loss substantially improves both local topology preservation and global geometric consistency. Moreover, unlike non-parametric approaches such as MDS and t-SNE, PACC learns an explicit forward mapping that can directly embed previously unseen CSI samples without reconstructing the entire channel chart. V. C ONCLUSION 
+
+We have proposed PACC, a propagation-aware channel charting framework that incorporates physical constraints into deep metric learning without requiring precise user locations or timestamp-based pseudo-labels. By extracting physically meaningful CSI features, including angle-delay information and channel gain, PACC constructs propagation-aware dissimilari-ties tailored to both LoS and NLoS conditions. Combined with the triplet-based neighborhood supervision, the proposed loss preserves both local neighborhood relationships and geometric consistency. Simulation results in representative LoS- and NLoS-dominant scenarios show that PACC consistently outper-forms both conventional dimensionality-reduction baselines and existing learning-based channel charting approaches in terms of neighborhood preservation and global geometric fidelity. These results demonstrate the effectiveness of incorporating propagation knowledge into unsupervised CSI representation learning and highlight the potential of PACC for applications such as beam management and radio environment sensing. REFERENCES [1] C. Studer, S. Medjkouh, E. Gonultas ¸, T. Goldstein, and O. Tirkkonen, “Channel charting: Locating users within the radio environment using channel state information,” IEEE Access , vol. 6, pp. 47 682–47 698, 2018. [2] P. Stephan, F. Euchner, and S. Ten Brink, “Angle-delay profile-based and timestamp-aided dissimilarity metrics for channel charting,” IEEE Trans. Commun. , vol. 72, no. 9, pp. 5611–5625, 2024. [3] P. Huang, O. Casta˜ neda, E. G¨ on¨ ultas ¸, S. Medjkouh, O. Tirkkonen, T. Gold-stein, and C. Studer, “Improving channel charting with representation-constrained autoencoders,” in Proc. IEEE 20th Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , 2019, pp. 1–5. [4] L. Le Magoarou, “Efficient channel charting via phase-insensitive distance computation,” IEEE Wireless Commun. Lett. , vol. 10, no. 12, pp. 2634– 2638, 2021. [5] M. Stahlke, G. Yammine, T. Feigl, B. M. Eskofier, and C. Mutschler, “Indoor localization with robust global channel charting: A time-distance-based approach,” IEEE Trans. Mach. Learn. Commun. Netw. , vol. 1, pp. 3–17, 2023. [6] P. Ferrand, A. Decurninge, L. G. Ord´ o˜ nez, and M. Guillaud, “Triplet-based wireless channel charting: Architecture and experiments,” IEEE J. Sel. Areas Commun. , vol. 39, no. 8, pp. 2361–2373, 2021. [7] F. Euchner, P. Stephan, M. Gauger, S. D¨ orner, and S. Ten Brink, “Improving triplet-based channel charting on distributed massive MIMO measurements,” in Proc. IEEE 23rd Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , 2022, pp. 1–5. [8] F. Euchner, P. Stephan, and S. ten Brink, “Leveraging the Doppler effect for channel charting,” in Proc. IEEE 25th Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , 2024, pp. 731–735. [9] F. Euchner, P. Stephan, and S. ten Brink, “Uncertainty-aware dimension-ality reduction for channel charting with geodesic loss,” in Proc. 58th Asilomar Conf. Signals, Syst., Comput. , 2024, pp. 1665–1672. [10] M. Ahadi, O. Esrafilian, F. Kaltenberger, and A. Malik, “TDoA-based self-supervised channel charting with NLoS mitigation,” IEEE Trans. Mach. Learn. Commun. Netw. , vol. 4, pp. 780–793, 2026. [11] A. H. Muqaibel, S. A. Alawsh, and G. M. BinMakhashen, “Under-Sampled UWB NLOS/LOS Channel Classification using Machine Learning,” Arab. J. Sci. Eng. , vol. 50, no. 8, pp. 6095–6108, 2025. [12] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR) ,2016, pp. 770–778. [13] E. Perez, F. Strub, H. De Vries, V. Dumoulin, and A. Courville, “FiLM: Visual reasoning with a general conditioning layer,” in Proc. AAAI Conf. Artif. Intell. , vol. 32, no. 1, 2018. [14] J. Venna and S. Kaski, “Neighborhood preservation in nonlinear projection methods: An experimental study,” in Proc. Int. Conf. Artif. Neural Netw. (ICANN) , 2001, pp. 485–491. [15] J. B. Kruskal, “Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis,” Psychometrika , vol. 29, no. 1, pp. 1–27, 1964.

@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-08-24</span>
+      <span class="dpr-home-dashboard-kicker">2026-08-25</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 12 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>6</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>7</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>9</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-24 20:48:44 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-25 21:01:48 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,9 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读6篇、速读6篇，聚焦5G/6G通信与AI融合。</p>
-<p>最值得看：LLM-as-Judge评估5G故障分析（10分），以及场景化小模型提升CSI反馈效率（9分）。</p>
-<p>建议关注6G数字孪生感知、近海网络优化及多无人机通信控制方向。</p>
+<p>今日精读16篇论文，聚焦无线语义通信与信道智能感知两大热点。最值得关注：特征稀疏正则化实现单模型自适应图像传输，以及物理引导度量学习提升信道图表精度。建议普通读者优先跟进语义通信中稀疏编码与隐私保护结合的前沿方向。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -73,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">6 篇</strong>
+    <strong class="dpr-home-dashboard-count">7 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Free-Text Evaluation of LLMs for 5G Domain Knowledge and Fault Analysis using LLM-as-Judge">Free-Text Evaluation of LLMs for 5G Domain Knowledge and Fault Analysis using LLM-as-Judge</span></li><li><span class="dpr-home-dashboard-paper-title" title="Learnware for CSI Feedback: Scene-specific Small Models Can Do Big">Learnware for CSI Feedback: Scene-specific Small Models Can Do Big</span></li><li><span class="dpr-home-dashboard-paper-title" title="RFWM: Physics-Guided World Model for Dynamic Wireless Radiance Field Generation">RFWM: Physics-Guided World Model for Dynamic Wireless Radiance Field Generation</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Single-Model Adaptive Wireless Image Transmission via Feature Sparsity Regularization">Single-Model Adaptive Wireless Image Transmission via Feature Sparsity Regularization</span></li><li><span class="dpr-home-dashboard-paper-title" title="PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning">PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="ISAC Beamforming Design Based on a Matrix Nearness Formulation With Improved Efficiency">ISAC Beamforming Design Based on a Matrix Nearness Formulation With Improved Efficiency</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>7</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -86,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">6 篇</strong>
+    <strong class="dpr-home-dashboard-count">9 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G">PRISM: Decision-Centric Predictive Sensing for Cognitive Digital Twins in 6G</span></li><li><span class="dpr-home-dashboard-paper-title" title="Proper Sea Surface Roughness Enhances the Performance of Near-Shore Maritime Networks">Proper Sea Surface Roughness Enhances the Performance of Near-Shore Maritime Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="RMWorld: Task-Aware Radio World Models with Value-of-Information Guided Multi-Trial Learning for Multi-UAV Communication Control">RMWorld: Task-Aware Radio World Models with Value-of-Information Guided Multi-Trial Learning for Multi-UAV Communication Control</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment">Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment</span></li><li><span class="dpr-home-dashboard-paper-title" title="FlowSem: Flow Matching for Adaptive Wireless Image Transmission in Semantic Communication">FlowSem: Flow Matching for Adaptive Wireless Image Transmission in Semantic Communication</span></li><li><span class="dpr-home-dashboard-paper-title" title="Privacy Preserving Semantic Communications in Wireless Edge Networks with Vision Language Models">Privacy Preserving Semantic Communications in Wireless Edge Networks with Vision Language Models</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>9</strong></span></div>
 </section>
 </div>
 

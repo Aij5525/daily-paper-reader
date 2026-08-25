@@ -1,0 +1,981 @@
+Title: Dual-Orthogonality Waveforms for Integrated Communication and Imaging in Dynamic Multipath Channels
+
+URL Source: https://arxiv.org/pdf/2608.23294v1
+
+Published Time: Tue, 25 Aug 2026 02:10:05 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+> 1
+
+# Dual-Orthogonality Waveforms for Integrated Communication and Imaging in Dynamic Multipath Channels 
+
+Edoardo Talignani ∗, Student Member, IEEE , Francesco Linsalata ∗, Member, IEEE ,Musa Furkan Keskin, Senior Member, IEEE , Davide Scazzoli, Member, IEEE , Alireza Pourafzal, Member, IEEE ,Mohammad Mahdi Mojahedian, Member, IEEE , and Henk Wymeersch, Fellow, IEEE 
+
+Abstract —Dual-Orthogonality waveforms are multi-antenna signaling schemes that enforce mutual orthogonality across transmit channels and over a prescribed set of delay shifts. By relaxing strict time orthogonality to the physically admis-sible region induced by propagation, these waveforms preserve full-band operation per transmit antenna while enabling the injection of communication data within the relaxed orthog-onality structure and maintaining separability among spatial streams. This property makes Dual-Orthogonality particularly attractive for Integrated Sensing and Communications (ISAC), where reliable data transmission, high-resolution sensing, and imaging must coexist under realistic, time-varying propagation conditions. In dynamic communication multipath environments, combined delay–Doppler dispersion across multiple propagation paths perturbs the transmit subspaces and partially breaks the relaxed orthogonality conditions. This paper analyzes the impact of multipath channel dynamics on Dual-Orthogonality waveforms and develops a multipath-structured decoding framework that exploits the waveform-induced subspace structure to enable low-complexity linear equalization. The receiver further incorpo-rates structured multipath parameter estimation and effective-subspace reconstruction to support interference-aware decoding under realistic propagation conditions. Numerical results show communication performance comparable to Orthogonal Fre-quency Division Multiplexing (OFDM)-based ISAC and MIMO-Orthogonal Time Frequency Space (OTFS) baselines in time-varying multipath, while improving sensing/imaging via full-band per-transmit operation. The method achieves approximately 30 cm range resolution, > 15 dB suppression of multipath imaging artifacts with coherent Synthetic Aperture Radar (SAR) processing, and a more favorable sensing–communication trade-off. Over-the-air experiments at 60 GHz validate complementary aspects of the framework: controlled measurements confirm multi-stream communication, the designed zero-correlation re-gion, and accurate radar ranging, while a second campaign in a highly reflective indoor environment directly demonstrates multipath-aware stream equalization under strong unsuppressed reflections. 
+
+Index Terms —ISAC, multipath propagation, linear equaliza-tion, channel dynamics, radar imaging. 
+
+E. Talignani, F. Linsalata, D. Scazzoli are with the Dipartimento di Elettronica, Informazione e Bioingegneria, Politecnico di Milano, Milano, Italy (e-mail: {name.surname}@polimi.it). M. F. Keskin, A. Pourafzal, M. M. Mojahedian, and H. Wymeersch are with the Department of Electrical Engineering, Chalmers University of Technology, Gothenburg, Sweden (e-mail: furkan@chalmers.se, alireza.pourafzal@chalmers.se, m.mojahedian@gmail.com, henkw@chalmers.se) 
+
+> ∗
+
+E. Talignani and F. Linsalata equally contributed to this research as co–first authors. The authors would like to thank Marco Manzoni and Stefano Tebaldini for their valuable discussions and insightful comments on the radar-related aspects of this work. Sensing path Communication path (A) Communication transmitter and sensing receiver (B) Communication receiver 
+
+Fig. 1. Representative ISAC scenario. Node A simultaneously serves a remote communication receiver B and senses the surrounding environment through reflected echoes. Multipath-induced interference degrades communication at B, while providing exploitable information for sensing at A. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communications (ISAC) extends the long-standing evolution of cellular networks beyond pure data transport. Early cellular generations supported secondary functions primarily in the form of user localization, typically with meter-level accuracy [1]. With the introduction of wider bandwidths and dedicated reference signals, recent standards have pushed positioning accuracy to the decimeter level [2]. ISAC generalizes this paradigm by enabling environmental sensing and imaging in addition to communication, using the same transmitted waveforms and shared physical resources [3], [4]. In this context, sensing encompasses functionalities like target detection, ranging, tracking, and high-resolution imag-ing. This joint operation allows reliable multi-antenna data transmission while simultaneously supporting high-resolution sensing and imaging, which are expected to be native capabil-ities of future sixth-generation (6G) wireless systems. Fig. 1 highlights the fundamentally asymmetric role of multipath propagation in ISAC systems. While the sensing function inherently exploits reflections to reconstruct environmental features, the communication receiver experiences multipath as a source of interference. This dual role of multipath represents a central challenge in the design of practical ISAC waveforms and receivers, particularly under realistic delay and Doppler dynamics. From a waveform design perspective, imaging extended and distributed targets ideally requires signals that remain orthogonal under arbitrary relative delay and Doppler shifts. In practice, however, realistic field-of-view and range constraints limit the set of physically observable delay values. This arXiv:2608.23294v1 [eess.SP] 24 Aug 2026 2
+
+observation motivates a relaxation of strict time orthogonality to only those shifts that can be induced by the scene, allowing the remaining degrees of freedom to be exploited for data transmission. This principle underlies the concept of Dual-Orthogonality waveforms, which are designed to be orthog-onal across transmit antennas and over a prescribed set of admissible delay shifts [5]. Multipath propagation plays a fundamentally asymmetric role in ISAC systems: it constitutes a primary source of information for sensing and imaging, while simultaneously degrading communication performance through inter-stream and inter-symbol interference. Dual-Orthogonality waveforms were originally introduced in [5], demonstrating that relaxed orthogonality enables the joint support of communication and high-resolution sensing. However, that work focused on COSMIC waveform construction under idealized single-path communication assumptions and did not explicitly address the impact of multipath channel dynamics. That work did not characterize how multiple delay–Doppler paths perturb the waveform-induced transmit subspaces, nor did it provide the channel estimation, interference equalization, or coher-ent multipath-imaging processing required for operation in dynamic propagation environments. This paper closes this gap by explicitly analyzing Dual-Orthogonality waveforms for communication in realistic multipath channels and by jointly addressing waveform structure, receiver processing, channel estimation, and environmental reconstruction. These devel-opments enable reliable communication and high-resolution imaging under propagation conditions that were outside the scope of the original COSMIC formulation. In contrast to conventional ISAC receivers based on matched filtering, we show that, in the case of Dual-Orthogonality waveforms, multipath fundamentally alters the effective transmit subspaces observed at the receiver, rendering such approaches subop-timal. To address this issue, we develop a multipath-aware receiver framework based on structured channel estimation and low-complexity linear equalization, enabling reliable com-munication while preserving full-band sensing and imaging capabilities. Throughout the paper, Orthogonal Frequency Di-vision Multiplexing (OFDM) and Orthogonal Time Frequency Space (OTFS) are adopted as reference baselines to benchmark the proposed approach under identical channel and bandwidth conditions. The main contributions of this work are as follows:  
+
+> •
+
+Building upon the original COSMIC waveform-construction principle [5], we derive a complete Dual-Orthogonality signal and receiver model for dynamic multipath ISAC, explicitly characterizing the subspace coupling introduced by multiple delay–Doppler propagation paths.  
+
+> •
+
+We analytically characterize the impact of multipath and Doppler dynamics on the induced transmit subspaces and develop a structured multipath-aware linear decod-ing strategy, supported by Cramér–Rao Bound analysis to quantify estimation limits. The receiver formulation further includes practical estimation of the number of dominant resolvable paths and explicitly characterizes the linear combiner as a constrained Zero-Forcing subspace receiver, together with its feasibility conditions and lim-itations.  
+
+> •
+
+Numerical simulations show communication performance comparable to representative OFDM-based ISAC and MIMO-OTFS baselines while preserving full-band op-eration per transmit channel, enabling decimeter-level range resolution (30 cm) and over 15 dB multipath arti-fact suppression. The comparison jointly considers com-munication performance, imaging quality, and effective goodput under matched dynamic multipath conditions. Joint ISAC results confirm operation in a favorable sensing–communication trade-off region with competitive effective goodput.  
+
+> •
+
+We experimentally validate the proposed waveforms at 
+
+60 GHz , confirming reliable multi-stream communication (Error Vector Magnitude (EVM) ≈ − 13 dB ), a measur-able zero-correlation region, and centimeter-level radar ranging accuracy. Moreover, an experimental campaign conducted in a reflective indoor environment directly evaluates the multipath-aware communication receiver under strong unsuppressed reflections, demonstrating sub-stantial EVM recovery through the proposed subspace equalization without relying on receive-side spatial sepa-ration. The remainder of this paper is organized as follows. Sec-tion II reviews related work on ISAC waveform design. Section III introduces the system and signal model. Sec-tion IV presents the proposed multipath-aware communica-tion receiver and channel estimation framework. Section V addresses imaging. Section VI reports numerical simulation results, while Section VII provides experimental validation. Section VIII concludes the paper. 
+
+Paper Notation: Scalars are denoted by italic letters, vectors by bold lowercase letters, and matrices by bold uppercase letters. Continuous-time signals are denoted by (·), while discrete-time samples are denoted by [·]. Superscripts n index transmit antennas or data streams, whereas subscripts index propagation paths or auxiliary quantities. The operators (·)⊤,
+
+(·)H, and vec( ·) denote transpose, Hermitian transpose, and vectorization, respectively, and ⊗ denotes the Kronecker prod-uct. The operator diag( xk)K−1 
+
+> k=0
+
+denotes a K × K diagonal matrix whose k-th main diagonal element is xk. C denotes the complex field. IK denotes the K × K identity matrix, while 0 the all-zero vector. II. R ELATED WORKS 
+
+Waveform designs for ISAC can be broadly categorized based on how communication and sensing functionalities are combined. Multipath propagation plays a central role: it is often treated as an impairment to be mitigated or suppressed, even though it also constitutes a fundamental source of infor-mation for sensing and imaging. 
+
+Communication-oriented Designs exploit the fact that known communication signals can be correlated at the re-ceiver for sensing using pilots, preambles, or data-aided re-constructions [9], [19]. As a result, design priorities include favorable correlation properties, robustness to Doppler and 3
+
+TABLE I SUMMARY OF REPRESENTATIVE ISAC W AVEFORM CATEGORIES                                       
+
+> Waveform Pros Cons Ref.
+> Communication-centric
+> CP-OFDM Standardized; spectrally efficient High PAPR; Doppler-sensitive [6]–[8] CP-SC Low PAPR; PA-efficient Equalization complexity [9]–[11] CAZAC Ideal autocorrelation Doppler sensitive; limited modula-tion [12] OTFS Robust in delay–Doppler High complexity [13]–[16] AFDM Full diversity; multipath resolution Chirp optimization needed [17], [18] Filtered (UFMC/FBMC) Low OOB leakage Intrinsic interference; complex pi-lots [9]
+> Sensing-centric
+> LFM/FMCW High range resolution; Doppler ro-bust Low data rate; sweep trade-off [9], [19] Index Modulation Radar-compatible data embedding Detection complexity; index errors [20]–[22] Spatial/PPM Constant envelope; hardware effi-cient Low throughput; delay ambiguity [9], [23], [24]
+> Joint-design
+> Cooperative ISAC Rate–accuracy Pareto optimization Coordination overhead [25] FD Joint Beamforming Joint SI mitigation and beamform-ing Strong coupling; CSI dependent [26] Symbol-Level Precoding Symbol-level rate–sensing trade-off High per-symbol complexity [27] COSMIC Joint communication–imaging CSI dependent [5]
+
+carrier-frequency offsets, and low peak-to-average power ra-tio (PAPR). OFDM, which underpins the 5G New Radio (NR) physical layer [6], is the most prominent example due to its Fast Fourier Transform (FFT)-based transceivers, high spectral efficiency, and natural multiple-input multiple-output (MIMO) scalability [7]. Nevertheless, Cyclic Prefix (CP)–OFDM suffers from high PAPR, sinc-shaped sidelobes, Doppler sensitivity, and cyclic-prefix overhead [8]. To better handle doubly selective channels, delay–Doppler-domain mul-ticarrier schemes such as OTFS and Affine Frequency Division Multiplexing (AFDM) have been proposed. These schemes exploit sparse delay–Doppler representations to resolve mul-tipath components and mitigate Doppler-induced interference, enabling accurate joint delay and Doppler estimation at the cost of increased transceiver complexity and sensitivity to pulse design [13], [17]. Extensions such as AFDM-based index modulation further embed information onto additional index dimensions while preserving sensing performance [18]. Other communication-centric candidates include single-carrier waveforms, constant-amplitude zero-autocorrelation (CAZAC) sequences, and filtered multicarrier schemes (e.g., UFMC, FBMC/OQAM, GFDM), which offer improved power effi-ciency or spectral containment at the expense of increased receiver complexity or reduced Doppler robustness [9]. 
+
+Sensing-oriented Designs primarily prioritize the radar waveform, while communication information is embedded so as not to disrupt sensing performance. Typical implementa-tions rely on linear frequency-modulated (LFM) or frequency-modulated continuous-wave (FMCW) chirps, as well as phase-or code-modulated radar signals, preserving constant-envelope transmission, ambiguity-function control, and Doppler toler-ance [9], [19]. Information embedding is commonly achieved via index modulation across antennas, subcarriers, pulses, or codes, allowing data transmission while maintaining radar compatibility [20]–[22]. Alternative approaches encode in-formation into spatial sidelobes of the transmit beampattern or into controlled timing shifts, as in pulse-position modu-lation (PPM), enabling concurrent radar operation and low-rate communication [23], [24]. While hardware efficient, these schemes face intrinsic limits on achievable data rates and may introduce parameter coupling between communication symbols and sensing observations, potentially biasing range– Doppler estimates [9]. 
+
+Joint Designs depart from simple waveform reuse and instead adopt system-level optimization, designing signals or beamformers that explicitly balance communication and sensing objectives. Representative examples include coop-erative multi-base-station formulations that map the Pareto frontier between communication rate and localization accu-racy [25], full-duplex ISAC architectures with joint beamform-ing and power optimization under radar Signal-to-Interference-plus-Noise Ratio (SINR) constraints [26], and symbol-level precoding for dual-functional radar–communication systems, where constant-modulus waveforms are optimized on a per-symbol basis to meet both sensing and communication require-ments [27]. Although powerful, these methods typically rely on centralized optimization, accurate channel state information (CSI), and high computational complexity, which can limit scalability and real-time applicability. 
+
+Discussions: Despite their differences, existing ISAC wave-form designs largely rely on idealized propagation assump-tions or receiver structures that do not explicitly account for multipath-induced subspace coupling, particularly in the context of joint communication and imaging. This limitation motivates waveform and receiver designs that remain effec-tive under realistic channel dynamics while preserving high-resolution sensing and imaging capabilities. Table I provides a comparative summary of representative ISAC waveform categories, highlighting their main advantages and limitations. OFDM-based schemes are particularly relevant for ISAC due to their direct compatibility with 5G New Radio (NR) and existing cellular infrastructures. In practical MIMO– OFDM sensing and ISAC systems, multi-antenna transmis-sion is commonly realized via frequency-division multiple access (FDMA), whereby each transmitter occupies a disjoint subset of subcarriers. While this preserves inter-antenna or-thogonality and enables joint delay–Doppler–angle estimation using standard OFDM processing [28], it effectively reduces the per-transmitter bandwidth. When echoes are processed independently, for instance in time-domain back-projection imaging, this leads to a range-resolution loss proportional to the number of transmit antennas unless coherent combination is performed, a known limitation of FDMA MIMO radar [29]. Interleaved OFDM (I–OFDM) mitigates this loss by assign-ing each transmitter a uniformly interleaved set of subcarriers spanning the full bandwidth, thereby preserving range resolu-tion while maintaining frequency-domain orthogonality [30]. However, the resulting periodic spectral structure produces Dirichlet-like autocorrelation functions with grating sidelobes at predictable delay offsets, which can degrade imaging perfor-mance [31]. Non-equidistant subcarrier interleaving (NeqSI) addresses this issue by employing a jointly designed non-uniform spectral lattice that breaks periodicity and suppresses coherent sidelobe buildup, while preserving the mainlobe determined by the total bandwidth [32]–[34]. Despite these advantages, both I–OFDM and NeqSI in-troduce practical challenges. Irregular spectral allocations increase transceiver complexity and impose stringent inter-antenna synchronization requirements under timing and carrier-frequency offsets [30], [31]. In addition, NeqSI is sen-sitive to frequency selectivity, as non-uniform tone and pilot 4
+
+placement complicates channel estimation and may degrade decoding performance in rapidly time-varying channels [33]. Both schemes also remain susceptible to Doppler-induced intercarrier interference if compensation is imperfect [31]. Existing works primarily treat NeqSI as a radar-oriented extension of communication-style multicarrier signaling rather than as part of a unified ISAC design [32], [33]. Neverthe-less, because NeqSI yields superior radar performance while preserving the robust communication capabilities of standard OFDM, despite its higher implementation complexity, it is adopted here, alongside OTFS as the state-of-the-art baseline for delay–Doppler resilience, and used for comparison with the proposed Dual-Orthogonality waveform scheme under identical conditions. III. S YSTEM AND SIGNAL MODEL 
+
+We consider an ISAC node equipped with NT transmit and MS receive antennas. The moving ISAC node transmits Dual-Orthogonality waveforms that simultaneously support data transmission toward a remote communications receiver and probing of the surrounding environment through reflected echoes. Although all observations originate from the same transmitted signal, the resulting received signals may differ due to distinct receiver locations, scattering geometries, and propagation conditions. 
+
+A. Transmit Signal Model 
+
+The ISAC transmitter operates over a bandwidth B during a signaling interval of duration Tp. Let Ts = 1 /B denote the sampling period and define K ≜ Tp/T s. The discrete-time transmit signal across the NT transmit antennas is given by 
+
+s[k] = [ s1[k], s 2[k], . . . , s NT [k] ] ⊤ with k = 0 , 1, . . . , K −1,where sn[k] ∈ C denotes the sample transmitted by the n-th antenna. Collecting the samples over the signaling interval yields the transmit block S = [ s1, s2, . . . , sNT ] ∈ CK×NT ,where sn ∈ CK×1 denotes the waveform transmitted by the 
+
+n-th antenna. The waveform design follows the principle of Dual-Orthogonality [5], which enforces signal separability along two complementary dimensions. First, signals transmitted from different antennas are assigned to mutually orthogonal subspaces of the K-sample signal space, ensuring inter-stream orthogonality in the absence of propagation effects. Second, this orthogonality is enforced only over a finite and physically admissible delay window determined by the maximum extent of the sensed scene, while the remaining degrees of freedom are exploited for data transmission. To enforce spatial orthogonality, each waveform is assigned to a Ks-dimensional orthogonal subspace of the K-sample signal space, with Ks < K here set as Ks = ⌊K/N T ⌋. Let 
+
+C ∈ CK×K denote a unitary basis ( CHC = IK ), and let Cn ∈
+
+CK×Ks collect a distinct subset of columns of C assigned to the n-th antenna. The transmitted waveform associated with the n-th antenna is expressed as 
+
+sn = Cn αn, n = 1 , . . . , N T , (1) where αn ∈ CKs×1 contains the symbol space associated with the n-th stream. The assigned subspaces are mutually orthogonal, i.e., CH 
+
+> i
+
+Cj = δij IKs , ensuring ideal inter-antenna orthogonality under single-path propagation. In multipath environments, delayed replicas break subspace separation. To address this effect, orthogonality is enforced only over a finite delay interval corresponding to the maximum round-trip propagation time within the scene. Let eSi ∈ CKz ×K
+
+denote the reduced cross-correlation (Toeplitz) operator associ-ated with the i-th transmit subspace, which models correlation with all delayed replicas (up to Kz samples) of the waveform associated with Ci. To account for the zero-delay tap, Kz =
+
+⌈τs/T s⌉+1 corresponds to the maximum physically admissible round-trip delay of the sensed scene, with τs = 2 Rs/c , where 
+
+Rs denotes the maximum sensing range and c is the speed of light. Note that the orthogonality construction requires a bound of Kz < K s. Specifically, the rows of eSi span the first Kz
+
+delayed versions of sH 
+
+> i
+
+[5]. Dual-Orthogonality then requires that eSi sn = 0, ∀ i < n, (2) i.e., the waveform transmitted by the n-th antenna is or-thogonal, over the admissible delay window, to the subspace spanned by all previously assigned transmit waveforms. Col-lecting these constraints yields the linear operator 
+
+Qn ≜
+
+eS1Cn
+
+eS2Cn
+
+...
+
+eSn−1Cn
+
+ ∈ C(n−1) Kz ×Ks , (3) with the generic block eSlCn ∈ CKz ×Ks . As eSl is built from sl, Qn directly depends on the preceding symbols 
+
+α1, . . . , αn−1, resulting in a data-dependent construction. Note that for the first stream (n = 1), the constraint set is empty, leaving the assigned subspace fully available. To prevent an empty null space for higher-index antennas, the available degrees of freedom must strictly bound Kz .Guaranteeing a strictly positive null-space dimension dn =
+
+Ks − (n − 1)( Kz − 1) > 0 for all NT streams requires 
+
+Kz ≤ ⌊ (Ks − 1) /(NT − 1) ⌋ + 1 .For instance, considering a safe sensing margin of Rs =20 m (corresponding to a 40 m round-trip distance, yield-ing τs ≈ 0.133 μs), the B = 40 MHz configu-ration yields K = 1600 , Ks = 200 , and Kz =7, ensuring strictly positive null-space dimensions dn ∈{200 , 194 , 188 , 182 , 176 , 170 , 164 , 158 } for all NT = 8
+
+streams. Similarly, B = 200 MHz yields K = 8000 ,
+
+Ks = 1000 , and Kz = 28 , resulting in dn ∈{1000 , 973 , 946 , 919 , 892 , 865 , 838 , 811 }.The projected symbol vector αn is thus constrained to lie in the null space of Qn, i.e., αn ∈ Null( Qn). Let the columns of 
+
+Nn ∈ CKs×(Ks−(n−1)( Kz −1)) form an orthonormal basis for 
+
+Null( Qn). The transmitted coefficients are then synthesized as 
+
+αn = Nnxn, (4) where xn ∈ CKs−(n−1)( Kz −1) denotes the vector of infor-mation symbols for the n-th stream. The “ (Kz − 1) ” term accounts for the zero-delay constraint: since CH 
+
+> i
+
+Cn = 0 by construction, the corresponding row in Qn identically vanishes and does not consume a degree of freedom. 5
+
+Remark 1. An important feature of this construction is its inherent flexibility. The choice of the unitary basis C allows the waveform family to adapt to different architectural re-quirements without modifying the underlying signal model. For instance, selecting C as a Discrete Fourier Transform (DFT) matrix reduces the model to conventional OFDM transmission. More generally, when C is instantiated as a random unitary operator, the resulting waveform structure provides implicit physical-layer obfuscation by avoiding publicly fixed signaling bases. B. Propagation Model 
+
+We model the propagation between the ISAC transmitter and a generic receiver as a P -path narrowband MIMO channel. In this subsection, we focus on the observation collected at a remote receiver equipped with MC antennas. Let y(t) ∈
+
+CMC ×1 denote the continuous-time baseband signal observed at this receiver. The received signal is expressed as 
+
+y(t) =  
+
+> P−1
+
+X
+
+> p=0
+
+γp ej2πν pt arx (ϕp) a⊤
+
+> tx
+
+(θp) s(t − τp) + w(t), (5) where γp ∈ C, τp ∈ R, and νp ∈ R denote the complex gain, propagation delay, and Doppler shift of the p-th path, respectively, while θp and ϕp denote its angle of departure and angle of arrival, respectively. The vectors atx (·) ∈ CNT ×1
+
+and arx (·) ∈ CMC ×1 represent the transmit and receive array steering vectors, and w(t) is additive white Gaussian noise. Sampling the received signal at K instants over the signaling interval yields the discrete-time observation Y ∈
+
+CK×MC . Under the standard narrowband delay–Doppler chan-nel model 1, where fractional delays are represented through frequency-domain phase shifts and Doppler induces a discrete-time phase rotation without time-scaling of the baseband waveform, sampling (5) at K time instants yields the following compact matrix representation [16]: 
+
+Y = 
+
+> P−1
+
+X
+
+> p=0
+
+γpD(νp)FHB(τp)FSa tx (θp)a⊤
+
+> rx
+
+(ϕp) + W, (6) where F ∈ CK×K denotes the unitary DFT matrix, 
+
+B(τp) and D(νp) ∈ CK×K are diagonal matrices de-fined as B(τp) = diag  e−j2πkτ p/(KT s)K−1 
+
+> k=0
+
+and D(νp) = diag  ej2πkν pTs
+
+K−1 
+
+> k=0
+
+, with k = 0, . . . , K − 1, modeling continuous-valued delay via frequency-domain phase shifts (in the discrete-time Fourier basis) and Doppler via time-domain phase rotations, and W ∈ CK×MC denotes additive noise. While physical multipath propagation induces linear (Toeplitz) shifts, the model in (6) employs a circulant matrix approximation FHB(τp)F commonly used for compact re-ceiver modeling [16]. Because Dual-Orthogonality waveforms do not employ a Cyclic Prefix (CP), this circulant operator constitutes an approximation of the true physical channel. However, because the signaling interval is significantly longer                       
+
+> 1The narrowband assumption is valid when the maximum delay drift over the pulse duration is negligible compared to the sampling period, i.e., 2vmax Tp/c ≪Ts. Under the simulated mobility ( vmax = 30 m/s,
+> Tp= 40 μs), the maximum intra-pulse delay drift is 0.008 ns. This strictly satisfies the condition even for the most restrictive simulated bandwidth of
+> B= 200 MHz, where Ts= 5 ns.
+
+than the maximum channel delay spread ( Tp ≫ τmax ), the difference between the linear and circular shifts is strictly confined to a small fraction of the block boundary. As formally proven in Appendix C, the relative error energy introduced by this approximation is rigorously bounded by 2τmax /T p ≪ 1,thereby safely justifying the circulant approximation for equal-ization purposes. 
+
+Remark 2. An analogous model applies to the sensing receiver co-located with the transmitter. In the monostatic case, the propagation paths correspond to target reflections and multipath scattering. The same delay–Doppler param-eterization therefore provides a unified description for both communication and sensing observations. 
+
+IV. C OMMUNICATION RECEIVER PROCESSING 
+
+This section addresses receiver-side processing at the remote communication receiver . Based on the signal model introduced in Sec. III, we analyze how multipath propagation alters the ideal orthogonality properties of Dual-Orthogonality wave-forms and how explicit estimation of the underlying multipath components enables reliable data decoding through multipath-aware linear equalization. The communication receiver is equipped with a uniform linear array (ULA) of MC antennas with half-wavelength inter-element spacing, which enables spatial filtering and subspace-based processing. 
+
+A. Orthogonality Loss and Effective Channel 
+
+Let ym ∈ CK×1 denote the signal observed at the m-th antenna of the remote receiver, consisting of the m-th column of (6). The decoding of stream n inherently depends on the structure induced by the previously assigned streams 
+
+1, . . . , n − 1. Indeed, as explained in Sec. III-A, the Dual-Orthogonality subspaces are constructed sequentially, so that each new subspace is defined under orthogonality constraints with respect to the previously assigned ones. Decoding of the 
+
+n-th transmit stream naturally starts by projecting the received signal onto the corresponding transmit subspace, 
+
+eαn,m = CH 
+
+> n
+
+ym. (7) Substituting, from Sec. III, the transmit structure (1) into (6) and applying the projection in (7) to the observation from the m-th receive antenna, we obtain 
+
+eαn,m = 
+
+> P−1
+
+X
+
+> p=0
+> NT
+
+X
+
+> ℓ=1
+
+γp[arx (ϕp)] m[atx (θp)] ℓCH 
+
+> n
+
+HpCℓαℓ+CH 
+
+> n
+
+wm, (8) where Hp = D(νp) FHB(τp)F denotes the delay–Doppler operator associated with the p-th propagation path, consistently with the sampled channel model in (6). In the absence of delay and Doppler dispersion, the orthogonality property CH 
+
+> n
+
+Cℓ = 0
+
+for ℓ̸ = n ensures perfect stream separation. In general multipath channels, however, the operators Hp rotate the transmit subspaces, generating inter-antenna interference (IAI) and intra-stream distortion. To better understand the impact, we separate this expression into three distinct components as 
+
+eαn,m =  CH 
+
+> n
+
+Gn,m 
+
+αn
+
+| {z }
+
+> Distorted Signal
+
++ X
+
+> ℓ̸=n
+
+ CH 
+
+> n
+
+Gℓ,m 
+
+αℓ
+
+| {z }
+
+> Inter-Antenna Interference
+
++ CH 
+
+> n
+
+wm
+
+| {z } 
+
+> Filtered Noise
+
+(9) 6
+
+where Gℓ,m will be introduced shortly. This decomposition highlights how multipath-induced delay–Doppler operators rotate the transmit subspaces, generating IAI. The expression in (9) serves to explicitly identify these contributions and motivate the structured equalization strategy developed in the following subsection. To capture this effect, we separate in (7) the desired contribution corresponding to ℓ = n from the interference terms ℓ̸ = n. Focusing on the component associated with stream n, we define the effective subspace channel of the n-th stream and m-th receiving antenna as 
+
+Gn,m ≜ 
+
+> P−1
+
+X
+
+> p=0
+
+γp[arx (ϕp)] m[atx (θp)] nHpCn. (10) Note that Gn,m ∈ CK×Ks does not represent the full MIMO channel matrix, but the channel induced on the n-th transmit subspace by the physical multipath operator, capturing the delay–Doppler distortion within that subspace. Reliable decod-ing therefore hinges on accurate estimation of the multipath parameters that define Gn,m . The effective channel Gn,m can be interpreted as the original transmit subspace Cn undergoing a sequence of unitary delay and Doppler transformations, weighted by the path gain and transmit-array response. As a result, multipath propagation maps each transmit subspace into a rotated and distorted subspace at the receiver, whose superposition across paths defines the effective channel seen by stream n. Assuming the effective subspace channel Gn,m is known, we first describe the linear equalization strategy that enables stream separation under multipath-induced subspace coupling. The subsequent subsection details how the required multipath parameters are estimated in practice. 
+
+B. Multipath-Aware Equalization 
+
+As discussed in the previous subsection, projection onto the original transmit subspaces via matched filtering does not ac-count for multipath-induced subspace distortion and therefore cannot fully suppress IAI. We therefore introduce a multipath-aware linear equalization strategy that explicitly incorporates the effective channel structure into the combiner design. Using the effective channel model, decoding of the n-th stream at the m-antenna is performed via linear equalization. A linear combiner An,m ∈ CK×Ks produces the subspace estimate 
+
+bαn,m = AH
+
+> n,m
+
+ym, (11) where ym ∈ CK×1 denotes the received signal vector corresponding to the m-th column of the sampled observation matrix Y ∈ CK×MC in (6). 
+
+Remark 3. In the special case where a single path ˆp domi-nates, the effective channel Gℓ,m reduces to the contribution of that path only, as Gˆpℓ,m . Inter-stream leakage can therefore be suppressed by enforcing AH
+
+> n,m
+
+Gˆpℓ,m = 0, ℓ̸ = n, where 
+
+Gˆpℓ,m = γˆp[arx (ϕˆp)] m[atx (θˆp)] ℓHˆpCℓ, for ℓ̸ = n. While effective in near single-path conditions, this design becomes suboptimal in multipath-rich environments. Since Hˆp is rank preserving (see Appendix B), each matrix Gˆpℓ,m ∈ CK×Ks
+
+has rank Ks. The interference matrix formed by concatenating 
+
+{Gˆpℓ,m }ℓ̸=n has full column rank (NT − 1) Ks and therefore admits a non-trivial null space, enabling exact cancellation of dominant-path interference. 
+
+Reliable decoding requires accounting for the full super-position of multipath components captured by the effec-tive channel model Gn,m presented in (10). To this end, we define the aggregate interference matrix associated with stream n as Hint  
+
+> n,m
+
+∈ CK×(NT −1) Ks , given by: Hint  
+
+> n,m
+
+=[ G1,m , . . . , Gn−1,m , Gn+1 ,m , . . . , GNT ,m ].
+
+To separate the streams, the design of the linear combiner 
+
+An,m is cast as a constrained Zero-Forcing (ZF) subspace receiver. Specifically, An,m is constructed to exactly suppress the interference by projecting the desired effective channel onto the orthogonal complement of the interference subspace: 
+
+AH 
+
+> n,m
+
+=
+
+
+
+GH
+
+> n,m
+
+Π⊥ 
+
+> Hint
+> n,m
+
+Gn,m 
+
+−1
+
+GH
+
+> n,m
+
+Π⊥ 
+
+> Hint
+> n,m
+
+, (12) where Π⊥ 
+
+> Hint
+> n,m
+
+∈ CK×K is the orthogonal projection onto the left null space of Hint  
+
+> n,m
+
+(i.e., the null space of (Hint 
+
+> n,m
+
+)H). By construction, the linear combiner in (12) effectively suppresses the IAI component in the decoded subspace (9) arising from multipath-induced orthogonality leakage. While this closed-form ZF approach guarantees determin-istic processing latency and effective stream separation, it is subject to the standard ZF trade-off: in environments where multipath components are highly correlated or the effective subspaces are poorly conditioned, the projection may result in noise enhancement. While spatial parameter estimation inherently exploits the full receive array ( MC antennas) to resolve paths, the proposed equalizer resolves interference in the code/delay domain. Consequently, subsequent symbol equalization and decoding are performed on a single receive antenna, although spatial diversity combining (e.g., Maximum Ratio Combining) could optionally be applied across the array. The equalizer derived under this framework relies on the estimated Gn,m , establishing a direct link between multipath parameter estimation and data decoding performance. 
+
+Remark 4. The proposed receiver design relies exclusively on linear constrained optimization and admits closed-form solutions, resulting in deterministic processing latency and hardware-friendly implementation. Unlike iterative or non-linear receivers, the proposed approach preserves low com-plexity while explicitly exploiting multipath structure for in-terference mitigation. C. Pilot-Aided Multipath Parameter Estimation 
+
+A known pilot sequence u ∈ CKu , with Ku < K s, is embedded into the first transmit waveform prior to the Dual-Orthogonality construction, requiring: 
+
+[s1]1: Ku = u ⇔ Cuα1 = u (13) where Cu ∈ CKu×Ks consists of the first Ku rows of C1.The pilot is embedded within the existing waveform block and therefore does not require an additional time interval, frequency allocation, or transmit subspace. However, allo-cating these fixed pilot samples consumes a portion of the available signaling dimensions, thereby introducing a pay-load overhead. A detailed analysis of this overhead, together 7
+
+Algorithm 1 Multipath Parameters Estimation                                                            
+
+> Require: Received signal Y, Pilot u, Array manifold a(·)
+> Ensure: Parameter set Ψ = {ˆτp,ˆϕp,ˆνp,ˆγp}P−1
+> p=0
+> Spatial Estimation (Subspace-Based):
+> 1: ˆR←1
+> KYHY
+> 2: En←NoiseSubspace ( ˆR)
+> 3: {ˆϕp}P−1
+> p=0 ←find_peaks
+> ϕ
+> 1
+> a(ϕ)HEnEH
+> na(ϕ)
+> 
+> 4: for p= 0 , . . . , P −1do
+> Beamforming & Delay Estimation:
+> 5: Form spatial filter wp←a( ˆϕp)
+> 6: zp[k]←wH
+> pyk
+> 7: ˆτp←as in (15)
+> Doppler Estimation (ML Search):
+> 8: Construct delay–angle compensated template 9: ˆνp←as in (16)
+> Gain Recovery (Least Squares):
+> 10: y←vec( Y)
+> 11: Construct LS design matrix HLS = [ h0, . . . , hP−1]
+> 12: hpas in (17) 13: ˆγ←(HH
+> LS HLS )−1HH
+> LS y
+> 14: return Ψ
+
+with the constructive solution satisfying (13), is provided in Appendix A. This pilot sequence enables estimation of the multipath parameters required to form the effective channel. The channel estimation pipeline first identifies the spatial signatures. From the received block Y, the sample covariance matrix ˆR = 1 
+
+> K
+
+YHY is formed, and the angles of arrival are estimated by identifying the P dominant peaks of the subspace-based spatial spectrum as 
+
+ˆϕp = arg max 
+
+> ϕ
+
+1
+
+aH
+
+> rx
+
+(ϕ)EnEH 
+
+> n
+
+arx (ϕ) , (14) for p = 0 , . . . , P −1 and where En denotes the noise subspace obtained from the eigenvalue decomposition of ˆR, by collect-ing the eigenvectors corresponding to the smallest eigenvalues, under the standard assumption that the number of dominant multipath components is smaller than the receive array di-mension. Here, P denotes the number of dominant, resolvable multipath components. While practical systems can estimate 
+
+P via MUSIC peak thresholding or standard information-theoretic criteria, the estimation procedure in Algorithm 1 and the numerical evaluations in Section VI assume P is known a priori. This strictly isolates the interference-cancellation performance of the proposed equalizer from model-order esti-mation errors. Conditioned on these angles, the received signal is spatially filtered to emphasize individual path contributions. 2
+
+Specifically, for each estimated angle ˆϕp, arx ( ˆϕp) is applied to Y as a beamforming vector. For equalization purposes, it is sufficient to work with a stream-dependent effective path gain. Specifically, the complex coefficient associated with each propagation path can be defined as γp,n ≜ γp[atx (θp)] n, which directly parameterizes the contribution of path p to stream n. Because the pilot sequence is embedded exclusively in the first transmit stream to minimize overhead (Appendix A), the remote receiver cannot explicitly resolve the Angle of Departure (AoD, θp). Consequently, the receiver employs a far-field approximation, absorbing the unresolved spatial phase into the common esti-    
+
+> 2To reduce complexity, angle and delay are estimated sequentially instead of via a joint two-dimensional search, assuming spatial filtering sufficiently suppresses residual multipath components. The impact of residual leakage is evaluated in simulations for an 8×1receive array, consistent with [28]
+
+mated macroscopic gain such that γp,n ≈ ˆγp for all n. While this introduces a residual spatial phase error, the constrained Zero-Forcing projection in (12) remains robust. The interfer-ence subspace is primarily anchored by the known temporal codes ( Cℓ) and the estimated delay–Doppler operators ( Hp), allowing the equalizer to effectively suppress dominant inter-ference by targeting its temporal support rather than relying on strict spatial phase coherence. This equivalent representation preserves the structure of Gn,m while simplifying the receiver-side processing. Let yk ∈ CMC ×1 denote the k-th row of Y, i.e., the spatial receive vector at time index k. Delay estimation is performed by correlating the beamformed signal with the known pilot sequence u, yielding 
+
+ˆτp = arg max 
+
+> τ
+> Ku−1
+
+X
+
+> k=0
+
+
+
+aH
+
+> rx
+
+( ˆϕp)yk
+
+
+
+u∗(k − τ ) . (15) To resolve fractional delays with sub-sample precision, parabolic interpolation is then applied to the correlation magnitude of the peak and its immediate adjacent samples. Subsequently, the Doppler shifts ˆνp (directly related to the relative velocities ˆvp) are estimated via a Maximum Likelihood (ML) grid search. While AoA estimation exploits the spatial covariance structure of the full received block, delay and Doppler estimation rely on the known pilot structure to enable coherent projection-based estimation in the temporal domain. This involves maximizing the normalized coherent projection of the observation onto the delay-and-angle-compensated pilot template h:
+
+ˆνp = arg max 
+
+> ν
+
+hH(ˆ τp, ˆϕp, ν )y 2
+
+∥h(ˆ τp, ˆϕp, ν )∥2 . (16) where y ≜ vec( Y) ∈ CKM C ×1, and h(ˆ τp, ˆϕp, ν ) = arx ( ˆϕp)⊗
+
+D(ν)FHB(ˆ τp)F¯u, with ¯u = [ u⊤, 01×(K−Ku)]⊤ denoting the zero-padded pilot. This properly incorporates the estimated arrival angle, delay, and Doppler phase rotation. Finally, the complex path gains {ˆγp} are recovered via linear least-squares (LS). We define the LS design matrix HLS =[h0, . . . , hP −1], where 
+
+hp = arx ( ˆϕp) ⊗ D(ˆ νp)FHB(ˆ τp)F ¯u. (17) The LS estimate of the path gains is then given by 
+
+ˆγ = ( HH
+
+> LS
+
+HLS )−1HH
+
+> LS
+
+y. (18) The estimation procedure is summarized in Algorithm 1. It is important to note that the proposed parameter estima-tion procedure operates sequentially (spatial angle → delay →
+
+Doppler) rather than jointly. While a joint multi-dimensional ML search over (ϕ, τ, ν ) would yield theoretically optimal es-timates, it is computationally prohibitive for practical real-time ISAC systems. The sequential approach trades strict optimality for computational feasibility. Because the delay and Doppler estimations are conditioned on the initial angle estimates, this architecture is theoretically susceptible to error propagation. However, when the receive array size is sufficiently large to spatially resolve the dominant paths, the spatial filtering step (beamforming) effectively decouples the multipath compo-nents. This isolates the delay-Doppler estimation for each path, thereby bounding the residual error propagation and allowing 8
+
+the sequential estimator to approach the Cramér-Rao Bound (CRB) at high SNR regime, as corroborated by the numerical results in Section VI. 
+
+D. Theoretical Performance Limits 
+
+To quantify the fundamental limits of the proposed channel estimation framework, we derive a global Cramér-Rao Bound (CRB) for the effective subspace channel matrix Gn,m in (10). We define the global parameter vector ψ = [ ψ⊤ 
+
+> 0
+
+, . . . , ψ⊤ 
+
+> P−1
+
+]⊤,where the parameters for the p-th path ( p = 0 , . . . , P − 1) are given by ψp = [ τp, ϕ p, ν p, ℜ{ γp}, ℑ{ γp}]⊤. γp ∈ C denotes the complex path gain, decomposed into its real and imaginary parts. The Fisher Information Matrix (FIM) for ψ, denoted as Jψ , is computed via the Slepian-Bangs formula based on the signal model in (6). However, since communication reliability depends on the accuracy of the effective channel reconstruction rather than individual physical parameters, we bound the mean squared error of the matrix Gn,m itself. Let 
+
+g(ψ) = vec (Gn,m ) represent the vectorized effective channel as a function of the physical parameters. The Jacobian matrix of this transformation is T = ∂g/∂ ψ.The global lower bound on the variance of the channel estimator is then given by: 
+
+E
+
+h
+
+∥ ˆGn,m − Gn,m ∥2
+
+> F
+
+i
+
+≥ Tr 
+
+
+
+TJ −1 
+
+> ψ
+
+TH
+
+. (19) This bound captures the coupled impact of delay, Doppler, an-gle, and complex gain errors on the final subspace projection, providing a direct benchmark for the estimation performance reported in Section VI. V. SAR I MAGING PROCESSING 
+
+This section focuses on imaging processing at the ISAC node using the reflected echoes of the transmitted Dual-Orthogonality waveforms. Unlike the remote communication receiver, which estimates channel parameters for data decod-ing, the sensing receiver can exploit mobility to synthesize a large aperture and perform high-resolution imaging. Cru-cially, the proposed waveform enables coherent multi-antenna Synthetic Aperture Radar (SAR) processing without requiring frequency- or time-division across transmitters, allowing all antennas to contribute to imaging at full bandwidth and full aperture [35]. 
+
+A. Sensing Observation Model and Virtual Array Structure 
+
+In the monostatic sensing configuration, the SAR observa-tion corresponds to a particular instance of the propagation model in Sec. III. Specifically, at aperture position of the sensing receiver xq , the received baseband signal is obtained from (5) by considering a co-located transmit and sensing array, where the channel captures both direct target reflections and higher-order multipath echoes. The continuous-time echo can be written as 
+
+yq (t)=  
+
+> P−1
+
+X
+
+> p=0
+
+γp,q ej2πν p,q tarx (ϕp,q )a⊤
+
+> tx
+
+(θp,q )s(t − τp,q )+ wq (t),
+
+(20) where Ψq = {τp,q , θ p,q , ϕ p,q , γ p,q , ν p,q }P −1 
+
+> p=0
+
+represents the set of multipath parameters associated with aperture position xq .
+
+Algorithm 2 MIMO-SAR Image Formation                                    
+
+> Require: Range-compressed data {sq,n,m [k]}, positions {xq}, phase cen-ters {xTX
+> n,xRX
+> m}, grid G
+> Ensure: Reflectivity map I(r)
+> 1: for all r∈ G do
+> 2: I(r)←0
+> 3: for all (q, n, m )do
+> 4: τ←τq,n,m (r)
+> 5: v←interp( sq,n,m , τ )
+> 6: I(r)←I(r) + v e j2πf cτ
+> 7: I(r)← | I(r)|/max r∈G |I(r)|
+
+Matched filtering (pulse compression) [35] is then performed to separate the spatial channels. The observation at the m-th receive antenna yq,m (t), consisting in the m-th column of (20), is cross-correlated with the waveform sn(t) transmitted by the n-th antenna. The resulting pulse-compressed complex envelope for the (n, m ) transmit-receive pair is given by 
+
+sq,n,m (t) = 
+
+Z
+
+yq,m (t + τ )s∗
+
+> n
+
+(τ ) dτ, (21) whose discrete-time sampled version is sq,n,m [k] =
+
+sq,n,m (kT s). By combining the outputs across all NT transmit and MS receive antennas, a virtual array with NT MS elements is synthesized. Under half-wavelength inter-element spacing at the resulting virtual elements positions, given by proper array geometry, the virtual array enlarges the effective aperture and enables grating-lobe-free operation while improving angular resolution and discrimination of closely spaced scatterers. Unlike OFDM-based multi-transmit SAR schemes that rely on FDMA or subcarrier interleaving to preserve orthogonality, thereby reducing per-transmitter bandwidth or introducing pe-riodic sidelobes, the Dual-Orthogonality waveform preserves orthogonality across transmit antennas within a prescribed delay–Doppler region without bandwidth partitioning, as de-scribed in Sec. III-A. As a result, SAR processing can co-herently exploit the full signal bandwidth across all transmit antennas. 
+
+B. Time-Domain Back-Projection Imaging 
+
+Imaging processing is performed at the ISAC node, which repeatedly transmits waveform blocks along the synthetic aperture. Let us consider the aperture positions xq with 
+
+q ∈ { 1, . . . , Q }. At each aperture position, the received echo follows the monostatic propagation model, obtaining (21). Under the standard SAR assumption of negligible intra-pulse Doppler and coherent phase evolution across aperture positions, residual phase evolution is compensated by the exponential term in the back-projection step. For a candidate image location r, the two-way propagation delay associated with aperture position q and transmit–receive pair (n, m )
+
+is τq,n,m (r) = ∥xq + xTX  
+
+> n
+
+− r∥+∥xq + xRX  
+
+> m
+
+− r∥/c , where 
+
+xTX  
+
+> n
+
+and xRX  
+
+> m
+
+denote local phase-center coordinates relative to the platform reference frame. The MIMO-SAR time-domain back-projection (TDBP) operator is then given by 
+
+˜I(r) = 
+
+> Q
+
+X
+
+> q=1
+> NT
+
+X
+
+> n=1
+> MS
+
+X
+
+> m=1
+
+sq,n,m (τq,n,m (r)) ej2πf cτq,n,m (r). (22) The reflectivity map is obtained by coherent accumulation across time acquisitions (synthetic aperture) and spatial MIMO channels after interpolation of the range-compressed signals at 9
+
+the geometrically consistent delays [35]. To ensure that image intensity is independent of the number of transmitted pulses and path-loss effects, the final SAR image is normalized as 
+
+I(r) = | ˜I(r)|
+
+max r| ˜I(r)| . (23) Algorithm 2 summarizes the implemented TDBP procedure. 
+
+C. Orthogonality under Delay–Doppler Perturbations 
+
+A key property of the proposed waveform for SAR imaging is its exact delay-domain orthogonality at the discrete design points, while general delay–Doppler propagation may intro-duce residual cross-ambiguity. Under the sampled narrow-band model introduced in Sec. III, each propagation path is represented in discrete time by 
+
+H(τ, ν ) = D(ν)FHB(τ )F, (24) which coincides with the delay–Doppler transformation ap-pearing in (6). In the monostatic SAR configuration, this operator models the delay–Doppler transformation associated with each reflector. 
+
+Proposition 1. Let si and sℓ denote the waveforms transmitted by antennas i and ℓ, respectively. Let Ad = {τk = kT s}Kz −1
+
+> k=0
+
+denote the discrete set of admissible delays enforced during the waveform construction. Let Tk ∈ CK×K denote the linear zero-padded integer-delay operator associated with τk = kT s.For every constrained waveform pair i < ℓ, the Dual-Orthogonality construction guarantees 
+
+sH 
+
+> i
+
+Tksℓ = 0 , k = 0 , . . . , K z − 1, i < ℓ. (25) 
+
+Therefore, exact cross-stream orthogonality is guaranteed at the integer-delay, zero-Doppler design points explicitly in-cluded in the waveform construction. For fractional delays and/or nonzero Doppler shifts, the corresponding delay– Doppler operator is not included in the null-space con-straints, and the cross-term sH 
+
+> i
+
+H(τ, ν )sℓ is generally nonzero. Its magnitude depends on the specific waveform realization, fractional-delay offset, Doppler shift, bandwidth, and signal-ing duration. These off-grid terms are therefore treated as residual cross-ambiguity rather than as exact orthogonality conditions. Proof. For ℓ > i , the transmitted waveform is sℓ = Cℓαℓ,where αℓ is selected in the null space of Qℓ. Hence, Qℓαℓ =
+
+0. Considering the block of Qℓ associated with waveform i,as defined in (3), gives 
+
+eSiCℓαℓ = eSisℓ = 0. (26) As introduced in (2), the k-th row of eSi evaluates the cross-correlation between si and the k-sample linearly delayed ver-sion of sℓ. Therefore, sH 
+
+> i
+
+Tksℓ = 0 for every k = 0 , . . . , K z −1,which proves (25). To highlight the impact of multipath and Doppler in (22), we can write the pulse-compressed echo at aperture position q as 
+
+sq (t) = P 
+
+> p
+
+γp,q ap,q (t). Substituting into (22) yields a double sum over q and p. For a true scatterer at r0, the geometric delays τq (r0) align across q, producing constructive coherent integration. Multipath components that are not geometrically consistent with r generate phase histories that do not align      
+
+> (a) Profile A: Sparse Multipath Scenario
+> (b) Profile B: Close spaced Reflec-tors Multipath Scenario Fig. 2. Simulated geometric multipath environments used for numerical evaluation: (a) Profile A, characterized by sparse and spatially separated reflectors; and (b) Profile B, characterized by closely spaced reflectors and a richer, more challenging multipath structure.
+
+across q, and therefore spread their energy over the image grid. A residual Doppler error ∆ν induces a phase drift 
+
+∆ϕq ≈ 2π∆νt q . Over an aperture of duration Tap , controlled defocusing is obtained when 2π|∆ν|Tap ≪ π, i.e., |∆ν|≪ 
+
+1/(2 Tap ). The coherent back-projection mechanism further improves robustness by reinforcing geometrically consistent phase histories, while components that are inconsistent with a candidate image location do not accumulate coherently across the synthetic aperture. As a result, residual cross-ambiguity effects arising from fractional delays or nonzero Doppler are inherently suppressed by the coherent integration process, even though exact waveform orthogonality is formally guaranteed only at the discrete design points. VI. N UMERICAL SIMULATIONS 
+
+This section evaluates the proposed Dual-Orthogonality ISAC framework through numerical simulations under dy-namic multipath conditions. Communication and sensing per-formances are analyzed separately and then jointly compared against OFDM-based and OTFS baselines. The simulation parameters are summarized in Table II. Propagation is modeled using two geometric, ray-based mul-tipath scenarios, referred to as Profile A and Profile B , illus-trated in Fig. 2. The geometric construction preserves phase coherence across paths, meaning that the complex path phases                                                 
+
+> TABLE II SIMULATION PARAMETERS
+> Parameter Symbol Value
+> Channel profiles A / B Sparse / rich geometric multipath Max delay spread τmax ≈1μs (150 m range) Tx velocity v[3–30] m/s Bandwidth B40, 200 MHz Carrier frequency fc28 GHz Pulse duration Tp40 μsModulation –QPSK ISAC MIMO array NT×MS8×8
+> Comm Rx MC×18×1
+> Active subcarriers Nsub 1600, 8000 Cyclic prefix Ncp 51, 255 (1.275 μs)
+> Dual-Orthogonality Parameters (for Rs= 20 m)
+> Total samples per block K1600, 8000 Samples per stream Ks200, 1000 Zero-correlation window Kz7, 28 Pilot overhead Ku30 10
+
+are determined by the actual propagation distances, ensur-ing physically consistent phase relationships across multipath components and aperture positions, which is essential for co-herent SAR imaging evaluation. Profile A represents a sparse multipath environment with well-separated reflectors, whereas Profile B introduces closely spaced reflectors and stronger scattering interactions, yielding a richer and more challenging propagation structure. In both scenarios, the positions of the reflectors and scattering surfaces are randomized across simulation runs while preserving the characteristic spacing constraints of each profile (in particular, the close reflector spacing in Profile B) and maintaining all elements within the considered field of view. This controlled randomization introduces statistical variability in path phases and gains while preserving the underlying geometric structure of the scene. To assess robustness under mobility, the transmitting ISAC platform moves with velocities ranging from 3 m/s to a peak of 
+
+30 m/s, inducing Doppler shifts consistent with typical urban and highway dynamic scenarios. The OFDM cyclic prefix NCP is dimensioned to exceed the maximum communication delay spread ( ≈ 1 μs). In principle, 
+
+τs (and thus Kz ) can be chosen smaller than the OFDM TCP if a narrower sensing region is targeted. For Dual-Orthogonality waveforms, the nulling window Kz is indeed deliberately dimensioned to exclusively cover the target radar sensing range (Rs = 20 m), ensuring physical realizability and large null-space dimensions across all transmit streams as detailed in Section III-A. Any residual long-tail communication multi-path arriving from beyond this sensing range is subsequently suppressed by the receiver’s linear equalizer. For fair com-parison, the OFDM-NeqSI and OTFS configurations match the Dual-Orthogonality waveform parameters ( B = 40 MHz, 
+
+Tp = 40 μs). The OFDM baselines employ Nsub = 1600 
+
+and 8000 active subcarriers, respectively, with a cyclic prefix of NCP = 51 and 255 samples ( 1.275 μs), exceeding the maximum simulated delay spread (150 m range, approximately 
+
+1 μs) to ensure interference-free reception under the consid-ered multipath conditions. The OTFS baseline maps symbols onto a delay-Doppler grid consisting of 16 Doppler bins and 100 delay bins (scaled to 16 × 500 for the 200 MHz sensing evaluations), matching the same block lengths. For the OFDM baseline, receiver processing employs standard per-antenna LS channel estimation at pilot subcarriers followed by frequency-domain interpolation. To ensure a fair comparison, these inde-pendent LS estimates are then coherently combined across the receive array via spatial phase-alignment (beamforming) using the estimated angles of arrival (AoA), thereby suppressing spatial noise and maximizing the effective estimation SNR prior to equalization. 
+
+A. Communication Performance 
+
+We first evaluate the accuracy of the proposed pilot-aided multipath parameter estimation, since reliable data decod-ing directly depends on the quality of the reconstructed effective subspace channel. The Normalized Mean Squared Error (NMSE) of the estimated effective channel, defined as E[∥ ˆGn,m − Gn,m ∥2 
+
+> F
+
+]/∥Gn,m ∥2 
+
+> F
+
+, is compared against the theoretical CRB derived in Sec. IV-D.         
+
+> Fig. 3. Normalized Mean Squared Error in estimation of Gn,m vs Cramér– Rao Bound for Profile A and Profile B.
+> Fig. 4. Bit error rate versus SNR, evaluated on a single receive antenna, with
+> Tp= 40 μs, and B= 200 MHz.
+
+Figure 3 shows that the estimation error approaches the CRB as the SNR increases, confirming the statistical efficiency of the proposed estimator in the high-SNR regime. The overall trends for Profile A and Profile B are closely aligned, since in both cases the estimator operates on an equivalent linear observation model of the composite channel. The main dif-ference lies in the overall channel energy, which results in a vertical shift of both the CRB and the corresponding NMSE curves, rather than in a change of convergence behavior. Having established the reliability of the channel estimation stage, we next isolate the equalization capability by consider-ing an ideal benchmark with perfect channel state information (CSI). In this case, the effective subspace channel is assumed to be known exactly at the receiver, as in Sec. IV-B, thereby eliminating estimation-induced errors and exposing only the impact of multipath-induced subspace coupling. Figure 4reports the resulting bit error rate (BER) performance. The received signal y is processed using the linear combiners 
+
+An designed according to the Zero-Forcing and Matched-Filtering criteria described in Sec. IV. The perfect-CSI curve represents an upper bound, corresponding to decoding with exact knowledge of the orthogonal transmit subspaces. Al-though unattainable in practice, this benchmark quantifies the degradation caused by delay–Doppler distortions in multipath channels. The proposed aggregate multipath-aware combiner significantly reduces inter-antenna interference and achieves BER performance close to the ideal reference across the entire SNR range, demonstrating the effectiveness of the structured linear equalization strategy. 
+
+B. Imaging Performance 
+
+We evaluate sensing and imaging performance using the framework described in Sec. V. Figure 5 compares radar images obtained via pulse compression and TDBP under mul-tipath conditions for four waveform families in a multi-target 11                  
+
+> (a) Dual-Orthogonality (b) OFDM-FDMA [29]
+> (c) OFDM-NeqSI [33] (d) OTFS [14] Fig. 5. Pulse-compressed TDBP radar images in Profile B (Fig. 2b, B= 200 MHz): (a) proposed Dual-Orthogonality waveform; (b) OFDM-FDMA, showing reduced range resolution from bandwidth partitioning; (c) OFDM-NeqSI, exhibiting elevated sidelobes and structured artifacts; and (d) OTFS, displaying a higher interference floor due to delay–Doppler cross-ambiguity.
+> Fig. 6. MIMO-SAR image using Dual-Orthogonality waveforms under dynamic multipath conditions ( B= 200 MHz, 1024 SAR acquisitions).
+> Fig. 7. Average ISLR as a function of the number of transmit antennas NT.
+
+scenario, which is reported in Fig. 2b. The proposed Dual-Orthogonality waveform (Fig. 5a) accurately localizes all true targets, while multipath-induced replicas appear as structured ghost responses that remain spatially separable from the direct echoes. In contrast, OFDM-FDMA (Fig. 5b) suffers from reduced range resolution due to bandwidth partitioning across transmit antennas. The resulting narrower per-transmitter bandwidth produces broader mainlobes and limits discrimina-tion of closely spaced targets. OFDM-NeqSI (Fig. 5c) restores full-band operation and achieves improved range resolution, confirming its role as a strong imaging baseline. However, its non-uniform spectral allocation increases sensitivity to frequency selectivity and residual synchronization errors under channel dynamics, leading to elevated sidelobes and structured artifacts in multi-target scenes. Similarly, despite operating over the full bandwidth, OTFS (Fig. 5d) suffers from severe ghosting. Multiplexing streams in the delay–Doppler domain induces high time-domain cross-correlation, manifesting as inter-stream leakage and false targets during TDBP processing. The proposed Dual-Orthogonality waveform preserves full-band coherent imaging across all transmit channels without spectral fragmentation or delay-domain cross-ambiguity. As a result, it achieves sharper focusing and improved separation between true scatterers and multipath-induced ghosts, partic-ularly in the presence of closely spaced targets. Figure 6 further illustrates the focused MIMO-SAR re-flectivity map obtained using Dual-Orthogonality waveforms. Coherent integration over 1024 aperture positions signifi-cantly enhances azimuth resolution and energy concentration. Multipath-induced ghost responses, such as second-bounce reflections, are suppressed by approximately 15 dB relative to the corresponding true scatterers. In realistic scenarios, higher-order multipath components typically exhibit lower energy due to additional propagation losses, further reinforcing the robustness of the proposed approach. To quantitatively assess imaging quality and multipath arti-fact suppression, we adopt the Integrated Sidelobe Level Ratio 12 
+
+(ISLR), defined as ISLR = 10 log 10 
+
+ R  
+
+> S
+
+|I(r)|2dr
+
+R
+
+> M
+
+|I(r)|2dr
+
+
+
+, (27) where M denotes the mainlobe region centered at the true target and S the remaining sidelobe region, such that a lower ISLR indicates superior suppression of multipath-induced ghost targets and clutter. Figure 7 reports the average ISLR as a function of the number of transmit antennas NT . The proposed Dual-Orthogonality design consistently achieves the lowest ISLR and exhibits a monotonic improvement as NT
+
+increases. This behavior confirms that the additional spatial de-grees of freedom are coherently exploited thanks to full-band orthogonality preservation. In contrast, the OFDM baselines exhibit performance saturation or degradation due to band-width fragmentation (FDMA) or residual non-orthogonality under Doppler (NeqSI). While OTFS outperforms both OFDM schemes via full-band transmission and improved delay– Doppler resolution, it hits an ISLR saturation floor due to intrinsic 2D grid sidelobes accumulating as inter-stream leakage. By mathematically forcing a zero-correlation zone, the proposed waveform circumvents this limit, achieving the lowest ISLR across all evaluated antenna configurations. 
+
+C. Joint ISAC validation 
+
+While ISLR characterizes sensing performance, communi-cation efficiency must also be considered to evaluate overall ISAC capability. We therefore adopt the effective goodput metric 
+
+G = (1 − Be)Ke
+
+Tp
+
+[Mbit/s ], (28) where Be denotes the BER and Ke is the number of informa-tion bits per waveform. This metric jointly captures reliability and spectral efficiency. Figure 8 maps ISLR versus effective goodput as the number of transmit antennas varies, with the receive array fixed and SNR = 8 dB and 10 dB. Each point cor-responds to a specific value of NT with NT = 2 , . . . , 14 , and the associated goodput and ISLR are computed under identical channel conditions. Three operating regions are defined with respect to theoretical performance limits: high-goodput values identify the communication-oriented region, low-ISLR values identify the sensing-oriented region, and the balanced ISAC re-gion lies below the ISLR threshold and to the right of the good-put threshold. The proposed Dual-Orthogonality waveform consistently achieves lower ISLR than both OFDM-NeqSI and OTFS across all antenna configurations, indicating superior multipath suppression and improved imaging contrast. This sensing advantage is obtained with only a limited reduction in goodput, resulting in operating points that remain close to those of OFDM-NeqSI in terms of communication efficiency. OFDM-FDMA is omitted from the joint comparison because bandwidth partitioning across transmit antennas inherently reduces per-antenna resolution, leading to a fundamentally different sensing–communication operating regime that is not directly comparable with full-band schemes. Overall, the proposed scheme exhibits a more balanced ISAC behavior, reaching the joint design-oriented operating region as shown in the graphs, effectively balancing radar           
+
+> (a) Profile A
+> (b) Profile B Fig. 8. Joint sensing–communication performance, where the proposed waveform’s communication goodput is evaluated on a single receive antenna, expressed in terms of ISLR and effective goodput for NT= 2 , . . . , 14 , with a fixed receive array and SNR values of 8 dB and 10 dB: (a) sparse multipath Profile A and (b) rich multipath Profile B. Each point corresponds to a different number of transmit antennas, comparing the proposed Dual-Orthogonality waveform with OFDM-NeqSI and OTFS under identical channel conditions.
+
+imaging and communication efficiency. As the number of transmit antennas increases, the overall goodput decreases. For the Dual-Orthogonality waveform, this reduction is mainly due to the additional overhead introduced by the orthogonality constraints. In the case of NeqSI, the degradation is driven by enhanced sensitivity to Doppler and multipath effects, which become more pronounced with increasingly complex sub-carrier allocation patterns required at higher antenna counts. Similarly, OTFS goodput degrades rapidly as NT grows due to severe inter-stream interference. Untangling these coupled streams overwhelms the receiver’s linear equalizer, deteriorat-ing the ISAC operating point. The proposed design inherently avoids this equalization bottleneck, maintaining a superior joint trade-off. VII. E XPERIMENTAL VALIDATION 
+
+This section experimentally validates the proposed ISAC waveforms across two configurations: Setup A (controlled Line-of-Sight) and Setup B (reflective multipath). The ex-perimental campaign focuses on the practical validation of waveform properties, radar ranging, and multipath-aware com-munication processing, while coherent MIMO-SAR imaging is assessed numerically in Section VI. Specifically, the mea-surements verify the designed zero cross-correlation region, 13     
+
+> (a) Hardware setup (b) Tx1–Tx3 correlation (c) QPSK constellation (d) Sensing result Fig. 9. Experimental validation at 60 GHz: (a) hardware setup comprising the RFSoC platform, three EVK06003 transceivers, synchronization hardware, anechoic panels, and corner reflectors; (b) Tx1–Tx3 cross-correlation showing the designed zero-correlation region; (c) recovered QPSK constellations for the two simultaneously transmitted streams; and (d) radar ranging result showing the reference and 2.35 m targets.
+
+accurate radar ranging, and the effectiveness of multipath subspace equalization under interference. 
+
+A. Experimental Setup 
+
+The experimental setups are illustrated in Fig. 9(a) and Fig. 10(a). Measurements were conducted in the 60 GHz Industrial, Scientific, and Medical (ISM) band using up/down-conversion modules with integrated antennas, specifically the EVK06003 evaluation kits [36]. All modules were operated as transceivers (TRx) in full-duplex mode and driven by synchronized clocks in order to eliminate carrier frequency offsets. Clock synchronization was provided by an LBE-1421 GPS-disciplined oscillator. While numerical results are obtained at 28 GHz to align with standardized cellular channel models, the experimental validation is conducted at 60 GHz, within the ISM band, due to regulatory availability and hard-ware constraints. Since the proposed waveform design and receiver processing are formulated at baseband and depend on normalized delay–Doppler characteristics rather than on the carrier frequency itself, the experimental results are fully representative of the targeted operating regime and directly support the conclusions drawn from simulation. Baseband waveform generation and acquisition were per-formed using an RFSoC ZCU111 platform [37], operated with the Multi-Tile Synchronization (MTS) reference design. The MTS framework enables precise time alignment between Analog-to-Digital Converters (ADCs) and Digital-to-Analog Converters (DACs), ensuring synchronization among trans-mitted waveforms. However, it constrains the system to real-valued waveforms and a maximum length of 16384 samples. The sampling frequency was set to 3932 .16 MHz to minimize the impact of up/down-sampling and ensure optimal system performance. The hardware configuration was adapted for each validation phase. In Setup A, three EVK06003 modules were employed: two co-located TRxs were used for sensing operations, while a third TRx was positioned facing them to evaluate baseline communication performance, with anechoic panels placed around the environment to suppress reflections. In Setup B, two transceivers (TRx1 and TRx2) were utilized to simulta-neously transmit their respective data streams; the anechoic panels were removed to expose the reflective environment and intentionally induce severe multipath propagation. 
+
+B. Baseline Configuration and Results 
+
+In Setup A in Fig. 9(a), the propagation environment allows isolating the intrinsic properties of the proposed waveform, such as inter-stream orthogonality, zero-autocorrelation re-gions, and stream separability, without confounding effects due to uncontrolled multipath (which are addressed in Setup B). For the sensing experiments in this configuration, a corner reflector was positioned at a distance of 2.35 m from the sensing TRxs to validate range estimation. Since acquisition was not synchronized with transmission start, a second corner reflector was placed close to the sensing TRxs to provide a zero-range reference at approximately 15 cm. For these communication experiments, a bandwidth of 245 .76 MHz was used, while sensing experiments employed a bandwidth of 
+
+491 .52 MHz. These values were selected as integer divisors of the sampling frequency. The resulting baseband waveforms consisted of 738 and 1476 samples, respectively. In both cases, the waveform duration was set to 3 μs, corresponding to 11808 
+
+samples at the DAC/ADC rate. The corresponding baseline results are summarized in Fig. 9(b)–(d), covering both communication and sensing per-formance. From a communication perspective, Fig. 9(b) shows the measured cross-correlation between the transmitted wave-forms of TRx1 and TRx3. The received signal at Rx1 consists of the superposition of the transmitted signals from all other TRxs filtered by their respective channels, as described in (5). By correlating the received signal with the known transmitted waveforms, a clear zero-autocorrelation region is observed. In this experiment, the zero-correlation interval was set to 
+
+±15 m. Although hardware impairments and noise limit the depth of the correlation null, an average suppression of approx-imately 15 dB is clearly visible, confirming the effectiveness of the proposed waveform design under practical conditions. Communication performance was further evaluated at Rx3, which receives the superposition of the signals transmitted by TRx1 and TRx2, consistent with the signal model in (6) for NT = 2 . The recovered Quadrature Phase Shift Keying (QPSK) constellations are shown in Fig. 9(c). The detected symbols are correctly clustered around the ideal constellation points, demonstrating effective stream separation. A slightly increased variance is observed for the second stream, which is attributed to the Dual-Orthogonality process and the as-sociated noise enhancement during orthogonalization. Never-theless, this effect does not compromise detection reliability. 14     
+
+> (a) Reflective experimental setup (b) TRx1: Raw vs. equalized (c) Decoded stream superposition Fig. 10. Experimental validation in the reflective multipath environment (Setup B) using a single receive antenna ( MC= 1 ): (a) laboratory configuration without anechoic absorbers; (b) raw and equalized QPSK symbols for TRx1, showing the mitigation of multipath-induced ISI and inter-stream interference; and (c) superimposed decoded constellations, confirming the simultaneous recovery of both transmitted streams from the same single-antenna observation without receive-side spatial separation.
+
+The measured Error Vector Magnitude (EVM) is −12 .89 dB overall, with values of −15 .82 dB and −12 .77 dB for TRx1 and TRx2, respectively, confirming the high precision of the communication system. Sensing performance is illustrated in Fig. 9(d). TRx1 and TRx2 were used to implement a monostatic radar configu-ration. The additional close-range corner reflector provides a reference peak at 15 cm, compensating for the lack of timing synchronization between DAC generation and acquisition. The correlation outputs were interpolated by a factor of 16 to obtain smooth profiles and enable peak estimation with sub-resolution accuracy. For the employed sensing bandwidth of 
+
+491 .52 MHz, the theoretical range resolution is 30 .5 cm. The figure reports the average of four cross-correlation mea-surements obtained using both transmitted waveforms and receivers, clearly showing accurate detection of the target at 
+
+2.35 m with centimeter-level precision. 
+
+C. Validation in Reflective Multipath Environment 
+
+To complement the measurements of Setup A and directly evaluate the multipath-aware communication receiver, a sec-ond experimental campaign was conducted in a highly reflec-tive indoor laboratory environment. The anechoic RF panels were removed, exposing the transmitted waveforms to strong unsuppressed reflections from metal shelving, monitors, glass surfaces, and hard desks, as shown in Fig. 10(a). To quantify the severity of this reflective environment, we evaluated the Rician K-factor (defined as the ratio of the dominant path power to the scattered multipath power) from the extracted Channel Impulse Response (CIR). The controlled baseline (Setup A) exhibits a dominant Line-of-Sight (LOS) channel with a K-factor of 7.93 dB. Conversely, Setup B introduces severe delay dispersion, driving the K-factor down to 2.79 dB. Most notably, a prominent reflection is visible at a relative delay of +5 samples with an amplitude exceeding 50% of the main LOS peak, confirming a highly dispersive propagation channel. In this setup, TRx1 and TRx2 simultaneously transmit their respective streams ( s1 and s2). The receiver under test (Rx1, co-located at TRx1) captures the unshielded superpo-sition of the incoming remote stream ( s2) and the multipath reflections of its own transmitted waveform ( s1). Due to the distributed architecture of the transceiver modules, the receiver Rx1 operates with a single-antenna observation ( MC = 1 ). Mathematically, for MC = 1, the receive-array term 
+
+[arx (ϕp)] m reduces to a scalar and can be absorbed into the corresponding effective path gain. As a consequence, the spatial MUSIC and beamforming stages of the general multi-antenna receiver are not available, and channel estimation is performed directly from the temporal observation. The esti-mated temporal channel parameters are then used to construct the effective subspace channels required by the multipath-aware equalizer. Inter-stream interference is mitigated through projection onto the orthogonal complement of the estimated interference subspace, Π⊥ 
+
+> Hint
+> n,m
+
+. In this configuration, stream separation relies on the temporal and code-domain structure of the Dual-Orthogonality waveforms rather than on receive-side spatial filtering. The decoding results are reported in Fig. 10(b)–(c). In the reflective environment, the raw sym-bols are strongly dispersed by ISI superimposed on the IAI generated by the simultaneously transmitted streams. The corresponding raw EVMs are −8.31 dB and −7.85 dB for TRx1 and TRx2, respectively. After applying the proposed multipath-aware equalizer, the EVM improves to −12 .90 dB for TRx1 and −9.43 dB for TRx2. As shown in Fig. 10(b), the equalized symbols concentrate substantially closer to the ideal QPSK constel-lation points. Moreover, Fig. 10(c) shows that both trans-mitted streams are simultaneously recovered from the same multipath-contaminated single-antenna observation. VIII. C ONCLUSION 
+
+Dual-Orthogonality waveforms provide an effective solution for ISAC in dynamic multipath environments by enforcing orthogonality over a physically admissible delay window while preserving full-band operation per transmit channel. This avoids the bandwidth fragmentation of FDMA–OFDM and provides radar and imaging performance competitive with OFDM-NeqSI. Comparison with MIMO-OTFS further confirms favorable full-band sensing performance, with im-proved sidelobe behavior and a competitive joint sensing– communication operating point. From a communication per-spective, multipath-aware linear equalization effectively mit-igates orthogonality loss, while the pilot-aided estimator ap-15 
+
+proaches the Cramér–Rao Bound under favorable propagation conditions and remains robust in richer multipath scenarios. From a sensing perspective, coherent SAR processing pro-vides accurate target localization and effective suppression of multipath-induced artifacts. While coherent MIMO-SAR imaging is assessed numerically, the 60 GHz experimental campaign validates the waveform properties, radar ranging, and communication receiver. Measurements in a reflective environment further demonstrate multipath-aware recovery of simultaneously transmitted streams from a single-antenna observation without receive-side spatial separation, with clear EVM improvement after equalization. Since the framework is formulated in terms of a generic unitary basis, OFDM-like signaling can be viewed as a particular instantiation. Hybrid designs combining OFDM communication efficiency with structured delay–Doppler subspace orthogonality represent a promising direction for future investigation. APPENDIX APILOT CONSISTENCY UNDER DUAL -O RTHOGONALITY 
+
+This appendix justifies the pilot insertion strategy adopted for multipath parameter estimation in Sec. IV. Let Cn ∈ CK×Ks denote the code matrix associated with the n-th transmit stream, and define Cu ≜ Cn(1: Ku, :) ∈
+
+CKu×Ks , K u < K s, as the submatrix collecting its first Ku
+
+rows. Assume that rank( Cu) = Ku, and let C+u denote its Moore–Penrose pseudoinverse. Let Nn ∈ CKs×(Ks−Ku)
+
+span the null space of Cu, i.e., CuNn = 0. The symbol vector associated with the n-th transmit stream is constructed as αn = C+u u + Nnxn, where u ∈ CKu denotes the known pilot sequence and xn ∈ CKs−Ku collects the free information symbols. The corresponding transmitted wave-form sn = Cnαn satisfies [sn]1: Ku = Cuαn = u, since 
+
+CuC+u = IKu and CuNn = 0.While pilots can theoretically be embedded in any stream n
+
+provided the intersection Null( Cu) ∩ Null( Qn) is non-empty, our implementation assigns the pilot exclusively to the first stream ( n = 1 , where Q1 = 0) to minimize overhead and avoid subspace conflicts. Consequently, the available payload dimension for the first stream reduces to Ks −Ku, whereas all subsequent streams ( n > 1) carry no pilots and retain their full data dimension dn = Ks − (n − 1)( Kz − 1) . In our numerical evaluations, a pilot of length Ku = 30 is used. For B =40 MHz ( Ks = 200 ), this introduces a 15% overhead on the first stream and exactly 0% on all remaining streams. APPENDIX BFULL -R ANK CONDITION FOR DOMINANT -P ATH 
+
+INTERFERENCE NULLING 
+
+This appendix derives the rank condition underlying the dominant-path interference-nulling construction in Sec. IV, formalizing when linear subspace projection can suppress inter-stream interference from a dominant multipath compo-nent. Consider the path-dependent delay–Doppler operator 
+
+Hˆp associated with the dominant multipath component indexed by ˆp, and define the stacked interference matrix corresponding to the n-th transmit stream as 
+
+Hint ˆp,n = [HˆpC1, . . . , HˆpCn−1, HˆpCn+1 , . . . , HˆpCNT ] ∈
+
+CK×(NT −1) Ks , where Cℓ ∈ CK×Ks denotes the orthogonal code matrix assigned to the ℓ-th transmit stream, and the block corresponding to ℓ = n is omitted. The delay–Doppler operator Hˆp admits the decomposition 
+
+Hˆp = D(νˆp) FHB(τˆp) F ≜ U, where F is the unitary DFT matrix and B(·) and D(·) are diagonal phase-rotation matrices modeling delay and Doppler, respectively. Since U is the product of unitary matrices, it is itself unitary and therefore rank preserving. Consequently, the rank of the interference matrix satisfies rank 
+
+
+
+Hint ˆp,n 
+
+
+
+= rank([ Cℓ ]ℓ̸=n). From the Dual-Orthogonality construction in Sec. III, the matrices {Cℓ}
+
+have orthonormal columns and mutually orthogonal column spaces. It follows that rank([ Cℓ ]ℓ̸=n) = P 
+
+> ℓ̸=n
+
+rank( Cℓ) = (NT − 1) Ks. The interference matrix Hint   
+
+> n, ˆp
+
+has full column rank and admits a non-trivial left null space provided that 
+
+(NT − 1) Ks < K . This condition is satisfied under the design choice Ks ≈ K/N T adopted throughout the paper. While the above inequality provides a sufficient (but not necessary) condition, it guarantees the existence of a non-trivial null space. APPENDIX CVALIDITY OF THE CIRCULANT CHANNEL APPROXIMATION 
+
+This appendix derives the mathematical bound on the error introduced by approximating the true physical linear (Toeplitz) multipath delay with the circulant operator used in (6). Let S ∈ CK×NT denote the transmit block for the current signaling interval, and Sprev denote the block from the previous interval, both containing independent zero-mean symbols with variance σ2 
+
+> s
+
+. For a generic path p with delay τp, let Lp =
+
+⌈τp/T s⌉ denote the discrete sample delay. A true physical delay applies a linear shift. Let TLp ∈
+
+CK×K denote the linear zero-padded integer-delay operator (as defined in Proposition 1), which shifts the block down by 
+
+Lp samples. Let Twrap ,L p denote the complementary upper-shift matrix that extracts the last Lp samples. The exact physical received signal for the current block, including Inter-Block Interference (IBI) from the previous block, is 
+
+Yexact = 
+
+> P−1
+
+X
+
+> p=0
+
+γpD(νp)
+
+h
+
+TLp S+Twrap ,L p Sprev 
+
+i
+
+Ap +W, (29) where Ap = atx (θp)aT
+
+> rx
+
+(ϕp).Conversely, the circulant approximation FHB(τp)F mathe-matically applies a circular shift, which wraps the tail of the current block to the front. The circulant operator decomposes perfectly as TLp + Twrap ,L p . The approximated model in (6) is thus equivalent to 
+
+Ycirc = 
+
+> P−1
+
+X
+
+> p=0
+
+γpD(νp)
+
+h
+
+TLp S + Twrap ,L p S
+
+i
+
+Ap + W. (30) Defining the approximation error matrix as E = Ycirc −
+
+Yexact , the main linear delay terms and noise cancel exactly, yielding E = PP −1 
+
+> p=0
+
+Ep, where the error induced by path p is explicitly defined as: 
+
+Ep = γpD(νp)Twrap ,L p (S − Sprev )Ap. (31) 16 
+
+This confirms the error is confined solely to the Lp boundary samples, representing the mismatch between the assumed circular wrap-around and the true IBI. To bound the total expected error energy, we apply the stan-dard Uncorrelated Scattering assumption, where independent paths possess uncorrelated phases ( E[γpγ∗ 
+
+> p′
+
+] = 0 for p̸ = p′). Consequently, cross-path terms vanish in expectation, and the total error energy is the sum of the individual path energies. For a given path p, since D(νp) is unitary, ∥Ap∥2 
+
+> F
+
+= NT MC ,and Twrap ,L p extracts exactly Lp rows of the independent data difference (variance 2σ2 
+
+> s
+
+), we have 
+
+E[∥Ep∥2 
+
+> F
+
+] = |γp|2NT MC (2 Lpσ2 
+
+> s
+
+). (32) The expected signal energy received from path p without error is E[∥Yexact ,p ∥2 
+
+> F
+
+] = |γp|2NT MC Kσ 2 
+
+> s
+
+.The relative error energy is given by the ratio: 
+
+E[∥Ep∥2 
+
+> F
+
+]
+
+E[∥Yexact ,p ∥2 
+
+> F
+
+] = 2Lp
+
+K ≤ 2( τmax + Ts)
+
+Tp
+
+, (33) where τmax is the maximum channel delay spread. Note that this exact decomposition assumes integer sample delays; for fractional delays, the operator FHB(τp)F does not reduce to a perfect integer circular shift, which constitutes an inherent limitation of the compact circulant model. Nevertheless, for the system parameters considered in this work ( Tp = 40 μs, 
+
+τmax ≈ 1 μs), the maximum relative error energy introduced by the circulant approximation is bounded by ≈ 5% . There-fore, because Tp ≫ τmax , the circulant model accurately captures the physical channel macroscopic behavior while enabling compact frequency-domain equalizer design. REFERENCES [1] J. A. del Peral-Rosado et al. , “Survey of cellular mobile radio local-ization methods: From 1G to 5G,” IEEE Communications Surveys & Tutorials , vol. 20, no. 2, pp. 1124–1148, 2018. [2] L. Italiano et al. , “A tutorial on 5G positioning,” IEEE Communications Surveys & Tutorials , vol. 27, pp. 1488 – 1535, Aug. 2024. [3] Z. Wei et al. , “Integrated sensing and communication signals toward 5G-a and 6G: A survey,” IEEE Internet of Things Journal , vol. 10, no. 13, pp. 11 068–11 089, 2023. [4] W. Saad, M. Bennis, and M. Chen, “A vision of 6G wireless systems: Applications, trends, technologies, and open research problems,” IEEE Network , vol. 34, no. 3, pp. 134–142, 2020. [5] M. Manzoni et al. , “Cosmic waveforms for integrated communication and imaging,” in ICASSP 2025 - 2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) , 2025, pp. 1–5. [6] NR; Physical channels and modulation , 3GPP Std. TS 38.211, Rev. V18.5.0, Jan. 2025, release 18. [Online]. Available: https://cdn. standards.iteh.ai/samples/73940/db416a117e5e4729bd314248c226a50b/ ETSI-TS-138-211-V18-5-0-2025-01-.pdf [7] A. Liu et al. , “A survey on fundamental limits of integrated sensing and communication,” IEEE Communications Surveys & Tutorials , vol. 24, no. 2, pp. 994–1034, 2022. [8] P. Yuan et al. , “Integrated sensing and communications system with multiple cyclic prefixes,” IEEE Communications Letters , vol. 27, no. 8, pp. 2043–2047, Aug. 2023. [9] W. Zhou et al. , “Integrated sensing and communication waveform design: A survey,” IEEE Open Journal of the Communications Society ,vol. 3, pp. 1930–1946, 2022. [10] M. Tanahashi and H. Ochiai, “On the distribution of instantaneous power in single-carrier signals,” IEEE Transactions on Wireless Communica-tions , vol. 9, no. 3, pp. 1207–1216, Mar. 2010. [11] Y. Zeng, Y. Ma, and S. Sun, “Joint radar-communication with cyclic prefixed single carrier waveforms,” IEEE Transactions on Vehicular Technology , vol. 69, no. 4, pp. 4069–4079, Apr. 2020. [12] F. Zhang, T. Mao, and Z. Wang, “Doppler-resilient design of cazac sequences for mmwave/thz sensing applications,” IEEE Transactions on Vehicular Technology , vol. 73, no. 2, pp. 2878–2883, Feb. 2024. [13] E. Shtaiwi et al. , “Orthogonal time frequency space for integrated sens-ing and communication: A survey,” arXiv preprint arXiv:2402.09637 ,2024. [Online]. Available: https://arxiv.org/abs/2402.09637 [14] L. Gaudio et al. , “On the effectiveness of OTFS for joint radar parameter estimation and communication,” IEEE Transactions on Wireless Com-munications , vol. 19, no. 9, pp. 5951–5965, Sep. 2020. [15] P. Raviteja et al. , “Orthogonal time frequency space (OTFS) modulation based radar system,” in 2019 IEEE Radar Conference (RadarConf) .IEEE, Apr. 2019. [16] M. F. Keskin et al. , “Integrated sensing and communications with MIMO-OTFS: ISI/ICI exploitation and delay-doppler multiplexing,” 
+
+IEEE Transactions on Wireless Communications , vol. 23, no. 8, pp. 10 229–10 245, Aug. 2024. [17] A. Bemani, N. Ksairi, and M. Kountouris, “Integrated sensing and communications with affine frequency division multiplexing,” 
+
+arXiv preprint arXiv:2402.16468 , Feb. 2024. [Online]. Available: https://arxiv.org/abs/2402.16468 [18] G. Liu et al. , “Pre-chirp-domain index modulation for affine frequency division multiplexing,” arXiv preprint arXiv:2402.15185 , Feb. 2024. [Online]. Available: https://arxiv.org/abs/2402.15185 [19] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE Journal on Selected Areas in Communications , vol. 40, no. 6, pp. 1728–1767, 2022. [20] A. M. Elbir et al. , “Index modulation for integrated sensing and com-munications: A signal processing perspective,” IEEE Signal Processing Magazine , Sep. 2024. [21] Z. Xu, A. Petropulu, and S. Sun, “A joint design of MIMO-OFDM dual-function radar communication system using generalized spatial modu-lation,” in 2020 IEEE Radar Conference (RadarConf20) , Virtual/USA, 2020, conference paper. [22] S. D. Tusha et al. , “Multidimensional index modulation for 5G and beyond wireless networks,” Proceedings of the IEEE , vol. 109, no. 2, pp. 170–198, Feb. 2021. [23] A. Hassanien et al. , “Signaling strategies for dual-function radar com-munications: An overview,” IEEE Aerospace and Electronic Systems Magazine , pp. 36–45, Oct 2016. [24] F. Liu et al. , “Fundamental limits of pulse based uwb isac systems: A parameter estimation perspective,” IEEE Internet of Things Journal ,vol. 12, pp. 49 387–49 401, 2025. [25] P. Gao, L. Lian, and J. Yu, “Cooperative isac with direct localization and rate-splitting multiple access communication: A pareto optimiza-tion framework,” IEEE Journal on Selected Areas in Communications ,vol. 41, no. 5, pp. 1496–1516, May 2023. [26] Z. He et al. , “Full-duplex communication for isac: Joint beamforming and power optimization,” IEEE Journal on Selected Areas in Commu-nications , vol. 41, no. 9, pp. 2920–2935, September 2023. [27] R. Liu et al. , “Dual-functional radar-communication waveform design: A symbol-level precoding approach,” IEEE Journal of Selected Topics in Signal Processing , vol. 15, no. 6, pp. 1316–1331, November 2021. [28] M. F. Keskin, H. Wymeersch, and V. Koivunen, “MIMO-OFDM joint radar-communications: Is ICI friend or foe?” IEEE Journal of Selected Topics in Signal Processing , vol. 15, no. 6, pp. 1393–1408, Nov. 2021. [29] D. Cohen, D. Cohen, and Y. C. Eldar, “High resolution FDMA MIMO radar,” IEEE Transactions on Aerospace and Electronic Systems , vol. 56, no. 4, pp. 2806–2822, Aug. 2020. [30] C. Sturm et al. , “Spectrally interleaved multi-carrier signals for radar network applications and mimo radar,” IET Radar, Sonar & Navigation ,vol. 7, no. 3, pp. 261–269, 2013. [31] X. Lin and Z. Wang, “Interleaved OFDM signals for MIMO radar,” 
+
+IEEE Sensors Journal , vol. 15, no. 11, pp. 6294–6307, 2015. [32] A. Hakobyan and B. Yang, “A novel OFDM-MIMO radar with non-equidistant subcarrier interleaving and compressed sensing,” in Proc. Int. Radar Symposium (IRS) , 2016. [33] A. H. ans M. Ulrich and B. Yang, “OFDM-MIMO radar with optimized nonequidistant subcarrier interleaving,” IEEE Transactions on Aerospace and Electronic Systems , vol. 56, no. 1, pp. 572–584, 2020. [34] K. Wu et al. , “Joint communications and sensing employing multi-or single-carrier OFDM communication signals: A tutorial on sensing methods, recent progress and a novel design,” Sensors , vol. 22, no. 4, p. 1613, 2022. [35] M. Manzoni et al. , “Multipath in automotive mimo sar imaging,” IEEE Transactions on Geoscience and Remote Sensing , vol. 66, 2023. [36] S. Semiconductors. Rf module evk06003. [On-line]. Available: https://www.sivers-semiconductors.com/sivers-wireless/ wireless-products/evaluation-kits/ [37] AMD. Zynq ultrascale+ rfsoc zcu111 evaluation kit. [Online]. Available: https://www.xilinx.com/products/boards-and-kits/zcu111.html

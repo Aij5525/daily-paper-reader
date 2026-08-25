@@ -1,0 +1,669 @@
+Title: Fluid-Antenna-Assisted Distributed Joint Decoding for Cell-Free Massive MIMO Unsourced Random Access
+
+URL Source: https://arxiv.org/pdf/2608.20885v1
+
+Published Time: Mon, 24 Aug 2026 00:35:35 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# Fluid-Antenna-Assisted Distributed Joint Decoding for Cell-Free Massive MIMO Unsourced Random Access 
+
+Liandong Hu, Jian Dang, Zaichen Zhang 
+
+Abstract —Unsourced random access (URA) supports massive sporadic connectivity but remains limited by multiuser inter-ference, distributed channel uncertainty, and local fading. This paper proposes a fluid-antenna-assisted distributed joint de-coder for cell-free massive MIMO URA. Single-radio-frequency-chain access points sequentially sound correlated ports; the central processor then performs correlation-aware expectation-maximization approximate message passing, selects one common payload port per access point, and combines MIMO iterative Gaussian approximation with full-packet channel re-estimation and successive interference cancellation. Fixed-port ablations confirm the complementary benefits of distributed reception, re-estimation, and iterative cancellation, while fluid-antenna simula-tions show improved average and lower-tail received power over fixed-port reception. The framework provides a feasible integra-tion of fluid antennas and cell-free URA and motivates end-to-end evaluation under pilot collisions and switching overhead. 
+
+Index Terms —approximate message passing, cell-free massive MIMO, fluid antenna system, iterative Gaussian approximation, successive interference cancellation, unsourced random access 
+
+I. INTRODUCTION 
+
+A. Background and Related Work 
+
+URA removes scheduling and device-identity overhead by letting all active terminals share a codebook and asking the receiver for an unordered message list [1]. Coded compressed sensing couples sparse recovery with channel decoding [2], while random-spreading URA uses a message-selected se-quence and iterative soft interference cancellation. Multiple antennas improve separation; distributing them as cell-free ac-cess points (APs) further supplies macrodiversity and reduces cell-edge effects [12], although fixed AP antennas remain vulnerable to local fading [3], [6], [7], [9], [10], [13], [14], [16]. Fluid antenna systems (FASs) connect one radio-frequency (RF) chain to a selectable port within a compact aperture, thereby exploiting favorable spatial samples without one chain                     
+
+> This work is supported by the Fundamental Research Funds for the Central Universities (2242022k60001) , Basic Research Program of Jiangsu (No. BK20252003) Liandong Hu is with the National Mobile Communications Research Laboratory, Frontiers Science Center for Mobile Information Communication and Security, Southeast University, Nanjing, 211189, China. (e-mail: lian-donghu@seu.edu.cn). Jian Dang is with the National Mobile Communications Research Labo-ratory, Frontiers Science Center for Mobile Information Communication and Security, Southeast University, Nanjing 211189, China and he is also with Purple Mountain Laboratories, Nanjing 211111, China.(email: dan-gjian@seu.edu.cn). Corresponding Author: Jian Dang.
+> Zaichen Zhang is with the National Mobile Communications Research Laboratory,Frontiers Science Center for Mobile Information Communication and Security, Southeast University, Nanjing, 210096, China and he is also with the Purple Mountain Laboratories, Nanjing 211111, China (e-mail: zczhang@seu.edu.cn).
+
+per port [18], [19]. Closely spaced ports are correlated, so independent-port models overstate diversity. Recent AP-side cell-free FAS and FAS-assisted URA studies [20], [21] motivate combining port reconfiguration with sparse coded detection; a correlation-aware receiver for random-spreading cell-free URA is still needed [4], [15], [17], [22]–[25], [27]– [33]. 
+
+B. Challenges and Contributions 
+
+The CPU must jointly infer sparse activity and correlated port channels, then choose one physically common port per single-RF-chain AP before payload reception. The selected ports remain fixed during decoding and successive interference cancellation (SIC), while activity errors, code correlations, near–far effects, and channel uncertainty interact. The main contributions of this paper are summarized as follows.  
+
+> •
+
+A single-RF-chain FAS-assisted cell-free URA model captures sequential sounding and spatial correlation across Q candidate ports.  
+
+> •
+
+Correlation-aware EM-AMP jointly detects activity and estimates port channels; posterior aggregate energy se-lects a common AP port for MIMO-IGA/NR-LDPC Turbo decoding.  
+
+> •
+
+Full-packet regularized least-squares (RLS) re-estimation and SIC cancel decoded pilots at all sounded ports and payloads at the fixed selected ports. The remainder of the paper is organized as follows: Sec-tion II defines the system model. The proposed fluid-antenna-assisted distributed joint decoder is introduced in Section III. Numerical results are presented in Section IV, and Section V concludes the paper. 
+
+Notation: Italic, bold lowercase, bold uppercase, and cal-ligraphic letters denote scalars, vectors, matrices, and sets. Hats and overbars denote estimates and selected-port quan-tities. (·)T, (·)H, (·)∗, ∥ · ∥ F, tr( ·), blkdiag( ·), vec( ·), and 
+
+⊗ denote transpose, Hermitian transpose, conjugation, Frobe-nius norm, trace, block diagonalization, vectorization, and Kronecker product. [X]i,j denotes the (i, j )th entry; | · | 
+
+denotes magnitude/cardinality. 0, I, C, and R denote zero, identity, complex, and real domains. E[·], Var( ·), Pr( ·), and 
+
+Re {·} denote expectation, variance, probability, and real part. 
+
+CN (x; μ, C) and δ(·) denote the proper complex Gaussian PDF and Dirac delta function. II. SYSTEM MODEL Consider M distributed APs serving Ka active single-antenna UEs in a disk of radius R. Each AP connects one arXiv:2608.20885v1 [cs.IT] 21 Aug 2026 RF chain to Q switchable ports on a linear aperture of length 
+
+W λ c, where λc is the carrier wavelength. The all-port channel vector from UE u to AP m is 
+
+hu,m = [ hu,m, 1, . . . , h u,m,Q ]T = pϕu,m gu,m (1) with ϕu,m = (du,m /d 0)−β constant across the compact aperture. Under two-dimensional isotropic scattering, 
+
+gu,m ∼ CN (0, RQ), [RQ]q,r = J0
+
+ 2πW |q − r|
+
+Q − 1
+
+
+
+, (2) where J0(·) is the zeroth-order Bessel function. UE–AP pairs are independent, port channels within an AP are correlated, and fading is block-flat. For Q = 1 , RQ = [1] .Each Binfo -bit message uses its first Bp bits to select a unit-norm column of the common Gaussian codebook 
+
+A ∈ Cnp×K , K = 2 Bp . The remaining bits are protected by CRC and NR-LDPC coding [5] and BPSK-modulated to 
+
+su ∈ { +1 , −1}nc . Active indices D are assumed distinct; collision resolution is outside the present scope. The frame has Q sequential port-sounding pilot subslots and 
+
+nc payload slots. In pilot subslot q, AP m observes 
+
+ym,q, 0 =
+
+> Ka
+
+X
+
+> u=1
+
+hu,m,q aiu + nm,q, 0, q = 1 , . . . , Q. (3) Stacking all AP-port observations gives the all-port row-sparse model 
+
+Y0 = AH + N0, (4) where the all-port channel matrix H ∈ CK×M Q has nonzero rows only for i ∈ D , and noise entries have variance σ2
+
+> n
+
+.Equivalently, 
+
+[H]i, (m−1) Q+q =
+
+(
+
+hu,m,q , i = iu for some u, 
+
+0, i / ∈ D . (5) After sounding, the CPU selects one port q⋆m per AP and holds it fixed for all payload slots. With ¯hu,m = hu,m,q ⋆m , AP 
+
+m receives 
+
+ym,j =
+
+> Ka
+
+X
+
+> u=1
+
+¯hu,m aiu su,j + nm,j , j = 1 , . . . , n c, (6) and the concatenated observation is 
+
+Yj = Xj H + Nj , (7) where Xj = [ai1 s1,j , . . . , aiKa sKa,j ] and H ∈ CKa×M
+
+contains selected-port channels. One access attempt occupies L = np(Q + nc) channel uses. Under unit-energy spreading and BPSK symbols, the energy-per-source-bit convention is Eb/N 0 = ( Q + nc)/(Binfo σ2
+
+> n
+
+).Without identifying the active UEs, the receiver generates an estimated list eL from [Y0, Y1, . . . , Ync ]. The URA per-formance metric is the per-user probability of error (PUPE), 
+
+Pe = Pmd + Pfa , where 
+
+Pmd = 1
+
+Ka
+
+X
+
+> uu∈L
+
+Pr( uu /∈ eL), P fa = | eL \ L| | eL| . (8) III. DISTRIBUTED JOINT DECODING SCHEME The proposed receiver has four stages. First, the CPU uses all M Q port-sounding observations for joint activity detection and correlated port-channel estimation. Second, it selects one common receive port at each AP and fixes that port for the data phase. Third, a MIMO-IGA Turbo decoder exchanges soft information with an NR-LDPC decoder over the resulting 
+
+M -dimensional effective channel [26]. Finally, successfully decoded packets undergo channel re-estimation and SIC, after which the residual pilot observations are processed again. 
+
+A. Correlation-Aware EM-AMP Front End 
+
+Let P = M Q and let hi ∈ CP be the transpose of row i of the all-port matrix H. The indicator αi equals one when codeword i is occupied and zero otherwise. Building on generalized AMP and its EM extensions [8], we use a vector denoiser because all entries of an occupied row share the same support event and the Q ports of each AP are spatially correlated [11]: 
+
+p(hi) = (1 − λi)δ(hi) + λiCN (hi; 0, Ci), (9) where λi = Pr( αi = 1) . Let RQ,ϵ = RQ + ϵI with ϵ > 0.The regularized active-row covariance is 
+
+Ci = blkdiag( ϕi, 1RQ,ϵ , . . . , ϕ i,M RQ,ϵ ). (10) The scales ϕi,m are learned by EM because codeword hy-potheses have no user identities. With p = ( m − 1) Q + q, the complex GAMP linear step is compactly written as 
+
+μpl,p = X
+
+> i
+
+|[A]l,i |2[ bVi]p,p ,
+
+ˆpl,p = X
+
+> i
+
+[A]l,i ˆhi,p − μpl,p ˆu−
+
+> l,p
+
+,
+
+ˆul,p = [Y0]l,p − ˆpl,p 
+
+μpl,p + σ2
+
+> n
+
+,μri,p = X
+
+> l
+
+|[A]l,i |2
+
+μpl,p + σ2
+
+> n
+
+!−1
+
+,
+
+ˆri,p = ˆhi,p + μri,p 
+
+X
+
+> l
+
+[A]∗ 
+
+> l,i
+
+ˆul,p . (11) These updates yield r(t) 
+
+> i
+
+= hi + v(t) 
+
+> i
+
+, where v(t) 
+
+> i
+
+∼CN (0, Σr, (t) 
+
+> i
+
+) and Σr, (t) 
+
+> i
+
+is diagonal. The correlation-aware vector denoiser evaluates 
+
+π(t) 
+
+> i
+
+=
+
+"
+
+1 + 1 − λ(t)
+
+> i
+
+λ(t)
+
+> i
+
+CN (r(t) 
+
+> i
+
+; 0, Σr, (t) 
+
+> i
+
+)
+
+CN (r(t) 
+
+> i
+
+; 0, C(t) 
+
+> i
+
++ Σr, (t) 
+
+> i
+
+)
+
+#−1
+
+. (12) Conditioned on activity, the posterior mean and covariance are 
+
+γ(t) 
+
+> i
+
+= C(t) 
+
+> i
+
+(C(t) 
+
+> i
+
++ Σr, (t) 
+
+> i
+
+)−1r(t) 
+
+> i
+
+, (13) 
+
+V(t) 
+
+> i
+
+= C(t) 
+
+> i
+
+− C(t) 
+
+> i
+
+(C(t) 
+
+> i
+
++ Σr, (t) 
+
+> i
+
+)−1C(t) 
+
+> i
+
+. (14) The unconditional AMP estimates are 
+
+bh(t+1)  
+
+> i
+
+= π(t) 
+
+> i
+
+γ(t) 
+
+> i
+
+, (15) 
+
+bV(t+1)  
+
+> i
+
+= π(t) 
+
+> i
+
+(V(t) 
+
+> i
+
++ γ(t) 
+
+> i
+
+γ(t)H  
+
+> i
+
+) − bh(t+1)  
+
+> i
+
+bh(t+1)H  
+
+> i
+
+. (16) Algorithm 1: Correlation-Aware EM-AMP for FAS-Assisted Cell-Free Access                                                    
+
+> Input: Y0,A, K, M, Q, n p, σ 2
+> n, λ th , T max , τ th , ϵ .
+> 1Initialize λi,ϕi,m ,bhi=0, and bVifrom pilot energy.
+> 2 for t= 1 , . . . , T max do 3Apply complex GAMP to form r(t)
+> iand Σr, (t)
+> i.
+> 4Evaluate π(t)
+> i,γ(t)
+> i, and V(t)
+> ifrom (12)–(14).
+> 5Update bh(t+1)
+> iand bV(t+1)
+> iusing (15) and (16).
+> 6EM: set λ(t+1)
+> i=π(t)
+> iand update ϕ(t+1)
+> i,m using (17).
+> 7Stop if τ(t+ 1) ≤τth .
+> 8 end for 9 Output: bK={i:λi≥λth },bH, and posterior statistics.
+
+The EM stage sets λ(t+1)  
+
+> i
+
+= π(t) 
+
+> i
+
+and updates each AP-dependent scale as 
+
+ϕ(t+1)  
+
+> i,m
+
+= 1
+
+Q tr 
+
+h
+
+R−1
+
+> Q,ϵ
+
+(V(t) 
+
+> i,m
+
++ γ(t)
+
+> i,m
+
+γ(t)H  
+
+> i,m
+
+)
+
+i
+
+, (17) where the subscript m selects the Q×Q AP block. Algorithm 1 summarizes the alternating updates. Iterations stop at Tmax or when τ = ∥ bH(t+1) −
+
+bH(t)∥2F/ max {∥ bH(t)∥2F, ϵ } falls below τth . A codeword is active when its final posterior probability exceeds λth .
+
+B. Fluid-Antenna Port Selection 
+
+For the final posterior blocks γi,m and Vi,m , AP m selects one common port and extracts each detected effective channel as 
+
+ηm,q =
+
+> K
+
+X
+
+> i=1
+
+πi(|γi,m,q |2 + [ Vi,m ]q,q ), (18) 
+
+q⋆m = arg max  
+
+> q
+
+ηm,q , ˆ¯hi,m = [ bhi](m−1) Q+q⋆m . (19) The selected-port rows form bH. Port indices remain fixed dur-ing payload decoding and SIC; only their channel coefficients are refined. 
+
+C. MIMO-IGA-Based Turbo Decoder 
+
+After port selection, the CPU iterates an elementary signal estimator (ESE) with the NR-LDPC decoder over support bK.Joint code matching and spatial MRC reduce (7) to 
+
+zk,j = μkxk,j + X
+
+> i̸=k
+
+ρk,i xi,j + enk,j , (20) 
+
+μk = hH 
+
+> k
+
+hk, ρ k,i = ( aH 
+
+> k
+
+ai)( hH 
+
+> k
+
+hi),
+
+where E|enk,j |2 = μkσ2
+
+> n
+
+. Approximating residual interference as complex Gaussian gives 
+
+mIk,j = X
+
+> i̸=k
+
+ρk,i E[xi,j ], v Ik,j = X
+
+> i̸=k
+
+|ρk,i |2 Var( xi,j ) + μkσ2
+
+> n
+
+.
+
+(21) Thus zk,j |xk,j ∼ CN (μkxk,j + mIk,j , v Ik,j ), and the resulting ESE extrinsic LLR is 
+
+LESE  
+
+> k,j
+
+= 4μk Re {zk,j − mIk,j }
+
+vIk,j 
+
+. (22) The decoder returns extrinsic information and the next ESE iteration uses 
+
+LExt  
+
+> k,j
+
+= LDEC  
+
+> k,j
+
+− LESE  
+
+> k,j
+
+, (23) 
+
+E[xk,j ] = tanh( LExt  
+
+> k,j
+
+/2) , Var( xk,j ) = 1 − E[xk,j ]2.
+
+D. Successive Interference Cancellation and Channel Re-Estimation 
+
+For verified set Ksucc = {k1, . . . , k S }, decoded bits are remapped to ˆsk,j ∈ {+1 , −1} and Xk = ak ⊗
+
+[1 , ˆsk, 1, . . . , ˆsk,n c ]. Stack vec( Xks ) as Φpass ∈ Cnp(1+ nc)×S
+
+and unfold the selected-port residuals as Ysel resid ∈
+
+Cnp(1+ nc)×M . The full-packet RLS estimate is 
+
+bHrefine = ( ΦHpass Φpass + ξI)−1ΦHpass Ysel resid , (24) where ξ > 0 regularizes noise and residual interference. Unlike a pilot-only estimate, (24) exploits the decoded payload while retaining one fixed physical port. Decoded pilots are canceled at all sounded ports, using the refined coefficient at the selected port and the pilot estimate elsewhere: 
+
+ehk,m,q =
+
+(ˆ¯hk,m, refine , q = q⋆m,
+
+ˆhk,m,q , q̸ = q⋆m. (25) The pilot and payload residuals are updated as 
+
+yresid  
+
+> m,q, 0
+
+← yresid  
+
+> m,q, 0
+
+− X
+
+> k∈K succ
+
+akehk,m,q , (26) 
+
+Y(j)resid ← Y(j)resid − X
+
+> k∈K succ
+
+ak ˆsk,j ˆhT
+
+> k, refine
+
+. (27) EM-AMP then processes the pilot residuals again at the fixed port indices. SIC stops when no new packet passes verification or the round limit is reached. IV. NUMERICAL RESULTS For clarity, the legend labels in Fig. 1 and Fig. 2 are defined here. In Fig. 1(a), “Cell-free, SIC + re-est.” is the complete distributed receiver with SIC and full-packet RLS channel re-estimation; “Cell-free, SIC only” performs SIC with the initial pilot-based channel estimates; “Cell-free, one-shot” performs a single decoding pass without SIC or channel re-estimation; and “Colocated, SIC + re-est.” retains the complete processing chain but colocates all M receive chains at the service center. In Fig. 1(b), each curve label specifies Eb/N 0, and the horizontal axis gives the SIC round. In Fig. 2, color identifies the normalized aperture length W , solid-circle curves report the mean oracle gain, and dashed-square curves report the fifth-percentile oracle gain relative to the fixed Q = 1 port. 
+
+a) Simulation Setup and Evaluation Scope: Table I lists the common parameters. APs and active UEs are uniform over the permitted disk, with guard-distance violations rejected. Pilot indices are sampled without replacement, spreading is unit-energy, and the centralized baseline colocates the same 
+
+M independently faded receive chains. 50 52 54 56 58 60 62 64 66 68 70                  
+
+> Eb/N0(dB)
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> PUPE
+> (a) Fixed-port receiver comparison
+> 50 52 54 56 0.6 0.8 1.0
+> Cell-free, SIC + re-est. Cell-free, SIC only Cell-free, one-shot Colocated, SIC + re-est.
+> 123456
+> SIC iteration
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> PUPE
+> (b) Fixed-port SIC convergence
+> Eb/N0= 62 dB
+> Eb/N0= 64 dB
+> Eb/N0= 66 dB
+> Eb/N0= 68 dB
+
+Fig. 1. Archived fixed-port ( Q = 1 ) results for Ka = 100 , M = 50 , and R = 500 m: (a) receiver comparison with the dashed 50 –56 dB region enlarged; (b) SIC convergence. Markers were digitized from the supplied plots, whose floor is 10 −4.1 2 4 8 16        
+
+> Number of candidate ports, Q
+> 0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6
+> Selected-port MRC power gain (dB)
+> W= 0.5 , mean
+> W= 1 , mean
+> W= 2 , mean
+> W= 0.5 , 5th pct.
+> W= 1 , 5th pct.
+> W= 2 , 5th pct.
+
+Fig. 2. Oracle common-port MRC-power gain over Q = 1 under perfect CSI. Solid and dashed curves show mean and fifth-percentile gain. TABLE I SIMULATION PARAMETERS   
+
+> Parameter Value
+> Message and pilot index
+
+Binfo = 72 , Lcrc = 16 ; Bp = 12 ,
+
+K = 4096   
+
+> Coding and payload 5G NR-LDPC,
+
+nc = 264 , BPSK Spreading, active UEs, APs np = 150 , Ka = 100 , M = 50  
+
+> Topology and path loss
+
+Rmin = 100 m, R = 500 m; d0 =1 m, dref = 20 m, β = 2   
+
+> Outer and SIC iteration limits 20; 6 FAS ports and aperture
+
+Q ∈ {1, 2, 4, 8, 16 }, W ∈{0.5, 1, 2}; nominal (Q, W ) =(8 , 2) 
+
+Fig. 1 digitizes the supplied fixed-port plots and is only an archival Q = 1 reference. Fig. 2 independently evaluates (1)– (2) using 500 topology/channel realizations and 50 ,000 nor-malized power samples per (Q, W ). To isolate port selection, perfect-CSI oracle scoring and normalized powers are 
+
+q⋆m = arg max 
+
+qKaX
+
+u=1 
+
+|hu,m,q |2, (28) 
+
+Γsel 
+
+u =
+
+P
+
+m |hu,m,q ⋆m |2
+
+P
+
+m ϕu,m 
+
+, Γfix 
+
+u =
+
+P
+
+m |hu,m, 1|2
+
+P
+
+m ϕu,m 
+
+. (29) The reported gains are 
+
+∆mean = 10 log 10 
+
+E[Γ sel ]
+
+E[Γ fix ] , (30) 
+
+∆0.05 = 10 log 10 
+
+F −1sel (0 .05) 
+
+F −1fix (0 .05) , (31) where F −1 is the pooled empirical quantile. This oracle benchmark invokes neither EM-AMP nor RLS and is not an end-to-end PUPE result. 
+
+b) Receiver and Port-Selection Results: Unless other-wise stated, both benchmarks use Ka = 100 active user-equipment terminals (UEs), M = 50 single-RF-chain APs (or colocated receive chains), service radius R = 500 m, UE inner radius Rmin = 100 m, and minimum UE–AP guard distance dref = 20 m. The path-loss normalization distance and exponent are d0 = 1 m and β = 2 , respectively. The fixed-port benchmark sets Q = 1. PUPE is the per-user probability of error in (8), and Eb/N 0 is the energy-per-source-bit to noise-spectral-density ratio in decibels. One SIC round comprises decoding, packet verification, cancellation, and residual re-detection; 10 −4 is the resolution floor of the supplied PUPE plot. For the FAS benchmark, Q is the number of candidate ports per AP and W is the aperture length nor-malized by the carrier wavelength λc, so the physical aperture is W λ c; (Q, W ) = (8 , 2) is the nominal configuration. Perfect channel state information (CSI) is assumed, and selected-port powers are aggregated by maximum-ratio combining (MRC). In (30) and (31), ∆mean is the dB ratio of the selected-port and fixed-port mean normalized powers, whereas ∆0.05 
+
+is the dB ratio of their pooled fifth-percentile normalized powers and characterizes lower-tail reliability. The reported 95% confidence interval for ∆mean is obtained by resampling complete topology/channel-realization blocks. At 62 dB, Fig. 1(a) gives PUPEs of 3.0 × 10 −2 for the complete receiver, 6.5 × 10 −2 without re-estimation, 7.0 ×
+
+10 −2 without SIC, and 2.8 × 10 −1 for colocated reception. At 64 dB, the respective values are 1.0 × 10 −2, 1.8 × 10 −2,
+
+3.0 × 10 −2, and 1.2 × 10 −1. Macrodiversity dominates, while re-estimation improves cancellation. Fig. 1(b) shows that most SIC gain occurs within four rounds: at 62 dB, PUPE falls from 7.5 × 10 −2 to 3.0 × 10 −2, whereas 68 dB reaches the 10 −4 plotting floor after two rounds. Six rounds provide a conservative cap. Fig. 2 shows that aperture is more valuable than dense sampling of a fixed aperture. For Q = 4 , 8, and 16, ∆mean is 
+
+0.810 , 0.857 , and 0.857 dB at W = 0 .5, compared with 0.992 ,
+
+1.390 , and 1.559 dB at W = 2 . At nominal (Q, W ) = (8 , 2) ,
+
+∆0.05 = 1.330 dB and the 95% interval for ∆mean is 
+
+[1 .374 , 1.408] dB. Saturation reflects port correlation; these oracle gains exclude sounding overhead and receiver errors. V. CONCLUSION The proposed FAS-assisted cell-free URA receiver com-bines EM-AMP, port selection, MIMO-IGA, RLS refinement, and SIC. Existing evidence confirms reception, refinement, cancellation, and selection gains, while full FAS PUPE eval-uation remains open due to collision, latency, overhead, and scoring challenges. REFERENCES [1] Y. Polyanskiy, “A perspective on massive random-access,” in Proc. IEEE Int. Symp. Inf. Theory (ISIT) , Aachen, Germany, Jun. 2017, pp. 2523– 2527. [2] V. K. Amalladinne et al. , “Unsourced random access with coded compressed sensing: Integrating AMP and belief propagation,” IEEE Trans. Inf. Theory , vol. 68, no. 4, pp. 2384–2409, Apr. 2022. [3] Z. Zhang, B. An, K.-K. Wong, J. Dang, C. Masouros, Z. Zhang, and C.-B. Chae, “Coded pattern unsourced random access with analyses on sparse pattern demapper,” IEEE Trans. Wireless Commun. , vol. 25, pp. 5306–5319, 2026. [4] Z. Zhang et al. , “Joint pattern, data, and channel estimation for unsourced random access in GMAC and MIMO systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 21433–21448, 2026, doi: 10.1109/TWC.2026.3705749. [5] 3GPP, “NR; Multiplexing and channel coding,” 3GPP TS 38.212, V18.3.0, Sep. 2024. [6] Z. Zhang, J. Dang, and Z. Zhang, “Unsourced random access under quasi-static fading channel: A less-is-more strategy,” IEEE Trans. Wire-less Commun. , vol. 25, pp. 3287–3300, 2026. [7] Z. Zhang, J. Dang, Z. Zhang, L. Wu, B. Zhu, and Y. Wu, “Unsourced random access via random scattering with turbo probabilistic data association detector and treating collision as interference,” IEEE Trans. Wireless Commun. , vol. 23, no. 12, pp. 17899–17914, 2024. [8] J. P. Vila and P. Schniter, “Expectation-maximization Gaussian-mixture approximate message passing,” IEEE Trans. Signal Process. , vol. 61, no. 19, pp. 4658–4672, Oct. 2013. [9] Z. Zhang, J. Dang, Y. Qi, Z. Zhang, L. Wu, and H. Wang, “Efficient ODMA for unsourced random access in MIMO and hybrid massive MIMO,” IEEE Internet Things J. , vol. 11, no. 23, pp. 38846–38860, 2024. [10] Z. Zhang, J. Dang, and Z. Zhang, “Probabilistic ODMA receiver with low-complexity algorithm for MIMO unsourced random access,” IEEE Trans. Veh. Technol. , vol. 74, no. 10, pp. 16556–16561, 2025. [11] W. Zhu, M. Tao, X. Yuan, and Y. Guan, “Message passing-based joint user activity detection and channel estimation for temporally-correlated massive access,” IEEE Trans. Commun. , vol. 71, no. 6, pp. 3576–3591, Jun. 2023. [12] H. Q. Ngo, A. Ashikhmin, H. Yang, E. G. Larsson, and T. L. Marzetta, “Cell-free massive MIMO versus small cells,” IEEE Trans. Wireless Commun. , vol. 16, no. 3, pp. 1834–1850, Mar. 2017. [13] Z. Zhang, J. Dang, Z. Zhang, L. Wu, and B. Zhu, “Unsourced random access with uncoupled compressive sensing and forward error correc-tion,” IEEE Trans. Veh. Technol. , vol. 74, no. 2, pp. 3555–3560, Feb. 2025. [14] Z. Zhang, J. Dang, Z. Zhang, L. Wu, and B. Zhu, “Uncoupled unsourced random access: Exploiting geographical diversity of access points,” IEEE Trans. Veh. Technol. , vol. 74, no. 6, pp. 9882–9887, 2025. [15] K. Meng et al. , “Cooperative ISAC networks: Performance analysis, scaling laws, and optimization,” IEEE Trans. Wireless Commun. , vol. 24, no. 2, pp. 877–892, Feb. 2025. [16] Z. Zhang, K.-K. Wong, J. Dang, Z. Zhang, C. Masouros, and C.-B. Chae, “Integrated sensing and communications for unsourced random access via spectrum sharing compressive sensing approach with massive MIMO receiver,” IEEE Trans. Veh. Technol. , vol. 75, no. 7, pp. 13338–13350, 2026. [17] K. Chen, C. Qi, C.-X. Wang, and G. Y. Li, “Beam training and tracking for extremely large-scale MIMO communications,” IEEE Trans. Wireless Commun. , vol. 23, no. 5, pp. 5048–5062, May 2024. [18] K.-K. Wong, A. Shojaeifard, K.-F. Tong, and Y. Zhang, “Fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 1950–1962, Mar. 2021. [19] K.-K. Wong and K.-F. Tong, “Fluid antenna multiple access,” IEEE Trans. Wireless Commun. , vol. 21, no. 7, pp. 4801–4815, Jul. 2022. [20] M. Olyaee and S. Buzzi, “User-centric cell-free massive MIMO with ac-cess points empowered by fluid antennas,” in Proc. IEEE Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , 2024, pp. 137–141. [21] Z. Zhang, K.-K. Wong, J. Dang, Z. Zhang, C. Masouros, and C.-B. Chae, “On fundamental limits of slow-fluid antenna multiple access for unsourced random access,” IEEE Wireless Commun. Lett. , vol. 14, no. 11, pp. 3455–3459, Nov. 2025. [22] Z. Zhang, K.-K. Wong, J. Dang, Z. Zhang, and C.-B. Chae, “On fundamental limits for fluid antenna-assisted integrated sensing and communications for unsourced random access,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 136–149, 2026. [23] T. Wu et al. , “Scalable fluid antenna systems: A new paradigm for array signal processing,” IEEE J. Sel. Topics Signal Process. , vol. 20, no. 3, pp. 389–406, Apr. 2026. [24] B. Xu, J. Zhang, Z. Chen, B. Cheng, Z. Liu, Y.-C. Wu, and B. Ai, “Channel estimation for Rydberg atomic receivers,” IEEE Wireless Commun. Lett. , vol. 14, no. 9, pp. 2957–2961, Jun. 2025. [25] Z. Zhang, J. Dang, D. Morales-Jim´ enez, H. Jiang, Z. Zhang, C. Ma-souros, and C.-B. Chae, “Joint activity detection and channel estimation for fluid antenna system exploiting geographical and angular informa-tion,” IEEE J. Sel. Topics Signal Process. , vol. 20, no. 3, pp. 354–370, 2026. [26] L. Hu, J. Dang, and Z. Zhang, “Iterative Gaussian approximation for random spreading unsourced random access,” in Proc. 6th Int. Conf. Comput. Commun. Artif. Intell. (CCAI) , Nanjing, China, May 2026, pp. 836–840, doi: 10.1109/CCAI69603.2026.11642057. [27] Z. Zhang, K.-K. Wong, H. Jiang, C. Masouros, and C.-B. Chae, “Cram´ er–Rao bounds for activity detection in conventional and fluid antenna systems,” IEEE Wireless Commun. Lett. , vol. 15, pp. 3059– 3063, 2026. [28] T. Wu et al. , “Variable block-correlation modeling and optimization for secrecy analysis in fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 15069–15085, 2026. [29] Z. Zhang, K.-K. Wong, D. Morales-Jim´ enez, H. Jiang, H. Xu, C. Masouros, and Z. Zhang, “Finite-blocklength fluid antenna sys-tems,” IEEE Trans. Wireless Commun. , early access, 2026, doi: 10.1109/TWC.2026.3723456. [30] Z. Zhang, K.-K. Wong, D. Morales-Jim´ enez, H. Jiang, P. Ram´ ırez-Espinosa, C.-B. Chae, and C. Masouros, “Finite-blocklength fluid an-tenna systems with spatial block-correlation channel model,” IEEE Wireless Commun. Lett. , vol. 15, pp. 1911–1915, 2026. [31] B. Xu, J. Zhang, H. Du, Z. Wang, Y. Liu, D. Niyato, B. Ai, and K. B. Letaief, “Resource allocation for near-field communications: Fundamentals, tools, and outlooks,” IEEE Wireless Commun. , vol. 31, no. 5, pp. 42–50, Jul. 2024. [32] Z. Zhang, K.-K. Wong, H. Jiang, F. Rostami Ghadi, H. Shin, and Y. Zhang, “Finite-aperture fluid antenna array design: Analysis and algorithm,” IEEE Wireless Commun. Lett. , vol. 15, pp. 3199–3203, 2026. [33] Z. Zhang, Y. Wu, K.-K. Wong, H. Jiang, and A. Li, “Jointly correlated dual-side fluid antenna system,” IEEE Wireless Commun. Lett. , vol. 15, pp. 4370-4374, 2026.

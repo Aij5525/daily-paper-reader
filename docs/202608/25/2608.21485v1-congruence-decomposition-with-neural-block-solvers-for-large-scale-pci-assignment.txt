@@ -1,0 +1,1444 @@
+Title: Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment
+
+URL Source: https://arxiv.org/pdf/2608.21485v1
+
+Published Time: Tue, 25 Aug 2026 00:04:45 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> UNDER REVIEW 1
+
+# Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment 
+
+Yeqing Qiu, Chengpiao Huang, Ye Xue, Akang Wang, Fan Xu, Zhipeng Jiang, Dong Zhang, Ruoyu Sun, Qingjiang Shi, and Zhi-Quan Luo 
+
+Abstract —Physical Cell Identity (PCI) assignment is essential for interference management in dense 5G networks. As cellular networks scale, PCI reuse becomes unavoidable, which may cause collisions, confusions, and multiple forms of modular interference. Jointly mitigating these effects gives rise to a large-scale, multi-objective combinatorial optimization problem that is difficult to solve efficiently at practical network scales. In this work, we propose a congruence decomposition framework with neural block solvers for large-scale PCI assignment. The proposed decomposition exploits the arithmetic structure of PCI values to decouple multiple modular interference objectives into a collection of blockwise Min-k-Partition subproblems, followed by a graph coloring procedure to resolve PCI conflicts. For the resulting NP-hard Min-k-Partition subproblems, we develop neural block solvers by parameterizing their relaxed quadratic formulations with graph neural networks, enabling efficient optimization at large scales. Discrete assignments are recovered through conditional expectation rounding with theoretical guarantees. Ex-periments on synthetic cellular graphs and real-world 5G networks show that the proposed method consis-
+
+The work was supported in part by the National Key Research and Development Program of China under Grant 2022YFA1003900, the National Natural Science Foundation of China under Grant 62301334, Guangdong Major Project of Basic and Applied Basic Research under Grant 2023B0303000001, and the Guangdong Provincial Key Laboratory of Big Data Computing. 
+
+(Corresponding authors: Qingjiang Shi, Zhi-Quan Luo) 
+
+Yeqing Qiu is with the School of Science and Engineering, The Chinese University of Hong Kong, Shenzhen, China, and Shen-zhen Research Institute of Big Data, Shenzhen, China (email: yeqingqiu@link.cuhk.edu.cn). Chengpiao Huang is with the Department of Industrial Engineering and Operations Research, Columbia University, New York, USA (email: chengpiao.huang@columbia.edu). Ye Xue is with the School of Intelligent Systems En-gineering, Sun Yat-sen University, Shenzhen, China (email: xuey57@mail.sysu.edu.cn). Fan Xu is with the College of Electronic and Information Engineering, Tongji University, Shanghai, China (email: xxi-aof999@tongji.edu.cn). Zhipeng Jiang is with the School of Mathematical Sciences, University of Chinese Academy of Sciences, Beijing, China (email: jiangzhipeng@ucas.ac.cn). Dong Zhang is with Huawei Technologies, Shenzhen, China (email: zhangdong48@huawei.com). Akang Wang and Ruoyu Sun are with Shenzhen Research Institute of Big Data, Shenzhen, China, and School of Data Science, The Chinese University of Hong Kong, Shenzhen, China (email: wan-gakang@sribd.cn, sunruoyu@cuhk.edu.cn). Qingjiang Shi is with the School of Computer Science and Tech-nology, Tongji University, Shanghai, China, and Shenzhen Research Institute of Big Data, Shenzhen, China (email: shiqj@tongji.edu.cn). Zhi-Quan Luo is with The Chinese University of Hong Kong, Shenzhen, China, and Shenzhen Research Institute of Big Data, Shenzhen, China (email: luozq@cuhk.edu.cn). 
+
+tently outperforms existing modular-interference-aware baselines in modular interference reduction, conflict elimination, and computational efficiency. 
+
+Index Terms —PCI Assignment, Congruence De-composition, Multi-Objective Optimization, Neural Parametrization, Graph Neural Networks 
+
+I. Introduction 
+
+The advancement of 5G mobile networks has demon-strated great potential to transform wireless communica-tions, enabling ultra-dense deployments, spectrum agility, and diverse application scenarios [1, 2, 3, 4]. However, practical deployments have revealed a persistent gap between theoretical capabilities and actual user experience, especially in dense urban environments [5]. This gap arises not only from physical infrastructure limitations but also from the lack of intelligent coordination and adaptive parameter configuration [6, 7]. As a result, effective opti-mization of key network parameters has become essential for interference management and performance improvement in large-scale 5G deployments. 
+
+Physical Cell Identity (PCI) is one of the most important parameters in 5G networks. Each cell must be assigned a standardized integer PCI value used in synchronization and mobility management [8, 9]. Due to the limited range of usable PCI values and dense spatial reuse, improper assignments cause collisions , confusions , and modular interference , which occur when pairs of cells are assigned identical PCI values or their assigned PCIs are congruent under specific moduli [10, 11]. Jointly minimizing multiple modular interference objectives while eliminating collisions and confusions leads to a large-scale, multi-objective com-binatorial optimization problem with coupled arithmetic and graph structures. Early studies formulate PCI assignment as a graph coloring problem, where vertices represent cells and edges encode pairwise conflict relations. Greedy and randomized coloring heuristics [12, 13] are computationally efficient, but they only address collisions and confusions and do not model modular interference induced by arithmetic residue relations. Subsequent heuristic and metaheuris-tic methods, including genetic algorithms [14, 15] and memetic search [16], incorporate modular penalties into the objective, but they remain problem-specific and provide limited structural understanding or theoretical guaran-tees. Binary quadratic and mixed-integer programming formulations [11, 17] improve modeling fidelity, but scale arXiv:2608.21485v1 [cs.LG] 21 Aug 2026 UNDER REVIEW 2
+
+poorly to dense networks and do not explicitly exploit the arithmetic structure underlying multiple modular interference objectives. Recent efforts on PCI optimization have progressed along two complementary directions: exploiting the arithmetic structure of modular interference and improving solver scalability. On the structural side, Qiu et al. [10] exploited the Chinese Remainder Theorem (CRT) to decompose the joint mod-3 and mod-30 interference objectives into Min-k-Partition subproblems with k = 3 and 10. However, this construction relies on the specific coprime factorization 30 = 3 ×10 and is tailored to this particular pair of modular objectives. It does not directly extend to PCI optimization with arbitrary modular interference objectives. On the scal-ability side, Qiu et al. [18] proposed the Relaxed Gradient Projection (RGP) method, which relaxes the discrete PCI assignment problem and applies first-order optimization to the resulting continuous formulation. Subsequent work introduced Penalized Mirror Descent (PMD) for solving the decomposed Min-k-Partition subproblems [10], further improving computational efficiency. Nevertheless, these methods optimize directly in the node-wise assignment space and still incur substantial computational cost on large instances. To further improve scalability, we consider neural parametrization as an alternative. Rather than treating node-wise assignment variables as free optimization vari-ables, a graph neural network (GNN) generates the relaxed assignments through graph-based message passing. This parametrization induces graph-structured dependencies among node assignments and is naturally amenable to parallel computation on large graphs. Recent advances in neural-parametrized optimization have demonstrated the effectiveness of this approach for graph-structured combina-torial problems, including Max-k-Cut [19], QUBO [20], and scheduling [21]. These developments motivate using GNN parametrization as a scalable block solver for the large Min-
+
+k-Partition subproblems arising from PCI decomposition. In this work, we propose a congruence decomposition framework with neural block solvers that jointly address modular interference, collisions, and confusions in large-scale PCI assignment. Our key contributions are summa-rized as follows.  
+
+> •
+
+Congruence Decomposition for Multi-Modular PCI Assignment. We develop a congruence decom-position framework for PCI assignment with multiple modular interference objectives and hard collision and confusion constraints. By exploiting arithmetic relations among the involved moduli, the proposed framework decomposes the coupled modular objectives into blockwise Min-k-Partition subproblems, followed by a graph-coloring stage to handle collision and confusion constraints.  
+
+> •
+
+Neural Block Solver for Min-k-Partition. For the resulting NP-hard Min-k-Partition subproblems, we develop a neural block solver that parameterizes the simplex-relaxed solution using a GNN and opti-mizes the neural parameters against the corresponding quadratic objective. A deterministic conditional ex-pectation rounding scheme then recovers a discrete assignment without increasing the relaxed objective value.  
+
+> •
+
+Evaluation on Synthetic and Real-World Cellu-lar Networks. We evaluate the proposed framework on synthetic random geometric graphs (RGGs) and real-world measurement reports from a commercial cellular network. Across both settings, our method simultaneously reduces collisions and confusions while achieving the lowest multi-modular interference among competitive baselines. On a real-world network with thousands of cells, it further reduces modular interfer-ence and achieves a 2 .04 × speedup over the strongest decomposition-based baseline, demonstrating its effec-tiveness for large-scale PCI optimization. 
+
+Synopsis. The subsequent sections of the paper are structured as follows. Section II introduces the system model and formulates the PCI assignment problem. Section III presents the congruence decomposition framework for multi-modular PCI assignment. Building upon this decomposition, Section IV presents the neural block solver for the resulting Min-k-Partition subproblems, together with a deterministic conditional expectation rounding scheme for recovering the discrete solutions. Section V presents numerical experiments on synthetic and real-world data. Finally, Section VI concludes the paper. 
+
+Notations. We denote by Z and R the sets of integers and real numbers, respectively, and by Z+ the set of non-negative integers. For any positive integer k, Zk =
+
+{0, 1, . . . , k − 1}, and ZNk denotes the set of N -dimensional vectors with entries in Zk. For x ∈ R, ⌊x⌋ is the largest integer not exceeding x, and for any positive integer x,[x] = {1, 2, . . . , x }. For a, b ∈ Z and any positive integer k,we write a ≡ b (mod k) if a − b is divisible by k. gcd( a, b )and lcm( a, b ) denote the greatest common divisor and least common multiple of a and b, respectively. We use lowercase and uppercase boldface letters for column vectors and matrices, respectively. For a matrix A, Ai,j is its ( i, j )-th entry, Ai· is the i-th row, A⊤ is the transpose, and Tr( A)is the trace. Finally, 1{A} is the indicator of event A, and 
+
+|S| denotes the cardinality of a set S.
+
+II. Problem Formulation 
+
+For 5G PCI assignment, we model a 5G wireless network with N cells as a graph, where the vertices are given by V =
+
+{1, 2, · · · , N }, and vertex i represents the i-th cell. Between cells, there is interference and a neighboring relation. The interference between cells is encoded in an interference matrix W inter ∈ RN ×N , where W inter  
+
+> i,j
+
+= W inter  
+
+> j,i
+
+≥ 0 is the interference between cell i and cell j. For two cells i and 
+
+j, we say that j is a neighboring cell of i if the signal of cell j can be received by devices connected to cell i. The set of neighboring cell pairs is denoted by E1 ⊆ V × V . We further define the second-order neighboring set 
+
+E2 = {(i, j ) ∈ V × V | ∃ ℓ ∈ V such that ( ℓ, i ), (ℓ, j ) ∈ E 1},UNDER REVIEW 3
+
+Mod-p Typical interference source Reference 
+
+mod-3 Primary and Secondary Synchronization Signal reuse [8, 22] mod-4 Physical Broadcast Channel Demodulation Reference Signal reuse [8, 16] mod-6 Uplink and Downlink Demodulation Reference Signal pattern reuse [8, 11] mod-30 Zadoff–Chu root group reuse in PUCCH, PUSCH, SRS, and PRACH [8, 23] TABLE I: Common modular interference types in 5G PCI assignment. 
+
+Fig. 1: This figure illustrates the modular interference, collisions, and confusions of PCI assignment in a 5G wireless network, where each sector denotes a cell and the number inside indicates its assigned PCI value. 
+
+which consists of cell pairs that share the same neighbor. We let E = E1 ∪ E 2. Similar to [16], we assume that W inter ,
+
+E1, and E2 have been estimated and are known. The task of the 5G PCI assignment problem is to assign to each cell i ∈ V an integer PCI i ∈ Z1008 , called the 
+
+PCI value , to minimize modular interference and eliminate 
+
+collisions and confusions . The modular interference and PCI conflicts considered in this work are illustrated in Figure 1, and are detailed as follows  
+
+> •
+
+Mod-p interference occurs between two cells i and j,if their PCIs have the same mod p value, i.e. PCI i ≡
+
+PCI j (mod p). In this case, the magnitude of mod-
+
+p interference between the two cells is given by 
+
+W inter  
+
+> i,j
+
+. Such interference can lead to potential resource conflicts and signal degradation during the channel-sounding process and negatively impact network per-formance. The common modular interferences are listed in Table I. For example, Figure 1 illustrates the mod-3 interference between cells with PCI 99 and 303, and the mod-4 interference between cells with PCI 13 and 301.  
+
+> •
+
+A collision arises when two neighboring cells i and j
+
+share the same PCI, that is, ( i, j ) ∈ E 1 and PCI i =PCI j . It prevents a UE from determining the serving cell and establishing a connection [16]. For instance, two neighboring cells in Figure 1 are assigned PCI 250, resulting in a PCI collision.  
+
+> •
+
+A confusion arises when two cells ( i, j ) ∈ E 2 share the same PCI. In other words, this means that two cells i, j sharing a common neighbor have the same PCI. This can potentially cause a UE confusion during cell handovers. For example, Figure 1 depicts a PCI confusion scenario where two non-neighboring cells share PCI 77 and have a common neighbor with PCI 252. Mathematically, the PCI assignment problem can be formulated as min 
+
+> PCI
+
+( N∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{PCI i ≡ PCI j (mod p1)}, (1a) 
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{PCI i ≡ PCI j (mod p2)}, (1b) 
+
+· · · 
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{PCI i ≡ PCI j (mod pm)}
+
+)
+
+, (1c) s.t. PCI i̸ = PCI j , ∀(i, j ) ∈ E , (1d) PCI i ∈ Z1008 , ∀i ∈ V , (1e) where PCI = (PCI 1, ..., PCI N ). This is a multi-objective optimization problem where the objectives are to minimize the modular interference (1a) – (1c), and the constraints include eliminating collisions and confusions (1d) and the PCI range requirement (1e). In practice, a common set of mod values is ( p1, p 2, p 3, p 4) = (3 , 4, 6, 30) as shown in Table I. 
+
+III. Congruence Decomposition for Multi-Modular PCI Assignment 
+
+This section develops a congruence decomposition frame-work for PCI assignment with multiple modular inter-ference objectives. By exploiting the arithmetic relations among the involved moduli, the proposed framework de-composes the modular assignment stage into a sequence of blockwise Min-k-Partition subproblems, followed by graph coloring for handling collision and confusion constraints. We refer to this construction as congruence decomposition ,as it represents each modular congruence through equality relations over a subset of prime-power coefficient blocks. 
+
+A. Decomposition Framework 
+
+Consider an integer variable xi associated with each node i. When the interference term depends on modular equalities ( xi mod pℓ) for multiple moduli {p1, p 2, . . . , p m},all modular relations can be equivalently represented by UNDER REVIEW 4
+
+(xi mod p) with p = lcm( p1, . . . , p m), since identical mod-p
+
+values imply identical residues under every pℓ. Our decom-position framework is based on a division-with-remainder reformulation. The optimization objectives depend on each cell’s PCI through the mod p1, ..., p m values, which are uniquely determined by its mod p = lcm( p1, . . . , p m)value. This motivates a standard division-with-remainder reformulation: PCI i = pq i + ri,
+
+where qi =
+
+⌊ PCI i
+
+> p
+
+⌋
+
+∈ Z+ is the quotient , and ri ∈ Zp is the mod p value of PCI i.This representation naturally separates the modular component ri, which determines all interference relations, from the quotient qi, which enforces the remaining struc-tural constraints. Substituting this representation into the general PCI optimization yields: min 
+
+> q,r
+
+( N∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod p1)},
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod p2)},
+
+· · · ,
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod pm)}
+
+)
+
+,
+
+s.t. q = [ q1, · · · , q N ] ∈ ZN 
+
+> +
+
+,
+
+r = [ r1, · · · , r N ] ∈ ZNp ,qi̸ = qj or ri̸ = rj , ∀(i, j ) ∈ E 
+
+p × q + r ∈ ZN
+
+> 1008
+
+.
+
+Since all interference terms depend solely on r, the problem decomposes into two sequential stages:  
+
+> •
+
+Sub-problem 1: Modular assignment. Determine 
+
+r to jointly minimize all modular interferences: min 
+
+> r
+
+( N∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod p1)},
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod p2)},
+
+· · · ,
+
+> N
+
+∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{ri ≡ rj (mod pm)}
+
+)
+
+,
+
+s.t. r ∈ ZNp .
+
+(3)  
+
+> •
+
+Sub-problem 2: Quotient assignment q. Given r,assign q to eliminate residual conflicts while maintain-ing feasible ranges: find q = ( q1, · · · , q N ),
+
+s.t. qi̸ = qj , ∀(i, j ) ∈ E with ri = rj ,
+
+q ∈ ZN 
+
+> +
+
+,p × q + r ∈ ZN
+
+> 1008
+
+.
+
+(4) This yields a clean modular–quotient decomposition, where 
+
+r governs modular interference and q resolves remaining PCI conflicts. 
+
+B. Congruence Decomposition for Arbitrary Modular In-terference Objectives 
+
+We now study Subproblem 1 for arbitrary, possibly non-coprime moduli {pℓ}ℓ∈[m]. While previous work [10] relied on the specific coprime factorization 30 = 3 × 10 for the mod-3 and mod-30 objectives, we extend the decomposition to arbitrary modular objectives by combining the CRT with an su-adic decomposition that separates the contributions of different moduli within a common mod-p representation. We first consider the prime factorization of p =lcm( p1, . . . , p m): 
+
+p = st1 
+
+> 1
+
+· · · stn 
+
+> n
+
+,
+
+where s1, ..., s n are the prime factors and t1, ..., t n ≥ 1. For any residue r ∈ Zp, define its CRT coordinates by 
+
+r(u) := r mod stu 
+
+> u
+
+∈ Zstu u , u ∈ [n].
+
+By the CRT, the mapping 
+
+r ←→ (r(1) , . . . , r (n)) ∈
+
+> n
+
+∏
+
+> u=1
+
+Zstu u
+
+is bijective, and we write 
+
+r = CRT (r(1) , . . . , r (n)).
+
+We then examine how each modulus pℓ depends on these CRT coordinates. Write 
+
+pℓ = st1,ℓ  
+
+> 1
+
+· · · stn,ℓ  
+
+> n
+
+,
+
+where 0 ≤ tu,ℓ ≤ tu for each u = 1 , ..., n .Then congruence modulo pℓ is equivalent to congruence modulo stu,ℓ  
+
+> u
+
+for every prime factor su. Hence r mod pℓ is fully determined by the truncated CRT coordinates 
+
+r(u) mod stu,ℓ  
+
+> u
+
+, u ∈ [n].
+
+This observation motivates an su-adic decomposition of each coordinate r(u), so that different modular objectives can be expressed through different subsets of lower-order prime-power components. We now decompose each mod-stu 
+
+> u
+
+coordinate. Let the exponents {tu,ℓ }mℓ=1 of su be sorted as 
+
+tu, (1) ≤ · · · ≤ tu, (m) = tu,
+
+and set tu, (0) = 0. Then any residue r(u) ∈ Zstu u admits the following su-adic block decomposition: 
+
+r(u) =
+
+> m
+
+∑
+
+> h=1
+
+r(u,h )stu, (h−1)  
+
+> u
+
+, (5) where r(u,h ) ∈ Zsδu,h u
+
+and δu,h = tu, (h) − tu, (h−1) . When 
+
+δu,h = 0, the corresponding block is degenerate, i.e., 
+
+Zsδu,h u
+
+= Z1, and thus carries no degree of freedom. The nondegenerate blocks group the su-adic digits of r(u)UNDER REVIEW 5ℤ60 
+
+ℤ51
+
+ℤ31
+
+ℤ22 ℤ21
+
+Mod-3
+
+Mod-6
+
+Mod-4
+
+Mod-30 
+
+ℤ𝑝 = ℤ lcm 𝑝 1,⋯,𝑝 𝑚 
+
+ℤ𝑠 1𝑡1 = ℤ 𝑠 1𝑡 1, 𝑚 
+
+ℤ𝑠 1
+
+> 𝑡 1, 𝑚−1
+
+ℤ𝑠 1
+
+> 𝑡 1, 𝑚−2
+
+ℤ𝑠 1
+
+> 𝑡 1, 1
+
+ℤ𝑠 2 
+
+> 𝑡 2
+
+= ℤ 𝑠 2
+
+> 𝑡 2, 𝑚
+
+ℤ𝑠 2
+
+> 𝑡 2, 𝑚−1
+
+ℤ𝑠 2𝑡 2, 𝑚−2 
+
+ℤ𝑠 2
+
+> 𝑡 2, 1
+
+ℤ𝑠 𝑛 𝑡𝑛 = ℤ 𝑠 𝑢 𝑡 𝑢, 𝑚 
+
+ℤ𝑠 𝑛 𝑡 𝑛, 𝑚−1 
+
+ℤ𝑠 𝑛  
+
+> 𝑡 𝑛 𝑚−2
+
+ℤ𝑠 𝑛 𝑡 𝑛, 1 
+
+× ℤ 𝑠 1𝛿1,2 
+
+× ℤ 𝑠 1𝛿1,𝑚 
+
+× ℤ 𝑠 2𝛿2,2 
+
+× ℤ 𝑠 2𝛿2,𝑚 
+
+…
+
+× ℤ 𝑠 𝑢 𝛿𝑢,2 
+
+× ℤ 𝑠 𝑢 
+
+> 𝛿 𝑢,𝑚
+
+(a)  (b) 
+
+Fig. 2: (a) Hierarchical congruence decomposition of Zp into prime-power coefficient blocks. (b) The resulting multi-modular decomposition for PCI assignment simultaneously addressing mod-3, mod-4, mod-6, and mod-30 interferences. according to the exponent intervals ( tu, (h−1) , t u, (h)], with zero-length intervals corresponding to degenerate blocks. Since the residue modulo pℓ only depends on powers up to tu,ℓ for each prime factor su, it is fully determined by the following coefficient blocks 
+
+{
+
+r(u,h )
+
+∣∣∣ u ∈ [n], t u, (h) ≤ tu,ℓ 
+
+}
+
+, (6) Equivalently, we define the corresponding block-index set as 
+
+Jℓ = {(u, h ) | u ∈ [n], t u, (h) ≤ tu,ℓ } (7) We formalize this coefficient-based characterization of modular equality in the following theorem. 
+
+Theorem III.1 (Blockwise Characterization of Modular Equality) . For any two residues ri, r j ∈ Zp, we have 
+
+ri ≡ rj (mod pℓ)
+
+if and only if 
+
+r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+, ∀(u, h ) ∈ J ℓ.
+
+Proof. See Appendix A. Theorem III.1 shows that each modular congruence can be replaced by equality constraints on a subset of coefficient blocks. Accordingly, Subproblem 1 admits the following blockwise reformulation: min 
+
+> {r(u,h )}
+
+( N∑
+
+> i,j =1
+
+W inter 
+
+> i,j
+
+∏
+
+> (u,h )∈J 1
+
+1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+},
+
+> N
+
+∑
+
+> i,j =1
+
+W inter 
+
+> i,j
+
+∏
+
+> (u,h )∈J 2
+
+1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+},
+
+· · · ,
+
+> N
+
+∑
+
+> i,j =1
+
+W inter 
+
+> i,j
+
+∏
+
+> (u,h )∈J m
+
+1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+}
+
+)
+
+,
+
+s.t. r(u,h ) ∈ ZNsδu,h u
+
+, ∀u ∈ [n], h ∈ [m].
+
+(8) To solve this problem, we propose to update each r(u,h )
+
+sequentially while fixing the other r(u′,h ′). This yields a weighted Min-k-Partition subproblem with k = sδu,h  
+
+> u
+
+:min 
+
+> r(u,h )
+
+∑
+
+> ℓ:( u,h )∈J ℓ
+
+λℓN∑
+
+> i,j =1
+
+W inter  
+
+> i,j
+
+· 1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+}· ∏
+
+> (u′,h ′)∈J ℓ
+> (u′,h ′)̸=( u,h )
+
+1{r(u′,h ′) 
+
+> i
+
+= r(u′,h ′) 
+
+> j
+
+},
+
+s.t. r(u,h ) ∈ ZNsδu,h u
+
+.
+
+(9) Each update minimizes the conditional interference deter-mined by its active blocks, where the weights {λℓ}ℓ∈[m]
+
+encode the relative significance of different modular ob-jectives. This blockwise formulation defines a conditional partitioning problem: given the current assignments of other blocks, each subproblem searches for the optimal 
+
+k-way partition of nodes in Zsδu,h u
+
+that most reduces modular interference. The procedure naturally admits a BCD scheme, whose convergence is guaranteed by the following theorem. 
+
+Theorem III.2 (Finite-Step Termination of BCD) . Con-sider the BCD procedure whose block update is given by (9) .If each block update is accepted only when it decreases its associated objective, then the overall procedure terminates in a finite number of updates. Proof. See Appendix B. As a concrete specialization, consider the PCI assignment with (p1, p 2, p 3, p 4) = (3 , 4, 6, 30) ,
+
+with p = lcm(3 , 4, 6, 30) = 60 = 2 2 · 3 · 5. The above construction then yields a four-block residue decomposition of Z60 , shown in Fig. 2 (b). In this representation, the mod-3 objective depends only on the ternary block, the mod-4 objective depends on the two binary blocks, the mod-6 objective depends on the binary and ternary blocks UNDER REVIEW 6
+
+jointly, and the mod-30 objective depends on all blocks except the higher binary block. Hence the PCI interference criteria are converted into a nested family of blockwise equality relations, and each corresponding update reduces to a weighted Min-k-Partition subproblem, which will be addressed in Section IV. 
+
+C. Graph Coloring for Quotient Assignment 
+
+We now revisit sub-problem 2 in (4), which seeks a quotient assignment q given the mod-p values r obtained from sub-problem 1. Since collisions and confusions can occur only between constrained cell pairs with identical remainders, the con-straints in (4) reduce to the edge set 
+
+E′ := {(i, j ) ∈ E | ri = rj }.
+
+Hence sub-problem 2 is equivalent to a graph coloring problem [12] on the graph ( V, E′), where colors correspond to quotient values. We apply GGC [12, 24] for efficient approximate solutions. The remaining issue is the PCI range constraint pq i +ri ∈
+
+Z1008 . Following [10], we adopt a heuristic post-processing step: cells violating the range are reassigned feasible quotients that minimize additional collisions and confusions, processed in descending order of node degree (including second-order neighbors) to prioritize constrained regions. In summary, sub-problem 2 reduces to graph coloring on the graph ( V, E′), complemented by a tailored adjustment procedure to enforce PCI feasibility. 
+
+D. Summary 
+
+Below, we summarize our framework for PCI assignment. The original problem is decomposed into modular sub-blocks, leading to two stages: 1) solving a sequence of blockwise Min-k-Partition sub-problems that progressively minimize multi-modular interference, generalizing the graph-partition ap-proach [10] beyond the coprime setting; 2) handling collisions and confusions via graph coloring under the PCI range constraint. The full procedure is outlined in Algorithm 1. For brevity, we refer to the resulting multi-modular decomposition procedure as MMD. 
+
+IV. Neural Block Solver for Min-k-Partition 
+
+The multi-modular decomposition reduces the modular assignment stage to a sequence of block subproblems (9). For a block r(u,h ) ∈ ZNsδu,h u
+
+, fixing all other blocks yields a weighted Min-k-Partition problem with k = sδu,h  
+
+> u
+
+. This section develops an instance-wise GNN-parametrized solver for these block subproblems. We refer to the resulting neural block solver as GNN-Parametrized Optimization (GPO). 
+
+Algorithm 1: Blockwise Alternating Minimization with Graph Coloring for PCI Assignment 
+
+Data: Interference matrix W , edge set E, modulus set {p1, . . . , p m}, and weights {λ1, · · · , λ m}.
+
+Result: A PCI assignment PCI ∈ ZN
+
+> 1008
+
+.
+
+(Pre-processing) Compute p ← lcm( p1, . . . , p m); 
+
+Factorize p = ∏nu=1 stu 
+
+> u
+
+and pℓ = ∏nu=1 stu,ℓ  
+
+> u
+
+for all 
+
+ℓ ∈ [m]; 
+
+for u = 1 to n do Sort {tu,ℓ }mℓ=1 as tu, (1) ≤ · · · ≤ tu, (m) = tu;
+
+Set tu, (0) = 0; 
+
+for h = 1 to m do Set δu,h ← tu, (h) − tu, (h−1) ;
+
+Set ku,h ← sδu,h  
+
+> u
+
+;
+
+for ℓ = 1 to m do Set Jℓ ← { (u, h ) | u ∈ [n], h ∈ [m], t u, (h) ≤ tu,ℓ };
+
+(Sub-problem 1: Mod-p Assignment) Initialize r(u,h ) ← 0 for all ( u, h ); 
+
+repeat for u = 1 to n do for h = 1 to m do Update r(u,h ) by solving Problem (9) if the objective decreases; 
+
+until No improving block update ;
+
+Recover r = CRT 
+
+(∑mh=1 r(u,h ) · stu, (h−1) 
+
+> u
+
+)nu=1 
+
+;
+
+(Sub-problem 2: Quotient Assignment) Construct restricted edge set 
+
+E′ = {(i, j ) ∈ E | ri = rj };
+
+Apply GGC on ( V, E′) to obtain quotient assignment q;
+
+if some pq i + ri > 1007 then Reassign quotients of violating nodes using heuristic adjustment (process in descending order of degree); 
+
+Output PCI = pq + r;
+
+A. Effective Block Graph Construction 
+
+For each block ( u, h ), we construct an effective weighted graph over N nodes, with edge weights capturing all relevant interference contributions conditioned on other block assignments: 
+
+˜W inter 
+
+> i,j
+
+= ∑
+
+> ℓ:( u,h )∈J ℓ
+
+λℓWi,j · ∏
+
+> (u′,h ′)∈J ℓ
+> (u′,h ′)̸=( u,h )
+
+1{r(u′,h ′) 
+
+> i
+
+= r(u′,h ′) 
+
+> j
+
+},
+
+where the product masks out node pairs whose modular equality has already been broken by the fixed active blocks. UNDER REVIEW 7
+
+The corresponding block problem is thus given by min 
+
+> r(u,h )
+> N
+
+∑
+
+> i=1
+> N
+
+∑
+
+> j=1
+
+˜W inter  
+
+> i,j
+
+1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+},
+
+s.t. r(u,h ) ∈ ZNk ,
+
+(10) with k = sδu,h  
+
+> u
+
+.For notational simplicity, we denote the effective block weight matrix ˜W inter by a general W and encode r(u,h ) as a one-hot matrix X ∈ { 0, 1}N ×k. Then (10) is rewritten as a quadratic objective over one-hot vectors: min  
+
+> X
+
+Tr( X⊤W X ), (11) s.t. X ∈ X := {e1, . . . , ek}N .
+
+B. GNN-Parametrized Relaxed Optimization 
+
+Given the challenges associated with solving the discrete problem (11), we take the natural relaxation approach of replacing X by its convex hull, which is the Cartesian product of N k -dimensional probability simplices, denoted by ∆ Nk . Consequently, the discrete problem (11) is relaxed into the following continuous optimization form: min  
+
+> X
+
+Tr( X⊤W X ) := f (X), (12) s.t. X ∈ ∆Nk ⊆ [0 , 1] N ×k.
+
+To solve this relaxed block problem (12), we use a GNN as a graph-aware neural parametrization of the relaxed assignment. The Min-k-Partition block naturally aligns with a node classification task where each node is assigned one of k labels. Moreover, the gradient of the quadratic objective satisfies ∇f (X) = 2 W X , which has the form of weighted neighborhood aggregation. This matches the message-passing structure of GNNs and motivates repre-senting the relaxed assignment through a graph-structured neural model. Specifically, each node i is initialized with a trainable embedding h(0)  
+
+> i
+
+with Xavier initialization [25]. We adopt an L-layer GNN [26] with the update 
+
+h(l) 
+
+> i
+
+= σ
+
+Φ(l)1 h(l−1)  
+
+> i
+
++ Φ(l)2
+
+∑ 
+
+> j∈N (i)
+
+Wj,i h(l−1) 
+
+> j
+
+ (13) for l = 1 , · · · , L with trainable parameters Φ(l)1 , Φ(l)2 and activation function σ.This update combines node-wise transformations with weighted aggregation from neighboring nodes, allowing the parametrization to exploit the graph structure of the current block instance. After the final row-wise softmax activation, we denote the resulting simplex-valued output by 
+
+H(L) 
+
+> Φ
+
+∈ ∆Nk .
+
+Each row of the final embeddings H(L) 
+
+> Φ
+
+lies in ∆Nk ,producing a feasible relaxed assignment X = H(L) 
+
+> Φ
+
+,where Φ := ( H(0) , Φ(1) 1 , Φ(1) 2 , · · · , Φ(L)1 , Φ(L)2 ) denotes the trainable parameters of GNN. When solving a testing instance W , we optimize the trainable parameters from a fresh random initialization using the objective min  
+
+> Φ
+
+L(Φ) := Tr 
+
+(
+
+H(L)⊤ 
+
+> Φ
+
+W H (L)
+
+> Φ
+
+)
+
+. (14) The parameters are optimized separately for each weighted block instance, allowing the parametrization to adapt to the effective graph induced by the current modular decom-position. After obtaining the instance-specific parameters 
+
+Φ⋆, the relaxed solution is produced by a single forward evaluation: 
+
+X = H(L) 
+
+> Φ⋆
+
+.
+
+C. Conditional Expectation Rounding 
+
+Let X ∈ ∆Nk be a feasible solution to the relaxed problem (12). Our goal is to construct a discrete assignment X ∈ X 
+
+whose objective value is no larger than f (X). We first introduce an auxiliary random matrix Z taking values in X , where each row is independently distributed as 
+
+P(Zi· = es) = Xi,s , i ∈ [N ], s ∈ [k]. (15) Since W has zero diagonal, this product distribution satisfies 
+
+E[f (Z)] = f (X). (16) Thus, the relaxed objective equals the expected objective of the randomized discrete assignment [19]. However, drawing realizations from this randomized rounding distribution only gives this guarantee in expectation and may require many trials to obtain a realization with objective no larger than f (X). We therefore derandomize this procedure by conditional expectation. At step i, suppose the first i−1 rows have been fixed as X1·, . . . , X(i−1) ·. Define the conditioning event 
+
+Ci−1 := {Za· = Xa·, a = 1 , . . . , i − 1}. (17) For each candidate label s ∈ [k], define 
+
+ψi(s) := E[f (Z) | C i−1, Zi· = es] . (18) The algorithm fixes node i to the label minimizing ψi(s). The description is given in Algorithm 2. Below we show that this method always leads to a solution X no worse than X.
+
+Theorem IV.1. Let X and X be the input and output of Algorithm 2 respectively. Then 
+
+f (X) ≤ f (X). (19) 
+
+Proof. See Appendix C. This conditional expectation rounding deterministically produces a discrete feasible solution whose objective value is guaranteed not to exceed that of the relaxed solution. Our method extends the conditional expectation method UNDER REVIEW 8
+
+Algorithm 2: Conditional Expectation Rounding  
+
+> 1:
+
+Input: Relaxed solution X ∈ ∆Nk ; 
+
+> 2:
+
+Initialize: X ← 0N ×k; 
+
+> 3:
+
+Define the auxiliary random matrix Z by (15);  
+
+> 4:
+
+for i = 1 to N do  
+
+> 5:
+
+Set Ci−1 by (17);  
+
+> 6:
+
+Set s⋆i ← arg min s∈[k] ψi(s), where ψi(s) is defined in (18);  
+
+> 7:
+
+Set Xi· ← es⋆i ; 
+
+> 8:
+
+end for  
+
+> 9:
+
+Output: X ∈ X ;
+
+Algorithm 3: Edge-based Local Search Refinement 
+
+Data: Initial labels X from Algorithm 2 of GPO, edge set E with weights W , number of partitions k
+
+Result: Refined labels X
+
+repeat for each (i, j, w ) ∈ E do for c1 = 1 to k do for c2 = 1 to k do 
+
+Compute cost difference ∆ f for (Xi·, Xj·) ← (ec1 , ec2 ); 
+
+if ∆f < 0 then 
+
+Update ( Xi·, Xj·) ← (ec1 , ec2 ); 
+
+until no improvement or time budget reached ;
+
+return X
+
+from Max-Cut [27, 28] to weighted Min-k-Partition with simplex-relaxed variables. While the basic implementation of Algorithm 2 evaluates conditional costs independently for each node, leading to a naive complexity of O(k2N |E| ), we adopt an incremental update scheme that maintains edge-local expectations and updates them only when a node is fixed. This reduces the overall rounding complexity to 
+
+O(k|E| ). The complete incremental procedure and analysis are given in Appendix D. 
+
+D. Edge-Based Refinement 
+
+After conditional expectation rounding, we further ap-ply a monotone local refinement step. The procedure is summarized in Algorithm 3. For each weighted edge ( i, j ), the algorithm enumerates all label pairs ( c1, c 2) ∈ [k]2 and accepts the reassignment (Xi·, Xj·) ← (ec1 , ec2 )only if it decreases the objective. The procedure repeats until no improving reassignment is found or a time budget (e.g., 30 seconds) is reached. Since every accepted move decreases the objective, this refinement preserves the guarantee obtained after rounding while further improving the final discrete solution. 
+
+Algorithm 4: GNN-Parametrized Optimization for Min-k-Partition 
+
+Data: Weighted graph matrix W and number of partitions k.
+
+Result: Discrete assignment X ∈ X .
+
+Initialize GNN parameters Φ;
+
+repeat Update embeddings H(L) 
+
+> Φ
+
+using GNN layers; 
+
+Compute loss L(Φ) ← Tr( H(L)⊤ 
+
+> Φ
+
+W H (L) 
+
+> Φ
+
+); 
+
+Optimize Φ via gradient-based training; 
+
+until convergence ;
+
+Obtain the optimized parameter Φ⋆;
+
+Compute relaxed solution X ← H(L) 
+
+> Φ⋆
+
+;
+
+Apply Algorithm 2 to obtain X ∈ X ;
+
+Apply Algorithm 3 to refine solution X ∈ X ;
+
+Output: X
+
+E. Summary 
+
+We summarize the proposed GNN-parametrized op-timization framework for solving each weighted Min-k-Partition block. The method consists of three steps: 1) Instance-wise neural optimization: optimize the GNN parameters on the current weighted block graph by minimizing the objective (14). 2) Deterministic rounding: convert the relaxed so-lution into a discrete assignment via conditional expectation rounding, which does not increase the objective value. 3) Edge-based refinement: further improve the rounded assignment by a monotone local search over interference-relevant edges. The full procedure is outlined in Algorithm 4. Compared with the PMD approach [10], our frame-work differs in both relaxation and optimization. PMD reformulates Min-k-Partition as a quadratic program with norm-equality constraints and enforces feasibility through a penalty-based iterative procedure, which requires an outer loop over the penalty parameter. In contrast, we directly optimize the penalty-free simplex relaxation (12) through a GNN-based neural parametrization. The resulting relaxed solution is then converted into a discrete assignment by conditional expectation rounding, which deterministically guarantees that the rounded objective value is no larger than the relaxed objective value. By avoiding penalty tuning and introducing a graph-aware parametrization of the relaxed assignment, the proposed solver provides a simpler alternative for large-scale block optimization. Furthermore, unlike the naive pairwise local search used in [10], our refinement is edge-restricted and only examines interference-relevant pairs. Since each accepted move decreases the objective, this refinement preserves monotonic improvement while sub-stantially reducing the local-search overhead. UNDER REVIEW 9
+
+Fig. 3: The Evaluation Results on RGG( N, r ) with N ∈ { 500 , 1000 , 2000 } and r ∈ { 0.05 , 0.1, 0.2} of different scales. 
+
+V. Numerical Experiments 
+
+In this section, we evaluate the performance and ef-ficiency of the proposed framework for large-scale PCI assignment. We compare it against state-of-the-art base-lines in jointly optimizing mod-3, mod-4, mod-6, and mod-30 interference listed in Table I, while eliminating collisions and confusions. All four interference types are treated equally, indicating that λ1 = λ2 = λ3 = λ4 = 1. Experiments are implemented in Python on a system equipped with an Intel i9-12900K CPU and an NVIDIA GeForce RTX 3090 GPU. 
+
+A. List of Baseline Methods 
+
+We call our proposed method of Multi-Modular Decom-position with GNN Parametrization-based Optimization 
+
+MMD-GPO . The baseline methods for comparison are de-scribed as follows. We select five representative methods for solving the PCI problem. 
+
+Greedy Graph Coloring Method ( GGC ) [12]: This method employs a greedy coloring algorithm to address collisions and confusions. In the simulation, we utilize the codes provided from [24]. 
+
+Genetic Method ( Genetic ) [14]: We apply a genetic method for comparison. The fitness function is set as the summation of all modular interferences. The hyperpa-rameter settings include a population size of 30 and 200 iterations, and the probabilities of crossover, mutation, and selection are set to 0 .77, 0 .3, and 0 .8, respectively. 
+
+Memetic Algorithm ( MA-NWS ) [16]: We adopt the non-warm-start version as recommended by [16], which relies solely on the core evolutionary mechanism of the Memetic Algorithm. The fitness function is set as the summation of all modular interferences. All hyperparameters are set according to the best-performing configuration reported in [29]. 
+
+Relaxed Gradient Projection ( RGP ) [18]: We solve the continuous relaxation via gradient projection and apply the rounding rule therein. All parameters, including step sizes and tolerances, are set according to [18]. 
+
+Multi-Modular Decomposition with Penalized Mirror Descent ( MMD-PMD ) [10]: To isolate the effect of the proposed neural block solver, we combine our congruence decomposition with the PMD block solver of [10]. All hyperparameters, including step sizes, penalty schedule, and iteration limits, are set according to the configurations reported in [10]. 
+
+B. Synthetic Data Experiments 
+
+In this section, we test our method on synthetically generated networks. 
+
+1) Experiment Setup: Following [10], we generate syn-thetic networks using the random geometric graph model RGG( N, r ), where N denotes the number of cells and 
+
+r is called the connection radius. Cells are uniformly distributed in a 2D unit square, and cell j is treated as a neighbor of node i if their Euclidean distance is at most 
+
+r. The interference matrix W is defined by setting the interference inversely proportional to the Euclidean dis-tance, simulating spatial interference in wireless networks. This model is widely used to emulate realistic wireless topologies [10, 30, 31]. To evaluate algorithm performance under diverse topo-logical conditions, we systematically vary both the net-UNDER REVIEW 10 
+
+TABLE II: Structural statistics of the random geometric graphs used in our experiments (averaged over 20 instances per setting). RGG( N, r ) Density Max Clique Avg. Degree Clustering Coef. (500 , 0.05) 0.01 6.45 3.78 0.53 (500 , 0.1) 0.03 13 .65 14 .48 0.62 (500 , 0.2) 0.11 30 .45 52 .69 0.65 (1000 , 0.05) 0.01 9.70 7.54 0.60 (1000 , 0.1) 0.03 20 .45 28 .85 0.62 (1000 , 0.2) 0.11 53 .05 105 .29 0.65 (2000 , 0.05) 0.01 14 .90 15 .09 0.60 (2000 , 0.1) 0.03 33 .75 57 .74 0.62 (2000 , 0.2) 0.11 95 .15 210 .51 0.65 work size and spatial density. Specifically, we consider network sizes N ∈ { 500 , 1000 , 2000 }, and connection radii 
+
+r ∈ { 0.05 , 0.1, 0.2} which correspond to sparse, medium, and dense graphs, respectively. For each configuration RGG( N, r ), we generate 20 independent instances, which yields a total of 180 graph instances. For each type of graph, we compute standard structural metrics, including edge density, maximum clique size, average degree, and clustering coefficient. These statistics are summarized in Table II and allow us to interpret algorithm performance under varying structural complexities. All methods are run with a 3600s time limit. If an algorithm has not terminated by then, we record its intermediate solution if available; otherwise, it is marked as “Timeout”. 
+
+GPO is designed as a two-layer GNN, with both the input and hidden dimensions set to 5 × k for solving Min-k-Partition. To address the issue of gradient vanishing, we apply graph normalization as proposed by [32]. The GPO 
+
+model is optimized using Adam with a learning rate of 10 −2 for a maximum epoch number of 10 5, applying early stopping with a tolerance of 10 −2 and patience of 100 iterations. Optimization terminates if no improvement is observed. 
+
+2) Experiment Results: We list the performance of five baselines and our proposed method under three key metrics: (i) the sum of modular interference (including mod-3, mod-4, mod-6, and mod-30 interferences), (ii) the sum of collisions and confusions , and (iii) the computational time . Note that since GPO optimizes an instance-specific GNN parametrization for each test graph, its per-instance optimization cost is fully included in the reported runtime. The averaged results over 20 instances are summarized in Fig. 3. 
+
+Interference Minimization. As shown in the top-left heatmap, both MMD-PMD and MMD-GPO achieve sub-stantially lower modular interference compared with all other baselines, which validates the effectiveness of the pro-posed MMD in dealing with this multi-objective challenge. Furthermore, MMD-GPO consistently outperforms MMD-PMD ,demonstrating that GPO provides an additional gain over the plain PMD strategy by further refining the interference reduction. 
+
+Collision and Confusion Reduction. The top-right heatmap shows the total number of collisions and confu-sions. Both MMD-PMD and MMD-GPO completely eliminate such conflicts in all settings, confirming that the MMD framework guarantees collision- and confusion-free assign-ments in these cases. Although GCC also returns zero collisions and confusions, its solution ignores modular interference altogether and is therefore not practically applicable. In contrast, the remaining heuristics suffer from persistent residual conflicts, especially as the network size increases. 
+
+Computational Efficiency. The bottom heatmap illustrates the average computational time. MMD-GPO exhibits a clear scalability advantage as the network size increases. For N ≥ 1000, it is substantially faster than MMD-PMD across all completed settings, while MMD-PMD times out on the largest instances, highlighting the scalability advantage of GPO. Although GGC has the shortest runtime, it only addresses collisions and confu-sions without optimizing modular interference. Overall, 
+
+MMD-GPO provides the best balance between efficiency and performance. 
+
+Summary. In summary, the MMD framework is key to eliminating collisions and confusions, while the GPO significantly boosts both performance and efficiency in op-timizing multi-modular interference. As a result, MMD-GPO 
+
+consistently outperforms all modular-interference-aware baselines, demonstrating the robustness and practicality of our approach for large-scale PCI assignment. 
+
+C. Real-World Data Experiments 1) Experimental Setup: We conduct experiments on real measurement-report (MR) data collected from acommercial downlink cellular network in Beijing, China. The dataset contains approximately 2 ,000 reconfigurable cells deployed in a dense urban area. The MRs provide neighbor relations, frequency-domain co-occurrence statis-tics, and interaction strengths among cells. Following the preprocessing and graph-construction pipeline established in [10], the MR data is converted into the collision set E1,the confusion set E2, and the interference matrix W inter .
+
+2) Experimental Results: Table III reports the perfor-mance of all methods on the real-world dataset containing 2,000 reconfigurable cells. We evaluate each method using three metrics: (i) the total number of collisions and confusions; (ii) the overall modular interference value; and (iii) the computational time. Among the traditional baselines, GGC removes all colli-sions and confusions but yields the highest interference due to fully discarding modular interference. Genetic , MA-NWS ,and RGP reduce interference to some extent, yet none of them attains collision-free and confusion-free assignments, and all incur substantially higher runtime. Built on the MMD framework, both MMD-PMD and the proposed MMD-GPO generate solutions that strictly satisfy collision-free and confusion-free constraints while achieving considerably lower interference than all classical baselines. Moreover, MMD-GPO reaches the lowest interference overall, improving upon MMD-PMD by 2 .8% and outperforming the UNDER REVIEW 11 
+
+TABLE III: The evaluation results on the real-world data. Methods Coll. & Conf. Inter. Time (s) 
+
+GGC [12, 24] 0 122392610 3.20 
+
+Genetic [14] 226 111035257 3649.26 
+
+MA-NWS [16] 128 62123830 7520.81 
+
+RGP [18] 372 53833127 2423.40 
+
+MMD-PMD [10] 0 53505001 2969.44 
+
+MMD-GPO 0 51999927 1452.26 
+
+other modular-interference-aware baselines by 3 .4% ∼ 53%. It also delivers the best computational efficiency among methods that explicitly optimize modular interference, running about 2 × faster than MMD-PMD and significantly faster than other modular-interference-aware baselines. In summary, MMD-GPO achieves the most favorable balance between interference minimization and runtime efficiency, while rigorously preserving collision-free and confusion-free feasibility. 
+
+VI. Conclusion 
+
+This paper developed a congruence decomposition frame-work with neural block solvers for large-scale PCI assign-ment with multiple modular interference objectives. By exploiting the arithmetic structure of modular congruence relations, the proposed decomposition framework trans-forms the modular assignment stage into a sequence of blockwise Min-k-Partition subproblems and separates it from collision and confusion handling through graph color-ing. The resulting block-coordinate procedure admits finite-step termination under monotone block updates. To im-prove the scalability of the resulting NP-hard subproblems, we further developed an instance-wise GNN-parametrized block solver with deterministic conditional expectation rounding and edge-based refinement. Experiments on synthetic cellular graphs and real-world 5G network data demonstrate substantial reductions in modular interference and improved computational scalability while maintaining collision- and confusion-free solutions in the evaluated instances. Future work includes developing a deeper theoret-ical understanding of neural-parametrized block solvers and exploring whether the proposed congruence decomposition can be extended beyond PCI assignment. 
+
+Appendix A Proof of Theorem III.1 
+
+Proof. From the CRT, the congruence 
+
+ri ≡ rj (mod pℓ)holds if and only if, for every prime factor su,
+
+ri ≡ rj (mod stu,ℓ  
+
+> u
+
+).
+
+Fix u ∈ [n] and write the su-adic expansion with sorted exponents tu, (1) ≤ · · · ≤ tu, (m) = tu:
+
+r(u) 
+
+> i
+
+= ri mod stu 
+
+> u
+
+=
+
+> m
+
+∑
+
+> h=1
+
+r(u,h ) 
+
+> i
+
+stu, (h−1)  
+
+> u
+
+,r(u) 
+
+> j
+
+= rj mod stu 
+
+> u
+
+=
+
+> m
+
+∑
+
+> h=1
+
+r(u,h ) 
+
+> j
+
+stu, (h−1)  
+
+> u
+
+,
+
+where tu, (0) := 0 and each coefficient r(u,h ) 
+
+> i
+
+lies in Zsδu,h u
+
+with δu,h = tu, (h) − tu, (h−1) .Then, the congruence ri ≡ rj (mod stu,ℓ  
+
+> u
+
+) is equivalent to equality of the two expansions modulo stu,ℓ  
+
+> u
+
+, hence to equality of all base-su digits whose positional weights are strictly smaller than stu,ℓ  
+
+> u
+
+. Concretely, 
+
+r(u) 
+
+> i
+
+≡ r(u) 
+
+> j
+
+(mod stu,ℓ  
+
+> u
+
+)
+
+⇔ ∑
+
+> h:tu, (h)≤tu,ℓ
+
+r(u,h ) 
+
+> i
+
+stu, (h−1)  
+
+> u
+
+= ∑ 
+
+> h:tu, (h)≤tu,ℓ
+
+r(u,h ) 
+
+> j
+
+s tu, (h−1)  
+
+> u
+
+.
+
+By the uniqueness of the su-adic expansion at these positional weights, the last equality holds if and only if 
+
+r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+for every h with tu, (h) ≤ tu,ℓ .
+
+Collecting this condition over all prime factors su yields exactly the requirement that r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+for every pair (u, h ) ∈ J ℓ. This proves the equivalence. 
+
+Appendix B Proof of Theorem III.2 
+
+Proof. Let Λ( {r(u,h )}) = 
+
+> m
+
+∑
+
+> ℓ=1
+
+λℓ
+
+∑
+
+> i,j
+
+W inter 
+
+> i,j
+
+∏
+
+> (u,h )∈J ℓ
+
+1{r(u,h ) 
+
+> i
+
+= r(u,h ) 
+
+> j
+
+}
+
+be the weighted sum of modular interferences. Since every block update satisfies Λ new < Λold , the sequence {Λ(t)} of objective values produced by the algorithm is monotonically decreasing. Since the overall feasible set is finite, Λ can assume only finitely many values. Therefore, the decreasing sequence {Λ(t)} must stabilize after a finite number of updates, i.e., the algorithm reaches a configuration at which no further accepted block update is possible. This implies termination in a finite number of block updates. 
+
+Appendix C Proof of Theorem IV.1 
+
+Proof. Let X ∈ ∆Nk be a feasible solution to the relaxed problem (12), and let X be the output of Algorithm 2. Define an auxiliary random matrix Z ∈ X by indepen-dently drawing each row according to 
+
+P(Zi· = es) = Xi,s , i ∈ [N ], s ∈ [k].
+
+Since W has zero diagonal, the randomized rounding is unbiased [19]: 
+
+E[f (Z)] = f (X). (20) UNDER REVIEW 12 
+
+Consider the sequential conditional expectation proce-dure. Suppose that before fixing node i, the first i − 1 rows have been fixed as X1·, . . . , X(i−1) ·. Let 
+
+Ci−1 = {Zℓ· = Xℓ·, ℓ = 1 , . . . , i − 1}.
+
+For each candidate label s ∈ [k], define 
+
+ψi(s) := E[f (Z) | C i−1, Zi· = es] . (21) Algorithm 2 selects 
+
+s⋆i ∈ arg min  
+
+> s∈[k]
+
+ψi(s)and sets Xi· = es⋆i .By the law of total expectation, 
+
+E[f (Z) | C i−1] = 
+
+> k
+
+∑
+
+> s=1
+
+Xi,s ψi(s)
+
+≥ min  
+
+> s∈[k]
+
+ψi(s) = ψi(s⋆i ). (22) Thus, fixing the i-th row according to Algorithm 2 does not increase the conditional expected objective. Applying this argument sequentially for i = 1 , . . . , N , we obtain 
+
+f (X) ≤ E[f (Z)] = f (X), (23) where the equality follows from (20). Therefore, Algo-rithm 2 returns a discrete assignment whose objective value is no larger than that of the relaxed solution. 
+
+Appendix D Efficient Implementation of Algorithm 2 
+
+Here we describe an efficient, incremental implementa-tion of Algorithm 2 that maps the relaxed solution X ∈ ∆Nk
+
+to a discrete one-hot assignment X ∈ X . Denote the objective evaluated at X by 
+
+f (X) = ∑
+
+> (i,j )∈E
+
+Wi,j X⊤ 
+
+> i·
+
+Xj· := ∑
+
+> (i,j )∈E
+
+Wi,j Ti,j ,
+
+where Ti,j = X⊤ 
+
+> i·
+
+Xj· is the expected contribution of edge ( i, j ) under the product distribution induced by X.The rounding proceeds by fixing nodes sequentially: when considering node i, we evaluate, for each candidate label 
+
+s ∈ { 1, . . . , k }, the change in the conditional expected objective obtained by assigning s to node i. Since only edges incident to i are affected, it suffices to inspect 
+
+N (i) = {j | (i, j ) ∈ E} . For an incident edge ( i, j ), the post-conditioning value T (s) 
+
+> i,j
+
+is defined as 
+
+T (s) 
+
+> i,j
+
+=
+
+
+
+1, if node j is already fixed to label s, 
+
+0, if node j is already fixed to a label ̸ = s, Xj,s , if node j is not yet fixed .
+
+(24) 
+
+Algorithm 5: Incremental Conditional Rounding 
+
+Input: Relaxed solution X ∈ ∆Nk , edge set E,weights Wi,j .
+
+Output: Discrete assignment X ∈ X .
+
+Initialize Ti,j ← X⊤ 
+
+> i·
+
+Xj· for all ( i, j ) ∈ E ;
+
+for i = 1 to N do for s = 1 to k do Compute T (s) 
+
+> i,j
+
+for all j ∈ N (i) by (24); 
+
+Compute 
+
+∆fi(s) ← ∑  
+
+> j∈N (i)
+
+Wi,j 
+
+(T (s) 
+
+> i,j
+
+− Ti,j 
+
+);
+
+Set s⋆ ← arg min s ∆fi(s); 
+
+Set Xi· ← es⋆ ;
+
+Update Ti,j ← T (s⋆) 
+
+> i,j
+
+for all j ∈ N (i); 
+
+return X;Thus, the incremental change for candidate s is ∆fi(s) = ∑ 
+
+> j∈N (i)
+
+Wi,j 
+
+(T (s) 
+
+> i,j
+
+− Ti,j 
+
+).
+
+We choose the label s⋆ = arg min s ∆fi(s), set Xi· to the corresponding one-hot vector, and update Ti,j ← T (s⋆)
+
+> i,j
+
+for all j ∈ N (i). This edge-local maintenance avoids recomputing the quadratic form at each step and yields the practical procedure summarized in Algorithm 5. The initial computation of f (X) requires O(k|E| ) time. During rounding, for each node i and each label s, we inspect all incident edges, and the total number of such edge visits over the entire process is exactly |E| . Hence, the overall time complexity is O(k|E| ). 
+
+References 
+
+[1] M. Shafi, A. F. Molisch, P. J. Smith, T. Haustein, P. Zhu, P. De Silva, F. Tufvesson, A. Benjebbour, and G. Wunder, “5G: A tutorial overview of standards, trials, challenges, deployment, and practice,” IEEE Journal on Selected Areas in Communications , vol. 35, no. 6, pp. 1201–1221, 2017. [2] X. Ge, S. Tu, G. Mao, C.-X. Wang, and T. Han, “5G ultra-dense cellular networks,” IEEE Wireless Communications , vol. 23, no. 1, pp. 72–79, 2016. [3] A. Loulou and M. Renfors, “Enhanced OFDM for fragmented spectrum use in 5G systems,” Transactions on Emerging Telecommunications Technologies , vol. 26, no. 1, pp. 31–45, 2015. [4] Y. Xu, G. Gui, H. Gacanin, and F. Adachi, “A survey on resource allocation for 5G heterogeneous networks: Current research, future trends, and challenges,” IEEE Communications Surveys & Tutorials , vol. 23, no. 2, pp. 668–695, 2021. [5] L. Pierucci, “The quality of experience perspective toward 5G technology,” IEEE Wireless Commun. ,vol. 22, no. 4, pp. 10–16, 2015. [6] Z.-Q. Luo, X. Zheng, D. López-Pérez, Q. Yan, X. Chen, N. Wang, Q. Shi, T.-H. Chang, and A. Garcia-UNDER REVIEW 13 
+
+Rodriguez, “SRCON: A data-driven network perfor-mance simulator for real-world wireless networks,” 
+
+IEEE Commun. Mag. , vol. 61, no. 6, pp. 96–102, 2023. [7] Y.-F. Liu, T.-H. Chang, M. Hong, Z. Wu, A. Man-Cho So, E. A. Jorswieck, and W. Yu, “A survey of recent advances in optimization methods for wire-less communications,” IEEE J. Sel. Areas Commun. ,vol. 42, no. 11, pp. 2992–3031, 2024. [8] “3GPP TS 38.211 V17.4.0: NR; Physical channels and modulation,” 3rd Generation Partnership Project (3GPP), 2024. [9] K. Lodhi, J. Chhillar, S. J. Darak, and D. Sharma, “Design and performance analysis of hardware realiza-tion of 3GPP physical layer for 5G cell search,” Chips ,vol. 2, no. 4, pp. 223–242, 2023. [10] Y. Qiu, C. Huang, Y. Xue, Z. Jiang, Q. Shi, D. Zhang, and Z.-Q. Luo, “Relaxation-free min-k-partition for PCI assignment in 5G networks,” IEEE Trans. Signal Process. , vol. 73, pp. 3931–3946, 2025. [11] J. Gui, Z. Jiang, and S. Gao, “PCI planning based on binary quadratic programming in LTE/LTE-a networks,” IEEE Access , vol. 7, pp. 203–214, 2018. [12] T. Bandh, G. Carle, and H. Sanneck, “Graph coloring based physical-cell-ID assignment for LTE networks,” in Proc. of the 2009 Int. Conf. Wireless Commun. and Mobile Comput.: Connecting the world wirelessly , ser. IWCMC ’09. Association for Computing Machinery, 2009, p. 116–120. [13] A. Pratap, R. Misra, and U. Gupta, “Randomized graph coloring algorithm for physical cell ID assign-ment in LTE-a femtocellular networks,” Wireless Pers. Commun. , vol. 91, pp. 1213–1235, 2016. [14] P. Li and J. Wang, “PCI planning method based on ge-netic algorithm in LTE network,” Telecommunications Science , vol. 32, no. 3, p. 2016082, 2016. [15] A. Shen, B. Guo, Y. Gao, T. Xie, X. Hu, Y. Zhang, J. Shen, Y. Fang, G. Wang, and Y. Liu, “A novel PCI optimization method in LTE system based on intelligent genetic algorithm,” in Int. Conf. Signal and Inf. Process., Netw. And Comput. Springer, 2017, pp. 350–355. [16] C. E. Andrade, L. S. Pessoa, and S. Stawiarski, “The physical cell identity assignment problem: a practical optimization approach,” IEEE Transactions on Evolutionary Computation , vol. 28, no. 2, pp. 282– 292, 2022. [17] J. Fairbrother, A. N. Letchford, and K. Briggs, “A two-level graph partitioning problem arising in mobile wireless communications,” Comput. Optim. and Appl. ,vol. 69, pp. 653–676, 2018. [18] Y. Qiu, Y. Xue, Z. Jiang, and Q. Shi, “Relaxed gradient projection for PCI assignment in 5G net-work,” in 2025 IEEE/CIC International Conference on Communications in China (ICCC) , 2025, pp. 1–6. [19] Y. Qiu, Y. Xue, A. Wang, Y. Wang, Q. Shi, and Z.-Q. Luo, “ROS: A GNN-based relax-optimize-and-sample framework for max-k-cut problems,” in Proceedings of the 42nd International Conference on Machine Learning , 2025. [20] M. J. Schuetz, J. K. Brubaker, and H. G. Katzgraber, “Combinatorial optimization with physics-inspired graph neural networks,” Nature Machine Intelligence ,vol. 4, no. 4, pp. 367–377, 2022. [21] Z. Zhao, G. Verma, C. Rao, A. Swami, and S. Segarra, “Link scheduling using graph neural networks,” IEEE Transactions on Wireless Communications , vol. 22, no. 6, pp. 3997–4012, 2023. [22] R. Acedo-Hernández, M. Toril, S. Luna-Ramírez, I. de la Bandera, and N. Faour, “Analysis of the impact of PCI planning on downlink throughput performance in LTE,” Computer Networks , vol. 76, pp. 42–54, 2015. [23] E. Zeljković, D. Gogos, G. Dox, S. Latré, and J. M. Marquez-Barja, “ALPACA: A PCI assignment algo-rithm taking advantage of weighted ANR,” Journal of Network and Systems Management , vol. 30, no. 2, p. 33, 2022. [24] G. G. Subies, “Welsh powell algorithm to color graphs,” https://gist.github.com/GuillemGSubies/ 59b968ec0a68c17384c9f15c15cb38e6. [25] X. Glorot and Y. Bengio, “Understanding the difficulty of training deep feedforward neural networks,” in 
+
+Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics , ser. Proceed-ings of Machine Learning Research, Y. W. Teh and M. Titterington, Eds., vol. 9. Chia Laguna Resort, Sardinia, Italy: PMLR, 13–15 May 2010, pp. 249–256. [26] C. Morris, M. Ritzert, M. Fey, W. L. Hamilton, J. E. Lenssen, G. Rattan, and M. Grohe, “Weisfeiler and leman go neural: Higher-order graph neural networks,” in Proceedings of the AAAI conference on artificial intelligence , vol. 33, 2019, pp. 4602–4609. [27] N. Karalias and A. Loukas, “Erdos goes neural: an unsupervised learning framework for combinatorial optimization on graphs,” Advances in Neural Infor-mation Processing Systems , vol. 33, pp. 6659–6672, 2020. [28] P. Raghavan, “Probabilistic construction of deterministic algorithms: Approximating packing integer programs,” Journal of Computer and System Sciences , vol. 37, no. 2, pp. 130–143, 1988. [Online]. Available: https://www.sciencedirect. com/science/article/pii/0022000088900037 [29] C. E. Andrade, M. G. Resende, W. Zhang, R. K. Sinha, K. C. Reichmann, R. D. Doverspike, and F. K. Miyazawa, “A biased random-key genetic algorithm for wireless backhaul network design,” Appl. Soft Comput. ,vol. 33, pp. 150–169, 2015. [30] R. Gowaikar, B. Hochwald, and B. Hassibi, “Com-munication over a wireless network with random connections,” IEEE Trans. Inf. Theory , vol. 52, no. 7, pp. 2857–2871, 2006. [31] M. Haenggi, J. G. Andrews, F. Baccelli, O. Dousse, and M. Franceschetti, “Stochastic geometry and ran-dom graphs for the analysis and design of wireless networks,” IEEE J. Sel. Areas Commun. , vol. 27, no. 7, pp. 1029–1046, 2009. UNDER REVIEW 14 
+
+[32] T. Cai, S. Luo, K. Xu, D. He, T.-y. Liu, and L. Wang, “Graphnorm: A principled approach to accelerating graph neural network training,” in International Con-ference on Machine Learning . PMLR, 2021, pp. 1204– 1215.

@@ -1,0 +1,2281 @@
+Title: Online Scheduling for Throughput Maximization of Time-varying Markovian Channels with Unknown Statistics
+
+URL Source: https://arxiv.org/pdf/2608.19398v1
+
+Published Time: Fri, 21 Aug 2026 00:10:30 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+> 1
+
+# Online Scheduling for Throughput Maximization of Time-varying Markovian Channels with Unknown Statistics 
+
+Tasmeen Zaman Ornee, Member, IEEE, Clement Kam, Member, IEEE, and Ness B. Shroff, Fellow, IEEE 
+
+Abstract —We consider a wireless scheduling problem in down-link wireless networks with unknown channel statistics, where a Base Station (BS) sends data to multiple users. The scheduling performance relies heavily on accurate Channel State Informa-tion (CSI), which is often costly to acquire. In this paper, CSI is obtained from ACK/NACK feedback, only after each scheduled transmission. Due to limited wireless channel resources, all users cannot be scheduled for transmission simultaneously. Hence, the most recently observed CSI can be outdated. The traditional approach to solve scheduling problems using outdated CSI is to utilize belief states, which are calculated using the time correlation statistics of channels. However, channel statistics are often unknown; consequently, belief states can be uncountable and this approach becomes infeasible. In this paper, we introduce a new sufficient statistics for the wireless scheduling problem. Towards this effort, we characterize the CSI staleness by the Age of Channel State Information (AoCSI) and show that the latest observed CSI and its AoCSI is a sufficient statistic of the history to make the scheduling decisions. Accordingly, we are able to reduce the state space for online learning. Our goal is to develop an online scheduling algorithm that maximizes the expected sum throughput of all users over a finite time-horizon while satisfying a channel resource constraint. The formulated problem is a Restless Multi-armed Bandit (RMAB). We develop an online Maximum Gain First (Online-MGF) policy, which achieves sub-linear regret on the number of episodes. For a special case of ON/OFF channels, we are able to prove indexability and derive a closed-form expression of the Whittle index. Numerical results demonstrate that the Online-MGF policy converges to MGF and Whittle index policies with known statistics within a very few episodes. In addition, Online-MGF outperforms Maximum AoCSI First (MAF) and random policies. 
+
+I. I NTRODUCTION 
+
+6G and Future-Generation (Future-G) wireless networks aims to support a massive number of users and a broad range of applications, such as interconnected Internet of Things 
+
+A part of this manuscript has been accepted by IEEE INFOCOM , 2026 [1]. T. Z. Ornee and N. B. Shroff are with the Department of Electrical and Computer Engineering, The Ohio State University, Columbus, OH, 43210 USA (email: ornee.1@osu.edu, shroff.11@osu.edu) C. Kam is with the U.S. Naval Research Laboratory, Washington, DC, 20375 USA (e-mail: clement.kam@nrl.navy.mil). This work has been supported in part by the Army Research Laboratory and was accomplished under Cooperative Agreement Number W911NF-23-2-0225, by the U.S. National Science Foundation under the grants: NSF AI Institute (AI-EDGE) 2112471, CNS-2312836, CNS-2225561, and CNS-2239677, and Office of Naval Research under grant N00014-24-1-2729. The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the official policies, either expressed or implied, of the Army Research Laboratory or the U.S. Government. The U.S. Government is authorized to reproduce and distribute reprints for Government purposes notwithstanding any copyright notation herein. 
+
+(IoT) devices, vehicle to vehicle and vehicle to infrastruc-ture communications, and Unmanned Aerial Vehicle (UAV) deployments. A fundamental challenge in these applications is the efficient allocation of limited wireless resources such as spectrum, power, and time slots among a massive number of users. This difficulty is further increased by the highly dynamic nature of the wireless environment; high-mobility nodes (e.g., UAVs and vehicles) and the use of higher-frequency bands (mmWave and Terahertz) cause wireless channel states to fluctuate rapidly due to blockage, Doppler shifts, and fast fading, which yields the static resource allocation techniques ineffective. One strategy to address the difficulty that arises from fluctuating channel conditions is to exploit the time correlation of the channel state information (CSI) to predict the current CSI based on outdated CSI [2]–[8]. For example, a BS can anticipate the future capacity of a channel by understanding its time-varying characteristics. However, accurate time corre-lation statistics for a wireless channel are often unknown in practice. The lack of complete channel statistical knowledge makes the resource allocation problem highly complicated. Motivated by these practical limitations, we investigate an online wireless scheduling problem for throughput maximiza-tion under unknown channel statistics and imperfect CSI in this paper. Our system consists of a BS that transmits data to N users and operates in a discrete-time environment. Due to limited communication resources, the BS selects M out of N users for transmission at any time-slot t. To model the time correlations in fading channels, we assume that the wireless channel between the BS and each scheduled user evolves as a discrete-time, finite-state Markov chain. The CSI can be modeled by Signal-to-Noise Ratio (SNR), Bit Error Rate (BER), received signal power, etc. The BS obtains the CSI from an ACK/NACK feedback after each scheduled transmission. Therefore, the BS utilizes the past available observations to predict the CSI in the current time-slot before making the scheduling decisions. Moreover, the channel statistics are unknown to the BS in our model. Therefore, in order to maximize the throughput, the BS requires to estimate the channel statistics and the current CSI based on the available information prior to making the scheduling decisions. To that end, we answer the following research question in this study: 
+
+How to design an efficient online scheduling al-gorithm for maximizing throughput while satisfying arXiv:2608.19398v1 [cs.NI] 19 Aug 2026 2
+
+an instantaneous resource constraint with unknown channel statistics and imperfect CSI? 
+
+The contributions of this study are summarized below:  
+
+> •
+
+The optimal scheduling problem for maximizing through-put can be formulated as an RMAB [9], where each user (and its channel) is represented as an arm and each arm is described as an MDP [9]. Existing studies [2]–[5], [8], [10]–[12] utilize belief states as sufficient statistics which can lead to an uncountable number of possible states, specifically when the channel statistics are unknown. We are able to reduce the state space of this problem by utilizing a sufficient statistic of the history [13]. To that end, we leverage a metric called Age of Channel State Information (AoCSI) [14], which is defined as the time difference between the current time and the last time CSI is updated. We show that the latest observed CSI and its AoCSI form a sufficient statistic of the information history to make the scheduling decisions for each user (see Theorem 1). Therefore, by leveraging the latest observed CSI and its AoCSI as states, we replace the Partially Observed Markov Decision Process (POMDP) or belief MDP framework used in [2]–[5], [8], [10]– [12] with a more tractable MDP framework to solve the scheduling problem with unknown channel statistics.  
+
+> •
+
+By using (i) relaxation and Lagrangian decomposition and (ii) an optimistic Upper Confidence Bound (UCB) approach, we develop an online Maximum Gain First (Online-MGF) policy (see Algorithm 1). Unlike the Whit-tle index-based policy [9], our policy does not require satisfying any indexability condition. Utilizing standard relaxation and Lagrangian decomposition, we decouple the original problem into multiple independent MDPs. Because we are able to reduce the state space of each MDP by finding a sufficient statistic, we can simplify the search space of the online learning algorithm. Unlike existing online learning approaches for RMABs [15], [16], our Online-MGF policy leverages AoCSI and do not need to estimate the entire transition probabilities (see Re-marks 1 and 2). It eliminates the O(N τ 2|C| 2) complexity of estimating full transition matrices for passive actions [15] and the O(N τ 3|C| 3) complexity of root-finding step required by current online Whittle index policies [16]. This results in a more efficient per-episode complexity of O(N Hτ |C| 2 + HN log N ) (see Remark 3).  
+
+> •
+
+We propose a stronger definition for regret that evaluates the performance of the proposed policy with respect to the optimal policy. Earlier studies provide regret bound for RMAB with respect to the Lagrangian function [1], [16], [17]. Our definition is more general and the proposed Online-MGF policy achieves sublinear regret 
+
+O(√K log K) on the number of episodes K (see Theo-rems 2, 3, and 4).  
+
+> •
+
+For the special case of a two-state Markov chain, such as an ON/OFF channel, the Online-MGF policy in Algo-rithm 1 can be simplified. This is because the feedback allows us a direct mapping to the actual channel state (e.g., a NACK confirms the OFF state with probability 1). Consequently, we only need to estimate transition probabilities associated with the ON states (see Algorithm 2). Furthermore, we establish indexability for this setting and derive the closed-form expression of the Whittle index. The algorithm for the Online Whittle index policy is provided in Algorithm 3.  
+
+> •
+
+Numerical results show that the Online-MGF policy con-verges faster to the MGF and Whittle index policies with known channel statistics and achieves good performance over Maximum AoCSI First (MAF) and Random policies (see Figures 3-6). Moreover, Online-MGF policy shows similar performance as the Whittle index policy with known channel statistics (see Figures 3-6). In one setup, the Online-MGF policy outperforms the Whittle index policy with known channel statistics (see Figure 5). II. R ELATED WORK 
+
+Opportunistic scheduling algorithms have been widely used and extensively studied in the literature under perfect and imperfect CSI [2], [4]–[8], [10], [18]. These studies addressed the scheduling problem using the POMDP (or belief MDP) formulation which considers belief states [3]–[8], [10], [18]. Such formulations can lead to an uncountable number of state spaces, specifically when the channel statistics are unknown. Age of Information (AoI) has emerged as an important met-ric to study sampling and scheduling problems, because it captures the “freshness (or rather staleness)” of information [11], [19]–[27]. Building upon this concept, Age of Channel State Information (AoCSI) was proposed in [14] to analyze the impact of CSI staleness on the overall system perfor-mance. Subsequently, several papers [28]–[31] studied differ-ent scheduling schemes and the impact of AoCSI and different functions of AoCSI. When the channel statistics are unknown, using POMDP (or belief MDP) formulations with belief states makes the solution computationally intractable and introduces significant challenges for online learning algorithms. Unlike [2], [4]–[8], [10], [18], we do not require utilizing POMDP (or belief MDP) formulation with belief states. We obtain a sufficient statistic of the history in this study, which contains the last observed CSI and its AoCSI. Therefore, instead of utilizing belief states, we can use a smaller state space. Moreover, restless bandits are a popular framework to solve resource allocation and sequential decision-making problems. Numerous scheduling problems have been formulated as RMABs and Whittle index policies were found for contexts such as multi-access channels, network utility maximization, age penalty minimization, remote estimation, etc [3], [9], [20]– [22]. Whittle index policy is proven to be asymptotically optimal [32] under an indexability condition, which is often very challenging to establish in practice. Consequently, non-indexable scheduling policies have been analyzed in recent years [12], [17], [23], [27], [33], [34]. Unlike [12], [17], [23], [27], [33], [34], we consider unknown channel statistics, and thus the methods established in existing studies cannot be used to solve our problem. A gain index-based asymptotically optimal policy was proposed in [12], [17], [27], [34], [35] with known system dynamics. When system dynamics are 3M shared wireless channels User 1 User 2 User 3 User N
+
+Base Station 
+
+> Fig. 1: System Model.
+
+unknown, online learning is a promising approach to solve RMABs, where a decision-maker simultaneously estimates the unknown system dynamics and makes scheduling deci-sions. There exist several online learning policies that studied RMAB problems with unknown system dynamics [16], [36]– [41]. Without the “restless” setting, [36]–[38] studied online learning policies for Multi-armed Bandits (MABs). Under indexability, [40] proposed a Thompson sampling-based online Whittle index policy and [16], [41] proposed UCB-based online Whittle index policies. Unlike [16], [40], [41], we develop a UCB-based online Maximum Gain First (Online-MGF) policy that does not require satisfying any indexability condition, which often does not hold in practice. Moreover, compared to the existing studies, our proposed Online-MGF policy requires us to estimate probabilities associated with one action instead of the entire transition probabilities as we find a sufficient statistic of the history. III. M ODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+Our system consists of a wireless network with one Base Station (BS) and N users with M shared wireless channels as depicted in Figure 1. The system is time-slotted and operates within a finite time horizon T . At any time-slot t, the BS can simultaneously transmit to at most M users without interference, where M < N .The wireless channel Cn(t) between the BS and user n
+
+is independent across users, i.e., Cn(t), t = 1 , 2, . . . , T , and 
+
+Cm(t), t = 1 , 2, . . . , T are independent for all n̸ = m. The CSI Cn(t) remains static within each time-slot. However, 
+
+Cn(t) evolves stochastically between successive time-slots. The CSI Cn(t) is modeled as a discrete-time, finite-state time-homogeneous Markov chain with C states, where 2 ≤ C < ∞.For each channel n, Cn(t) evolves according to a transition matrix Pn ∈ RN ×N , where 
+
+Pn(Cn(t) = j|Cn(t − 1) = i) = pij , (1) which is the (i, j )-th entry of the transition matrix Pn. The transition matrix Pn is unknown in our model. At the beginning of each time-slot t, the BS does not know the actual CSI Cn(t) while making the scheduling decisions. Let an(t) ∈ { 0, 1} denotes the scheduling decision to schedule user n at time-slot t, defined as 
+
+an(t)= 
+
+(
+
+1, if user n is scheduled in time-slot t, 
+
+0, otherwise. (2) Whenever user n receives data from the BS, it sends a zero-delay feedback to the BS to inform a successful or failed transmission. We denote βn(t) ∈ {0, 1} as the delivery indicator for user n at time-slot t. If the transmission fails (i.e., βn(t) = 0 ), the BS recognizes that the channel is in a bad condition or ”OFF” state. However, if the transmission is successful (i.e., βn(t) = 1 ), the user also sends the received signal power, which allows the BS to calculate the Signal-to-Noise Ratio (SNR). Because the CSI is modeled as a finite-state Markov chain, this feedback information is essential for the BS to map the successful transmission to a specific channel state Cn(t) within the discretized CSI space. However, the feedback is only received at the end of the time-slot after the data is transmitted. The delivery indicators βn(t) are independent across both users and time-slots. Consequently, when the BS makes the scheduling decision in time-slot t, the most recent information available of user n is the last observed CSI Cn(t − ∆n(t)) , which is observed at time-slot t − ∆n(t).The time difference between the current time t and the last CSI update time t − ∆n(t) is called the Age of Channel State Information (AoCSI) [14], defined as 
+
+∆n(t + 1) = 
+
+(
+
+1, if an(t) = 1 ,
+
+∆n(t) + 1 , otherwise. (3) 
+
+B. Problem Formulation with Known Channel Statistics 
+
+Let π = ( an(1) , a n(2) , . . . , a n(T )) Nn=1 denote a scheduling policy, where an(t) is defined in (2) for all t = 1 , 2, . . . , T .Our goal is to find the optimal policy π that maximizes the sum of throughput over the finite time horizon T , subject to the constraint on the number of users selected in each time-slot 
+
+t. The sum-throughput optimization problem is formulated as follows 
+
+max 
+
+> π∈Π
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+Eπ
+
+
+
+h(Cn(t), a n(t)) Hn(t)
+
+
+
+(4) s.t. 
+
+> N
+
+X
+
+> n=1
+
+an(t) ≤ M, t = 1 , 2, . . . , T, (5) where Π is the set of all causal scheduling policies, 
+
+h(Cn(t), a n(t)) is the instantaneous throughput of user-n in time-slot t, and Hn(t) is the information history available for the BS at time-slot t, defined as 
+
+Hn(t) = ( Cn(τ −∆n(τ )) , ∆n(τ ), a n(τ − 1) , β n(τ − 1)) tτ =1 ,
+
+(6) which includes all previously observed channel states, their AoCSI values, scheduling decisions, and delivery indicators 4
+
+of user n up to time-slot t. The instantaneous throughput 
+
+h(Cn(t), a n(t)) = 0 , if user n is not scheduled at time-slot t
+
+(i.e., an(t) = 0 ). When user n is scheduled at time-slot t (i.e., 
+
+an(t) = 1 ), the throughput depends on the CSI Cn(t). In this framework, Cn(t) can represent discretized Signal-to-Noise Ratio (SNR) levels or received signal power. For instance, if Cn(t) represents discretized SNR levels, the instantaneous throughput is defined by the Shannon capacity 
+
+h(Cn(t), a n(t)) = an(t)W log 2(1 + Cn(t)) , (7) where W represents the channel bandwidth. Alternatively, if 
+
+Cn(t) is the received signal power, the throughput is given by 
+
+h(Cn(t), a n(t)) = an(t)W log 2(1 + Cn(t)
+
+σ2 ), (8) where σ2 is the noise power. Problem (4)-(5) can be formulated as a Partially Observed Markov Decision Process (POMDP) [42]. This is because the scheduler has no knowledge of the current CSI at time-slot t
+
+while making the scheduling decisions. Existing studies utilize belief states to solve similar kind of POMDP problems [2]– [5], [8], [10]–[12]. However, this approach requires handling over an uncountably infinite state space of continuous proba-bility distributions. Furthermore, when the underlying channel statistics are unknown, evaluating these belief states become significantly challenging and computationally intractable for online learning algorithms. To address this, we simplify prob-lem (4)-(5) by reducing its state space to a countable space. We achieve this by using a sufficient statistic of the history to provide an equivalent MDP formulation. The details are presented in Section IV. IV. P ROBLEM SIMPLIFICATION 
+
+We are able to simplify problem (4)-(5) by utilizing the sufficient statistic of the history [13]. 
+
+Theorem 1. If Cn(t) ↔ Cn(t − 1) ↔ Cn(t − 2) ↔ . . . is a Markov chain, then the last observed CSI and its AoCSI 
+
+(Cn(t − ∆n(t)) , ∆n(t)) Nn=1 is a sufficient statistic of the information history (Hn(t)) Nn=1 for making the scheduling decisions (an(t)) Nn=1 at time-slot t in problem (4) -(5) .Proof. See Appendix A. Theorem 1 implies that (Cn(t − ∆n(t)) , ∆n(t)) Nn=1 is a sufficient statistic to find the optimal scheduling decisions at time-slot t. Using Theorem 1, we can reformulate problem (4)-(5) as 
+
+max 
+
+> π∈Π
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+Eπ
+
+
+
+f (Cn(t−∆n(t)) , ∆n(t), a n(t)) 
+
+
+
+(9) s.t. 
+
+> N
+
+X
+
+> n=1
+
+an(t) ≤ M, t = 1 , 2, . . . , T, (10) where 
+
+f (Cn(t − ∆n(t)) , ∆n(t), a n(t)) =E[h(Cn(t), a n(t)) |Cn(t − ∆n(t)) , ∆n(t)] . (11) If an(t) = 0, then f (Cn(t − ∆n(t)) , ∆n(t), 0) = 0
+
+as h(Cn(t), 0) = 0; If an(t) = 1, then f (Cn(t −
+
+∆n(t)) , ∆n(t), 1) can be further simplified: We denote the transition probability to the current CSI Cn(t) = c′ from the outdated CSI Cn(t − ∆n(t)) = c and AoCSI ∆n(t) = δ by 
+
+Pn(c′|c, δ ). Given Cn(t − ∆n(t)) = c and ∆n(t) = δ, we have 
+
+f (c, δ, 1) = X
+
+> c′
+
+h(c′, 1) Pn(c′|c, δ ), (12) where Pn(c′|c, δ ) is obtained from the δ-step transition matrix 
+
+P δn and 
+
+Pn(Cn(t) = j|Cn(t − δ) = i) = pδij . (13) In problem (9)-(10), the state space is reduced from an uncountable number of belief states to a countable number of states. Moreover, the state space can be made finitely countable using a large truncated AoCSI value [2], [21]. We let Γ denote the maximum AoCSI value in the truncated space. Problem (9)-(10) is an RMAB where each user n is rep-resented as an arm and each arm n is described as an MDP. Each MDP associated with arm n has two actions at every time-slot t: active ( an(t) = 1) and passive ( an(t) = 0). The problem (9)-(10) is “restless” because the AoCSI ∆n(t)
+
+evolves even when the n-th arm is passive [21]. Since we are able to simplify the original problem (4)-(5), the RMAB (9)-(10) has a reduced state space compared to (4)-(5). However, even with reduced state space, solving RMAB problems is significantly challenging, and it is intractable to find the optimal solution [43]. A Whittle index policy is known to be an efficient approach to solve RMAB problems [9]. This policy is known to be asymptotically optimal under a complicated condition called indexability [32]. Nevertheless, indexability is often very difficult to establish in practice. Recently, another policy called the gain index policy has been proven to be asymptotically optimal for RMABs [12], [27], [44]. A key advantage of the gain index-based policy is that it does not require proving indexability. In this paper, we provide a gain index-based policy for the problem (9)-(10). Furthermore, in Section VIII, we show numerically that our developed gain index-based policy performs equally well compared to the Whittle index policy. In addition, the transition matrix Pn is unknown in our model. Therefore, we first study a gain index-based policy for problem (9)-(10) with known channel state transition matrix Pn. Utilizing the insights from the solution with known channel statistics, we will develop an online algorithm called “Online Maximum Gain First (Online-MGF)” policy when the channel statistics are unknown. To that end, we utilize Lagrangian dual decomposition and decompose problem (9)-(10) to N independent per-arm problems, detailed in Section IV-A. 
+
+A. Relaxation and Lagrangian Decomposition 
+
+Following the standard relaxation and Lagrangian decompo-sition technique for RMABs [9], we first relax the constraint 5
+
+(10) and obtain the following relaxed problem: 
+
+max 
+
+> π∈Π
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+Eπ
+
+
+
+f (Cn(t − ∆n(t)) , ∆n(t), a n(t)) 
+
+
+
+(14) s.t. 
+
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+Eπ [an(t)] ≤ M T, (15) where the relaxed constraint (15) needs to be satisfied in total finite time T , instead of satisfying at every time-slot t. Next, we apply Lagrange multiplier λ ≥ 0 (also known as dual cost) to the relaxed constraint (15) and obtain the following Lagrangian dual problem: 
+
+L(π∗, P, λ ) =max 
+
+> π∈Π
+> N
+
+X
+
+> n=1
+
+Eπ
+
+ TX
+
+> t=1
+
+f (Cn(t−∆n(t)) , ∆n(t), a n(t)) 
+
+− λ(an(t) − M T )
+
+
+
+, (16) where P = ( Pn)Nn=1 . The term λM T is a constant and does not affect the policy π, and therefore can be removed. For a given λ, problem (16) can be decomposed into N independent per-arm problems, where each per-arm problem associated with arm n is given by 
+
+Ln(π∗
+
+> n
+
+, P n, λ )= max 
+
+> πn∈Πn
+
+Eπn
+
+ TX
+
+> t=1
+
+f (Cn(t−∆n(t)) , ∆n(t)) , a n(t)) − λa n(t)
+
+
+
+,
+
+(17) where Ln(π∗
+
+> n
+
+, P n, λ ) is the optimum value of (17), πn =(an(1) , a n(2) , . . . , a n(T )) is the sub-scheduling policy of arm 
+
+n, and Πn is the set of all causal sub-scheduling policies of arm n.We first solve (17) for given λ. Following the solution to the decoupled problem (17), we will develop a solution for the original RMAB (9)-(10). Then we obtain the optimal Lagrange multiplier from λ∗ = argmin λ L(π∗, P, λ ), where L(π∗, P, λ )
+
+is defined in (16). Using dynamic programming [13], (17) can be solved. Given Cn(t − ∆n(t)) = c and ∆n(t) = δ at time-slot t,the Bellman optimality equation for the MDP (17) is given by 
+
+Vn,t (c, δ ; λ) = max  
+
+> a∈A
+
+Qn,t (c, δ, a ; λ), (18) where Qn,t (c, δ, a ; λ) is the action-value function defined as 
+
+Qn,t (c, δ, a ; λ) = 
+
+(
+
+f (c, δ, 1)+ P 
+
+> c′∈C
+
+Pn(c′|c, δ )Vn,t +1 (c′, 1; λ)−λ, if a = 1 ,Vn,t +1 (c, δ + 1; λ), if a = 0 .
+
+(19) where Vn,T +1 (c, δ ) = 0 for all c, δ . Using (12), the action-value function (19) can be further simplified as 
+
+Qn,t (c, δ, a ; λ) = 
+
+(P 
+
+> c′
+
+Pn(c′|c, δ )( h(c′, 1) + Vn,t +1 (c′, 1; λ)) − λ, if a = 1 ,Vn,t +1 (c, δ + 1; λ), if a = 0 .
+
+(20) The value function Vn,t (c, δ ; λ) can be calculated using the backward induction method [13] from time t = T, T −
+
+1, . . . , 1:
+
+Vn,t (c, δ ; λ) = max 
+
+ X
+
+> c′
+
+Pn(c′|c, δ )( h(c′, 1) + Vn,t +1 (c′, 1; λ)) − λ, Vn,t +1 (c, δ + 1; λ)
+
+
+
+, (21) where Vn,T +1 (c, δ ; λ) = 0 for all (c, δ ).If the action-value function associated with the active action Qn,t (c, δ, 1; λ) is higher than the action-value func-tion associated with the passive action Qn,t (c, δ, 0; λ), i.e, 
+
+Qn,t (c, δ, 1; λ) > Q n,t (c, δ, 0; λ), then the optimal decision to problem (17) is to schedule arm n.An equivalent policy is to employ the gain index, which is defined by [12], [17], [27] 
+
+αn,t (c, δ ) = Qn,t (c, δ, 1; λ) − Qn,t (c, δ, 0; λ). (22) The gain index αn,t (c, δ ) is the difference between two action-value functions. Following the policy with the gain index 
+
+αn,t (c, δ ), arm n is scheduled if the gain index is positive, i.e., αn,t (c, δ ) > 0. To that end, we develop a Maximum Gain First (MGF) policy. This policy selects at most M arms with the highest gain. 
+
+Remark 1. Analysis of the action-value function (20) yields useful insights to design our online learning algorithm. From 
+
+(20) , if the action is passive (i.e., a = 0 ), it is evident from (3) 
+
+that the AoCSI transition will be from δ to δ + 1 and the last observed CSI c will remain in the same state c. Consequently, the actual state transition is known to the BS with probability 
+
+1 when a passive action is taken. Therefore, to design our online algorithm, we do not need to compute any probabilities associated with the passive action. 
+
+V. P ROBLEM STATEMENT FOR ONLINE SETTING 
+
+In our online learning environment, the BS interacts with 
+
+N arms through K episodes, where the length of the time horizon in each episode is H time-slots. A key challenge in this setting is that the decision maker has no prior knowledge of the actual transition probabilities P = ( Pn)Nn=1 . In every episode k, the BS starts from an initial state (c(1) , δ(1)) = 
+
+{(c1(1) , δ 1(1)) , (c2(1) , δ 2(1)) , . . . , (cN (1) , δ N (1)) } and im-plements a policy πk. Subsequently, it utilizes the observations up to H time-slots to iteratively estimate the underlying transition probabilities. Finding the optimal policy for RMAB problems is generally intractable and PSPACE-hard [43]. Therefore, it is significantly challenging to evaluate the performance of an online learning policy with respect to the optimal policy of RMAB. The authors in [1], [16] employ Lagrangian dual problem to evaluate the performance of the developed online policies. Recently, [41] utilize the optimal policy to measure the regret for an online Whittle index policy. Similar to [41], we evaluate the performance of our online learning algorithm πk in episode 
+
+k with respect to the optimal policy. Through simulation, 6
+
+we demonstrate that the Online-MGF policy converges to the MGF policy with known channel statistics within a very few episodes (see Section VIII). Let Jk(π, P) denote the expected cumulative throughput obtained by executing policy π during episode k under the actual transition probabilities P. Because each episode consists of H time-slots, Jk(π, P) is defined as the sum of the expected instantaneous throughput: 
+
+Jk(π, P) = Eπ, P
+
+ HX
+
+> t=1
+> N
+
+X
+
+> n=1
+
+f (Cn(t − ∆n(t)) , ∆n(t), a n(t)) 
+
+
+
+,
+
+(23) where the initial state at t = 1 for episode k is given by 
+
+(c(1) , δ (1)) . In this sequel, we define the regret. 
+
+Definition 1. Regret. Given the actual transition probabilities 
+
+P, the regret of the policy πk in episode k is given by Reg (k) = Jk(π∗, P) − Jk(πk, P), (24) where π∗ is the optimal policy associated with transition probability P. Using (24), we get the total regret as follows: Reg (K) = 
+
+> K
+
+X
+
+> k=1
+
+Reg (k). (25) We get an upper bound of (24) as follows Reg (k) = Jk(π∗, P) − Jk(πk, P) (26) 
+
+≤
+
+> N
+
+X
+
+> n=1
+
+Ln(π∗
+
+> n
+
+, P n, λ ∗) − Jk(πk, P) (27) 
+
+=
+
+> N
+
+X
+
+> n=1
+
+Ln(π∗
+
+> n
+
+, P n, λ ∗) −
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗)+
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗) − Jk(πk, P), (28) where λ∗ minimizes the Lagrangian L(π∗, P, λ ), and (27) holds because the Lagrangian upper bounds the original prob-lem. The regret bound obtained in [1], [16] consists of the first two terms of (28) that represents the performance difference associated with Lagrangian problem. Hence, Definition 1 is stronger compared [1], [16] because the optimal policy is taken into account. VI. D ESIGN OF ONLINE POLICY FOR SOLVING (9)-(10) We solve the online learning problem in two steps: (i) Utilizing a UCB-based approach, we first develop an Online-MGF policy in Section VI-A that does not need to satisfy any indexability condition; (ii) Next, we analyze the regret and find a regret bound which illustrates that the developed algorithm achieves sublinear regret in Section VI-B. 
+
+A. Online-MGF Policy 
+
+We utilize UCB-based online learning to provide an algo-rithm for the Online-MGF policy. To compute the gain index in (22), we need to know the action-value functions, and, hence, the transition probabilities P. Because P is unknown in our model, we develop an online learning method in Algorithm 1. 
+
+1) Confidence Bound for Transition Probabilities: For ev-ery arm n and every episode k, we maintain the number of visits Bkn(c, δ, c ′), which denotes the number of transitions from CSI Cn(t−∆n(t)) = c and AoCSI ∆n(t) = δ to the CSI 
+
+Cn(t) = c′ under the active action an(t) = 1 observed by the last k episodes. Because our learning algorithm only needs to estimate probabilities associated with the active actions, we need to observe the state transitions under the active actions only. For a small given constant μ > 0, we define the confidence radius as follows: 
+
+ρkn(c, δ ) = 
+
+s
+
+2|C| log(2Γ |C| N k2 
+
+> μ
+
+)max(1 , B kn(c, δ )) , (29) where Bkn(c, δ ) = P 
+
+> c′∈{ 0,1}
+
+Bkn(c, δ, c ′) is the number of visits to state (c, δ ) for arm n under the active action by episode k, Γ is the maximum value in the truncated AoCSI space, and N is the number of users. Let P kn denote a candidate transition probability matrix for arm n in episode k. The empirical transition probability is given by 
+
+ˆP kn (c′|c, δ ) = Bkn(c, δ, c ′)
+
+Bkn(c, δ ) . (30) Then, the confidence region of possible transition probabilities is given by 
+
+Bk =
+
+
+
+P kn | X
+
+> c′∈C
+
+P kn (c′|c, δ ) − ˆP kn (c′|c, δ )
+
+≤ ρkn(c, δ ), ∀n, c, δ 
+
+
+
+, (31) where P kn represents any candidate transition probability ma-trix for arm n in episode k that falls within the allowable confidence radius around the empirical estimate ˆP kn . In the fol-lowing section, we formulate an optimization problem where our algorithm explicitly selects P kn ∈ Bk that maximizes the expected future reward. Thus this step transforms the candidate transition probabilities into the optimistic transition probabilities required for scheduling. 
+
+2) Algorithm for Online-MGF Policy: Using an opti-mistic approach, we estimate the transition probabilities [1], [15], [16]. We choose the optimistic transition probabilities 
+
+P kn (c′|c, δ ) for each arm n in episode k that maximizes the value function within the confidence radius ρkn(c, δ ). The optimization problem at episode k in time-slot t is given by 
+
+max   
+
+> Pkn∈B k
+
+V P kn 
+
+> n,t
+
+(c, δ ; λk), (32) s.t. V P kn 
+
+> n,t
+
+(c, δ ; λk) = max  
+
+> a∈A
+
+QP kn
+
+> n,t
+
+(c, δ, a ; λk), (33) 7
+
+Algorithm 1: Online Maximum Gain First (Online-MGF) Policy  
+
+> 1
+
+Initialize N users, constraint M , episode length H. 
+
+> 2
+
+Initialize B1
+
+> n
+
+(c, δ, c ′) = 0 for all c, δ, c ′. 
+
+> 3
+
+Initialize λ(1) . 
+
+> 4
+
+for episode k = 1 , 2, . . . do  
+
+> 5
+
+Reset t = 1 and initial state (c, δ) = ( c(1) , δ(1)) . 
+
+> 6
+
+Compute transition probabilities for each arm by solving the optimization problem (32)-(33).  
+
+> 7
+
+Compute gain indices from (35) for each arm at every time-slot t. 
+
+> 8
+
+Schedule M users with highest positive gain indices at every time-slot t. 
+
+> 9
+
+Observe transitions and update visits Bkn(c, δ, c ′),empirical transition probability matrix ˆPk,confidence region Bk. 
+
+> 10
+
+Update λk+1 from (36). where QP kn
+
+> n,t
+
+(c, δ, a ; λk) is the action-value function given by 
+
+QP kn
+
+> n,t
+
+(c, δ, a ; λk) = 
+
+P
+
+> c′∈C
+
+P kn (1 |c, δ )( h(c′, 1) + V P kn 
+
+> n,t
+
+(c′, 1; λk)) − λk, if a = 1 ,V P kn 
+
+> n,t
+
+(c, δ + 1; λk), if a = 0 .
+
+(34) After computing the optimistic transition probabilities and optimistic value functions, we utilize the optimistic action-value functions for each arm n in episode k to compute the gain index as follows: 
+
+αkn,t (c, δ ; λk) = QP kn
+
+> n,t
+
+(c, δ, 1; λk) − QP kn
+
+> n,t
+
+(c, δ, 0; λk). (35) The algorithm to compute the Online-MGF policy is pro-vided in Algorithm 1. At every episode k, this policy selects 
+
+M arms with the highest positive gain indices (35). 
+
+Remark 2. Existing Lagrangian-based online Whittle index policies require solving two sequential optimization problems: first, to estimate the optimistic transition probabilities and, second, to compute the Whittle indices [16]. Specifically, after estimating the optimistic transition probabilities, the algorithm in [16] requires solving an inverse root-finding problem to calculate the Whittle indices for every state. Unlike [16], our Algorithm 1 only requires solving one optimization prob-lem (32)-(33) to obtain the optimistic transition probabilities 
+
+P kn (c′|c, δ ) for the current CSI Cn(t) = c′ at time-slot t given the outdated CSI Cn(t − ∆n(t)) = c and AoCSI ∆n(t) = δ.Once the optimistic probabilities P kn (c′|c, δ ) are obtained, the gain index in (35) is computed using optimistic action-value functions (34) from scalar subtraction. Hence, Algorithm 1 does not need to solve the root-finding step as required in [16]. 
+
+Remark 3. (Computational Complexity.) The Online-MGF policy in Algorithm 1 reduces computational complexity com-pared to existing online learning approaches for RMABs [15], [16]. In each episode, Algorithm 1 computes the op-timistic transition probabilities and action-value functions by using backward induction, which yields a complexity of O(N Hτ |C| 2). Next, to make the scheduling decisions, Algorithm 1 exhibits O(HN log N ) complexity for sorting. Hence, a total per-episode complexity of Algorithm 1 is 
+
+O(N Hτ |C| 2 + HN log N ). In [15], the authors estimate the transition probability matrices for both active and passive actions, which yields the estimation complexity to scale quadratically with the state-space size as O(N τ 2|C| 2). Fur-thermore, in [16], the online Lagrangian-based Whittle index policies require an additional optimization step to calculate the Whittle indices for every state, introducing a complexity of O(N τ 3|C| 3). By leveraging the deterministic behavior of passive AoCSI transitions and directly utilizing the gain indices, our Algorithm 1 entirely eliminates the need of these computations associated with the transition matrix ( O(τ 2|C| 2))and Whittle indices ( O(τ 3|C| 3)). The Lagrange multiplier λk is updated in every k-th episode by using the stochastic sub-gradient descent method [45], [46]. The update rule is given by 
+
+λk+1 = max 
+
+
+
+λk + ηkH 
+
+ NX
+
+> n=1
+> H
+
+X
+
+> t=1
+
+akn(t) − M
+
+
+
+, 0
+
+
+
+, (36) where η/ (kH ) is the learning parameter, and action akn(t) is obtained by solving the following decoupled problem: 
+
+akn(t) = arg max  
+
+> a
+
+QP kn
+
+> n,t
+
+(c, δ, a ; λk). (37) 
+
+B. Regret Bound for Algorithm 1 
+
+In this section, we analyze the regret of Algorithm 1. For clarity of analysis, we split the regret bound (24) in Definition 1 into two components: Reg comp 1 =
+
+> N
+
+X
+
+> n=1
+
+Ln(π∗
+
+> n
+
+, P n, λ ∗) −
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗), (38) Reg comp 2 =
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗) − Jk(πk, P). (39) Specifically, comp 1 captures the performance degradation due to estimating the unknown channel transition probabilities. In contrast, comp 2 measures the sub-optimality gap between the theoretical upper bound (the relaxed Lagrangian problem) and our actual MGF policy. In the following analysis, we first bound the regret associated with comp 1 and then we bound comp 2. Finally, we combine these two bounds to establish the total cumulative regret Reg (K) of the proposed Online-MGF policy. To bound the regret, we first show that with high probability the true transition P lies within the confidence region Bk in (31). 
+
+Lemma 1. Given μ > 0 and k ≥ 1, we get that Pr (P ∈Bk) ≥ 1 − μk2 .Proof. See Appendix B. Lemma 1 implies that for each episode k, a confidence region can be obtained within which the actual transition 8
+
+probability lies with high probability. Utilizing Lemma 1, we bound the regret associated with comp 1 for each episode k in the following lemma. 
+
+Lemma 2. For given initial state 
+
+(( c1(1) , δ 1(1)) , (c2(1) , δ 2(1)) , . . . , (cN (1) , δ N (1))) , the following holds with probability 1 − μ:
+
+Reg comp 1 (k)
+
+≤
+
+> N
+
+X
+
+> n=1
+
+V P kn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk)−V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk). (40) 
+
+Proof. See Appendix C. Next, we utilize Lemma 2 to bound the regret associated with comp 1 for K episodes. In this sequel, we have the following theorem. 
+
+Theorem 2. With probability 1 − μ, the cumulative regret of Algorithm 1 associated with comp 1 in all K episodes is given by 
+
+Reg comp 1 (K) ≤ O 
+
+
+
+Vmax Γ|C| N H pK log K
+
+
+
+, (41) 
+
+where Vmax is the maximum value-function, Γ is the maximum value of AoCSI, |C| is the size of the state space of CSI, N
+
+is the number of users, H is the time-horizon length in each episode, and K is the total number of episodes. Proof. See Appendix D. Next, we will find the regret associated with comp 2. Define 
+
+g(N ) = 
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P kn , λ ∗) − Jk(πk, Pk). (42) The function g(N ) represents the gap between the perfor-mance of the Lagrangian problem under its optimal solution and the main problem under the MGF policy. In g(N ), both the optimal solution of Lagrangian problem and the MGF policy are associated with transition probability Pk. Hence, 
+
+g(N ) does not represent the regret, but instead it measures the optimality gap of the MGF policy even if we know the actual transition probabilities. In this sequel, we have the following lemma. 
+
+Lemma 3. The sub-optimality gap (42) between the La-grangian dual problem and the original problem is upper-bounded as follows 
+
+g(N ) ≤ O
+
+ K
+
+√N
+
+
+
+, (43) 
+
+where N is the number of users and K is the number of episodes. Proof. See Appendix E. An immediate corollary of Lemma 3 is 
+
+Corollary 1. If the number of users N → ∞ , then g(N ) → 0.
+
+0 11 − rn
+
+rn
+
+pn
+
+1 − pn 
+
+> Fig. 2: Two-state Markov chain model for channel of user n.
+
+Theorem 3. If N → ∞ , then with probability 1 − μ, the cumulative regret of Algorithm 1 associated with comp 2 in all 
+
+K episodes is given by 
+
+Reg comp 2 (K) ≤ O 
+
+
+
+2Vmax Γ|C| N H pK log K
+
+
+
+, (44) 
+
+where Vmax is the maximum value-function, Γ is the maximum value of AoCSI, |C| is the size of the state space of CSI, N
+
+is the number of users, H is the time-horizon length in each episode, and K is the total number of episodes. Proof. See Appendix F. 
+
+Theorem 4. If N → ∞ , then with probability 1 − μ, the cumulative regret of Algorithm 1 in all K episodes is given by 
+
+Reg (K) ≤ O 
+
+
+
+3Vmax Γ|C| N H pK log K
+
+
+
+, (45) 
+
+where Vmax is the maximum value-function, Γ is the maximum value of AoCSI, |C| is the size of the state space of CSI, N
+
+is the number of users, H is the time-horizon length in each episode, and K is the total number of episodes. Proof. See Appendix G. Theorem 4 illustrates that Algorithm 1 achieves sub-linear regret with respect to the number of episodes K as N → ∞ .This regret bound aligns with existing online learning algo-rithms in literature [16], [36], [37], [40], [41], [47]. Because we generalize our problem to a multiple channel state scenario, the analysis cannot be simplified as our previous study with ON/OFF channel states [1]. In section VIII, our numerical results illustrate that the Online-MGF policy converges to both the MGF policy with known channel statistics within a small number of episodes. VII. S PECIAL CASE : ON/OFF C HANNEL 
+
+Consider a simplified scenario where the CSI Cn(t) is mod-eled as a discrete-time, two-state time-homogeneous Markov chain (ON/OFF channels, where Cn(t) ∈ { 0, 1}). If Cn(t) = 0, the channel of user n is in the OFF state; otherwise, if 
+
+Cn(t) = 1 , the channel of user n is in the ON state. The state transition of the channels for user n is provided in Figure 2 and the corresponding transition matrix is given by 
+
+Pn =
+
+Pn(1 |1) Pn(0 |1) 
+
+Pn(1 |0) Pn(0 |0) 
+
+
+
+=
+
+pn 1 − pn
+
+rn 1 − rn
+
+
+
+, (46) 9
+
+Algorithm 2: Online Maximum Gain First (Online-MGF) Policy for ON/OFF channel  
+
+> 1
+
+Initialize N users, constraint M , episode length H. 
+
+> 2
+
+Initialize B1
+
+> n
+
+(c, δ, c ′) = 0 for all c, δ, c ′. 
+
+> 3
+
+Initialize λ(1) . 
+
+> 4
+
+for episode k = 1 , 2, . . . do  
+
+> 5
+
+Reset t = 1 and initial state (c, δ) = ( c(1) , δ(1)) . 
+
+> 6
+
+Compute P kn (1 |c, δ ) for each arm n and for all 
+
+(c, δ ) by solving (32)-(33).  
+
+> 7
+
+Compute gain indices from (35) for each arm at every time-slot t. 
+
+> 8
+
+Schedule M users with highest gain indices at every time-slot t. 
+
+> 9
+
+Observe transitions and update visits Bkn(c, δ, c ′),empirical transition probability ˆPk, confidence region Bk. 
+
+> 10
+
+Update λk+1 from (36). where 
+
+pn = Pn(Cn(t) = 1 |Cn(t − 1) = 1) , (47) 
+
+rn = Pn(Cn(t) = 1 |Cn(t − 1) = 0) . (48) For this simplified scenario, the function f (c, δ, a ) can be written as 
+
+f (Cn(t − ∆n(t)) , ∆n(t), a n(t)) =an(t)E[Cn(t)|Cn(t − ∆n(t)) , ∆n(t)] , (49) where we consider linear throughput function 
+
+h(Cn(t), a n(t)) = Cn(t)an(t). If an(t) = 0, then 
+
+fn(Cn(t − ∆n(t)) , ∆n(t), 0) = 0; If an(t) = 1, then 
+
+fn(Cn(t − ∆n(t)) , ∆n(t), 1) can be further simplified: Given 
+
+Cn(t − ∆n(t)) = c and ∆n(t) = δ, we have 
+
+f (c, δ, 1) = Pn(1 |c, δ ), (50) where Pn(1 |c, δ ) can be calculated as 
+
+Pn(1 |0, δ ) = rn(1 − (pn − rn)δ )1 − pn + rn
+
+, (51) 
+
+Pn(1 |1, δ ) = rn + (1 − pn)(1 − (pn − rn)δ )1 − pn + rn
+
+. (52) Becuase of this simplification, we need to compute only the transition probabilities Pn(1 |c, δ ) in the online learning algo-rithm. Using (50), we can simplify the action-value function (19) associated with ON/OFF channels. 
+
+Qn,t (c, δ, a ; λ) = 
+
+
+
+Pn(1 |c, δ )+ P 
+
+> c′∈{ 0,1}
+
+Pn(c′|c, δ )Vn,t +1 (c′, 1; λ) − λ, 
+
+if a = 1 ,Vn,t +1 (c, δ + 1; λ), if a = 0 .
+
+(53) To that end, the Online-MGF policy in Algorithm 2 only requires solving one optimization problem (32)-(33) to get probabilities P kn (1 |c, δ ) for the CSI Cn(t) = 1 at time-slot t
+
+given outdated CSI Cn(t−∆n(t)) = c and AoCSI ∆n(t) = δ.
+
+Algorithm 3: Online Whittle Index Policy for ON/OFF channel  
+
+> 1
+
+Initialize N users, constraint M , episode length H. 
+
+> 2
+
+Initialize B1
+
+> n
+
+(c, δ, c ′) = 0 for all c, δ, c ′. 
+
+> 3
+
+for episode k = 1 , 2, . . . do  
+
+> 4
+
+Reset t = 1 and initial state (c, δ) = ( c(1) , δ(1)) . 
+
+> 5
+
+Compute P kn (1 |c, δ ) for each arm n and for all 
+
+(c, δ ) by solving (32)-(33).  
+
+> 6
+
+Compute Whittle indices from (58) for each arm at every time-slot t. 
+
+> 7
+
+Schedule M users with highest Whittle indices at every time-slot t. 
+
+> 8
+
+Observe transitions and update visits Bkn(c, δ, c ′),empirical transition probability ˆPk, confidence region Bk.This also yields P kn (0 |c, δ ) = 1 − P kn (1 |c, δ ). Therefore, we do not need to compute the entire transition probabilities from state (c, δ ) to next state (c′, δ ′). The AoCSI evolution is known since whenever source n is scheduled AoCSI becomes 1, and otherwise, it increases by 1.
+
+A. Whittle Index Policy 
+
+Another benefit of this model is that we can prove indexa-bility and derive a closed-form expression of the Whittle index for the infinite-horizon average-cost setting. Our problem (9)-(10) considers a finite horizon T . However, computing time-dependent Whittle indices is computationally intractable and generally does not yield a closed-form solution. Therefore, following standard practice in RMAB literature [9], [32], we analyze the infinite-horizon case where the value functions and action-value functions become time-invariant. This allows us to develop a Online Whittle index policy. To that end, we find the Whittle index policy for the following problem 
+
+lim  
+
+> T→∞
+
+1
+
+T max 
+
+> π∈Π
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+Eπ
+
+
+
+f (Cn(t−∆n(t)) , ∆n(t), a n(t)) 
+
+
+
+(54) s.t. 
+
+> N
+
+X
+
+> n=1
+
+an(t) ≤ M, t = 1 , 2, . . . , T. (55) Define Φ( λ) as the set of states (c, δ ) ∈ { 0, 1} × N such that if Cn(t−∆n(t)) = c and ∆n(t) = δ, the optimal solution for (17) is to take a passive action at time t.
+
+Definition 2. (Indexability). [44] An arm is said to be 
+
+indexable if, as the activation cost λ increases from −∞ to 
+
+∞, the set Φ( λ) increases monotonically, i.e., λ1 ≤ λ2 implies 
+
+Φ( λ1) ⊆ Φ( λ2).In general, establishing indexability of an RMAB is achallenging task. However, we are able to prove indexability of problem (9)-(10) for ON/OFF channels. This becomes possible because the reward function f (c, δ, 1) is greatly simplified in this case and only requires us to know the probability 
+
+Pn(1 |c, δ ).10 0 20 40 60 80 100 Episode (k) 45 50 55 60 65 70 75 80 85 90 Sum of Througputs 
+
+H=100 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 550 600 650 700 750 800 850 900 Sum of Througputs 
+
+H=1000 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 7000 7200 7400 7600 7800 8000 8200 8400 8600 8800 9000 Sum of Througputs 
+
+H=10000 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 
+
+Fig. 3: Sum of Throughputs vs the number of episodes ( k) with different time-horizon length in each episode ( H). The other parameters are 
+
+p1 = 0 .6, r1 = 0 .5, p2 = 0 .9, r2 = 0 .75 , N = 4 , and M = 1 .0 20 40 60 80 100 Episode (k) 5500 6000 6500 7000 7500 8000 8500 9000 Sum of Througputs 
+
+N=10, M=1 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 2.8 2.9 33.1 3.2 3.3 3.4 3.5 3.6 Sum of Througputs 10 4 N=10, M=4 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 1.4 1.45 1.5 1.55 1.6 1.65 1.7 1.75 1.8 Sum of Througputs 10 5 N=100, M=20 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 
+
+Fig. 4: Sum of Throughputs vs the number of episodes ( k) with different configurations of N and M . The other parameters are p1 = 0 .6,
+
+r1 = 0 .5, p2 = 0 .9, r2 = 0 .75 , and H = 10000 .0 20 40 60 80 100 Episode (k) 2.4 2.6 2.8 33.2 3.4 3.6 Sum of Througputs 10 4 p1=0.1 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 2.7 2.8 2.9 33.1 3.2 3.3 3.4 3.5 3.6 Sum of Througputs 10 4 p1=0.5 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 0 20 40 60 80 100 Episode (k) 3.15 3.2 3.25 3.3 3.35 3.4 3.45 3.5 3.55 Sum of Througputs 10 4 p1=0.8 
+
+MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy 
+
+Fig. 5: Sum of Throughputs vs the number of episodes ( k) with different channel statistics. The other parameters are H = 10000 , N = 10 ,and M = 4 .
+
+Theorem 5. If the channel state Cn(t) evolves as a two-state Markov chain, then, the RMAB problem (9) -(10) is indexable. Proof. See Appendix H. Next, we introduce the definition of the Whittle index. 
+
+Definition 3. [48] If an arm is indexable, then the Whittle index Wn(c, δ ) of the arm at state (c, δ ) is defined by 
+
+Wn(c, δ ) = inf 
+
+λ∈R{λ ∈ R : ( c, δ ) ∈ Φ( λ)}, (56) which is the infimum of the activation cost λ for which it is better not to activate the arm. 
+
+Theorem 6. The Whittle index Wn(c, δ ) of problem (17) at state (c, δ ) is given by 
+
+Wn(c, δ ) = 
+
+
+
+Pn(1 |1, δ )1 −  Pn(1 |1, 1) − Pn(1 |1, δ ) , if c = 1 ,
+
+0, if c = 0 ,
+
+(57) 
+
+where Pn(1 |c, δ ) is defined in (51) -(52) .Proof. See Appendix I. The benefit of developing the Whittle index policy is that the algorithm does not need to solve λ by stochastic sub-gradient descent method in every episode. Because the scheduler is unaware of the actual transition probability, the Whittle index 11 10 20 30 40 50 60 70 80 90 100 Number of Channels (M) 012345678Sum of Througputs 10 5
+
+> MGF Policy with Known Statistics Whittle Policy with Known Statistics Online-MGF Policy MAF Policy Random Policy
+
+Fig. 6: Sum of Throughputs vs Number of Channels ( M ). The other parameters are p1 = 0 .6, r1 = 0 .5, p2 = 0 .9, r2 = 0 .75 , H =10000 , and N = 100 .
+
+at episode k is given by 
+
+W kn (c, δ ) = 
+
+
+
+P kn (1 |1, δ )1 −  P kn (1 |1, 1) − P kn (1 |1, δ ) , if c = 1 ,
+
+0, if c = 0 ,
+
+(58) where W kn (c, δ ) represents the Whittle index at episode k. The Online Whittle index policy is provided in Algorithm 3. This algorithm selects M users with the highest Whittle indices at every time-slot t.VIII. S IMULATION RESULTS 
+
+In this section, we evaluate the performance of the following policies:  
+
+> •
+
+Random Policy : This policy randomly selects users following a uniform distribution. In the simulation, we use MATLAB built-in function randperm( N, M ). 
+
+> •
+
+MGF Policy with Known Channel Statistic : This policy computes the gain index using the known channel statistics. Then, this policy schedules M users with the highest gain indices in every time-slot.  
+
+> •
+
+Whittle Index Policy with Known Channel Statis-tic : This policy computes the Whittle index using the known channel statistics. The closed-form expression for the Whittle index with known channel statistics of this problem is provided in [3], [8]. Then, the policy schedules 
+
+M users with the highest Whittle indices in every time-slot t. 
+
+> •
+
+Online-MGF Policy : The policy is provided in Algo-rithm 1. The Online-MGF policy does not know the channel statistics. This policy first learns the channel statistics, then computes gain indices at the beginning of each episode, and schedule M users with the highest gain indices.  
+
+> •
+
+Maximum Age First (MAF) policy : This policy sched-ules M users with the highest AoCSI values at every time-slot. 
+
+A. ON/OFF Channel 
+
+In the simulation, we consider two classes of users, namely class 1 and class 2. Users in the same class have the same channel statistics. We consider that half of the users belong to class 1 and another half belong to class 2. We denote 
+
+Pn(Cn(t) = 1|Cn(t − 1) = 1) of user n by p1 and 
+
+Pn(Cn(t) = 1 |Cn(t − 1) = 0) by r1 if the user n belongs to class 1; otherwise we denote Pn(Cn(t) = 1 |Cn(t − 1) = 1) 
+
+of user n by p2 and Pn(Cn(t) = 1 |Cn(t − 1) = 0) by r2 if user n belongs to class 2.Figure 3 illustrates the sum of throughput vs the number of episodes ( k) with different time horizon length in each episode H = 100 , 1000 , 10000 . In this figure, we set p1 = 0 .6,
+
+r1 = 0 .5, p2 = 0 .9, r2 = 0 .75 , N = 4 , and M = 1 .According to Figure 3, MGF policy with known channel statistics shows similar performance as Whittle index policy with known channel statistics. The figure also depicts that the proposed Online-MGF policy converges faster to the MGF policy with known channel statistics as the number of time horizon H in each episode increases. This is because for higher values of H, Online-MGF observes more state transitions in each episode, which yields accurate learning of channel statistics. Moreover, Online-MGF performs better compared to the other baselines, such as MAF and random policies. This is because MAF policy only considers AoCSI and ignores most recently observed CSI, whereas Random policy schedules the users randomly. Figure 4 illustrates the sum of throughput vs number of episodes ( k) with different configurations of N and M . In this figure, we set H = 10000 and the other parameters are the same as Figure 3. This figure shows that for all configurations, the Online-MGF policy converges faster to the MGF and the Whittle index policies with known channel statistics. As expected, the proposed Online-MGF policy performs better compared to MAF and random policies. Figure 5 depicts the sum of throughput vs the number of episodes ( k) with different values of p1 = 0 .1, 0.5, 0.8. In this figure, we set N = 10 , M = 4 and other parameters are the same as Figure 4. As expected, the Online-MGF policy outperforms the MAF and random policies. In Figure 6, we plot the sum of throughput vs the number of channels ( M ). In this figure, the sum of throughput for each point is averaged over 100 episodes. For this figure, we set 
+
+N = 100 and other parameters are the same as Figure 4. As the number of channels increases, the sum of throughput increases. The figure illustrates that the performance gain of Online-MGF policy with MAF and Random policies first increases with M
+
+up to M = 50 . After M = 50 , the performance gain decreases because the number of available channels for allocating to 
+
+N = 100 users increases. Our simulation illustrates that the performance of our proposed Online-MGF policy aligns with the MGF policy and Whittle index policy with known channel statistics. Fur-thermore, Online-MGF policy outperforms MAF and random policy as the number of episodes increases in every settings. Notably, for p1 = 0 .8, the Online-MGF policy outperforms the Whittle index policy with known channel statistics. 12 0 20 40 60 80 100 Episode (k) 1.18 1.2 1.22 1.24 1.26 1.28 1.3 Sum of Throughputs 10 4 H=1000       
+
+> MGF Policy with Known Statistics Online MGF MAF Policy Random Policy 020 40 60 80 100 Episode (k) 1.16 1.18 1.2 1.22 1.24 1.26 1.28 Sum of Throughputs 10 5H=10000
+> MGF Policy with Known Statistics Online MGF MAF Policy Random Policy
+
+Fig. 7: Sum of Throughputs vs the number of episodes ( k) with different time-horizon length in each episode ( H). The other parameters are 
+
+N = 10 , M = 4 , and P1 and P2 are same as the simulation setup. 0 20 40 60 80 100 Episode (k) 2.85 2.9 2.95 33.05 3.1 3.15 3.2 Sum of Throughputs 10 4 N=4, M=1       
+
+> MGF Policy with Known Statistics Online MGF MAF Policy Random Policy 020 40 60 80 100 Episode (k) 1.16 1.18 1.2 1.22 1.24 1.26 1.28 Sum of Throughputs 10 5N=10, M=4
+> MGF Policy with Known Statistics Online MGF MAF Policy Random Policy
+
+Fig. 8: Sum of Throughputs vs the number of episodes ( k) with different configurations of N and M . The other parameters are H = 10000 
+
+and P1 and P2 are same as the simulation setup. 
+
+B. Three-state Channel Model 
+
+In this simulation, we evaluate the performance of the Online-MGF policy for a more complex scenario where the CSI Cn(t) is modeled as a three-state time-homogeneous Markov chain. In this model, the channel states are represented by their Signal-to-Noise Ratio (SNR) values and Cn(t) ∈{0.5, 6.31 , 39 .81 }. Similar to the ON/OFF channel setup, we consider two classes of users, namely class 1 and class 2. Users in the same class have the same channel statistics, and we consider that half of the users belong to class 1 and the other half belong to class 2. Instead of standard ON/OFF probabilities, the state transitions for users in class 1 and class 2 are governed by distinct 3×3 transition probability matrices, denoted by P1 and P2, respectively, which are given by 
+
+P1 =
+
+
+
+0.80 0.20 00.10 0.80 0.10 0 0.20 0.80 
+
+ , P2 =
+
+
+
+0.50 0.40 0.10 0.25 0.50 0.25 0.10 0.40 0.50 
+
+ .
+
+To evaluate scheduling performance, the instantaneous throughput is calculated by h(Cn(t), a n(t)) = an(t) log 2(1 + (Cn(t)) . Because closed-form expression of the Whittle index is not available for three state channel model, Whittle policy with known statistics is not plotted for the figures in this setup. Figure 7 illustrates the sum of throughput vs the number of episodes ( k) with different time horizon length in each episode 
+
+H = 1000 , 10000 . In this figure, we set N = 10 , and M = 4 .According to Figure 7, when H is small, MGF policy with known channel statistics performs better than the Online-MGF policy. The figure also depicts that the proposed Online-MGF policy converges faster to the MGF policy with known channel statistics as the number of time horizon H in each episode increases because for higher H, Online-MGF observes more state transitions in each episode, which yields accurate learning of channel statistics. Moreover, Online-MGF performs better compared to the other baselines, such as MAF and random policies. Figure 8 illustrates the sum of throughput vs number of episodes ( k) with different configurations of N and M . In this figure, we set H = 10000 and the other parameters are the same as Figure 7. This figure shows that for all configurations, the Online-MGF policy converges faster to the MGF with known channel statistics as the number of users N
+
+and channels M increases. As expected, the proposed Online-MGF policy performs better compared to MAF and random policies. IX. CONCLUSION 
+
+We study an online wireless scheduling problem with im-perfect CSI and unknown channel statistics. The formulated problem is an RMAB. By leveraging the sufficient statistic of the history, we are able to reduce the state space of the underlying RMAB for online learning. To that end, we develop an Online-MGF policy to solve the RMAB that does not need to satisfy any indexability condition and achieves sub-linear regret with the number of episodes. The proposed policy 13 
+
+exhibits less complexity compared to existing online learning policies. Through simulation, we validate the effectiveness of the proposed Online-MGF policy. REFERENCES [1] T. Z. Ornee, C. Kam, and N. Shroff, “Online wireless scheduling for throughput maximization under unknown channel statistics,” 2026, accepted by IEEE INFOCOM. [2] W. Ouyang, A. Eryilmaz, and N. B. Shroff, “Asymptotically optimal downlink scheduling over Markovian fading channels,” in IEEE INFO-COM , 2012, pp. 1224–1232. [3] ——, “Low-complexity optimal scheduling over time-correlated fading channels with ARQ feedback,” IEEE Trans. Mob. Comput. , vol. 15, no. 9, pp. 2275–2289, 2016. [4] S. H. A. Ahmad, M. Liu, T. Javidi, Q. Zhao, and B. Krishnamachari, “Optimality of myopic sensing in multichannel opportunistic access,” 
+
+IEEE Trans. Inf. Theory , vol. 55, no. 9, pp. 4040–4050, 2009. [5] C.-p. Li and M. J. Neely, “Exploiting channel memory for multi-user wireless scheduling without channel measurement: Capacity regions and algorithms,” in ACM MobiHoc , 2010, pp. 50–59. [6] Q. Zhao, B. Krishnamachari, and K. Liu, “On myopic sensing for multi-channel opportunistic access: structure, optimality, and performance,” 
+
+IEEE Transactions on Wireless Communications , vol. 7, no. 12, pp. 5431–5440, 2008. [7] X. Liu, E. K. P. Chong, and N. B. Shroff, “Opportunistic transmission scheduling with resource-sharing constraints in wireless networks,” 
+
+IEEE Journal on Selected Areas in Communications , vol. 19, no. 10, pp. 2053–2064, 2002. [8] K. Liu and Q. Zhao, “Indexability of restless bandit problems and optimality of Whittle index for dynamic multichannel access,” IEEE Trans. Inf. Theory , vol. 56, no. 11, pp. 5547–5567, 2010. [9] P. Whittle, “Restless bandits: activity allocation in a changing world,” 
+
+Journal of Applied Probability , vol. 25A, pp. 287–298, 1988. [10] P. Ansell, K. Glazebrook, J. Ni˜ no-Mora, and M. O’Keeffe, “Whittle’s index policy for a multi-class queueing system with convex holding costs,” Math. Meth. Oper. Res. , vol. 57, pp. 21–39, 04 2003. [11] Y. Chen and A. Ephremides, “Scheduling to minimize age of incorrect information with imperfect channel state information,” Entropy , vol. 23, no. 12, p. 1572, 2021. [12] G. Chen and S. C. Liew, “An index policy for minimizing the uncertainty-of-information of Markov sources,” arXiv preprint arXiv:2212.02752 , 2022. [13] D. P. Bertsekas et al. , “Dynamic programming and optimal control, 4th edition,” Belmont, MA: Athena Scientific , vol. 1, 2011. [14] M. Costa, S. Valentin, and A. Ephremides, “On the age of channel state information for non-reciprocal wireless links,” in 2015 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2015, pp. 2356–2360. [15] S. Wang, G. Xiong, and J. Li, “Online restless multi-armed bandits with long-term fairness constraints,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 38, no. 14, 2024, pp. 15 616–15 624. [16] K. Wang, L. Xu, A. Taneja, and M. Tambe, “Optimistic Whittle index policy: Online learning for restless bandits,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 37, no. 8, 2023, pp. 10 131– 10 139. [17] M. K. C. Shisher, B. Ji, I.-H. Hou, and Y. Sun, “Learning and communications co-design for remote inference systems: Feature length selection and transmission scheduling,” IEEE J. Sel. Areas Inf. Theory ,vol. 4, pp. 524–538, 2023. [18] L. Tassiulas, “Scheduling and performance limits of networks with constantly changing topology,” IEEE transactions on information theory ,vol. 43, no. 3, pp. 1067–1073, 2002. [19] Y. Sun and B. Cyr, “Sampling for data freshness optimization: Non-linear age functions,” J. Commun. Netw. , vol. 21, no. 3, pp. 204–219, 2019. [20] G. Chen, S. C. Liew, and Y. Shao, “Uncertainty-of-information schedul-ing: A restless multiarmed bandit framework,” IEEE Trans. Inf. Theory ,vol. 68, no. 9, pp. 6151–6173, 2022. [21] M. K. C. Shisher, Y. Sun, and I.-H. Hou, “Timely communications for remote inference,” IEEE/ACM Transactions on Networking , vol. 32, no. 5, pp. 3824–3839, 2024. [22] T. Z. Ornee and Y. Sun, “A Whittle index policy for the remote estimation of multiple continuous Gauss-Markov processes over parallel channels,” in ACM MobiHoc , 2023, p. 91–100. [23] G. Xiong, X. Qin, B. Li, R. Singh, and J. Li, “Index-aware reinforcement learning for adaptive video streaming at the wireless edge,” in ACM MobiHoc , 2022, pp. 81–90. [24] I. Kadota, A. Sinha, E. Uysal-Biyikoglu, R. Singh, and E. Modiano, “Scheduling policies for minimizing age of information in broadcast wireless networks,” IEEE/ACM Trans. Netw. , vol. 26, no. 6, pp. 2637– 2650, 2018. [25] T. Z. Ornee and Y. Sun, “Sampling and remote estimation for the Ornstein-Uhlenbeck process through queues: Age of information and beyond,” IEEE/ACM Trans. Netw. , vol. 29, no. 5, p. 1962–1975, oct 2021. [26] Y. Sun, Y. Polyanskiy, and E. Uysal, “Sampling of the Wiener process for remote estimation over a channel with random delay,” IEEE Trans. Inf. Theory , vol. 66, no. 2, pp. 1118–1135, 2020. [27] T. Z. Ornee, M. K. C. Shisher, C. Kam, and Y. Sun, “Remote safety monitoring: Significance-aware status updating for situational awareness,” 2025. [Online]. Available: https://arxiv.org/abs/2507.09833 [28] M. Costa, S. Valentin, and A. Ephremides, “On the age of channel information for a finite-state Markov model,” in IEEE ICC , 2015, pp. 4101–4106. [29] K. T. Truong and R. W. Heath, “Effects of channel aging in massive MIMO systems,” Journal of Communications and Networks , vol. 15, no. 4, pp. 338–351, 2013. [30] M. Lipski, C. Kam, S. Kompella, and T. Ephremides, “Age of channel state information for collaborative beamforming,” in ACM MobiHoc ,2024, pp. 392–397. [31] S. Chakraborty and Y. Sun, “Send pilot or data? Leveraging age of channel state information for throughput maximization,” arXiv preprint arXiv:2503.13866 , 2025. [32] R. R. Weber and G. Weiss, “On an index policy for restless bandits,” 
+
+Journal of applied probability , vol. 27, no. 3, pp. 637–648, 1990. [33] Y. Zou, K. T. Kim, X. Lin, and M. Chiang, “Minimizing age-of-information in heterogeneous multi-channel systems: A new partial-index approach,” in ACM MobiHoc , 2021, pp. 11–20. [34] T. Z. Ornee, M. K. C. Shisher, C. Kam, and Y. Sun, “Context-aware status updating: Wireless scheduling for maximizing situational awareness in safety-critical systems,” in IEEE MILCOM , 2023, pp. 194– 200. [35] M. K. C. Shisher, A. Piaseczny, Y. Sun, and C. G. Brinton, “Computation and communication co-scheduling for timely multi-task inference at the wireless edge,” IEEE INFOCOM , 2025. [36] G. Neu and G. Bart´ ok, “An efficient algorithm for learning with semi-bandit feedback,” in International Conference on Algorithmic Learning Theory . Springer, 2013, pp. 234–248. [37] D. Foster and A. Rakhlin, “Beyond UCB: Optimal and efficient con-textual bandits with regression oracles,” in International conference on machine learning . PMLR, 2020, pp. 3199–3210. [38] F. Li, J. Liu, and B. Ji, “Combinatorial sleeping bandits with fairness constraints,” IEEE Transactions on Network Science and Engineering ,vol. 7, no. 3, pp. 1799–1813, 2019. [39] R. Ortner, D. Ryabko, P. Auer, and R. Munos, “Regret bounds for restless Markov bandits,” in International conference on algorithmic learning theory . Springer, 2012, pp. 214–228. [40] N. Akbarzadeh and A. Mahajan, “On learning Whittle index policy for restless bandits with scalable regret,” IEEE Transactions on Control of Network Systems , vol. 11, no. 3, pp. 1190–1202, 2023. [41] M. K. C. Shisher, V. Tripathi, M. Chiang, and C. G. Brinton, “Online learning of Whittle indices for restless bandits with non-stationary transition kernels,” 2025. [Online]. Available: https: //arxiv.org/abs/2506.18186 [42] V. Krishnamurthy, Partially observed Markov decision processes . Cam-bridge university press, 2016. [43] C. Papadimitriou and J. Tsitsiklis, “The complexity of optimal queueing network control,” in IEEE CCC , 1994, pp. 318–322. [44] I. M. Verloop, “Asymptotically optimal priority policies for indexable and nonindexable restless bandits,” 2016. [45] A. Nedic and A. Ozdaglar, “Subgradient methods in network resource allocation: Rate analysis,” in IEEE CISS , 2008, pp. 1189–1194. [46] K. E. Avrachenkov and V. S. Borkar, “Whittle index based q-learning for restless bandits with average reward,” Automatica , vol. 139, p. 110186, 2022. [47] V. Tripathi and E. Modiano, “An online learning approach to optimizing time-varying costs of aoi,” 2021. [Online]. Available: https://arxiv.org/abs/2105.13383 [48] P. Whittle, “Restless bandits: Activity allocation in a changing world,” 
+
+Journal of applied probability , vol. 25, no. A, pp. 287–298, 1988. 14 
+
+[49] T. Weissman, E. Ordentlich, G. Seroussi, S. Verdu, and M. J. Weinberger, “Inequalities for the L1 deviation of the empirical distribution,” Hewlett-Packard Labs, Tech. Rep , p. 125, 2003. [50] P. Ju, A. Ghosh, and N. B. Shroff, “Achieving fairness in multi-agent markov decision processes using reinforcement learning,” arXiv preprint arXiv:2306.00324 , 2023. [51] A. Agarwal, N. Jiang, S. M. Kakade, and W. Sun, “Reinforcement learning: Theory and algorithms,” CS Dept., UW Seattle, Seattle, WA, USA, Tech. Rep , vol. 32, p. 96, 2019. [52] D. B. Brown and J. E. Smith, “Index policies and performance bounds for dynamic selection problems,” Management Science , vol. 66, no. 7, pp. 3029–3050, 2020. 15 
+
+APPENDIX APROOF OF THEOREM 1We prove Theorem 1 in three steps: (i) First, we show that Cn(t) is conditionally independent of the (Cn(τ −
+
+∆n(τ )) , ∆n(τ )) t−1  
+
+> τ=1
+
+given the last observed CSI Cn(t−∆n(t)) 
+
+and its AoCSI ∆n(t); (ii) Next, we show that Cn(t) is condi-tionally independent of the scheduling decisions (an(τ )) t−1 
+
+> τ=1
+
+and the delivery indicators (βn(τ )) t−1  
+
+> τ=1
+
+given the AoCSI history (∆ n(τ )) tτ =1 ; (iii) Finally, we show that the value function of the finite horizon MDP given the history Hn(t) is equal to the value function of the finite horizon MDP given 
+
+(Cn(t − ∆n(t)) , ∆n(t)) .Due to the Markov property and time homogeneity of the CSI Cn(t), we have the following Markov chain given ∆n(t):
+
+Cn(t) ↔ Cn(t − ∆n(t)) ↔ Cn(( t − 1) − (∆ n(t − 1))) ↔
+
+. . . . Therefore, Cn(t) is conditionally independent of (Cn(τ −
+
+∆n(τ )) , ∆n(τ )) t−1  
+
+> τ=1
+
+given (Cn(t − ∆n(t)) , ∆n(t)) .Moreover, Cn(t) depends on (Cn(t − ∆n(t)) , ∆n(t)) and 
+
+(βn(τ )) t−1 
+
+> τ=1
+
+. To compute ∆n(τ ), we require scheduling de-cisions (an(τ )) t−1  
+
+> τ=0
+
+and (∆ n(τ )) t−1 
+
+> τ=1
+
+. Hence, Cn(t) depends on (an(τ )) t−1  
+
+> τ=0
+
+and (∆ n(τ )) t−1  
+
+> τ=1
+
+through ∆n(t). However, if the AoCSI history (∆ n(τ )) tτ =1 is given, then the CSI Cn(t)
+
+does not depend on the scheduling decisions (an(τ )) t−1  
+
+> τ=1
+
+and the delivery indicators (βn(τ )) t−1 
+
+> τ=1
+
+. Hence, Cn(t) is condition-ally independent of the scheduling decisions (an(τ )) t−1  
+
+> τ=0
+
+and the delivery indicators (βn(τ )) t−1  
+
+> τ=0
+
+given the AoCSI history 
+
+(∆ n(τ )) tτ =1 .Next, from (4), we can write 
+
+E
+
+ NX
+
+> n=1
+
+h(Cn(t)an(t)) (Hn(t)) Nn=1 
+
+
+
+=
+
+> N
+
+X
+
+> n=1
+
+E
+
+
+
+h(Cn(t)an(t)) Hn(t)
+
+
+
+, (59) where (59) holds because given (an(τ )) t−1 
+
+> τ=1
+
+, (βn(t)) t−1  
+
+> τ=1
+
+are independent across both users and time-slots and the CSI 
+
+{Cn(t), t = 0 , 1, 2, . . . , T } and {Cm(t), t = 0 , 1, 2, . . . , T }
+
+are independent for all n̸ = m.Next, utilizing the fact that Cn(t) is conditionally indepen-dent of Hn(t) given (Cn(t − ∆n(t)) , ∆n(t)) , we get that 
+
+E
+
+
+
+h(Cn(t)an(t)) Hn(t)
+
+
+
+=E
+
+
+
+h(Cn(t)an(t)) Cn(t − ∆n(t)) , ∆n(t)
+
+
+
+. (60) Therefore, the value function of the finite horizon MDP (4)-(5) under any given policy π = ( an(1) , a n(2) , . . . , a n(T )) Nn=1 
+
+can be written as 
+
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+E
+
+
+
+h(Cn(t)an(t)) (Hn(t)) Nn=1 
+
+
+
+=
+
+> T
+
+X
+
+> t=1
+> N
+
+X
+
+> n=1
+
+E
+
+
+
+h(Cn(t)an(t) Cn(t − ∆n(t)) , ∆n(t)
+
+
+
+, (61) where (61) holds from (60). Therefore, from [13, Chapter 4.3], Theorem 1 follows. APPENDIX BPROOF OF LEMMA 1To bound the probability that the actual transition P fall outside the confidence region Bk, we evaluate the distance between the true transition probabilities Pn(·| c, δ ) and the empirical transition probabilities ˆP kn (·| c, δ ).The L1-deviation between an actual probability distribution and its empirical estimate over m distinct events from n
+
+samples is bounded by [49, Theorem 2.1] Pr (|p − ˆp|1 ≥ α) ≤ (2 m − 2) e− nα 22 . (62) We will utilize this result to compare the actual transition prob-abilities Pn(·| c, δ ) and the optimistic transition probabilities 
+
+P kn (·| c, δ ) for all state (c, δ ).In our model, when an active action is taken, the AoCSI drops to δ′ = 1 . Therefore, the next state only varies over the size of the CSI space, i.e., m = |C| distinct possible next states. For any given user n and state (c, δ ), let n = max {1, B kn(c, δ )}
+
+denote the number of samples. Substituting the confidence radius ρkn(c, δ ) defined in (29) for α in (62), we get Pr 
+
+
+
+| ˆP kn (·| c, δ ) − Pn(·| c, δ )|1 ≥ ρkn(c, δ )
+
+
+
+≤2|C| e − n   
+
+> 2
+> "2|C| log(2Γ |C| N k2
+> μ)
+> n
+> #!
+
+=2 |C| e  
+
+> 
+> −|C| log
+> 2Γ |C| N k 2
+> μ
+> 
+
+=2 |C| 
+
+ μ
+
+2Γ |C| N k 2
+
+|C| 
+
+=
+
+ μ
+
+Γ|C| N k 2
+
+|C| 
+
+. (63) Because the state space size |C| ≥ 2 and the term inside the parenthesis is strictly less than 1 (for sufficiently small μ), we can write Pr 
+
+
+
+| ˆP kn (·| c, δ ) − Pn(·| c, δ )|1 ≥ ρkn(c, δ )
+
+
+
+≤ μ
+
+Γ|C| N k 2 . (64) The actual transition matrix P lies outside the confidence region Bk if the deviation exceeds the confidence radius for any user n ∈ {1, . . . , N } or any state (c, δ ) within the truncated state space size Γ|C| . Applying the Union Bound over all N users and all Γ|C| states yields Pr (P /∈ B k)
+
+≤
+
+> N
+
+X
+
+> n=1
+
+X
+
+> (c,δ )∈C×D
+
+Pr 
+
+
+
+| ˆP kn (·| c, δ ) − Pn(·| c, δ )|1 ≥ ρkn(c, δ )
+
+
+
+≤N Γ|C| 
+
+ μ
+
+Γ|C| N k 2
+
+
+
+= μk2 . (65) Therefore, the probability that the true transition matrix P falls within the confidence ball is Pr (P ∈ B k) = 1 − Pr (P /∈ B k) ≥ 1 − μk2 . (66) This completes the proof. 16 
+
+APPENDIX CPROOF OF LEMMA 2If the confidence bound holds, i.e., P ∈ B k, we can write Reg comp 1 (k)=L(π∗, P, λ ∗) − L(πk, P, λ k)=
+
+> N
+
+X
+
+> n=1
+
+
+
+V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λ∗) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)
+
+
+
+,
+
+≤
+
+> N
+
+X
+
+> n=1
+
+
+
+V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)
+
+
+
+,
+
+(67) where (67) holds because the Lagrange multiplier λ∗ mini-mizes the Lagrangian L(π∗, P, λ ). Note that V Pn 
+
+> n, 1
+
+(·; πkn) rep-resents the value achieved under the actual transition proba-bilities by executing policy πk.Next, in order to prove (40), we first show that the optimal value function under the true transition Pn is upper-bounded by the optimistic value function under P kn , which is given by 
+
+V Pn 
+
+> n,t
+
+(c, δ ; λk) ≤ V P kn 
+
+> n,t
+
+(c, δ ; λk). (68) We prove (68) by using backward induction. For t = H + 1 ,it is trivially true since V Pn
+
+> n,H +1
+
+(c, δ ) = V P kn
+
+> n,H +1
+
+(c, δ ) = 0 for all (c, δ ).Let (68) holds for t = h + 1 . Then, we have 
+
+V Pn
+
+> n,h +1
+
+(c, δ ; λk) ≤ V P kn
+
+> n,h +1
+
+(c, δ ; λk). (69) We have to show that if (69) holds, then the following is true for t = h,
+
+V Pn 
+
+> n,h
+
+(c, δ ; λk) − V P kn 
+
+> n,h
+
+(c, δ ; λk)= max  
+
+> a∈{ 0,1}
+
+QPn
+
+> n,h
+
+(c, δ, a ; λk) − max  
+
+> a∈{ 0,1}
+
+QP kn
+
+> n,h
+
+(c, δ, a ; λk)
+
+≤ max 
+
+> a∈{ 0,1}
+
+
+
+QPn
+
+> n,h
+
+(c, δ, a ; λk) − QP kn
+
+> n,h
+
+(c, δ, a ; λk)
+
+
+
+. (70) Next, we analyze (70) for both actions. If the passive action (a = 0 ) is taken, the last observed CSI will not change, and the state transition is deterministic. Using (69), we get 
+
+QPn
+
+> n,h
+
+(c, δ, 0; λk) − QP kn
+
+> n,h
+
+(c, δ, 0; λk)=V Pn
+
+> n,h +1
+
+(c, δ + 1; λk) − V P kn
+
+> n,h +1
+
+(c, δ + 1; λk) ≤ 0. (71) If the active action ( a = 1 ) is taken, we have 
+
+QPn
+
+> n,h
+
+(c, δ, 1; λk) − QP kn
+
+> n,h
+
+(c, δ, 1; λk)= X
+
+> c′
+
+Pn(c′|c, δ ) h(c′, 1) + V Pn
+
+> n,h +1
+
+(c′, 1; λk)−
+
+max   
+
+> ˜Pkn∈B k
+
+X c′ ˜P n k(c′|c, δ ) h(c′, 1) + V P kn
+
+> n,h +1
+
+(c′, 1; λk)
+
+≤ X
+
+> c′
+
+Pn(c′|c, δ ) h(c′, 1) + V P kn
+
+> n,h +1
+
+(c′, 1; λk)−
+
+max   
+
+> ˜Pkn∈B k
+
+X c′ ˜P n k(c′|c, δ ) h(c′, 1) + V P kn
+
+> n,h +1
+
+(c′, 1; λk)
+
+(72) 
+
+≤0. (73) Here, (72) holds from V Pn 
+
+> n,h +1
+
+≤ V P kn 
+
+> n,h +1
+
+and (73) holds because the actual transition probability Pn lies within the confidence ball Bk (i.e., Pn ∈ B k). Therefore, the expected value at Pn can never exceed the maximum possible expected value found by searching over all ˜P kn ∈ B k. Because this implies the difference between the true expectation and the optimistic expectation is less than or equal to zero for all actions, we conclude V Pn 
+
+> n,h
+
+(c, δ ; λk) ≤ V P kn 
+
+> n,h
+
+(c, δ ; λk) for all 
+
+t. Substituting this into (67) yields Reg comp 1 (k)
+
+≤
+
+> N
+
+X
+
+> n=1
+
+
+
+V P kn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)
+
+
+
+.
+
+(74) This completes the proof. APPENDIX DPROOF OF THEOREM 2We bound the cumulative regret of comp 1 over K episodes by analyzing two cases: when the true transition probability 
+
+P lies within the confidence ball Bk, and when it does not. When the confidence bound holds (i.e., P ∈ B k), from Lemma 2, the regret for episode k is bounded by the difference in value functions evaluated under the policy πk, which is given by Reg comp 1 (k)
+
+≤
+
+> N
+
+X
+
+> n=1
+
+
+
+V P kn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)
+
+
+
+.
+
+(75) Since we need to estimate the transitions only for the active actions, by using Lemma 2 and applying Lemma 10 of [50], we get 
+
+V P kn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)=EPn,π kn
+
+ HX
+
+> t=1
+
+1(an(t) = 1) X
+
+> c′,δ ′
+
+
+
+P kn (c′, δ ′|cn(t), δ n(t)) 
+
+−Pn(c′, δ ′|cn(t), δ n(t)) 
+
+
+
+V P kn
+
+> n,t +1
+
+(s′)
+
+
+
+.
+
+(76) 17 
+
+Applying H¨ older’s inequality [51] and utilizing the upper bound of the value function Vmax , we obtain 
+
+V P kn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk) − V Pn 
+
+> n, 1
+
+(cn(1) , δ n(1); λk; πkn)
+
+≤Vmax EPn,π kn
+
+ HX
+
+> t=1
+
+1(an(t) = 1) P kn (·| cn(t), δ n(t)) 
+
+− Pn(·| cn(t), δ n(t)) 
+
+> 1
+
+
+
+.
+
+(77) Because Pn ∈ B k and P kn ∈ B k, both transition matrices lie within the confidence radius ρkn with center at the empirical estimate ˆP kn . Using the triangle inequality, we can write 
+
+P kn (·| cn(t), δ n(t)) − Pn(·| cn(t), δ n(t)) 1
+
+≤ P kn (·| cn(t), δ n(t)) − ˆP kn (·| cn(t), δ n(t)) 1+
+
+ˆP kn (·| cn(t), δ n(t)) − Pn(·| cn(t), δ n(t)) 1
+
+≤2ρkn(cn(t), δ n(t)) . (78) Therefore, when the confidence bound holds, the regret for episode k is bounded by Reg comp 1 (k)
+
+≤2Vmax 
+
+> N
+
+X
+
+> n=1
+
+EPn,π kn
+
+" HX
+
+> t=1
+
+1(an(t) = 1) ρkn(cn(t), δ n(t)) 
+
+#
+
+.
+
+(79) Let γkn(c, δ ) is a random variable, which represents the number of visits to state (c, δ ) ∈ C × D in episode k for arm n and the active action is taken by arm n during episode k. Substituting 
+
+ρkn(c, δ ) form (29) to (79), we get the total regret over K
+
+episodes as follows 
+
+> K
+
+X
+
+> k=1
+
+Reg comp 1 (k)
+
+≤2Vmax 
+
+> N
+
+X
+
+> n=1
+
+E
+
+ KX
+
+> k=1
+
+X
+
+> (c′,δ ′)∈C×D
+
+γkn(c, δ )
+
+s
+
+2|C| log(2Γ |C| N k2 
+
+> μ
+
+)max(1 , B kn(c, δ )) 
+
+
+
+.
+
+(80) Next, by applying [16, Lemma E.3] yields 
+
+> K
+
+X
+
+> k=1
+
+X
+
+> (c,δ )∈C×D
+
+γkn(c, δ )
+
+pmax(1 , B kn(c, δ )) 
+
+≤
+
+√H + 1 + 1 
+
+ X
+
+> (c,δ )∈C×D
+
+q
+
+Bkn(c, δ )
+
+≤
+
+√H + 1 + 1 
+
+pΓ|C| KH, (81) where the last inequality holds because the total number of active actions taken by arm n over K episodes is at most 
+
+KH . Substituting this into (80), we get the cumulative regret 
+
+> K
+
+X
+
+> k=1
+
+Reg comp 1 (k)
+
+≤ 2Vmax 
+
+s
+
+2|C| log 
+
+
+
+2Γ |C| N K2
+
+μ
+
+
+
+> N
+
+X
+
+> n=1
+
+
+
+(√H + 1 + 1) pΓ|C| KH 
+
+
+
+= O
+
+
+
+Vmax Γ|C| N H pK log K
+
+
+
+. (82) When the confidence bound fails (i.e, P /∈ Bk), from Lemma 1, we know Pr (P /∈ B k) ≤ μ/k 2. The maximum possible regret in any episode is bounded by 2Vmax N H .Summing over K episodes, the cumulative regret when the confidence bound does not hold is given by 
+
+> K
+
+X
+
+> k=1
+
+2Vmax N H Pr (P /∈ B k) ≤ 2Vmax N H 
+
+> K
+
+X
+
+> k=1
+
+μk2
+
+≤ 2Vmax N Hμ π2
+
+6= O(μ). (83) Combining both cases, the total cumulative regret for comp 1
+
+holds with probability 1 − μ and is given by Reg comp 1 (K) ≤O 
+
+
+
+Vmax Γ|C| N H pK log K
+
+
+
++ O(μ)=O
+
+
+
+Vmax Γ|C| N H pK log K
+
+
+
+. (84) This completes the proof. APPENDIX EPROOF OF LEMMA 3Following the Lagrangian bounding framework established in [52], the sub-optimality of the MGF policy is bounded by the expected sum of single-step action-value difference relative to the optimal actions a∗
+
+> n
+
+(t) taken to solve the relaxed problem evaluated at the optimal dual cost λ∗. For episode k, the cost due to this difference is bounded by 
+
+gk(N ) ≤ EπMGF 
+
+ HX
+
+> t=1
+> N
+
+X
+
+> n=1
+
+
+
+Qn,t (cn(t), δ n(t), a ∗
+
+> n
+
+(t)) 
+
+− Qn,t (cn(t), δ n(t), a MGF  
+
+> n
+
+(t)) 
+
+ 
+
+,
+
+(85) where a∗
+
+> n
+
+(t) denote the action chosen to solve the relaxed problem (14)-(15), and aMGF  
+
+> n
+
+(t) denote the action chosen according to the MGF policy. Using standard fluid approximations, [52] bound this dif-ference. By leveraging the gain index in (35), we can directly compute this difference. From (35), the optimal policy for the relaxed problem selects a∗ 
+
+> n
+
+= 1 if αn(c, δ ) > λ ∗, and the passive action otherwise. The MGF policy selects M arms with the highest gain αn(c, δ ). Because the channel state is finite, the maximum single-step cost is bounded by ∆max ,18 
+
+which depends entirely on the maximum CSI Cmax and the maximum AoCSI bound τ
+
+max  
+
+> n,c,δ
+
+|αn(c, δ ) − λ∗| ≤ ∆max . (86) Substituting (86) into (85), we get 
+
+gk(N ) ≤ ∆max 
+
+> H
+
+X
+
+> t=1
+
+EπMGF 
+
+" NX
+
+> n=1
+
+1(a∗
+
+> n
+
+(t)̸ = aMGF  
+
+> n
+
+(t)) 
+
+#
+
+. (87) Based on the fluid limit convergence for RMABs, as the network size N → ∞ , the empirical state distribution con-verges to a deterministic fluid limit [32]. The deviation of the strictly feasible constraint ( M activations) from the relaxed threshold constraint ( λ∗) behaves according to the Central Limit Theorem [32], [52]. Specifically, the expected total number of mismatched arms scales with the standard deviation of the empirical measure, bounded by Cv
+
+√N (where Cv is the variance constant) [52]. The expected mismatch for each user in each episode is given by 
+
+1
+
+N gk(N ) ≤ 1
+
+N ∆max HC v
+
+√N = HC v ∆max 
+
+√N . (88) Next, by taking summation over the finite horizon of K
+
+episodes, we get 
+
+g(N ) ≤
+
+> K
+
+X
+
+> k=1
+
+HC v ∆max 
+
+√N = O
+
+ K
+
+√N
+
+
+
+. (89) This completes the proof. APPENDIX FPROOF OF THEOREM 3Utilizing g(N ) in (42), we can decompose comp 2 as follows comp 2 =
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗) − Jk(πk, P)=g(N ) + 
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗) −
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P kn , λ ∗)+ Jk(πk, Pk) − Jk(πk, P). (90) If the confidence bound holds, then 
+
+> N
+
+X
+
+> n=1
+
+Ln(πkn, P n, λ ∗) − Ln(πkn, P kn , λ ∗) ≤ 0. (91) This is because πkn is the optimal solution to the Lagrangian problem and Pk achieves the highest Lagrangian objective value. Furthermore, following the value difference bound estab-lished in (76)-(78), the difference in the expected cumulative throughput under the same policy πk but different transition probabilities is bounded by 
+
+Jk(πk, Pk) − Jk(πk, P)
+
+≤
+
+> N
+
+X
+
+> n=1
+
+Vmax EPn,π kn
+
+ HX
+
+> t=1
+
+1(an(t) = 1) P kn (·| cn(t), δ n(t)) 
+
+− Pn(·| cn(t), δ n(t)) 1
+
+
+
+≤2Vmax 
+
+> N
+
+X
+
+> n=1
+
+EPn,π kn
+
+" HX
+
+> t=1
+
+1(an(t) = 1) ρkn(cn(t), δ n(t)) 
+
+#
+
+.
+
+(92) By taking summation of (92) over all K episodes and following the similar procedure in Appendix D, we get 
+
+Jk(πk, Pk) − Jk(πk, P)
+
+≤O 
+
+
+
+2Vmax Γ|C| N H pK log K
+
+
+
+. (93) When the confidence bound fails (i.e., P /∈ B k), which occurs with probability at most μ/k 2, the maximum cost per episode is bounded by 2Vmax N H . Taking summation over K
+
+episodes yields the bound O(μ).Utilizing (91) and (93) in (90) for all K episodes, with probability 1−μ, the cumulative regret associated with comp 2
+
+is given by Reg comp 2 ≤ g(N )K + O
+
+
+
+2Vmax Γ|C| N H pK log K
+
+
+
+. (94) Finally, utilizing Lemma 3 and taking N → ∞ yields (45). This completes the proof. APPENDIX GPROOF OF THEOREM 4Using (84) and (94), we get the cumulative regret over all 
+
+K episodes as follows Reg (K) ≤ Reg comp 1 + Reg comp 2
+
+≤ g(N )K + O
+
+
+
+3Vmax Γ|C| N H pK log K
+
+
+
+, (95) from which (45) follows by using Lemma 3 and taking N →∞.This completes the proof. APPENDIX HPROOF OF THEOREM 5To prove indexability for ON/OFF channels, we consider the decoupled problem (17) with a subsidy λ for the passive action, i.e., when a = 0 (equivalently, a cost λ for the active action). We assume positively correlated channels, i.e., 
+
+Pn(1 |1, δ ) > P n(1 |0, δ ). From Definition 2, an arm is index-able if the set Φ( λ) increases monotonically as the activation cost λ increases. We establish this by analyzing the threshold policies for both observed states. 
+
+Case 1: (The last observed state is “ON” ( c = 1 ).) When 
+
+c = 1 , the expected immediate reward for taking the active action is Pn(1 |1, δ ) − λ. Because the channels are positively correlated, Pn(1 |1, δ ) is decreasing with δ. Consequently, the 19 
+
+active action becomes less beneficial as δ increases. the action-value function Qn,t (1 , δ, 1) for the active action decreases as 
+
+δ increases. Therefore, the optimal policy forms a threshold structure: take the active action if δ ≤ δ∗ 
+
+> 1
+
+and the passive action if δ > δ ∗ 
+
+> 1
+
+, where δ∗ 
+
+> 1
+
+is the AoCSI threshold. As λ
+
+increases, the net reward for taking the active action decreases with δ and the active action becomes less beneficial for all δ.Consequently, the threshold δ∗ 
+
+> 1
+
+also decreases or remains the same. A decreasing threshold implies that the set of states where the arm is active decreases as λ increases. Therefore, the set of passive states Φ1(λ) = {(1 , δ ) | δ > δ∗ 
+
+> 1
+
+} in monotonically increases as λ increases. 
+
+Case 2: (The last observed state is “OFF” ( c = 0 ).) When 
+
+c = 0 , the expected immediate reward for taking the active action is Pn(1 |0, δ ) − λ. The probability Pn(1 |0, δ ) mono-tonically increases with δ and growing towards the steady state probability distribution. This implies that the immediate reward for activation also increases as δ grows. Because the active action becomes more beneficial over time, the optimal policy forms a reversed-threshold structure: take the passive action if δ ≤ δ∗ 
+
+> 0
+
+and the active action if δ > δ ∗ 
+
+> 0
+
+. As the penalty λ increases, the immediate net reward of taking the active action decreases for all δ. This delays the point at which activation becomes optimal and the threshold δ∗ 
+
+> 0
+
+exhibit larger values. A non-decreasing threshold δ∗ 
+
+> 0
+
+implies that the set of passive states Φ0(λ) = {(0 , δ ) | δ ≤ δ∗ 
+
+> 0
+
+} monotonically expands as λ increases. Since the passive sets for both c = 1 and c = 0 grow monotonically as the activation cost λ increases, all arms are indexable by Definition 2. This completes the proof. APPENDIX IPROOF OF THEOREM 6We will derive the closed-form Whittle index by finding the cost λ for which the active and passive actions are equally ben-eficial at a given state (c, δ ), i.e., Q(c, δ, 1; λ) = Q(c, δ, 0; λ).
+
+Case 1: (Whittle index for c = 1 .) To compute the Whittle index at state (1 , δ ), we will utilize the action-value functions for both active and passive actions, i.e., Q(1 , δ, 1; λ) =
+
+Q(1 , δ, 0; λ).If passive action is taken at (1 , δ ), then, AoCSI increases to 
+
+δ +1 . Since Pn(1 |1, δ ) is decreasing with δ, the optimal policy prefers to stay passive at δ + 1 . Thus, the passive action leads to a trajectory of staying passive forever. Hence, the action-value function for the passive action relative to λ will be 0, i.e., Q(1 , δ, 0; λ) = 0 . If the active action is taken, the AoCSI becomes 1. The next state will be (1 , 1) with probability 
+
+Pn(1 |1, δ ) and (0 , 1) with probability Pn(0 |1, δ ). The action-value function for the active action is then given by 
+
+Q(1 , δ, 1; λ) = Pn(1 |1, δ ) − λ + Pn(1 |1, δ )V (1 , 1; λ)+ (1 − Pn(1 |1, δ )) V (0 , 1; λ). (96) Because the channels are positively correlated, if the last observed CSI is “OFF” (i.e, c = 0 ), it is highly likely to remain at the “OFF” state. This makes the probability Pn(0 |1, δ )
+
+very small and yields V (0 , 1; λ) = 0 . Conversely, state (1 , 1) 
+
+represents the highest possible probability Pn(1 |1, 1) . Since 
+
+δ ≥ 1, the state (1 , 1) strictly belongs to the active region. Then the value function V (1 , 1; λ) is given by 
+
+V (1 , 1; λ) = Pn(1 |1, 1) − λ + Pn(1 |1, 1) V (1 , 1; λ)(1 − Pn(1 |1, 1)) V (0 , 1; λ). (97) which yields 
+
+V (1 , 1; λ) = Pn(1 |1, 1) − λ
+
+1 − Pn(1 |1, 1) , (98) which holds because V (0 , 1) = 0 . Substituting the values of V (1 , 0; λ) and V (1 , 1; λ) in (96) and Q(1 , δ, 1; λ) =
+
+Q(1 , δ, 0; λ) = 0 , we get 
+
+Pn(1 |1, δ ) − λ + Pn(1 |1, δ )
+
+ Pn(1 |1, 1) − λ
+
+1 − Pn(1 |1, 1) 
+
+
+
+= 0 . (99) Solving for λ yields the Whittle index Wn(c, δ ) as follows 
+
+Wn(c, δ ) = Pn(1 |1, δ )1 − (Pn(1 |1, 1) − Pn(1 |1, δ )) . (100) 
+
+Case 2: (Whittle index for c = 0 .) Due to the positive correlation, if the last observed state is “OFF,” the probability of the channel being “ON” starts at its lowest possible value and slowly rises. Throughout this trajectory, the expected reward is consistently lower than the expected reward of an arm starting at c = 1 . Hence, it is never optimal to schedule and the Whittle index is 0. Combining cases 1 and 2, we get (57). This completes the proof.

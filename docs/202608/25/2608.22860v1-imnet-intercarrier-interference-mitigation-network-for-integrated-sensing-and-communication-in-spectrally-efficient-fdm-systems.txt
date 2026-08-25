@@ -1,0 +1,2101 @@
+Title: IMNet: Intercarrier Interference Mitigation Network for Integrated Sensing and Communication in Spectrally Efficient FDM Systems
+
+URL Source: https://arxiv.org/pdf/2608.22860v1
+
+Published Time: Tue, 25 Aug 2026 01:39:59 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# IMNet: Intercarrier Interference Mitigation Network for Integrated Sensing and Communication in Spectrally Efficient FDM Systems 
+
+Hyeonho Noh, Member, IEEE 
+
+Abstract — Spectrally efficient frequency-division multiplexing (SEFDM) is an attractive waveform to improve communication spectral efficiency by compressing the subcarrier spacing, yet its use for integrated sensing and communication (ISAC) poses a fundamental sensing challenge. Specifically, the intentional loss of subcarrier orthogonality generates SEFDM-induced intercarrier interference (S-ICI), which combines with Doppler-induced ICI (D-ICI) from moving targets to blur range–velocity maps and severely degrade sensing accuracy. Building on multi-user multi-input-multi-output (MIMO) SEFDM systems, this paper develops a model-driven ISAC framework that supports spectrally efficient multi-user communication while mitigating both S-ICI and D-ICI in sensing. To this end, an intercarrier interference mitig-ation network (IMNet) is proposed, which exploits the distinct physical structures of the two interferences. A bank of Doppler correction filters first compensates the velocity-dependent D-ICI over multiple Doppler hypotheses, and an axial-attention network subsequently suppresses the residual D-ICI and the long-range S-ICI to recover reliable sensing signals. To further improve range and velocity estimation accuracy, IMNet with local refinement (IMNet-LR) is proposed, which performs maximum-likelihood refinement with nuisance projection around the IMNet detections to achieve sub-cell precision without an exhaustive global search. Simulation results show that IMNet-LR achieves near-maximum-likelihood range and velocity estimation accuracy with more than three orders of magnitude lower execution time compared to conventional detection methods. 
+
+Index Terms —Integrated sensing and communication (ISAC), spectrally efficient FDM (SEFDM), intercarrier interference (ICI) mitigation network (IMNet), radar target detection 
+
+I. I NTRODUCTION 
+
+Wireless networks are evolving from passive data-delivery systems into infrastructures that support intelligent agents operating in the physical world [1], [2]. This evolution is being accelerated by physical artificial intelligence (AI), in which autonomous robots and other embodied agents must perceive, reason, and act in dynamic environments [3]. Their safe and coordinated operation requires not only reliable data exchange but also continuous localization, object tracking, motion estim-ation, and situational awareness [4]. Integrated sensing and communication (ISAC) supports these requirements by using a common waveform, spectrum, and transceiver platform for both data transmission and environmental sensing [5], [6]. ISAC can therefore transform wireless infrastructure into a distributed perception layer for physical AI rather than merely a medium for communication. 
+
+Hyeonho Noh is with the Department of Information and Communica-tion Engineering, Hanbat National University, Republic of Korea (e-mail: hhnoh@hanbat.ac.kr). Table I COMPARISON OF THE PROPOSED SCHEME WITH RECENT WORKS .                                                                          
+
+> Ref Scheme Sens. Comm. Compl. ICI suppr. SEFDM
+> [14] ML G#G##✗✗
+> [15] ML G##✓✗
+> [16], [17] ML G#G##✗✗
+> [18] SS G#G##✗✗
+> [12], [19] SS G#G#G#✗✗
+> [8], [9], [20], [21] FFT #G#✗✗
+> [11], [22], [23] FFT G##✗✗
+> [24] FFT G##✓✗
+> [25] ML, FFT G##✓✗
+> [26], [27] FFT G#G#G#✓✗
+> [13] ML #✗✓
+> [28] DL, FFT G#G#✓✗
+> IMNet DL, ML, FFT G#✓✓
+
+* SS: Subspace, Sens.: Sensing performance, Comm.: Communication performance, Compl.: Complexity. 
+
+, G#, and # denote high, moderate, and low performance, respectively. 
+
+Among the waveforms available for practical ISAC, ortho-gonal frequency-division multiplexing (OFDM) has emerged as the most widely studied option because its two-dimensional time–frequency structure is inherently suited to joint com-munication and sensing [7]. The orthogonal time–frequency structure of OFDM enables efficient separation of target echoes in the range–Doppler domain, making it particularly amenable to joint range and velocity estimation [8]. Moreover, the occupied bandwidth and coherent observation interval govern the attainable range and velocity resolutions, respect-ively, while subcarrier orthogonality enables efficient Fourier-domain processing [9]–[12]. Building on the same multicarrier principle, spectrally efficient frequency-division multiplexing (SEFDM) relaxes strict subcarrier orthogonality and increases the spectral overlap among adjacent subcarriers, allowing more data-bearing subcarriers to be accommodated within a given bandwidth. SEFDM thereby improves communication spec-tral efficiency while retaining the underlying time–frequency structure that supports joint range and Doppler estimation [13]. This combination of enhanced spectral efficiency and inherent sensing capability makes SEFDM a promising waveform for next-generation ISAC systems. 
+
+A. Related Works 
+
+Various approaches have been proposed for estimating target range and velocity in multicarrier ISAC systems, as summar-ized in Table I. 
+
+Multicarrier ISAC sensing. Multicarrier sensing techniques have largely been developed around OFDM, whose time-arXiv:2608.22860v1 [eess.SP] 24 Aug 2026 2
+
+frequency structure enables efficient joint range and Doppler estimation. The fast Fourier transform (FFT)-based ISAC receiver in [8] decouples target delay and Doppler into phase progressions across subcarriers and symbols, allowing the range-Doppler map to be efficiently constructed through Four-ier processing. This principle has been extended to multi-user (MU) multiple-input multiple-output (MIMO) systems for joint waveform and beamforming design [11], [29] and inter-ference management [21]. Despite its computational efficiency, FFT-based sensing is confined to discrete delay-Doppler bins determined by the finite numbers of subcarriers and symbols, thereby limiting estimation accuracy. To overcome this lim-itation, parametric and super-resolution methods have been developed, including MIMO range-velocity estimation [9], tensor-based estimation [16], estimation of signal parameters via rotational invariance techniques (ESPRIT)-type approaches [12], [19], and maximum likelihood (ML)-based refinements [14], [17]. Though these methods can provide sub-bin accur-acy, their complexity or sensitivity to snapshot support and model mismatch can become problematic in dense scenes. The work in [30] further employed a physics-guided learning approach for target localization in wideband OFDM systems affected by hardware-induced dispersion, but its formulation is limited to single-symbol angle–range localization. SEFDM has also been explored for ISAC, with [31] experi-mentally demonstrating a MU MIMO-SEFDM system and its spectral-efficiency gains through over-the-air measurements. For SEFDM-based sensing, the loss of subcarrier orthogonality inherently introduces SEFDM-induced ICI (S-ICI), which has been addressed using model-based estimation and interference cancellation techniques [13], [32]. Although these approaches account for the interference arising from non-orthogonal wave-form compression, they do not explicitly address Doppler-induced ICI (D-ICI) caused by target motion. Moreover, their reliance on iterative ML-based refinement or spectral cancellation incurs substantial computational complexity. 
+
+ICI-robust ISAC. ICI-robust processing attempts to recover sensing performance when target motion or waveform mis-match breaks OFDM orthogonality. ICI-free OFDM radar processing can suppress D-ICI through dedicated symbol structures [24], but this strategy significantly sacrifies commu-nication data rate. Joint range and velocity estimation under intrapulse and intersubcarrier Doppler effects has also been analyzed in [15]. Another direction exploits, rather than simply suppresses, ICI in MIMO-OFDM joint radar-communications [25]. Nevertheless, both works [15], [25] depend on ML search, which leads to prohibitive computational complexity. Communication-compatible OFDM radar receivers with ICI mitigation have been further developed in [26], [27], and DCFNet [28] suppresses D-ICI in MU MIMO-OFDM sensing through a Doppler correction filter (DCF) bank and a U-Net. Nevertheless, all of these receivers are tied to the OFDM model and are therefore not well suited to mitigating S-ICI. 
+
+B. Challenges 
+
+The above studies indicate two challenges that must be ad-dressed jointly. First, SEFDM improves spectral efficiency by intentionally breaking subcarrier orthogonality; the resulting S-ICI raises the interference floor across the range-Doppler map, making weak target signals difficult to distinguish. Second, exhaustive ML and successive interference cancel-lation (SIC)-based refinements can approach high estimation accuracy, but their complexity increases with the search grid and number of targets, which makes dense low-latency sensing difficult. Motivated by these unresolved challenges, this study poses a key research question: 
+
+How can high-precision sensing be achieved with low computational complexity under SEFDM-induced ICI? 
+
+C. Contributions 
+
+This paper develops a MU MIMO-SEFDM ISAC frame-work that exploits SEFDM for improved communication spectral efficiency while addressing the resulting S-ICI in radar sensing. To this end, IMNet, a model-driven learning receiver that combines the known SEFDM signal structure with learning-based interference mitigation, is proposed. The contributions are summarized as follows:  
+
+> •
+
+A MU MIMO-SEFDM ISAC framework is developed in which transmit beamforming supports both communication and sensing. To maintain sufficient target sensing gain while maximizing communication spectral efficiency, a sum-rate maximization problem is formulated subject to power constraints and a minimum sensing beampattern gain toward the focal directions. The resulting beamformer provides a controllable communication–sensing operating point and strengthens the sensing signal before IMNet processing. Although the S-ICI couples the subcarriers, the problem is recast through the weighted minimum mean-square error (WMMSE) method and the precoder update is shown to be decoupled across subcarriers, yielding an efficient closed-form solution for each subcarrier.  
+
+> •
+
+IMNet, a model-driven detection architecture that exploits the distinct structures of D-ICI and S-ICI rather than treating them as generic interference, is proposed. IMNet first employs a DCF bank to generate multiple velocity-compensated range–velocity maps, such that targets affected by severe D-ICI can be recovered in maps associated with nearby Doppler hypotheses. These complementary observa-tions are then jointly processed by a structure-aware ICI rejection head. In particular, IMNet selectively exploits the DCF outputs according to their residual interference levels, while range-wise attention mitigates the long-range S-ICI coupling across distant range cells and Doppler-wise atten-tion suppresses the residual D-ICI after Doppler compens-ation. A detection head then transforms the ICI-mitigated representation into a target-confidence map, enabling robust target detection under severe S-ICI and D-ICI.  
+
+> •
+
+To improve the grid-limited estimation accuracy of IMNet without resorting to exhaustive likelihood search, IMNet with local refinement (IMNet-LR) is introduced. IMNet detections serve as initial target candidates, around which a local ML refinement with nuisance projection is performed. 3
+
+ó̷ Ý̷   
+
+> `ʴv1`ó㍚ )ÖȺɶ˃ǩʴ˓Ⱥʅɶ óʴƠɶ˃ɯȺ˓ ǄǩƠɯȔʅʴɯȺɶș
+> ç̺ɯǄʅɝ ɯƠʫʫȺɶș Āʫ㎿ Ǎʅɶ̨ǩʴ˃Ⱥʅɶ 1ʅ̭ɶ㎿ Ǎʅɶ̨ǩʴ˃Ⱥʅɶ çƠɯʫɝȺɶș㍚ )Öʴǩɯʅ̨Ơɝ çʫƠ˓ȺƠɝ1`ó @˃˓ȺɯƠ˓ǩǗ ʴƠɶșǩ˃ƠɶŲ̈́ ǩɝʅǍȺ˓Ⱥǩ˃ 1Ơ˓Ơ
+> Figure 1. Architecture of the considered MU-MIMO-SEFDM ISAC system.
+
+By restricting the likelihood evaluation to small neighbor-hoods of detected targets, IMNet-LR provides sub-cell range and velocity estimates while avoiding a fine-grid search over the entire range-Doppler domain.  
+
+> •
+
+Extensive simulations demonstrate that the proposed IMNet framework achieves substantial improvements in both detec-tion accuracy and computational efficiency relative to con-ventional detectors. Its detection performance approaches the ideal interference-free bound, confirming its effective-ness in practical SEFDM ISAC scenarios. Furthermore, IMNet-LR achieves the range and velocity accuracy of an exhaustive likelihood search while running roughly three orders of magnitude faster. 
+
+Notations. (·)∗, (·)T, (·)H, and (·)† are complex conjugate, transpose, conjugate transpose, and Moore–Penrose pseudo-inverse, respectively. For a matrix A, A−1, Tr( A), and 
+
+[A](i,j ) are the inverse, trace, and (i, j )-th entry of A, re-spectively, and A  0 and A ≻ 0 indicate that A is positive semidefinite and positive definite. The symbol ./ is the elementwise complex division and ∗ is the two-dimensional convolution. The N × N identity matrix is denoted by IN ,and 1 is the all-ones vector. The diagonal matrix with diagonal elements (a1, a 2, . . . , a m) is denoted by diag (a1, a 2, . . . , a m).
+
+CN (μ, Σ) is the complex normal distribution with mean μ
+
+and covariance matrix Σ. Rn×m and Cn×m are the (n × m)-dimensional real and complex spaces, respectively. Re {·} and 
+
+Im {·} are the real and imaginary parts, ‖·‖ 2 is the Euclidean norm, ⌊·⌋ is the floor operator. II. S CENARIO AND PROTOCOL 
+
+The proposed MU MIMO-SEFDM ISAC system, consisting of a base station (BS), J radar targets, and K communication users, is considered. The BS is equipped with a uniform linear array (ULA) comprising NT transmit antennas and NR
+
+receive antennas, while each user is equipped with a single receive antenna. Compared to OFDM, SEFDM compresses the subcarrier spacing from ∆f to β∆f with bandwidth compression factor 0 < β ≤ 1, thereby accommodating more subcarriers within a given bandwidth at the cost of the loss of subcarrier orthogonality and the resulting inherent ICI. The BS simultaneously serves the users and performs target sensing. Its primary objective is to estimate the ranges and velocities of targets while transmitting data to K users. The ISAC system operates in two stages: 
+
+ISAC signal transmission. The BS transmits SEFDM sig-nals embedded with communication symbols, which are used both for downlink communication and target sensing within predefined focal angles. To improve the downlink data rate and enhance beamforming gain toward focal angles, the BS applies transmit beamforming. 
+
+Sensing signal reception. The BS retains the full per-antenna time-domain samples across its NR receive antennas and sweeps its receive beam over the angular domain; for each observed angle of arrival (AoA), it forms a two-dimensional range-velocity map through 2D fractional Fourier processing. Far-field point targets with constant radial velocities are considered, and the BS-to-user channels include multipath components from scatterers in the propagation environment. 
+
+A. System and Signal Model 
+
+Over Nsym consecutive SEFDM symbols, the baseband transmit signal vector is given by 
+
+x(t) = 1
+
+√Nc
+
+> Nsym −1
+
+∑
+
+> μ=0
+
+∑
+
+> n∈N c
+
+∑
+
+> k∈K
+
+v(n) 
+
+> k
+
+s(n,μ )
+
+> k
+
+× ej2πnβ ∆f t μ rect 
+
+( tμ + TCP 
+
+TOFDM 
+
+)
+
+, (1) where Nc is the number of SEFDM subcarriers; K =
+
+{0, . . . , K − 1}; v(n) 
+
+> k
+
+∈ CNT×1 is the transmit beamformer for user k on subcarrier n; s(n,μ ) 
+
+> k
+
+is the communication symbol of user k on subcarrier n in the μ-th symbol; ∆f = 1 /T is the OFDM-equivalent subcarrier spacing serving as the reference grid; T is the SEFDM signal duration; TCP is the cyclic prefix (CP) duration; TOFDM = T +TCP ; tμ = t−μT OFDM ; and rect (·)
+
+is the rectangular function defined as rect 
+
+( tT
+
+)
+
+=
+
+{
+
+1, for 0 ≤ t < T, 
+
+0, otherwise . (2) The channel coherence time is assumed to exceed Nsym TOFDM ,so that v(n) 
+
+> k
+
+is constant over the transmission. The BS transmits the up-converted signal xRF (t) = x(t)ej2πf c t.4
+
+B. Communication SINR 
+
+Each user down-converts the received radio-frequency (RF) signal to baseband and applies standard carrier frequency recovery. It is assumed that the carrier frequency offset (CFO) is compensated by conventional synchronization [33], [34] so that its residual impact on the signal-to-interference-plus-noise ratio (SINR) is negligible. After CP removal, each user applies the fractional discrete Fourier transform (FrDFT) of parameter β to project the time-domain samples onto the SEFDM subcarrier grid. For β < 1, the SEFDM subcarriers are non-orthogonal, and the FrDFT output associated with subcarrier n contains contributions from the other transmitted subcarriers. The coupling from subcarrier m to subcarrier n,for m, n ∈ N c, is characterized by 
+
+ρm,n (β) = 1
+
+Nc
+
+> Nc−1
+
+∑
+
+> ℓ=0
+
+ej2π(m−n)βℓ/N c . (3) For each k ∈ K , the SINR of user k on subcarrier n reads 
+
+γ(n) 
+
+> k
+
+=
+
+∥∥∥(h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+∥∥∥2
+
+I(n) 
+
+> k
+
++ J(n) 
+
+> k
+
+(β) + σ2
+
+> k
+
+, (4) where 
+
+I(n) 
+
+> k
+
+= ∑
+
+> ℓ∈K\{ k}
+
+∥∥∥(h(n) 
+
+> k
+
+)Hv(n)
+
+> ℓ
+
+∥∥∥2
+
+, (5) 
+
+J(n) 
+
+> k
+
+(β) = ∑
+
+> m∈N c\{ n}
+
+|ρm,n (β)|2 ∑
+
+> ℓ∈K
+
+∥∥∥(h(m) 
+
+> k
+
+)Hv(m)
+
+> ℓ
+
+∥∥∥2
+
+, (6) 
+
+h(n) 
+
+> k
+
+∈ CNT×1 is the BS-to-user frequency-domain channel vector evaluated at subcarrier n, and σ2 
+
+> k
+
+is the noise variance. The term I(n) 
+
+> k
+
+captures the multi-user interference within subcarrier n, and J(n) 
+
+> k
+
+(β) collects the S-ICI leaking from the other subcarriers. 
+
+C. Radar Received Signal 
+
+The reflected waveform is collected by the NR-element receive ULA. The standard far-field, monostatic point-target model with constant path gains, negligible range migration, and a sufficient CP is used [9], [24]–[26]. Thus the i-th path has delay τi = 2 Ri/c 0, Doppler fD,i = −2vifc/c 0, and array response Ai = aR(θi)aH 
+
+> T
+
+(θi) with [aM(θ)] r = e−j2πr ∆ sin θ
+
+for M ∈ { T, R}.Following down-conversion, the baseband reflected signal can be represented by 
+
+y(t) = ∑
+
+> i∈P
+
+aie−j2πf c τi ej2πf D,i tAix(t − τi) + z(t). (7) After CP removal and sampling at tμ = mT /N c, the r-th receive-antenna sample is given by 
+
+y(r,m,μ ) = ∑
+
+> i∈P
+
+∑
+
+> n∈N c
+
+∑
+
+> k∈K
+
+¯ai
+
+√Nc
+
+[aR(θi)] r aHT (θi)v(n) 
+
+> k
+
+s(n,μ )
+
+> k
+
+× ej2πnβm/N c e−j2πnβ ¯τi
+
+× ej2π ¯fD,i m/N c ej2π ¯fD,i μα + ˆ z(r,m,μ ), (8) where ¯ai = aie−j2πf c τi , ¯τi = τi/T , ¯fD,i = fD,i T , α =
+
+TOFDM /T , and ˆz(r,m,μ ) ∼ CN (0 , σ 2). Stacking (8) over m
+
+and μ gives Yr ∈ CNc×Nsym with 
+
+Yr = ∑
+
+> i∈P
+
+¯ai[aR(θi)] r DI
+
+( ¯fD,i 
+
+)FH  
+
+> Nc,β
+
+D∗
+
+> R
+
+(β ¯τi
+
+)˜SiDv
+
+( ¯fD,i 
+
+)
+
++ Zr , (9) where 
+
+[˜Si](p,q ) = aHT (θi) ∑
+
+> k∈K
+
+v(p) 
+
+> k
+
+s(p,q ) 
+
+> k
+
+, (10) 
+
+DI(f ) = diag (1, e j2π fNc , . . . , e j2π fNc (Nc−1) ), (11) 
+
+DR(τ ) = diag (1, e j2πτ , . . . , e j2πτ (Nc−1) ), (12) 
+
+Dv(f ) = diag (1, e j2πf α , . . . , e j2πf α (Nsym −1) ), (13) and the N -point FrDFT matrix FN,β of parameter β has entries, for 0 ≤ p, q ≤ N − 1,
+
+[FN,β ](p,q ) = 1
+
+√N e−j 2πβ N pq , (14) and [Zr ](m,μ ) ∼ CN (0 , σ 2). Equation (9) exposes the two frequency-domain distortions that motivate IMNet: D-ICI from 
+
+DI( ¯fD,i ) and S-ICI from the non-orthogonal fractional inverse discrete Fourier transform (FrIDFT) FH 
+
+> Nc,β
+
+.
+
+D. Joint Angle-Range-Velocity Processing 
+
+The per-antenna model in (9) preserves angle, fast-time, and slow-time dimensions. The BS sweeps its receive beam across the angular domain by a spatial DFT and, for each observed AoA, forms a two-dimensional range-velocity map. 
+
+Step 1: Receive beamforming toward the observed AoA. 
+
+The BS steers a receive beam to the observed AoA θ by applying the conjugate array response a∗
+
+> R
+
+(θ) along the receive-antenna axis. For each (m, μ ), the beamformed sample is 
+
+˚y(m,μ ) = 1
+
+√NR 
+
+> NR−1
+
+∑
+
+> r=0
+
+y(r,m,μ ) e j2πr ∆ sin θ . (15) Sweeping θ over the angular domain scans the scene, and the remaining analysis is carried out for one such observation angle. The angular Dirichlet response of the steered beam to a path arriving from θi is 
+
+κ(θi) = 1
+
+√NR
+
+> NR−1
+
+∑
+
+> r=0
+
+e−j2πr ∆(sin θi−sin θ), (16) which peaks at θi = θ and decays for off-boresight paths. Collecting the beamformed data into Y ∈ CNc×Nsym yields 
+
+Y=∑
+
+> i∈P
+
+¯aiκ(θi) DI( ¯fD,i )FH 
+
+> Nc,β
+
+D∗
+
+> R
+
+(β ¯τi)˜SiDv( ¯fD,i )+ Z, (17) where P is the multipath set of (9) and the angular weight 
+
+κ(θi) concentrates the beam response on paths aligned with θ
+
+while suppressing off-boresight paths. 
+
+Step 2: ICI decomposition at the observed AoA. For paths within the beam mainlobe around θ, it holds ˜Si ≈ ˜S with 5
+
+[˜S](p,q ) = aHT (θ) ∑ 
+
+> k∈K
+
+v(p) 
+
+> k
+
+s(p,q ) 
+
+> k
+
+. By defining the deviation term ∆FH 
+
+> β
+
+= FH  
+
+> Nc,β
+
+− FH
+
+> Nc,1
+
+, (17) becomes 
+
+Y = ∑
+
+> i∈P
+
+¯aiκ(θi) FH 
+
+> Nc
+
+D∗
+
+> R
+
+(β ¯τi)˜SD v( ¯fD,i )+ Yleak + ∑
+
+> i∈P
+
+(YD-ICI ,i + YS-ICI ,i 
+
+) + Z, (18) where 
+
+YD-ICI ,i = ¯ aiκ(θi) ( DI( ¯fD,i ) − INc )FH 
+
+> Nc
+
+D∗
+
+> R
+
+(β ¯τi)˜SD v( ¯fD,i ),
+
+(19) 
+
+YS-ICI ,i = ¯ aiκ(θi) DI( ¯fD,i )∆ FH 
+
+> β
+
+D∗
+
+> R
+
+(β ¯τi)˜SD v( ¯fD,i ). (20) 
+
+YD-ICI ,i and YS-ICI ,i are the D-ICI and S-ICI contributions of path i, respectively, and Yleak collects the residual off-boresight (cross-angular) leakage left by the mainlobe approx-imation ˜Si ≈ ˜S.
+
+Step 3: range–Doppler processing. At the observed AoA θ,the BS first applies the FrDFT along the fast-time dimension to obtain the SEFDM subcarrier-domain observations. It then removes the known data modulation through elementwise division by the effective transmit-symbol matrix ˜S. Finally, the BS applies the inverse FrDFT along the range dimension and the DFT along the slow-time dimension to form the range– Doppler image: 
+
+¯Y = FH
+
+> Nc,β
+
+(FNc,β Y./ ˜S)FNsym . (21) With the usual within-bin approximation ˜Si./ ˜S ≈ 1×1T, (21) yields 
+
+¯Y ≈ ∑
+
+> i∈P
+
+¯aiκ(θi)e∗
+
+> R
+
+(β ¯τi)eT 
+
+> v
+
+( ¯fD,i ) + ¯Yleak 
+
++ ∑
+
+> i∈P
+
+( ¯YD-ICI ,i + ¯YS-ICI ,i 
+
+) + ¯Z, (22) where the DFT response vectors are defined by 
+
+[eR(¯ τ )] m = 1
+
+√Nc
+
+> Nc−1
+
+∑
+
+> n=0
+
+ej2π(¯ τ −m/N c)n, (23) 
+
+[ev( ¯f )] μ = 1
+
+√Nsym 
+
+> Nsym −1
+
+∑
+
+> q=0
+
+ej2π( ¯f α −μ/N sym )q. (24) Thus the desired path produces a range-Doppler peak, while two structured impairments remain as sidelobes: the D-ICI 
+
+¯YD-ICI ,i and the S-ICI ¯YS-ICI ,i , which IMNet corrects in Sec. III. III. P ROPOSED SCHEME : IMN ET 
+
+This section presents IMNet, a model-driven deep archi-tecture that suppresses the impairments exposed in Sec. II-D: the D-ICI and the S-ICI. IMNet assigns each impairment to a dedicated stage tailored to its structure, and the three stages are cascaded as illustrated in Fig. 2. 
+
+A. Stage 1: Doppler Correction Filter Bank 
+
+Low-velocity targets induce negligible Doppler-ICI and are already visible in the range-Doppler map, whereas high-velocity targets generate strong ICI that raises the sidelobe floor and buries nearby targets. A DCF D∗ 
+
+> I
+
+( ¯fD,k ) shifts the low-ICI region from zero velocity to a hypothesized velocity 
+
+¯fD,k , so that fast targets around ¯fD,k re-emerge from the floor, at the cost of contaminating the other velocity bands. Stage 1 therefore forms a bank of Nv maps, each clean over a different velocity band, which Stage 2 fuses so that every target is recovered in at least one map. 
+
+Doppler correction filtering. Let V = { ¯fD,k }k∈N v de-note a velocity hypothesis grid of size Nv, with Nv =
+
+{−⌊ Nv/2⌋, . . . , ⌊Nv/2⌋ − 1}. For each k ∈ Nv , the BS derotates the fast-time samples by the hypothesized Doppler, 
+
+Y(k) = D∗ 
+
+> I
+
+( ¯fD,k ) Y. (25) Substituting (17) and using D∗ 
+
+> I
+
+( ¯fD,k )DI( ¯fD,i ) = DI( ¯fD,i −
+
+¯fD,k ) yields 
+
+Y(k) = ∑
+
+> i∈P
+
+¯aiκ(θi) DI( ¯fD,i − ¯fD,k )FH  
+
+> Nc,β
+
+D∗
+
+> R
+
+(β ¯τi)˜S
+
+× Dv( ¯fD,i ) + D∗ 
+
+> I
+
+( ¯fD,k )Yleak + D∗ 
+
+> I
+
+( ¯fD,k )Z, (26) which recasts each target’s Doppler-ICI in terms of its offset 
+
+¯fD,i − ¯fD,k from the filter velocity. A target inside the com-pensated band ( ¯fD,i ≈ ¯fD,k ) has DI( ¯fD,i − ¯fD,k ) ≈ INc , so its ICI vanishes and it re-emerges from the floor; targets outside the band keep the ICI term and stay buried in this map, but are recovered in the map whose band matches their velocity. 
+
+Doppler processing. The per-hypothesis radar image is then formed in analogy with (21): 
+
+¯Y(k) = FH
+
+> Nc,β
+
+(FNc,β Y(k)./ ˜S)FNsym . (27) Stacking { ¯Y(k)} across the velocity hypotheses Nv pro-duces the DCF-bank tensor ¯YDCF ∈ CNv ×Nc×Nsym , i.e., the 2D range-velocity observation augmented with Nv velocity-compensated channels. Since D∗ 
+
+> I
+
+( ¯fD,k ) acts only on DI( ¯fD,i ),the DCF changes the ICI level of a target but not its position on the range-Doppler grid. All Nv maps therefore share a common grid on which every target exists at the same cell. 
+
+B. Stage 2: ICI Rejection Head 
+
+Stage 2 turns the Nv-channel DCF-bank tensor ¯YDCF into a single coherent range-Doppler representation. Its design follows from an asymmetry between the two interference mechanisms. While the D-ICI can be largely compensated by the velocity-matched DCF bank in Stage 1, the SEFDM transform is non-unitary for β < 1, i.e., FHNc,β FNc,β 6 = INc ,so the conventional FrDFT/FrIDFT processing in (27) cannot fully remove the S-ICI. Stage 2 therefore applies axial at-tention along both range and Doppler: range-wise attention captures and suppresses the long-range S-ICI induced by SEFDM compression, while Doppler-wise attention further refines the residual Doppler-domain interference after DCF compensation. Since the residual interference level varies across the Nv
+
+DCF-bank slices, Stage 2 first learns their relative contri-butions through a channel-wise gating mechanism. For i =6
+
+vɶʫ˨˓  
+
+> ±`1 ˃̺ɯǄʅɝ
+> ç˨ǄǍƠʴʴȺǩʴ
+> ç˓Ơșǩ㋊㍛1ʅʫʫɝǩʴ)ʅʴʴǩǍ˓Ⱥʅɶ`Ⱥɝ˓ǩʴ
+> 1ʅʫʫɝǩʴǍʅʴʴǩǍ˓Ⱥʅɶ ȔȺɝ˓ǩʴȺɶș
+> ç˓Ơșǩ㋋㍛v)vÝǩɍǩǍ˓ȺʅɶnǩƠǗ
+> )ȫƠɶɶǩɝ㎿̭Ⱥ˃ǩșƠ˓Ⱥɶș ÝǩƠɝ㍺vɯƠșǩɯǄǩǗǗȺɶș㍚ Öʅ˃Ⱥ˓ȺʅɶƠɝǩɶǍʅǗȺɶș˃
+> ç˓Ơșǩ㋌㍛1ǩ˓ǩǍ˓ȺʅɶnǩƠǗ
+> 1ȺɝƠ˓ǩǗ)ʅɶ̨˃˓ƠǍɔ㍚ ÖʅȺɶ˓̭Ⱥ˃ǩʫʴʅɍǩǍ˓Ⱥʅɶ çȺșɯʅȺǗ
+
+±˨˓ʫ˨˓˃           
+
+> óƠʴșǩ˓ǩ˃˓ȺɯƠ˓ǩ˃
+> 1ʅʫʫɝǩʴʫʴʅǍǩ˃˃Ⱥɶș
+> ¤ ÝƠɶșǩ㎿̷ȺƠɝ n 㚉¤ 㚉¤ Ö
+> ÝǩɍǩǍ˓Ⱥʅɶ#ɝʅǍɔ
+> vɶʫ˨˓ 1ʅʫʫɝǩʴ㎿̷ȺƠɝ n ±˨˓ʫ˨˓
+> 㚉1ȺɝƠ˓ǩǗ)ʅɶ̨
+> 1ȺɝƠ˓ǩǗ)ʅɶ̨˃˓ƠǍɔ㚉ÖʅȺɶ˓̭Ⱥ˃ǩʫʴʅɍǩǍ˓Ⱥʅɶ
+> vɶʫ˨˓ #¤ ÝǩĀ ㋊Ĭ㋊ )ʅɶ̨
+> ㋍
+> ±˨˓ʫ˨˓
+> ÝǩɍǩǍ˓ȺʅɶǄɝʅǍɔ˃ v)v㎿ɯȺ˓ȺșƠ˓ǩǗ ǗƠ˓ƠǍ˨Ǆǩ
+
+Figure 2. Architecture of IMNet, consisting of three stages: (i) a DCF bank that compensates Doppler-induced ICI over multiple velocity hypotheses, (ii) an ICI rejection head that fuses the DCF outputs and suppresses residual S-ICI and D-ICI through channel-wise gating and axial self-attention, and (iii) a detection head that produces a target-confidence map over the range-Doppler grid. 
+
+0, . . . , N v − 1, the descriptor g ∈ RNv and the gate w ∈
+
+(0 , 1) Nv are given by 
+
+[g]i = 1
+
+NcNsym  
+
+> Nc−1
+
+∑
+
+> m=0
+> Nsym −1
+
+∑
+
+> μ=0
+
+∣∣[ ¯Y(i)]m,μ 
+
+∣∣, (28) 
+
+w = σ(W2 ReLU( W1g)), (29) where σ is the elementwise logistic function, W1 ∈ Rds×Nv ,
+
+W2 ∈ RNv ×ds , and ds is the bottleneck width. The same gate is applied to the real and imaginary components of each DCF slice, preserving their relative phase information. The gated slices are then stacked into the real-valued tensor G ∈
+
+R2Nv ×Nc×Nsym as 
+
+[G]i,m,μ = [ w]i Re {[ ¯Y(i)]m,μ 
+
+}, (30) 
+
+[G]Nv +i,m,μ = [ w]i Im {[ ¯Y(i)]m,μ 
+
+}. (31) A 3 × 3 convolution with kernel We ∈ Rd×2Nv×3×3 first extracts local range-Doppler features from G and embeds them into d channels. Learned positional encodings uR ∈ Rd×Nc
+
+and uD ∈ Rd×Nsym are then added along the range and Doppler axes, respectively. For a channel index c ∈ { 0, . . . , d − 1},a range index m ∈ { 0, . . . , N c − 1}, and a Doppler index 
+
+μ ∈ { 0, . . . , N sym − 1}, the embedding H(0) ∈ Rd×Nc×Nsym is given by 
+
+[H(0) ]c,m,μ = [φ(We ∗ G)]  
+
+> c,m,μ
+
++ [ uR]c,m + [ uD]c,μ , (32) where ∗ denotes 2D convolution over the range-Doppler grid with zero padding, and φ denotes a rectified linear unit (ReLU) activation followed by batch normalization. The tensor H(0) is refined by L rejection blocks, each consisting of successive range- and Doppler-axis self-attention followed by a pointwise multilayer perceptron (MLP). At the 
+
+ℓ-th block, the input is H(ℓ−1) ∈ Rd×Nc×Nsym . For each Doppler index μ, the range slice H(ℓ−1)  
+
+> R,μ
+
+∈ RNc×d treats the 
+
+Nc range cells as tokens, whereas for each range index m, the Doppler slice H(ℓ−1)  
+
+> D,m
+
+∈ RNsym ×d treats the Nsym Doppler cells as tokens. For a unified description, let a ∈ { R, D} denote the atten-tion axis and let s index the slices along the complementary axis. The attention along each axis uses nh heads in parallel. For the hth head of the ℓ-th block, the query, key, and value matrices for slice s are constructed as 
+
+Q(ℓ) 
+
+> a,s,h
+
+= LN 
+
+(
+
+H(ℓ−1) 
+
+> a,s
+
+)
+
+W(ℓ)q,a,h , (33) 
+
+K(ℓ) 
+
+> a,s,h
+
+= LN 
+
+(
+
+H(ℓ−1) 
+
+> a,s
+
+)
+
+W(ℓ)k,a,h , (34) 
+
+V(ℓ) 
+
+> a,s,h
+
+= LN 
+
+(
+
+H(ℓ−1) 
+
+> a,s
+
+)
+
+W(ℓ)v,a,h , (35) where W(ℓ)q,a,h , W(ℓ)k,a,h , W(ℓ)v,a,h ∈ Rd×dh , dh = d/n h, and 
+
+LN( ·) denotes layer normalization over the channel dimension. The output of the hth head for slice s is represented by 
+
+O(ℓ) 
+
+> a,s,h
+
+= softmax 
+
+( Q(ℓ)
+
+> a,s,h
+
+(K(ℓ)
+
+> a,s,h
+
+)T
+
+√dh
+
+)
+
+V(ℓ)
+
+> a,s,h
+
+, (36) and the corresponding multi-head attention output reads 
+
+MHA (ℓ)
+
+> a
+
+(
+
+H(ℓ−1) 
+
+> a,s
+
+)
+
+= [O(ℓ)
+
+> a,s, 1
+
+, . . . , O(ℓ)
+
+> a,s,n h
+
+]W(ℓ)p,a , (37) where W(ℓ)p,a ∈ Rd×d. The projection matrices are shared across all slices of the same axis within a block. For a = R ,each attention matrix spans all Nc range cells, allowing direct interaction between arbitrarily separated range locations without imposing a locality constraint. For a = D, the same operation is applied over all Nsym Doppler cells to model the remaining Doppler-domain dependencies after DCF compensation. For the ℓ-th rejection block, the input H(ℓ−1) ∈ Rd×Nc×Nsym 
+
+is processed sequentially as follows. 
+
+Step 1) Range attention: For each Doppler index μ =0, . . . , N sym − 1, the range slice H(ℓ−1) R,μ ∈ RNc×d is updated 7
+
+through the range-axis multi-head attention as 
+
+˜H(ℓ)R,μ = H(ℓ−1) R,μ + MHA (ℓ)R
+
+(
+
+H(ℓ−1) R,μ 
+
+)
+
+. (38) Collecting the updated range slices over all μ yields ˜H(ℓ) ∈
+
+Rd×Nc×Nsym .
+
+Step 2) Doppler attention: For each range index m =0, . . . , N c − 1, the Doppler slice ˜H(ℓ)D,m ∈ RNsym ×d is then updated through the Doppler-axis multi-head attention as ̂
+
+H(ℓ)D,m = ˜H(ℓ)D,m + MHA (ℓ)D
+
+( ˜H(ℓ)D,m 
+
+)
+
+. (39) Collecting the updated Doppler slices over all m yields ̂ H(ℓ) ∈
+
+Rd×Nc×Nsym .
+
+Step 3) Pointwise MLP: Finally, the MLP is applied inde-pendently to the d-dimensional feature vector at each range-Doppler cell: 
+
+H(ℓ) =̂ H(ℓ) + MLP (ℓ) (
+
+LN 
+
+(̂ 
+
+H(ℓ))) 
+
+. (40) This axial factorization avoids constructing a full NcNsym ×
+
+NcNsym attention matrix. Instead, the range attention forms 
+
+Nsym matrices of size Nc × Nc, while the Doppler atten-tion forms Nc matrices of size Nsym × Nsym . Consequently, the attention complexity is reduced from O(N 2 
+
+> c
+
+N 2
+
+> sym
+
+d) to 
+
+O (NcNsym (Nc + Nsym )d).After the Lth block, a convolution with the kernel Wo ∈
+
+Rdψ ×d×3×3 produces the ICI-mitigated data cube, which reads 
+
+Fψ = φ(Wo ∗ H(L)). (41) 
+
+C. Stage 3: Detection Head 
+
+The detection head maps Fψ to a target-confidence map using dilated convolutions followed by a pointwise projection and sigmoid activation: 
+
+ˆM = σ (Dρ(Fψ )) ∈ [0 , 1] Nc×Nsym , (42) where Dρ(·) denotes the detection head with learnable para-meters ρ. Targets are declared by thresholding ˆM at τ , selected to satisfy the desired false-alarm budget P ⋆
+
+> FA
+
+. For a detected peak (m⋆(i), ˜μ⋆(i)) , the range and velocity estimates are 
+
+ˆRi = m⋆(i)c0
+
+2Ncβ∆f , (43) 
+
+ˆvi = − ˜μ⋆(i)c0∆f
+
+2αN sym fc
+
+, (44) where ˜μ⋆(i) denotes the signed Doppler-bin index. 
+
+D. Training Objective 
+
+IMNet is trained in a supervised manner over the learnable parameters Θ = ψ ∪ρ, where ψ collects all learnable paramet-ers of Stage 2, including the gating, embedding, positional en-coding, axial-attention, MLP, and output-projection paramet-ers, and ρ denotes the parameters of the detection head. Each training sample consists of the DCF-bank tensor ¯YDCF( j) and the corresponding target parameters {¯τ (j) 
+
+> i
+
+, ¯f (j)D,i }i∈P .The supervision is a binary target-presence map M⋆(j) ∈{0, 1}Nc×Nsym defined as 
+
+[M⋆(j)]m,μ =
+
+{
+
+1, (m, μ ) = ( m(j) 
+
+> i
+
+, μ (j) 
+
+> i
+
+) for some i ∈ P ,
+
+0, otherwise ,
+
+(45) where m(j) 
+
+> i
+
+and μ(j) 
+
+> i
+
+denote the range and Doppler bins corresponding to ¯τ (j) 
+
+> i
+
+and ¯f (j)D,i , respectively. Since only a small fraction of the range-Doppler cells contain targets, IMNet is trained using the focal loss [35], 
+
+LF = −
+
+> Nsym −1
+
+∑
+
+> μ=0
+> Nc−1
+
+∑
+
+> m=0
+
+(1 − p(j)
+
+> m,μ
+
+)γ log p(j)
+
+> m,μ
+
+, (46) where γ is the focusing parameter and 
+
+p(j) 
+
+> m,μ
+
+=
+
+{
+
+[ ˆM(j)]m,μ , [M⋆(j)]m,μ = 1 ,
+
+1 − [ ˆM(j)]m,μ , otherwise . (47) The parameters Θ are optimized over mini-batches, while Stage 1 remains parameter free. 
+
+E. Local Refinement 
+
+The local-refinement version of IMNet, denoted IMNet-LR, improves the grid-limited IMNet detections to sub-cell resolution using the original signal model. The vectorized observation is first defined as 
+
+y = vec( Y) ∈ CNc Nsym , (48) where vec( ·) stacks the columns of its matrix argument. For normalized Doppler ν and normalized delay τ , the single-target response is 
+
+A(ν, τ ) = DI(ν)FHNc ,β D∗
+
+> R
+
+(βτ )˜SD v(ν), (49) with the corresponding vectorized atom 
+
+b(ν, τ ) = vec ( A(ν, τ )) ∈ CNcNsym . (50) Accordingly, the vectorized observation is modeled as 
+
+y = ∑
+
+> i∈P
+
+ci b(νi, τ i) + z, (51) where ci collects the unknown complex path gain and angular response and z ∼ CN (0, σ 2INcNsym 
+
+).For the jth detection, the coarse detection from IMNet can be represented by τj = m⋆(j)/N c and νj = ˜ μ⋆(j)/(αN sym ).To mitigate interference from stronger neighboring targets, the context atoms associated with the jth seed are collected as 
+
+Bj = [b(ˆ νℓ, ˆτℓ)]
+
+> ℓ∈C j
+
+, j / ∈ C j , (52) where Cj = {ℓ ∈ P \ { j} : [ ˆM]m⋆ (ℓ),μ ⋆(ℓ) ≥ TI}, where TI
+
+is the confidence threshold for selecting interfering detections. Their subspace is projected out by 
+
+P⊥ 
+
+> j
+
+= INcNsym − Bj
+
+(BH 
+
+> j
+
+Bj
+
+)† BH 
+
+> j
+
+. (53) 8
+
+For a candidate (ν, τ ) in the current local search grid, the concentrated ML score is given by 
+
+Λj (ν, τ ) = 
+
+∣∣bH(ν, τ )P⊥ 
+
+> j
+
+y∣∣2
+
+bH(ν, τ )P⊥ 
+
+> j
+
+b(ν, τ ) . (54) Let Ωj denote the fine-grid search, which is given by 
+
+Ωj =
+
+{
+
+(ν, τ ) : |τ − τj | ≤ 12Nc
+
+, |ν − νj | ≤ 12αN sym 
+
+}
+
+.
+
+(55) The final sub-cell estimate is 
+
+(ˆ νj , ˆτj ) = arg max  
+
+> (ν,τ )∈Ωj
+
+Λj (ν, τ ). (56) IV. T RANSMIT BEAMFORMING DESIGN 
+
+In this section, transmit beamforming for the MU MIMO-SEFDM ISAC system is considered, where the objective is to maximize the multi-user communication sum-rate while main-taining a prescribed sensing beampattern gain. The corres-ponding constrained optimization problem is then formulated, followed by the development of an efficient iterative solution. 
+
+A. Problem Formulation 
+
+The BS designs {v(n) 
+
+> k
+
+} based on the frequency-domain channels {h(n) 
+
+> k
+
+}. Since the SINR in (4) depends on the beamformers of other subcarriers through the S-ICI term 
+
+J(n) 
+
+> k
+
+(β) in (6), the resulting sum-rate maximization is coupled across the entire band: 
+
+max  
+
+> {v(n)
+> k}
+
+∑
+
+> n∈N c
+
+R(n)sum , (57a) s.t. tr 
+
+(∑
+
+> k∈K
+
+v(n)
+
+> k
+
+(v(n)
+
+> k
+
+)H
+
+)
+
+≤ P (n)tot , ∀n ∈ N c, (57b) 
+
+1
+
+Nc
+
+> J
+
+∑
+
+> j=1
+
+∑
+
+> k∈K
+
+∣∣∣aHT (θj )v(n)
+
+> k
+
+∣∣∣2
+
+≥ P (n)T,req , ∀n ∈ N c.
+
+(57c) where R(n)sum = ∑ 
+
+> k∈K
+
+log 
+
+(
+
+1 + γ(n)
+
+> k
+
+)
+
+. The sensing constraint (57c) enforces a minimum aggregate transmit beampattern gain over the J focal directions on each subcarrier. Thus, the constraints are separable across subcarriers, whereas the objective remains coupled through the S-ICI. 
+
+B. WMMSE Reformulation 
+
+The WMMSE formulation [36], which provides an equival-ent representation of the sum-rate objective in (57a), is adop-ted. Let user k apply the receive scalar u(n) 
+
+> k
+
+to its subcarrier-n
+
+observation, and define P (n) 
+
+> k
+
+= ∑
+
+> ℓ∈K
+
+∣∣∣(h(n) 
+
+> k
+
+)Hv(n)
+
+> ℓ
+
+∣∣∣2
+
+. Then, (6) can be written as 
+
+J(n) 
+
+> k
+
+(β) = ∑ 
+
+> m∈N c\{ n}
+
+|ρm,n (β)|2P (m) 
+
+> k
+
+. (58) For unit-energy symbols, the mean-square error (MSE) of user 
+
+k on subcarrier n is given by 
+
+MSE (n) 
+
+> k
+
+=
+
+∣∣∣1 − (u(n) 
+
+> k
+
+)∗(h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+∣∣∣2
+
++ |u(n) 
+
+> k
+
+|2
+
+(
+
+P (n) 
+
+> k
+
+−
+
+∣∣∣(h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+∣∣∣2
+
++ J(n) 
+
+> k
+
+(β) + σ2
+
+> k
+
+)
+
+. (59) Introducing the positive weights α(n) 
+
+> k
+
+> 0, the correspond-ing WMMSE problem is 
+
+min    
+
+> {v(n)
+> k,u (n)
+> k,α (n)
+> k}
+
+∑
+
+> n∈N c
+
+∑
+
+> k∈K
+
+(
+
+α(n) 
+
+> k
+
+MSE (n) 
+
+> k
+
+− log α(n)
+
+> k
+
+)
+
+, (60) subject to (57b) and (57c). The WMMSE formulation has the same stationary points in the precoders as the sum-rate problem [36]. For fixed precoders, the optimal receive scalar and MSE weight are 
+
+ˆu(n) 
+
+> k
+
+= (h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+P (n) 
+
+> k
+
++ J(n) 
+
+> k
+
+(β) + σ2
+
+> k
+
+, (61) 
+
+ˆα(n) 
+
+> k
+
+= 1MSE (n)
+
+> k
+
+, (62) where ˆα(n) 
+
+> k
+
+= 1 + γ(n) 
+
+> k
+
+when u(n) 
+
+> k
+
+= ˆ u(n) 
+
+> k
+
+.For fixed {u(n) 
+
+> k
+
+, α (n) 
+
+> k
+
+}, the only cross-subcarrier dependence in the precoder update arises from the SEFDM-induced leak-age terms. These terms can be re-indexed as 
+
+∑
+
+> n∈N c
+
+∑
+
+> k∈K
+
+α(n) 
+
+> k
+
+|u(n) 
+
+> k
+
+|2J(n) 
+
+> k
+
+(β) = ∑
+
+> n∈N c
+
+∑
+
+> k∈K
+
+η(n) 
+
+> k
+
+P (n) 
+
+> k
+
+, (63) where η(n) 
+
+> k
+
+= ∑  
+
+> m∈N c\{ n}
+
+α(m) 
+
+> k
+
+|u(m) 
+
+> k
+
+|2|ρn,m (β)|2. Thus, for fixed WMMSE auxiliary variables, the leakage generated by subcarrier n is collected into the scalar η(n) 
+
+> k
+
+, and the precoder-dependent objective becomes separable across subcarriers without approximation. Dropping terms independent of the precoders, the reformulated optimization problem is given by 
+
+min 
+
+> V(n)
+
+∑
+
+> k∈K
+
+(v(n) 
+
+> k
+
+)HG(n)v(n)
+
+> k
+
+− 2 ∑
+
+> k∈K
+
+Re 
+
+{
+
+α(n) 
+
+> k
+
+(u(n) 
+
+> k
+
+)∗(h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+}
+
+, (64a) s.t. (57b) , (57c) , (64b) where 
+
+G(n) = ∑
+
+> p∈K
+
+(
+
+α(n) 
+
+> p
+
+|u(n) 
+
+> p
+
+|2 + η(n)
+
+> p
+
+)
+
+h(n) 
+
+> p
+
+(h(n) 
+
+> p
+
+)H  0. (65) 
+
+C. Closed-Form Precoder 
+
+For fixed WMMSE auxiliary variables, the precoder sub-problem (64) has a quadratic objective, while the sensing constraint is a reverse-convex quadratic constraint. A closed-form stationary precoder is derived from the Karush–Kuhn– Tucker (KKT) conditions. The sensing requirement can be expressed through the aggregate matrix A = 1
+
+> Nc
+
+∑Jj=1 aT(θj )aHT (θj )  0, such that the left-hand side of (57c) is ∑
+
+> k∈K
+
+(v(n) 
+
+> k
+
+)HAv (n) 
+
+> k
+
+. Then, by 9
+
+introducing the Lagrange multipliers λ(n) ≥ 0 and μ(n) ≥ 0
+
+associated with (57b) and (57c), respectively, the Lagrangian is given by 
+
+L = ∑
+
+> k∈K
+
+(v(n) 
+
+> k
+
+)H(
+
+G(n) + λ(n)INT − μ(n)A
+
+)
+
+v(n) 
+
+> k
+
+(66) 
+
+− 2∑
+
+> k∈K
+
+Re 
+
+{
+
+α(n) 
+
+> k
+
+(u(n) 
+
+> k
+
+)∗(h(n) 
+
+> k
+
+)Hv(n)
+
+> k
+
+}
+
+−λ(n)
+
+P (n)tot +μ(n)
+
+P (n)T,req .
+
+The first-order stationarity condition ∂L/∂ (v(n) 
+
+> k
+
+)∗ = 0
+
+gives 
+
+v(n) 
+
+> k
+
+= α(n) 
+
+> k
+
+u(n)
+
+> k
+
+(
+
+G(n) + λ(n)INT − μ(n)A
+
+)−1
+
+h(n) 
+
+> k
+
+. (67) The multipliers λ(n) and μ(n) are then determined from the corresponding complementary-slackness conditions. 
+
+D. Solution for the Lagrange Multipliers 
+
+The multipliers λ(n) and μ(n) are optimized alternately, and this procedure is repeated iteratively until convergence. 
+
+Solution for λ(n). With the fixed μ(n), v(n) 
+
+> k
+
+(λ(n), μ (n))
+
+denotes the right-hand side of (67). If G(n) − μ(n)A ≻ 0 and 
+
+∑ 
+
+> k∈K
+
+‖v(n) 
+
+> k
+
+(0 , μ (n))‖22 ≤ P (n) 
+
+> tot
+
+, ˆλ(n) = 0 is obtained. Other-wise, the constraint (57b) must hold with equality. Let EΛEH
+
+represent the eigenvalue decomposition of G(n) − μ(n)A, so that the matrix inverted in (67) becomes E(Λ + λ(n)INT )EH.To ensure that the Lagrangian is bounded below and the inverse in (67) is well defined, λ(n) is restricted to 
+
+λ(n) > max 
+
+{
+
+0, −λmin 
+
+(G(n) − μ(n)A)}
+
+. (68) Then, the following equation should be satisfied: 
+
+∑
+
+> k∈K
+
+Tr 
+
+((Λ + λ(n)INT
+
+)−2Υk
+
+)
+
+= P (n) 
+
+> tot
+
+, (69) where Υk = (α(n)
+
+> k
+
+)2∣∣u(n)
+
+> k
+
+∣∣2EHh(n) 
+
+> k
+
+(h(n) 
+
+> k
+
+)HE. Then, (69) is equivalent to 
+
+∑
+
+> k∈K
+> NT
+
+∑
+
+> i=1
+
+[Υk]ii 
+
+([Λ]ii + λ(n))2 = P (n) 
+
+> tot
+
+. (70) Over the admissible interval in (68), the left-hand side of (70) is monotonically decreasing in λ(n). Hence, ˆλ(n) can be readily obtained via a one-dimensional bisection method. 
+
+Solution for μ(n). With the fixed λ(n), if the sensing constraint (57c) is satisfied at μ(n) = 0 , it holds that ˆμ(n) = 0 .Otherwise, the sensing constraint is active and must hold with equality. To express this equality explicitly in terms of μ(n),
+
+M(n) = G(n) + λ(n)INT is defined, so that (67) can be written as v(n) 
+
+> k
+
+= α(n) 
+
+> k
+
+u(n) 
+
+> k
+
+(M(n) − μ(n)A)−1h(n) 
+
+> k
+
+. Since the direct substitution of this expression into the sensing constraint involves the inverse of M(n) − μ(n)A, its μ(n)-dependent part is diagonalized through the eigenvalue decomposition 
+
+(M(n))−1/2A(M(n))−1/2 = QΓQH, (71) where Q is unitary and Γ = diag( γ1, . . . , γ NT ) contains the nonnegative eigenvalues. Accordingly, (M(n) − μ(n)A)−1 =(M(n))−1/2Q(INT − μ(n)Γ)−1QH(M(n))−1/2. Writing zk =
+
+α(n) 
+
+> k
+
+u(n) 
+
+> k
+
+QH(M(n))−1/2h(n) 
+
+> k
+
+, the sensing-gain equality re-duces to the scalar form 
+
+∑
+
+> k∈K
+
+(v(n) 
+
+> k
+
+)HAv (n) 
+
+> k
+
+=
+
+> NT
+
+∑
+
+> i=1
+
+γi
+
+∑ 
+
+> k∈K
+
+|[zk ]i|2
+
+(1 − μ(n)γi)2 . (72) Denoting the largest eigenvalue by γmax = max i γi, the Lag-rangian (66) is bounded below only while INT − μ(n)Γ ≻ 0,which restricts μ(n) to 
+
+0 ≤ μ(n) < μ (n) 
+
+> max
+
+= 1
+
+γmax 
+
+. (73) If ∑
+
+> k∈K
+
+(v(n) 
+
+> k
+
+)HAv (n) 
+
+> k
+
+≥ P (n) 
+
+> T,req
+
+already holds at μ(n) = 0 , it follows that ˆμ(n) = 0 . Otherwise, the constraint (57c) must hold with equality, so that (72) gives 
+
+> NT
+
+∑
+
+> i=1
+
+γi
+
+∑ 
+
+> k∈K
+
+|[zk ]i|2
+
+(1 − μ(n)γi)2 = P (n)
+
+> T,req
+
+. (74) The left-hand side of (74) is monotonically increasing in μ(n)
+
+over (73). Hence, ˆμ(n) can be readily obtained via a one-dimensional bisection method. 
+
+E. Overall Algorithm 
+
+Algorithm 1 summarizes the proposed precoder computa-tion. The dominant computational cost arises from the NT×NT
+
+eigenvalue decompositions required in the multiplier updates, resulting in O(NcN 3 
+
+> T
+
+) complexity per inner iteration. The equations for λ(n) and μ(n) are solved efficiently by one-dimensional bisection using (70) and (74), respectively. The procedure is repeated until the achieved sum rate converges. V. S IMULATION RESULTS 
+
+System parameters. The simulation setup follows [28] and extends it to SEFDM compression. Unless otherwise stated, the carrier frequency, bandwidth, subcarrier count, and symbol count are set to fc = 60 GHz, B = 50 MHz, Nc = 2048 ,and Nsym = 64 , respectively, which give a subcarrier spacing of 24 .41 kHz and FFT-limited resolutions of ∆R = 3 m and 
+
+∆vrel = 0 .76 m/s. The BS uses NT = NR = 20 antennas. The compression factor is β = 0 .6. Each scene places K = 4 users at a range of 40 m moving at walking speed and J = 10 targets at the focal angle θ0 = 0 with ranges drawn from 50 to 400 m. Transmit power PBS = 30 dBm, sensing beampattern gain 
+
+PT,req = 40 dB, and noise variance σ2 
+
+> k
+
+= −80 dBm are used, and the channels follow 3GPP TR 38.901 [37]. All simulations run on an AMD Ryzen ™ Threadripper 7970X processor and an NVIDIA RTX PRO 6000 graphics processing unit (GPU). 
+
+Model parameters. IMNet uses a 9-window DCF bank, a squeeze-and-excitation block with r = 2 , and a rejection head of L = 4 axial blocks with width 96 and 4 heads returning 
+
+dψ = 128 channels, followed by a detection head of four 3×3
+
+convolutions with dilations 1, 2, 4, and 8, which covers 31 ×31 
+
+range-Doppler cells. Training uses the focal loss with γ = 2 ,
+
+10 ,000 training and 1,000 test scenes, 500 epochs, batch size 
+
+16 , and Adam with learning rate 10 −4.10 
+
+Algorithm 1 WMMSE Beamforming for MU MIMO-SEFDM ISAC  
+
+> 1:
+
+Input: Channels {h(n) 
+
+> k
+
+}, focal angles {θj }, per-subcarrier budgets {P (n) 
+
+> tot
+
+}, sensing thresholds {P (n)
+
+> T,req
+
+}, compression factor β. 
+
+> 2:
+
+Output: Optimized precoders {v(n) 
+
+> k
+
+}. 
+
+> 3:
+
+Initialize V and compute A. 
+
+> 4:
+
+repeat  
+
+> 5:
+
+u(n) 
+
+> k
+
+, α (n) 
+
+> k
+
+← (61) for all k, n  
+
+> 6:
+
+Compute η(n) 
+
+> k
+
+= ∑  
+
+> m6=n
+
+α(m) 
+
+> k
+
+|u(m) 
+
+> k
+
+|2|ρn,m (β)|2 for all 
+
+k, n , then G(n) ← (65)  
+
+> 7:
+
+for all n ∈ N c in parallel do  
+
+> 8:
+
+μ(n) ← 0 
+
+> 9:
+
+repeat  
+
+> 10:
+
+Compute EΛEH of G(n) − μ(n)A and Υk. 
+
+> 11:
+
+λ(n) ← 0 if G(n) − μ(n)A ≻ 0 and ∑ 
+
+> k∈K
+
+‖v(n) 
+
+> k
+
+(0 , μ (n))‖22 ≤ P (n) 
+
+> tot
+
+; otherwise, obtain 
+
+λ(n) from (70) by bisection over its admissible interval.  
+
+> 12:
+
+Form M(n) = G(n) + λ(n)INT and compute 
+
+QΓQH from (71).  
+
+> 13:
+
+μ(n) ← 0 if (57c) holds at μ(n) = 0 ; otherwise, obtain μ(n) from (74) by bisection over (73).  
+
+> 14:
+
+until λ(n) and μ(n) converge  
+
+> 15:
+
+Compute v(n) 
+
+> k
+
+from (67) for all k ∈ K . 
+
+> 16:
+
+end for  
+
+> 17:
+
+until ∑ 
+
+> n
+
+R(n) 
+
+> sum
+
+converges          
+
+> 3 3 3 3  
+> ""    
+> 
+> "  $ η !  %
+>  ! #" $ ! $
+> Figure 3. Spectral-efficiency/beampattern-gain trade-off for the proposed and baseline methods.
+
+A. Analysis on the Proposed Beamformers 
+
+The proposed transmit beamformer is compared with the following three baselines.  
+
+> •
+
+Semidefinite relaxation (SDR) : The rank-one constraint on the transmit covariance matrix is relaxed, and beamforming vectors are recovered from the optimized covariance matrix.  
+
+> •
+
+Sensing only : The transmit beamformer is designed solely to maximize the sensing beampattern gain under the power constraint.  
+
+> •
+
+Communication only : The sum-rate maximization problem in (57) is solved without the sensing constraint in (57c). Fig. 3 illustrates the trade-off between communication        
+
+> 1  1  1  1   1   1  1 1 
+> "! !#$
+>     1
+> ## !#$  # ! # # #  !  #  # 
+> Figure 4. ROC curves for IMNet and baseline methods.
+
+spectral efficiency and sensing beampattern gain as the min-imum sensing requirement is varied. The proposed beam-former smoothly spans the operating region between the communication-only and sensing-only, with higher sensing requirements leading to increased beampattern gain at the expense of spectral efficiency. Moreover, the proposed method consistently achieves higher spectral efficiency than SDR for the same beampattern gain. This performance gap arises from the rank relaxation in SDR, where the optimized covariance matrix generally requires rank-one recovery to obtain feas-ible beamforming vectors, resulting in a loss relative to the proposed direct beamformer design. These results demon-strate that the proposed method provides a more favorable communication–sensing trade-off than the SDR baseline. 
+
+B. Detection Performance of IMNet Compared to the Baseline Methods 
+
+The following baselines are considered:  
+
+> •
+
+ICI-contaminated FFT : 2D FFT applied directly to the received signals.  
+
+> •
+
+ICI-free FFT : 2D FFT applied to ICI-free received signals, i.e., ¯YD-ICI ,i = ¯YS-ICI ,i = 0 , ∀i. 
+
+> •
+
+DCFNet : the 9-window DCF bank, U-Net-based ICI-rejection module, and detection head from [28]. For the baseline methods without a dedicated target-detection rule, a conventional constant false alarm rate (CFAR) detector is applied to their sensing outputs for a fair comparison. The detection performance is characterized by the detection probability and false alarm probability, defined as  
+
+> •
+
+Detection probability ( PD): the fraction of actual targets that are correctly detected.  
+
+> •
+
+False alarm probability ( PFA ): the number of false detec-tions, i.e., detections not associated with any actual target, normalized by the total number of sensing-map cells. By varying the CFAR threshold, different (PFA , P D) operating points are obtained to construct the receiver operating charac-teristic (ROC) curves. In Fig. 4, the ROC curves are plotted at β = 0.6 for 
+
+PT,req ∈ { 30 , 40 } dB. The ICI-contaminated FFT baseline degrades sharply in the low-PFA regime because the structured sidelobes and SEFDM-induced leakage raise the interference floor. The ICI-free FFT scheme substantially improves the 11                       
+
+> −  "%( $     !  
+> '$!
+>    "%( $     !  
+>  "!% !%
+>    "%( $     !  
+>  %
+>    "%( $     !  
+> %&#$
+>    "%( $     !  
+> #"&!%#&%
+> Figure 5. Comparison of range–velocity detection maps for IMNet and the baseline methods. For each detector, the 10 strongest local peaks, excluding those corresponding to communication users, are declared as target candidates and shown in white, while the communication-user locations are indicated in red.
+> Figure 6. Detection probability over false-alarm probability and spectral efficiency.
+
+ROC performance by removing the structured interference before detection. DCFNet and IMNet further outperform the ICI-free scheme, indicating the advantage of learned detection over conventional CFAR even in the absence of structured ICI. Between the two learning-based methods, IMNet achieves the highest detection probability in the low-PFA regime. This gain is attributed to its range-axis attention, which is better suited than the local U-Net processing of DCFNet to suppress the S-ICI along the range dimension. To provide qualitative insight into the detection behavior, Fig. 5 visualizes a dense range–velocity scene with J = 10 tar-gets. The ICI-contaminated map exhibits strong sidelobes and numerous interference-induced false alarms, whereas DCFNet partially suppresses the interference through its DCF bank and U-Net-based rejection module. In contrast, IMNet more effect-ively suppresses both D-ICI and S-ICI, revealing weak target responses that were previously buried under the noise and interference floor. Consequently, even targets located far from the detector become detectable, and the resulting detections align more closely with the ground-truth range–velocity cells. The joint sensing–communication trade-off is further ex-amined in Fig. 6, which shows PD as a function of PFA 
+
+and spectral efficiency η. As the false-alarm requirement becomes more stringent and the operating point shifts toward higher spectral efficiency, the detection probability generally decreases because less favorable sensing conditions make weak target responses more difficult to distinguish. This de-gradation is particularly pronounced for the ICI-contaminated FFT detector, whose PD drops rapidly in the low-PFA region.                  
+
+> 11 1 
+> )#&%(((& ('
+> 1  1
+> 1 
+> 1 1
+> 1 
+> $   #
+> 11 1 
+> )#&%(((& ('
+> 1  
+> 1  1
+> 1 
+> 1 1
+> "%!(*  #'
+>  (   ( (    
+> Figure 7. Weak-target range and velocity RMSE versus the number of detected targets.
+
+Removing the structured interference substantially improves the ICI-free FFT baseline, but its CFAR detector still exhibits a marked loss under stringent false-alarm constraints. The learning-based detectors are considerably more robust over the same operating region, with DCFNet maintaining a high PD
+
+over a broader range of η. IMNet provides the most stable surface and preserves a high detection probability even in the challenging low-PFA and high-η regime, demonstrating that its improved ICI suppression enables sensing performance to be retained at higher communication spectral efficiency. 
+
+C. Estimation Performance of IMNet Compared to The Baseline Methods 
+
+In this subsection, the range and velocity root-mean-square error (RMSE) of IMNet, IMNet-LR, DCFNet, conventional 12 
+
+ML, NMCR [13], ESPRIT, and FFT-based methods is eval-uated under the localization setting. A challenging two-target scenario is considered in which both targets have the same radial velocity of 23 .19 m /s, and hence occupy the same Doppler bin. The strong target is located at 50 m with a signal-to-noise ratio (SNR) of 20 dB, whereas the weak target is located at 200 m. Two complementary experiments are conducted: the weak-target SNR is fixed at −10 dB while the number of declared candidates C is varied, and C is fixed at 20 while the weak-target SNR is swept from −15 
+
+to 10 dB. Because both targets experience a large Doppler shift, the strong reflector generates substantial D-ICI that spreads across neighboring subcarriers and raises the inter-ference floor around the weak target. In addition, the non-orthogonal SEFDM waveform introduces S-ICI across the range dimension, further obscuring the weak echo and making its localization particularly challenging. In Fig. 7, the weak-target SNR is fixed at −10 dB, while the number of declared candidates C is varied from 1 to 20 .For the score-map-based methods, candidate cells are ranked by confidence and the first C local peaks are retained, whereas ML and 1D ML+FFT rank the refined candidates according to their final likelihood scores. With C = 1 , all methods select the strong target, resulting in a weak-target range error of approximately 150 m, i.e., the separation between the two targets. As C increases to 2, IMNet-LR successfully identifies the weak target and reduces its range RMSE to 0.038 m. This sub-cell accuracy is enabled by the local refinement in Sec. III-E, which uses the IMNet detection as a coarse seed and performs a fine-grid matched-filter ML search within its local neighborhood while projecting out the nuisance contribution of the strong target. Exhaustive ML exhibits a similar behavior and achieves a range RMSE of 0.027 m, but at the cost of prohibitively high computational complexity. In contrast, NMCR requires C = 4 before the weak target is included among its candidates because the dominant target and its sidelobes occupy the highest-ranked peaks, after which its range RMSE settles at approximately 0.237 m. Without local refinement, the learning-based methods remain limited by the range–velocity grid resolution: IMNet reaches a range RMSE of approximately 1.10 m from C = 2 onward, whereas DCFNet requires C = 6 to recover the weak target and then settles at about 1.32 m. FFT+CFAR remains strongly affected by the structured interference and still exhibits a range RMSE of 20 .0 m at C = 20 , while the two ESPRIT variants and 1D ML+FFT fail to recover the weak target within the considered declaration budget. Fig. 8 further evaluates the weak-target estimation accuracy by sweeping the weak-target SNR from −15 to 10 dB. All methods are allowed up to C = 20 declarations, so the com-parison primarily reflects localization accuracy once the weak target has been identified. Range RMSE of IMNet-LR closely follows the Cram´ er–Rao lower bound (CRLB) over the entire SNR range, decreasing from 0.047 m at −15 dB to 0.0027 mat 10 dB, with exhaustive ML achieving comparable accuracy. NMCR achieves relatively low estimation error, but remains inferior to IMNet-LR since it relies on the assumption that D-ICI is negligible. In the considered high-Doppler scenario,                  
+
+> − − −
+> ")' ) 
+>   
+>   
+>  
+>  
+>  
+> % $
+>      
+> ")' ) 
+>   
+>   
+>   
+>  
+>  
+> #&!)*$(
+>  )  ) )     
+> Figure 8. Weak-target range and velocity RMSE performance of the detection methods with respect to the SNR of the weak target.
+> ĥǩƠɔ˓Ơʴșǩ˓Ǘǩ˓ǩǍ˓ǩǗ
+> Figure 9. Execution time for various numbers of detected targets. The red mark represents when the weak target is detected.
+
+this assumption is violated, and the resulting D-ICI from the strong target masks the weak echo and limits the estimation accuracy of NMCR. The unrefined score-map methods remain limited by the range–velocity grid resolution, with RMSEs of approximately 1.1–1.4 m across the SNR sweep, whereas FFT+CFAR is substantially more sensitive to the low-SNR regime and reaches 41 .3 m at −15 dB. The execution times of the considered estimators are com-pared in Fig. 9, where the red markers indicate the smallest number of declarations C at which each method detects the weak target. Exhaustive ML detects the weak target at C = 2 ,but already requires on the order of 10 2 s because of its exhaustive fine-grid likelihood search over the entire range– Doppler domain. IMNet-LR also detects the weak target at 
+
+C = 2, while requiring only a few tens of milliseconds by restricting the ML refinement to a local neighborhood around the IMNet detection. Plain IMNet achieves detection at the same declaration budget with only a few milliseconds of execution time, although its estimation accuracy remains limited by the range–velocity grid resolution. NMCR requires 
+
+C = 4 before recovering the weak target and incurs a sub-second execution time, whereas DCFNet requires a larger declaration budget despite its millisecond-level complexity. These results highlight the main advantage of IMNet-LR: it preserves the early weak-target detection of IMNet and attains the near-ML estimation accuracy observed in Fig. 8, while reducing the execution time by more than three orders of magnitude relative to exhaustive ML. 13 
+
+VI. C ONCLUSION 
+
+This paper developed a MU MIMO-SEFDM ISAC frame-work that improves communication spectral efficiency while mitigating both D-ICI and S-ICI. A WMMSE-based beam-former with separable per-subcarrier precoder updates was derived, and IMNet, which combines a DCF bank with axial attention for effective ICI suppression and target detection, was proposed. IMNet-LR further refines the detected targets through local matched-filter ML with nuisance projection to achieve sub-cell range and velocity estimation. Simulations show that the proposed framework provides robust detection under severe interference, while IMNet-LR attains near-ML accuracy with more than three orders of magnitude lower execution time. REFERENCES [1] L. Bariah and M. Debbah, “AI embodiment through 6G: Shaping the future of AGI,” IEEE Wireless Commun. , vol. 31, no. 5, pp. 174–181, 2024. [2] Y. Xiao, G. Shi, and P. Zhang, “Toward agentic AI networking in 6G: A generative foundation model-as-agent approach,” IEEE Commun. Mag. ,vol. 63, no. 9, pp. 68–74, 2025. [3] H. J. Yang, H. Kim, H. Noh, S. Kim, and B. Shim, “Large multimodal model-empowered task-oriented autonomous communications: Design methodology and implementation challenges,” IEEE Veh. Technol. Mag. ,pp. 2–13, 2025. [4] J. A. Zhang et al. , “Enabling joint communication and radar sensing in mobile networks-a survey,” IEEE Commun. Surveys Tuts. , vol. 24, no. 1, pp. 306–345, 2022. [5] F. Liu, Y. Cui, C. Masouros, J. Xu, T. X. Han, Y. C. Eldar, and S. Buzzi, “Integrated sensing and communications: Toward dual-functional wire-less networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [6] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Trans. Commun. , vol. 68, no. 6, pp. 3834–3862, 2020. [7] Z. Wei et al. , “Integrated sensing and communication signals toward 5G-a and 6g: A survey,” IEEE Internet Things J. , vol. 10, no. 13, pp. 11 068–11 092, 2023. [8] C. Sturm and W. Wiesbeck, “Waveform design and signal processing aspects for fusion of wireless communications and radar sensing,” Proc. IEEE , vol. 99, no. 7, pp. 1236–1259, July 2011. [9] Z. Xiao, R. Liu, M. Li, Q. Liu, and A. L. Swindlehurst, “A novel joint angle-range-velocity estimation method for MIMO-OFDM ISAC systems,” IEEE Trans. Signal Process. , vol. 72, pp. 3805–3818, 2024. [10] M. F. Keskin, H. Wymeersch, and V. Koivunen, “Monostatic sensing with OFDM under phase noise: From mitigation to exploitation,” IEEE Trans. Signal Process. , vol. 71, pp. 1363–1378, 2023. [11] Z. Xu and A. Petropulu, “A bandwidth efficient dual-function radar com-munication system based on a MIMO radar using OFDM waveforms,” 
+
+IEEE Trans. Signal Process. , vol. 71, pp. 401–416, 2023. [12] Z. Hu, Q. Ye, Y. Huang, S. Hu, and G. Yang, “Joint range-velocity-azimuth estimation for OFDM-based integrated sensing and communic-ation,” IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 12 933– 12 948, 2024. [13] M. Mirabella, P. Di Viesti, C. Masouros, and G. M. Vitetta, “Joint range and Doppler estimation using spectrally efficient FDM,” IEEE Trans. Wireless Commun. , vol. 25, pp. 11 113–11 127, 2026. [14] M. Mirabella, P. D. Viesti, A. Davoli, and G. M. Vitetta, “An approx-imate maximum likelihood method for the joint estimation of range and Doppler of multiple targets in OFDM-based radar systems,” IEEE Trans. Commun. , vol. 71, no. 8, pp. 4862–4876, 2023. [15] F. Zhang, Z. Zhang, W. Yu, and T.-K. Truong, “Joint range and velocity estimation with intrapulse and intersubcarrier Doppler effects for OFDM-based radcom systems,” IEEE Trans. Signal Process. , vol. 68, pp. 662–675, 2020. [16] R. Zhang et al. , “Integrated sensing and communication with massive MIMO: A unified tensor approach for channel and target parameter estimation,” IEEE Trans. Wireless Commun. , vol. 23, no. 8, pp. 8571– 8587, 2024. [17] M. F. Keskin, C. Marcus, O. Eriksson, A. Alvarado, J. Widmer, and H. Wymeersch, “Integrated sensing and communications with MIMO-OTFS: ISI/ICI exploitation and delay-Doppler multiplexing,” IEEE Trans. Wireless Commun. , vol. 23, no. 8, pp. 10 229–10 246, 2024. [18] R. Xie, D. Hu, K. Luo, and T. Jiang, “Performance analysis of joint range-velocity estimator with 2D-MUSIC in OFDM radar,” IEEE Trans. Signal Process. , vol. 69, pp. 4787–4800, 2021. [19] Y. Liu, G. Liao, Y. Chen, J. Xu, and Y. Yin, “Super-resolution range and velocity estimations with OFDM integrated radar and communications waveform,” IEEE Trans. Veh. Technol. , vol. 69, no. 10, pp. 11 659– 11 672, 2020. [20] X. Tian and Z. Song, “On radar and communication integrated system using OFDM signal,” in Proc. IEEE Radar Conf. , 2017, pp. 0318–0323. [21] Y. L. Sit, B. Nuss, and T. Zwick, “On mutual interference cancellation in a MIMO OFDM multiuser radar-communication network,” IEEE Trans. Veh. Technol. , vol. 67, no. 4, pp. 3339–3348, 2018. [22] S. D. Liyanaarachchi, T. Riihonen, C. B. Barneto, and M. Valkama, “Joint MIMO communications and sensing with hybrid beamforming architecture and OFDM waveform optimization,” IEEE Trans. Wireless Commun. , vol. 23, no. 2, pp. 1565–1580, 2024. [23] B. Duan et al. , “Frequency-domain differential interference cancellation for full-duplex OFDM ISAC systems,” IEEE Trans. Veh. Technol. ,vol. 73, no. 6, pp. 8615–8631, 2024. [24] G. Hakobyan and B. Yang, “A novel intercarrier-interference free signal processing scheme for OFDM radar,” IEEE Trans. Veh. Technol. , vol. 67, no. 6, pp. 5158–5167, June 2018. [25] M. F. Keskin, H. Wymeersch, and V. Koivunen, “MIMO-OFDM joint radar-communications: Is ICI friend or foe?” IEEE J. Sel. Topics Signal Process. , vol. 15, no. 6, pp. 1393–1408, 2021. [26] H. Noh, H. Lee, and H. J. Yang, “ICI-robust transceiver design for integration of MIMO-OFDM radar and MU-MIMO communication,” 
+
+IEEE Trans. Veh. Technol. , vol. 72, no. 1, pp. 821–838, 2023. [27] J.-H. Park, Y.-J. Yoon, W. Cho, D. Ham, and S.-C. Kim, “Intercarrier interference mitigation for communication compatible OFDM radar,” 
+
+IEEE Trans. Veh. Technol. , vol. 73, no. 4, pp. 5930–5934, 2024. [28] H. Noh, H. Lyu, M. Z. Win, and H. J. Yang, “DCFNet: Doppler correction filter network for integrated sensing and communication in multi-user MIMO-OFDM systems,” IEEE Trans. Wireless Commun. ,vol. 25, pp. 16 778–16 794, 2026. [29] X. Liu, T. Huang, N. Shlezinger, Y. Liu, J. Zhou, and Y. C. Eldar, “Joint transmit beamforming for multiuser MIMO communications and MIMO radar,” IEEE Trans. Signal Process. , vol. 68, pp. 3929–3944, 2020. [30] H. Noh and H. J. Yang, “Dispersion-aware localization network for wideband OFDM pinching-antenna integrated sensing and communica-tion systems,” arXiv:2608.20731 , 2026. [31] Y. Zhang, T. Xu, C. Masouros, and I. Darwazeh, “A non-orthogonal waveform enabled spectrally efficient over-the-air ISAC transmission,” in Proc. IEEE 25th Int. Workshop Signal Process. Adv. Wireless Com-mun. (SPAWC) , 2024, pp. 586–590. [32] M. Mirabella, P. Di Viesti, C. Masouros, and G. M. Vitetta, “Spectrally efficient time-frequency space modulation: A delay-doppler domain FTN waveform for ISAC systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 18 424–18 439, 2026. [33] T. Schmidl and D. Cox, “Robust frequency and timing synchronization for OFDM,” IEEE Trans. Commun. , vol. 45, no. 12, pp. 1613–1621, 1997. [34] P. Moose, “A technique for orthogonal frequency division multiplexing frequency offset correction,” IEEE Trans. Commun. , vol. 42, no. 10, pp. 2908–2914, 1994. [35] T.-Y. Lin et al. , “Focal loss for dense object detection,” in Proc. IEEE Int. Conf. Comput. Vis. (ICCV) , Oct 2017, pp. 2980–2988. [36] Q. Shi, M. Razaviyayn, Z.-Q. Luo, and C. He, “An iteratively weighted MMSE approach to distributed sum-utility maximization for a MIMO interfering broadcast channel,” IEEE Trans. Signal Process. , vol. 59, no. 9, pp. 4331–4340, 2011. [37] 3GPP, “Study on channel model for frequencies from 0.5 to 100 GHz, version 16.1.0,” 3GPP, Sophia Antipolis, France, 3GPP Rep. (TR) 38.901, 2020, [Online]. Available: http://www.3gpp.org/DynaReport/38901.htm.
