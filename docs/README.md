@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-08-25</span>
+      <span class="dpr-home-dashboard-kicker">2026-08-26</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 4 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>7</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>9</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>2</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-25 21:01:48 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-26 22:04:49 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读16篇论文，聚焦无线语义通信与信道智能感知两大热点。最值得关注：特征稀疏正则化实现单模型自适应图像传输，以及物理引导度量学习提升信道图表精度。建议普通读者优先跟进语义通信中稀疏编码与隐私保护结合的前沿方向。</p>
+<p>今日精读2篇、速读2篇，聚焦无线通信与感知前沿。最值得关注的是Transformer实现多接收器无导频Wi-Fi解码（9.0分），以及光智能反射面提升VLC信道估计（8.0分）。建议普通读者优先了解这两项技术的实用场景与性能优势。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">7 篇</strong>
+    <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Single-Model Adaptive Wireless Image Transmission via Feature Sparsity Regularization">Single-Model Adaptive Wireless Image Transmission via Feature Sparsity Regularization</span></li><li><span class="dpr-home-dashboard-paper-title" title="PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning">PACC: Propagation-Aware Channel Charting with Physics-Guided Metric Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="ISAC Beamforming Design Based on a Matrix Nearness Formulation With Improved Efficiency">ISAC Beamforming Design Based on a Matrix Nearness Formulation With Improved Efficiency</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A Transformer for Joint Multi-Receiver Pilotless Wi-Fi Decoding">A Transformer for Joint Multi-Receiver Pilotless Wi-Fi Decoding</span></li><li><span class="dpr-home-dashboard-paper-title" title="Impact of Optical Reconfigurable Intelligent Surfaces on Channel Estimation for VLC Systems">Impact of Optical Reconfigurable Intelligent Surfaces on Channel Estimation for VLC Systems</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>7</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">9 篇</strong>
+    <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment">Congruence Decomposition with Neural Block Solvers for Large-Scale PCI Assignment</span></li><li><span class="dpr-home-dashboard-paper-title" title="FlowSem: Flow Matching for Adaptive Wireless Image Transmission in Semantic Communication">FlowSem: Flow Matching for Adaptive Wireless Image Transmission in Semantic Communication</span></li><li><span class="dpr-home-dashboard-paper-title" title="Privacy Preserving Semantic Communications in Wireless Edge Networks with Vision Language Models">Privacy Preserving Semantic Communications in Wireless Edge Networks with Vision Language Models</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks">Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings">Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>9</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
 </section>
 </div>
 

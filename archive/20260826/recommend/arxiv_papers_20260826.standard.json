@@ -1,0 +1,174 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-26T22:02:32.005567+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2608.24584v1",
+      "source": "arxiv",
+      "title": "A Transformer for Joint Multi-Receiver Pilotless Wi-Fi Decoding",
+      "abstract": "In this paper we discuss the development of a fully pilotless multi-access-point Wi-Fi receiver. This is based on a self-attention Transformer that operates on per-(access point, subcarrier) tokens and outputs bit-wise logits for a standard low-density parity-check decoder. In realistic ray-traced indoor channels, pilotless decoding becomes feasible as soon as some spatial diversity is available. While a single-access point configuration does not attain practical error rates, when compared to an ideal maximum-ratio-combining baseline with perfect channel knowledge, cooperative configurations with three access points achieve coded bit error rates of approximately $10^{-5}$. This is achieved while benefiting from higher spectral efficiency by eliminating pilots.",
+      "authors": [
+        "Xavier Tardy",
+        "Grégoire Lefebvre",
+        "Apostolos Kountouris",
+        "Haïfa Farès",
+        "Amor Nafkha"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-25T14:09:22+00:00",
+      "link": "https://arxiv.org/pdf/2608.24584v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "self-attention Transformer applied to wireless signal decoding",
+      "llm_evidence_cn": "自注意力Transformer用于无线信号解码",
+      "llm_evidence": "自注意力Transformer用于无线信号解码",
+      "canonical_evidence": "自注意力Transformer用于无线信号解码",
+      "llm_tldr_en": "Proposes a self-attention Transformer receiver that performs pilotless multi-access-point Wi-Fi decoding with bit-wise LDPC logits, achieving 1e-5 BER in cooperative configurations.",
+      "llm_tldr_cn": "论文提出一种基于自注意力Transformer的完全无导频Wi-Fi接收机，它以接入点-子载波为词元输出比特级置信度并衔接LDPC译码。在真实光线追踪室内信道中，单接入点配置无法达到实用误码率，而三接入点协同配置相比理想最大比合并基线可获得约1e-5的编码误码率，同时因省去导频为系统带来更高的频谱效率，验证了Transformer在无线接收处理中的潜力。",
+      "llm_tldr": "论文提出一种基于自注意力Transformer的完全无导频Wi-Fi接收机，它以接入点-子载波为词元输出比特级置信度并衔接LDPC译码。在真实光线追踪室内信道中，单接入点配置无法达到实用误码率，而三接入点协同配置相比理想最大比合并基线可获得约1e-5的编码误码率，同时因省去导频为系统带来更高的频谱效率，验证了Transformer在无线接收处理中的潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.24287v1",
+      "source": "arxiv",
+      "title": "Impact of Optical Reconfigurable Intelligent Surfaces on Channel Estimation for VLC Systems",
+      "abstract": "Visible light communication (VLC) offers wireless data connectivity indoors, yet its performance is severely limited by link blockages. While optical reconfigurable intelligent surfaces (ORISs) have been proposed to overcome these blockages, existing literature predominantly relies on the unrealistic assumption of ideal channel state information. In this paper we investigate the contribution of ORIS elements in VLC systems under practical, non-ideal channel estimation scenarios. We analyze the communication performance using two pilot-based estimation techniques: pilot symbol assisted modulation (PSAM) and superimposed training (ST), evaluating the impact of data power allocation factors and averaged orthogonal frequency division multiplexing (OFDM) symbols. Our results show that PSAM with an ORIS deployment enables optimal large data power allocation factors, resulting in spectral efficiency improvements that surpass scenarios with ideal channel estimates but without ORIS deployment. While ST performs well with a large number of averaged OFDM symbols, it is unable to overcome the performance of PSAM when ORIS elements are deployed. We also find the system robust to imperfect ORIS orientation; even with only half of the elements accurately aligned, performance remains acceptable. Ultimately, we show that spectral efficiency values of approximately 5 bits/s/Hz are achievable using ORIS with PSAM, a performance comparable to, or even exceeding, that of unobstructed line-of-sight links.",
+      "authors": [
+        "Borja Genoves Guzman",
+        "M. Julia Fernández-Getino García"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-25T09:14:20+00:00",
+      "link": "https://arxiv.org/pdf/2608.24287v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "practical channel estimation for VLC with optical RIS; wireless channel modeling under non-ideal CSI",
+      "llm_evidence_cn": "面向VLC的光学可重构智能表面信道估计；非理想信道状态下的无线信道建模",
+      "llm_evidence": "面向VLC的光学可重构智能表面信道估计；非理想信道状态下的无线信道建模",
+      "canonical_evidence": "面向VLC的光学可重构智能表面信道估计；非理想信道状态下的无线信道建模",
+      "llm_tldr_en": "Examines how ORIS elements affect VLC channel estimation under practical non-ideal CSI, comparing PSAM and superimposed training pilot schemes with different power allocation factors.",
+      "llm_tldr_cn": "可见光通信（VLC）性能受链路阻塞影响，光学可重构智能表面（ORIS）可缓解但现有研究常假设理想信道状态信息。本文在非理想信道估计条件下研究ORIS对VLC系统的影响，采用导频符号辅助调制（PSAM）和叠加训练（ST）两种估计技术，分析数据功率分配因子与平均正交频分复用参数的作用。研究为实际ORIS辅助VLC系统的信道估计设计提供了有价值的指导。",
+      "llm_tldr": "可见光通信（VLC）性能受链路阻塞影响，光学可重构智能表面（ORIS）可缓解但现有研究常假设理想信道状态信息。本文在非理想信道估计条件下研究ORIS对VLC系统的影响，采用导频符号辅助调制（PSAM）和叠加训练（ST）两种估计技术，分析数据功率分配因子与平均正交频分复用参数的作用。研究为实际ORIS辅助VLC系统的信道估计设计提供了有价值的指导。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.17774v1",
+      "source": "arxiv",
+      "title": "Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks",
+      "abstract": "Embodied intelligence is shifting artificial intelligence from passive digital perception toward active physical interaction. However, foundation-model-enabled embodied agents face a fundamental tension between open-world cognition and resource-constrained deployment. On-device models are limited by computation, memory, and energy budgets, whereas cloud-centric solutions introduce latency and reliability risks over dynamic wireless links. Edge general intelligence provides a promising cognitive backbone, but existing frameworks still lack physical grounding, action awareness, and mechanisms for actively acquiring useful physical experience. To address these limitations, this article introduces edge-native embodied intelligence (ENEI), an action-aware wireless edge framework that integrates embodied agents, the 6G communication and networking fabric, and edge cognitive services into a 6G-mediated bidirectional edge-embodiment loop. Along the edge-to-embodiment axis, confidence-aware assistance and edge-driven generative adaptation enhance local autonomy under out-of-distribution (OOD) conditions. Along the embodiment-to-edge axis, value-of-experience guided active embodied federated learning enables physical actions to generate informative experience for continuous edge model evolution. The 6G fabric supports both directions through goal-oriented transmission and programmable radio-resource allocation. Two case studies on OOD drone navigation and mobility-driven federated learning illustrate the feasibility and communication efficiency of the proposed mechanisms. ENEI provides a unified perspective in which edge cognition strengthens embodied action, while embodied agency actively enriches edge cognition, laying the foundation for scalable, adaptive, and self-evolving embodied wireless systems.",
+      "authors": [
+        "Yiru Wang",
+        "Chuanao Jiang",
+        "Jiahui Cui",
+        "Zide Fan",
+        "Lei Wang",
+        "Zehui Xiong",
+        "Dong In Kim"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "eess.SP"
+      ],
+      "published": "2026-08-18T13:39:12+00:00",
+      "link": "https://arxiv.org/pdf/2608.17774v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "foundation-model-enabled embodied agents in wireless edge networks; action-aware edge general intelligence",
+      "llm_evidence_cn": "无线边缘网络中的基础模型具身智能体；行动感知的边缘通用智能",
+      "llm_evidence": "无线边缘网络中的基础模型具身智能体；行动感知的边缘通用智能",
+      "canonical_evidence": "无线边缘网络中的基础模型具身智能体；行动感知的边缘通用智能",
+      "llm_tldr_en": "Proposes edge-native embodied intelligence (ENEI), an action-aware framework using foundation models for wireless edge networks to balance open-world cognition with resource constraints and enable physical interaction.",
+      "llm_tldr_cn": "具身智能从数字感知走向物理交互，但基础模型赋能的具身智能体面临开放世界认知与资源受限部署之间的冲突，云中心方案又带来动态无线链路的时延和可靠性风险。本文提出边缘原生具身智能（ENEI），一种行动感知的框架，在无线边缘网络中为智能体提供物理落地与主动获取物理经验的能力。该框架为未来基础模型驱动的无线边缘智能系统提供了新的设计思路。",
+      "llm_tldr": "具身智能从数字感知走向物理交互，但基础模型赋能的具身智能体面临开放世界认知与资源受限部署之间的冲突，云中心方案又带来动态无线链路的时延和可靠性风险。本文提出边缘原生具身智能（ENEI），一种行动感知的框架，在无线边缘网络中为智能体提供物理落地与主动获取物理经验的能力。该框架为未来基础模型驱动的无线边缘智能系统提供了新的设计思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "use of large language models in wireless communication",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.23995v1",
+      "source": "arxiv",
+      "title": "Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings",
+      "abstract": "Device-free human pose estimation using commodity WiFi signals has emerged as a promising paradigm for pervasive sensing in mobile computing systems. However, existing approaches often suffer from severe performance degradation when deployed across heterogeneous environments due to complex multipath propagation and domain shifts in wireless signals. In this paper, we present a physics-informed WiFi sensing framework for robust 3D human pose estimation under mobile and cross-environment settings. Our approach explicitly models wireless signal propagation characteristics and incorporates multipath-aware attention to capture environment-dependent signal variations. To further improve generalization, we introduce a disentangled representation learning scheme that separates pose-related features from environment-specific factors, enabling effective cross-domain adaptation without requiring extensive retraining. We implement our system using commodity WiFi devices and evaluate it on multiple public benchmarks, including Person-in-WiFi-3D and MM-Fi, as well as real-world deployments across diverse indoor environments. Experimental results demonstrate that our framework significantly improves robustness and generalization performance compared to state-of-the-art methods, particularly under cross-environment scenarios. These results highlight the potential of physics-informed wireless sensing for enabling reliable, scalable, and infrastructure-free human-centric applications in mobile computing systems.",
+      "authors": [
+        "Kaixuan Huang",
+        "Yuanbo Chen",
+        "Guangjin Pan",
+        "Shiyi Mu",
+        "Tao Yu",
+        "Guhan Zheng",
+        "Shunqing Zhang"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-25T02:36:43+00:00",
+      "link": "https://arxiv.org/pdf/2608.23995v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multipath-aware attention and physics-informed modeling for wireless WiFi sensing",
+      "llm_evidence_cn": "面向WiFi无线感知的多径感知注意力与物理信息建模",
+      "llm_evidence": "面向WiFi无线感知的多径感知注意力与物理信息建模",
+      "canonical_evidence": "面向WiFi无线感知的多径感知注意力与物理信息建模",
+      "llm_tldr_en": "Presents a physics-informed WiFi sensing framework with multipath-aware attention for robust 3D human pose estimation across mobile and cross-environment settings, improving generalization by modeling wireless propagation.",
+      "llm_tldr_cn": "针对WiFi无设备人体姿态估计在异构环境下性能下降的问题，提出物理信息引导的感知框架。显式建模无线信号传播特性，引入多径感知注意力捕获环境相关的信号变化，并通过解耦提升跨域泛化。实验表明该方法在移动和跨环境场景下具有更好的鲁棒性。为无线感知中的注意力机制应用提供了借鉴。",
+      "llm_tldr": "针对WiFi无设备人体姿态估计在异构环境下性能下降的问题，提出物理信息引导的感知框架。显式建模无线信号传播特性，引入多径感知注意力捕获环境相关的信号变化，并通过解耦提升跨域泛化。实验表明该方法在移动和跨环境场景下具有更好的鲁棒性。为无线感知中的注意力机制应用提供了借鉴。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

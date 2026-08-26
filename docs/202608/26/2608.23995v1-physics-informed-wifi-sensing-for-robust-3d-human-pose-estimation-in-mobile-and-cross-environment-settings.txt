@@ -1,0 +1,636 @@
+Title: Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings
+
+URL Source: https://arxiv.org/pdf/2608.23995v1
+
+Published Time: Wed, 26 Aug 2026 00:34:00 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> 1
+
+# Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings 
+
+Kaixuan Huang, Yuanbo Chen, Student Member, IEEE , Guangjin Pan, Member, IEEE ,Shiyi Mu, Tao Yu, Guhan Zheng, Shunqing Zhang, Senior Member, IEEE 
+
+Abstract —Device-free human pose estimation using commodity WiFi signals has emerged as a promising paradigm for pervasive sensing in mobile computing systems. However, existing ap-proaches often suffer from severe performance degradation when deployed across heterogeneous environments, due to complex multipath propagation and domain shifts in wireless signals. In this paper, we present a physics-informed WiFi sensing framework for robust 3D human pose estimation under mobile and cross-environment settings. Our approach explicitly mod-els wireless signal propagation characteristics and incorporates multipath-aware attention to capture environment-dependent signal variations. To further improve generalization, we introduce a disentangled representation learning scheme that separates pose-related features from environment-specific factors, enabling effective cross-domain adaptation without requiring extensive retraining. We implement our system using commodity WiFi devices and evaluate it on multiple public benchmarks, in-cluding Person-in-WiFi-3D and MM-Fi, as well as real-world deployments across diverse indoor environments. Experimental results demonstrate that our framework significantly improves robustness and generalization performance compared to state-of-the-art methods, particularly under cross-environment scenarios. These results highlight the potential of physics-informed wireless sensing for enabling reliable, scalable, and infrastructure-free human-centric applications in mobile computing systems. 
+
+I. I NTRODUCTION 
+
+With the proliferation of commodity WiFi infrastructure, device-free human sensing has become an increasingly impor-tant capability in mobile computing systems. Unlike camera-based approaches [1]–[3], wireless sensing enables privacy-preserving sensing without capturing visual information, mak-ing it suitable for deployment in sensitive indoor environments. In addition, it relies on existing wireless infrastructure and does not require users to carry dedicated devices. These advantages make wireless sensing attractive for a wide range of applications, including healthcare monitoring, smart envi-ronments, and human-computer interaction [4], [5]. 
+
+This work was supported by the Science and Technology Commission Foundation of Shanghai under Grant 24DP1500703, and the National Natural Science Foundation of China (NSFC) under Grant 62571307. (Corresponding Author: Shunqing Zhang) Kaixuan Huang, Yuanbo Chen, Shiyi Mu, Guhan Zheng, Shunqing Zhang are with the School of Information and Communication Engineering, Shang-hai University, Shanghai, 200444, China (e-mail: {xuan1999, cyb24721331, mushiyi, guhanzheng, shunqing }@shu.edu.cn). Guangjin Pan is with Department of Electrical Engineering, Chalmers University of Technology, 41296 Gothenburg, Sweden (e-mail: guangjin.pan@chalmers.se) Tao Yu is with the Department of Electrical and Electronic Engineering, The University of Hong Kong, Hong Kong (e-mails:taoyee@hku.hk). 
+
+Fig. 1: WiFi-based pose estimation enables privacy-preserving sensing through walls and in darkness, while leveraging ubiq-uitous infrastructure for practical deployment in healthcare, smart homes, and elderly care. Compared with specialized sensing modalities such as mmWave radar [6], WiFi sensing can be deployed using widely available 802.11 equipment, which supports scalable and cost-effective deployment. In wireless systems, Channel State Information (CSI) characterizes the frequency response across multiple subcarriers and captures fine-grained multipath propagation induced by human motion. When signals prop-agate through the environment, they undergo reflection and scattering before reaching the receiver. This physical process enables pose estimation without line-of-sight and under chal-lenging lighting conditions, making it particularly attractive for applications in hospitals, elderly-care facilities, and private homes. However, realizing this potential in practice requires a system that generalizes reliably across heterogeneous de-ployment environments without retraining, a requirement that existing approaches have yet to satisfy [7]–[11]. The fundamental barrier to such cross-environment robust-ness lies in the physics of wireless propagation. Wireless sig-nals are highly sensitive to environmental conditions, including room layout, object placement, and transceiver configuration. Even small changes in these factors alter the multipath struc-ture of the channel, causing severe domain shifts that rapidly arXiv:2608.23995v1 [eess.SP] 25 Aug 2026 2
+
+degrade model performance in unseen scenarios [12]. This sensitivity has three interconnected root causes. First , CSI measurements are dominated by reflections from static struc-tures such as walls and furniture, whereas signal variations due to human motion are relatively weak. Pose-related infor-mation is therefore often obscured by strong, environment-dependent static components [13], making it difficult for a model trained in one environment to identify the same motion patterns in another. Second , the mapping from CSI to human pose is highly ambiguous. CSI signals represent superposed contributions from multiple propagation paths, so different body configurations can produce similar signal patterns under different multipath geometries. This many-to-many ambiguity means that a model lacking structural con-straints will latch onto environment-specific correlations rather than learning truly transferable pose representations. Third ,because the multipath geometry varies across environments, the distribution of both static and dynamic CSI components shifts substantially, creating a domain gap that purely data-driven adaptation strategies struggle to bridge without access to labeled target-environment data. The common limitation of existing WiFi-based pose esti-mation methods is that they treat CSI as generic sequential or spatial data [14]–[18], without explicitly accounting for the physical mechanisms that give rise to these three root causes. As a consequence, their learned representations inevitably mix static environmental components with dynamic human-induced signals, remain sensitive to multipath-induced ambi-guity, and fail to generalize when the propagation structure changes. Addressing cross-environment robustness, therefore, requires a principled approach that models the underlying electromagnetic propagation rather than simply transplanting computer vision architectures to wireless signals. To this end, we propose a physics-informed WiFi sens-ing framework for robust 3D human pose estimation under mobile and cross-environment settings. The key idea is to integrate physical insights from wireless signal propagation directly into the learning architecture, so that each component targets one of the three root causes identified above. Specifi-cally, a physics-guided attention mechanism separates dynamic human-induced signal correlations from static environmental artifacts, thereby addressing the weak-motion signal problem. A hierarchical semantic fusion module introduces action-level structural constraints to resolve the ill-posed CSI-to-pose mapping. A physics-disentangled domain adaptation strategy explicitly decomposes the channel into static and dynamic components and enforces cross-environment invariance on the dynamic representation, enabling zero-shot generalization without target-environment labels. Together, these components form a unified framework grounded in electromagnetic prop-agation principles, enabling reliable pose estimation across diverse and previously unseen environments. The main contri-butions of this work are summarized as follows:  
+
+> •
+
+Physics-Guided Multipath-Aware Attention (PGMA). 
+
+We propose a novel attention mechanism specifically designed for wireless sensing signals. Unlike standard self-attention, which treats inputs as generic sequences, the proposed PGMA explicitly incorporates antenna ge-ometry, wavelength-dependent phase relationships, and multipath feasibility constraints into the attention formu-lation. This design enables the network to prioritize signal correlations consistent with electromagnetic propagation while suppressing environment-specific static artifacts, di-rectly addressing the first root cause of cross-environment degradation.  
+
+> •
+
+Hierarchical Cross-Attention Fusion (HCAF). We in-troduce the first action-conditioned pose inference frame-work for WiFi sensing. By progressively integrating action-level semantic priors through dynamic convolu-tion, cross-attention coupling, and joint-specific modu-lation, the proposed HCAF restricts pose estimation to biomechanically feasible submanifolds, thereby alleviat-ing the many-to-many CSI-to-pose ambiguity that pre-vents learning of environment-invariant representations.  
+
+> •
+
+Physics-Disentangled Domain Adaptation (PDDA). We develop a principled domain adaptation strategy based on the physical decomposition of CSI signals. By separating static environmental components from dynamic human-induced perturbations and enforcing contrastive invari-ance on the dynamic representations, the proposed PDDA achieves robust cross-environment generalization without requiring labeled data in target environments.  
+
+> •
+
+Theoretical Justification and Extensive Experiments. 
+
+We provide information-theoretic analysis showing that physics-guided representations increase mutual informa-tion with human pose, that action conditioning reduces conditional pose entropy, and that contrastive domain alignment promotes environment-invariant feature clus-tering. Extensive experiments on two public benchmarks and a real-world deployment dataset confirm that the pro-posed framework achieves state-of-the-art performance and strong zero-shot generalization across environments. The remainder of this paper is structured as follows. Section II reviews related work, and Section III establishes the fundamental signal model and formally states the pose estimation problem. Subsequently, Section IV details the three core innovations of our proposed framework. To ground our design choices, Section V provides a theoretical analysis of the model’s properties. Following this, Section VI reports compre-hensive experimental results and concludes in Section VII. II. R ELATED WORK 
+
+A. Attention Mechanisms for WiFi HPE 
+
+Early WiFi-based approaches employed convolutional neu-ral networks to learn direct mappings from CSI to joint co-ordinates. Person-in-WiFi [14] pioneered end-to-end learning for this task, while WiPose [15] extended the framework to 3D estimation through temporal modeling. However, the inherently local receptive fields of convolutional networks limit their ability to capture the global signal dependencies that characterize WiFi propagation. In practical environments, dis-tant body movements can induce correlated variations across spatially separated antenna and subcarrier dimensions, which cannot be effectively modeled by local operators. 3
+
+To address this limitation, recent work has explored at-tention mechanisms for modeling long-range dependencies. CSIFormer [16] applies Transformer architectures to cap-ture temporal correlations, while PerUNet [17] and HPE-Li [18] introduce channel-wise and kernel-based attention for spatial feature refinement. These approaches improve rep-resentation capacity and demonstrate the benefits of global modeling. However, they treat CSI as generic sequential or spatial data, without accounting for the physical structure of wireless propagation. In particular, antenna correlations depend on geometric configuration, subcarrier relationships are governed by wavelength-dependent patterns, and mul-tipath propagation constrains feasible signal combinations. Because these methods operate on the full CSI observation without separating static environmental components from dy-namic human-induced signals, the learned attention weights inevitably mix pose-irrelevant environmental artifacts with motion information, precisely the first root cause of cross-environment degradation. Although recent Transformer-based pose estimation methods leverage frequency-domain represen-tations and structural priors [19]–[21], their direct application to WiFi signals remains suboptimal without modeling the underlying propagation mechanism. The proposed PGMA addresses this gap by introducing physics-guided attention that encodes antenna geometry and multipath characteristics into the attention formulation, enabling the network to concentrate on pose-relevant dynamic correlations. 
+
+B. Semantic Guidance for Signal Ambiguity 
+
+A fundamental challenge in WiFi-based human pose esti-mation lies in the ambiguous mapping between CSI measure-ments and human poses. Due to multipath propagation, differ-ent body configurations can produce similar signal patterns, while similar poses may correspond to distinct CSI obser-vations under varying environments. Existing methods typi-cally formulate this problem as an unconstrained regression task, directly predicting joint coordinates from signal features without incorporating high-level structural constraints [14], [15]. Without such constraints, models are susceptible to fitting environment-specific CSI patterns rather than learning transferable pose representations, which compounds the cross-environment generalization problem. In contrast, the computer vision community has demon-strated the effectiveness of semantic and structural guidance for human pose estimation. Stacked hourglass networks [22] and multi-resolution architectures such as HRNet [23] show that hierarchical feature fusion improves spatial reasoning. More recent work incorporates temporal consistency and structural priors to enhance robustness [21], [24]. Despite these advances, such semantic guidance has not been fully explored in WiFi sensing, where signal ambiguity is inherently more severe due to the indirect nature of observations and is further exacerbated by environmental variation. To address this gap, the proposed HCAF introduces a hierarchical fusion strategy that progressively injects action-level semantics into the feature representation, thereby constraining the solution space to physically plausible and biomechanically consistent poses and reducing environment-sensitive ambiguity in the CSI-to-pose mapping. 
+
+C. Cross-Environment Domain Adaptation 
+
+WiFi-based human pose estimation suffers from significant performance degradation across environments. Variations in room geometry, furniture layout, and electromagnetic inter-ference alter the multipath propagation structure and lead to substantial domain shifts. As a result, models trained in one environment often fail to generalize to unseen settings, a cen-tral deployment challenge for mobile computing applications. Recent work has explored domain adaptation techniques to mitigate this issue. MetaFi++ [12] and related meta-learning approaches [25] improve adaptability by optimizing for rapid fine-tuning, but they require labeled samples from each target environment, which is impractical in real-world deployment. Adversarial domain adaptation methods based on gradient reversal [26], [27] have shown effectiveness in vision tasks [28], yet their direct application to WiFi sensing is limited. In wireless systems, domain shift originates from changes in the physical signal generation process. Specifically, alterations in the multipath propagation structure rather than superficial differences in data distribution. Recent surveys [29], [30] confirm that WiFi domain variation is fundamentally tied to multipath propagation and environmental geometry. Purely data-driven adaptation strategies that ignore this physical ori-gin therefore align the wrong signal components and provide only superficial invariance, leaving the root cause of cross-environment degradation unaddressed. Existing work has made substantial progress in improv-ing representation learning, structural modeling, and domain adaptation for WiFi-based human pose estimation. However, these advances have largely been pursued in isolation, and none provides a unified solution to all three root causes of cross-environment degradation: the dominance of static envi-ronmental components over weak motion signals, the many-to-many CSI-to-pose ambiguity, and the physics-rooted domain shift across environments. In contrast, this work proposes a unified physics-informed framework that simultaneously addresses all three root causes through propagation-aware attention, semantic guidance, and physically grounded domain adaptation, enabling reliable 3D pose estimation in practical mobile computing scenarios. III. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. OFDM CSI Signal Model 
+
+In OFDM-based WiFi systems, Channel State Information captures the complex frequency response between transmitter and receiver. For a single antenna pair at time t, the received signal follows y = h(t) · x + n, where x is the transmitted signal, n represents additive noise, and h(t) characterizes the time-varying channel response. The CSI vector aggregates the frequency response across Nsub subcarriers as 
+
+h(t) = [H(f1, t ), H (f2, t ), . . . , H (fNsub , t )]T . (1) 4
+
+Due to multipath propagation, the CSI at subcarrier fn is given by 
+
+H(fn, t ) = 
+
+> M
+
+∑
+
+> k=1
+
+ak(t) e−j2πf n τk(t), (2) where ak(t) and τk(t) denote the complex gain and prop-agation delay of the k-th path, and M is the total number of physical paths. Human motion modulates the channel by dynamically altering these components. The key insight that drives the entire framework is that the multipath channel contains both time-invariant contributions from static scatterers and time-varying contributions induced by human motion. These two types of contributions convey fundamentally different information: the former encodes the environment geometry and is irrelevant to pose estimation, whereas the latter encodes the human body’s kinematic state. To make this structure explicit, we decompose the channel response according to the temporal characteristics of individual multipath contributors as 
+
+H(fn, t ) = e−j2π∆f ·tHs(fn)+
+
+> P
+
+∑
+
+> p=1
+
+ρp(fn, t ) e−j 2πdp (t) 
+
+> λn
+
+, (3) where ∆f is the carrier frequency offset between oscillators, 
+
+Hs(fn) captures the time-invariant environmental contribu-tion from static scatterers, ρp(fn, t ) and dp(t) characterize the complex amplitude and instantaneous path length of the 
+
+p-th dynamic component induced by human motion, and 
+
+λn = c/f n denotes the wavelength at subcarrier fn. For a system with Nant transmit-receive antenna pairs and Nsub 
+
+subcarriers, we construct the CSI matrix Ht ∈ CNant ×Nsub and extract amplitude-phase information into a real-valued tensor 
+
+Xt ∈ RL×din , where L = Nant × Nsub and din = 2 .The decomposition in (3) reveals the key structure exploited by our framework. The static component Hs(fn) is estimated by temporal averaging over a window of Twin = 10 frames, which is long relative to human motion periods but short relative to environmental changes. The dynamic component 
+
+Xd = Xt − Xs then concentrates the human-induced infor-mation that is relevant to pose estimation, while Xs encodes environment-specific propagation characteristics useful for do-main calibration. 
+
+B. Problem Formulation 
+
+Building on the signal model above, we state the es-timation problem in a form that exposes the three tech-nical challenges that motivate the architecture. Let D =
+
+{(X(e) 
+
+> t
+
+, a (e), Y(e) )}Ee=1 denote the training set from E en-vironments, where X(e) 
+
+> t
+
+is the CSI observation, a(e) ∈{1, . . . , N action } is the action label, and Y(e) = {yj }Jj=1 ∈
+
+RJ×3 is the 3D joint position ground truth with J keypoints. We partition the model parameters into four functional groups 
+
+θ = ( θenc , θfus , θdec , θadp ), corresponding to the CSI encoder, the semantic fusion module, the pose decoder, and the envi-ronment adapters, respectively. 
+
+Problem 1 (Physics-Constrained WiFi-Based 3D HPE) 
+
+Find parameters θ⋆ that solve 
+
+min  
+
+> θ
+
+Lpose + λa Laction + λd Ldomain , (4) 
+
+where the three loss terms are defined as 
+
+Lpose = 1
+
+|D| 
+
+∑
+
+> e,t
+
+1
+
+J
+
+> J
+
+∑
+
+> j=1
+
+∥∥ˆyj (θ; X(e) 
+
+> t
+
+) − y(e)gt ,j 
+
+∥∥2, (5) 
+
+Laction = − 1
+
+|D| 
+
+∑
+
+> e,t Naction
+
+∑
+
+> c=1
+
+1[a(e) = c] log ˆ pc, (6) 
+
+Ldomain = − 1
+
+NsNs∑
+
+> i=1
+
+log 
+
+∑ 
+
+> j∈P (i)
+
+exp (sim( zd,i , zd,j )/τ )∑  
+
+> k6=i
+
+exp (sim( zd,i , zd,k )/τ ) , (7) 
+
+with weights λa = 0 .5 and λd = 0 .2, contrastive temperature 
+
+τ = 0 .07 , Ns the batch size, P(i) the set of samples sharing action a(i) but drawn from a different environment, sim( ·, ·)
+
+the cosine similarity, ˆpc the predicted probability for class c,and zd,i the pooled dynamic feature of sample i.
+
+The three objectives in (4) address distinct aspects of the estimation pipeline, and their interplay reflects the three challenges. The pose loss Lpose involves a highly non-convex, non-injective mapping from the high-dimensional CSI space to the 3D joint space, where identical CSI observations can arise from multiple distinct poses, and gradient descent without additional regularization converges to arbitrary local minima. The domain loss Ldomain forces dynamic features from different environments to cluster toward a shared action-discriminative manifold, which must be balanced against the representational capacity required by Lpose . The action loss 
+
+Laction ensures that the semantic guidance branch maintains sufficient discriminability throughout training, as degraded action predictions propagate errors into the hierarchical fusion stages. The scalar weights λa and λd govern the Pareto trade-off among these competing objectives. The structure of Problem 1 directly motivates the three-component architec-ture. The pose loss is minimized more effectively when the encoder produces representations concentrated on dynamic CSI components. The residual ambiguity in the CSI-to-pose mapping, which Lpose alone cannot eliminate, is addressed by 
+
+Laction as additional information prior. The cross-environment generalization requirement captured by Ldomain is handled by the domain adaptation. Each architectural decision thus corresponds to one term in the multi-objective formulation. IV. P ROPOSED FRAMEWORK 
+
+A. System Overview 
+
+As shown in Fig. 2, the proposed framework addresses Problem 1 through three physics-grounded components. Un-like existing methods that directly transplant computer vision architectures to wireless signals, each component is derived from the electromagnetic propagation model established in Section III. The encoder first extracts discriminative features from the raw CSI tensor through physics-aware attention, the fusion module then resolves pose ambiguity by injecting action 5
+
+Ș
+
+Ș     
+
+> 6-3' +TIUJKX 'IZOUT(XGTIN )RGYYOLOIGZOUT
+> 8KYTKZ 'IZOUT
+> +SHKJJOTM
+> ȜȜ
+> YZGTJ YOZ
+> ȜȜ ȜȜ
+> .OKXGXINOIGR )XUYY'ZZKTZOUT
+> 0UOTZYVKIOLOI *KIUJKX +T\+TIUJKX 'JGVZKX 6UYK2GHKR
+> ȘȘ
+> 6XKJOIZKJVUYK
+> 1OTKIZ<
+> *_TGSOI)9/ 'IZOUT2GHKR 9ZGZOI)9/
+> +
+> !∈ ℝ $%&' ×$ ()*
+> ,-
+> ,.
+> /IUGXYK
+> 0 !"#$
+> 1 ∈ 2 3×4 56789
+> 1 ∈ 2 3×4 56789
+> :;
+> 0UOTZ /%&'"$&(
+> 6UYK2GHKR ;)!
+> <=
+> -GZKJ,[YOUT8KLOTKJ
+> /%#**
+> +T\'JGVZKX
+> 6UYK*KIUJKX 'IZOUT)RGYYOLOKX
+
+Fig. 2: Architecture of the proposed unified physics-informed framework for robust WiFi-based 3D human pose estimation. The framework integrates three physics-grounded components: Physics-Guided Multipath-Aware Attention for environment-invariant feature extraction, Hierarchical Cross-Attention Fusion for action-guided ambiguity resolution, and Physics-Disentangled Domain Adaptation for cross-environment generalization. The code and demonstration have been uploaded to GitHub at https://github.com/keysonhuang/Physical-Informed-WIFI-Sensing-for-3D-Human-Pose-Estimation. semantics at multiple granularities, and the domain adaptation layer ensures that the resulting representation generalizes across environments. We describe each component in turn. 
+
+B. Physics-Guided Multipath-Aware Attention 
+
+The physical decomposition in (3) reveals that the full CSI observation Xt simultaneously contains static environmental components Xs and dynamic human-induced components 
+
+Xd. Since only Xd carries pose-relevant information while 
+
+Xs constitutes environment-specific interference, an attention mechanism that concentrates on human-induced signal correla-tions while suppressing static artifacts is expected to yield sub-stantially more discriminative representations. Standard self-attention operates on the full observation Xt without physical bias, attending equally to static and dynamic correlations alike. PGMA directly incorporates the physics prior through three coordinated mechanisms: electromagnetic positional en-coding, learnable multipath feasibility masks, and frequency-decomposed band processing. Each of the L positions in Xt corresponds to one transmit-receive antenna pair and one subcarrier. For position i, let dant 
+
+> i
+
+denote the physical separation of the corresponding transmit-receive antenna pair and fi denote its subcarrier frequency, with wavelength λi = c/f i. The electromagnetic positional encoding for position i is 
+
+Pi =
+
+
+
+sin(2 πd ant  
+
+> i
+
+/λ i)cos(2 πd ant  
+
+> i
+
+/λ i)sin(2 πf i/f max )cos(2 πf i/f max )
+
+ , (8) where fmax is the maximum subcarrier frequency. The first two entries encode the spatial phase relationship governed by the antenna geometry, while the latter two capture the spectral progression across the OFDM band. Stacking encodings for all 
+
+L positions into P ∈ RL×4, we inject them into input features as 
+
+Xaug  
+
+> t
+
+= Xt + WP P, (9) where WP ∈ Rdin ×4 projects the encodings to the fea-ture space. Following standard query-key-value projection, we modulate the attention scores with a learnable multipath feasibility mask: 
+
+Aij =exp 
+
+( qikTj
+
+√dk
+
++ log mij 
+
+)
+
+> L
+
+∑
+
+> k=1
+
+exp 
+
+( qikTk
+
+√dk
+
++ log mik 
+
+) , (10) where dk is the key dimension and mij ∈ (0 , 1] is the prior probability that positions i and j share significant multipath correlation. This formulation admits a Bayesian interpretation: the data-driven likelihood from the query-key product is com-bined with the physics-based log-prior log mij to approximate the posterior correlation probability under the multipath chan-nel model. Using the per-position antenna separations dant  
+
+> i
+
+, d ant 
+
+> j
+
+and subcarrier frequencies fi, f j , the mask is initialized as 
+
+m(0)  
+
+> ij
+
+= exp 
+
+(
+
+− (dant  
+
+> i
+
+− dant  
+
+> j
+
+)2
+
+2σ2
+
+> d
+
+− (fi − fj )2
+
+2σ2
+
+> f
+
+)
+
+(11) and refined through training as mij = σ(m(0)  
+
+> ij
+
++∆ mij ), where the learnable residual ∆mij allows adaptation to deployment-specific propagation characteristics, and σd and σf govern spatial and spectral coherence ranges respectively. Human motion affects different frequency bands distinctly, as lower frequencies penetrate obstacles more effectively while higher frequencies provide finer spatial resolution. To exploit this spectral diversity, we partition the spectrum into B = 3 
+
+frequency bands and process each with dedicated attention 6
+
+heads. The output of the ℓ-th encoder layer is 
+
+Z(ℓ) = LN 
+
+(
+
+Z(ℓ−1) +
+
+> B
+
+∑
+
+> b=1
+
+w(ℓ) 
+
+> b
+
+· PGMA (ℓ)
+
+> b
+
+(
+
+Z(ℓ−1) ))
+
+,
+
+(12) where LN( ·) denotes layer normalization and the band weights 
+
+w(ℓ) = Softmax 
+
+(
+
+W(ℓ) 
+
+> w
+
+GAP 
+
+(
+
+X(ℓ)
+
+> t
+
+)) 
+
+(13) adapt to signal quality variations across bands, with GAP( ·)
+
+denoting global average pooling. Stacking Nenc = 4 such layers with residual connections produces the refined feature representation Z ∈ RL×dmodel with dmodel = 256 . This rep-resentation is subsequently passed to the HCAF module for action-guided ambiguity resolution. 
+
+C. Hierarchical Cross-Attention Fusion 
+
+Even with well-extracted dynamic-component features, the CSI-to-pose mapping remains highly ambiguous because mul-tiple distinct body configurations can produce similar CSI sig-natures through different multipath combinations. The action category to which a pose belongs constrains it to a specific biomechanical submanifold of the full pose space, thereby substantially narrowing the set of feasible configurations. HCAF operationalizes this constraint through three progressive stages of action semantic integration, moving from coarse action-conditioned modulation to fine-grained joint-specific adaptation. First, the action semantics must be extracted to minimize the solution space. Global average pooling aggregates the PGMA features Z into a compact global descriptor zglobal =
+
+> 1
+> L
+
+∑Li=1 Zi. An action classifier predicts action probabilities 
+
+ˆpa = Softmax( W2 ReLU( W1 zglobal + b1) + b2) , (14) supervised by the cross-entropy loss Laction in (6). A contin-uous action embedding ea = Wemb ˆpa ∈ Rdemb serves as the semantic context for subsequent stages. This soft embedding preserves uncertainty in the action prediction, which is impor-tant for the robustness mechanism described at the end of this subsection. Second, the hierarchical features are fused via action-conditioned modulation to strengthen the feature representa-tion. The action embedding generates dynamic convolution kernels through a hypernetwork kconv = Wk ea, reshaped into convolution weight format Kdyn and applied to the spatial rearrangement Zsp of Z:
+
+fcoarse = GAP(ResNet(Conv2D( Zsp , Kdyn ))) . (15) Dynamic convolution kernels adapt the spatial feature extrac-tion to the action context, allowing the network to emphasize anatomical regions that are most informative for the predicted action. Lastly, refined Cross-Attention Coupling to obtain fine-grained features, thereby reducing ambiguity. The action em-bedding queries the coarse pose features via cross-attention: 
+
+fcross = Softmax 
+
+( Qa KT
+
+> pose
+
+√dk
+
+)
+
+Vpose , (16) where Qa = WcQ ea, Kpose = WcK fcoarse , and Vpose =
+
+WcV fcoarse , with dk the key dimension shared with the PGMA encoder. A gating mechanism adaptively combines the cross-attended and coarse features: 
+
+g = σ(Wg [fcoarse , ea, fcross ]) , (17) 
+
+fref = g ⊙ fcross + (1 − g) ⊙ fcoarse . (18) The gate provides inherent robustness to action-prediction er-rors: when action predictions are uncertain, the gate increases reliance on the direct CSI-to-pose pathway, thereby reducing the weight of the semantic-guidance branch. Different body joints exhibit varying degrees of action dependence, so joint-specific adaptation layers allow each joint to selectively weight semantic information: 
+
+ωj = σ(Wj [fref , ea]) , (19) 
+
+fj = ωj ⊙ fref . (20) Each joint is decoded independently through a two-layer MLP to produce the final 3D coordinates ˆyj ∈ R3. The joint-specific weights learned during training encode the anatomical prior that distal joints, such as wrists and ankles, are more strongly constrained by action context than proximal joints, such as the pelvis and spine. 
+
+D. Physics-Disentangled Domain Adaptation 
+
+Environmental variations alter the static channel component 
+
+Hs(fn) in (3), creating a domain shift rooted in propa-gation physics. This shift is fundamentally different from the appearance shift encountered in visual domain adapta-tion: whereas the latter can be addressed by aligning sur-face statistics, the former involves changes in the physical path structure of the channel that affect both the amplitude and phase relationships across all antenna-subcarrier pairs. Standard adversarial domain adaptation ignores this structure, confusing static and dynamic components that follow entirely different statistical behaviors. PDDA enforces environment-invariant dynamic representations by operating directly on the physically separated components. We implement the decomposition in (3) through tempo-ral averaging over Twin = 10 frames, yielding Xs and the residual Xd = Xt − Xs. Dynamic features zd =GAP(PGMA( Xd; θenc )) are subjected to the supervised con-trastive loss Ldomain in (7): dynamic features from the same action cluster tightly across environments while features from different actions remain separable. The positive pairs in P(i)
+
+are deliberately drawn from different environments, so the contrastive loss directly rewards environment-invariant repre-sentations that preserve action discriminability. Simultaneously, lightweight environment-specific adapters leverage the static component Xs to calibrate the decoder for deployment-specific propagation. For environment e, the adapter output δe = Adapter e(Xs), implemented as a two-layer MLP with 128 hidden units, is applied before decoding as 
+
+fadp = fref + δe. (21) These adapters account for less than 1% of total parame-ters, providing efficient environment-specific calibration with-7
+
+out compromising the invariant dynamic representation. The PDDA design thus achieves a clean separation of concerns: the shared encoder and fusion modules learn environment-invariant pose features, while the adapters absorb the residual environment-specific signal that cannot be removed by physi-cal decomposition alone. V. T HEORETICAL ANALYSIS 
+
+In this section, we establish these properties as formal theorems, providing information-theoretic validation for the physics-guided attention and action-conditional fusion designs. We further analyze the contrastive domain loss to confirm that it promotes the environment-invariant feature geometry required by PDDA. The theoretical analysis assumes that static environmental and dynamic human-induced components are approximately independent with respect to the pose variable. While strict independence may not hold in practical wireless environments, static multipath contributions typically evolve on a much slower timescale than human motion. Over short observation windows used for pose estimation, this temporal separation allows the dynamic components to capture the dominant pose-dependent signal variations. Consequently, the independence assumption provides a reasonable approximation for analyzing the representation properties of the proposed framework. 
+
+A. Physics-Guided Representations and Mutual Information 
+
+The decomposition in (3) implies that Xt = Xd + Xs,where Xs ⊥ Y and Xs ⊥ Xd hold by the independence of static scatterers from human motion. A generic representation 
+
+Z = g(Xt) will mix both components, potentially suppressing pose-relevant information. The following theorem quantifies the information cost of this mixing. 
+
+Theorem 1 Physics-Guided Representation Maximizes Mu-tual Information: Let Xt = Xd + Xs with Xs ⊥ Y and 
+
+Xs ⊥ Xd. For any measurable function g, let Zd = g(Xd)
+
+and Zmix = g(Xd + Xs). Then 
+
+I(Zd; Y) ≥ I(Zmix ; Y), (22) 
+
+with equality if and only if g(Xd + Xs) = φ(g(Xd)) almost surely for some deterministic function φ.
+
+The proof is given in Appendix A. The implication for the PGMA design is direct: the multipath feasibility mask mij 
+
+suppresses antenna-subcarrier pairs that cannot carry human-induced multipath, steering the learned representation toward 
+
+Zd and thereby increasing I(Z; Y) relative to unconstrained attention. Standard attention applied to the full observation Xt
+
+does not satisfy the equality condition in Theorem 1, because the static component Xs perturbs the query-key products in a way that depends on the environment rather than on Xd
+
+alone. It confirms a clear information-theoretic advantage of physics-guided design over generic attention. It is instructive to translate this result into a quantitative bound. Let ǫs = I(Xs; Xd + Xs|Xd) measure the degree to which the static component perturbs the representation path. The chain rule applied and yields I(Zd; Y)−I(Zmix ; Y) ≥ 0,with the gap growing as the energy of Xs relative to Xd
+
+increases. In typical indoor environments, static multipath energy can exceed dynamic human-induced energy by an order of magnitude, implying a substantial practical benefit from physical decomposition prior to attention computation. 
+
+B. Action-Conditional Inference and Entropy Reduction 
+
+Theorem 1 addresses the feature extraction challenge but leaves the ambiguity problem: even with optimal dynamic-component features, the conditional entropy H(Y|Xd) may remain high due to multipath superposition. The following theorem shows that this residual ambiguity is reduced by con-ditioning on the estimated action category, providing formal justification for the HCAF design in Section IV-C. 
+
+Theorem 2 Action Conditioning Reduces Conditional Pose Entropy: Let ˆA denote the action category estimated from Xt.Then 
+
+H(Y | ˆA, Xt) ≤ H(Y | Xt), (23) 
+
+with strict inequality whenever I(Y; ˆA | Xt) > 0. Further-more, the entropy reduction is exactly 
+
+H(Y | Xt) − H(Y | ˆA, Xt) = I(Y; ˆA | Xt) ≥ 0. (24) The proof is given in Appendix B. The strict inequality holds whenever the action classifier retains residual infor-mation about Y beyond what is already captured by Xt
+
+alone. As established in the proof, this condition is satisfied precisely when the estimated action is informative about the biomechanical submanifold of the pose, which holds for any classifier with accuracy exceeding random chance on at least two action classes. The identity in (24) further implies that the entropy re-duction is monotone in classifier quality. Let A denote the true action label. Since ˆA is a stochastic function of A, the data processing inequality gives I(Y; ˆA|Xt) ≤ I(Y; A|Xt ),with equality when the classifier is perfect. This monotonicity directly motivates the design of cross-entropy supervision in 
+
+Laction : maximizing classifier accuracy maximizes the entropy reduction achieved by conditioning, thereby reducing ambigu-ity in pose regression. Conversely, when classifier confidence is low, the gating mechanism in (17) down-weights the action-conditioned pathway, reverting to direct pose regression. 
+
+C. Contrastive Domain Alignment and Feature Separability 
+
+The previous two theorems address feature extraction and ambiguity resolution, but leave the question of whether the contrastive loss Ldomain in (7) actually promotes environment-invariant representations. The following result establishes that minimizing Ldomain is equivalent to maximizing a lower bound on the mutual information between dynamic features and action labels, while simultaneously minimizing the mutual information between dynamic features and the environment identity. 
+
+Theorem 3 Contrastive Alignment Promotes Environment-Invariant Representations: Let E denote the environment 8
+
+index and A the action label. For any dynamic feature rep-resentation zd, define the environment leakage as I(zd; E)
+
+and the action informativeness as I(zd; A). Minimizing Ldomain 
+
+over the encoder parameters θenc simultaneously increases a lower bound on I(zd; A) and decreases an upper bound on 
+
+I(zd; E | A), approaching the ideal representation satisfying 
+
+zd ⊥ E | A as the loss approaches its minimum. 
+
+To see why this holds, note that the contrastive loss in (7) constructs positive pairs by selecting samples that share the same action across different environments. A representation that minimizes this loss must assign high similarity to same-action pairs from different environments and low similarity to different-action pairs regardless of environment. The first condition directly drives I(zd; E | A) toward zero, because features that distinguish environments within the same action class will contribute to misranking. The second condition drives I(zd; A) upward, because action-discriminative features are required to separate different-action pairs in the con-trastive objective. The combined effect therefore approaches the conditional independence zd ⊥ E | A, which is precisely the invariance property required for zero-shot generalization across environments. A formal proof following the InfoNCE lower-bound argument is provided in Appendix C. VI. E XPERIMENTAL EVALUATION 
+
+A. Experimental Setup 1) Datasets: We evaluate on two publicly available bench-marks and one self-collected dataset. Person-in-WiFi-3D [31] is the first end-to-end multi-person 3D pose estimation dataset using WiFi signals, containing data from seven volunteers performing eight daily actions across three locations with approximately 90,000 training and 7,800 test samples anno-tated with 14-keypoint 3D poses. MM-Fi [32] is a large-scale multi-modal benchmark featuring 40 subjects performing 27 actions in four environments across 320,000 frames with 17-keypoint annotations, it defines three evaluation protocols for daily activities (P1), rehabilitation exercises (P2), and all activities (P3), along with three split settings for random (S1), cross-subject (S2), and cross-environment (S3) evaluation. The 
+
+Real-World Prototype Dataset was collected using an Intel 5300 NIC with one transmitting antenna and three distributed receivers, illustrated in Fig. 3, each with three receiving antennas, providing nine independent CSI links across 30 OFDM subcarriers at 5.32 GHz. It covers eight actions across two indoor scenarios, yielding 28,406 aligned frames with CSI sampled at 600 Hz and ground truth captured at 30 fps. 
+
+2) Evaluation Metrics: The Mean Per Joint Position Error (MPJPE) measures the average Euclidean distance MPJPE = 
+
+> 1
+> J
+
+∑ 
+
+> j
+
+‖ˆyj − ygt ,j ‖2 in millimeters and serves as the primary accuracy metric. Procrustes Aligned MPJPE (PA-MPJPE) ap-plies an alignment transformation removing global rotation, translation, and scale, evaluating structural pose quality inde-pendently of global positioning. The Percentage of Correct Keypoints PCK@ α = 1
+
+> J
+
+∑ 
+
+> j
+
+I
+
+( ‖ˆyj −ygt ,j ‖2   
+
+> ‖prs −plh‖2
+
+≤ α
+
+)
+
+evaluates joint localization within a torso-normalized threshold, where 
+
+prs and plh denote the right shoulder and left hip positions respectively. TABLE I: Results on the Person-in-WiFi-3D Dataset [31].                                             
+
+> Method PCK@20 PCK@50 MPJPE PA-MPJPE
+> WiPose [15] 61.5 87.8 118.9 70.5 CSIFormer [16] 63.0 87.9 115.1 71.9 PerUNet [17] 63.5 88.5 113.9 71.1 MDPose [33] 64.1 88.0 112.5 70.3 MetaFi++ [12] 65.2 89.8 110.5 68.9 PowerSkel [34] 66.1 90.1 108.7 67.9 Person-in-WiFi-3D [31] 71.5 91.5 91.7 57.2 HPE-Li [18] 71.4 91.7 92.0 57.9 DT-Pose [9] 73.0 91.6 90.0 58.7
+> Ours 74.1 92.0 84.98 55.5
+
+3) Implementation Details: All experiments are imple-mented in PyTorch 2.0 on NVIDIA RTX A6000 GPUs. The PGMA encoder stacks Nenc = 4 Transformer layers with 
+
+h = 8 attention heads and dmodel = 256 , using feed-forward dimension dff = 1024 and dropout 0.1. The action embedding dimension is demb = 128 . The Adam optimizer uses β1 = 0 .9,
+
+β2 = 0 .999 , initial learning rate 1 × 10 −4 decaying by a factor of 0.5 every 30 epochs, batch size 32, and 100 training epochs. The total model has approximately 13.87M parameters and achieves an inference speed of 258.4 FPS, corresponding to 0.039 GFLOPs per frame. 
+
+B. Performance on Two Public Datasets 1) The overall performance: Table I presents an evalua-tion on Person-in-WiFi-3D. Our method achieves the lowest MPJPE of 84.98 mm and PA-MPJPE of 55.5 mm, representing substantial improvements over the strongest baseline DT-Pose, which achieves 90.0 mm MPJPE. The method also attains the highest PCK@50 of 92.0% and PCK@20 of 74.1%. The magnitude of improvement is particularly notable for PA-MPJPE, reflecting that the physics-constrained representation and action-guided fusion maintain superior structural pose integrity across diverse body configurations. Table II presents the full benchmark on MM-Fi under all three protocols and split settings. Under S1, our model achieves 156.2 mm MPJPE and 72.4 mm PA-MPJPE on P1, compared to DT-Pose at 166.5 mm and 104.1 mm, respec-tively. The PA-MPJPE advantage is especially pronounced across all protocols, reflecting that while absolute localization improves significantly, structural pose quality improves even more dramatically, as most competing methods remain above 100 mm in PA-MPJPE. Under S2, our model yields 190.3 mm MPJPE and 76.6 mm PA-MPJPE in P1, compared to DT-Pose at 215.1 mm and 106.6 mm. The consistent margin across all three protocols demonstrates strong subject-independent learning, which we attribute to the action-guided fusion, which removes subject-specific appearance biases from the CSI representation. The S3 setting presents the most challenging scenario. While DT-Pose achieves competitive absolute MPJPE in some protocols (334.5 mm in P1), its PA-MPJPE of 106.2 mm reveals severe structural degradation. Our model achieves a PA-MPJPE of 78.9 mm in P1, with consistent results of 77.8 mm and 80.4 mm in P2 and P3, demonstrating that physics-disentangled adaptation learns environment-invariant represen-9
+
+TABLE II: Comprehensive Results on the MM-Fi Dataset [32].                                                                                                                                                               
+
+> Method P1 P2 P3
+> PCK@20 PCK@50 MPJPE PA-MPJPE PCK@20 PCK@50 MPJPE PA-MPJPE PCK@20 PCK@50 MPJPE PA-MPJPE
+> S1 (Random Split)
+> MetaFi++ [12] 48.7 86.2 187.2 120.5 32.0 81.2 214.3 121.6 43.5 84.7 197.5 120.7 HPE-Li [18] 53.2 88.2 176.5 110.8 35.2 84.2 208.0 110.7 48.1 86.9 185.4 107.2 DT-Pose [9] 57.6 88.8 166.5 104.1 40.1 82.5 196.7 102.6 50.8 86.4 178.9 104.8 Ours 54.2 92.3 156.2 72.4 38.8 88.0 185.8 73.4 52.3 92.1 157.8 70.9 S2 (Cross-Subject)
+> MetaFi++ [12] 35.4 82.5 224.3 123.1 25.0 78.6 247.6 123.0 33.3 81.1 232.2 124.2 HPE-Li [18] 39.1 85.8 220.1 105.8 27.2 78.2 243.3 102.5 36.5 81.5 228.6 108.7 DT-Pose [9] 41.1 85.9 215.1 106.6 28.1 78.5 240.3 100.2 37.2 82.1 223.6 107.3 Ours 43.9 89.8 190.3 76.6 35.5 86.8 203.4 74.3 41.3 89.4 190.9 75.2 S3 (Cross-Environment)
+> MetaFi++ [12] 4.3 45.1 370.8 122.1 4.8 40.9 365.2 118.3 4.5 40.1 372.5 118.2 HPE-Li [18] 5.6 47.2 361.1 110.3 5.3 42.3 358.2 104.0 5.1 42.9 365.4 115.9 DT-Pose [9] 10.2 58.5 334.5 106.2 4.3 48.6 340.3 103.4 8.9 60.4 320.8 106.2 Ours 7.2 57.6 335.7 78.9 6.1 51.3 331.3 77.8 5.7 54.3 335.5 80.4
+
+TABLE III: Per-joint MPJPE on the MM-Fi dataset. 
+
+Joint MPJPE (mm) Joint MPJPE (mm) Pelvis 130.41 Neck 158.15 R-Hip 132.17 Head 158.40 R-Knee 133.17 L-Shoulder 152.25 R-Ankle 134.98 L-Elbow 182.70 L-Hip 131.40 L-Wrist 239.00 L-Knee 133.37 R-Shoulder 153.22 L-Ankle 138.43 R-Elbow 182.00 Spine 135.06 R-Wrist 238.30 Thorax 149.60 
+
+TABLE IV: Per-joint MPJPE on the Person-in-WiFi-3D dataset. 
+
+Joint MPJPE (mm) Joint MPJPE (mm) Head 47.5 Neck/Torso 41.5 L-Shoulder 89.5 R-Shoulder 64.5 L-Elbow 132.0 R-Elbow 245.5 L-Hand 130.5 R-Hand 175.5 L-Hip 54.5 R-Hip 30.5 L-Knee 55.0 R-Knee 28.5 L-Foot 47.5 R-Foot 47.2 
+
+tations of human pose shape. This structural robustness under cross-environment evaluation provides the strongest validation of the PDDA component, consistent with the invariance guar-antee established in Theorem 3. 
+
+2) Per-Joint Error Analysis: Per-joint error analysis on MM-Fi, detailed in Table III, reveals that core skeletal struc-tures such as the pelvis and hip joints achieve the lowest errors at approximately 130 mm, benefiting from their large effective radar cross-section. Distal joints, including the wrists, display the highest variance at approximately 239 mm, reflecting the challenge of tracking rapidly articulating limbs with minimal reflective surfaces. Knee joints maintain accuracy comparable to proximal structures at approximately 133 mm, successfully capturing periodic lower-body dynamics. On the Person-in-WiFi-3D benchmark in Table IV, the model achieves exceptional precision in lower-body tracking with knee and hip errors below 65 mm, attributed to stable ground-level multipath propagation. Upper-limb estimation 
+
+Fig. 3: Real-world data collection setup showing the WiFi transceiver configuration and a synchronized camera system. One transmitter and three distributed receivers with three an-tennas each create nine independent CSI links, each capturing 30 OFDM subcarriers at 5.32 GHz. presents greater challenges, with the right elbow at 245.5 mm primarily due to occlusion angles during arm movement sequences, while overall hand tracking at approximately 175 mm remains within acceptable bounds for gesture recognition. The per-joint error profiles on both datasets are consistent with the physical intuition that joints with larger backscatter cross-sections and more stable propagation paths benefit most from the physics-guided representation. 
+
+C. Real-World Deployment Validation 1) Numerical Results: Table V presents zero-shot gener-alization results, where all methods are evaluated without additional training on the target environment. Our approach achieves 144.8 mm MPJPE and 105.5 mm PA-MPJPE, repre-senting 10.8% and 7.9% improvements over DT-Pose, which achieves 162.3 mm and 114.5 mm, respectively. PCK@50 reaches 93.3%. The PA-MPJPE advantage substantially ex-ceeds all baselines, demonstrating that the physics-informed representation learns transferable pose structure rather than memorizing environment-specific propagation patterns. 
+
+2) Per-Joint Analysis on Real-World Data: Table VI reveals that lower extremities demonstrate remarkable robustness, 10 
+
+TABLE V: Performance on the real-world deployment dataset. All methods are evaluated without additional training on the target environment.                     
+
+> Method PCK@20 PCK@50 MPJPE PA-MPJPE MetaFi++ [12] 64.3 85.6 189.7 129.2 HPE-Li [18] 70.5 89.9 173.5 119.7 DT-Pose [9] 71.8 90.1 162.3 114.5
+> Ours 74.6 93.3 144.8 105.5
+
+TABLE VI: Per-joint MPJPE on the real-world deployment dataset.                         
+
+> Joint MPJPE (mm) Joint MPJPE (mm) Head 138.5 Neck 132.0 R-Shoulder 129.5 R-Elbow 173.6 R-Wrist 210.0 L-Shoulder 128.5 L-Elbow 190.1 L-Wrist 250.0 R-Hip 116.5 L-Hip 114.0 R-Knee 112.5 R-Ankle 98.5 L-Knee 118.0 L-Ankle 115.5
+
+Fig. 4: Qualitative visualization on the real-world deployment dataset. The top row shows video frames, the second row shows ground truth, the third row shows our predictions with correct keypoints highlighted in red, and the bottom row shows baseline results with errors highlighted in green. Our method maintains anatomically plausible skeleton structures across diverse actions. with ankle and knee joints achieving errors between 98 and 120 mm despite significant environmental noise, validat-ing the practical utility for gait analysis. Error magnitudes increase progressively toward the distal upper extremities, with wrists exhibiting the largest deviations of 210 to 250 mm due to inherently weak backscatter from small cross-sectional areas, compounded by multipath interference and rapid Doppler shifts. The consistent per-joint error profile across controlled and uncontrolled environments confirms that the model learns anatomically meaningful representations rather than environment-specific artifacts. 
+
+Fig. 5: Visualization on the Person-in-WiFi-3D dataset. The top row shows ground truth, the middle row our predictions (red circles), and the bottom row baseline results (green circles). Our method accurately tracks single-arm and bilateral gestures, while the baseline struggles to separate superposed arm signals. 
+
+D. Qualitative Visualization 
+
+Fig. 4 presents qualitative comparisons across the three evaluation datasets. On the real-world deployment data, our method generates pose estimations that closely align with the ground truth, maintaining anatomically plausible skeleton structures across all eight action categories. The baseline produces notable errors in joint localization, particularly in distorted limb positions and unrealistic joint configurations, as highlighted by green circles. On the Person-in-WiFi-3D data in Fig. 5, our model correctly identifies unilateral and bilateral arm elevations, accurately capturing the V-shape configuration in the second column and the lateral extension in the third column, where the baseline underestimates the full range of motion. On the MM-Fi data shown in Fig. 6, which features highly dynamic actions, our approach successfully captures the simultaneous abduction of both arms and legs during jumping and maintains stable pelvic positioning during reaching movements, while the baseline exhibits collapsed poses with limbs appearing closer to the body. 
+
+E. Ablation Studies 1) Component Contribution: To validate the contribution of each architectural component, we conduct ablation ex-periments on MM-Fi protocols P3S1, P3S2, and P3S3 by systematically removing individual modules. As reported in Table VII, the full model consistently achieves the lowest MPJPE of 157.8 mm, 190.9 mm, and 335.5 mm across the three settings. The action branch contributes most significantly, as its removal causes 20.1% degradation on P3S1 (from 157.8 mm to 189.5 mm), consistent with the entropy reduction predicted by Theorem 2. PGMA provides 7.0% improvement by suppressing static environmental correlations, in agreement with Theorem 1. Removing the learnable mask or the fre-quency band decomposition yields moderate increases of 4.3 mm and 5.0 mm on P3S1, respectively, confirming that both components contribute complementary signal-preprocessing benefits. The environment adapter yields a consistent 2.8% 11 
+
+Fig. 6: Visualization on the MM-Fi dataset. The top row shows ground truth, the middle row our predictions (red circles), and the bottom row baseline results (green circles). Our approach captures full-body dynamics, including simultaneous limb abduction and asymmetric kicks, while the baseline produces collapsed or generic standing poses under high-amplitude motion. TABLE VII: Ablation study results (MPJPE, mm) across three MM-Fi evaluation protocols, showing the individual contribution of each component. Lower is better.                      
+
+> Variant P3S1 P3S2 P3S3
+> Ours (full model) 157.8 190.9 335.5
+> w/o Learnable Mask 164.5 196.2 342.8 w/o Freq. Decomposition 165.8 197.5 344.2 w/o Env. Adapter 162.2 194.7 347.4 w/o PGMA 168.9 198.3 358.4 w/o Action Branch 189.5 224.5 363.9
+
+improvement, validating the lightweight calibration strategy of PDDA and corroborating the invariance analysis of Theorem 3. 
+
+2) Robustness to Imperfect Action Guidance: Table VIII evaluates performance under controlled action classification error injection. Performance degrades gracefully as the error rate increases, consistent with the gated fusion design: when action predictions are uncertain, the gate increases reliance on the direct CSI-to-pose pathway. Critically, even at 60% action accuracy, the model achieves 186.8 mm MPJPE, still outperforming the 189.5 mm obtained without any semantic guidance. This confirms practical deployability under realistic action-recognition conditions and validates that the hierarchi-cal fusion exploits action semantics when reliable, and falls back to direct regression when guidance quality is insufficient. 
+
+F. Computational Complexity. 
+
+The proposed framework is designed to maintain practical deployment efficiency despite incorporating physics-guided modules. We calculate the computational complexity for both the training and inference stages. During training, the PGMA module introduces additional positional encodings and attention masks, which incur negligi-ble overhead relative to standard self-attention operations. For sequence length L = Nant × Nsub and model dimension dmodel ,computing query-key products requires L2dmodel multiply-accumulate operations per attention layer. With typical con-figuration where Nant = 3 and Nsub = 30 yielding L = 90 
+
+TABLE VIII: Robustness to imperfect action guidance (P3S1). Performance degrades gracefully, and even 60% action accu-racy surpasses the no-guidance baseline.                             
+
+> Action Acc. PCK@20 PCK@50 MPJPE PA-MPJPE
+> 100% 52.3 92.1 157.8 70.9 90% 48.5 90.8 164.9 76.9 80% 46.8 89.4 172.4 83.2 70% 45.2 88.2 179.6 89.2 60% 43.6 86.8 186.8 95.2 No guidance 39.8 85.3 189.5 102.3
+
+and dmodel = 256 , each attention layer requires approximately 2.07 million operations. With four encoder layers and eight attention heads, the total PGMA cost becomes approximately 66.3 million floating-point operations (mFLOPs). The HCAF, including dynamic convolution generation, ResNet processing, cross-attention, and joint-specific decoding, requires approxi-mately 350 mFLOPs. The PDDA adds minimal inference cost under 50 mFLOPs and employs environment-specific adapters comprising two linear layers, adding fewer than 3% to the parameter count. During inference, the model has 13.87 million parameters and requires 0.039 GFLOPs per inference. On an NVIDIA RTX 6000 GPU, the system achieves approximately 258.4 frames per second for pose estimation, demonstrating real-time processing capability. VII. C ONCLUSION 
+
+This paper presents a unified physics-informed deep learn-ing framework for WiFi-based 3D human pose estimation that grounds each architectural decision in the underlying electromagnetic propagation model. The core problem is formulated as a multi-objective optimization problem that jointly minimizes the pose regression error, the action clas-sification loss, and the contrastive domain alignment loss. The framework comprises three components: PGMA directly incorporates antenna geometry and multipath constraints into attention mechanisms, HCAF progressively integrates action-level semantic information to resolve the ill-posed CSI-to-pose mapping, and PDDA explicitly disentangles static environ-mental factors from dynamic human-induced signal variations to achieve cross-environmental robustness. Formal theoretical analysis confirms that physics-guided representations provably maximize mutual information with pose, that action condi-tioning provably reduces conditional pose entropy, and that the contrastive domain loss drives encoder features toward the ideal environment-invariant manifold. The framework achieves state-of-the-art performance on Person-in-WiFi-3D and MM-Fi and demonstrates strong zero-shot generalization on real-world deployment data. REFERENCES [1] H. Li, F. Zheng, Y. Liu, J. Xiong, W. Zhang, H. Hu, and H. Gao, “Adaptive skeleton prompt tuning for cross-dataset 3d human pose estimation,” in ICASSP 2025-2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) . IEEE, 2025, pp. 1–5. 12 
+
+[2] Y. Li, S. Yang, P. Liu, S. Zhang, Y. Wang, Z. Wang, W. Yang, and S.-T. Xia, “Tokenpose: Learning keypoint tokens for human pose estimation,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2021, pp. 11 313–11 322. [3] J. Zhang, D. Zhang, H. Yang, Y. Liu, J. Ren, X. Xu, F. Jia, and Y. Zhang, “Mvpose: Realtime multi-person pose estimation using motion vector on mobile devices,” IEEE Transactions on Mobile Computing , vol. 22, no. 6, pp. 3508–3524, 2022. [4] S. Wu, H. Zhang, Z. Liu, H. Chen, and Y. Jiao, “Enhancing human pose estimation in the internet of things via diffusion generative models,” 
+
+IEEE Internet of Things Journal , 2025. [5] C. Zheng, W. Wu, C. Chen, T. Yang, S. Zhu, J. Shen, N. Kehtarnavaz, and M. Shah, “Deep learning-based human pose estimation: A survey,” 
+
+ACM Computing Surveys , vol. 56, no. 1, pp. 1–37, 2023. [6] K. Deng, D. Zhao, Z. Zhang, S. Wang, W. Zheng, and H. Ma, “Midas++: Generating training data of mmwave radars from videos for privacy-preserving human sensing with mobility,” IEEE Transactions on Mobile Computing , vol. 23, no. 6, pp. 6650–6666, 2023. [7] Y. Gu, J. Chen, C. Chen, K. He, J. Ju, Y. Feng, R. Du, and C. Wu, “Csipose: Unveiling human poses using commodity wifi devices through the wall,” IEEE Transactions on Mobile Computing , 2025. [8] Q. Xia, J. Morales, Y. Huang, T. Hara, K. Wu, H. Oshima, M. Fukuda, Y. Namioka, and T. Maekawa, “Self-supervised learning for complex activity recognition through motif identification learning,” IEEE Trans-actions on Mobile Computing , vol. 24, no. 5, pp. 3779–3793, 2024. [9] Y. Chen, J. Guo, S. Guo, J. Zhou, and D. Tao, “Towards robust and realistic human pose estimation via wifi signals,” arXiv preprint arXiv:2501.09411 , 2025. [10] J. Liu, L. Zhang, Y. Li, H. Wang, and K. Wu, “Privacy-preserving human activity sensing: A survey,” Journal of Network and Computer Applications , vol. 214, p. 103602, 2024. [11] C. Hinojosa, M. M´ arquez, H. Arguello, E. Adeli, L. Fei-Fei, and J. C. Niebles, “Privhar: Recognizing human actions from privacy-preserving lens,” in European Conference on Computer Vision (ECCV) . Springer, 2022, pp. 373–390. [12] Y. Zhou, H. Huang, S. Yuan, H. Zou, L. Xie, and J. Yang, “Metafi++: Wifi-enabled transformer-based human pose estimation for metaverse avatar simulation,” IEEE Internet of Things Journal , vol. 10, no. 16, pp. 14 128–14 136, 2023. [13] Y. Wang, Y. Ren, Y. Chen, and J. Yang, “Wi-mesh: A wifi vision-based approach for 3d human mesh construction,” in Proceedings of the 20th ACM Conference on Embedded Networked Sensor Systems (SenSys) .ACM, 2022, pp. 362–376. [14] F. Wang, S. Zhou, S. Panev, J. Han, and D. Huang, “Person-in-wifi: Fine-grained person perception using wifi,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2019, pp. 5452–5461. [15] W. Jiang, H. Xue, C. Miao, S. Wang, S. Lin, C. Tian, S. Murali, H. Hu, Z. Sun, and L. Su, “Towards 3d human pose construction using wifi,” in Proceedings of the 26th Annual International Conference on Mobile Computing and Networking , 2020, pp. 1–14. [16] Y. Zhou, C. Xu, L. Zhao, A. Zhu, F. Hu, and Y. Li, “Csi-former: Pay more attention to pose estimation with wifi,” Entropy , vol. 25, no. 1, p. 20, 2022. [17] Y. Zhou, A. Zhu, C. Xu, F. Hu, and Y. Li, “Perunet: Deep signal channel attention in unet for wifi-based human pose estimation,” IEEE Sensors Journal , vol. 22, no. 20, pp. 19 750–19 760, 2022. [18] T. D. Gian, T. D. Lai, T. V. Luong, K.-S. Wong, and V.-D. Nguyen, “Hpe-li: Wifi-enabled lightweight dual selective kernel convolution for human pose estimation,” in European Conference on Computer Vision .Springer, 2024, pp. 93–111. [19] W. Li, H. Liu, H. Tang, and P. Wang, “Poseformerv2: Exploring frequency domain for efficient and robust 3d human pose estimation,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2023, pp. 8877–8886. [20] H. Ci, M. Ma, C. Wang, and Y. Wang, “Gfpose: Learning 3d human pose prior with gradient fields,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2023, pp. 4800– 4810. [21] J. Zhang, Z. Cai, Z. Yan, J. Liu, Z. Wang, and J. Zhang, “Mixste: Seq2seq mixed spatio-temporal encoder for 3d human pose estimation in video,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2023, pp. 13 232–13 242. [22] A. Newell, K. Yang, and J. Deng, “Stacked hourglass networks for human pose estimation,” in European Conference on Computer Vision .Springer, 2016, pp. 483–499. [23] K. Sun, B. Xiao, D. Liu, and J. Wang, “Deep high-resolution repre-sentation learning for human pose estimation,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2019, pp. 5693–5703. [24] J.-H. Shan, T. Liu, J. Wang, W. Li, and J. Liu, “Diffpose: Toward more reliable 3d pose estimation,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 46, no. 11, pp. 7491–7506, 2024. [25] A. Y. Radwan, M. Yildirim, N. Hasanzadeh, H. Tabassum, and S. Valaee, “A tutorial-cum-survey on self-supervised learning for wi-fi sensing: Trends, challenges, and outlook,” IEEE Communications Surveys & Tutorials , pp. 1–1, 2025. [26] Y. Ganin, E. Ustinova, H. Ajakan, P. Germain, H. Larochelle, F. Lavio-lette, M. Marchand, and V. Lempitsky, “Domain-adversarial training of neural networks,” Journal of Machine Learning Research , vol. 17, no. 1, pp. 2096–2030, 2016. [27] E. Tzeng, J. Hoffman, K. Saenko, and T. Darrell, “Adversarial discrim-inative domain adaptation,” in Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , 2017, pp. 7167–7176. [28] J. Xu, T. Takano, K. Nakata, and K. Nishino, “Self-supervised 3d human pose estimation in static video via neural rendering,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2023, pp. 10 825–10 834. [29] C. Chen, G. Zhou, and Y. Lin, “Cross-domain wifi sensing with channel state information: A survey,” ACM Computing Surveys , vol. 55, no. 11, pp. 1–37, 2023. [30] I. Ahmad, A. Ullah, and W. Choi, “Wifi-based human sensing with deep learning: Recent advances, challenges, and opportunities,” IEEE Open Journal of the Communications Society , vol. 5, pp. 3595–3623, 2024. [31] K. Yan, F. Wang, B. Qian, H. Ding, J. Han, and X. Wei, “Person-in-wifi 3d: End-to-end multi-person 3d pose estimation with wi-fi,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 969–978. [32] J. Yang, H. Huang, Y. Zhou, X. Chen, Y. Xu, S. Yuan, H. Zou, C. X. Lu, and L. Xie, “Mm-fi: Multi-modal non-intrusive 4d human dataset for versatile wireless sensing,” in Advances in Neural Information Processing Systems , vol. 36, 2023. [33] C. Tang, W. Li, S. Vishwakarma, F. Shi, S. Julier, and K. Chetty, “Mdpose: Human skeletal motion reconstruction using wifi micro-doppler signatures,” IEEE Transactions on Aerospace and Electronic Systems , vol. 60, no. 1, pp. 157–167, 2023. [34] C. Yin, X. Miao, J. Chen, H. Jiang, J. Yang, Y. Zhou, M. Wu, and Z. Chen, “Powerskel: A device-free framework using csi signal for human skeleton estimation in power station,” IEEE Internet of Things Journal , vol. 11, no. 11, pp. 20 165–20 177, 2024.
