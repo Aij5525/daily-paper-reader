@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-08-26</span>
+      <span class="dpr-home-dashboard-kicker">2026-08-28</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 4 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>2</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>10</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-26 22:04:49 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-28 03:06:07 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读2篇、速读2篇，聚焦无线通信与感知前沿。最值得关注的是Transformer实现多接收器无导频Wi-Fi解码（9.0分），以及光智能反射面提升VLC信道估计（8.0分）。建议普通读者优先了解这两项技术的实用场景与性能优势。</p>
+<p>今日共处理16篇论文，精读6篇、速读10篇，核心聚焦6G通信与语义通信前沿。最值得关注的是利用预训练视觉Transformer的Token化语义通信，以及面向多用户感知的6G网络新范式。建议优先精读这两篇高分论文，可快速把握未来无线网络感知与智能传输的关键趋势。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">2 篇</strong>
+    <strong class="dpr-home-dashboard-count">6 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A Transformer for Joint Multi-Receiver Pilotless Wi-Fi Decoding">A Transformer for Joint Multi-Receiver Pilotless Wi-Fi Decoding</span></li><li><span class="dpr-home-dashboard-paper-title" title="Impact of Optical Reconfigurable Intelligent Surfaces on Channel Estimation for VLC Systems">Impact of Optical Reconfigurable Intelligent Surfaces on Channel Estimation for VLC Systems</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Token-Oriented Semantic Communication with Pretrained Vision Transformers">Token-Oriented Semantic Communication with Pretrained Vision Transformers</span></li><li><span class="dpr-home-dashboard-paper-title" title="Multi-UE Networked Sensing: A New Paradigm for 6G Perceptive Mobile Networks">Multi-UE Networked Sensing: A New Paradigm for 6G Perceptive Mobile Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="Agentic Autoresearch for Cell-Edge Power Control: Radically Redefining the Researcher&#x27;s Role">Agentic Autoresearch for Cell-Edge Power Control: Radically Redefining the Researcher&#x27;s Role</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">2 篇</strong>
+    <strong class="dpr-home-dashboard-count">10 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks">Edge-Native Embodied Intelligence for Action-Aware Wireless Edge Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings">Physics-Informed WiFi Sensing for Robust 3D Human Pose Estimation in Mobile and Cross-Environment Settings</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Lightweight AI for UAV-Mounted RIS: An Overview">Lightweight AI for UAV-Mounted RIS: An Overview</span></li><li><span class="dpr-home-dashboard-paper-title" title="Throughput Maximization for MapReduce-Based Collaborative Computing over Energy-Harvesting Wireless Devices">Throughput Maximization for MapReduce-Based Collaborative Computing over Energy-Harvesting Wireless Devices</span></li><li><span class="dpr-home-dashboard-paper-title" title="Semi-Blind Channel Estimation for Dynamic NTN Systems via Spiked Random Matrix Theory">Semi-Blind Channel Estimation for Dynamic NTN Systems via Spiked Random Matrix Theory</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>10</strong></span></div>
 </section>
 </div>
 

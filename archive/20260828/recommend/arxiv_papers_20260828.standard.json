@@ -1,0 +1,643 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-28T02:57:57.897888+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 12,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 10,
+    "quick_skim_target": 11,
+    "quick_selected": 10
+  },
+  "deep_dive": [
+    {
+      "id": "2608.25410v1",
+      "source": "arxiv",
+      "title": "Token-Oriented Semantic Communication with Pretrained Vision Transformers",
+      "abstract": "Token communications realize the semantic communication principle at the granularity of transformer tokens, providing a promising direction for client--server collaborative inference in resource-constrained edge systems. However, directly transmitting token embeddings presents two practical challenges: substantial communication cost and limited interoperability across model-specific token embedding spaces. To address these challenges, we propose a \\emph{token-oriented} semantic communication framework. In this framework, token-level task relevance determines which compressed image latents are transmitted, enabling token-granular transmission without directly transmitting token embeddings. The framework is modular, coordinating three pretrained components---a lightweight client-side vision transformer (ViT), a learned image compression (LIC) model, and a large server-side ViT---without end-to-end training. The key enabler is the one-to-one spatial alignment between ViT patch tokens and the LIC latent vectors, which allows token-level task relevance to directly determine which latent vectors are transmitted. Building on this alignment, token-aligned LIC selectively transmits task-relevant latents, layer-selective attention rollout estimates token relevance from a selected range of attention layers in a single forward pass, and surrogate token substitution adapts the frozen server model by optimizing a single learnable token. Experiments on ImageNet show that the proposed framework achieves a more favorable rate--accuracy trade-off than recent semantic communication schemes, hand-crafted codecs, and task-agnostic LIC models.",
+      "authors": [
+        "Jiwoong Im",
+        "Minwoo Kim",
+        "Jaeho Lee",
+        "Yo-Seb Jeon",
+        "Yongjune Kim"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-08-26T06:13:45+00:00",
+      "link": "https://arxiv.org/pdf/2608.25410v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Transformer tokens and pretrained vision transformers for semantic communication",
+      "llm_evidence_cn": "利用Transformer令牌与预训练视觉Transformer实现语义通信，属于Transformer在无线信号处理中的应用",
+      "llm_evidence": "利用Transformer令牌与预训练视觉Transformer实现语义通信，属于Transformer在无线信号处理中的应用",
+      "canonical_evidence": "利用Transformer令牌与预训练视觉Transformer实现语义通信，属于Transformer在无线信号处理中的应用",
+      "llm_tldr_en": "Proposes a token-oriented semantic communication framework using pretrained vision transformers, transmitting task-relevant compressed image latents without sharing token embeddings, enabling efficient edge inference.",
+      "llm_tldr_cn": "该文针对边缘客户端与服务器协作推理中直接传输Transformer令牌嵌入成本高且跨模型不互通的问题，提出面向令牌的语义通信框架。它依据令牌级任务相关性选择传输压缩图像潜变量，实现令牌粒度传输而无需暴露原始令牌嵌入。框架模块化协调多个预训练视觉Transformer组件，在保持模型互操作性的同时大幅降低通信开销。与预训练Transformer结合的新范式为资源受限边缘智能提供了高效可行的语义通信方案。",
+      "llm_tldr": "该文针对边缘客户端与服务器协作推理中直接传输Transformer令牌嵌入成本高且跨模型不互通的问题，提出面向令牌的语义通信框架。它依据令牌级任务相关性选择传输压缩图像潜变量，实现令牌粒度传输而无需暴露原始令牌嵌入。框架模块化协调多个预训练视觉Transformer组件，在保持模型互操作性的同时大幅降低通信开销。与预训练Transformer结合的新范式为资源受限边缘智能提供了高效可行的语义通信方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.25597v1",
+      "source": "arxiv",
+      "title": "Multi-UE Networked Sensing: A New Paradigm for 6G Perceptive Mobile Networks",
+      "abstract": "Networked sensing, which jointly exploits observations from multiple distributed nodes, is essential for unlocking the full sensing potential of integrated sensing and communications (ISAC). This article introduces multi-UE sensing, a new networked sensing paradigm for future perceptive mobile networks that exploits the correlated sensing observations naturally arising from distributed user equipment devices (UEs) interacting with common targets. Representative uplink, downlink, and hybrid sensing architectures are presented, together with a multi-view signal processing framework encompassing synchronization, correlation-aware parameter estimation, and sensing fusion. Key open challenges, including correlation modelling, target association, sensing information compression, and communication-sensing co-optimization, are also discussed.",
+      "authors": [
+        "J. Andrew Zhang",
+        "Jingying Bao",
+        "Kai Wu",
+        "Henk Wymeersch",
+        "Christos Masouros",
+        "Y. Jay Guo"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-26T10:10:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.25597v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-UE networked sensing for ISAC in 6G perceptive mobile networks",
+      "llm_evidence_cn": "面向6G感知移动网络的多用户设备网络感知通信感知一体化",
+      "llm_evidence": "面向6G感知移动网络的多用户设备网络感知通信感知一体化",
+      "canonical_evidence": "面向6G感知移动网络的多用户设备网络感知通信感知一体化",
+      "llm_tldr_en": "This article introduces multi-UE networked sensing, a new ISAC paradigm exploiting correlated observations from distributed user devices, with uplink/downlink/hybrid architectures and a multi-view processing framework for 6G perceptive networks.",
+      "llm_tldr_cn": "本文提出多用户设备(UE)网络感知范式，利用多个分布式UE对同一目标感知的关联观测实现通信感知一体化(ISAC)的感知增强。系统给出了上/下行与混合感知架构，以及包含同步、相关感知参数估计与感知融合的多视角信号处理框架，并讨论了相关性建模、目标关联等开放挑战。该工作为6G感知移动网络提供了新的设计思路。",
+      "llm_tldr": "本文提出多用户设备(UE)网络感知范式，利用多个分布式UE对同一目标感知的关联观测实现通信感知一体化(ISAC)的感知增强。系统给出了上/下行与混合感知架构，以及包含同步、相关感知参数估计与感知融合的多视角信号处理框架，并讨论了相关性建模、目标关联等开放挑战。该工作为6G感知移动网络提供了新的设计思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.26093v1",
+      "source": "arxiv",
+      "title": "Agentic Autoresearch for Cell-Edge Power Control: Radically Redefining the Researcher's Role",
+      "abstract": "Designing machine learning algorithms for wireless resource management is labour-intensive: the architecture, the loss function and the training recipe are all specified by hand. We demonstrate that this design layer can be surrendered to an autonomous agent in its entirety. We adopt the autoresearch protocol, in which an AI coding agent edits a training script, runs a fixed-budget experiment, and retains or discards the change according to a single immutable metric. We grant the agent authority over the architecture family, the input representation, the output parameterization, the loss function and the task-sampling law, and set it a target chosen for its difficulty: sum-least-percentile-rate power control across a multicell network. The formulation targets cell-edge throughput and is non-convex, non-smooth and strongly NP-hard away from its max-min vertex. Safeguards render the results trustworthy: a hash-pinned evaluator, an enforced inference contract and a pre-registered falsifier per experiment. In eighty-one unattended experiments over twenty-six hours, the agent reached $99.5\\%$ of a converged minorization-maximization reference in one fixed-cost inference pass, at roughly $600\\times$ lower inference cost, closing $94\\%$ of the gap from its first working architecture, with one parameter set serving every network size and percentile target. It recovered provable structure rather than tuned constants: the output parameterization it discovered reproduces the exact max-min-optimal allocation at the minimum percentile, for every value of the trained weights.",
+      "authors": [
+        "Ahmad Khan",
+        "Akram Bin Sediq",
+        "Sara Azadegi Naeini",
+        "Raviraj S. Adve"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.IT",
+        "eess.SY"
+      ],
+      "published": "2026-08-26T17:56:00+00:00",
+      "link": "https://arxiv.org/pdf/2608.26093v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Agentic ML for wireless power control; wireless system design via machine learning.",
+      "llm_evidence_cn": "智能体驱动的无线功率控制机器学习；直接对应无线通信系统的机器学习设计。",
+      "llm_evidence": "智能体驱动的无线功率控制机器学习；直接对应无线通信系统的机器学习设计。",
+      "canonical_evidence": "智能体驱动的无线功率控制机器学习；直接对应无线通信系统的机器学习设计。",
+      "llm_tldr_en": "An AI coding agent autonomously designs ML algorithms for cell-edge power control, editing architecture, loss, and training recipe to maximize sum-least-percentile rate across multicell networks.",
+      "llm_tldr_cn": "针对无线资源管理算法设计依赖人工的问题，论文提出将设计流程完全交给自主智能体。该智能体通过自动编辑训练脚本并运行固定预算实验，可同时决定网络结构、损失函数与训练规则等关键选择。实验以多个小区的和最小百分位速率功率控制为目标，验证了全自动设计能够替代人工调参，大幅降低研究者的设计负担。",
+      "llm_tldr": "针对无线资源管理算法设计依赖人工的问题，论文提出将设计流程完全交给自主智能体。该智能体通过自动编辑训练脚本并运行固定预算实验，可同时决定网络结构、损失函数与训练规则等关键选择。实验以多个小区的和最小百分位速率功率控制为目标，验证了全自动设计能够替代人工调参，大幅降低研究者的设计负担。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.26727v1",
+      "source": "arxiv",
+      "title": "Amortized Neural SVD for XL-MIMO: Structure-Guided Factor Prediction for Beamforming and Multi-Stream Utility",
+      "abstract": "Singular value decomposition (SVD) is a core operation in multiple-input multiple-output (MIMO) beamforming, but the cubic complexity of standard SVD routines can lead to a major latency bottleneck as array dimensions scale to extremely large sizes. This paper presents a fully learned neural operator that avoids explicit SVD computation by directly mapping channel matrices to truncated low-rank factors for precoder and combiner design. In contrast to iterative numerical solvers and algorithm-unrolled networks, the proposed structure-aware model, termed SVDNet, produces these factors in a single forward pass at inference, shifting the per-instance decomposition cost to offline training. The model also includes lightweight constraints to enforce basic algebraic properties required by beamforming, such as semi-unitarity of the singular vectors and nonnegative singular values, without invoking matrix factorization kernels. Experiments on extremely large-scale MIMO channels with matrix dimensions up to 512*512 show that the proposed approach achieves spectral efficiency close to exact SVD-based beamforming in single-stream transmission and consistently improves multi-stream sum-rate over representative learned baselines, indicating good scalability for low-latency wireless processing.",
+      "authors": [
+        "Yue Zhang",
+        "Yiyan Zhang",
+        "Ruijin Sun",
+        "Honggang Jia",
+        "Chen Gong"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-27T07:19:57+00:00",
+      "link": "https://arxiv.org/pdf/2608.26727v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Neural operator for MIMO beamforming maps channel matrices to low-rank factors, improving wireless system design",
+      "llm_evidence_cn": "针对MIMO波束成形的神经算子直接将信道矩阵映射为低秩因子，属于无线通信系统设计的机器学习方法",
+      "llm_evidence": "针对MIMO波束成形的神经算子直接将信道矩阵映射为低秩因子，属于无线通信系统设计的机器学习方法",
+      "canonical_evidence": "针对MIMO波束成形的神经算子直接将信道矩阵映射为低秩因子，属于无线通信系统设计的机器学习方法",
+      "llm_tldr_en": "SVD is a latency bottleneck for XL-MIMO beamforming. SVDNet, a fully learned neural operator, maps channel matrices to truncated low-rank factors in a single forward pass, avoiding explicit decomposition and supporting precoder/combiner design and multi-stream utility.",
+      "llm_tldr_cn": "大型MIMO波束成形依赖奇异值分解，但标准SVD在高维阵列下计算复杂、时延高。论文提出SVDNet，一种全学习的神经算子，将信道矩阵直接映射为截断低秩因子，推理时单次前向即可得到预编码与合并器。相比迭代数值求解与展开网络，该方法将计算负担转移到离线训练，从而加速大规模MIMO波束成形设计，并提升多流效用。",
+      "llm_tldr": "大型MIMO波束成形依赖奇异值分解，但标准SVD在高维阵列下计算复杂、时延高。论文提出SVDNet，一种全学习的神经算子，将信道矩阵直接映射为截断低秩因子，推理时单次前向即可得到预编码与合并器。相比迭代数值求解与展开网络，该方法将计算负担转移到离线训练，从而加速大规模MIMO波束成形设计，并提升多流效用。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.27041v1",
+      "source": "arxiv",
+      "title": "Radio Imaging and Resource Allocation in Frugal Multistatic D-MIMO ISAC Systems",
+      "abstract": "Emerging integrated sensing and communication (ISAC) systems based on distributed MIMO (D-MIMO) enable radio imaging by exploiting spatial diversity across multiple access points (APs). However, joint sensing and communication introduce mutual interference between communication and sensing signals. In this paper, we propose a downlink D-MIMO ISAC framework that allocates orthogonal subcarriers to sensing and communication to eliminate inter-function interference. We consider a phase-coherent architecture in which single-antenna APs serve communication user equipment (UEs) while constructing a reflectivity image of the environment. We develop a two-timescale resource allocation framework that minimizes reconstructed-image entropy subject to a communication spectral-efficiency (SE) constraint. The proposed design follows a communication-centric policy, where imaging uses the resources left after satisfying the communication requirement. The long-timescale optimization (LTO) determines AP modes and subcarrier assignment, including the partitioning between communication and sensing and the allocation of sensing subcarriers among transmit APs, using synthetic scenarios with random UE and target distributions. The short-timescale optimization (STO) adapts the communication-sensing power-splitting factor to preserve the SE constraint in the current scenario. Numerical results show that the proposed orthogonal subcarrier allocation achieves a superior sensing-communication trade-off compared with conventional superposition, where sensing and communication share the same subcarriers. Finally, we evaluate coherent and non-coherent imaging receivers and identify the synchronization regimes in which each approach provides better imaging and localization performance.",
+      "authors": [
+        "Sauradeep Dey",
+        "Musa Furkan Keskin",
+        "Dario Tagliaferri",
+        "Gonzalo Seco-Granados",
+        "Henk Wymeersch"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-27T12:28:58+00:00",
+      "link": "https://arxiv.org/pdf/2608.27041v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Integrated sensing and communication (ISAC) with radio imaging in D-MIMO wireless networks",
+      "llm_evidence_cn": "分布式MIMO通感一体化系统中的无线电成像与资源分配",
+      "llm_evidence": "分布式MIMO通感一体化系统中的无线电成像与资源分配",
+      "canonical_evidence": "分布式MIMO通感一体化系统中的无线电成像与资源分配",
+      "llm_tldr_en": "Proposes a downlink D-MIMO ISAC framework with orthogonal subcarrier allocation to eliminate communication-sensing interference, and a two-timescale resource allocation minimizing image entropy.",
+      "llm_tldr_cn": "针对分布式MIMO通感一体化系统中通信与感知信号相互干扰的难题，论文提出一种下行链路D-MIMO ISAC框架，将正交子载波分别分配给感知与通信以消除互干扰，并利用单天线接入点组成相位相干架构实现环境反射成像。在此基础上设计双时间尺度资源分配算法，以重建图像熵最小化为目标协调感知与通信性能。该框架为多基站分布式通感一体化系统的高效无线资源调度提供了切实可行的方案。",
+      "llm_tldr": "针对分布式MIMO通感一体化系统中通信与感知信号相互干扰的难题，论文提出一种下行链路D-MIMO ISAC框架，将正交子载波分别分配给感知与通信以消除互干扰，并利用单天线接入点组成相位相干架构实现环境反射成像。在此基础上设计双时间尺度资源分配算法，以重建图像熵最小化为目标协调感知与通信性能。该框架为多基站分布式通感一体化系统的高效无线资源调度提供了切实可行的方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.24974v1",
+      "source": "arxiv",
+      "title": "Clearing the Underbrush: AI-Enhanced RF Interference Suppression",
+      "abstract": "AI-based structured interference rejection has grown more popular because deep learning approaches can outperform traditional methods by jointly considering the signal of interest (SOI) and the signal mixture (SOI plus interference). This work builds on a previous AI-enabled approach utilizing autoregressive transformer-based models by adding a Finite Scalar Quantization (FSQ) tokenizer layer which aims to improve the interference rejection performance while keeping overall latency to a minimum. Additionally, we experiment with other inference optimization techniques with the goal of speeding up inference without much accuracy loss. We explore this space with an experiment where the SOI is a digitally modulated radio frequency (RF) signal and the structured interference is a digital television signal, an extremely common type of Orthogonal Frequency-Division Multiplexing (OFDM) transmission. Our results achieve low latency and increased interference rejection over traditional techniques and prior work with other AI-enabled methods. We demonstrate the benefits of the AI-enabled approaches via audio metrics such as Perceptual Evaluation of Speech Quality (PESQ). Additionally, we explore a variety of applications and detail how our interference rejection algorithm may be used in operationally-relevant scenarios.",
+      "authors": [
+        "Rahul Jain",
+        "Pierre Trepagnier",
+        "Rick Gentile",
+        "Joey Botero",
+        "Alexia Schulz"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "eess.SP"
+      ],
+      "published": "2026-08-25T14:55:46+00:00",
+      "link": "https://arxiv.org/pdf/2608.24974v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "transformer-based RF interference suppression in wireless signal processing",
+      "llm_evidence_cn": "基于Transformer的射频干扰抑制无线信号处理",
+      "llm_evidence": "基于Transformer的射频干扰抑制无线信号处理",
+      "canonical_evidence": "基于Transformer的射频干扰抑制无线信号处理",
+      "llm_tldr_en": "This work enhances an autoregressive transformer-based RF interference suppressor by introducing an FSQ tokenizer layer, reducing latency while maintaining accuracy, validated on digitally modulated radio signals.",
+      "llm_tldr_cn": "针对射频干扰抑制任务，本文在已有的自回归Transformer模型基础上引入有限标量量化(FSQ)分词器层，以减少推理延迟并提升干扰抑制性能。实验在数字调制射频信号上验证了方法有效性，同时探索多种推理优化技术以在精度损失可控的情况下加速推理。该工作展示了Transformer架构在无线信号处理干扰抑制中的应用价值。",
+      "llm_tldr": "针对射频干扰抑制任务，本文在已有的自回归Transformer模型基础上引入有限标量量化(FSQ)分词器层，以减少推理延迟并提升干扰抑制性能。实验在数字调制射频信号上验证了方法有效性，同时探索多种推理优化技术以在精度损失可控的情况下加速推理。该工作展示了Transformer架构在无线信号处理干扰抑制中的应用价值。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.25402v1",
+      "source": "arxiv",
+      "title": "Lightweight AI for UAV-Mounted RIS: An Overview",
+      "abstract": "Unmanned Aerial Vehicles (UAV)-mounted Reconfigurable Intelligent Surfaces (RIS) have emerged as a promising architecture for enhancing wireless coverage, spectral efficiency, and energy performance in 6G networks. By combining programmable electromagnetic wave manipulation with aerial mobility, UAV-RIS systems enable dynamic blockage mitigation, adaptive beamforming, and flexible deployment across terrestrial, maritime, and satellite-integrated environments. However, joint optimization of UAV trajectory, RIS phase configuration, and resource allocation incurs high computational complexity, which is incompatible with the strict energy and onboard processing constraints of UAV platforms. Lightweight AI techniques offer practical solutions to this challenge. Hence, this paper provides a comprehensive overview of lightweight AI techniques for UAV-mounted RIS systems, including Reinforcement Learning (RL), meta-learning, Federated Learning (FL), Multi-Armed Bandits (MAB), and energy-aware optimization. We present a detailed taxonomy and comparative analysis of existing work, highlight computational-energy trade-offs, and identify open research challenges for scalable, energy-efficient airborne intelligent surfaces. Furthermore, we present a case study demonstrating the effect of MAB schemes on throughput and energy efficiency in UAV-mounted RIS.",
+      "authors": [
+        "Sherief Hashima",
+        "Kohei Hatano",
+        "Eiji Takimoto",
+        "Mohamed Rihan",
+        "Basem. M. Elhalawany",
+        "Hamada Rizk"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-08-26T06:03:32+00:00",
+      "link": "https://arxiv.org/pdf/2608.25402v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Uses lightweight AI for UAV-mounted RIS wireless system design",
+      "llm_evidence_cn": "面向UAV-RIS无线系统设计使用轻量级AI",
+      "llm_evidence": "面向UAV-RIS无线系统设计使用轻量级AI",
+      "canonical_evidence": "面向UAV-RIS无线系统设计使用轻量级AI",
+      "llm_tldr_en": "An overview of lightweight AI techniques for optimizing UAV-mounted RIS in 6G, addressing high complexity of joint trajectory and phase optimization.",
+      "llm_tldr_cn": "针对无人机搭载可重构智能表面（UAV-RIS）在6G中的应用，联合优化无人机轨迹、RIS相位与资源分配带来极高计算复杂度。本文综述了轻量级AI技术如何以低能耗、低算力方式实现动态阻塞缓解、自适应波束赋形与灵活部署。相关工作表明轻量级AI能在严格机载约束下有效提升系统性能，为UAV-RIS的实际部署提供可行路径。",
+      "llm_tldr": "针对无人机搭载可重构智能表面（UAV-RIS）在6G中的应用，联合优化无人机轨迹、RIS相位与资源分配带来极高计算复杂度。本文综述了轻量级AI技术如何以低能耗、低算力方式实现动态阻塞缓解、自适应波束赋形与灵活部署。相关工作表明轻量级AI能在严格机载约束下有效提升系统性能，为UAV-RIS的实际部署提供可行路径。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.22492v1",
+      "source": "arxiv",
+      "title": "Estimating Timing Advance for Sub-THz Distributed Systems from Sub-10 GHz Channel State Information",
+      "abstract": "Dual-band wireless architectures transmit the control information over the sub-10 GHz while reserving sub-THz for high data rate links, offering notable capacity gains. However, a critical bottleneck in such systems is timing synchronization. Due to the narrow beams of the sub-THz radio units (RUs), when the dual-band user equipment (UE) rotates or moves, it becomes necessary to switch the transmission between the sub-THz RUs. This switching requires recalibrating the timing of uplink (UL) and downlink (DL) transmissions to prevent communication disruptions. Moreover, for sub-THz RUs, the method introduces significant overhead and latency, especially when switches are frequent. Leveraging the reliable sub-10 GHz band offers greater resilience to UE mobility, making it suitable for control signalling. Thus, in this paper, we propose a deep learning-based algorithm that infers the propagation delay from the sub-THz RUs to the UE using sub-10 GHz channel characteristics. The inferred delay is used for calculating the timing advance for UL transmissions without the need for two-way synchronization. Simulation results show that the RU switch can be made seamless at the physical layer, without incurring any synchronization-related latency.",
+      "authors": [
+        "Nishant Gupta",
+        "Muris Sarajlic",
+        "Erik G. Larsson"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-23T16:22:38+00:00",
+      "link": "https://arxiv.org/pdf/2608.22492v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "estimating sub-THz timing advance from sub-10 GHz channel state information",
+      "llm_evidence_cn": "利用sub-10 GHz信道状态信息估计sub-THz定时提前量",
+      "llm_evidence": "利用sub-10 GHz信道状态信息估计sub-THz定时提前量",
+      "canonical_evidence": "利用sub-10 GHz信道状态信息估计sub-THz定时提前量",
+      "llm_tldr_en": "This paper estimates timing advance for sub-THz distributed systems from sub-10 GHz channel state information, avoiding frequent sub-THz RU switching overhead and reducing latency in dual-band wireless architectures.",
+      "llm_tldr_cn": "面向双频段无线系统中sub-THz频段定时同步开销大的问题，本文提出利用可靠的sub-10 GHz信道状态信息来估计定时提前量，以减少sub-THz无线单元切换时的重校准开销。该方法利用低频段CSI与高频段链路的空间相关性，避免频繁高频波束切换带来的时延与信令负担。相关工作为双频段协同通信提供了低成本同步方案。",
+      "llm_tldr": "面向双频段无线系统中sub-THz频段定时同步开销大的问题，本文提出利用可靠的sub-10 GHz信道状态信息来估计定时提前量，以减少sub-THz无线单元切换时的重校准开销。该方法利用低频段CSI与高频段链路的空间相关性，避免频繁高频波束切换带来的时延与信令负担。相关工作为双频段协同通信提供了低成本同步方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.21859v1",
+      "source": "arxiv",
+      "title": "Sensing-Assisted Anti-Blockage Pinching-Antenna Systems For Indoor Immersive Communications",
+      "abstract": "Indoor immersive communication, empowered by millimeter-wave (mmWave) technologies, is a key enabler for 6G-ready Extended Reality (XR) applications. However, mmWave signals are highly susceptible to dynamic obstacles (e.g., moving humans), leading to frequent line-of-sight (LoS) blockages. Moreover, although massive-antenna systems have been widely adopted indoors, their fixed-site deployment limits their effectiveness in wide and dynamic indoor environments such as factories and offices. To address these challenges, we present a sensing-assisted anti-blockage Pinching-Antenna Systems (PASS) solution for indoor immersive communications. By mechanically moving a pinching antenna (PA) along a dielectric waveguide, PASS can flexibly extend the service coverage and re-establish LoS links in wide indoor scenarios. Besides, our solution integrates sensing capabilities into PASS, where the PA executes controlled micro-movements to transmit and receive chirp radar signals, enabling real-time sensing of obstacles. Based on the sensing results, we design an anti-blockage PA movement strategy that detects blocked regions along the waveguide and proactively moves the PA to safe zones. Accordingly, the whole system performs a cycled \"sensing-movement-communication\" workflow with each cycle completed in a limited frame to ensure both timely sensing and communication. To ensure system efficiency, a closed-form pre-optimized solution of sensing parameters is derived under practical mechanical and sensing constraints. Extensive experiments show that our solution reduces blockage-induced outages to near-zero while sustaining the effective throughput required by indoor immersive applications.",
+      "authors": [
+        "Yi Hong",
+        "Yalin Liu",
+        "Yulei Wang",
+        "Yaru Fu"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-22T09:08:26+00:00",
+      "link": "https://arxiv.org/pdf/2608.21859v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Sensing-assisted anti-blockage system for mmWave indoor communications, combining sensing information with communication to overcome blockages",
+      "llm_evidence_cn": "利用感知辅助抗阻塞的毫米波室内通信系统，将感知与通信结合以克服阻塞问题",
+      "llm_evidence": "利用感知辅助抗阻塞的毫米波室内通信系统，将感知与通信结合以克服阻塞问题",
+      "canonical_evidence": "利用感知辅助抗阻塞的毫米波室内通信系统，将感知与通信结合以克服阻塞问题",
+      "llm_tldr_en": "To overcome dynamic blockages in mmWave indoor XR communications, PASS uses sensing to guide mechanical movement of a pinching antenna along a dielectric waveguide, flexibly adjusting antenna location to maintain line-of-sight links.",
+      "llm_tldr_cn": "室内沉浸式通信依赖毫米波，但毫米波易受动态遮挡，且固定大规模天线在动态室内环境中效果有限。论文提出感知辅助抗阻塞的夹捏天线系统（PASS），通过沿介质波导机械移动夹捏天线来灵活调整天线位置，结合感知信息动态规避障碍，保障XR等6G应用的视距链路。这一方案将感知能力融入天线部署与移动策略，为动态室内环境下的毫米波通信提供了抗阻塞的新思路。",
+      "llm_tldr": "室内沉浸式通信依赖毫米波，但毫米波易受动态遮挡，且固定大规模天线在动态室内环境中效果有限。论文提出感知辅助抗阻塞的夹捏天线系统（PASS），通过沿介质波导机械移动夹捏天线来灵活调整天线位置，结合感知信息动态规避障碍，保障XR等6G应用的视距链路。这一方案将感知能力融入天线部署与移动策略，为动态室内环境下的毫米波通信提供了抗阻塞的新思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.25549v1",
+      "source": "arxiv",
+      "title": "Throughput Maximization for MapReduce-Based Collaborative Computing over Energy-Harvesting Wireless Devices",
+      "abstract": "This paper studies resource allocation for MapReduce-based collaborative computing over heterogeneous wireless devices powered by renewable energy harvesting. We formulate a long-run average throughput maximization problem that jointly optimizes computing load, phase time allocations, transmit power, and per-device energy consumption, subject to battery evolution, CPU frequency, and latency constraints. To solve this problem online without prior knowledge of channel states or energy arrivals, we propose a DDPG-CVX algorithm that couples Deep Deterministic Policy Gradient (DDPG) with convex programming. DDPG determines the per-slot energy budget for each device from observed battery and channel states; the remaining resource allocation variables are then resolved to global optimality by an embedded convex solver. This two-phase decomposition reduces the action-space dimensionality of DDPG while preserving per-slot solution quality. Simulations show that DDPG-CVX achieves 1.25$\\times$$\\sim$32.36$\\times$ the throughput of representative benchmarks.",
+      "authors": [
+        "Yuhang Li",
+        "Siqi Sun",
+        "Hongen Zheng",
+        "Xiaojing Chen",
+        "Shunqing Zhang",
+        "Yanzan Sun"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.DC"
+      ],
+      "published": "2026-08-26T09:02:19+00:00",
+      "link": "https://arxiv.org/pdf/2608.25549v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "DDPG-based resource allocation for wireless devices matches ML-driven wireless system design",
+      "llm_evidence_cn": "基于DDPG的无线设备资源分配，与机器学习驱动的无线系统设计相关",
+      "llm_evidence": "基于DDPG的无线设备资源分配，与机器学习驱动的无线系统设计相关",
+      "canonical_evidence": "基于DDPG的无线设备资源分配，与机器学习驱动的无线系统设计相关",
+      "llm_tldr_en": "This paper optimizes throughput of MapReduce-based collaborative computing over energy-harvesting wireless devices using a DDPG-CVX algorithm, jointly allocating computing load, power, and time.",
+      "llm_tldr_cn": "论文针对能量采集无线设备上基于MapReduce的协作计算，提出长期平均吞吐量最大化的资源分配问题，联合优化计算负载、时隙时间、发射功率与每设备能耗。为在线求解，提出DDPG-CVX算法，由DDPG根据电池与信道状态决定每时隙能量预算，并用凸优化求解其余变量。实验表明该方法无需信道与能量先验信息即可有效逼近最优吞吐量，为机器学习驱动的无线系统设计提供了实用范例。",
+      "llm_tldr": "论文针对能量采集无线设备上基于MapReduce的协作计算，提出长期平均吞吐量最大化的资源分配问题，联合优化计算负载、时隙时间、发射功率与每设备能耗。为在线求解，提出DDPG-CVX算法，由DDPG根据电池与信道状态决定每时隙能量预算，并用凸优化求解其余变量。实验表明该方法无需信道与能量先验信息即可有效逼近最优吞吐量，为机器学习驱动的无线系统设计提供了实用范例。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.25847v1",
+      "source": "arxiv",
+      "title": "Efficient DCT-Based Estimation and Compensation of Nonlinear Channels for OFDM Systems",
+      "abstract": "This paper proposes a maximum-likelihood (ML) framework for estimating nonlinear frequency-selective channels in orthogonal frequency-division multiplexing (OFDM) communication systems. The nonlinear distortions are modeled using a Discrete Cosine Transform (DCT)-based representation, which results in a well-conditioned estimation problem with favorable convergence properties. The proposed method combines a compact parameterization with low computational complexity, enabling fast adaptation and efficient real-time implementation. Numerical results show that the proposed channel estimation can be used for multiple nonlinear compensation methods and achieve near-ideal BER performance with very limited training overhead. This performance is maintained down to approximately 15 dB SNR in the presence of both amplitude and phase nonlinearities, and down to -10 dB when only amplitude distortions are present.",
+      "authors": [
+        "Marc Martinez-Gost",
+        "Ana Pérez-Neira",
+        "Miguel Ángel Lagunas"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-26T14:22:53+00:00",
+      "link": "https://arxiv.org/pdf/2608.25847v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "DCT-based nonlinear channel estimation for OFDM",
+      "llm_evidence_cn": "基于DCT的OFDM非线性信道估计",
+      "llm_evidence": "基于DCT的OFDM非线性信道估计",
+      "canonical_evidence": "基于DCT的OFDM非线性信道估计",
+      "llm_tldr_en": "Proposes an efficient DCT-based maximum-likelihood framework for estimating and compensating nonlinear frequency-selective OFDM channels with low complexity and near-ideal BER performance.",
+      "llm_tldr_cn": "非线性频率选择性信道的估计在OFDM系统中具有挑战性。提出基于最大似然的估计框架，使用离散余弦变换表示非线性失真，得到良态估计问题。该方法参数紧凑、计算复杂度低，支持多种非线性补偿方法，并可在极低训练开销下达到接近理想的误码率性能。为非线性信道建模与补偿提供高效实时解决方案。",
+      "llm_tldr": "非线性频率选择性信道的估计在OFDM系统中具有挑战性。提出基于最大似然的估计框架，使用离散余弦变换表示非线性失真，得到良态估计问题。该方法参数紧凑、计算复杂度低，支持多种非线性补偿方法，并可在极低训练开销下达到接近理想的误码率性能。为非线性信道建模与补偿提供高效实时解决方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.25694v1",
+      "source": "arxiv",
+      "title": "Semi-Blind Channel Estimation for Dynamic NTN Systems via Spiked Random Matrix Theory",
+      "abstract": "Semi-blind channel estimation offers an attractive tradeoff between pilot overhead and estimation accuracy in large-scale wireless systems. However, reliable channel acquisition becomes particularly challenging in highly dynamic environments such as non-terrestrial networks (NTNs), where rapidly varying channels and high system dimensionality significantly degrade the performance of conventional covariance-based estimators due to sampling noise. In this paper, we propose a robust semi-blind channel estimation framework for multi-user uplink systems operating in NTN systems. The proposed approach introduces an optimally regularized least-squares formulation that balances training-based information and blind subspace structure. By exploiting the spiked covariance model within a random matrix theory (RMT) framework, we derive a closed-form characterization of the resulting channel mean-squared error and obtain an analytically tractable design of the optimal regularization parameter. The resulting estimator is computationally efficient and particularly well suited to high-dimensional regimes. Simulation results under realistic Third Generation Partnership Project (3GPP) NTN channel models demonstrate substantial performance improvements over conventional semi-blind and training-based estimators.",
+      "authors": [
+        "Xue Zhang",
+        "Abla Kammoun",
+        "Mohamed-Slim Alouini"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-26T12:11:30+00:00",
+      "link": "https://arxiv.org/pdf/2608.25694v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Semi-blind channel estimation for dynamic NTN systems",
+      "llm_evidence_cn": "动态非地面网络系统的半盲信道估计",
+      "llm_evidence": "动态非地面网络系统的半盲信道估计",
+      "canonical_evidence": "动态非地面网络系统的半盲信道估计",
+      "llm_tldr_en": "Proposes a robust semi-blind channel estimation framework for dynamic NTN systems using optimally regularized least-squares, balancing training and blind subspace structure via spiked random matrix theory.",
+      "llm_tldr_cn": "非地面网络信道快速时变大维度特性使传统协方差估计性能下降。提出基于最优正则化最小二乘的半盲信道估计框架，融合训练信息与盲子空间结构。利用尖峰随机矩阵理论提升采样噪声鲁棒性。数值结果显示在大规模动态场景中显著提高信道估计精度。",
+      "llm_tldr": "非地面网络信道快速时变大维度特性使传统协方差估计性能下降。提出基于最优正则化最小二乘的半盲信道估计框架，融合训练信息与盲子空间结构。利用尖峰随机矩阵理论提升采样噪声鲁棒性。数值结果显示在大规模动态场景中显著提高信道估计精度。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.26844v1",
+      "source": "arxiv",
+      "title": "Are We Shooting Flies with Cannons? Trade-off Analysis for AI-based 5G Intrusion Detection",
+      "abstract": "The increasing adoption of Artificial Intelligence (AI) in network intrusion detection raises the question of whether complex and computationally expensive models are justified for this task. In this work, we investigate the trade-off between detection performance and computational cost for intrusion detection in 5G network telemetry. We compare traditional machine learning (ML) models, including XGBoost as a representative of tree ensemble, and TabNet for tabular deep neural network (DNN), with a large language model (LLM) used as a general-purpose intrusion detector. The LLM is evaluated under both zero-shot and few-shot prompting configurations. We evaluate the models in terms of detection performance, inference time, and CPU time as a proxy for energy efficiency. Using a relatively large available 5G dataset, we show that traditional ML models consistently achieve near-perfect detection performance with negligible inference time, while LLM-based approaches perform significantly worse and incur orders-of-magnitude higher CPU usage. Few-shot prompting improves recall, but at the cost of lower accuracy and further increased CPU time, without closing the performance gap. These findings indicate that, for tabular intrusion detection in 5G networks, XGBoost offers a substantially better performance-cost trade-off than DNNs and LLMs, highlighting the importance of selecting models based on task suitability rather than increasing complexity.",
+      "authors": [
+        "Federica Uccello",
+        "Simin Nadjm-Tehrani"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-08-27T09:13:46+00:00",
+      "link": "https://arxiv.org/pdf/2608.26844v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Evaluates LLM for intrusion detection in 5G networks",
+      "llm_evidence_cn": "在5G网络入侵检测中评估大语言模型",
+      "llm_evidence": "在5G网络入侵检测中评估大语言模型",
+      "canonical_evidence": "在5G网络入侵检测中评估大语言模型",
+      "llm_tldr_en": "Compares LLM against traditional ML for 5G intrusion detection, analyzing trade-offs between detection performance and computational cost.",
+      "llm_tldr_cn": "随着AI在网络入侵检测中的广泛应用，复杂模型是否值得高计算成本成为关键问题。本文在5G网络遥测数据上比较XGBoost、TabNet与大语言模型（LLM）的检测性能与推理开销，LLM在零样本和少样本提示下进行评估。结果表明LLM在5G入侵检测场景中需要权衡性能与计算资源，并非总是最优选择，为AI安全检测的模型选型提供了实证参考。",
+      "llm_tldr": "随着AI在网络入侵检测中的广泛应用，复杂模型是否值得高计算成本成为关键问题。本文在5G网络遥测数据上比较XGBoost、TabNet与大语言模型（LLM）的检测性能与推理开销，LLM在零样本和少样本提示下进行评估。结果表明LLM在5G入侵检测场景中需要权衡性能与计算资源，并非总是最优选择，为AI安全检测的模型选型提供了实证参考。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "use of large language models in wireless communication",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.27124v1",
+      "source": "arxiv",
+      "title": "TRACE-CRC: Trajectory-Adaptive Conformal Risk Control for Multi-Step Channel State Information Prediction",
+      "abstract": "Reliable prediction of time-varying channel state information (CSI) is essential for efficient wireless communication. Each CSI frame is a matrix-valued representation of the wireless channel response, and a sequence of CSI frames forms a temporal channel trajectory. Modern deep learning-based CSI predictors, however, often provide only point predictions and lack calibrated uncertainty estimates. This limitation is particularly problematic in multi-step CSI prediction, where the target is a sequence of future CSI matrices, and downstream decisions such as beamforming or scheduling may fail if any part of the predicted trajectory is unreliable. We propose trajectory-adaptive calibration and error profiling with conformal risk control (TRACE-CRC), a method for trajectory-aware uncertainty quantification in multi-step CSI prediction. TRACE-CRC constructs Frobenius-norm uncertainty balls around predicted CSI matrices and controls the risk that at least one future frame is uncovered. Instead of calibrating each future step independently, TRACE-CRC combines future-step-dependent error profiling, trajectory difficulty stratification, and learn-then-test (LTT) risk control. Empirically, TRACE-CRC achieves reliable trajectory-level coverage with substantially smaller uncertainty balls than conservative multi-step corrections, while avoiding the trajectory undercoverage of compact stepwise and adaptive conformal baselines.",
+      "authors": [
+        "Kiarash Rezaei",
+        "Mehdi Sattari",
+        "Javad Aliakbari",
+        "Tommy Svensson",
+        "Paolo Monti",
+        "Carlos Natalino"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-08-27T13:39:00+00:00",
+      "link": "https://arxiv.org/pdf/2608.27124v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-step CSI prediction with conformal risk control for channel modeling.",
+      "llm_evidence_cn": "多步CSI预测与共形风险控制，直接涉及无线信道建模与预测。",
+      "llm_evidence": "多步CSI预测与共形风险控制，直接涉及无线信道建模与预测。",
+      "canonical_evidence": "多步CSI预测与共形风险控制，直接涉及无线信道建模与预测。",
+      "llm_tldr_en": "Proposes trajectory-adaptive conformal risk control to calibrate uncertainty in multi-step CSI prediction, ensuring reliable downstream beamforming/scheduling decisions.",
+      "llm_tldr_cn": "深度CSI预测器通常只给出点预测，缺少校准的不确定性估计，多步预测中任一时刻不可靠都可能导致波束成形或调度失败。论文提出轨迹自适应共形风险控制方法TRACE-CRC，对多步CSI预测轨迹进行校准与误差刻画。该方法能提供带有置信保证的预测区间，提升下流决策的可靠性。",
+      "llm_tldr": "深度CSI预测器通常只给出点预测，缺少校准的不确定性估计，多步预测中任一时刻不可靠都可能导致波束成形或调度失败。论文提出轨迹自适应共形风险控制方法TRACE-CRC，对多步CSI预测轨迹进行校准与误差刻画。该方法能提供带有置信保证的预测区间，提升下流决策的可靠性。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.27137v1",
+      "source": "arxiv",
+      "title": "Over-The-Air Extreme Learning Machines with Nonlinear Stacked Intelligent Metasurfaces",
+      "abstract": "The recently envisioned goal-oriented communications paradigm requires machine learning inference to be performed directly on wirelessly transferred data. This paper presents an eXtremely Large (XL) Multiple-Input Multiple-Output (MIMO) system that operates as an Extreme Learning Machine (ELM) to execute Over-The-Air (OTA) binary classification. To reduce hardware complexity, the receiver is equipped with cascaded metasurfaces terminating in a single radio-frequency chain. A front metasurface layer applies a fixed nonlinear response to the incoming signal, acting as the ELM's activation function. Subsequent tunable linear metasurface layers physically approximate the trained network weights directly in the wave domain. Numerical evaluations across diverse datasets showcase that our XL MIMO architecture achieves classification accuracy comparable to idealized digital models, thereby proving the viability of low-complexity, wave-domain OTA learning.",
+      "authors": [
+        "Kyriakos Stylianopoulos",
+        "Mattia Fabiani",
+        "Giulia Torcolacci",
+        "Davide Dardari",
+        "George C. Alexandropoulos"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-08-27T13:50:00+00:00",
+      "link": "https://arxiv.org/pdf/2608.27137v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Over-the-air extreme learning machine with stacked metasurfaces performs ML inference in wireless physical layer, an instance of ML-based wireless system design",
+      "llm_evidence_cn": "利用堆叠智能超表面实现空中极限学习机，在无线物理层直接执行机器学习推理，属于基于机器学习的无线系统设计",
+      "llm_evidence": "利用堆叠智能超表面实现空中极限学习机，在无线物理层直接执行机器学习推理，属于基于机器学习的无线系统设计",
+      "canonical_evidence": "利用堆叠智能超表面实现空中极限学习机，在无线物理层直接执行机器学习推理，属于基于机器学习的无线系统设计",
+      "llm_tldr_en": "Presents an XL-MIMO system that performs over-the-air binary classification as an extreme learning machine, using cascaded metasurfaces with a nonlinear front layer and tunable linear layers to realize network weights in the wave domain.",
+      "llm_tldr_cn": "面向目标导向通信，要求机器学习推理直接在无线传输数据上执行。论文提出一种超大MIMO系统作为空中极限学习机（ELM），接收端采用级联超表面并仅配单射频链，前端超表面施加固定非线性响应作为激活函数，后续可调线性超表面在波域近似训练权重，从而完成过空中二分类。数值评估显示该系统能以较低硬件复杂度实现无线数据上的推理分类，为物理层机器学习通信提供了新途径。",
+      "llm_tldr": "面向目标导向通信，要求机器学习推理直接在无线传输数据上执行。论文提出一种超大MIMO系统作为空中极限学习机（ELM），接收端采用级联超表面并仅配单射频链，前端超表面施加固定非线性响应作为激活函数，后续可调线性超表面在波域近似训练权重，从而完成过空中二分类。数值评估显示该系统能以较低硬件复杂度实现无线数据上的推理分类，为物理层机器学习通信提供了新途径。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.27198v1",
+      "source": "arxiv",
+      "title": "Knowledge Distillation Driven Semantic NOMA with GAN Refinement for 6G Robotic Vehicle Networks",
+      "abstract": "To achieve sustainable intelligent mobility, 6G-empowered robotic vehicles (RVs) require high-fidelity visual perception under stringent bandwidth and energy constraints. Semantic communication offers a spectral-efficient solution but suffers from severe interference in uplink non-orthogonal multiple access (NOMA) RV networks. To address this, we propose a knowledge distillation-driven and generative models-enhanced NOMA framework for robust and green RV communications, named KDG-SemNOMA. First, we develop a ConvNeXt-based deep joint source-channel coding (DeepJSCC) architecture with an enhanced attention feature (AF) module for dynamic channel adaptation. Second, to mitigate interference without inference overhead, an orthogonal transmission teacher model guides the NOMA student model via a two-stage knowledge distillation strategy. Finally, to address the over-smoothing artifacts of pixel-wise optimization, we introduce a channel-conditional GAN (cGAN). By explicitly taking the Stage-I initial reconstruction and channel states as conditional inputs, this module refines coarse outputs into high-fidelity images with realistic textures. Experiments on FFHQ-256 demonstrate that KDG-SemNOMA significantly outperforms state-of-the-art methods in both pixel-level accuracy and perceptual fidelity.",
+      "authors": [
+        "Qifei Wang",
+        "Zhen Gao",
+        "Li Qiao",
+        "Ziwei Wan",
+        "De Mi",
+        "Dapeng Li",
+        "Ying Sun"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "cs.CV",
+        "eess.IV"
+      ],
+      "published": "2026-08-27T14:41:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.27198v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "deep JSCC with attention and generative models for 6G NOMA communication",
+      "llm_evidence_cn": "面向6G NOMA通信的深度联合信源信道编码与注意力机制",
+      "llm_evidence": "面向6G NOMA通信的深度联合信源信道编码与注意力机制",
+      "canonical_evidence": "面向6G NOMA通信的深度联合信源信道编码与注意力机制",
+      "llm_tldr_en": "KDG-SemNOMA uses knowledge distillation and GAN refinement with a ConvNeXt DeepJSCC attention architecture for robust semantic NOMA uplink in 6G robotic vehicle networks, improving visual perception under stringent bandwidth and energy constraints.",
+      "llm_tldr_cn": "面向6G机器人车辆网络上行链路，本文提出KDG-SemNOMA方案，将知识蒸馏与生成对抗网络精炼引入语义NOMA系统。采用ConvNeXt深度联合信源信道编码与增强注意力模块实现动态信道适应，并通过生成模型抑制多址干扰，在带宽和能耗受限下提升视觉感知质量。该方法为语义通信与深度学习结合的无线传输提供了新思路。",
+      "llm_tldr": "面向6G机器人车辆网络上行链路，本文提出KDG-SemNOMA方案，将知识蒸馏与生成对抗网络精炼引入语义NOMA系统。采用ConvNeXt深度联合信源信道编码与增强注意力模块实现动态信道适应，并通过生成模型抑制多址干扰，在带宽和能耗受限下提升视觉感知质量。该方法为语义通信与深度学习结合的无线传输提供了新思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}

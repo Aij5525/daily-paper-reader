@@ -1,0 +1,168 @@
+Title: Estimating Timing Advance for Sub-THz Distributed Systems from Sub-10 GHz Channel State Information
+
+URL Source: https://arxiv.org/pdf/2608.22492v1
+
+Published Time: Tue, 25 Aug 2026 01:15:57 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Estimating Timing Advance for Sub-THz Distributed Systems from Sub-10 GHz Channel State Information 
+
+Nishant Gupta 1,3, Muris Sarajlic 2 and Erik G. Larsson 11Department of Electrical Engineering (ISY), Linköping University, Linköping, Sweden 
+
+2Ericsson Research, Lund, Sweden 
+
+3Department of Communications and Computer Engineering, LNMIIT Jaipur, India Email: nishantgupta.nic@gmail.com, muris.sarajlic@ericsson.com, erik.g.larsson@liu.se 
+
+Abstract—Dual-band wireless architectures transmit the control information over the sub-10 GHz while reserving sub-THz for high data rate links, offering notable capacity gains. However, a critical bottleneck in such systems is timing synchronization. Due to the narrow beams of the sub-THz radio units (RUs), when the dual-band user equipment (UE) rotates or moves, it becomes necessary to switch the trans-mission between the sub-THz RUs. This switching requires recalibrating the timing of uplink (UL) and downlink (DL) transmissions to prevent communication disruptions. Moreover, for sub-THz RUs, the method introduces significant overhead and latency, especially when switches are frequent. Leveraging the reliable sub-10 GHz band offers greater resilience to UE mobility, making it suitable for control signalling. Thus, in this paper, we propose a deep learning-based algorithm that infers the propagation delay from the sub-THz RUs to the UE using sub-10 GHz channel characteristics. The inferred delay is used for calculating the timing advance for UL transmissions without the need for two-way synchronization. Simulation results show that the RU switch can be made seamless at the physical layer, without incurring any synchronization-related latency. Index Terms—Timing synchronization, sub-terahertz com-munications, sub-10 GHz channel state information, deep learning. 
+
+I. Introduction Sub-terahertz (sub-THz) communications has been re-garded as a promising technology for 6G, owing to its ability to provide extremely high data rate for particular applications, such as augmented reality (AR) or extended reality (XR) [1]. However, sub-THz communication faces several challenges, including blockages and significant path loss [2]. Additionally, the small wavelengths in the sub-THz band cause most objects, like human bodies or concrete walls, to create blockages and reflections. Therefore, it is necessary to have a dense and distributed deployment of sub-THz base stations, also known as radio units (RUs). Distributed sub-THz RUs implementation can be conveniently combined with a deployment oper-ating at a lower frequency band, e.g., sub-10 GHz. Such a dual-band setup has several benefits, two of the most important being:  
+
+> •
+
+sub-THz can be used for offloading high-throughput traffic from sub-10 GHz;  
+
+> •
+
+sub-10 GHz can provide side information and control information that can improve the stability of oper-ation and reduce control signaling overhead at sub-THz. An example scenario covering the second point above regards RU selection. The straightforward method for RU/beam selection is to conduct an exhaustive search on all the possible beam pairs between the sub-THz RUs and user equipments (UEs) [3]. The beam selection process can be accelerated, thus reducing the signaling overhead in sub-THz, by optimizing the beam selection using the channel characteristics from sub-10 GHz [4]–[7]. For instance, the authors in [4] proposed a deep learning-based approach to infer a suitable sub-THz RU while incorporating the UE’s orientation. Another more involved example is transmitting control information on the sub-10 GHz and allocating the sub-THz connection for the transmission of data exclusively. Due to the high directionality of the sub-THz, when the UE moves or rotates, it needs to switch from one sub-THz RU to another. Thus, UE needs to perform time synchronization with the new sub-THz RU and determine the timing advance (TA). This is because the propagation delay from another sub-THz RU may be different from the previ-ous serving sub-THz RU. Conventional synchronization involves transmitting the downlink (DL) synchronization signal and receiving the uplink (UL) synchronization signal to estimate the propagation delay. For sub-THz RUs, the method introduces significant overhead and latency, especially when switches are frequent. Moreover, the advanced use-cases like AR/XR for sub-THz will not tolerate high latency. These limitations become even more pronounced under UE mobility, where repeated synchronization signaling can significantly degrade system throughput. Leveraging the reliable sub-10 GHz band becomes promising as it offers greater resilience to UE mobility, making it suitable for control signalling. The existing works on dual-band systems, such as [8], [9], have largely focused on the beam steering and tracking. Moreover, arXiv:2608.22492v1 [eess.SP] 23 Aug 2026 Fig. 1: Illustration of the realignment between UE and sub-THz RU. 
+
+the authors in [10] proposed a sub-6 GHz synchronous mmWave communication scheduler, where the sub-6 GHz serves as a control channel for mmWave scheduling such that the network utility across mmWave is maximized. In [11], the authors designed a hybrid beamformer in the mmWave band using the sub-6 GHz channel informa-tion that can maximize the spectral efficiency. However, these approaches continue to rely on conventional UL/DL synchronization procedures at the high-frequency band, and therefore do not address the fundamental overhead imposed by synchronization signaling at sub-THz. In this paper, we depart from this conventional paradigm by eliminating the need for explicit UL and DL (two-way) signal transmissions for synchronization at sub-THz altogether. Instead, we exploit channel state informa-tion (CSI) available at sub-10 GHz to infer the propagation delay of the corresponding sub-THz link. By learning the non-linear relationship between low-band CSI and sub-THz timing offsets, the proposed deep learning–based framework enables accurate TA estimation prior to sub-THz data transmission. As a result, the RU or UE can pre-advance its transmission timing. Additionally, sub-10 GHz enables fast initial access at sub-THz, reducing overheads at sub-THz. To the best of our knowledge, achieving sub-THz timing synchronization by leveraging sub-10 GHz CSI has not been investigated in the current literature, thereby introducing a new dimension of cross-band cooperation beyond beam management and scheduling. II. System Model and Problem Formulation A. System Model We consider an indoor communication system, where multiple sub-THz RUs (referred to as D-band) with multiple antenna elements are distributed and deployed alongside sub-10 GHz (called mid-band in 5G) APs with multiple antennas, as shown in Fig. 1. These APs and RUs are connected to the central processing unit (CPU). RUs are built into a dielectric fiber that can carry the RF propagation. All the sub-THz RUs are sequentially con-nected to each other, and the signal flow is unidirectional. Each sub-THz RU behaves as a distributed multiple-input CP      
+
+> CP
+> CP
+> RU1 - UE
+> RU2 - UE
+> RU3 - UE
+> a) narrow BW –long OFDM symbol b) wide BW –short OFDM symbol
+> Fig. 2: Time synchronization error and cyclic prefix.
+
+multiple-output (MIMO) system, where the signal to each RU is generated in the CPU, which is then sent in analog form to each RU. B. Problem Formulation Due to high pathloss and low transmit power, sub-THz systems need to rely on beamforming in order to support a satisfactory link budget. This implies that the beams used, both at the network and UE side, will typically be narrow. As the UE moves or rotates, it will fall in and out of the coverage of individual RUs. This scenario is illustrated in Fig. 1, where it is illustrated how the UE, due to rotation, falls out of the coverage of RU 2 and into the coverage area of RU 3. Such switches between RUs may happen often at sub-THz [12]. At lower frequencies, with narrower transmission band-widths, the switch between serving RUs in a distributed system can be made seamless at the physical layer, without the need for resynchronization. Namely, when the physical layer is based on orthogonal frequency division multiplexing (OFDM) or related block-based transmission waveforms, any potential discrepancy in the RU-UE prop-agation delay (and hence time synchronization) between two RUs can be absorbed by the cyclic prefix (CP). The concept is illustrated in Fig. 2(a), which illustrates the processes occurring at the UE receiver. It is assumed that the UE is time-synchronized with RU1 and that the start of the FFT window for the reception of the OFDM symbol (dashed box) is placed within the CP. In the time domain, the UE receiver sees a cyclic shift of the OFDM symbols, which translates to a phase ramp in the frequency domain -an effect easily removed by frequency domain equalization. Assume now that the serving UE switches to RU2 or RU3. Denote the propagation delays RU1 - UE, RU2 - UE and RU3 - UE by τ1, τ2 and τ3, respectively. Let the difference 
+
+∆τ1→2 = τ1 − τ2 be smaller than the duration of the CP as illustrated. If the UE keeps the placement of the FFT window according to the time synchronization with RU1, there will be a time synchronization error when switching to RU2. However, due to this error being smaller than the CP length, the UE receiver will simply see another cyclic shift of the OFDM symbol, the effects of which are again easily removed by equalization. Same holds for switching Fig. 3: Illustration of training and testing phases in the proposed approach. 
+
+to RU3 from RU1, if ∆τ1→3 = τ1 − τ3 is smaller than the CP. However, this synchronization error cannot be absorbed by the CP if the OFDM symbol and its CP are too short compared to the difference in propagation delays, as illustrated in Fig. 2(b). In this case, a wrongly placed FFT window will incur a severe degradation in performance. Thus, the UE must resynchronize with the new RU via DL reference signals for UE-side time synchronization, and the UE sends an UL reference signal for the purpose of network-side synchronization and determination of TA. The network then typically informs the UE of the TA so that future UL transmissions can be sent earlier, in order to align with symbol/slot/frame boundaries at the network side. Operation at sub-THz assumes extremely large band-widths, which implies very short CPs. Specifically, 6G TANDEM assumes operation in D-band with 7.5 GHz bandwidth. An OFDM waveform parameterization fitting this bandwidth allocation is an FFT size of 4k with a subcarrier spacing of 1920 kHz. Assuming a CP of length 288 (to keep CP overhead sathe me as in 5G NR), the length of the CP is 36.6 ns, which translates to a propagation distance of 10.9 meters. From the very simple calculation above, it follows that the inter-RU handover at sub-THz cannot be reliably made seamless at the physical layer, as described previously and illustrated in Fig. 2(b), and explicit two-way resynchronization is required. Resyn-chronization when switching RUs would entail disrupting the DL transmission and increasing latency. It is therefore important to make the resynchronization process when switching between sub-THz RUs more efficient, shorter, or remove it altogether to ensure that latency is kept low and user quality of experience is high. Summary of problem: Frequent sub-THz RU-UE switch-ing necessitates resynchronization that results in excessive latency and control overhead. This raises a fundamental question: can the reliable sub-10 GHz band be exploited to provide TA for sub-THz links, thereby reducing or even eliminating the need for explicit two-way synchronization procedures at sub-THz? III. Proposed Methodology In this section, we first present the proposed approach, followed by dataset generation and deep neural network model. A. Deep Learning-based approach We propose a solution methodology that utilizes CSI obtained from sub-10 GHz to solve the resynchronization problem. Specifically, we propose a supervised learning approach wherein a mapping is learned between UE-to-network channel characteristics at sub-10 GHz and mean propagation delays from each of the sub-THz RUs to the UE. When trained, the proposed algorithm will take the sub-10 GHz channel characteristic as input and output estimates of mean propagation delays from the RUs to the UE. These estimates can in turn be used to  
+
+> •
+
+infer the TA without the need for DL/UL synchro-nization signal transmissions, and/or  
+
+> •
+
+pre-compensate the DL transmissions by the correct delay at the network side. The proposed deep learning approach is illustrated in Fig. 3. In the training phase, we note the propagation delays τi = [ τ1, τ 2 ... τ N ]Ti from the UE to each of the N
+
+RUs for position i. Mean delay τn is determined from the power delay profile (PDP) of the channel between the UE and RU n as 
+
+τn =
+
+∑Ln−1 
+
+> l=0
+
+p(n) 
+
+> l
+
+τ (n)
+
+> l
+
+∑Ln−1 
+
+> l=0
+
+p(n)
+
+> l
+
+, (1) classifier 
+
+Algorithm 1 
+
+inference 
+
+Algorithm 2 
+
+inference 
+
+Algorithm 3 
+
+low-band 
+
+channel characteristics 
+
+weighted 
+
+mean delay 
+
+from  best RU 
+
+RU selection 
+
+weighted 
+
+mean delay 
+
+from  all RUs Fig. 4: Proposed approach for the inference of propagation delay from sub-THz RU, where the algorithm is our proposed network. 
+
+where Ln is the number of discrete taps in the PDP, p(n)
+
+> l
+
+is the power and τ (n) 
+
+> l
+
+is the delay of the l-th tap. Simulta-neously, the UL pilot is sent at sub-10 GHz, and the UL channel is estimated, from which a sub-10 GHz channel characteristic ξi is extracted. The channel characteristic ξi
+
+captures the temporal and angular characteristics of the channel, which contain information about the location of the UE. From a set of training data obtained by the UE or UEs occupying different positions i in the coverage area, the model infers the mapping τi = ˜f (ξi). In the test phase, the UE is located at a position j and sends an UL pilot in sub-10 GHz, from which channel characteristic ξj
+
+is derived. Using the learned mapping ˜f (ξi), the model outputs estimated delays ˆτj = [ˆ τ1, ˆτ2 ... ˆτN ]Tj from the UE in position j to all the sub-THz RUs. These delay estimates are subsequently used for TA compensation. For a given sub-THz RU n, the compensated TA is computed as TA n,j comp = ˆ τn − ˆτref ,j , (2) where ˆτref ,j denotes a UE timing reference. The above equation applies the estimated one-way propagation delay as a relative timing offset, ensuring that the transmission arrives synchronously. Such delay-based TA compensation is consistent with established TA principles [13], [14]. Such computations are not feasible for real-time operation using conventional methods; therefore, a deep learning-based approach is employed to enable fast and accurate delay estimation. Fig. 4 illustrates the proposed framework. Since the UE does not have prior knowledge of the sub-THz RU to which it will switch, we propose two variants of the proposed framework. In the first variant, the index of the best RU is estimated from channel characteristic 
+
+ξ using a dedicated classification model referred to as Algorithm 1 in Fig. 4. The design and implementation of Algorithm 1 follow the methodology presented in [4]. Given the estimated best RU index and the sub-10 GHz channel characteristic, Algorithm 2 subsequently infers the sound channel in high-band DL from all RUs determine RU with best link quality from UE report determine channel characteristics from sub-10 GHz AP to UE use index of best RU and AP channel characteristics to train inference algorithm 1 sound channel in high-band DL from all RUs determine RU with best link quality from UE report extract delays and compute weighted mean delay from best RU use weighted mean delay from best RU and AP channel characteristics to train inference Algorithm 2 sound channel in high-band DL from all RUs determine channel characteristics from sub-10GHz AP to UE use weighted mean delay from all RUs and AP channel characteristics to train inference Algorithm 3   
+
+> (a) (b) (c)
+> determine channel characteristics from sub-10 GHz AP to UE extract delays and compute weighted mean delay from all RUs
+
+Fig. 5: (a) Training of Algorithm 1, (b) Algorithm 2, and (c) Algorithm 3. 
+
+weighted propagation delay to the selected best sub-THz RU. In the second variant, referred to as Algorithm 3, the framework avoids RU selection and directly infers the weighted mean propagation delay across all candidate sub-THz RUs using the sub-10 GHz channel characteristics. Fig. 5 illustrates the training procedures of three in-ference algorithms. Algorithm 1 (Fig. 5(a)) uses high-band DL sounding to determine the best RU from the UE report. It uses the index of the best RU along with the sub-10 GHz channel characteristics to train the model. Algorithm 2 in Fig. 5(b) computes the weighted mean delay of the best RU from (1) using high-band DL sounding, and similarly, Algorithm 3 (Fig. 5(c)) computes weighted mean delay across all RUs; in both cases, the delays are combined with sub-10 GHz channel characteristics for training. B. Data Set Generation A ray tracing tool is used to construct the dataset using the shooting and bouncing rays method [15]. We consider the office environment setup of dimension (8 x 5 x 5) meters (m) in length, width, and height, respectively, as described in [16]. It includes one sub-10 GHz and nine sub-THz RUs similar to [17], three stripes, each with three sub-THz RUs. The sub-10 GHz AP is placed on the eight-meter wall (in the middle), while RUs are positioned on the ceiling with a half-meter gap in between the RUs. The sub-10 GHz AP operates at 5.8 GHz with 100 MHz bandwidth, while the sub-THz RUs operate at 100 GHz with 7.5 GHz bandwidth, yielding delay resolutions of 10 ns and 0.13 ns, respectively. The height of the UE is restricted between 0.8 and 1.8 m. The algorithms are trained using the PDP. The PDP feature vector from sub-10 GHz has a size Nf comprising path gains and path delays between the sub-10 GHz AP and UE. For Algorithm 1, the Nf
+
+features serve as the input, and the corresponding labels represent the index of best RU ∈ { 0, · · · , 8}. For Algorithm 2, the same Nf feature combined with the best RU index obtained from Algorithm 1, forms an ( Nf +1 ) dimensional 6000 6500 7000 0510 -8 (a) Algorithm 2 6000 6500 7000 024 10 -7 
+
+> (b) Algorithm 3
+> Fig. 6: Convergence performance of the loss function (RMSE).
+
+input, while the label corresponds to the true weighted mean propagation delay from the best RU computed via brute force. In Algorithm 3, only Nf features are used as input, and the label corresponds to the true weighted mean propagation delay computed across all the sub-THz RUs ( N RUs) via brute force. Simulations are conducted in a single environment with a limited number of rays, enforcing a minimum inter-UE separation of 0.1 m, and users are assumed to be uniformly distributed. The simplified dataset is used to ac-cess feasibility and practicality of the proposed approach. Additional complexity, such as channel estimation and channel ageing effects, will be explored in future works. Training and testing datasets are generated separately within the same environment. C. Proposed Deep Learning Model The proposed deep learning model (Algorithm 2 and Algorithm 3) is composed of an input layer, three hidden layers (with 64, 128, and 256 neurons), and an output layer. For Algorithm 2, the output has a single neuron acting as a single-output regression model. Furthermore, Algorithm 3 contains the multi-output of length N be-having as a multi-output regression model. The learning rate is set to 0.01, and the Rectified Linear Unit (ReLU) activation function is used at all the hidden layers. Moreover, the activation function in the output layer is linear. The Stochastic Gradient Descent with Momentum (SGDM) optimizer is used, and the deep learning model is trained for 2000 epochs. Note: In the proposed model, the total number of floating point operations (FLOPs) is 43352 FLOPs per iteration, and the approximate inference time for the network is 4.5 × 10 −4 seconds per input. We train the deep learning model with appropriate training data until the loss is saturated. Figs. 6(a) and 6(b) show the convergence performance of the loss function, i.e., root mean square error (RMSE), with the number of iterations (or 2000 epochs with 4 iterations per epoch). In particular, the RMSE of the training set and the validation set are compared in Fig. 6(a) for Algorithm 2 and Fig. 6(b) for Algorithm 3. It can be observed that the deep learning model converges quickly, and the difference between the training set and the validation set is quite small. IV. Results and Discussion In this section, we evaluate the performance of the proposed approach. Note that we have considered the inferred weighted mean propagation delay ( ˆτ ) as our output parameter as stated in Section III-A. A. Performance Evaluation The performance of the proposed approach is shown in Fig. 7. The plot gives the CDF of inferred weighted mean delay for three different cases; (i) the difference of actual delay (obtained from brute force) from the best RU with that of the inferred delay from Algorithm 2, (ii) the difference of actual delay (obtained from brute force) from the best RU with that of the inferred delay from the Algorithm 3 (i.e., the best-inferred delay while considering all the RUs), and (iii) difference between the inferred delay from Algorithm 2 (inferred delay from best RU) and inferred delay from the Algorithm 3 (best while considering all the RUs). The distribution of the estimated propagation delay from different models is shown in Fig. 8. The results offer several interesting insights:  
+
+> •
+
+Estimating the delay to all the RUs has a lower prediction error (measured at the median and 90th percentile) than predicting the delays from the best RUs.  
+
+> •
+
+The prediction error of Algorithm 2 (measured at the median and 90th percentile) is below 10 ns. As a reminder, delay resolution at sub-10 GHz is 10 ns, and at sub-THz, it is 0.13 ns. Fusing the high delay resolution data from sub-THz and low delay resolution data from sub-10 GHz results in a delay prediction resolution that is higher than the lowest delay resolution in the dataset. Most importantly, the results encourage an important practical application of the proposed method. Some steps of the explicit UL-DL synchronization between the UE and the new RU can be skipped. Let RU old denote the currently serving RU and RU new denote the RU that will take over as serving RU, and consider the possible applications:  
+
+> •
+
+In one application, the RU-UE delay for RU new 
+
+inferred with the help of a sub-10 GHz UL pilot can be utilized to adjust the transmission time after the RU switch. Assume that the UE is time synchronized with RU old and that, through the inference process, Difference b/w inferred delay from Algorithm 2 & Algorithm 3 Fig. 7: CDF of the inferred weighted mean delay. 
+
+Fig. 8: Distribution of weighted mean delay for different algorithms. 
+
+the network estimates ∆τold →new = τold − τnew . The network may delay or advance the DL transmissions from RU new by ∆τold →new without informing the UE of the timing change. Likewise, the network may adjust its UL reception at RU new by ∆τold →new .Neither DL nor UL synchronization signals need to be sent in this case, and the DL transmission does not have to be interrupted. If the estimated 
+
+∆τold →new << CP length, there will be no penalty in UL or DL performance. Simulation results show that, for the considered scenario, the estimated ∆τold →new 
+
+of 5 - 10 ns is much lower than the expected CP length of 36.6 ns as considered for the system calculation in Section II-B. In other words, the RU switch can be made seamless at the physical layer.  
+
+> •
+
+In another application, the network infers 
+
+∆τold →new = τold − τnew and uses it to calculate a new TA value for communication with RU new ,which is signaled to the UE, preferably over the sub-10 GHz control link. The network will send a DL synchronization signal for the UE to readjust its time synchronization as the switch from RU old to RU new is performed. The TA value is used by the UE to advance its future UL transmissions. In this scenario, there is no need for the UL synchronization signal to be sent, and again, the DL transmission at sub-THz does not have to be interrupted. V. Conclusion Switching between sub-THz RUs to maintain commu-nication as the UE moves/rotates poses a critical issue in the data transmission. This is because the propagation delay from another sub-THz RU may be different from the serving sub-THz RU. As a result, the signal may fall outside the CP, rendering the UE unable to decode it. Therefore, each switch requires recalibrating the timing to avoid potential disruptions. Traditional methods are resource-intensive. In this paper, we proposed a deep learning-based method to infer propagation delay from sub-THz RUs using sub-10 GHz channel characteristics. With our algorithm, a precise alignment of UE transmis-sion timing across sub-THz RUs can be made reliably while reducing or eliminating the need for explicit two-way synchronization. Future work will extend the framework to more complex scenarios. Acknowlegement This work has received funding from the EU pro-grammes Horizon Europe (No. 101096302 – 6GTandem). Nishant Gupta is now with the Department of Communi-cation and Computer Engineering, LNMIIT Jaipur, India, was with the Department of Electrical Engineering (ISY), Linköping University, Linköping, Sweden, when this work was performed. References                                      
+
+> [1] V. Petrov, T. Kurner, and I. Hosako, “IEEE 802.15.3d: First standardization efforts for sub-Terahertz band communications toward 6G,” IEEE Commun. Mag., vol. 58, no. 11, pp. 28–33, Nov. 2020. [2] A. Shafie, N. Yang, C. Han, J. M. Jornet, M. Juntti, and T. Kürner, “Terahertz communications for 6G and beyond wireless networks: Challenges, key advancements, and opportu-nities,” IEEE Network, vol. 37, no. 3, pp. 162–169, June 2023. [3] M. Giordani, M. Mezzavilla, and M. Zorzi, “Initial access in 5G mmWave cellular networks,” IEEE Commun. Mag., vol. 54, no. 11, pp. 40–47, Nov. 2016. [4] N. Gupta, M. Sarajlic, and E. G. Larsson, “Deep Learning for sub-THz Radio Unit Selection Using sub-10 GHz Channel Information and Inferred Device Beamforming,” in Proc. IEEE 101st Veh. Technol. Conf. (VTC2025-Spring), Oslo, Norway, June 2025, pp. 1–5. [5] A. N. Uwaechia and N. M. Mahyuddin, “A comprehensive survey on millimeter wave communications for fifth-generation wireless networks: Feasibility and challenges,” IEEE Access, vol. 8, pp. 62 367–62 414, Mar. 2020. [6] K. Vuckovic, M. B. Mashhadi, F. Hejazi, N. Rahnavard, and A. Alkhateeb, “PARAMOUNT: Toward generalizable deep learning for mmWave beam selection using sub-6 GHz channel measurements,” IEEE Trans. Wireless Commun., vol. 23, no. 5, pp. 5187–5202, May 2024. [7] F. Pasic, M. Hofer, M. Mussbah, S. Caban, S. Schwarz, T. Zemen, and C. F. Mecklenbräuker, “Channel estimation for mmWave MIMO using sub-6 GHz out-of-band information,” in Proc. Int. Conf. Smart Apps, Commun. Netw. (SmartNets), Harrisonburg, USA, July 2024, pp. 1–6. [8] I. Chafaa, R. Negrel, E. V. Belmega, and M. Debbah, “Self-Supervised Deep Learning for mmWave Beam Steering Exploit-ing Sub-6 GHz Channels,” IEEE Trans. Wireless Commun., vol. 21, no. 10, pp. 8803–8816, Oct. 2022.
+
+[9] Y. Zhao, X. Zhang, X. Gao, K. Yang, Z. Xiong, and Z. Han, “LSTM-Based Predictive mmWave Beam Tracking via Sub-6 GHz Channels for V2I Communications,” IEEE Trans. Com-mun., vol. 72, no. 10, pp. 6254–6270, Oct. 2024. [10] C. He, Y. Wan, L. Zhao, H. Lu, and T. Shimizu, “Sub-6 GHz V2X-assisted synchronous millimeter wave scheduler for vehicle-to-vehicle communications,” IEEE Transactions on Vehicular Technology, vol. 71, no. 11, pp. 11 717–11 728, Nov. 2022. [11] Z. Huang, Z. Wang, and S. Chen, “Sub-6 GHz assisted mmWave hybrid beamforming with heterogeneous graph neural network,” IEEE Trans. Commun., vol. 72, no. 11, pp. 6917–6928, Nov. 2024. [12] I. F. Akyildiz, J. M. Jornet, and C. Han, “Terahertz band: Next frontier for wireless communications,” Physical communication, vol. 12, pp. 16–32, Sep. 2014. [13] H. Holma and A. Toskala, LTE for UMTS: OFDMA and SC-FDMA based radio access. John Wiley & Sons, 2009. [14] S. Mukherjee, A. K. Sinha, and S. K. Mohammed, “Timing Advance Estimation and Beamforming of Random Access Re-sponse in Crowded TDD Massive MIMO Systems,” IEEE Trans. Commun., vol. 67, no. 6, pp. 4004–4019, June 2019. [15] Z. Yun and M. F. Iskander, “Ray tracing for radio propagation modeling: Principles and applications,” IEEE Access, vol. 3, pp. 1089–1100, July 2015. [16] MathWorks, “Three-dimensional indoor positioning with 802.11az fingerprinting and deep learning,” WLAN Toolbox Example, MathWorks Documentation, 2025, online. Available: https://in.mathworks.com/help/wlan/ug/three-dimensional-indoor-positioning-with-802-11az-fingerprinting-and-deep-learning.html. [17] [Online]. Available: https://horizon-6gtandem.eu/

@@ -1,0 +1,276 @@
+Title: Amortized Neural SVD for XL-MIMO: Structure-Guided Factor Prediction for Beamforming and Multi-Stream Utility
+
+URL Source: https://arxiv.org/pdf/2608.26727v1
+
+Published Time: Fri, 28 Aug 2026 00:45:16 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Amortized Neural SVD for XL-MIMO: Structure-Guided Factor Prediction for Beamforming and Multi-Stream Utility 
+
+Yue Zhang ∗, Yiyan Zhang †, Ruijin Sun ∗, Honggang Jia ∗, Chen Gong ∗∗State Key Laboratory of ISN and School of Telecommunications Engineering, Xidian University, Xi’an, 710071, China 
+
+†School of Computer Science and Technology, Xi’an Jiaotong University, Xi’an, 710049, China Email: {25011210995, jiahg,25011211225 }@stu.xidian.edu.cn,zhangyy414@stu.xjtu.edu.cn, sunruijin@xidian.edu.cn 
+
+Abstract —Singular value decomposition (SVD) is a core oper-ation in multiple-input multiple-output (MIMO) beamforming, but the cubic complexity of standard SVD routines can lead to a major latency bottleneck as array dimensions scale to extremely large sizes. This paper presents a fully learned neural operator that avoids explicit SVD computation by directly mapping channel matrices to truncated low-rank factors for precoder and combiner design. In contrast to iterative numerical solvers and algorithm-unrolled networks, the proposed structure-aware model, termed 
+
+SVDNet , produces these factors in a single forward pass at inference, shifting the per-instance decomposition cost to offline training. The model also includes lightweight constraints to enforce basic algebraic properties required by beamforming, such as semi-unitarity of the singular vectors and nonnegative singular values, without invoking matrix factorization kernels. Experiments on extremely large-scale MIMO channels with matrix dimensions up to 512 × 512 show that the proposed approach achieves spectral efficiency close to exact SVD-based beamforming in single-stream transmission and consistently improves multi-stream sum-rate over representative learned baselines, indicating good scalability for low-latency wireless processing. Code is available at https://github.com/ZY021023/Neural-SVD-for-MIMO. 
+
+Index Terms —Massive MIMO, beamforming, singular value decomposition, orthogonality, unitary constraint, low-latency signal processing. 
+
+I. I NTRODUCTION 
+
+Singular value decomposition (SVD) is a fundamental numerical primitive in multiple-input multiple-output (MIMO) signal processing. Many canonical transmission strategies can be expressed through the dominant singular modes of the channel matrix: in the practically prevalent single-stream regime, the principal right singular vector determines the optimal beamforming direction, while in multi-stream operation, the leading singular subspace enables spatial multiplexing and power allocation [1]–[4]. As antenna arrays evolve toward massive and extremely large-scale MIMO (XL-MIMO), these SVD-based operations are invoked repeatedly across users and time–frequency resources, making the computational efficiency of SVD a first-order concern for both real-time adaptation and large-scale system evaluation [5]–[8]. The need to accelerate SVD becomes acute as array dimen-sions scale. In standard MIMO pipelines, a general-purpose dense SVD is routinely invoked to extract dominant modes for each channel realization. However, for dense matrices, computing an exact SVD incurs steep arithmetic and memory 
+
+Fig. 1. System overview of the proposed learned neural SVD operator. 
+
+costs: for an N × N matrix, the leading-order complexity is cubic, i.e., O(N 3), accompanied by substantial O(N 2) memory traffic that often becomes a major factor in wall-clock runtime as N grows. Consequently, repeatedly calling an exact library routine (e.g., via LAPACK or torch.svd ) can become a dominant latency bottleneck in both real-time processing loops and large-scale simulation frameworks [9], [10]. While partial, iterative, or randomized methods can mitigate costs when only the top-k subspace is required, their runtime depends on data-dependent convergence behavior. Moreover, these methods still involve repeated matrix-vector products and orthogonalization steps, which complicates predictable per-sample execution at extremely large dimensions. These considerations motivate an amortized, structure-preserving learned operator with fixed and controllable inference cost, evaluated rigorously against exact SVD baselines in terms of both communication utility and wall-clock scaling. From a learning perspective, accelerating SVD is intrinsically challenging because the output is highly structured and utility-critical. Unlike generic matrix regression, valid SVD factors must satisfy stringent algebraic constraints-most notably, the unitarity of singular vectors and the nonnegativity and ordering of singular values-to remain actionable for downstream signal processing. Small violations of orthogonality can induce sub-space leakage and unstable beamforming directions, translating into tangible rate loss even when the reconstruction error appears modest. This challenge is compounded in complex-arXiv:2608.26727v1 [eess.SP] 27 Aug 2026 valued channels, where phase consistency and unitary structure are essential. These considerations suggest that a viable learned substitute should be viewed not as an unstructured predictor of H, but as a structured operator whose outputs remain valid under communication metrics [2]. Motivated by this viewpoint, we adopt an operator-learning approach: rather than solving SVD from scratch for each realization, we learn an amortized SVD operator that enforces structural validity by design. Specifically, as illustrated in Fig. 1, we propose a structure-aware neural SVD model, termed SVDNet, that maps a complex-valued channel matrix directly to structured factors ( ˆU, ˆΣ, ˆV) in a single forward pass. These factors can then be used by standard beamforming and precoding rules to form transmit/receive weights and evaluate downstream communication utility. The architecture is tailored to factorization, combining matrix-structured encoding with a lightweight, fixed-depth differentiable unitary-guidance mechanism to promote near-unitary singular-vector outputs, together with SVD-specific constraints such as nonnegativ-ity and ordering consistency [11], [12]. We evaluate this learned operator using communication-centric utility metrics and wall-clock scaling behavior relative to an exact SVD reference. In the dominant single-stream regime, the network-only output achieves near-reference beamforming utility while providing substantial latency reductions, with the runtime advantage growing significantly as antenna dimensions scale up to 512 × 512 . For multi-stream operation, we additionally introduce an optional predicted-subspace refinement as an accuracy–complexity knob, enabling improved utility without reverting to full SVD in the main loop. The main contributions of this paper are summarized as follows: 1) Utility-aware learned SVD operator. We cast SVD in MIMO processing as a structured numerical operator and propose a learned model that predicts ( ˆU, ˆΣ, ˆV) for complex channel matrices in a single forward pass. The method is evaluated primarily through communication utility rather than solely reconstruction error. 2) Structure-aware factorization design. We develop an SVD-specific architecture targeting structural validity. This includes matrix-structured encoding and a fixed-depth differentiable unitary-guidance component to stabilize singular vectors, together with constraints that enforce nonnegativity and consistent alignment of singular values and vectors. 3) Scaling evidence in XL-MIMO-scale settings. Using an exact SVD routine as a reference, we provide systematic evaluation on 128 × 128 , 256 × 256 , and 512 × 512 
+
+channels under the current measurement-anchored set-ting. Results demonstrate near-reference single-stream beamforming utility and favorable wall-clock scaling trends with increasing speedups at larger dimensions, supported by an optional refinement extension for multi-stream operation. II. S YSTEM MODEL AND METRICS 
+
+A. System Model and Reference Decomposition 
+
+We consider a narrowband MIMO channel matrix H ∈
+
+CM ×N , where M and N denote the numbers of receive and transmit antennas, respectively. The singular value decomposi-tion (SVD) of H is defined as 
+
+H = UΣV H, (1) where U ∈ CM ×r and V ∈ CN ×r have orthonormal columns, 
+
+Σ = diag( s) ∈ Rr×r 
+
+> +
+
+with singular values s1 ≥ s2 ≥ · · · ≥ 
+
+sr ≥ 0, and r = min( M, N ). Throughout this paper, we use 
+
+torch.svd as an exact reference decomposition. Our goal is to replace per-instance numerical SVD with a learned amortized factorization operator. Given H, the proposed neural model produces a low-rank factorization 
+
+( ˆU, ˆs, ˆV), where ˆU ∈ CM ×R, ˆV ∈ CN ×R, ˆs ∈ RR
+
+> +
+
+, and 
+
+R ≪ r. The predicted factors are then directly used to construct beamforming/precoding directions and to evaluate communication utility against the reference SVD [13]. 
+
+B. Communication Utility and Scaling Latency Metrics 
+
+Single-stream (primary) utility: We focus on the practically dominant single-stream beamforming setting ( k = 1 ), where performance is primarily determined by the principal right singular direction. Let v ∈ CN be a candidate transmit beamforming vector and ¯v = v/∥v∥2 its unit-norm normaliza-tion to ensure a consistent transmit-power convention. For a given linear SNR ρ, the rank-1 beamforming rate used in our evaluation is 
+
+R1(H, ¯v) = log 2
+
+ 1 + ρ∥H¯v∥22
+
+ , (2) where ∥H¯v∥22 = ( H¯v)H(H¯v). We report the relative utility by comparing R1(H, ˆv1) against the reference R1(H, v1), where 
+
+v1 is the principal right singular vector from torch.svd . We primarily present the normalized ratio R1(H, ˆv1)/R 1(H, v1)
+
+to isolate the performance loss induced by amortized inference. 
+
+Multi-stream (secondary) utility: For k > 1, we eval-uate an interference-aware sum-rate induced by a set of 
+
+k transmit/receive directions. Denote Uk = U(: , 1 : k),
+
+Vk = V(: , 1 : k), and define the effective coupling matrix 
+
+A = UH 
+
+> k
+
+HV k ∈ Ck×k. (3) If the factors were perfectly unitary and aligned with the true SVD, A would be diagonal. In practice, learned factors may yield off-diagonal terms representing residual inter-stream coupling. We treat diagonal entries Aii as intended gains and off-diagonal entries Aij (j̸ = i) as interference leakage. With a power allocation vector p ∈ Rk 
+
+> +
+
+(P pi = 1 ), the per-stream signal-to-interference-plus-noise ratio (SINR) is computed as 
+
+SINR i = ρp i|Aii |2
+
+νi + ρ P  
+
+> j̸=i
+
+pj |Aij |2 , (4) where νi is the i-th diagonal entry of UH 
+
+> k
+
+Uk to account for non-unitary factors. The multi-stream sum-rate is Pki=1 log 2(1 + SINR i).Fig. 2. Architecture of the proposed learned neural SVD operator with structure-aware post-processing. 
+
+Latency and scaling: To quantify solver-substitution bene-fits, we measure decomposition latency for (i) the learned amortized factorization and (ii) the exact reference SVD via torch.svd . We report the speedup ratio tsvd /t net and emphasize its scaling with dimensions (M, N ). The key motivation is that the amortized inference cost is bounded by fixed architectural choices (e.g., fixed output rank R and fixed-depth structural guidance), leading to increasing advantages as array sizes grow. III. P ROPOSED METHOD 
+
+A. Learned Neural SVD Operator 
+
+We develop a learned neural SVD operator that amortizes per-instance decomposition into a single forward pass. As illustrated in Fig. 2, given a complex MIMO channel matrix H ∈ CM ×N ,the operator Fθ predicts a low-rank SVD-like factorization 
+
+( ˆU, ˆs, ˆV), where ˆU ∈ CM ×R, ˆV ∈ CN ×R, ˆs ∈ RR
+
+> +
+
+, and 
+
+R ≪ min( M, N ). The predicted factors are consumed directly by standard beamforming/precoding rules (e.g., ˆv1 for k = 1 
+
+and ˆV1: k for k > 1), enabling solver substitution in latency-critical pipelines. The operator follows a compact three-stage design. A normalization stage first stabilizes channel magnitude variation using dataset-level statistics stored in the model. The encoder then extracts matrix-aware representations through row- and column-oriented branches aligned with the two natural axes of 
+
+H. Three factor heads decode these features into provisional low-rank factors ( ˜U, ˜s, ˜V), which are subsequently converted by a lightweight structural post-processing stage into the final outputs ( ˆU, ˆs, ˆV). In particular, the vector factors are regularized by differentiable unitary guidance, while the singular values are constrained to be nonnegative and sorted in descending order. Deployment requires only a forward evaluation of Fθ ; no explicit matrix factorization routines are used in the network-only inference path. During training, we supervise the predicted factors through matrix reconstruction rather than direct singular-vector regres-sion. Given a target channel matrix Hgt , we reconstruct 
+
+ˆH = ˆU diag(ˆ s) ˆVH.
+
+We define 
+
+Lrec = ∥Hgt − ˆH∥F
+
+∥Hgt ∥F + ϵ ,
+
+Lortho = X  
+
+> Q∈{ ˆU,ˆV}
+
+∥QHQ − IR∥F ,
+
+and optimize 
+
+L = Lrec + λortho Lortho . (5) During training, λortho is gradually increased so that the early stage emphasizes low-rank reconstruction, while later epochs place stronger weight on semi-unitary structure. This curriculum-like weighting improves optimization stability by allowing the network to first capture the dominant matrix content and then refine the structural validity of the predicted factors. The above terms are averaged over the minibatch during training. This choice is also robust to the inherent phase ambiguity of singular vectors, since paired phase rotations of 
+
+ˆU and ˆV leave the reconstructed matrix ˆH unchanged. 
+
+B. Structure-Aware Design and Unitary Guidance 
+
+Learning to output SVD factors is constrained by the fact that downstream performance depends on algebraic structure rather than reconstruction alone. In MIMO beamforming and precoding, singular vectors represent physically meaningful spatial directions; violations of unitarity may lead to unstable beamformers and, in multi-stream settings, residual inter-stream coupling that directly degrades achievable rate. Accordingly, the proposed operator injects SVD-specific inductive bias to produce factors that are both trainable and directly actionable. The design is structure-aware in two complementary ways. First, it adopts a fixed low-rank parameterization with rank R,matching the practical need for dominant modes while control-ling inference cost. Second, it enforces SVD-compatible factor semantics through differentiable post-processing: predicted singular values are constrained to be nonnegative via asmooth positivity mapping, calibrated to the input energy scale (Frobenius-norm matching), and sorted in descending order with synchronized column permutation of ˆU and ˆV. This ordering consistency is crucial in the dominant-mode regime to ensure that the first column corresponds to the strongest spatial direction across samples. The remaining bottleneck is orthogonality: unconstrained decoders may produce vectors that are only approximately orthogonal and can drift from semi-unitarity at scale. We there-fore incorporate a fixed-depth differentiable unitary guidance layer ( ˆU, ˆV) = P( ˜U, ˜V), applied separately to the decoded factors. Let X ∈ Cm×R denote the complex-valued output of the U - or V -decoder (with m = M or N ). We first normalize each column of X and then perform d iterations 
+
+Ut+1 = 12 Ut
+
+ 3IR − U Ht Ut
+
+, t = 0 , . . . , d − 1, (6) where U0 is the normalized input X, and IR denotes the 
+
+R × R identity matrix. The output P(X) = Ud encourages 
+
+U Hd Ud ≈ IR without invoking explicit matrix factorization routines. This module is used consistently during both training and inference. 
+
+C. Multi-Stream Enhancement 
+
+Although our primary emphasis is the dominant single-stream regime ( k = 1), the learned factors also support multi-stream transmission. For k > 1, performance becomes increasingly sensitive to the quality of the predicted subspace and residual coupling among streams. We therefore employ an optional refinement restricted to a low-dimensional subspace predicted by the network. Given ˆV ∈ CN ×R, we form 
+
+Vsub = ˆV[: ,1: rsub ] with rsub = min {max( k, r align ), R } (we use 
+
+ralign = 3 in the final experiments). A Rayleigh–Ritz update is performed in this subspace by constructing 
+
+G = ( HV sub )H (HV sub ) = VH
+
+> sub
+
+HH HV sub , (7) and extracting its k dominant eigenvectors Ek. The refined right-singular directions are Vref = Vsub Ek, followed by σi =
+
+∥Hv i∥2 and ui = Hv i/σ i for i = 1 , . . . , k . This step is not required for the dominant-mode case but improves stream decoupling for k > 1 under the interference-aware sum-rate metric in Section II. 
+
+D. Computational Complexity 
+
+For a square n × n channel, numerical SVD has cubic com-plexity O(n3). In contrast, as illustrated in Fig. 2, the proposed encoder processes the matrix through separate row- and column-wise branches and applies linear attention without forming an explicit n × n attention matrix. Under fixed embedding width, the per-layer attention cost is linear in sequence length, so                                                                                          
+
+> TABLE I NORMALIZED SPECTRAL -E FFICIENCY RATIO UNDER WATER -F ILLING FOR
+> SINGLE -AND MULTI -S TREAM CASES
+> Single-Stream ( k= 1 ): Pure Neural Output
+> Nη1@ 0 dB η1@ 10 dB η1@ 20 dB 128 0.9950 0.9965 0.9975 256 0.9933 0.9952 0.9965 512 0.9959 0.9969 0.9975
+> Multi-Stream ( k= 3 ): NN / NN+REF
+> Nη3@ 0 dB η3@ 10 dB η3@ 20 dB 128 0.8611 / 0.9434 0.7923 / 0.9308 0.7138 / 0.9247
+> 256 0.8189 / 0.9227 0.7506 / 0.9149 0.6761 / 0.9154
+> 512 0.6954 / 0.8535 0.6145 / 0.8494 0.5359 / 0.8585
+> TABLE II INFERENCE LATENCY AND PEAK GPU MEMORY ALLOCATION .
+> CPU GPU Peak GPU Mem
+> NSVDNet Exact SVD Speedup SVDNet Exact SVD Speedup SVDNet Exact SVD (ms) (ms) (ms) (ms) (MB) (MB) 128 6.09 19.02 3.12 ×4.99 9.11 1.83 ×48.6 48.6 256 16.18 67.20 4.15 ×6.02 21.65 3.59 ×89.2 89.7 512 27.88 156.39 5.61 ×4.67 77.58 16.60 ×175.0 178.0
+
+the end-to-end deployment cost is dominated by the matrix-shaped projections and decoders. With fixed embedding width, number of heads, encoder depth, output rank R, and guidance depth, the overall complexity therefore scales approximately as O(n2). The optional refinement adds only a small overhead, 
+
+O(n2rsub + r3
+
+> sub
+
+), with small rsub .IV. E XPERIMENTS 
+
+A. Datasets, Experimental Setup, and Protocol 
+
+We evaluate the proposed learned SVD operator on complex-valued square MIMO channel matrices with M = N ∈{128 , 256 , 512 }, and additionally include N ∈ { 32 , 64 } for scalability benchmarking. The dataset is constructed via a two-stage procedure anchored by a measured seed set of approximately 30,000 realizations at 128 × 128 provided by Huawei Xi’an Research Institute. To enable consistent evaluation across dimensions, we synthesize datasets at other sizes by matching statistics estimated from the seed set, thereby preserving key second-order, low-rank, and large-scale structural characteristics across dimensions. Each sample consists of a clean ground-truth channel Y ∈ CM ×N and a noisy observation X = Y + W, where W denotes additive circularly symmetric complex Gaussian noise with variance chosen to meet the target signal-to-noise ratio (SNR). This measurement-anchored construction is intended to evaluate scaling behavior in XL-MIMO-scale settings under the statistics induced by the measured seed set. 
+
+Evaluation protocol. Unless otherwise stated, all learned methods infer factorization factors from the noisy observation TABLE III COMPARISON WITH LEARNED DECOMPOSITION BASELINES IN TERMS OF NORMALIZED SPECTRAL -EFFICIENCY RATIO ηk .
+
+N Method Single-stream ( k = 1 ) Multi-stream ( k = 3 )
+
+η1 @ 0 dB η1 @ 10 dB η1 @ 20 dB η3 @ 0 dB η3 @ 10 dB η3 @ 20 dB 32 
+
+SVDNet 0.9948 0.9963 0.9976 0.9189 0.8608 0.7859 
+
+Peken [2] 0.9924 0.9948 0.9966 0.8254 0.7524 0.6678 AED [14] 0.8096 0.8396 0.8782 0.6106 0.4814 0.3505 64 
+
+SVDNet 0.9985 0.9989 0.9992 0.9605 0.9183 0.8570 
+
+Peken 0.9953 0.9968 0.9977 0.7940 0.7073 0.6307 AED 0.8268 0.8617 0.8994 0.5685 0.4262 0.3156 128 
+
+SVDNet 0.9950 0.9965 0.9975 0.8611 0.7923 0.7138 
+
+Peken 0.9906 0.9938 0.9960 0.7199 0.6404 0.5461 AED 0.8309 0.8632 0.8975 0.4803 0.3589 0.2809 256 
+
+SVDNet 0.9933 0.9952 0.9965 0.8189 0.7506 0.6761 
+
+Peken † (DNC) 0.0212 0.0306 0.0482 0.0042 0.0065 0.0103 AED 0.8339 0.8652 0.8946 0.3131 0.2374 0.1293 512 
+
+SVDNet 0.9959 0.9969 0.9975 0.6954 0.6145 0.5359 
+
+Peken † (DNC) 0.0158 0.0253 0.0394 0.0036 0.0048 0.0067 AED 0.8661 0.8918 0.9127 0.2747 0.2167 0.1785   
+
+> Note: †indicates runs that converged to near-degenerate low-utility solutions under the common training protocol; these cases are marked as DNC.
+
+X, while communication utilities are evaluated on the corre-sponding clean channel Y. As an upper bound, we compute the SVD of Y using torch.svd , which serves as the oracle reference for the normalized utility metrics reported below. 
+
+Implementation details. For each dimension, we train a separate model on 20,000 samples (90%/10% train/validation split) and evaluate on a disjoint test set of 1,000 samples. Complex channel matrices are represented in concatenated real-valued form. During training, the noisy observation X is used as the network input, while the objective in Section III is computed against the corresponding clean target channel 
+
+Y. The orthogonality weight λortho is linearly increased during training, from 0.01 at the beginning to 2.0 at the final epoch. We evaluate SNRs of {0, 10 , 20 } dB and consider both single- and multi-stream transmission with k ∈ { 1, 2, 3, 4}
+
+under water-filling power allocation; the main reported results focus on k = 1 and k = 3 . The network outputs a rank-R
+
+factorization with R = 32 . For multi-stream operation, we enable the optional subspace refinement (Section III-C) within a predicted right-singular subspace of dimension ralign = 3 .We also examined the sensitivity of the unitary-guidance depth over d ∈ { 1, 2, 3, 4}; shallower settings ( d = 1 , 2) reduced downstream utility, whereas d = 4 brought no consistent gain and slowed training convergence. All reported results therefore use d = 3 .
+
+Metrics and latency. Communication performance is quantified by the interference-aware achievable sum-rate defined in Section II, computed from the effective channel A = UH 
+
+> k
+
+YV k.For computational efficiency, we report decomposition-only latency for the learned operator and for torch.svd under identical measurement settings on an NVIDIA RTX 4060 GPU. The reported latency focuses on the core neural decomposition, while the optional refinement involves only low-dimensional operations. 
+
+B. Experiment Results 
+
+We report results for the single-stream regime ( k = 1 ) and the multi-stream regime ( k = 3 ), using water-filling power allocation based on predicted singular values. All methods are evaluated under the interference-aware achievable sum-rate in Section II. We report the normalized spectral-efficiency ratio 
+
+ηk relative to the oracle SVD on the clean channel Y. Table I reports ηk for both regimes; the multi-stream block is shown as NN-only / NN+REF, where NN+REF denotes the optional refinement within the predicted subspace. 
+
+Single-stream results. Table I (top block) shows that SVD-Net achieves near-oracle dominant-mode utility across all tested dimensions and SNRs. In particular, η1 remains within 
+
+[0 .9933 , 0.9975] for N ∈ { 128 , 256 , 512 } over {0, 10 , 20 } dB, indicating that the learned operator provides a reliable surrogate for dominant-stream precoding. 
+
+Multi-stream results and optional refinement. Table I (bottom block) shows that multi-stream transmission is more sensitive to structural errors that induce residual inter-stream interference. The raw neural output (NN-only) degrades with both N and SNR; for example, at N = 512 , η3 drops from 
+
+0.6954 at 0 dB to 0.5359 at 20 dB. The optional NN+REF stage substantially reduces this gap by re-solving the top-
+
+k modes within the predicted ralign -dimensional subspace (ralign = 3 ), improving η3 from 0.5359 to 0.8585 at N = 512 and 20 dB. This indicates that the network captures a useful low-dimensional signal subspace, while the refinement provides a practical accuracy–latency trade-off without reverting to full SVD. 
+
+Efficiency and scaling. Table II compares SVDNet with the exact SVD baseline ( torch.svd ) in terms of decomposition-only latency on CPU/GPU and peak GPU memory allocation. Across both backends, the speedup increases with N . On GPU, SVDNet latency remains within 4.67 –6.02 ms, whereas 
+
+torch.svd increases to 77 .58 ms at N = 512 , corresponding to a 16 .60 × speedup. On CPU, the speedup reaches 5.61 × at 
+
+N = 512 . Peak memory remains comparable across methods, indicating that the acceleration comes from computational efficiency rather than increased memory usage. This per-sample metric is also conservative: under batched inference (e.g., 8 samples), the effective GPU throughput speedup reaches approximately 140 ×.
+
+C. Accuracy Comparison with Learned Decomposition Base-lines 
+
+To benchmark scalability and architectural efficacy, we com-pare SVDNet with two representative learned decomposition baselines: Peken , a pure neural operator with the same end-to-end formulation, and AED , a prior-aided method based on QR decomposition [2], [14]. All methods are trained and evaluated under the same protocol across N ∈ { 32 , . . . , 512 }.Table III reports the normalized spectral-efficiency ratio ηk
+
+relative to the oracle SVD, where larger values indicate better communication utility. To isolate the quality of the learned operators, the multi-stream block ( k = 3 ) reports raw neural outputs without optional refinement.  
+
+> •
+
+Stability under dimension scaling (vs. Peken [2]): Both SVDNet and Peken aim to learn the SVD operator directly from channel data. However, as shown in Table III, Peken exhibits severe performance degradation at N ≥ 256 ,where η1 drops to very low values. This suggests that defin-ing the problem correctly is not sufficient by itself; without explicit structural constraints, generic networks struggle to maintain stable optimization in high-dimensional factor spaces. In contrast, SVDNet incorporates unitary guidance to regularize the search space, enabling stable convergence and near-oracle performance even at extreme dimensions (N = 512 ).  
+
+> •
+
+Comparison with the prior-aided baseline (vs. AED [14]): While AED utilizes a valid mathematical prior (QR decomposition) to improve stability, it consistently underperforms SVDNet, especially in the multi-stream regime ( k = 3 ). This suggests that its underlying neural architecture—despite the QR backend—is less effective at capturing complex MIMO channel features. The rigidity of the QR block, combined with a generic feature extractor, limits its expressivity. By contrast, SVDNet employs a specialized, structure-aware architecture that explicitly models the interactions between singular vectors and values, leading to higher utility than the prior-aided baseline. Overall, Table III shows that SVDNet offers better optimiza-tion stability under dimension scaling than the pure neural baseline, while also achieving higher utility than the prior-aided baseline. Across N = 32 –512 , it delivers near-oracle single-stream accuracy and consistently stronger multi-stream performance. V. C ONCLUSION 
+
+We proposed a structure-aware learned SVD operator for large-scale MIMO channels that amortizes matrix decomposi-tion into a single forward pass. The proposed design yields near-oracle dominant-mode accuracy across a wide range of array sizes and remains effective in the multi-stream setting with an optional subspace refinement. Comparisons with learned decomposition baselines show that the gains do not arise from neuralization alone: a pure neural baseline collapses at large dimensions, while a prior-aided amortized baseline remains consistently less accurate. These results demonstrate that incorporating SVD structure into the network is key to scalable and stable learned decomposition for massive MIMO. REFERENCES [1] N. Cheng, F. Chen, W. Chen, Z. Cheng, Q. Yang, C. Li, and X. Shen, “6G omni-scenario on-demand services provisioning: vision, technology, and prospect (in Chinese),” Sci. Sin. Inf. , vol. 54, pp. 1025–1054, 2024. [2] T. Peken, S. Adiga, R. Tandon, and T. Bose, “Deep learning for SVD and hybrid beamforming,” IEEE Trans. Wireless Commun. , vol. 19, no. 10, pp. 6621–6642, 2020. [3] H. Abdi, “Singular value decomposition (SVD) and generalized singular value decomposition,” in Encyclopedia of Measurement and Statistics ,N. J. Salkind, Ed. Thousand Oaks, CA: Sage, 2007, pp. 907–912. [4] R. Zhang, K. Xiong, H. Du, D. Niyato, J. Kang, X. Shen, and H. V. Poor, “Generative AI-enabled vehicular networks: fundamentals, framework, and case study,” IEEE Netw. , vol. 38, no. 4, pp. 259–267, 2024. [5] N. Cheng, F. Lyu, W. Quan, C. Zhou, H. He, W. Shi, and X. Shen, “Space/aerial-assisted computing offloading for IoT applications: a learning-based approach,” IEEE J. Sel. Areas Commun. , vol. 37, no. 5, pp. 1117–1129, 2019. [6] Z. Wang, J. Zhang, H. Du, D. Niyato, S. Cui, B. Ai, M. Debbah, K. B. Letaief, and H. V. Poor, “A tutorial on extremely large-scale MIMO for 6G: fundamentals, signal processing, and applications,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1560–1605, 2024. [7] X. Shen, J. Gao, M. Li, C. Zhou, S. Hu, M. He, and W. Zhuang, “Toward immersive communications in 6G,” Front. Comput. Sci. , vol. 4, p. 1068478, 2023. [8] E. G. Larsson, O. Edfors, F. Tufvesson, and T. L. Marzetta, “Massive MIMO for next generation wireless systems,” IEEE Commun. Mag. ,vol. 52, no. 2, pp. 186–195, 2014. [9] S. Imambi, K. B. Prakash, and G. R. Kanagachidambaresan, “PyTorch,” in

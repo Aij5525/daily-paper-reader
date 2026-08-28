@@ -1,0 +1,358 @@
+Title: 2608.25597v1.pdf
+
+URL Source: https://arxiv.org/pdf/2608.25597v1
+
+Published Time: Thu, 27 Aug 2026 00:48:04 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+1
+
+J. Andrew Zhang, Jingying Bao, Kai Wu, Henk Wymeersch, Christos Masouros, and Y. Jay Guo 
+
+Abstract: Networked sensing, which jointly exploits 
+
+observations from multiple distributed nodes, is essential for 
+
+unlocking the full sensing potential of integrated sensing and 
+
+communications (ISAC). This article introduces multi-UE 
+
+sensing, a new networked sensing paradigm for future 
+
+perceptive mobile networks that exploits the correlated sensing 
+
+observations naturally arising from distributed user equipment 
+
+devices (UEs) interacting with common targets. Representative 
+
+uplink, downlink, and hybrid sensing architectures are 
+
+presented, together with a multi-view signal processing 
+
+framework encompassing synchronization, correlation-aware 
+
+parameter estimation, and sensing fusion. Key open challenges, 
+
+including correlation modelling, target association, sensing 
+
+information compression, and communication-sensing co-
+
+optimization, are also discussed. 
+
+Keywords: ISAC, Networked Sensing, Multistatic sensing 
+
+# 1. INTRODUCTION 
+
+Future sixth-generation (6G) mobile networks are expected to evolve from communication-centric infrastructures into perceptive mobile networks (PMNs) with integrated sensing and communications (ISAC) capability [1]. By reusing communication signals, spectrum, and network infrastructure for radar-like sensing, PMNs can enable large-scale environmental perception while maintaining seamless wireless connectivity. Such networks are envisioned to support a wide range of emerging applications, including intelligent transportation, autonomous systems, disaster monitoring, infrastructure protection, and low-altitude sensing. Compared with deploying dedicated sensing devices, ISAC offers the potential for significantly reduced hardware cost, improved spectrum efficiency, and pervasive sensing coverage. 
+
+A key capability required to fully realize PMNs is networked sensing, where sensing observations from multiple distributed wireless nodes are jointly exploited to obtain multi-view, high-resolution perception of the environment. Without cooperation among network nodes, individual sensing devices typically provide only fragmented and limited observations due to restricted spatial perspectives, blockage, and fading. By leveraging distributed observations across the network, networked sensing can substantially improve sensing resolution, robustness, coverage, and target identifiability [2-6]. 
+
+Existing networked sensing approaches predominantly rely on multiple-cooperative-receiver (multi-CoopRx) architectures, where multiple coordinated receivers, typically base stations (BSs), jointly perform sensing using signals from a single transmitter [2]–[6], as illustrated in Fig. 1(a). While such approaches can improve sensing performance for multiple sensing applications as exemplified in these works, they often require densely deployed BSs and extensive network coordination, including tight inter-BS synchronization, rigorous interference management, and high-capacity backhaul links for exchanging large volumes of sensing data. These requirements significantly increase system complexity, deployment cost, and implementation difficulty, limiting scalability in practical mobile networks. Moreover, existing studies mainly focus on BS-side cooperation and largely overlook the sensing potential of distributed user equipment devices (UEs), despite the fact that modern wireless networks are inherently multi-access systems with massive numbers of geographically distributed UEs. 
+
+In this article, we introduce a paradigm shift from multi-CoopRx to multi-UE networked sensing, with particular focus on the commercially attractive multi-UE single-BS multistatic architecture shown in Fig. 1(b). In this architecture, multiple non-cooperative UEs form distributed bistatic sensing links with a common BS, where sensing information is extracted from uplink signals, downlink signals, or both and jointly exploited for sensing. The proposed paradigm exploits afundamental property of wireless networks that has received limited attention: geographically proximate UEs often illuminate or observe the same targets from different spatial perspectives, whether acting as transmitters or receivers, generating multi-view observations with different yet correlated sensing parameters , such as delay, Doppler, angles, and amplitudes. Such correlation, arising from common targets, sensing geometry, and environmental interactions, provides valuable prior information for sensing parameter estimation, target association, and multi-view fusion. By jointly exploiting both multi-view diversity and correlation, signals from multiple UEs can be fused at a single BS to achieve high-resolution perception with significantly reduced coordination and infrastructure requirements. Compared with multi-CoopRx sensing, the proposed approach naturally aligns with the multi-
+
+# Multi-UE Networked Sensing: 
+
+# A New Paradigm for 6G Perceptive Mobile Networks 
+
+J.A. Zhang ( Senior member, IEEE ), J. Bao, K. Wu, and Y.J. Guo (Fellow, IEEE ) are with the University of Technology Sydney, Australia. Email: {Andrew.Zhang; Kai.Wu; Jay.Guo}@uts.edu.au; Jingying.Bao@student.uts.edu.au. H. Wymeersch ( Fellow, IEEE ) is with Chalmers University of Technology, Sweden. Email: henkw@chalmers.se. C. Masouros (Fellow, IEEE ) is with the University College London, UK. Email: c.masouros@ucl.ac.uk. 
+
+This research was partially supported by the Australian Research Council's DP220101158 and LP 250200707, and by the SNS JU project 6G-DISAC under the EU's Horizon Europe research and innovation program under Grant Agreement No. 101139130. 2
+
+access nature of wireless networks and offers a scalable and cost-effective framework for large-scale sensing. 
+
+Multi-UE sensing can exploit both non-coherent and coherent sensing diversity. Non-coherent processing exploits diversity and correlation among sensing observations collected from different UEs to improve coverage, observability, robustness, target separability, and multi-view fusion, without requiring stringent synchronization among participating UEs. Coherent processing, on the other hand, can potentially provide additional gains, such as coherent SNR improvement, bandwidth aggregation, and distributed aperture formation, but generally requires accurate synchronization, calibration, and geometry information of the participating UEs. This article considers both processing paradigms, with emphasis on coherently and jointly exploiting multi-UE observations under practical synchronization and calibration constraints. 
+
+Although this article primarily focuses on the single-BS architecture, the proposed multi-UE sensing framework can be naturally extended to systems with multiple cooperating BSs. In addition to cellular networks, the framework is also applicable to other multi-access wireless systems such as Wi-Fi, low-altitude networks, and LoRa networks. 
+
+The remainder of this article is organized as follows. Section 2 presents representative multi-UE sensing architectures. Section 3 discusses key sensing mechanisms and enabling technologies. Section 4 highlights major technical challenges and open research problems. Finally, Section 5 concludes the article. 
+
+# 2. MULTI-UE SENSING ARCHITECTURES 
+
+As illustrated in Fig. 1(b), the principles of multi-view sensing and correlation exploitation can be realized through several architectural frameworks depending on how sensing observations are acquired and fused across the network. The most representative architectures include uplink-based sensing, downlink-assisted sensing, and hybrid sensing that jointly exploits both uplink and downlink observations. These architectures differ in the roles played by UEs and BSs, the location of sensing processing and fusion, and the forms of sensing diversity they provide. 
+
+2.1 Uplink-Only Multi-UE Sensing 
+
+In uplink-only multi-UE sensing, multiple UEs simultaneously transmit communication signals to a BS, while the BS jointly exploits the direct and reflected signal components for sensing. Each UE-BS pair forms a distinct bistatic sensing link, and the spatial distribution of UEs creates multiple sensing geometries for observing common targets. Consequently, although sensing observations are collected at a common BS, the network can obtain multiple views of the same target through transmitter-side spatial diversity . This architecture is particularly attractive because it aligns well with current cellular protocols and naturally supports scalable sensing in dense wireless networks with minimal additional signaling overhead. 
+
+Beyond its implementation simplicity, uplink-based sensing illustrates several fundamental advantages of multi-UE sensing that are also shared, to varying degrees, by the other architectures discussed later. By exploiting multiple geographically distributed UEs, the sensing system can observe the same target from different spatial perspectives, providing richer sensing information than is available from any individual sensing link. Such multi-view observations can improve target observability, enhance target separability in cluttered environments, increase robustness against blockage and fading, and provide wider sensing coverage. Furthermore, the sensing capability naturally scales with the number of participating UEs, allowing future dense wireless networks to transform increasing UE density into a sensing resource. These advantages are particularly important for outdoor sensing scenarios, where multiple targets, scatterers, and interference sources coexist in highly dynamic environments. 
+
+Fig. 1 Evolution from (a) multi-CoopRx sensing, where sensing diversity and fusion are primarily realized through cooperating BS receivers, to (b) UE-centric networked sensing, where sensing diversity is generated by distributed UEs without inter-UE cooperation and fusion can be performed at a single BS. 
+
+Feedback Paradigm shift (b) Proposed Multi-UE Sensing 
+
+Uplink (direct and indirect) Downlink (direct and indirect) 
+
+> Coordinated edge/cloud High speed connection /Sync
+
+(a) Existing Multi-CoopRx Sensing Sensing Sensing Uplink-only Downlink assisted 3
+
+However, uplink sensing typically requires multiple UEs to share communication resources. Consequently, each UE may only occupy a subset of the available sensing resources, typically orthogonal, to avoid mutual interferences; and under spatial multiplexing, sensing observations can be further affected by inter-user interference. 
+
+2.2 Downlink-Assisted Multi-UE Sensing 
+
+In downlink-assisted multi-UE sensing, distributed UEs receive downlink signals transmitted by one or multiple BSs and locally extract sensing-related features, such as delay, Doppler, angle, or target signatures. Rather than forwarding raw received signals, the UEs report compressed measurements or high-level sensing features to the network edge or BS for joint fusion, thereby significantly reducing communication overhead. This architecture enables the network to exploit sensing observations collected from diverse UE locations and perspectives, substantially enriching the available sensing information. 
+
+Compared with uplink-based sensing, downlink sensing can potentially leverage a much larger number of sensing observations due to the broadcast nature of downlink transmissions. A single BS transmission can be simultaneously observed by numerous UEs in a cell, and downlink sensing allows every participating UE to exploit the received signal for sensing, simplifying sensing observation extraction while enabling denser spatial sampling, richer multi-view diversity, and stronger geometric constraints for sensing. 
+
+2.3 Hybrid Uplink-Downlink Multi-UE Sensing 
+
+Hybrid multi-UE sensing jointly exploits sensing information obtained from both uplink and downlink transmissions to leverage the complementary advantages of the two architectures. In this framework, sensing information is simultaneously extracted from uplink transmissions generated by a set of distributed UEs and from downlink signals observed by the same or a different set of distributed UEs. 
+
+Although uplink and downlink sensing observations are governed by the same physical environment, they are not necessarily identical. In frequency-division-duplex (FDD) systems, uplink and downlink operate on different frequency bands and therefore experience different channels. Even in time-division-duplex (TDD) systems, sensing observations may differ due to different resource allocations, beamforming configurations, reference signals, transmission time, and participating nodes. As a result, uplink and downlink sensing often provide complementary measurements, sensing qualities, and observation opportunities. More importantly, hybrid sensing enables simultaneous exploitation of sensing observations collected from both transmitting and receiving UEs, increasing the number of available observations and strengthening the geometric constraints that can be exploited for localization, tracking, and environmental reconstruction. 
+
+By collectively leveraging observations collected from both transmitting and receiving UEs, hybrid sensing can exploit a larger and more diverse set of sensing nodes than either uplink-only or downlink-only sensing.  Consequently, targets can be observed through a larger number of sensing paths and spatial perspectives, improving target observability, sensing coverage, and robustness against blockage and unfavorable viewing angles. The additional diversity in space, time, and/or frequency can also reduce sensing ambiguities and enhance target separability in complex environments. 
+
+2.4 Multiple-Access-Aware Multi-UE Sensing 
+
+The multiple-access scheme adopted by a wireless network, such as TDMA, OFDMA, and SDMA, fundamentally shapes the sensing capabilities of multi-UE sensing systems, particularly in the uplink. When UE signals, whether pilots or random data symbols, are orthogonal and/or separable, all these schemes can support UE-specific sensing observation extraction and provide sensing gains through coherent processing of multiple observations, leading to improved signal-to-noise ratio (SNR), robustness against fading and blockage, and target detection reliability. However, different multiple-access schemes expose different sensing resources and forms of diversity, resulting in distinct sensing characteristics, as summarized in Table 1. Specifically, TDMA provides temporal diversity through additional sensing snapshots, OFDMA enables flexible frequency-domain sampling and bandwidth aggregation, while SDMA offers spatial and angular diversity through simultaneous observations from different spatial directions. 
+
+The signal allocation pattern can further influence sensing performance. Taking OFDMA as an example, different subcarrier allocation strategies may lead to distinct sensing 
+
+Schemes  Potential Sensing Improvements 
+
+Typical Limitations 
+
+TDMA (time-division multiple access) 
+
+Improved Doppler resolution and/or estimation range 
+
+Limited simultaneous multi-view diversity and lower sensing update rate 
+
+OFDMA (orthogonal frequency division multiple access) 
+
+Improved delay resolution and/or enlarged delay estimation range; scalable parallel sensing 
+
+Fragmented spectrum resources, frequency synchronization requirements, scheduling complexity 
+
+SDMA (spatial division multiple access) 
+
+Improved angular resolution; virtual aperture gain for sensing and imaging 
+
+Inter-user interference, high processing complexity 
+
+Table 1 Impact of multi-access schemes on multi-UE sensing performances. Common improvements such as improved SNR and diversity, and robustness to blockage are omitted. The sensing benefits include both diversity gains and, when sufficient synchronization and calibration are available, coherent gains such as bandwidth aggregation and distributed aperture formation. 4
+
+benefits. When each UE occupies localized subcarrier blocks, the aggregated bandwidth across multiple UEs can be exploited to improve delay resolution through stitched wideband sensing. In contrast, interleaved subcarrier allocation increases frequency-domain sampling diversity, which can enlarge the unambiguous delay estimation range and mitigate range ambiguities. Similar opportunities exist in TDMA and SDMA systems. Consequently, future multi-UE sensing systems may require sensing-aware multiple-access design, where communication resource allocation is jointly optimized with sensing objectives. 
+
+# 3. MULTI-UE SENSING SIGNAL PROCESSING FRAMEWORK 
+
+Realizing the potential of multi-UE sensing requires a signal processing framework capable of transforming heterogeneous observations collected from distributed UEs into reliable environmental perception. As illustrated in Fig. 2, in uplink-only networked sensing, this process involves several interconnected modules spanning synchronization, parameter estimation, and information fusion; while downlink-assisted sensing is typically implemented via bistatic sensing and sensing information compression at each UE, and relaying the information to BS for sensing fusion, without requiring direct collaborations between UEs. The framework is fundamentally built upon the correlation structure among sensing observations, which originates from the common targets and propagation environment observed by multiple UEs. Such correlation may be represented via channel correlation matrix, joint probability density functions of sensing parameters of the propagation paths, and expressions linked to common target geometry and bistatic relationships. 
+
+In principle, signals corresponding to both pilots and random data payloads can be exploited for sensing, similar to conventional bistatic sensing systems [1,7]. However, the use of data payloads in multi-UE sensing introduces additional challenges. Firstly, it is generally difficult to directly apply conventional radar-like correlation or matched-filter processing to the received time-domain signal, which consists of superimposed transmissions from multiple users propagated through different channels. Consequently, sensing often needs to be performed after transforming the received signal into a domain where different users become separable, such as the frequency, spatial, or code domain. Explicit decoding or removal of the data symbols, however, may not always be necessary. In SDMA systems, payload-based sensing may be further affected by residual multi-user interference and imperfect user separation. When the decision-directed method is used, decoding errors and signal reconstruction uncertainties can distort the correlation structure among sensing observations from different UEs, reducing the effectiveness of correlation-aware parameter estimation and multi-view fusion. 
+
+Hereafter, we mainly refer to the use of channel state information (CSI) estimated from pilots for sensing. At the receiver side, the processing pipeline typically begins with bistatic offset cancellation to mitigate the effects of clock asynchronism and UE-dependent sensing offsets. Correlation-aware sensing parameter estimation is then performed to jointly infer target-related parameters from multiple observations. Finally, multi-view fusion combines information collected from different UEs, possibly from both downlink and uplink, into a unified representation of the environment, enabling enhanced localization, tracking, imaging, and situational awareness. Together, these modules form the core signal processing framework for multi-UE sensing and constitute the focus of this section. 
+
+While the above modules form the core signal processing framework, several other important functions are also essential for realizing practical multi-UE sensing systems. In particular, many networked sensing applications rely on knowledge of the UE geometry, including UE locations, orientations, and synchronization states. When accurate UE state information is unavailable, sensing may need to rely on relative measurements or higher-level feature and semantic fusion. As many of these problems remain largely open, they are discussed separately in Section 4. 
+
+3.1 Synchronization and Bistatic Offsets Cancellation 
+
+Synchronization is one of the fundamental challenges in multi-UE networked sensing. Sensing observations collected from bistatic communication systems are affected by various synchronization mismatches induced by clock offsets, including carrier frequency offsets, phase offsets, and timing offsets [7]. These offsets are particularly problematic in multi-UE sensing because they vary across UEs and may be significantly larger than the target-induced variations of interest. Without proper compensation, the resulting sensing parameters can be severely distorted, obscuring the geometric relationships 
+
+Fig. 2 Block diagram showing major sensing signal processing framework for uplink-only networked sensing. 
+
+Bi-static Offsets Cancellation Multi-view Fusion Network Joint Sensing Parameter Estimation Correlation model/Prior RF Point Cloud Output / Sensing Application Grouped UEs BS Resource Optimization Optional Tx Localization Extracted Downlink sensing info 
+
+Uplink signals 5
+
+among observations from different UEs. This not only complicates sensing parameter association and localization, but also prevents coherent sensing fusion and limits the achievable gains from multi-view processing. Therefore, suppressing synchronization-related distortions while preserving target-dependent information is a critical prerequisite for networked sensing in all of the three architectures discussed in Section 2. 
+
+Recent studies have shown that many of these offsets can be effectively mitigated through per-subcarrier processing in multicarrier communication systems [7]. Representative approaches include cross-correlation, as well as signal-ratio processing, based on CSI between received signals and a locally generated reference signal. The reference signal can be directly from the received signal at one antenna or subcarrier, or constructed corresponding to a dominating path or, more advanced, a signal subspace [8]. By exploiting their common offsets, these operations can largely eliminate unknown transmitter- and receiver-dependent offsets while preserving relative delay, Doppler, and angular information associated with targets. 
+
+The implementation of offset suppression depends on the adopted multiple-access scheme, although the principled approach above can be applied. In TDMA systems, processing can be performed independently for each UE transmission interval. In OFDMA systems, offset cancellation is typically carried out on a per-subcarrier basis before combining observations across frequency resources. In SDMA systems, synchronization processing is often integrated with spatial separation and beamforming operations. Despite these architectural differences, the underlying objective remains the same: transforming heterogeneous multi-UE observations into a common sensing representation that is largely invariant to communication-specific synchronization errors. 
+
+However, these operations often convert absolute sensing parameters into relative measurements. Recovering absolute sensing parameters generally requires additional prior information, such as a known reference or anchor path, calibration, or bidirectional signaling. While beneficial for offset suppression, relative sensing parameters may also distort or partially remove the correlation structure required for multi-UE sensing. Therefore, it is crucial to design processing methods that eliminate synchronization-induced offsets while preserving the target-dependent geometric relationships among sensing observations. An example is provided in [9], where the correlation among sensing parameters is retained through the known delay of a constructed reference signal. Extending such approaches to more general scenarios without reliable prior information remains an open research challenge. 
+
+3.2 Sensing Parameter Estimation with Correlation Exploitation 
+
+Following synchronization and offset suppression, the next key step is to jointly estimate sensing parameters, such as delay, Doppler, and angles from multi-UE observations. A distinctive feature of multi-UE sensing is that these parameters are not independent across UEs, but linked by common target geometry and motion. 
+
+Exploiting such correlation can significantly improve estimation accuracy, robustness, and target separability. Depending on the available prior information and system requirements, various correlation-aware estimation approaches may be adopted. Table 2 summarizes representative correlation-aware parameter estimation techniques for multi-UE sensing. Structured sparse recovery methods exploit common target support across multiple UEs, while statistical estimation techniques incorporate prior knowledge on target motion, UE locations, and sensing uncertainties. Subspace-based approaches leverage common signal subspaces and covariance structures across UEs to improve resolution and estimation performance. More recently, learning-assisted methods have emerged as a promising framework for capturing complex spatial and temporal correlations that are difficult to model analytically. 
+
+Figure 3 illustrates the potential benefits of correlation-aware sensing parameter estimation using the uplink multi-UE sensing framework in [ 9],  where each UE occupies 128 localized subcarriers in an OFDMA system.  By applying Bayesian compressive sensing to jointly exploit the propagation-delay correlation among nearby UEs observing a common target, the BS can achieve substantially higher estimation accuracy than conventional independent per-UE processing approaches.  In general, future sensing systems are expected to jointly exploit geometric consistency, statistical priors, temporal continuity, and multi-view observations, thereby transforming multi-UE sensing from a collection of independent bistatic links into a unified networked sensing system. 
+
+3.3 Multi-view Fusion 
+
+Fig. 3 Sensing parameter estimation accuracy versus the number of jointly processed UEs in uplink-only multi-UE sensing. Solid and dashed curves are for multi-UE sensing and the baseline scheme using individual UE’s signals, respectively. Curves with square and circle marks are for Doppler and delay estimates respectively. System setup is similar to those in [9], with SNR=10 dB. 6
+
+Multi-view fusion aims to combine sensing information collected from multiple UEs, including both uplink and downlink observations when available, into a unified and more comprehensive representation of the environment and deliver sensing applications. While correlation-aware parameter estimation exploits information across UEs to improve sensing parameter estimation, multi-view fusion operates at a higher level by jointly integrating observations from multiple spatial perspectives to improve target localization, tracking, imaging, and environmental perception. 
+
+Multi-view fusion can be performed at different levels of abstraction,  similar to collaborative sensing frameworks discussed in [2, 3], but under more stringent overhead constraints. It ranges from raw received signals to high-level semantic representations, requiring different communication overhead requirements when downlink-assisted sensing is involved. At the measurement level, sensing parameters such as delay, Doppler, and angle estimates obtained from multiple UEs using the techniques described in Section 3.2 are jointly processed to improve sensing performance. Such approaches preserve the maximum amount of sensing information but typically require accurate parameter association and synchronization. Alternatively, feature-level fusion combines higher-level sensing representations, such as range-Doppler maps, occupancy maps, or learned sensing embeddings. Compared with measurement-level fusion, feature-level fusion offers a more favorable trade-off between sensing performance and communication overhead, making it attractive for practical deployments. At an even higher level, semantic-level fusion [4] integrates task-relevant information extracted from multiple UEs, such as object identities, activities, intentions, or scene descriptions, enabling network-native perception while further reducing communication overhead. 
+
+Multi-view fusion can be realized using a variety of techniques depending on the fusion level and the available prior information. Measurement- and feature-level fusion are often formulated as probabilistic inference problems, where observations collected from multiple UEs are jointly processed to estimate target states or environmental maps. Such fusion can be implemented through Bayesian inference, factor graphs, and message-passing frameworks that have been extensively studied in cooperative localization and distributed inference systems [10]. More recently, graph-based and learning-assisted fusion approaches have attracted growing interest due to their ability to capture complex relationships among heterogeneous sensing observations and network topologies. Developing scalable fusion frameworks that effectively integrate heterogeneous sensing information across multiple abstraction levels remains an important research direction for future multi-UE sensing systems. 
+
+# 4. CHALLENGES AND OPEN RESEARCH PROBLEMS 
+
+Multi-UE sensing remains at an early stage of development, and many fundamental challenges must be addressed before it can be practically deployed. Many challenges identified for cooperative ISAC networks [6] remain relevant but are further complicated by the large number and dynamic nature of participating UEs. Table 3 provides an overview of the major open research challenges in multi-UE sensing, several of which are elaborated upon in the following subsections. 
+
+4.1 Correlation Modelling and Performance Characterization 
+
+While sensing channel modelling is a general challenge in ISAC  [5] , multi-UE sensing introduces the additional problem of characterizing and quantifying the correlation structure among observations collected from distributed UEs, which underpins correlation-aware estimation, fusion, and resource optimization. While the existence of correlation originates from common targets and propagation environments, its characteristics depend on numerous factors, including UE distribution, target location and motion, sensing geometry, channel propagation, and the adopted multiple-access scheme. 
+
+Category  Representative Techniques 
+
+Correlation / Prior Exploited  Key Advantages  Key Limitations 
+
+Geometry-Constrained and Structured Sparse Recovery 
+
+Geometric fitting, Joint sparsity, MMV-CS, Sparse Bayesian Learning 
+
+Common target geometry and bistatic relationships, structured sparsity across UEs 
+
+Effective with limited sensing resources; naturally exploits shared targets 
+
+Often nonlinear and nonconvex relationship; Grid mismatch; complexity grows with parameter dimension 
+
+Statistical Estimation 
+
+Joint ML, MAP, Bayesian estimation and tracking 
+
+Target statistics, UE locations, motion priors 
+
+Systematically incorporates prior knowledge and uncertainty 
+
+Requires accurate statistical models; high computational cost 
+
+Subspace-Based Estimation 
+
+Joint MUSIC, Distributed MUSIC, ESPRIT, Tensor-ESPRIT 
+
+Common subspaces, covariance structures, geometric constraints 
+
+High-resolution estimation; mature technology, no sparse discretization 
+
+Requires sufficient SNR and snapshots;  Limited ability  to incorporate statistical priors and uncertainty models 
+
+Learning-Assisted Estimation 
+
+Deep unfolding, GNNs, physics-informed learning 
+
+Learned spatial, temporal, and geometric relationships 
+
+Captures complex correlations and nonlinearities 
+
+Requires training data and generalization capability 
+
+Table 2 Comparison of Techniques that can exploit correlation between UEs for sensing. 7
+
+Developing accurate correlation models is therefore essential for designing correlation-aware estimation, fusion, and resource allocation algorithms. Such models may be established through analytical approaches, such as geometric and ray-tracing-based modelling, or through empirical studies using measurement data and learning-based techniques. Depending on the application, correlation may be characterized through deterministic geometric relationships, statistical correlation coefficients, covariance structures, joint probability density functions, or target-motion and environmental priors. 
+
+Beyond modelling, a rigorous theoretical framework is needed to characterize the sensing performance achievable by multi-UE sensing systems. Important questions include how sensing accuracy and target resolution scale with the number of UEs, the impact of UE density and spatial distribution, and the tradeoffs among sensing coverage, resolution, robustness, and communication overhead. Performance bounds, such as the Cramér-Rao lower bound and information-theoretic metrics, can provide valuable insights into the benefits and limitations of multi-view sensing. Establishing such theoretical foundations will not only guide system design but also reveal the fundamental gains achievable through correlation exploitation and multi-view fusion in future perceptive mobile networks. 
+
+4.2 Sensing Parameter Association and Tracking 
+
+A key challenge in multi-UE sensing is associating typically jointly estimated sensing parameters from UEs with their corresponding physical targets and identify common ones, unless they are automatically associated during the estimation [9]. The problem becomes particularly challenging in dense environments containing multiple targets, clutter, missed detections, and heterogeneous sensing observations. Furthermore, because each UE forms a distinct bistatic sensing geometry and may only observe a subset of targets, sensing measurements collected across the network are often incomplete and partially overlapping. 
+
+To address this challenge, future multi-UE sensing systems may exploit geometric consistency among sensing parameters, such as delay-Doppler-angle-pathloss relationships and common target localization constraints, to associate observations across UEs. Classical probabilistic approaches, including joint probabilistic data association, multiple hypothesis tracking, and random finite set based methods, provide powerful tools for handling uncertainty, clutter, and target dynamics. Recent ISAC research has begun investigating multi-target detection and tracking in practical 5G networks, distributed sensing systems, and cell-free architectures, where sensing observations collected from multiple nodes are jointly exploited for localization and tracking [2, 11]. Nevertheless, robust association of heterogeneous observations across dynamically changing UEs remains largely unexplored. Developing scalable association and tracking techniques that jointly exploit geometric, statistical, temporal, and semantic information therefore remains a critical research challenge for practical multi-UE sensing systems. 
+
+4.3 Sensing Information Compression at UEs 
+
+In downlink-assisted and hybrid multi-UE sensing, a potentially large number of UEs may participate in sensing, creating significant communication overhead when transmitting sensing information to the network for fusion. Consequently, efficient sensing information compression becomes essential for scalable multi-UE sensing. 
+
+Research Topics  Key Challenges  Potential Approaches  Impact on System 
+
+Correlation Modelling 
+
+Quantifying inter-UE sensing correlation under realistic geometries and mobility 
+
+Geometric modelling, stochastic geometry, ray tracing, learning-based modelling 
+
+Foundation for estimation, fusion, grouping, and resource allocation 
+
+Performance Characterization 
+
+Understanding achievable gains and multi-target separability from multi-view diversity 
+
+CRB, Ziv-Zakai bounds, information-theoretic analysis 
+
+Guides system design and UE deployment 
+
+Parameter Association and Tracking 
+
+Associating heterogeneous observations with common targets 
+
+JPDA, MHT, RFS filters, graph-based learning 
+
+Reliable localization and tracking 
+
+Sensing Information Compression 
+
+Reducing UE feedback overhead while preserving sensing utility 
+
+Compressive sensing, semantic sensing, federated learning, task-oriented compression 
+
+Scalability of downlink and hybrid sensing 
+
+UE Grouping and Resource Optimization 
+
+Selecting the most informative UEs and resources 
+
+Correlation-aware scheduling, optimization, reinforcement learning 
+
+Improves sensing efficiency and network utilization 
+
+UE Localization 
+
+Obtaining accurate UE positions, orientations, and synchronization states for sensing 
+
+Cooperative localization, anchor-assisted positioning, joint Tx-target localization 
+
+Enables target localization, imaging, association, fusion, and correlation exploitation 
+
+Security and Privacy 
+
+Preventing malicious sensing reports and protecting user information 
+
+Trust management, authentication, privacy-preserving sensing 
+
+Reliable and trustworthy sensing services 
+
+Table 3 Major Open Research Problems in Multi-UE Sensing. 8
+
+Unlike conventional source compression, the objective is not necessarily to reconstruct the original sensing measurements, but rather to preserve the information relevant to subsequent tasks such as parameter association, target tracking, and multi-view fusion. Potential approaches include compressive sensing, low-dimensional feature extraction, task-oriented compression, semantic sensing, federated learning, and distributed edge intelligence, where UEs transmit only the most informative sensing parameters, latent features, or semantic representations instead of raw sensing data. Existing studies on CSI compression for large-scale WiFi sensing [12 ] and task-oriented sensing-communication-computation frameworks provide useful insights, but the design of compression schemes that explicitly account for multi-view correlation and fusion performance remains largely unexplored. Developing task-aware and correlation-aware sensing compression techniques therefore represents an important research direction for future multi-UE sensing systems. 
+
+4.4 UE Grouping, Communication-Sensing Resource Coupling and Optimization 
+
+A unique challenge in multi-UE sensing is UE grouping and participation selection. Since different UEs may contribute vastly different sensing information depending on their locations, sensing geometries, propagation conditions, and target visibility, activating all available UEs is often neither necessary nor efficient. Instead, future sensing systems may dynamically select and group UEs to maximize sensing utility while limiting communication overhead and computational complexity. Such grouping decisions may exploit estimated sensing correlation, geometric diversity, target observability, and predicted sensing contribution, enabling the network to balance sensing performance and resource consumption. 
+
+This coupling creates new opportunities for sensing-aware network optimization. Future systems may jointly optimize communication and sensing objectives by selecting and grouping suitable UEs, allocating sensing-oriented time-frequency-spatial resources, and exploiting correlation among UEs to maximize sensing utility while minimizing communication overhead. Such optimization critically depends on accurate correlation modelling and performance characterization, which can quantify the sensing contribution of individual UEs and predict the sensing gains achievable through multi-view diversity and correlation exploitation. Furthermore, sensing requirements may be dynamically incorporated into communication resource management [5], enabling adaptive sensing coverage, tracking accuracy, and environmental awareness according to network conditions and application demands. Developing scalable cross-layer optimization frameworks that jointly integrate correlation modelling, performance characterization, UE grouping, resource allocation, and sensing fusion remains an important open research problem for future multi-UE sensing networks. 
+
+4.5 Other Open Research Problems 
+
+Several other important research challenges remain largely unexplored. First, many sensing applications require accurate knowledge of UE locations to properly interpret sensing observations and localize targets. The availability of calibrated UE positions, orientations, and synchronization states fundamentally affects whether absolute or only relative sensing information can be recovered. Due to privacy, UEs may not be willing to share their location information with BS. In addition to cooperative localization via multiple BSs, exploitation of known anchor points near the BS or joint UE and targets localization is also an option [10, 13]. Second, the distributed nature of multi-UE sensing introduces new security and privacy concerns [14], including spoofed sensing reports, malicious participants, adversarial attacks, and potential leakage of user location and environmental information. Furthermore, practical deployments must cope with heterogeneous device capabilities, varying sensing quality, and the scalability challenges associated with massive numbers of participating UEs. Beyond signal processing, protocol support for sensing signaling, reporting, uncertainty metadata, privacy, and UE scheduling will also be important for practical multi-UE sensing deployment. Addressing these issues will be essential for realizing reliable and trustworthy large-scale multi-UE sensing systems. 
+
+# 5. CONCLUSION 
+
+This article introduced multi-UE sensing as a scalable networked sensing paradigm for future perceptive mobile networks. Representative architectures, signal processing frameworks, and key enabling technologies were presented, together with several important open research challenges. Looking ahead, multi-UE sensing has the potential to become a fundamental enabler for large-scale outdoor sensing in future wireless networks, where numerous targets, scatterers, and interference sources coexist in highly dynamic environments. By leveraging multi-view diversity and correlation-aware processing across massive numbers of distributed UEs, it offers a promising pathway toward robust target detection, separation, identification, and tracking, paving the way for network-native environmental perception in future integrated sensing and communication systems. 
+
+# REFERENCES                            
+
+> 1. J. A. Zhang et al., "Enabling Joint Communication and Radar Sensing in Mobile Networks -ASurvey," in IEEE Communications Surveys & Tutorials, 24(1), pp. 306-345, 2022
+> 2. L. Xie, et al., "Collaborative Sensing in Perceptive Mobile Networks: Opportunities and Challenges," in IEEE Wireless Communications, 30 (1), pp. 16-23, February 2023
+> 3. Z. Wei et al., "Integrated Sensing and Communication Enabled Multiple Base Stations Cooperative Sensing Towards 6G," in IEEE Network, 38 (4), pp. 207-215, July 2024
+> 4. E. C. Strinati, et al., "Toward Distributed and Intelligent Integrated Sensing and Communications for 6G Networks," in IEEE Wireless Communications, 32(1), pp. 60-67, February 2025
+> 5. Y. Jiang, et al., "Electromagnetic Property Sensing in ISAC With Multiple Base Stations: Algorithm, Pilot Design, and Performance
+
+9
+
+Analysis," in IEEE Transactions on Wireless Communications, 24 (4), pp. 3400-3416, April 2025 
+
+6. K. Meng,  et al. , "Cooperative ISAC Networks: Opportunities and Challenges," in IEEE Wireless Communications, 32 (3), pp. 212-219, June 2025 
+
+7. K. Wu et al., "Sensing in Bistatic ISAC Systems with Clock Asynchronism: A signal processing perspective," in IEEE Signal Processing Magazine, vol. 41, no. 5, pp. 31-43, Sept. 2024 
+
+8. J. Zhao, et al., "Subspace-Based Super-Resolution Sensing for Bistatic ISAC With Clock Asynchronism," in IEEE Journal on Selected Areas in Communications, vol. 44, pp. 449-467, 2026 
+
+9. J. Bao, et al, “Uplink Networked Sensing via Multiuser Correlation Exploitation”, arXiv:2603.16442, accessed in July 2026, 
+
+10. H. Sallouha, et al, "On the Ground and in the Sky: A Tutorial on Radio Localization in Ground-Air-Space Networks," in IEEE Communications Surveys & Tutorials, 27(1), pp. 218-258, 2025 
+
+11. S. Liesegang, et al., "Scalable ISAC for Multi-Target Detection and Tracking in Cell-Free Massive MIMO: A Unified Framework," in IEEE TCOM, vol. 74, pp. 2777-2793, 2026 
+
+12. J. Yang, et al., "EfficientFi: Toward Large-Scale Lightweight WiFi Sensing via CSI Compression," in IEEE IoT Journal, 9 (15), pp. 13086-13095, 2022 
+
+13. Xianzhen Guo, et al., “User Equipment Assisted Localization for 6G Integrated Sensing and Communication”, arXiv:2312.13013v2, accessed in July 2026 
+
+14. K. Han, et al, "Next-Generation MIMO Transceivers for Integrated Sensing and Communications: Unique Security Vulnerabilities and Solutions," in Proceedings of the IEEE, 2026

@@ -1,0 +1,1904 @@
+Title: Semi-Blind Channel Estimation for Dynamic NTN Systems via Spiked Random Matrix Theory
+
+URL Source: https://arxiv.org/pdf/2608.25694v1
+
+Published Time: Thu, 27 Aug 2026 00:55:59 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+> 1
+
+# Semi-Blind Channel Estimation for Dynamic NTN Systems via Spiked Random Matrix Theory 
+
+Xue Zhang, Graduate Student Member, IEEE , Abla Kammoun, Member, IEEE ,and Mohamed-Slim Alouini, Fellow, IEEE 
+
+Abstract —Semi-blind channel estimation offers an attractive tradeoff between pilot overhead and estimation accuracy in large-scale wireless systems. However, reliable channel acquisition becomes particularly challenging in highly dynamic environments such as non-terrestrial networks (NTNs), where rapidly varying channels and high system dimensionality significantly degrade the performance of conventional covariance-based estimators due to sampling noise. In this paper, we propose a robust semi-blind channel estimation framework for multi-user uplink systems operating in NTN systems. The proposed approach introduces an optimally regularized least-squares formulation that balances training-based information and blind subspace structure. By exploiting the spiked covariance model within a random matrix theory (RMT) framework, we derive a closed-form characterization of the resulting channel mean-squared error and obtain an analytically tractable design of the optimal regularization parameter. The resulting estimator is computa-tionally efficient and particularly well suited to high-dimensional regimes. Simulation results under realistic Third Generation Partnership Project (3GPP) NTN channel models demonstrate substantial performance improvements over conventional semi-blind and training-based estimators. 
+
+Index Terms —Semi-blind channel estimation, non-terrestrial networks (NTNs), dynamic wireless channels, spiked covariance model, random matrix theory (RMT). 
+
+I. I NTRODUCTION 
+
+Future wireless systems, including sixth-generation (6G) networks and non-terrestrial networks (NTNs), are expected to operate under highly dynamic propagation environments, where platform mobility and propagation characteristics can considerably shorten the effective channel coherence inter-val, making reliable channel acquisition particularly challeng-ing. [1]–[3]. To address these challenges, significant research efforts have been devoted to the design of advanced waveforms capable of adapting to dynamic wireless channels. Representa-tive examples include delay–Doppler domain waveforms such as orthogonal time frequency space (OTFS) and orthogonal delay–Doppler division multiplexing (ODDM), chirp-based waveforms such as orthogonal chirp division multiplexing (OCDM) and affine frequency division multiplexing (AFDM), as well as enhanced orthogonal frequency division multiplex-ing (OFDM) variants [4]. These waveform designs aim to exploit the inherent structure of dynamic channels and improve communication robustness in rapidly varying environments. The performance of such advanced waveform systems crit-ically depends on the availability of accurate channel state 
+
+The authors are with Computer, Electrical and Mathematical Sciences and Engineering (CEMSE) Division, Department of Electrical and Computer Engineering, King Abdullah University of Science and Technology (KAUST), Thuwal 23955-6900, Saudi Arabia. (e-mail: xue.zhang@kaust.edu.sa; abla.kammoun@kaust.edu.sa; slim.alouini@kaust.edu.sa). (Corresponding au-thor: Xue Zhang). 
+
+information (CSI) at the receiver. In practice, CSI is ob-tained through channel estimation, which plays a fundamental role in enabling reliable detection and interference mitigation in multiple-input multiple-output (MIMO) systems [5], [6]. However, reliable channel acquisition becomes particularly challenging in dynamic wireless environments and large-scale MIMO systems due to rapidly varying channels and the high dimensionality of the signal space. Channel estimation techniques can generally be categorized into blind and pilot-aided approaches. Blind channel estimation relies solely on received data signals and exploits the statistical properties of the transmitted symbols to recover the channel [7]. Although blind methods can improve spectral efficiency by avoiding pilot overhead, they typically suffer from intrinsic ambiguities and high computational complexity [8]. In contrast, pilot-aided channel estimation inserts predefined training sequences, commonly referred to as pilot symbols, into the transmitted frame to facilitate channel acquisition [9]. While this approach is widely adopted due to its robustness and relatively low com-plexity, the use of pilot symbols inevitably consumes valuable time-frequency resources and reduces spectral efficiency. To balance the advantages and limitations of blind and pilot-aided methods, semi-blind channel estimation has been proposed, which jointly exploits pilot symbols and unknown data symbols to improve estimation accuracy while reducing pilot overhead [10]. Compared with purely blind approaches, semi-blind methods leverage a limited number of pilot symbols to resolve channel ambiguities and enhance estimation reliabil-ity [11]. This property is particularly attractive in large-scale MIMO systems, where channel estimation becomes increas-ingly challenging due to the large number of parameters in-volved. Consequently, semi-blind channel estimation emerges as a promising technique for improving channel acquisition performance without increasing pilot overhead. A substantial body of literature has explored semi-blind channel estimation schemes in multi-user MIMO systems. Among these approaches, maximum-likelihood (ML) esti-mation techniques, particularly those based on expectation-maximization (EM) algorithms, have attracted significant at-tention. In [11], a frequency-domain EM algorithm was proposed for estimating both blind and semi-blind channels for each user in an underdetermined multiple-input single-output (MISO) system. Similarly, the work in [12] investigated two EM-based schemes for semi-blind channel estimation, assuming Gaussian signaling for the unknown data symbols. To further enhance computational efficiency, [13] employed eigenvalue decomposition to accelerate the EM algorithm with a Gaussian prior and leveraged the discrete prior of data symbols to derive a tractable version of the EM procedure. arXiv:2608.25694v1 [eess.SP] 26 Aug 2026 2
+
+In addition to EM-based methods, iterative techniques have also been investigated to compute ML channel estimators. In this context, [14] proposed an iterative two-level optimization loop for jointly estimating channel coefficients and training sequences in MIMO systems. Beyond ML estimators, another class of methods extends blind estimation techniques by incor-porating training sequence information to resolve the inherent matrix ambiguities of blind approaches. For instance, [15] introduced a semi-blind structured signal subspace algorithm to simultaneously reduce computational complexity and min-imize the required training sequence size. Similarly, [16] developed a blind and semi-blind subspace-based algorithm designed to reduce the computational cost, accelerate conver-gence, and achieve accurate channel estimates with a smaller sample size. In parallel with these developments, the authors in [17] studied a simpler semi-blind channel estimation approach initially suggested in [18], which linearly combines the least-squares (LS) fit on the training sequence with the blind subspace criterion introduced in [19]. The resulting estimation criterion in [18] is quadratic, eliminating the need for iterative optimization, and can be interpreted as a regularized least-squares formulation where the statistical structure of the observations acts as a regularization constraint. Motivated by these advantages, the authors in [17] applied the approach to a single-input multiple-output (SIMO) system, deriving a semi-blind channel estimator where the blind subspace criterion serves as the regularization term. Furthermore, an asymptotic analysis was conducted to optimally tune the balance between the blind criterion and the LS fit based on the system design parameters. However, while effective for SIMO systems, this approach does not directly extend to massive MIMO systems under high-dimensional settings, where the large number of antennas, and the associated dimensionality challenges neces-sitate the development of new estimation strategies. In this paper, we investigate the problem of semi-blind channel estimation for uplink multi-user MIMO systems op-erating in dynamic wireless environments, with particular emphasis on NTN scenarios. Specifically, we consider a high-dimensional regime in which the number of antennas, the number of pilot symbols, and the total length of the data transmission block grow large with comparable orders. This regime is practically relevant, as many real-world massive MIMO systems operate under long coherence intervals where the channel remains approximately constant within one coher-ence block [20]. However, in such high-dimensional settings, conventional covariance-based channel estimation techniques often suffer from significant performance degradation due to sampling noise and scalability limitations. To address this, we leverage the statistical structure of the received data covariance matrix, which aligns with the well-known ”spiked model” from random matrix theory (RMT). The spiked model assumes that the population covariance matrix is a low-rank perturbation of a scaled identity matrix, with the scaling factor corresponding to the noise variance, denoted by σ2 
+
+> v
+
+. In this model, the dominant eigenmodes capture the signal subspace, while the remaining eigenmodes, which have eigenvalues equal to σ2 
+
+> v
+
+, correspond to the noise subspace. Such structure enables us to develop a robust semi-blind channel estimation framework. In particular, under the RMT asymptotic regime, we derive an asymptotic expression for the MSE of the semi-blind estimator. By analyzing this expression, we identify the optimal value of the regularization parameter and construct a consistent estimator for it. This, in turn, enables the design of an efficient semi-blind channel estimator whose performance is asymptotically optimal among all choices of the regularization parameter. To the best of our knowledge, the use of spiked covariance models from RMT to design semi-blind channel estimation algorithms for high-dimensional dynamic wireless systems has not been previously investigated. While related works exist, such as [21], which studied optimized spiked-model-based co-variance estimators under rotationally invariant loss functions, and [22], which applied similar concepts to the minimum vari-ance distortionless response (MVDR) beamforming problem, these approaches are not directly applicable to the semi-blind channel estimation problem considered in this work, partic-ularly in large-scale MIMO systems operating in dynamic wireless environments. Motivated by these observations, we develop a new and easily implementable semi-blind channel estimation framework tailored for high-dimensional multi-user MIMO systems, with particular relevance to emerging NTN scenarios and advanced waveform-based communication systems. Our main contributions are summarized as follows:  
+
+> •
+
+We propose a semi-blind channel estimator by minimiz-ing a regularized least-squares cost function that com-bines training sequence-based information with a blind subspace criterion, and derive a closed-form expression for the resulting channel mean squared error (MSE) accordingly.  
+
+> •
+
+We leverage spiked models from random matrix theory to analytically optimize the regularization parameter that balances the contributions of the training-based and blind components, thereby minimizing the MSE and yielding improved channel coefficient estimates.  
+
+> •
+
+We perform numerical simulations in realistic Third Gen-eration Partnership Project (3GPP) NTN environments to validate the accuracy of the proposed asymptotic expressions and to demonstrate the advantages of the semi-blind channel estimator over classical methods in dynamic wireless environments. The remainder of this paper is organized as follows. Sec-tion II introduces the system model. Section III presents the regularized semi-blind channel estimator and derives the corresponding MSE expression. In Section IV, we employ the spiked model from random matrix theory to optimize the regularization parameter for MSE minimization and derive the corresponding optimal channel estimates. Section V provides simulation results under realistic NTN channel models to validate the proposed approach. Finally, Section VI concludes the paper. 
+
+Notations : The vectors (matrices) are denoted by lower-case (upper-case) boldface characters. IM denotes the M × M
+
+identity matrix, and 0 stands for a zero matrix with appropriate dimension. E{·} represents the expectation operator. The trace 3
+
+of A are denoted by tr( A). Superscripts H denote the conjugate transpose. | · | denotes the absolute value. ‖ · ‖ 2
+
+stand for the l2 norm. A  0 is equivalent to A being positive semidefinite. δx denotes the Dirac measure at point x. For a sequence of random variables (Xn)n∈N and a random variable 
+
+X, we write 
+
+Xna.s. 
+
+−−−−−→  
+
+> N→+∞
+
+X, and Xn
+
+> D
+
+−−−−−→  
+
+> N→+∞
+
+X, (1) to indicate that Xn converges to X almost surely and in distribution, respectively. O(·) represents the convolution Big-O notation. II. S YSTEM MODEL 
+
+We consider a single-cell uplink multi-user MIMO sys-tem where a base station (BS) equipped with M antennas communicates with K single-antenna users, with K < M .Such a setting naturally arises in emerging wireless systems operating over highly dynamic propagation environments, in-cluding NTNs and high-mobility communication scenarios. The channel matrix between the BS and the users is denoted by G ∈ CM×K . We consider a multicarrier transmission framework, which encompasses a wide class of advanced waveform designs proposed for dynamic wireless channels. In particular, OFDM can be viewed as a representative case, and we adopt it here for analytical tractability. For each subcarrier, we use a narrowband (flat) fading approximation so that the channel on that subcarrier is fully characterized by G. We adopt a block-fading model in which G remains constant over a coherence block of N symbols and changes independently from block to block. The uplink transmission within each coherence block consists of L pilot symbols followed by 
+
+(N − L) data symbols. The received signal at the BS on a given subcarrier at time n is modeled as [12] 
+
+y[n] = Gs [n] + v[n], (2) where for n = 0 , . . . , L − 1, the transmitted vectors s(n) = [s1(n), . . . , s K (n)] T correspond to known pilot symbols, while for n = L, . . . , N −1 they represent unknown data sym-bols with unit average power, i.e., E{s(n)s(n)H } = PsIK .The noise vectors are modeled as v(n) ∼ CN (0, σ 2 
+
+> v
+
+IM ). Let 
+
+Sp = [ s(0) , . . . , s(L − 1)] and Sd = [ s(L), . . . , s(N − 1)] 
+
+denote the pilot and data symbol matrices within the coher-ence block, respectively. The complete transmitted symbol matrix is therefore given by S = [ Sp, Sd], and the received signal and noise matrices decompose as Y = [ Yp, Yd] and 
+
+V = [ Vp, Vd], respectively. The following assumption formalizes the statistical proper-ties of the pilot and data symbols used in our model. 
+
+Assumption 1. We assume that the pilot sequences are orthog-onal such that SpSHp = aL IK , where a denotes the average pilot transmit power per user. The unknown symbol vectors sn,
+
+n = L, · · · , N − 1, are independent with independent entries and covariance PsIK .
+
+III. S EMI -BLIND CRITERION 
+
+This section develops the semi-blind channel estimation criterion used for receiver design in dynamic multi-user MIMO systems. In the case of unknown data symbols, the covariance matrix of the received signal y(n) for n = L, . . . , N − 1 is defined as 
+
+R =E{y(n)y(n)H } = PsGG H + σ2 
+
+> v
+
+IM . (3) Applying eigen-decomposition to R yields 
+
+R = UsΛΛΛsUHs + σ2 
+
+> v
+
+UnUHn , (4) where ΛΛΛs is a K × K diagonal matrix containing the largest eigenvalues of R, Us is a M × K matrix that contains the eigenvectors corresponding to the K largest eigenvalues, and 
+
+Un is a M × (M − K) matrix that contains the eigenvec-tors associated with the smallest eigenvalue σ2 
+
+> v
+
+. Thus the eigenvalues and eigenvectors of R naturally split into two orthogonal subspaces: the signal subspace spanned by Us, and the noise subspace spanned by Un. A key property exploited by subspace-based identification algorithms [23]–[26] is that any vector belonging to the signal subspace is orthogonal to the noise subspace. In our case, we have 
+
+gHk Un = 0 , (5) for any k = 1 , . . . , K . Consequently, the channel vectors gk,
+
+k = 1 , . . . , K , lie among the directions that minimize the pseudo-spectrum P (g, Un) = gH UnUHn g.Since Un is not known in practice, it must be estimated from the data matrix Yd using its sample covariance matrix: 
+
+ˆR = 1
+
+N − L YdYHd . (6) Performing eigen-decomposition of ˆR, we can obtain the estimated ˆUs and ˆUn by selecting the eigenvectors corre-sponding to the K largest and (M − K) smallest eigenvalues, respectively. Note that the impact of estimation errors can be severe, particularly when the number of unknown sample available for estimation (N −L) is not substantially larger than the observation dimensionality M . To estimate the channel vectors, we search for the most significant minima of the estimated pseudo-spectrum: P (gk, ˆUn) = gHk ˆUn ˆUHn gk [25], i.e., 
+
+ˆgk = arg min   
+
+> ‖gk‖=1
+
+P (gk, ˆUn). (7) Combining all K channel vectors, the blind subspace estimator is given by 
+
+ˆGblind = arg min  
+
+> ‖gk‖=1
+> K
+
+∑
+
+> k=1
+
+P (gk, ˆUn)= arg min tr( GH ˆUn ˆUHn G). (8) On the other hand, when the known pilot symbols are assumed to satisfy SpSHp = aL IK , we have 
+
+YpSHp = GS pSHp + VpSHp , (9) 4
+
+leading to the exact channel expression: 
+
+G = 1
+
+aL YpSHp − 1
+
+aL VpSHp , (10) thus the training-based estimator is given by 
+
+ˆGtraining = arg min 
+
+∥∥∥∥G − 1
+
+aL YpSHp
+
+∥∥∥∥
+
+> 2
+> F
+
+= 1
+
+aL YpSHp . (11) A natural way to construct a semi-blind estimation criterion is to linearly combine the training-based criterion (11) with the blind subspace criterion to obtain [17] 
+
+CSB (G) = λ
+
+∥∥∥∥G − 1
+
+aL YpSHp
+
+∥∥∥∥
+
+> 2
+> F
+
++ (1 − λ)tr( GH ˆUn ˆUHn G),
+
+(12) where λ ∈ [0 , 1] is a regularization parameter that balances the influence of the training data and the blind information. To minimize (12), let 
+
+∂C SB (G)
+
+∂G =2 λ
+
+(
+
+G − 1
+
+aL YpSHp
+
+)
+
++ 2(1 − λ) ˆUn ˆUHn G , 000, (13) then we can obtain channel coefficients estimates as 
+
+ˆG =
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1 1
+
+aL YpSHp . (14) From (10) and (14), the estimation error is given by 
+
+ˆG − G =
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1 (
+
+G + 1
+
+aL VpSHp
+
+)
+
+− G
+
+= − 1 − λλ ˆUn ˆUHn
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1
+
+G
+
++
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1 1
+
+aL VpSHp , (15) then the corresponding MSE is defined as 
+
+MSE( λ) = 1
+
+K E{‖ ˆG − G‖2 
+
+> F
+
+}
+
+= (1 − λ)2
+
+λ2K tr 
+
+(
+
+GH
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1
+
+ˆUn
+
+· ˆUHn
+
+( 1 − λλ ˆUn ˆUHn + IM
+
+)−1
+
+G
+
+)
+
++ σ2
+
+> v
+
+aL tr 
+
+(( 1 − λλ ˆUn ˆUHn + IM
+
+)−2)
+
+. (16) Note that ˆUn and ˆUs are orthogonal projection matrices and satisfy the identity ˆUs ˆUHs + ˆUn ˆUHn = IM , (16) can be further rewritten as (17). It is well known that the estimated channel matrix ˆG can exhibit substantial errors compared to the true channel matrix 
+
+G. A primary source of this error lies in the estimation of the noise subspace ˆUn, which becomes particularly unreliable when the number of antennas M and the number of unknown data samples (N −L) are of the same order of magnitude. This situation frequently arises in large-scale wireless systems op-erating in dynamic propagation environments, where reliable covariance estimation becomes challenging. In the considered massive MIMO system, both M and (N − L) are assumed to be reasonably large, while the number of users K is relatively small and fixed. Under these conditions, the covariance matrix 
+
+R can be characterized as a low-rank (rank-K) perturbation of the identity matrix. From the perspective of RMT, this configuration corresponds to the so-called spiked covariance model. This model has been the subject of extensive recent research [27]–[31], which has provided valuable insights into the statistical behavior of sample covariance matrices with low-rank perturbations. Building on these insights, we propose to incorporate the theoretical properties of spiked covariance models into the design of a new semi-blind channel estimation strategy. To the best of our knowledge, this approach has not been previously explored in this specific context, representing a key contribution of our work. Further details are provided in Section IV. IV. O PTIMIZED CHANNEL MATRIX DESIGN 
+
+In high-mobility and non-stationary propagation environ-ments envisioned for future 6G/NTN systems and advanced waveform receivers, reliable channel acquisition is limited by the accuracy of sample covariance estimation in high dimensions. In this section, we leverage the known spiked covariance structure R to propose an optimized regularization parameter ˆλ∗, based on which an optimized channel matrix 
+
+ˆG∗ is designed to minimize the objective function in (16). 
+
+A. Spiked Covariance Models 
+
+This subsection briefly reviews the main RMT results asso-ciated with spiked covariance models that are relevant to the subsequent analysis and will be repeatedly used throughout the remainder of the paper. The covariance matrix R using eigen-decomposition can be rewritten as 
+
+R = σ2
+
+> v
+
+( K∑
+
+> k=1
+
+tkusk uHsk + IM
+
+)
+
+, (18) which has eigenvalues σ2 
+
+> v
+
+(t1 + 1) , . . . , σ 2 
+
+> v
+
+(tK + 1) , σ 2 
+
+> v
+
+, . . . , σ 2
+
+> v
+
+︸ ︷︷ ︸ 
+
+> M−Ktimes
+
+.Here, tk > 0 for k = 1 , . . . , K , t1σ2 
+
+> v
+
++ σ2 
+
+> v
+
+, . . . , t K σ2 
+
+> v
+
++ σ2
+
+> v
+
+are referred to as ”spiked” eigenvalues, and the associated eigenvectors us1, . . . , usK span the signal subspace Us.Our proposed estimator is designed to exploit this spec-tral structure by manipulating the eigenvalue distribution of the sample covariance matrix. Specifically, ˆR via eigen-decomposition can be given by 
+
+ˆR =
+
+> K
+
+∑
+
+> i=1
+
+ηi ˆusi ˆuHsi +
+
+> M
+
+∑
+
+> i=K+1
+
+ηi ˆuni ˆuHni , (19) where η1 ≥ · · · ≥ ηK denotes the K largest eigenvalue, while 
+
+ηK+1 ≥ · · · ≥ ηM denote the last M − K largest eigenvalue. Here, the vectors ˆusi for i = 1 , . . . , K and ˆuni for i = K +1, . . . , M represent the columns of ˆUs and ˆUn, respectively. 5
+
+MSE( λ) = (1 − λ)2
+
+λ2K tr 
+
+(
+
+GH ( ˆUs ˆUHs + λ ˆUn ˆUHn
+
+)
+
+(IM − ˆUs ˆUHs )
+
+( ˆUs ˆUHs + λ ˆUn ˆUHn
+
+)
+
+G
+
+)
+
++ σ2
+
+> v
+
+aL tr 
+
+(( ˆUs ˆUHs + λ ˆUn ˆUHn
+
+)2)
+
+= (1 − λ)2
+
+K tr 
+
+(
+
+GH
+
+(
+
+IM + 1 − λλ ˆUs ˆUHs
+
+)2
+
+G
+
+)
+
++ σ2 
+
+> v
+
+λ2
+
+aL tr 
+
+((
+
+IM + 1 − λλ ˆUs ˆUHs
+
+)2)
+
+− (1 − λ)2
+
+K tr 
+
+(
+
+GH
+
+(
+
+IM + 1 − λλ ˆUs ˆUHs
+
+)
+
+ˆUs ˆUHs
+
+(
+
+IM + 1 − λλ ˆUs ˆUHs
+
+)
+
+G
+
+)
+
+= (1 − λ)2
+
+K tr 
+
+(
+
+GH (IM − ˆUs ˆUHs )G
+
+)
+
++ σ2 
+
+> v
+
+(λ2M + (1 − λ2)K)
+
+aL 
+
+= (1 − λ)2
+
+K
+
+> K
+
+∑
+
+> k=1
+
+gHk gk − (1 − λ)2
+
+K
+
+> K
+
+∑
+
+> k=1
+> K
+
+∑
+
+> i=1
+
+gHk ˆusi ˆuHsi gk + σ2 
+
+> v
+
+(λ2M + (1 − λ2)K)
+
+aL . (17) Assuming that K remains fixed while all other dimensions 
+
+M , N , and L grow large at the same rate, the sample covari-ance matrix ˆR falls into the framework of a spiked random covariance model. In this regime, the empirical eigenvalue distribution consists of a bulk formed by the smallest M − K
+
+eigenvalues, together with at most K outlier eigenvalues (spikes) that separate from the bulk. The eigenvalue bulk follows the classical Marchenko-Pastur law, whose support and shape are determined by the noise variance and the di-mensional ratio. The remaining eigenvalues correspond to the informative signal components and may escape from the bulk. Their behavior is governed by a well-known phase transition phenomenon: only spikes whose population strength exceeds a critical threshold emerge from the bulk, while weaker spikes remain embedded within it [22], [25], [28], [32]. To make these ideas precise, we introduce the following assumption, which will underlie our study. 
+
+Assumption 2. We assume that the number K of users is fixed, while the number M of antennas, the number L of pilot symbols, and the length N of the whole transmission block go to infinity at the same rate, that M, N, L, N − L → +∞ with 
+
+M/N → α, L/N → β, M/ (N − L) = cM → c for certain 
+
+α, β, c > 0. The number of spikes K is fixed, independently of M and N − L, while t1 > . . . > t K with tK > √c for all large M .
+
+Throughout the paper, the notation −−−−→  
+
+> N→∞
+
+denotes con-vergence under this regime, with N → ∞ standing for the asymptotic setting introduced above. Let ˆμR(λ) be the empirical spectral distribution (ESD) of eigenvalues of the sample covariance matrix ˆR, defined as 
+
+ˆμR(λ) = 1
+
+M
+
+> M
+
+∑
+
+> i=1
+
+δηi , (20) which can be alternatively characterized through its Stieltjes transform defined as [25] 
+
+ˆmR(z) = 
+
+∫
+
+> R
+
+1
+
+λ − z dμ R(λ) = 1
+
+M
+
+> M
+
+∑
+
+> i=1
+
+1
+
+ηi − z
+
+= 1
+
+M tr 
+
+( ˆR − zIM
+
+)−1
+
+. (21) It is well-known from [33] that for all z ∈ C \ R,
+
+ˆmR(z) a.s. 
+
+−−−−−→  
+
+> N→+∞
+
+m(z), (22) where m(z) is the Stieltjes of a deterministic probability measure called the MP distribution, i.e., 
+
+m(z) = 
+
+∫
+
+> R
+
+1
+
+λ − z dμ (λ), (23) Here, the support of this distribution is the compact interval 
+
+[x−, x +] with x− = σ2 
+
+> v
+
+(1 − √c)2 and x+ = σ2 
+
+> v
+
+(1 + √c)2,which is defined by 
+
+dμ (x)=
+
+(
+
+1 − 1
+
+c
+
+)+
+
+δ0 +
+
+√(x − x−)( x+ − x)2σ2 
+
+> v
+
+cπx 111[x−,x + ](x)dx, 
+
+(24) where (1 − 1
+
+> c
+
+)+ δ0 represents the cardinality of zero eigenval-ues that can occur if N − L > M . Moreover, m(z) satisfies the following fundamental equation 
+
+m(z) = 1
+
+−z(1 + σ2 
+
+> v
+
+cm (z)) + σ2 
+
+> v
+
+(1 − c) . (25) An equivalent statement of (22) is given with the following convergence in distribution 
+
+ˆμR(z) D
+
+−−−−−→  
+
+> N→+∞
+
+μ(z), (26) which holds almost surely, meaning that the empirical eigen-value distribution of ˆR has the same asymptotic behavior as the MP distribution. Practically, for sufficiently large M and 
+
+(N − L), the eigenvalue histogram of ˆR closely approximates the density of the MP distribution. This is illustrated in Fig. 1, where we set N = 2048 , M = N/ 4, L = N/ 4, K = 5 , and 
+
+SNR = 5 dB. 
+
+Spectral behavior of the non-spiked eigenvalues The MP distribution was originally derived as the limiting spectral distribution of the empirical eigenvalues of a pure noise covariance matrix. However, under Assumption 2, where a deterministic perturbation of finite rank is introduced and this rank remains fixed as the matrix dimension increases, the MP law continues to describe the asymptotic distribution of the non-spiked eigenvalues. This well-established result can be 6  
+
+> Fig. 1. Histogram of the eigenvalues of ˆR.
+
+rigorously justified using the Stieltjes transform of the spectral distribution. In the context of RMT, such models with finite-rank perturbations are commonly referred to as spiked models. 
+
+Localization of the spiked eigenvalues. It is well known from the theory of spiked random covariance models (see, e.g., [22], [32], [34]) that any population spike ti satisfying 
+
+ti > √c generates, with probability tending to one as the dimensions grow, a spiked sample eigenvalue ηi that appears as an outlier , i.e., it separates from the bulk of the empirical spectral distribution. In particular, this sample outlier satisfies 
+
+ηi > σ 2 
+
+> v
+
+(1 + √c)2.
+
+Moreover, this outlier eigenvalue converges almost surely to the deterministic limit 
+
+ηi
+
+σ2
+
+> va.s.
+
+−−−−→  
+
+> N→∞
+
+1 + ti + c(1 + ti)
+
+ti
+
+. (27) The above relation is bijective in ti, which makes it possible to construct a strongly consistent estimator of the population spike. Solving (27) for ti yields the following estimator: 
+
+ˆti = ηi/σ 2 
+
+> v
+
++ 1 − cM +
+
+√
+
+(ηi/σ 2 
+
+> v
+
++ 1 − cM )2 − 4 ηi/σ 2
+
+> v
+
+2 − 1,
+
+Under the standard asymptotic regime, this estimator satisfies 
+
+|ˆti − ti| a.s. 
+
+−−−−→  
+
+> N→∞
+
+0,
+
+thereby providing a consistent estimate of the population spike strength. The purpose of this work is to provide a principled guideline for selecting the regularization parameter λ in the semi-blind estimator of (14). A direct optimization of (16) is not feasible, as it involves unobservable quantities such as the true channel matrix G and the true noise subspace. To obtain a practically usable choice of λ, we exploit the asymptotic regime defined in Assumption 2 and characterize the limiting behavior of the MSE. The overall procedure is summarized as follows: 1) Using Assumption 2, we express the MSE in terms of its deterministic limit, which depends only on the pop-ulation spike strengths t1, . . . , t K and their associated signal eigenvectors. 2) We define the oracle regularization parameter ¯λ∗ as the minimizer of this deterministic limit. 3) Finally, we construct a consistent estimator ˆλ∗ of ¯λ∗
+
+by replacing the population quantities with their consis-tent sample-based estimates, namely the sample outlier eigenvalues η1, . . . , η K and the sample signal eigenvec-tors ˆus1, . . . , ˆusK .This yields a fully data-driven choice of the regularization parameter and, consequently, the channel estimate ˆG∗.
+
+B. Deterministic Equivalent M SE (λ) and the Optimal ¯λ∗
+
+To derive the deterministic characterization MSE( λ),We exploit the fact that, under Assumption 2, the projection onto each sample signal eigenvector converges to its projection onto the corresponding population eigenvector. More precisely, for any deterministic vectors a, the projection operator ˆusi ˆuHsi 
+
+satisfies 
+
+aH ˆusi ˆuHsi a − zi aH usi uHsi a a.s. 
+
+−−→ 0,
+
+where zi = 1−c/t 2 
+
+> i
+> 1+ c/t i
+
+. Building on this projection convergence, we obtain the following asymptotic convergence result for the MSE: 
+
+Theorem 1. [Deterministic equivalent] Let Assumption 1 and 2 hold. Then, we have 
+
+sup λ∈[0 ,1] |MSE( λ) − MSE( λ)| a.s. 
+
+−−−−→  
+
+> N→∞
+
+−→ 0. (28) 
+
+where sup denotes the supremum, and 
+
+MSE( λ) = (1 − λ)2σ2
+
+> v
+
+PsK
+
+> K
+
+∑
+
+> k=1
+
+(1 − zk)tk + σ2 
+
+> v
+
+λ2αaβ , (29) 
+
+with zk = 1−c/t 2 
+
+> k
+> 1+ c/t k
+
+.Proof. See Appendix A. To minimize (29) with respect to λ, we formulate the following optimization problem, i.e., 
+
+min  
+
+> λ
+
+MSE( λ). (30) Taking the derivative of MSE( λ) with respect to λ and setting it to zero yields 
+
+∂MSE( λ)
+
+∂λ = 2( λ − 1) σ2
+
+> v
+
+PsK
+
+> K
+
+∑
+
+> k=1
+
+(1 − zk) tk + 2σ2 
+
+> v
+
+λα aβ , 0.
+
+(31) Solving this equation gives the optimal regularization param-eter: 
+
+¯λ∗ = 1 − ασ 2
+
+> vaβσ 2
+> v
+> PsK
+
+∑Kk=1 (1 − zk)tk + ασ 2
+
+> v
+
+. (32) 7
+
+C. Estimated Optimal ˆλ∗ and Proposed Algorithm 
+
+The optimal value ¯λ∗ in (32) depends on unobservable quantities, namely zk and tk for k = 1 , . . . , K , making it impractical for direct implementation. To overcome this limi-tation, we propose a consistent estimator that approximates the optimal ¯λ∗ using observable data. Specifically, the estimator is constructed based on the sample eigenvalues ηi and the corresponding sample eigenvectors ˆusi for i = 1, . . . , K ,enabling practical computation. 
+
+Theorem 2. [Estimated optimal regularization parameter] Under Assumption 1 and 2, we have 
+
+|ˆλ∗ − ¯λ∗| a.s. 
+
+−→ 0, (33) 
+
+where 
+
+ˆλ∗ = 1 − σ2 
+
+> v
+
+α 
+
+> aβσ 2
+> v
+> PsK
+
+∑Kk=1 (1 − ˆzk)ˆ tk + ασ 2
+
+> v
+
+. (34) 
+
+with ˆzi = 1−c/ ˆt2
+
+> i
+> 1+ c/ ˆti
+
+, and 
+
+ˆti = ηi/σ 2 
+
+> v
+
++ 1 − c + √(ηi/σ 2 
+
+> v
+
++ 1 − c)2 − 4ηi/σ 2
+
+> v
+
+2 − 1.
+
+(35) 
+
+Proof. See Appendix B. 
+
+Theorem 3. Under Assumption 1 and 2, we have 
+
+|MSE( ˆλ∗) − MSE( ¯λ∗)| a.s. 
+
+−−−−→  
+
+> N→∞
+
+0, (36) 
+
+where MSE( ˆλ∗) is given by: 
+
+MSE( ˆλ∗) := (1 − ˆλ∗)2σ2
+
+> v
+
+PsK
+
+> K
+
+∑
+
+> k=1
+
+(1 − ˆzk)ˆ tk + σ2 
+
+> v
+
+(ˆλ∗)2αaβ . (37) 
+
+Proof. See Appendix C. Based on Theorems 1, 2, and 3, we propose the following semi-blind estimator: 
+
+ˆG∗ =
+
+(
+
+1 − ˆλ∗
+
+ˆλ∗
+
+ˆUn ˆUHn + IM
+
+)−1
+
+1
+
+aL YpSHp
+
+=
+
+(ˆλ∗IM + (1 − ˆλ∗) ˆUs ˆUHs
+
+) 1
+
+aL YpSHp . (38) According to Theorem 3, this estimator achieves, asymptot-ically, the minimum MSE among all semi-blind estimators of the form given in (14). Having established the key theo-retical results underlying the proposed semi-blind estimator, we summarize the estimation steps in Algorithm 2. A central advantage of this method is its simplicity: the resulting channel estimate is available in closed form and relies solely on simple operations involving the eigenvalues and eigenvectors of the sample covariance matrix. 
+
+Algorithm 1 Proposed Channel Matrix Construction.  
+
+> 1:
+
+Compute the sample covariance matrix ˆR using the un-known data matrix Yd. 
+
+> 2:
+
+Perform eigen-decomposition of ˆR to obtain the ith largest eigenvalue ηi and its corresponding eigenvector ˆusi , for 
+
+i = 1 , . . . , K . 
+
+> 3:
+
+Compute ˆzi = 1−c/ ˆt2
+
+> i
+> 1+ c/ ˆti
+
+using 
+
+ˆti = ηi/σ 2 
+
+> v
+
+− 1 − c + √(ηi/σ 2 
+
+> v
+
++ 1 − c)2 − 4ηi/σ 2
+
+> v
+
+2 . 
+
+> 4:
+
+Form the optimized regularization parameter ˆλ∗:
+
+ˆλ∗ = 1 − σ2 
+
+> v
+
+α
+
+> aβσ 2
+> v
+> PsK
+
+∑Kk=1 (1 − ˆzk)ˆ tk + ασ 2
+
+> v
+
+. 
+
+> 5:
+
+Construct the optimal estimate of the semi-blind channel matrix: 
+
+ˆG∗ =
+
+(ˆλ∗IM + (1 − ˆλ∗) ˆUs ˆUHs
+
+) 1
+
+aL YpSHp . (39) 
+
+D. Scenario with Some ti Satisfying 0 < t i < √c
+
+The previous results are derived under the assumption that, for large M , ti > √c for i = 1 , . . . , K . However, in practical scenarios, it is generally unknown whether some of the spikes fall below this threshold, i.e., whether ti < √c for some 
+
+i. In this subsection, we examine such scenarios and assess how the proposed algorithm performs in the presence of weak spikes. Specifically, suppose there exists K2 < K such that, for sufficiently large M ,
+
+t1 > t 2 > · · · > t K−K2 > √c > t K−K2+1 > · · · > t K > 0.
+
+(40) In this regime, the population eigenvectors usi associated with the weak spikes (i.e., those with ti < √c) no longer asymp-totically align with their sample counterparts ˆusi . Similarly, the sample eigenvalues λi are no longer informative about the corresponding ti, for i = K − K2 + 1 , . . . , K . In particular, the work in [32] shows that: 
+
+uHsi ˆusi ˆuHsi usi a.s. 
+
+−→ 0, i = K − K2 + 1 , . . . , K, (41) while 
+
+ηi
+
+σ2
+
+> va.s.
+
+−→ (1 + √c)2, i = K − K2 + 1 , . . . K, (42) rather than obeying (62). The population covariance matrix is written as 
+
+R = σ2
+
+> v
+
+( K−K2∑
+
+> i=1
+
+tiusi uHsi +
+
+> K
+
+∑ 
+
+> j=K−K2+1
+
+tj usj uHsj 
+
+)
+
+. (43) Following similar steps as in the proof of Theorem 1, and incorporating the asymptotic behaviors in (41) and (42), the 8
+
+deterministic equivalent of MSE( λ) becomes: 
+
+MSE( λ) = (1 − λ)2σ2
+
+> v
+
+PsK
+
+> K
+
+∑
+
+> k=1
+
+tk + λ2σ2 
+
+> v
+
+αaβ 
+
+− (1 − λ)2σ2
+
+> v
+
+PsK
+
+> K−K2
+
+∑
+
+> k=1
+
+zktk, (44) where zk and tk retain the same definitions as in Theorem 1, but now the summation limits are adjusted to reflect the effective number of strong spikes (K − K2).
+
+1
+
+K
+
+> K
+
+∑
+
+> k=1
+
+tk = Ps
+
+σ2 
+
+> v
+
+K
+
+> K
+
+∑
+
+> k=1
+
+gHk gk, (45) In this case, we cannot rely on the estimation of tk from ηk to approximate Ps 
+
+> σ2
+> vK
+
+∑Kk=1 gHk gk. Indeed, for all k ≥ K−K2+1 ,the corresponding ηk converge to the right edge of the bulk, 
+
+σ2 
+
+> v
+
+(1 + √c)2, (46) a limit that is completely independent of the underlying values tk. As a result, the eigenvalue-based method becomes unreliable for estimating 1
+
+> K
+
+∑Kk=1 gHk gk.We therefore turn to the training-based estimator, which, as we show below, remains sufficient to construct a consistent estimate of 1
+
+> K
+
+∑Kk=1 gHk gk.From (11) and the identity SpSHp = aL IK , the training-based channel estimate satisfies 
+
+1
+
+aL SpYHp = GH + SpVHp
+
+aL .
+
+Consequently, 
+
+1
+
+a2L2 SpYHp YpSHp =
+
+(
+
+GH + SpVHp
+
+aL 
+
+) ( 
+
+G + VpSHp
+
+aL 
+
+)
+
+.
+
+Using standard concentration results for bilinear forms of random vectors [32], we have 
+
+SpVHp
+
+aL G a.s. 
+
+−−−−→  
+
+> N→∞
+
+0, GH VpSHp
+
+aL 
+
+> a.s.
+
+−−−−→  
+
+> N→∞
+
+0,
+
+and SpVHp VpSHp
+
+(aL )2 − σ2 
+
+> v
+
+αaβ IKa.s. 
+
+−−−−→  
+
+> N→∞
+
+0.
+
+Therefore, a consistent estimator of 1 
+
+> K
+
+tr( GH G) is 
+
+1
+
+a2L2 tr (SpYHp YpSHp
+
+) − σ2 
+
+> v
+
+αaβ .
+
+Substituting this expression into (44), we obtain the following consistent estimator for the MSE: ̂
+
+MSE( λ) :=(1 − λ)2
+
+( 1
+
+a2L2 tr( SpYHp YpSHp ) − σ2 
+
+> v
+
+αaβ 
+
+)
+
++ λ2σ2 
+
+> v
+
+αaβ − (1 − λ)2σ2
+
+> v
+
+PsK
+
+> K−K2
+
+∑
+
+> k=1
+
+ˆzkˆtk. (47) where in the last term ˆzk and ˆtk, k = 1 , . . . , K −K2 is justified because these indices correspond to spikes lying outside the 
+
+Algorithm 2 Proposed Channel Matrix Construction.  
+
+> 1:
+
+Compute the sample covariance matrix ˆR using the un-known data matrix Yd. 
+
+> 2:
+
+Perform eigen-decomposition of ˆR to obtain the ith largest eigenvalue ηi and its corresponding eigenvector ˆusi , for 
+
+i = 1 , . . . , K . 
+
+> 3:
+
+Estimate K1 := K − K2 the number of spikes by ˆK1 := #{ηi > σ 2 
+
+> v
+
+(1 + √c)2}. 
+
+> 4:
+
+Compute ˆzi = 1−c/ ˆt2
+
+> i
+> 1+ c/ ˆti
+
+, i = 1 , · · · K2 using 
+
+ˆti = ηi/σ 2 
+
+> v
+
+− 1 − c + √(ηi/σ 2 
+
+> v
+
++ 1 − c)2 − 4ηi/σ 2
+
+> v
+
+2 . 
+
+> 5:
+
+Compute ˆλ∗ using the expression in (48).  
+
+> 6:
+
+Construct the optimal estimate of the semi-blind channel matrix: 
+
+ˆG∗ =
+
+(ˆλ∗IM + (1 − ˆλ∗) ˆUs ˆUHs
+
+) 1
+
+aL YpSHp . (50) bulk, for which consistent estimation is possible. Setting λ to the value that minimizes ̂ MSE( λ) yields 
+
+ˆλ∗ = 1 
+
+− σ2 
+
+> v
+
+αβ
+
+( 1 
+
+> aL 2
+
+tr( SpYHp YpSHp ) + σ2 
+
+> vαβ
+
+)
+
+− aβσ 2
+
+> v
+> PsKK−K2
+
+∑
+
+> i=1
+
+ˆziˆti + σ2 
+
+> v
+
+α.
+
+(48) We then define the following semi-blind channel estimator: 
+
+ˆG∗ =
+
+(ˆλ∗IM + (1 − ˆλ∗) ˆUs ˆUHs
+
+) 1
+
+aL YpSHp . (49) Finally, we note that the quantity K − K2, corresponding to the number of spikes satisfying ti ≥ √c, can be directly inferred from the empirical eigenvalue distribution of the sam-ple covariance matrix. In practice, K2 is simply the number of sample eigenvalues that lie above the right edge of the bulk, namely σ2 
+
+> v
+
+(1 + √c)2. Equivalently, the remaining K2
+
+eigenvalues are absorbed into the bulk and thus correspond to the non-detectable spikes. This provides a simple and robust criterion for identifying the detectable components, and Algorithm 2 can be easily adapted to incorporate this detection step. 
+
+E. Complexity Analysis 
+
+In this subsection, we analyze the computational complexity of the two proposed channel matrix construction algorithms, namely Algorithms 1 and 2. The complexity is derived by separately evaluating the major computational components, including sample covariance matrix construction, dominant signal subspace extraction, pilot-based channel estimation, regularization parameter computation, and semi-blind channel reconstruction. Compared with Algorithm 1, Algorithm 2 additionally performs spike detection and evaluates an extra trace term for regularization parameter estimation. The sample covariance matrix ˆR = 1  
+
+> N−L
+
+YdYHd is first constructed, requiring O(M 2(N − L)) operations. Since only 9
+
+10 2 10 3
+
+00.05 0.1 0.15 0.2 0.25 0.3           
+
+> Fig. 2. MSE -performance versus Nwhen K= 3 ,α= 1 /2,β= 1 /8, and
+> SNR = 15 dB.
+
+the K dominant eigenpairs are required by the proposed algorithms, performing a full eigendecomposition is unneces-sary. Instead, a partial eigendecomposition algorithm, such as the power method or the Lanczos method, can be employed to extract the dominant signal subspace. According to [35], the corresponding computational complexity is approximately 
+
+O(M 2K).The pilot-based channel estimate ˆGtraining = 1 
+
+> aL
+
+YpSHp is obtained by multiplying an M × L matrix with an L × K
+
+matrix, resulting in a computational complexity of O(M LK ).The estimated optimal regularization parameter ˆλ∗ is then computed using the extracted dominant eigenvalues together with the pilot-based statistics. For Algorithm 1, the associated scalar operations on the K dominant eigenvalues require only 
+
+O(K) operations. For Algorithm 2, the regularization param-eter additionally involves the trace term tr( SpYHp YpSHp ) = 
+
+‖YpSHp ‖2 
+
+> F
+
+. Since the matrix product YpSHp has already been computed during pilot-based channel estimation, evaluating this trace term requires only an additional O(M K ) operations. This cost is dominated by the O(M LK ) complexity of the pilot-based channel estimation and therefore does not change the overall computational order. Finally, the semi-blind channel estimate is constructed as 
+
+ˆG = ˆλ∗ ˆGtraining + (1 − ˆλ∗) ˆUs ˆUHs ˆGtraining . Rather than explicitly forming the M × M projection matrix ˆUs ˆUHs ,the projection is efficiently evaluated as ˆUs( ˆUHs ˆGtraining ),which requires two matrix multiplications. Since ˆUs ∈ CM×K
+
+and ˆGtraining ∈ CM×K , the corresponding computational complexity is O(M K 2). The overall computational com-plexity of both Algorithm 1 and Algorithm 2 is therefore 
+
+O(M 2(N − L) + M 2K + M LK + M K 2).V. S IMULATION RESULTS 
+
+This section presents numerical simulations to evaluate the asymptotic behavior and finite-dimensional performance of 
+
+0 0.2 0.4 0.6 0.8 10.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2             
+
+> Minimum
+> Fig. 3. MSE -performance versus λwhen K= 3 ,α= 1 /4,β= 1 /8,
+> N= 256 , and SNR = 15 dB.
+
+the proposed semi-blind channel estimation algorithm under representative NTN propagation conditions. The simulations are conducted using the open-source Sionna/OpenNTN frame-work, which implements the standardized NTN channel mod-els specified in 3GPP TR 38.811 [36], [37]. Unless otherwise specified, the Dense Urban (DUR) propagation scenario is considered for uplink transmission. The carrier frequency is set to 2 GHz, the satellite BS is located at an altitude of 
+
+600 km, and the user elevation angle is fixed at 10 ◦. For the considered satellite altitude and elevation angle, the corre-sponding satellite–user slant range is approximately 1930 km. The satellite BS employs a vertically polarized 1×512 aperture antenna array, whereas each user terminal is equipped with a single vertically polarized omnidirectional antenna. According to the selected propagation scenario and satellite–user geom-etry, the adopted NTN channel model generates the corre-sponding propagation characteristics following the statistical procedures specified in 3GPP TR 38.811. These characteristics include the LoS/NLoS condition, path loss, shadow fading, delay spread, path delays, cluster powers, angular spreads, and Doppler effects. For each channel realization, the resulting channel response is mapped to the narrowband signal model considered in this paper, yielding the channel matrix G used for channel estimation. Unless otherwise stated, the theoretical and numerical evaluations adopt the block-fading model, under which G is assumed to remain approximately constant over the pilot and data observations within one effective coherence block. The impact of channel variation within the observation interval is separately investigated in Section V-C. The pilot matrix Sp is chosen to be orthogonal with a power scaling factor a = 1, while the data symbols Sd with Ps = 1
+
+are drawn from a quadrature phase-shift keying (QPSK) constellation. The signal-to-noise ratio (SNR) is defined as 
+
+SNR = (aβ +Ps(1 −β)) ‖G‖2
+
+> F
+> σ2
+> v
+
+. Each simulation point is obtained 10 
+
+10 2 10 3 10 4
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+10 0             
+
+> Fig. 4. NMAE versus Nunder different αand βwith K= 3 and SNR = 15 dB.
+
+5 10 15 20 10 -2 
+
+10 -1            
+
+> Fig. 5. NMAE versus SNR under different Nwith K= 3 ,α= 1 /4, and
+> β= 1 /8.
+
+by averaging over 1000 independent Monte Carlo realizations. 
+
+A. Experiments for Validating Accuracy 
+
+In the first experiment, we investigate the asymptotic be-havior of MSE( ˆλ). Under the asymptotic regime specified by Assumption 2, the system parameters are set as SNR = 15 dB, 
+
+α = M/N = 1 /2, β = L/N = 1 /8, and c = M/ (N − L) = 4/7. The number of users is fixed at K = 3 . As shown in Fig. 2, we compare the results predicted by Theorem 1 and Theorem 2 under both a randomly selected regularization parameter λ and the optimal regularization parameter λ∗. The random value of λ is selected once prior to the Monte Carlo 
+
+5 10 15 20 00.1 0.2 0.3 0.4 0.5              
+
+> 17 18 19 0.01 0.015 0.02
+> Fig. 6. MSE -performance versus SNR when K= 3 ,α= 1 /4,β= 1 /8,and N= 512 .
+
+simulations and kept fixed throughout all Monte Carlo itera-tions. It is observed that as the total transmission block length 
+
+N increases, the MSEs of the proposed algorithm converge to their respective asymptotic limits. Furthermore, Fig. 3 shows the variation of the MSE as a function of λ, ranging from 0
+
+to 1 in increments of 0.01 , and compares the results with the deterministic Cram´ er-Rao bound (CRB) derived in [38]. Here, 
+
+K = 3 , N = 256 , α = 1 /2, β = 1 /4, and SNR = 15 dB. The minimum MSE is achieved at λ = 0 .13 , which is in close agreement with the theoretical optimum ˆλ∗ = 0 .1350 
+
+derived from (32). The corresponding minimum MSE closely approaches the deterministic CRB, demonstrating the high estimation accuracy of the proposed algorithm. Next, we evaluate the accuracy of the asymptotic approx-imation to the MSE by computing the normalized MSE approximation error (NMAE), defined as: 
+
+NMAE = E[|MSE( λ) − MSE( λ)|2]
+
+E[MSE( λ)2] . (51) As shown in Fig. 4 with K = 3 and SNR = 15 dB, the NMAE decreases as the system dimensions increase, confirming the validity and accuracy of the asymptotic expression across various values of α and β. In addition, Fig. 5 presents the variation of the NMAE with respect to SNR, ranging from 5 dB to 20 dB with an increment of 1 dB, under different values of N . The results demonstrate that the asymptotic approximation remains accurate over a broad range of SNRs. 
+
+B. Comparison with Baseline Methods 
+
+In this subsection, we compare the MSE performance of the proposed algorithm with that of the EM algorithm presented in [12] and the subspace-based algorithm proposed in [39]. Fig. 6 illustrates the MSE results for SNR values ranging from 5 dB to 20 dB, in increments of 1 dB. The simulation 11 
+
+2 4 6 8 10 00.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16            
+
+> Fig. 7. MSE -performance versus Kwhen α= 1 /4,β= 1 /8,N= 1024 ,and SNR = 15 dB.
+
+parameters are set to N = 512 , K = 3 , α = 1 /4, and 
+
+β = 1 /8. As the SNR increases, all algorithms show im-proved estimation accuracy. Notably, the proposed algorithm consistently achieves lower MSE across the entire SNR range, demonstrating its superior performance. Additionally, Fig. 7 depicts the MSE performance as the number of users K
+
+increases from 2 to 10 with a step size of 1, with the SNR fixed at 15 dB. It can be observed that the MSE of all three algorithms decreases as K increases. Again, the proposed algorithm consistently outperforms both the EM and subspace-based algorithms across all tested values of K.
+
+C. Impact of Pilot Overhead and Channel Temporal Variation 
+
+We next investigate the impact of channel temporal variation and pilot overhead on the proposed semi-blind estimator. To decouple the effect of pilot overhead from the number of data samples used for covariance estimation, the data interval is fixed at Nd = 128 , while the pilot ratio β =
+
+L/N = L/ (L + Nd) is varied by adjusting the pilot length 
+
+L. The remaining parameters are set to M = 128 , K = 3 ,and SNR = 10 dB. To emulate different effective channel coherence conditions, the channel during the data interval is modeled according to the first-order temporally correlated process G[n] = ρG[n − 1] + √1 − ρ2E[n], where E[n]
+
+denotes an independent channel innovation with the same second-order statistics as G[n], and ρ ∈ [0 , 1] denotes the temporal correlation coefficient. Three correlation levels are considered to represent low, moderate, and high temporal variations, respectively. A smaller ρ corresponds to a faster decay of the temporal channel correlation and hence a shorter effective coherence interval. Fig. 9 shows the MSE of the proposed estimator versus the pilot ratio under different temporal variation levels, to-gether with the pilot-based estimator. As the temporal varia-tion becomes faster, the MSE increases because the received 
+
+0.1 0.2 0.3 0.4 0.5 00.5 11.5 22.5          
+
+> Fig. 8. MSE -performance versus βunder different channel temporal varia-tions when K= 3 ,M= 128 , and SNR = 10 dB.
+
+0.1 0.2 0.3 0.4 0.5 00.5 11.5 22.5               
+
+> Fig. 9. MSE -performance versus βunder moderate channel temporal variation when K= 3 ,M= 128 , and SNR = 10 dB.
+
+data samples become less temporally consistent with the channel observed during the pilot interval, thereby reducing the reliability of the data-aided covariance information. The performance degradation is more pronounced at small pilot ratios, where the proposed estimator relies more strongly on the covariance information extracted from the received data. As β increases, the pilot-based channel estimate becomes more accurate, and the performance differences among the consid-ered temporal variation levels gradually decrease. These results show that the proposed estimator benefits most from data-aided covariance information under relatively slow channel variations, whereas increasing the pilot overhead improves 12            
+
+> 510 15 20 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> 0246810 12 14
+> Fig. 10. BER and achievable sum rate versus SNR with K= 3 ,α= 1 /4,
+> β= 1 /16 , and N= 256 .
+
+robustness as the effective coherence interval becomes shorter. Fig. 8 further compares the proposed estimator with the EM and subspace-based algorithms under the moderate temporal-variation condition. The MSE of all considered methods decreases as the pilot ratio increases due to the improved pilot-based channel estimate. The proposed estimator consistently achieves the lowest MSE over the considered range of pilot ratios, with a more pronounced advantage in the low-pilot-overhead regime. This gain results from the additional co-variance information extracted from the received data, which complements the limited pilot observations. As the pilot ratio increases, all considered methods benefit from the additional pilot observations, while the proposed estimator maintains its performance advantage. Taken together, Figs. 9 and 8 demonstrate the tradeoff between pilot overhead and channel temporal variation. Under relatively slow channel variations, the proposed estimator can exploit the data-aided covariance information more effectively and achieve improved estimation accuracy with limited pilot resources. As the effective coherence interval becomes shorter, the covariance information becomes less reliable and the corre-sponding semi-blind gain decreases. In this regime, increasing the pilot ratio partially compensates for the degradation by providing a more accurate pilot-based channel estimate. These results characterize the practical operating regime of the pro-posed estimator under different channel coherence conditions and pilot-resource constraints. 
+
+D. System-Level Performance Evaluation 
+
+The preceding results evaluate the proposed estimator pri-marily in terms of channel estimation accuracy. To further assess whether the improved estimation accuracy translates into system-level communication gains, we evaluate the bit error rate (BER) and achievable sum rate using the estimated 
+
+0.03 0.04 0.05 0.06 0200 400 600 800 1000 1200 1400                
+
+> 0.03 0.04 0.05 0.06 0100 200
+> Fig. 11. The length Lof the training sequences versus ǫwith K= 3 ,
+> α= 1 /2,N= 512 , and SNR = 15 dB.
+
+CSI. The channel estimates obtained by the proposed semi-blind estimator and the training-based estimator are employed for uplink minimum mean-square error (MMSE) data detec-tion, while perfect CSI is included as a reference. The system parameters are set to N = 256 , K = 3 , α = 1 /4, and 
+
+β = 1 /16 .Fig. 10 shows the BER and achievable sum rate versus SNR. In terms of BER, the proposed estimator consistently outperforms the training-based estimator over the entire con-sidered SNR range and progressively approaches the perfect-CSI performance as the SNR increases. The performance gain becomes more pronounced in the moderate-to-high SNR regime, where residual channel estimation errors have a greater impact on data detection. This result confirms that the MSE improvement achieved by the proposed estimator translates into enhanced detection reliability. For the achievable-rate evaluation, the sum rate is computed from the user SINRs achieved by the MMSE detector and scaled by the data-transmission fraction 1−β to account for the pilot overhead. As shown in Fig. 10, the proposed estimator consistently achieves a higher achievable sum rate than the training-based estimator over the entire considered SNR range and progressively approaches the perfect-CSI reference as the SNR increases. The improved channel estimation accuracy reduces the performance degradation caused by imperfect CSI in MMSE detection, thereby yielding higher spectral efficiency. These results demonstrate that the estimation gain provided by the proposed semi-blind estimator translates into improvements in both detection reliability and spectral effi-ciency. 
+
+E. Evaluation of Pilot Requirements for a Target MSE 
+
+Finally, we demonstrate the practical application of the derived MSE expressions. Given a target MSE value ǫ, these 13 
+
+expressions can be used to determine the number of pilot symbols required to achieve the desired accuracy for both training-based and semi-blind techniques, with all other system parameters N , M , and K held constant. For the training-based scheme, only the pilot symbols are utilized for channel estimation, while the symbol vectors received during data transmission are discarded. Based on (10) and (11), the estimation error is given by 
+
+ˆGtraining − G = 1
+
+aL VpSHp , (52) Then, the corresponding MSE is given as 
+
+MSE training = 1
+
+K E{‖ ˆGtraining − G‖2 
+
+> F
+
+} = σ2 
+
+> v
+
+MaL . (53) This expression along with (37) enable us to determine the number of pilot symbols L required to meet a target MSE level ǫ for the training-based method and the proposed method. Figure 11 depicts the required pilot length L for different target MSE values, with the system parameters set to N = 512 ,
+
+α = 1 /2, K = 3 , and SNR = 15 dB. As expected, with the increase of higher target MSE values, the number of required pilots decreases for both approaches. Notably, the semi-blind method requires fewer than half the pilot symbols compared to the training-based approach to achieve the same target MSE, highlighting its superior efficiency in pilot utilization. VI. C ONCLUSION 
+
+In this paper, we proposed a semi-blind channel estimation method tailored for high-dimensional settings, where the num-ber of unknown data symbols, training symbols, data symbols, and BS antennas grow large simultaneously while the number of users remains fixed. The estimator is formulated as the solution of a quadratic optimization problem whose objective function depends on a regularization parameter that properly weights the blind subspace criterion and the training-based criterion, thereby enabling the estimator to jointly exploit the subspace structure of the received data and the information conveyed by the pilot symbols. Using RMT, we derived an asymptotic characterization of the MSE of the proposed esti-mator and obtained a consistent estimator of the optimal regu-larization parameter. This optimal parameter achieved the right balance between the blind and training-based components, yielding a simple, closed-form, and computationally efficient expression for the semi-blind channel estimator. Our method treated the channel as a deterministic but unknown quantity and did not rely on any underlying statistical distribution, which made it broadly applicable in realistic propagation conditions. To illustrate its practical relevance in realistic NTN environments, we applied the proposed estimator to NTN channel models. We showed that the resulting performance consistently outperformed existing approaches, such as the EM-based semi-blind algorithm, while achieving performance close to the CRB. These results highlight the potential of the proposed framework for reliable channel acquisition in future high-dimensional wireless systems operating over dynamic channels and advanced waveform receivers. APPENDIX APROOF OF THEOREM 1To establish the uniform convergence of |MSE( λ) −
+
+MSE( λ)| to zero, we start by expanding the difference as in (54). Applying the triangle inequality to this decomposition yields the upper bounds stated in (55). We then analyze the asymptotic behavior of each of the three terms in (55) and show that they converge to zero uniformly for all λ ∈ [0 , 1] .1) The first term is exactly zero since: 
+
+> K
+
+∑
+
+> k=1
+
+gHk gk = tr( GH G) = tr( GG H ) = σ2
+
+> v
+
+PsK∑
+
+> k=1
+
+tk. (56) 2) Using the result in [22], [32], we have 
+
+∣∣gHk ˆusi ˆuHsi gk − zigHk usi uHsi gk
+
+∣∣ a.s. 
+
+−→ 0, i = 1 , . . . , K, (57) from which we control the second term in (55) as: 
+
+∣∣∣∣∣
+
+> K
+
+∑
+
+> k=1
+
+( K∑
+
+> i=1
+
+gHk ˆusi ˆuHsi gk − zktk
+
+)∣ ∣∣∣∣
+
+=
+
+∣∣∣∣∣
+
+> K
+
+∑
+
+> k=1
+> K
+
+∑
+
+> i=1
+
+(gHk ˆusi ˆuHsi gk − σ2
+
+> v
+
+Ps
+
+zigHk usi uHsi gk)
+
+∣∣∣∣∣
+
+≤
+
+> K
+
+∑
+
+> k=1
+> K
+
+∑
+
+> i=1
+
+|gHk ˆusi ˆuHsi gk − σ2
+
+> v
+
+Ps
+
+zigHk usi uHsi gk| a.s. 
+
+−→ 0,
+
+(58) where in the second equality we used the fact that: 
+
+> K
+
+∑
+
+> k=1
+> K
+
+∑
+
+> i=1
+
+zigHk usi uHsi gk =
+
+> K
+
+∑
+
+> i=1
+
+ziuHsi 
+
+( K∑
+
+> k=1
+
+gkgHk
+
+)
+
+usi 
+
+=
+
+> K
+
+∑
+
+> i=1
+
+ziuHsi GG H usi 
+
+= σ2
+
+> v
+
+PsK∑
+
+> k=1
+
+zktk. (59) 3) As M/N → α, L/N → β with fixed K, M/L → α/β ,and K/L → 0, which yields 
+
+∣∣∣∣
+
+σ2 
+
+> v
+
+(λ2M + (1 − λ2)K)
+
+aL − σ2 
+
+> v
+
+λ2αaβ 
+
+∣∣∣∣ a.s. 
+
+−−−−→  
+
+> N→∞
+
+0. (60) Combining the asymptotic results for all three terms, and the fact that MSE( λ) is an analytic function with respect to λ, we conclude that 
+
+|MSE( λ) − MSE( λ)| a.s. 
+
+−−−−→  
+
+> N→∞
+
+0. (61) which establishes the uniform convergence of MSE( λ) over 
+
+λ ∈ [0 , 1] .APPENDIX BPROOF OF THEOREM 2Using the results in [22], [32], [34], for ti > √c, ηi satisfies the following convergence: 
+
+ηi
+
+σ2
+
+> va.s.
+
+−→ 1 + ti + c(1 + ti)
+
+ti
+
+, (62) 14 
+
+|MSE( λ) − MSE( λ)|
+
+=
+
+∣∣∣∣∣
+
+(1 − λ)2
+
+K
+
+> K
+
+∑
+
+> k=1
+
+(
+
+gHk gk − σ2
+
+> v
+
+Ps
+
+tk
+
+)
+
++ (1 − λ)2
+
+K
+
+> K
+
+∑
+
+> k=1
+
+(
+
+σ2 
+
+> v
+
+zktk −
+
+> K
+
+∑
+
+> i=1
+
+gHk ˆusi ˆuHsi gk
+
+)
+
++ σ2 
+
+> v
+
+(λ2M + (1 − λ2)K)
+
+aL − σ2 
+
+> v
+
+λ2αaβ 
+
+∣∣∣∣∣ (54) 
+
+≤ (1 − λ)2
+
+K
+
+∣∣∣∣∣
+
+> K
+
+∑
+
+> k=1
+
+(
+
+gHk gk − σ2
+
+> v
+
+Ps
+
+tk
+
+)∣∣∣∣∣ + (1 − λ)2
+
+K
+
+∣∣∣∣∣
+
+> K
+
+∑
+
+> k=1
+
+( K∑
+
+> i=1
+
+gHk ˆusi ˆuHsi gk − σ2
+
+> v
+
+Ps
+
+zktk
+
+)∣∣∣∣∣ +
+
+∣∣∣∣
+
+σ2 
+
+> v
+
+(λ2M + (1 − λ2)K)
+
+aL − σ2 
+
+> v
+
+λ2αaβ 
+
+∣∣∣∣ .
+
+(55) By solving the equation ηi
+
+> σ2
+> v
+
+= 1 + ˆ ti + c(1+ˆ ti)ˆti
+
+, we obtain consistent estimators of ti, i.e., 
+
+|ˆti − ti| a.s. 
+
+−→ 0, i = 1 , . . . , K, (63) where 
+
+ˆti = ηi/σ 2 
+
+> v
+
++ 1 − c + √(ηi/σ 2 
+
+> v
+
++ 1 − c)2 − 4ηi/σ 2
+
+> v
+
+2 − 1.
+
+(64) Finally, using ˆti, a consistent estimator of zi is 
+
+ˆzi = 1 − c/ ˆt2
+
+> i
+
+1 + c/ ˆti
+
+.
+
+Therefore, we obtain consistent estimators ˆλ∗ of the asymptotically-optimal ¯λ∗ by substituting ˆzi and ˆti for zi and 
+
+ti, respectively. APPENDIX CPROOF OF THEOREM 3To begin with, we apply triangle inequality to obtain 
+
+|MSE( ˆλ∗) − MSE( ¯λ∗)| ≤| MSE( ˆλ∗) − MSE( ˆλ∗)|
+
++ |MSE( ˆλ∗) − MSE( ¯λ∗)|. (65) Then we analyze the two terms on the right-hand side sepa-rately. From Theorem 1, we have 
+
+|MSE( ˆλ∗) − MSE( ˆλ∗)|≤ max  
+
+> λ∈[0 ,1]
+
+|MSE( λ) − MSE( λ)| a.s. 
+
+−−−−→  
+
+> N→∞
+
+0. (66) Then from the expression of derivative in (31), we can obtain its upper-bound as 
+
+∂MSE( λ)
+
+∂λ ≤ 2σ2 
+
+> v
+
+αaβ , Q. (67) This implies that MSE( λ) is Lipschitz continuous with con-stant Q on [0 , 1] [40]–[42]. that is 
+
+|MSE( ˆλ∗) − MSE( ¯λ∗)| ≤ Q|ˆλ∗ − ¯λ∗| a.s. 
+
+−→ 0. (68) Combining the two convergence results above, we conclude that |MSE( ˆλ∗) − MSE( ¯λ∗)| a.s. 
+
+−→ 0.REFERENCES [1] X. Zhang, R. Wang, B. Shang, and M.-S. Alouini, “Joint robust secure beamforming designs for ISAC-enabled LEO satellite systems,” in ICC 2024-IEEE International Conference on Communications . IEEE, 2024, pp. 1182–1188. [2] X. Cao, X. Su, P. Yang, Y. Gao, D. O. Wu, and T. Q. Quek, “Survey on near-space information networks: Channel modeling, transmission, and networking perspectives,” IEEE Communications Surveys & Tutorials ,vol. 28, pp. 672–715, 2025. [3] X. Zhang, B. Huang, and M.-S. Alouini, “Design of 3-D beamform-ing and deployment strategies for ISAC-based HAPS systems,” IEEE Transactions on Wireless Communications , vol. 25, pp. 13 228–13 242, 2026. [4] Q. Deng, Y. Ge, and Z. Ding, “A unifying view of OTFS and its many variants,” IEEE Communications Surveys & Tutorials , vol. 27, no. 6, pp. 3561–3586, 2025. [5] C. Wang, E. K. Au, R. D. Murch, W. H. Mow, R. S. Cheng, and V. Lau, “On the performance of the MIMO zero-forcing receiver in the presence of channel estimation error,” IEEE transactions on wireless communications , vol. 6, no. 3, pp. 805–810, 2007. [6] G. Zhou, C. Pan, H. Ren, P. Popovski, and A. L. Swindlehurst, “Channel estimation for RIS-aided multiuser millimeter-wave systems,” IEEE Transactions on Signal Processing , vol. 70, pp. 1478–1492, 2022. [7] S. Noh, Y. Sung, and M. D. Zoltowski, “A new precoder design for blind channel estimation in MIMO-OFDM systems,” IEEE Transactions on Wireless Communications , vol. 13, no. 12, pp. 7011–7024, 2014. [8] L. Tong, G. Xu, and T. Kailath, “Blind identification and equalization based on second-order statistics: A time domain approach,” IEEE Transactions on Information Theory , vol. 40, no. 2, pp. 340–349, 1994. [9] B. Hassibi and B. M. Hochwald, “How much training is needed in multiple-antenna wireless links?” IEEE Transactions on Information Theory , vol. 49, no. 4, pp. 951–963, 2003. [10] B. Srinivas, K. Mawatwal, D. Sen, and S. Chakrabarti, “An iterative semi-blind channel estimation scheme and uplink spectral efficiency of pilot contaminated one-bit massive MIMO systems,” IEEE Transactions on Vehicular Technology , vol. 68, no. 8, pp. 7854–7868, 2019. [11] C. H. Aldana, E. de Carvalho, and J. M. Cioffi, “Channel estimation for multicarrier multiple input single output systems using the EM algorithm,” IEEE Transactions on Signal Processing , vol. 51, no. 12, pp. 3280–3292, 2003. [12] E. Nayebi and B. D. Rao, “Semi-blind channel estimation for multiuser massive MIMO systems,” IEEE Transactions on Signal Processing ,vol. 66, no. 2, pp. 540–553, 2017. [13] M. Al-Shoukairi and B. D. Rao, “Semi-blind channel estimation in MIMO systems with discrete priors on data symbols,” IEEE Signal Processing Letters , vol. 29, pp. 51–54, 2021. [14] M. Abuthinien, S. Chen, and L. Hanzo, “Semi-blind joint maximum likelihood channel estimation and data detection for MIMO systems,” 
+
+IEEE Signal Processing Letters , vol. 15, pp. 202–205, 2008. [15] A. Lawal, K. Abed-Meraim, A. Zerguine, Q. Mayyala, K. N. Aliyu, and A. Muqaibel, “Semi-blind signal estimation using Toeplitz structured-based subspace method,” IEEE Wireless Communications Letters ,vol. 12, no. 8, pp. 1319–1323, 2023. [16] O. Rekik, K. N. Aliyu, B. M. Tuan, K. Abed-Meraim, and N. L. Trung, “Fast subspace-based blind and semi-blind channel estimation for MIMO-OFDM systems,” IEEE Transactions on Wireless Communi-cations , 2024, early access. [17] V. Buchoux, O. Capp´ e, ´E. Moulines, and A. Gorokhov, “On the performance of semi-blind subspace-based channel estimation,” IEEE Transactions on Signal Processing , vol. 48, no. 6, pp. 1750–1759, 2000. 15 
+
+[18] A. Gorokhov and P. Loubaton, “Semi-blind second order identification of convolutive channels,” in 1997 IEEE International Conference on Acoustics, Speech, and Signal Processing , vol. 5. IEEE, 1997, pp. 3905–3908. [19] E. Moulines, P. Duhamel, J.-F. Cardoso, and S. Mayrargue, “Subspace methods for the blind identification of multichannel FIR filters,” IEEE Transactions on signal processing , vol. 43, no. 2, pp. 516–525, 2002. [20] E. Bj¨ ornson, J. Hoydis, L. Sanguinetti et al. , “Massive MIMO networks: Spectral, energy, and hardware efficiency,” Foundations and Trends® in Signal Processing , vol. 11, no. 3-4, pp. 154–655, 2017. [21] I. M. Johnstone and A. Y. Lu, “On consistency and sparsity for principal components analysis in high dimensions,” Journal of the American Statistical Association , vol. 104, no. 486, pp. 682–693, 2009. [22] L. Yang, M. R. McKay, and R. Couillet, “High-dimensional MVDR beamforming: Optimized solutions based on spiked random matrix models,” IEEE Transactions on Signal Processing , vol. 66, no. 7, pp. 1933–1947, 2018. [23] B. A. Johnson, Y. I. Abramovich, and X. Mestre, “MUSIC, G-MUSIC, and maximum-likelihood performance breakdown,” IEEE Transactions on Signal Processing , vol. 56, no. 8, pp. 3944–3958, 2008. [24] X. Mestre and M. ´ A. Lagunas, “Modified subspace algorithms for DoA estimation with large arrays,” IEEE Transactions on Signal Processing ,vol. 56, no. 2, pp. 598–614, 2008. [25] P. Vallet, X. Mestre, and P. Loubaton, “Performance analysis of an improved MUSIC DOA estimator,” IEEE Transactions on Signal Pro-cessing , vol. 63, no. 23, pp. 6407–6422, 2015. [26] X. Zhang, Z. Zheng, W.-Q. Wang, and H. C. So, “DOA estimation of mixed circular and noncircular sources using nonuniform linear array,” 
+
+IEEE Transactions on Aerospace and Electronic Systems , vol. 58, no. 6, pp. 5703–5710, 2022. [27] J. Baik, G. Ben Arous, and S. P´ ech´ e, “Phase transition of the largest eigenvalue for nonnull complex sample covariance matrices,” Ann. Probab. , vol. 33, no. 5, pp. 1643–1697, 2005. [28] J. Baik and J. W. Silverstein, “Eigenvalues of large sample covariance matrices of spiked population models,” Journal of multivariate analysis ,vol. 97, no. 6, pp. 1382–1408, 2006. [29] D. Paul, “Asymptotics of sample eigenstructure for a large dimensional spiked covariance model,” Statistica Sinica , vol. 17, no. 4, pp. 1617– 1642. [30] N. El Karoui, “Tracy-widom limit for the largest eigenvalue of a large class of complex sample covariance matrices,” Ann. Probab. , vol. 35, no. 2, pp. 663–714, 2007. [31] B. Nadler, “Finite sample approximation results for principal component analysis: A matrix perturbation approach,” Ann. Probab. , vol. 36, no. 6, pp. 2719–2817, 2008. [32] R. Couillet and M. Debbah, Random Matrix Methods for Wireless Communications . New York, NY, USA: Cambridge Univ. Presss, 2011. [33] V. A. Marchenko and L. A. Pastur, “Distribution of eigenvalues for some sets of random matrices,” Matematicheskii Sbornik , vol. 114, no. 4, pp. 507–536, 1967. [34] J. Yao, S. Zheng, and Z. Bai, “Sample covariance matrices and high-dimensional data analysis,” Cambridge UP, New York , 2015. [35] G. Xu and T. Kailath, “Fast subspace decomposition,” IEEE Transac-tions on Signal Processing , vol. 42, no. 3, pp. 539–551, 1994. [36] W. 3GPP, “Study on New Radio (NR) to support non-terrestrial net-works,” 3rd Generation Partnership Project (3GPP), Technical Report (TR), TR 38.811 , 2020. [37] T. D¨ ue, M. Vakilifard, C. Bockelmann, D. W¨ ubben, and A. Dekorsy, “An open source channel emulator for non-terrestrial networks,” in Advanced Satellite Multimedia Systems Conference/Signal Processing for Space Communications Workshop (ASMS/SPSC 2025), Sitges, Spain , 2025. [38] X. Zhang, A. Kammoun, and M.-S. Alouini, “Fundamental limits via CRB of semi-blind channel estimation in massive MIMO systems,” IEEE Transactions on Signal Processing , vol. 73, pp. 3572–3587, 2025. [39] B. Zhong, X. Zhu, and E. G. Lim, “Subspace-based semi-blind channel estimation for user-centric cell-free massive MIMO systems,” in 2024 IEEE 99th Vehicular Technology Conference (VTC2024-Spring) . IEEE, 2024, pp. 1–5. [40] J. Lebl, “Basic analysis: Introduction to real analysis,” 2009. [41] Z. Li, W. Ren, X. Liu, and M. Fu, “Consensus of multi-agent systems with general linear and lipschitz nonlinear dynamics using distributed adaptive protocols,” IEEE Transactions on Automatic Control , vol. 58, no. 7, pp. 1786–1791, 2012. [42] M.-M. Z¨ uhlke and D. Kudenko, “Adversarial robustness of neural networks from the perspective of lipschitz calculus: A survey,” ACM Computing Surveys , vol. 57, no. 6, pp. 1–41, 2025.

@@ -1,0 +1,325 @@
+Title: Over-The-Air Extreme Learning Machines with Nonlinear Stacked Intelligent Metasurfaces
+
+URL Source: https://arxiv.org/pdf/2608.27137v1
+
+Published Time: Fri, 28 Aug 2026 01:06:56 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# Over-The-Air Extreme Learning Machines with Nonlinear Stacked Intelligent Metasurfaces 
+
+Kyriakos Stylianopoulos 1, Mattia Fabiani 2,3, Giulia Torcolacci 2,3, Davide Dardari 2,3, George C. Alexandropoulos 1
+
+> 1
+
+Department of Informatics and Telecommunications, National and Kapodistrian University of Athens, Greece 
+
+> 2
+
+DEI, University of Bologna, Italy; 3National Laboratory of Wireless Communications (WiLab), CNIT, Italy e-mails: {kstylianop, alexandg}@di.uoa.gr, {mattia.fabiani5, g.torcolacci, davide.dardari}@unibo.it 
+
+Abstract —The recently envisioned goal-oriented communi-cations paradigm requires machine learning inference to be performed directly on wirelessly transferred data. This paper presents an eXtremely Large (XL) Multiple-Input Multiple-Output (MIMO) system that operates as an Extreme Learn-ing Machine (ELM) to execute Over-The-Air (OTA) binary classification. To reduce hardware complexity, the receiver is equipped with cascaded metasurfaces terminating in a single radio-frequency chain. A front metasurface layer applies a fixed nonlinear response to the incoming signal, acting as the ELM’s activation function. Subsequent tunable linear metasurface layers physically approximate the trained network weights directly in the wave domain. Numerical evaluations across diverse datasets showcase that our XL MIMO architecture achieves classification accuracy comparable to idealized digital models, thereby proving the viability of low-complexity, wave-domain OTA learning. 
+
+Index Terms —Over-the-air inference, extreme learning ma-chines, nonlinear signal processing, XL MIMO, SIM. 
+
+I. I NTRODUCTION 
+
+Future wireless networks will leverage Edge Inference (EI) to jointly train transceiver pairs as end-to-end Machine Learn-ing (ML) models for efficient sensory data inference [1]. By exchanging task-specific representations through the channel, EI overcomes the inefficiencies of conventional decoupled designs in terms of data rate and computational burden, since feature extraction is performed alongside encoding at the Transmitter (TX), while the Receiver (RX) directly infers the target values instead of reconstructing the input data [2], [3]. To further improve computational efficiency, Over-The-Air (OTA) computing exploits the wireless propagation domain by performing computations directly through the superpo-sition of traveling Radio-Frequency (RF) signals [4]. The OTA paradigm has recently attracted interest in wireless ML applications. Specifically, hardware platforms based on Meta-Surfaces (MSs) have been proposed to emulate Deep artificial Neural Network (DNN) layers [2], [3], [5], [6] for OTA inference, which are trained through backpropagation, or to approximate digitally trained DNN weight matrices OTA [7], [8]. Nevertheless, many existing systems still rely on digital processing and lack theoretical foundations. Crucially, most MS-based DNN implementations are limited to performing 
+
+This work has been supported by the SNS JU projects 6G-DISAC and TIMES under the EU’s Horizon Europe research and innovation program under grant agreement numbers 101139130 and 101096307, respectively. The work of G. Torcolacci was funded by an NRRP Ph.D. grant. 
+
+linear operations [9], which significantly constrains the ap-proximation capability of the resulting ML models. Addressing some of these limitations, the work of [10] proposed an eXtremely Large (XL) Multiple-Input Multiple-Output (MIMO) architecture that operates as an Extreme Learning Machine (ELM) [11], enabling the partial execution of DNN computations OTA. In this framework, the wireless channel is exploited as a source of random hidden-layer weights, while the RX analog combiner implements the out-put layer. This approach ensures rapid training and efficient reconfiguration under channel variations, while retaining the universal function approximation capability. However, it faces practical limitations and scalability concerns due to real-valued signal constraints and hardware complexity induced by the use of NonLinear (NL) power amplifiers and numerous RF chains. In this paper, capitalizing on the complex-domain ELM framework [12] and building upon recent NL metamaterial advancements [9], [13], [14], we present an XL-MIMO-ELM system with an RX structure comprising Stacked Intelligent Metasurfaces (SIM) [15], followed by a single antenna and its respective RF chain. The first MS layer interfacing with the MIMO channel is composed of unit cells exhibiting identical fixed NL responses and implements the ELM activation func-tion, while the subsequent linear MS layers realize trainable OTA combining, effectively approximating the digital ELM output weights. The proposed OTA-ELM system enables fast training and minimizes digital processing at the reception side, while significantly reducing the hardware complexity with respect to the XL-MIMO-ELM of [10]. To configure the linear MS layers, we propose two distinct OTA training strategies. The first relies on Projected Gradient Descent (PGD) to approximate the ideal Least-Squares (LS) solution when the received signal at each NL unit cell can be measured. Alternatively, we introduce a black-box Genetic Optimization (GO) approach that only requires the final scalar output at the RF chain, significantly reducing the measurement overhead. The proposed architecture is numerically validated on standard datasets, demonstrating that it approaches the accuracy of ide-alized digital models while being robust to system variations. II. T HE PROPOSED XL MIMO S YSTEM MODEL 
+
+Consider a narrowband XL MIMO system with an Nt-antenna TX and an RX comprising a diffractive receiving MS, arXiv:2608.27137v1 [eess.SP] 27 Aug 2026 followed by an analog combining stage (detailed subsequently) and a single reception RF chain. Instead of performing conven-tional wireless communications, the system is trained end-to-end to act as an OTA function approximator [10]. In particular, given a prior dataset D ≜ {(x(i), z (i))}Di=1 of D input-target pairs, the XL MIMO system is designed to approximate the 
+
+x → z mapping so that the TX observes the input data 
+
+x (not necessarily belonging to D) and the RX estimates its (unobserved) target value z. The system is thus intended to perform EI, with all computational processing performed exclusively OTA, i.e., in the analog/RF domain. We assume that x(i) ∈ (0 , 1) Nt and, without loss of generality, z(i) ∈ { 0, 1}, that is, the dimension of the data observations are equal to the number of TX antennas and the dataset is used for real-valued binary classification. Note that the TX may incorporate a trainable feature extraction module to reduce the dimensionality of x [2], [3]; however, this aspect is left for future investigation. For reasons that will be clarified later, the data symbols are subject to Amplitude Modulation (AM); accordingly, each element of the transmitted signal 
+
+¯x ∈ CNt×1 is defined ∀i = 1 , . . . , N t as follows: 
+
+[¯ x]i ≜ [x]i exp( ȷπ [ψ]i), (1) where the elements of ψ may be chosen arbitrarily. The baseband representation of the impinging signal at the MS layer of the RX, which is composed of Nr metamaterial elements, can be expressed as (baseband representation): 
+
+y ≜ H¯x ∈ CNr×1, (2) where H ∈ CNr×Nt represents the XL MIMO channel response. For the subsequent theoretical analysis, we consider the case where H follows a Ricean fading distribution [16] and remains quasi-static for the duration of the training process: 
+
+H = pPL
+
+r K
+
+1 + K HLoS +
+
+r 11 + K HNLoS 
+
+!
+
+, (3) where HLoS is a rank-1 matrix of steering modeling for the Line-of-Sight (LoS) component, while HNLoS ∼CN (0, 1/√NtNrI), and K is the Ricean factor that controls the dominance of either component. We consider a diffractive MS layer at the RX composed of unit elements applying a memoryless NL transformation. Denoting with F (·) the bandpass response of the generic element of the NL MS, the baseband-equivalent output g(·)
+
+preserves the phase of the input, while transforming its enve-lope through the first-order harmonic extraction. The resulting element-wise mapping of the MS is expressed as g(y) ≜
+
+C(|y|) exp( ȷarg {y}), where C(·) denotes the AM/AM char-acteristic derived as follows [13]: 
+
+C(v) = 2
+
+π
+
+Z π
+
+> 0
+
+F (v cos( ϕ)) cos( ϕ)dϕ. (4) In this paper, we consider an element-wise thresholding device characterized overall by the positive bias b ∈ RNr×1+ , whose elements are drawn from an appropriate distribution during fabrication, hence ensuring low complexity. From (4), the transform yields the following piecewise mapping for each element j = 1 , . . . , N r of the diffractive MS layer: 
+
+C(|[y]j |) = 
+
+
+
+0, |[y]j | ≤ [b]j
+
+1
+
+π
+
+
+
+|[y]j | arccos 
+
+ [b]j
+
+|[y]j |
+
+
+
+−[b]j
+
+s
+
+1 −
+
+ [b]j
+
+|[y]j |
+
+2
+
+,
+
+|[y]j | > [b]j
+
+.
+
+(5) While this expression captures the exact physical behavior of the MS elements, the transcendental terms are computationally demanding for practical optimization. By approximating the transition for |[y]j | > [b]j as a continuous quasi-linear slope, the response of the MS layer can be expressed as the well-known softplus activation function [17]: 
+
+g([ y]j ) ≃ 0.2 log 
+
+
+
+1 + e5( |[y]j |− [b]j )
+
+exp ( jarg {[y]j }) . (6) Once processed through (6), the resulting signal is linearly combined via the controllable weight vector w ∈ CNr×1 prior to its feeding to the RF chain, yielding the scalar output: 
+
+ˆz ≜ w⊤g(y) + ˜ n, (7) where ˜n ∈ C denotes the Additive White Gaussian Noise (AWGN) introduced at the RX. Herein, the physical implemen-tation of (7) is based on SIM and is detailed in Section II-B. 
+
+A. XL MIMO as an ELM 
+
+The previously presented XL MIMO system may be re-garded as a form of an ELM, where the transformations (2) and (6) implement the random hidden layer (with random coefficients θ ≜ {H, b}) and the combining weights w
+
+of (7) play the role of the trainable weights of the output layer. We thus leverage the developed mathematical frame-work [10], [11], [18] for ML inference, which accounts for random parameters alongside trainable weights, enabling both the training procedure and its theoretical guarantees to be rigorously described. To find the optimal weight vector for a given dataset D, let us first define the ELM activation matrix 
+
+G ∈ CD×Nr as the transpose of the activated signals at the aforedescribed NL MS layer at the RX front: 
+
+G ≜ [g(y1), . . . , g (yD )] ⊤. (8) By further denoting the vector of target values for the whole dataset as z ≜ [z1, . . . , z D ]⊤ ∈ CD×1, w can be optimized to minimize the LS error between the target and output values, following the standard ELM formulation: 
+
+w∗ ≜ arg min  
+
+> w
+
+∥z − Gw ∥22. (9) This yields the closed-form solution: 
+
+w∗ =  GHG + ℓI−1 GHz ∈ CNr×1, (10) which accounts for L2 regularization, controlled by the hy-perparameter ℓ > 0, to ensure generalization beyond the training dataset D. A key advantage of ELMs is their universal approximation property, expressed for the proposed ELM as follows (a full proof with additional analysis has been deferred for the journal version of this work): 
+
+Proposition 1. Consider a dataset D ≜ {(x(i), z (i))}Di=1 and the system defined by (1) , (2) , (6) , and (7) . In the high-Signal-to-Noise Ratio (SNR) regime ( ˜n → 0), assuming H follows the Ricean model in (3) and b is drawn from a continuous distribution with positive support, there exists a weight vector 
+
+w∗ such that ∥z−Gw ∗∥22 = 0 for Nr = D with probability 1.Sketch of proof. To show that (9) admits a zero-error solution, it suffices to show that fD (θ) ≜ det( G)̸ = 0 with probability 
+
+1. To that end, the following corollary of the Identity Theorem for real analysis can be used, stating that, for a real analytic function fD (θ) on an open connected domain I of the iso-morphic space R2( NrD+Nr) in which fD (θ) is not identically zero, the zero set has zero Lebesgue measure [19]. Since it consists of a composition of real analytic functions, fD (θ) is real analytic, as long as |[H¯x]j |̸ = 0 ∀j = 1 , . . . , N r . Such H
+
+values have zero probability of occurring under Ricean fading, since they are embedded in a lower-dimensional manifold. Moreover, they form a closed set with co-dimension compared to the full parameter space of 2, therefore, excluding it, leaves the domain of fD (θ) connected and open. Finally, fD (θ) is not identically zero, as shown by the counterexample in which 
+
+Im (H) = 0. By performing AM transmission of x(i) with 
+
+ψ = 0, the proposed framework reduces to a standard real-valued ELM, for which, G is invertible [11, Theorem 2.2]. 
+
+B. OTA Analog Combining using SIM 
+
+Up to this point, the physical implementation of the combin-ing operation has been left unspecified to focus on theoretical analysis. We now describe the RX architecture that performs this combining OTA. Specifically, we consider that the outputs 
+
+g(y) of the diffractive NL MS layer are fed into a SIM of L
+
+diffractive linear MSs. Each l-th layer ( l = 1 , . . . , L ) comprises a square grid of Nl elements spaced by λ/ 2, with λ = c/f 0
+
+denoting the wavelength at the carrier frequency f0, and c
+
+is the speed of light. Let Ωl ∈ CNl×Nl−1 denote the signal propagation coefficients between the (l − 1) -th and the l-th MS layers, where N0 = Nr indicates the number of elements of the aforedescribed NL MS, and ωL ∈ CNL×1 represents the propagation between the last MS layer and the single-antenna element attached to the RX RF chain. Typical works leveraging SIM technology [15] assume free-space propagation between the MS layers, i.e., considering an anechoic enclosure, and model the element-to-element propagation through geometric optics [2], [5], [6], [15]. In this work, we model each Ωl
+
+as a full-rank pseudo-random matrix [9], which presumes a reverberating enclosure featuring a non-uniform, non-planar distribution of elements [20], [21]. Arguably, this choice is more realistic as it accounts for multipath components arising from imperfections of the enclosure and allows for the MS layers to be placed arbitrarily close. Moreover, the richer MSs with  trainable linear responses  
+
+> RF Chain
+> TX XL MIMO channel
+> MS with NL response
+> RF Chain RF Chain RF Chain
+> RX
+> random ELM coefficients ELM activation trainable ELM weights
+
+Fig. 1: The proposed XL MIMO system for implementing the proposed OTA-ELM framework using linear and NL MSs. The channel and MS responses are used as components of the ELM algorithm to realize OTA inference. The flow of computation during the forward pass is also sketched in this figure. propagation diversity compared to geometric optics provides substantial gains for the optimization framework. The responses of each l-th MS layer are expressed as 
+
+ϕl ≜ αl exp( ȷπ φl), with the amplitudes αl ∈ [0 , 1] Nl×1 and the phase shifts φl ∈ [0 , 2] Nl×1 being controllable parameters. Setting Φl ≜ diag( ϕl) and φ ≜ {ϕl}1
+
+> l=L−1
+
+, the overall transfer function of the L linear MSs is given by (as in Fig. 1): 
+
+wφ ≜
+
+
+
+ω⊤
+
+> L
+> 1
+
+Y
+
+> l=L−1
+
+ΦlΩl
+
+⊤
+
+∈ CNr×1. (11) Thus, the SIM response is used to perform OTA combining by substituting w in (7) with wφ.III. T RAINING APPROACHES WITH A SIM 
+
+A. Approximation of the LS Solution 
+
+Since the optimal digital weights w∗ are known from (10), the SIM responses can be optimized so that wφ closely ap-proximates w∗, leading to the following optimization problem with respect to the SIM parameters: 
+
+φGD ≜ {ϕ∗ 
+
+> l
+
+}Ll=1 ≜ arg min  
+
+> φ
+
+∥w∗ − wφ∥22 , (12) which can be solved via PGD. Since automatic differentiation may be applied, and due to a lack of space, the gradient derivations are omitted. However, we note that this approach relies on the knowledge of G [10], which involves measuring the impinging signal at each element of the front NL MS while using a single RF chain. To this end, a time-division measurement procedure can be employed, where, at each time slot t = 1 , . . . , N r, only the t-th metamaterials is active while all others are turned off (equivalently, setting [w]j or [wφ]j
+
+to 1j=t in (7)). Since MSs can be reconfigured with sub-
+
+μs latency, G can be measured, and the optimization can be performed within the channel coherence time, provided the channels exhibit reasonably slow fading. Furthermore, using multiple RX RF chains solely for training allows parallel measurements, resulting in a linear speedup. More details on the hardware realization of this approach will be provided in the journal version of this work. 16 32 64 128 256 512 
+
+Number of NL MS elements Nr
+
+0.60.70.80.91.0
+
+> Mean accuracy
+
+Ideal LS SIM (LS & PGD) SIM (Genetic) (a) WBCD. 16 32 64 128 256 512 
+
+Number of NL MS elements Nr
+
+0.60.70.80.91.0 
+
+> Mean accuracy
+
+(b) Parkinson’s. 16 32 64 128 256 512 
+
+Number of NL MS elements Nr
+
+0.60.70.80.91.0 
+
+> Mean accuracy
+
+(c) MNIST. 
+
+Fig. 2: Classification accuracy the proposed OTA-ELM approaches versus the number of metamaterials Nr (corresponding to the number of trainable parameters) at the RX’s NL MS layer, considering three distinct datasets. −20 −15 −10 −5 0 5 10       
+
+> Ricean factor K[dB]
+> 0.80 0.85 0.90 0.95
+> Mean accuracy
+> Ideal LS SIM (LS & PGD) SIM (Genetic)
+> Nr=64
+> Nr=512
+
+Fig. 3: Classification accuracy of the OTA-ELM approaches over different Ricean factors, considering the WBCD dataset. 
+
+B. Direct SIM Training via Genetic Optimization 
+
+Alternatively, we further apply a black-box optimization approach that does not rely on the observation of G. Specif-ically, we employ a GO approach as follows. Starting from a population of kpop candidate weight vectors φGO ≜ {ϕl}Ll=1 ,we evaluate the following maximization objective: 
+
+L(φGO ) ≜ − z − G
+
+
+
+ω⊤
+
+> L
+
+Y1 
+
+> l=L−1
+
+ΦlΩl
+
+⊤
+
+| {z } 
+
+> ˆz≜[ˆ z1,..., ˆzD]⊤∈CD×1
+> 22
+
+. (13) The ktop top-performing candidates are admissible for off-spring generation. To create each offspring through uniform crossover, two parents are selected through random 3-way tournaments. Mutations are applied with ∆ = ±0.2 ± ȷ0.2
+
+to each [φGO ]j . The process is repeated for kgen generations, after which the best φGO is kept; therefore, kgen × kpop total evaluations of the objective are needed. This makes the latency of this approach also dependent on the switching time of the SIM layers configuration. Note, however, that only the output 
+
+ˆz at the RF chain is required, rather than the full matrix G.IV. N UMERICAL RESULTS AND DISCUSSION 
+
+We have evaluated the proposed EI approaches on several standard small-to-medium-size binary classification datasets under a range of system settings and channel conditions. The considered datasets are the Parkinson’s and the Wisconsin Breast Cancer Dataset (WBCD) of 22 and 30 numerical fea-tures (corresponding to Nt values) with 240 and 700 datapoints for disease diagnosis [22], respectively, as well as the MNIST dataset of handwritten digit image recognition [23] (of 6 × 10 4
+
+points subsampled to 100 pixels and converted the objective to even/odd digit classification). Per-feature standardization 0 5 10 15 20 25 
+
+> Measurement SNR [dB]
+> 0.50.60.70.80.9
+> Mean accuracy
+> Ideal LS (Parkinson’s) SIM (LS & PGD – Parkinson’s) Ideal LS (WBCD) SIM (LS & PGD – WBCD)
+
+Fig. 4: Performance of the ideal LS benchmark and the ap-proximate SIM solution trained through PGD versus different levels of the measurement SNR, introduced by the observation of the received signals to compute the LS solution. was applied during preprocessing. To determine the predicted class, we have set a threshold of 0.5 on Re (ˆ z) of (7), and we report in the performance figures that follow the mean and standard deviation of accuracy values over 100 random initializations. For convenience, the phases ψ of the AM signals were set identically to 0, and b was sampled from a Rayleigh distribution with scale parameter E[∥H∥F]/(2 NrNt),for it to be in the same order as |y|.Unless otherwise specified, the channel parameters were set as PL = −50 dB and K = 0 dB. Since ˆz contains one bit of information, the receive SNR has negligible effect and was therefore set to 15 dB. For the SIM, we employed 
+
+L = 2 linear layers, each consisting of 32 × 32 diffractive elements. We considered Ωl ∼ CN (0, P ′
+
+> L
+
+I) with P ′ 
+
+> L
+
+set to 
+
+−10 dB. The regularization weight was set as ℓ = 10 −6
+
+to avoid severe overfitting, and we allowed a maximum of 
+
+T = 2000 iterations of the employed PGD procedure with step size 0.01 , irrespective of the number of training parameters for fairness, although convergence was achieved far earlier for most scenarios. For the presented GO approach, we set 
+
+kpop = 100 , kgen = 200 , and ktop = 30 . The idealized LS solution (which can be seen as an extension of the proposed framework of [10]) was used as an upper bound. This idealized weighting can be realized either with digital (requiring Nr
+
+RF chains) or analog (where a single RF chain suffices) combining. For the latter case, phase shifters [10] or MS structures with lossless waveguides [24] may be used. The performance of the proposed training approaches for an increasing number of elements Nr at the RX’s front MS layer is displayed in Fig. 2. Note that Nr also corresponds to the number of trainable ELM parameters. It is observed that, as Nr
+
+increases, the classification accuracy generally improves (ex-cept for slight overfitting in the simplest WBCD case), a trend that is consistent with the theoretical analysis as Nr → D.Both approximate SIM solutions achieve performance close to the ideal case; however, for the largest Nr values, a noticeable degradation occurs due to an insufficient number of training iterations. Indicatively, the execution of Ideal LS, LS & PGD, and GO algorithms takes, respectively, 0.32 , 6.21 , 178 .5 secs for the MNIST case when Nr = 64 and 2.37 , 10 .28 , 242 .18 
+
+secs for Nr = 512 using unoptimized Python code running on a standard desktop computer. In the previous investigation, we have assumed perfect knowledge of G during training. However, measuring g(y)
+
+requires one or more RF chains, which introduces measure-ment noise. To model this, we have included an AWGN term 
+
+˜n0 ∼ CN (0, 1/R diag( |y|2)) in (2), present only during the collection of signals for computing G and the LS solution in (10), in which R denotes the target measurement SNR in linear scale. Figure 4 reports the performance across different measurement SNR levels. It is shown that, while performance degrades at low measurement SNR, the SIM approximation achieves results comparable to the ideal LS case. At suffi-ciently high measurement SNR, both approaches converge to the noise-free performance, validating the idealized assump-tions of our theoretical analysis. Similarly, so far, we have assumed rich scattering ( K = 0 )in the TX-RX channel, ensuring that H is a full-rank matrix. This improves the universal approximation capability of our framework, as the condition number of G decreases, yielding better conditioning for the LS solution. Figure 3 illustrates the impact of channel scattering, considering various Ricean factors. As depicted, both the ideal and SIM-approximate methods maintain stable performance under sufficiently diverse channels. However, as the channel becomes LoS-dominant, classification accuracy degrades because the columns of G
+
+become linearly dependent, and therefore, the conditions for universal approximation are no longer satisfied. V. C ONCLUSION 
+
+This paper showcased that XL MIMO systems with properly designed MS components at the RX can perform computations equivalent to a complex-valued ELM, enabling fully OTA ML-based inference on the transmitted data. The channel coeffi-cients serve as random hidden-layer weights, while the RX’s SIM implements the activation function, bias, and trainable weights. Theoretical analysis confirmed universal approxima-tion. Two practical approaches, one approximating the ideal LS solution and the other based on GO without requiring per-element signal observations, achieved performance close to the ideal LS case under a range of system parameters. We further note that the novelty of the proposed architecture lies in the joint use of a fixed NL-MS layer to physically realize the ELM activation and of a cascaded linear SIM to implement the trainable output layer within a single-RF-chain receiver, a combination not addressed by prior XL-MIMO-ELM [10] (which requires multiple analog beamformers and lacks an NL layer). Future work will provide a comparative analysis further positioning the proposed NL-SIM architecture against digital and over-the-air ELM implementations, thereby clarifying the novelty of the proposed solution and its associated benefits in terms of hardware complexity, energy consumption, and training/measurement overhead. REFERENCES [1] A. Li et al. , “Toward goal-oriented semantic communications: New metrics, framework, and open challenges,” IEEE Wireless Commun. ,vol. 31, no. 5, pp. 238–245, 2024. [2] G. Huang et al. , “Stacked intelligent metasurfaces for task-oriented semantic communications,” IEEE Wireless Commun. Lett. , vol. 14, no. 2, pp. 2310–314, 2024. [3] K. Stylianopoulos et al. , “Over-the-air edge inference via end-to-end metasurfaces-integrated artificial neural networks,” IEEE Trans. Wireless Commun. , vol. 25, pp. 13 818–13 834, 2026. [4] A. ¸ Sahin and R. Yang, “A survey on over-the-air computation,” IEEE Commun. Surveys & Tuts. , vol. 25, no. 3, pp. 1877–1908, 2023. [5] X. Lin et al. , “All-optical machine learning using diffractive deep neural networks,” Science , vol. 361, no. 6406, pp. 1004–1008, 2018. [6] A. Momeni and R. Fleury, “Electromagnetic wave-based extreme deep learning with nonlinear time-floquet entanglement,” Nature Commun. ,vol. 13, no. 1, p. 2651, May 2022. [7] M. Hua et al. , “Implementing neural networks over-the-air via reconfig-urable intelligent surfaces,” IEEE Trans. Wireless Commun. , vol. 25, pp. 11 562–11 576, 2026. [8] M. E. Pandolfo et al. , “Over-the-air semantic alignment with stacked intelligent metasurfaces,” arXiv preprint arXiv:2512.05657 , 2025. [9] K. Stylianopoulos et al. , “Metasurfaces-integrated wireless neural net-works for lightweight over-the-air edge inference,” IEEE Wireless Com-mun. , to appear, 2026. [10] K. Stylianopoulos and G. C. Alexandropoulos, “Universal approxima-tion with XL MIMO systems: OTA classification via trainable analog combining,” arXiv preprint:2504.12758 , 2025. [11] G.-B. Huang et al. , “Extreme learning machine: Theory and applica-tions,” Neurocomput. , vol. 70, no. 1, pp. 489–501, 2006. [12] ——, “Incremental extreme learning machine with fully complex hidden nodes,” Neurocomput. , vol. 71, no. 4, pp. 576–583, 2008. [13] M. Fabiani et al. , “Nonlinear EM-based signal processing,” in Proc. Asilomar Conf. Signals, Sys., and Comput. , Pacific Grove, USA, 2025. [14] O. Abbas et al. , “Nonlinear stacked intelligent surfaces for wireless systems,” arXiv preprint arXiv:2510.23780 , 2025. [15] J. An et al. , “Stacked intelligent metasurfaces for efficient holographic MIMO communications in 6G,” IEEE J. Sel. Areas Commun. , vol. 41, no. 8, pp. 2380–2396, 2023. [16] M. Matthaiou et al. , “Analytic framework for the effective rate of MISO fading channels,” IEEE Trans. Commun. , vol. 60, no. 6, pp. 1741–1751, 2012. [17] P. F. V. Wiemann et al. , “Using the softplus function to construct alternative link functions in generalized linear models and beyond,” Stat. Papers , vol. 65, no. 5, pp. 3155–3180, 2024. [18] M.-B. Li et al. , “Fully complex extreme learning machine,” Neurocom-put. , vol. 68, pp. 306–314, 2005. [19] B. S. Mityagin, “The zero set of a real analytic function,” Math. Notes ,vol. 107, no. 3, pp. 529–530, 2020. [20] A. Rabault et al. , “On the tacit linearity assumption in common cascaded models of RIS-parametrized wireless channels,” IEEE Trans. Wireless Commun. , vol. 23, no. 8, pp. 10 001–10 014, 2024. [21] H. Niu et al. , “Flexible intelligent layered metasurfaces for downlink multi-user MISO communications,” arXiv preprint arXiv:2510.24190 ,2025. [22] D. Dua and C. Graff, “UCI machine learning repository,” University of California, Irvine, School of Information and Computer Sciences, 2017. [Online]. Available: http://archive.ics.uci.edu/ml [23] L. Deng, “The MNIST database of handwritten digit images for machine learning research,” IEEE Signal Process. Mag. , vol. 29, no. 6, pp. 141– 142, 2012. [24] N. Shlezinger et al. , “Dynamic metasurface antennas for 6G extreme massive MIMO communications,” IEEE Wireless Commun. , vol. 28, no. 2, pp. 106–113, 2021.

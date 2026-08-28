@@ -1,0 +1,550 @@
+Title: Sensing-Assisted Anti-Blockage Pinching-Antenna Systems For Indoor Immersive Communications
+
+URL Source: https://arxiv.org/pdf/2608.21859v1
+
+Published Time: Tue, 25 Aug 2026 00:31:16 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Sensing-Assisted Anti-Blockage Pinching-Antenna Systems For Indoor Immersive Communications 
+
+Yi Hong 1, Yalin Liu 1† , Yulei Wang 2, Yaru Fu 1
+
+> 1
+
+School of Science and Technology, Hong Kong Metropolitan University, Hong Kong SAR, China 
+
+> 2
+
+College of Electronics and Information Engineering, South-Central Minzu University, Wuhan, China Emails: {yhong, ylliu, yfu }@hkmu.edu.hk, ylwang@mail.scuec.edu.cn 
+
+Abstract —Indoor immersive communication, empowered by millimeter-wave (mmWave) technologies, is a key enabler for 6G-ready Extended Reality (XR) applications. However, mmWave signals are highly susceptible to dynamic obstacles (e.g., moving humans), leading to frequent line-of-sight (LoS) blockages. More-over, although massive-antenna systems have been widely adopted indoors, their fixed-site deployment limits their effectiveness in wide and dynamic indoor environments such as factories and offices. To address these challenges, we present a sensing-assisted anti-blockage Pinching-Antenna Systems (PASS) solution for indoor immersive communications. By mechanically moving a pinching antenna (PA) along a dielectric waveguide, PASS can flexibly extend the service coverage and re-establish LoS links in wide indoor scenarios. Besides, our solution integrates sensing capabilities into PASS, where the PA executes controlled micro-movements to transmit and receive chirp radar signals, enabling real-time sensing of obstacles. Based on the sensing results, we design an anti-blockage PA movement strategy that detects blocked regions along the waveguide and proactively moves the PA to safe zones. Accordingly, the whole system performs a cycled “sensing–movement–communication” workflow with each cycle completed in a limited frame to ensure both timely sensing and communication. To ensure system efficiency, a closed-form pre-optimized solution of sensing parameters is derived under practical mechanical and sensing constraints. Extensive experiments show that our solution reduces blockage-induced outages to near-zero while sustaining the effective throughput required by indoor immersive applications. 
+
+Index Terms —Pinching Antenna System, Anti-blockage, Sensing-Assisted Communications, Immersive Communications. 
+
+I. I NTRODUCTION 
+
+Empowered by millimeter-wave (mmWave) technologies, indoor immersive communication is emerging as a key evolu-tionary trend toward 6G. It enables human-centric interactive services with the digital world to support various Extended Reality (XR) applications, such as smart healthcare, remote working, and XR gaming. A crucial requirement is to pro-vide extremely high data-rate and low-latency services; for example, a typical XR scenario requires video frame rates of 
+
+90 − 120 frames/second [1]. To support this extreme capacity, massive antenna systems, such as Huawei’s LampSite X series, have been adopted for indoor mmWave communications [2]. However, these massive antenna systems rely on fixed-site deployment, which strictly limits their service region, making it hard to cover wider indoor scenarios, e.g., factories and offices. Moreover, mmWave signals are highly susceptible to 
+
+This work was supported in part by the Research Grants Council of the Hong Kong Special Administrative Region, China, under Project UGC/FDS16/E15/24, and in part by the Hong Kong Metropolitan University Research Grant under Project PFDS/2025/34. 
+
+Fig. 1: An immersive communication scenario of our solution. dynamic physical obstacles, such as humans moving randomly within a room [3]. Considering the fixed-site deployment and mmWave links, these massive antenna systems cannot effec-tively bypass the dynamic obstacles, leading to severe line-of-sight (LoS) link blockages and communication outages [4]. To address the above issues, the emerging Pinching-Antenna Systems (PASS) paradigm provides a promising solution [5]. On one hand, by mechanically moving a pinching antenna (PA) along a dielectric waveguide [6], PASS can flexibly extend the service coverage and re-establish LoS links in wide indoor scenarios. On the other hand, the PA’s inherent mechanical mobility enables anti-blockage capability to escape the geometrical shadow cast by physical obstacles [7]. Existing PASS studies present various PA anti-blockage solutions to enhance link quality [8]–[12]. Foundational works explore flexible PASS solutions in various scenarios, e.g., NOMA-assisted activation [8] and uplink rate maximization [9], but assume purely LoS links. Considering the LoS block-age, recent studies investigate different modeling methods of blockages to guide the PA’s movement [10]–[12]. By mod-eling obstacles as stochastic distributions, [10] characterizes blockages for multi-user interference suppression and [11] derives outage probabilities for multi-cell networks. Mean-while, [12] builds a three-dimensional (3D) geometry-aware model of eavesdropper-caused blockages and optimizes secure PASS operations [12]. However, [10]–[12] rely on long-term stochastic models, failing to provide real-time blockage char-acterization in the presence of dynamic obstacles. While the geometry-aware method in [13] gives a deterministic blockage model, the considered obstacle (as an eavesdropper) is treated at a fixed point, which is insufficient for handling dynamic obstacles in indoor immersive communications. In applying PASS to indoor immersive communications, arXiv:2608.21859v1 [eess.SP] 22 Aug 2026 Fig. 2: A Sensing-Assisted Anti-Blockage PASS solution. prior studies overlook a key practical limitation: the dynamic nature of obstacle positions. Obstacles can move randomly within the service area, resulting in time-varying and un-known locations that complicate the design of a PA movement strategy for anti-blockage. To address this issue, this paper proposes a sensing-assisted anti-blockage PASS solution (as shown in Fig. 1). By integrating a Frequency-Modulated Continuous-Wave (FMCW) transceiver circuit into PASS, the system enables obstacle sensing based on “chirp radar signals.” Specifically, the PA performs controlled micro-movements to transmit and receive FMCW chirp signals, thereby sensing the obstacle’s kinematics in real time. Based on the sensing result, we design the anti-blockage PA movement strategy by detecting blocked boundaries of the PA over the waveguide and moving the PA to a safe zone. To support real-time data transmission, we develop a cycled “sensing-movement-communication” workflow, in which each cycle is completed within a bounded time to ensure timely sensing and dynamic PA movement. Meanwhile, to guarantee sensing efficiency, we derive a closed-form pre-optimized solution for the sensing parameters under the constraints imposed by the sensing requirements and the mechanical limits of the PA. Extensive experiments demonstrate that our solution suppresses blockage outages to near-zero levels while sustaining the effective throughput required for indoor immersive applications. II. S YSTEM CONFIGURATION 
+
+As shown in Fig. 2, a Sensing-Assisted Anti-Blockage PASS solution is deployed in an indoor scenario, e.g., a room supporting immersive communication tasks. The PASS is employed by installing a dielectric waveguide on the ceiling with a PA moving along the waveguide to position its user. A mobile obstacle, e.g., a person, moves randomly within the room, thus causing link blockage to the PA-user communi-cations. To address this issue, the solution performs periodi-cal “sensing-movement-communication” cycles in continuous time frames. In each cycle, “sensing” is performed to estimate the location and motion of mobile obstacles, “movement” is moving the PA to a safe zone (“escaping” from the obstacle), and “communication” is serving a stable LoS link for the user. To ensure operational efficiency, each cycle is completed within a time frame, denoted by Tframe . Tframe is mainly allocated into the “sensing” and “communication” phases as the time in “movement” is comparatively small and ignorable. Let η ∈ (0 , 1) be the frame ratio for sensing. Then Tframe is divided into: i) a sensing phase of duration Ts = ηT frame , and ii) a communication phase of duration Tc = (1 − η)Tframe .Below are specific system configurations regarding system topology, sensing configurations, and signal propagation. The detailed workflow design is introduced in Section III. To ensure the effectiveness of the designed workflow, the feasible parameter settings are discussed in Section IV. 
+
+A. System Topology 
+
+A PASS is deployed in an indoor room, where the service area is modeled as a three-dimensional (3D) rectangular space with length L, width D, and ceiling height Hp. A dielectric waveguide of length L is mounted centrally along the length of the ceiling at height Hp. The user, located arbitrarily within the room, and the mobile obstacle are modeled as vertical cylinders with heights Hu and Hm, respectively. The obstacle has a cross-sectional radius of Rm. A PA is driven by a mechanical motor to move along the waveguide. Due to the motor’s physical limitation, the PA’s movement is constrained by a maximum velocity vmax p and a physical acceleration 
+
+ap. For simplicity, we ignore the motor’s minor non-linear acceleration and deceleration transition states, approximating it as linear motion 1. A 3D Cartesian coordinate system is established to locate all system objects, with its origin O below the waveguide’s feedpoint in the floor’s wider side (i.e., at the midpoint), the xy -plane on the floor, the x-axis opposite the waveguide feed points, the y-axis toward any direction perpendicular to the x-axis, and the z-axis vertically upward toward the ceiling’s midpoint. Let pp, pu, and pm be the coordinates of the PA, the user, and the geometrical centroid of the moving obstacle, respectively, which are given by 
+
+pp : [ xp, 0, H p]T, pu : [ xu, y u, H u]T, pm : [ xm, y m, H m]T.
+
+> 1A permanent magnet linear synchronous motor exhibits highly stable linear movement and ultra-rapid acceleration capabilities [14].
+
+Herein, {xu, x m} ∈ [0 , L ], {0, y u, y m} ∈ [−D/ 2, D/ 2] and 
+
+{Hu, H m} ∈ [0 , H p] because pp is constrained by the waveg-uide while pu and pm locate/moves freely in the room. 
+
+B. Sensing Configurations 
+
+The PASS integrates an FMCW transceiver circuit in [15], enabling the sensing capability via simultaneous chirp emis-sion and echo collection through a single antenna. To position the mobile obstacle, the PA conducts a controlled micro-movement along the waveguide while simultaneously emit-ting and collecting a sequence of consecutive chirp signals. Particularly, during a sensing phase Ts, the PA micro-moves to a direction via a scanning velocity vscan (vscan ≤ vmax p ). Let fPRF , ∆ts, and fs, be the chirp repetition frequency of chirp signals, the duration of a single chirp, and the sampling rate fs of emitting/collecting chirp signals. Thus, the echoing signals extract the features of the mobile obstacle in two dimensions: the chirp dimension comprising M = fPRF Ts
+
+consecutive chirps, and the sampling dimension comprising 
+
+N = fs∆ts signal samples collected within each chirp. These two dimensions represent the number of chirp signals emitted during Ts and the number of chirp-signal samples collected during ∆ts, representing N samples enclosed within each of the M consecutive chirps. Since the PA conducts a micro-movement on the waveguide at a scanning velocity vscan , the M chirps are transmitted and received at different positions. By combining these echoing signals, a Synthetic Linear Array (SLA) comprising M an-tenna elements is synthesized [16]. In the SLA, the interval between two adjacent virtual antenna elements is given by       
+
+> ∆dm=vscan Ts
+> M=vscan Ts
+> fPRF Ts
+> =vscan
+> fPRF
+> .(1)
+
+Accordingly, the effective synthetic aperture length of SLA is LSA = M ∆dm = vscan Ts. To guarantee fundamental spa-tial discrimination, a minimum cross-range angular resolution (denoted ∆θreq ) should be satisfied. Based on the Rayleigh criterion λs/(2 LSA ) ≤ sin(∆ θreq ) [16], a rigorous kinematic lower bound is explicitly imposed, which is given by       
+
+> vscan =LSA
+> Ts
+> ≥λs
+> 2Tssin(∆ θreq ),(2)
+
+where λs is the wavelength of sensing signals. 
+
+C. Signal Propagation 
+
+Signals emitted from the PA are used for sensing and communication. These signals propagate along the waveguide and the PA. Let Gw = ρ2e−2αwg xp be the power gain along the waveguide [17], where ρ denotes the amplitude coupling efficiency and αwg is the waveguide attenuation coefficient. During the sensing phase Ts, the effective Signal-to-Noise Ratio (SNR) is deemed as the multiplied raw single-sample SNR by the coherent processing gain of N M samples. And the PA collects a total of N M discrete signal samples across the SLA. By adding amplitudes of these echo signal samples, it yields a processing gain equal to N M . Consequently, the effective SNR based on all sensing signals from the SLA is given by       
+
+> SNR s=PpG2wσrcs λ2s
+> (4 π)3ˆd4sσ2g
+> ×N M, (3)
+
+where PpG2wλ2s σrcs /((4 π)3 ˆd4s ) represents the backscattered signal power captured by the PA’s effective synthetic aperture, 
+
+σrcs = 2πR mH2m/λ s represents the effective radar cross-section of the mobile obstacle, Pp be the transmit power at the PA and ˆds is the estimated mobile obstacle distance. During the communication phase Tc, the PA positions to the user and transmits data to the user via a LoS path. A unidirectional antenna is used for the user; thus, its antenna gain is 1. Let SNR c and Rc be the SNR and the communication rate of the PA-user link, which are given by          
+
+> SNR c=PpGwλ2c
+> 16 π2d2cσ2g
+> ,(4)
+> Rc=Bclog 2(1 + SNR c),(5)
+
+where λc is the wavelength of communication signals emitted from the PA, Bc is the used bandwidth, σ2g is the power of the Gaussian white noise N (0 , σ 2g ) at the receiver, and dc is the distance between the PA and the user. III. S YSTEM WORKFLOW 
+
+This section introduces the detailed design of the per-cycle workflow of “sensing-movement-communication”. Since the communication is to serve the stable LoS with the user following the determined PA’s movement, here we mainly introduce the sensing (for obstacle detection) and the PA movement (for anti-blockage once the obstacle is detected). 
+
+A. Obstacle Sensing 
+
+The PA senses the obstacle via the 5 steps below: 
+
+1) Step 1.1 : Sensing signal emitting, collecting, and trans-formation. During a sensing phase Ts, the PA micro-moves along the waveguide at a scanning speed vscan and simul-taneously emits M continuous chirp signals. Based on the FMCW transceiver circuit in Section II-B, the PA collects echo signals of M chirp signals, denoted the echo matrix by X = [x1, x2, . . . , xM ] ∈ CN ×M , where the column vector xm contains the N complex signal samples collected within the m-th chirp. The PA’s micro-moves synthesizes an SLA comprising M discrete spatial elements. A Fast Fourier Transform (FFT) is applied to each column of matrix X,converting the echo delay into a range spectrum comprising N
+
+frequency bins, which are correlated with the distance of the mobile obstacle. A FFT is then executed across the M chirps, transforming the shift induced by PA micro-movements into a feature matrix comprising M angle bins, which correspond to the Direction-of-Arrival (DoA) of the mobile obstacle. This two-dimensional FFT yields a Delay - DOA feature matrix 2.For quantitative analysis, all N M bins in the feature matrix             
+
+> 2Real-time obstacle localization can be computationally guaranteed by the lightweight FFT. Given Nsamples and Mchirps ( N≫M), the overall time complexity simplifies directly to O(M N log N), ensuring that sensing and parameter estimation are efficiently resolved within the dedicated slot Ts.
+
+are indexed by i. Let Y denote the Delay-DOA feature matrix, and Ai denote the raw amplitude of the i-th bin. The signal transformation and amplitude extraction are expressed as 
+
+Y = F(X) ∈ CN ×M , y = vec( Y),Ai = |[y]i|, i ∈ { 1, 2, . . . , N M }, (6) where F(·) is the FFT operation, vec( ·) is the vectorization operator, which transforms into a single column vector, and 
+
+| · | calculates the complex magnitude, mapping the complex values to absolute energy intensities in the real domain. Each element yi in vector y is a complex value representing the reflected signal at a specific range and angle coordinate, and its magnitude Ai represents the echo strength from an obstacle at this coordinate. 
+
+2) Step 1.2 : Echo signals selection. The raw amplitudes 
+
+Ai are contaminated by hardware imperfections and propaga-tion clutter, and direct peak extraction remains vulnerable to false alarms. Sensing the moving obstacle, i.e., finding the af-fected echo signal, requires a dynamic amplitude-thresholding mechanism. A median-based threshold method was designed to filter out background noise by sorting all raw amplitudes 
+
+Ai in descending order, i.e., median( Ai). Specifically, an echo signal i is identified as being affected by the moving obstacle only if its peak amplitude Ak exceeds the median of the amplitude matrix. Let Kcand denote the set of identified candidate echo signals, which is determined by 
+
+Kcand = {k | k ∈ [1 , 2, .., N M ], A k ≥ median( Ai)} . (7) 
+
+3) Step 1.3 : Geometrical obstacle coordinate estimation. 
+
+For the k-th amplitudes Ak extracted from the candidate set 
+
+Kcand , the matrix indices are mapped to the beat frequency 
+
+ˆfp,k and the spatial frequency index ˆmp,k , expressed as 
+
+ˆfp,k = ˆ nk
+
+fs
+
+N , ˆmp,k = ˆ mk − M
+
+2 , (8) where (ˆ nk, ˆmk) denotes its coordinate in the Distance-Angle feature matrix Y. Based on the coordinates of each identified echo signal within Kcand in the Delay - DOA feature matrix 
+
+Y, the spatial coordinates of the obstacle can be estimated. Specifically, the distance ˆds,k between the PA and the obstacle and the direction of arrival (DoA) ˆθs,k of the signal reflected at the PA are estimated by [18, Eqs. 2.17 and 2.32] 
+
+ˆds,k = c∆ts ˆfp,k 
+
+2Bs
+
+, ˆθs,k = arcsin 
+
+ ˆmp,k λs
+
+2M ∆dm
+
+
+
+, (9) where c is the light speed, Bs is the bandwidth of the sensing chirp signal, and λs is the wavelength of the sens-ing chirp signal. Given a rough height Hm of the mobile obstacle (as a system-level preliminary setting), its coordinates 
+
+ˆpk = [ˆ xk, ˆyk, H m]T can be reconstructed. According to the geometrical relationship between the obstacle and the PA, ˆxk
+
+and ˆyk are estimated by 
+
+ˆxk = xp + ˆds,k cos ˆθs,k , (10) 
+
+ˆyk =
+
+q ˆd2s,k − (ˆ xk − xp)2 − (Hp − Hm)2. (11) 
+
+4) Step 1.4 : User Localization Based on Projection Error Compensation: In order to exclude the interference of the user from the estimated coordinate of the mobile obstacle, we first obtain the user’s prior 3D spatial position via channel state in-formation (CSI) feedback. Let [xu, y u, H u]T denote the user’s true coordinate derived from CSI. It is worth noting that the radar strictly resolves the 2D position based on the presumed target plane Z = Hm. Since the user equipment operates at a different height ( Hu̸ = Hm), the user’s echo suffers from an elevation-induced range distortion when projected onto the radar’s presumed 2D plane. To accurately exclude the user, our system derives the user’s apparent position ˆyu on the presumed 
+
+Hm plane based on 3D slant-range conservation: 
+
+ˆyu =
+
+q
+
+y2u + ( Hp − Hu)2 − (Hp − Hm)2. (12) Consequently, the calibrated 3D coordinate of the user is obtained as ˆpu = [ xu, ˆyu, H u]T.
+
+5) Step 1.5 : User-interference exclusion and coordinate calibration. With the calibrated apparent position ˆpu, we can now accurately separate the mobile obstacle from the user. Let ˆpk = [ˆ xk, ˆyk]T denote the estimated horizontal position of the moving obstacle from the k-th echo signal ( k ∈ K cand ). The reconstructed candidate set Kcand simultaneously retains the amplitude Ak of each optional point for both the mobile obstacle and the user. Let Ru be the radius of a circular blanking region established around ˆpu. The final estimated coordinate ˆpm is determined by selecting the candidate with the maximum amplitude Ak falling outside this radius, which is formulated by           
+
+> [ˆ xm,ˆym]T= ˆ pk∗, k ∗= arg max
+> k∈K cand
+> Ak∥ˆpk−ˆpu∥2> R u.(13)
+
+Coupled with the prior height Hm, the full 3D coordinate ˆpm :[ˆ xm, ˆym, H m]T is obtained. 
+
+B. Anti-blockage Movement 
+
+Based on the sensing result, i.e., the moving obstacle’s coordinate, the PA performs the anti-blockage strategy in two steps: Step 2.1: formulating the PA’s movable boundaries (i.e., defining the safe zone and PA’s kinematic reachability limits), and Step 2.2: boundary-based movement. 
+
+1) Step 2.1 : Formulating the boundaries. Based on the mobile obstacle’s position ˆpm : [ˆ xm, ˆym, H m]T and its mod-eled cylinder shape with a cross-sectional radius Rm, the mobile obstacle casts a geometric shadow onto the waveguide from the perspective of the user pu. This instantiates a spatial mapping relationship that categorizes the available waveguide track into three distinct topological zones: the physical block-age zone (denoted by Zb), the robust blockage zone (denoted by ˜Zb), and the safe zone (denoted by Zs). Systematically, the physical shadow Zb is first dilated into 
+
+˜Zb to accommodate uncertainties, which in turn determinis-tically bounds the complementary safe zone Zs for the PA’s position and relocation. To determine whether an anti-blockage movement is necessary, a 3D vertical clearance condition is established. In practical indoor environments, if the user is sufficiently tall or the mobile obstacle is relatively short, the LoS signal can propagate directly over the obstacle without communication disconnection. Let HLoS denote the vertical height of the LoS link line between the PA and the user, evaluated at the mobile obstacle’s depth ˆym. Since the heights of the PA and the user are fixed, based on similar triangles, the height of the LoS link is derived as 
+
+HLoS = Hp − |ˆym||yu| (Hp − Hu). (14) 
+
+Based on this height, the blockage detection branches into two distinct conditions. If HLoS > H m (where Hm is the known maximum height of indoor obstacles), the LoS link safely bypasses the obstacle vertically. In this scenario, the blockage effect is fully neutralized, meaning no blockage zone exists ( Zb = ∅). Consequently, the entire waveguide track is deemed a safe zone, i.e., Zs = [0 , L ], and no further movement is required. Conversely, if HLoS ≤ Hm, the LoS link is occluded, triggering the 2D planar projection strategy to locate the horizontal shadow boundaries. Geometrically, a physical blockage zone Zb is identified on the waveguide, representing the interval where the mobile obstacle completely occludes the PA-user link. The physical blockage zone Zb,which represents the shadow of the mobile obstacle projected onto the waveguide from the user’s perspective, is formulated as 
+
+Zb =
+
+(
+
+∅ , if HLoS > H m,
+
+[xb, 0, H p]T, ∀xb ∈ [xb,l, x b,r] , otherwise ,
+
+(15) 
+
+with xb,l and xb,r corresponding to the left and right edge points of Zb from the perspective of the user, respectively. Let du,m be the distance between the user and the esti-mated mobile obstacle’s position, which is given by du,m =p(xu − ˆxm)2 + ( yu − ˆym)2. Let xb be the center of the blockage zone Zb. According to the geometrical relationship in Fig. 3, since the user, the obstacle’s center, and the shadow’s center xb are strictly collinear, we formulate the equations based on similar triangles as follows 
+
+xb − ˆxm
+
+|ˆym| = xb − xu
+
+|yu| , |ˆym||yu| = d′
+
+d′ + dm,n
+
+, (16) 
+
+dm,n
+
+dm,n + d′ = Rm
+
+∆x , (17) 
+
+xb = xb,r + xb,l
+
+2 , ∆x = xb,r − xb,l
+
+2 , (18) 
+
+where d′ is an auxiliary distance to assist our analysis. Solving the above equations of xb,l and xb,r, we have 
+
+xb,l = ˆxm|yu| − xu|ˆym| − Rm|yu||yu| − | ˆym| ,xb,r = ˆxm|yu| − xu|ˆym| + Rm|yu||yu| − | ˆym| ,
+
+|Z b| = xb,r − xb,l. (19) 
+
+To guarantee uninterrupted communication against sens-ing uncertainties, this ideal physical boundary is structurally expanded into a robust blockage zone ˜Zb. This region is constructed by dilating the exact physical radius Rm into 
+
+Fig. 3: Geometrical relationship in blockage zone detection. a robust effective radius ˜Rm to systematically compensate for sensing uncertainties, thereby guaranteeing uninterrupted communication. The accumulated spatial tracking error σm,the robust radius ˜Rm, and the robust blockage zone ˜Zb are formulated as                             
+
+> σm=
+> q
+> σ2res +σ2glint +σ2SNR ,(20)
+> ˜Rm=Rm+ ˆ vm
+> 
+> τ+ 12toutage
+> 
+> +κσ m,(21)
+> ˜Zb:
+> n
+> [xb,0, H p]T,∀xb∈[˜ xb,l,˜xb,r]
+> o
+> ,(22)
+> |˜Zb|= ˜ xb,r−˜xb,l=2 ˜Rm|yu||yu| − | ˆym|,(23)
+
+where σres ≈ c/ (2 Bs) is the bounded range measurement uncertainty, σglint ≈ 2Rm/√12 is the theoretical Root Mean Square error caused by the mobile obstacle glint effect 3,
+
+σSNR =
+
+r c
+
+> 2Bs
+> √SNR s
+
+2
+
++
+
+ ˆdsλs
+
+> 2LSA
+> √SNR s
+
+2
+
+denotes the ther-mal noise error, ˆvm = ˆpm−ˆpm[t−1]  
+
+> Tframe
+
+is the prior velocity of the obstacle, where t − 1 denotes the previous frame. and 
+
+τ = vmax p /a p denotes the mechanical actuation latency of the PA, toutage represents the duration of sensing outages 4 times and κ is a confidence multiplier. Consequently, to maintain an uninterrupted communication link, the PA’s movable area on the waveguide is strictly reduced to a safe zone Zs. This secure region is derived by directly excluding the robust blockage interval from the entire waveguide length [0 , L ]. The exact spatial set of the safe zone and its total available spatial span, denoted by |Z s|,are formulated as                    
+
+> Zs:
+> n
+> [xs,0, H p]T,∀xs∈[0 ,˜xb,l)∪(˜ xb,r, L ]
+> o
+> ,(24)
+> |Z s|=L− | ˜Zb|=L−2 ˜Rm|yu||yu| − | ˆym|.(25)
+
+2) Step 2.1 : Boundary-Based Anti-blockage Movement. 
+
+To execute the “sensing-movement-communication” cycle and maintain a LoS link, the PA must find an optimal position. 
+
+> 3The mobile obstacle is modeled as a cylinder, the radar reflection point drifts across its surface as the relative viewing angle changes during motion, which induces this spatial variance proportional to its physical dimensions.
+> 4PA misidentifies a mobile obstacle as an obstacle causing perceptual loss, and the tracker relies entirely on the previous frame’s mobile obstacle movement speed to calculate the position.
+
+Assuming an ideal obstacle-free environment, the uncon-strained optimal position maximizes the data ratio Rc(xp)
+
+defined in Eq. (5). By incorporating the geometric spreading loss and denoting the xp-independent system constant as 
+
+C = Ppρ2λ2c /(16 π2σ2g ), and the orthogonal distance between the user and the waveguide as D20 = y2u + ( Hp − Hu)2,the received SNR function is expressed as SNR c(xp) =
+
+Ce −2αwg xp /(( xp − xu)2 + D20 ).To find the unconstrained optimal position, we set the first-order derivative ∂SNR c/∂x p = 0 , which reduces to finding the roots of the quadratic polynomial expressed as 
+
+P (xp) = αwg x2p + (1 − 2αwg xu)xp
+
++ [ αwg (x2u + D20 ) − xu] = 0 . (26) Since the discriminant ∆ = 1 − 4α2wg D20 remains strictly positive ( 4α2wg D20 ≪ 1 for typical indoor waveguides), solving 
+
+P (xp) = 0 and verifying the negative second-order derivative yields the ideal unconstrained optimal position formulated as 
+
+xopt p = xu +
+
+−1 + 
+
+q
+
+1 − 4α2wg D20
+
+2αwg 
+
+. (27) While Eq. (27) provides the unconstrained optimum position for maximizing the LoS link data ratio, this unconstrained position may be inside the blockage zone or exceed the PA’s mobility capabilities. In practical deployment, the PA’s position must be coupled with hardware kinematic limits to mitigate the impact of mechanical delays. Let xp,t −1 denote the PA’s position in the previous frame t − 1, and xp ∈ Z s
+
+denote the intended anchor of the PA for the current frame. To maintain uninterrupted communication, the maximum al-lowable mechanical displacement is bounded by the duration of the subsequent communication phase Tc. Given the hard-ware’s maximum operating velocity vmax p , the PA’s kinematic displacement is strictly bounded by vmax p (1 − η)Tframe . By coupling this kinematic reachability limit with the topological safe zone, we define a unified feasible set Xsafe as              
+
+> Xsafe =Zs∩x| | x−xp,t −1| ≤ vmax p(1 −η)Tframe .(28)
+
+To execute the “sensing-movement-communication” cycle and maintain an uninterrupted LoS link, the PA’s anti-blockage strategy relies on the relationship between the ideal uncon-strained optimal position xopt p and the robust blockage zone 
+
+˜Zb. However, this ideal position xopt p may violate ˜Zb or the kinematic limits. The system categorizes the anti-blockage strategy into two operational modes to determine the actual constrained optimal position, denoted by x∗
+
+> p
+
+: 
+
+> •
+
+Mode 1 (Safety): If the unconstrained optimum position 
+
+xopt p ∈ Xsafe , the system assigns x∗ 
+
+> p
+
+= xopt p . The PA operates normally without link blockage.  
+
+> •
+
+Mode 2 (Escaping): If xopt p within the robust blockage zone ˜Zb, the PA evades the obstacle (“escaping”), and this escaping process is driven by constraint evaluations. If a local feasible subspace remains on the current side of the user, the constrained optimum shifts to the boundaries. Consequently, the system evaluates the throughput at the valid extreme edges of Xsafe on this local side to determine 
+
+x∗
+
+> p
+
+. If ˜Zb completely occupies the feasible interval on the current side, local boundary evaluation becomes invalid. The PA must cross the robust blockage zone ˜Zb to reach the new position x∗ 
+
+> p
+
+∈ X safe on the opposite side. By evaluating these mode-triggering conditions, the final constrained optimal position x∗ 
+
+> p
+
+∈ X mode is deterministically resolved in closed-form prior to system resource allocation. IV. P RE -OPTIMIZED SETTINGS OF SENSING PARAMETERS 
+
+This section exploits the pre-optimized settings of several sensing parameters, including the sensing time ratio η per frame and the PA scanning velocity vscan during sensing. To guarantee the quality of communications, an upper bound on 
+
+η and its feasible value range are introduced. To improve sensing efficiency, a closed-form pre-optimized solution of 
+
+η and vscan is derived under the constraints imposed by the sensing requirement and the mechanical limit of the PA. The derived solution can be adopted in our system before it runs. 
+
+A. Upper-bound of η
+
+Using the determined anti-blockage movement location in Section III-B, the PA serves communications to the user during the phase Tc = (1 − η)Tframe . The effective data ratio over the whole frame Tframe should satisfy a QoS threshold RQoS 
+
+catering to a specific immersive application. Thus, to ensure a reliable connection, the effective throughput must satisfy the link quality constraint given by 
+
+Reff = (1 − η) · Rc(x∗
+
+> p
+
+) ≥ RQoS . (29) The entire waveguide satisfies Eq. (29) under unobstructed conditions (Mode 1). However, intruding into the robust block-age zone degrades the link, thereby acting as the feasibility threshold that triggers the anti-blockage movement (Mode 2). To hold this constraint over all frames, the worst feasible PA-user link in our system should reach the above quality threshold. That is, when η reaches a hard upper boundary ηmax 
+
+and dc(x∗
+
+> p
+
+) = pp(x∗
+
+> p
+
+) − pu = dmax c reaches the maximum tolerable link distance. Thus, we can derive ηmax by 
+
+ηmax ≤ 1 − RQoS 
+
+Rc(dmax c ) . (30) In the whole workflow of our solution, the value of ηmax is set to ensure Eq. (30). Thus, Eq. (29) always holds, and the communication quality can be ensured. 
+
+B. Sensing Parameter Pre-optimization 
+
+Since the link quality constraint always holds by using the upper boundary ηmax in Eq. (29), the remaining effective setting task is no longer to maximize the throughput, but to minimize the sensing duration Ts = ηT frame under the feasible system constraints. Given a fixed Tframe , the sensing duration minimization can be transformed to the sensing time ratio 
+
+η minimization. Therefore, two sensing parameters, i.e., the micro-motion velocity vscan and the sensing duty cycle η can be pre-optimized when configuring the system. The parameter pre-optimization is formulated as problem P1.
+
+P1 : min  
+
+> vscan ,η
+
+η, 
+
+s.t. vscan · η ≥ λs
+
+2Tframe sin(∆ θreq ) , (C1) 
+
+vscan ≤ vmax p , (C2) 
+
+η ≤ ηmax . (C3) In P1, (C1) defines the lower bound for the sensing res-olution to distinguish the mobile obstacle from background clutter; (C2) restricts the sensing micro-motion velocity within the mechanical motor limit; and (C3) bounds the feasible sensing duty cycle overhead. According to (C1), to satisfy the preset radar angu-lar resolution, the sensing duty cycle must satisfy η ≥
+
+λs/(2 Tframe sin(∆ θreq )vscan ). This lower bound monotoni-cally decreases with respect to the micro-motion velocity 
+
+vscan . Therefore, to minimize the temporal sensing overhead 
+
+η, the system must operate the micro-motion velocity at its ceiling. Substituting the boundary of (C2) directly yields the optimal sensing velocity expressed as 
+
+v∗ 
+
+> scan
+
+= vmax p , η ∗ = λs
+
+2Tframe sin(∆ θreq )vmax p
+
+. (31) Considering the hardware timing constraints (C3), the final optimal sensing duty cycle is bounded as 
+
+η∗ = min 
+
+ λs
+
+2Tframe sin(∆ θreq )vmax p
+
+, η max 
+
+
+
+. (32) This operation ensures that the system satisfies both the kinematic reachability limits of the mechanical motor and the required radar angular resolution, keeping the sensing duty cycle overhead to an absolute minimum. Consequently, the optimization problem P1 is solved in closed-form. By transforming the coupled problem into geometric constraint evaluations and deterministic operational modes, the solution circumvents iterative numerical algorithms. This closed-form execution minimizes the online processing burden, ensuring the system executes the anti-blockage strategy with low la-tency for dynamic indoor immersive communication networks. V. N UMERICAL RESULTS 
+
+This section conducts numerical simulation experiments to validate the performance of the developed sensing-assisted anti-blockage PASS solution. In our simulation, the rectangular room is considered with physical dimensions of L×D×Hp =10 .0 × 10 .0 × 3.0 m3. The dielectric waveguide spans the entire length L along the ceiling’s center axis ( y = 0 ). The user equipment is anchored at a fixed depth of yu = 5 mand a seated height of Hu = 0.9 m, simulating a user engaging in an immersive gaming scenario. The user’s x-coordinate varies within the room, acting as a system-level parameter to be analyzed in our experiments. The mobile obstacle is assumed as a standing adult pedestrian with a 
+
+Fig. 4: The PA’s trajectory evolution over 30 seconds (a total of 2702 frames) following the anti-blockage movement modes. cross-sectional radius of Rm = 0.25 m and a height of 
+
+Hm = 1 .8 m, and a y-axis depth of ym = 3 .1 m. It has the potential to meet the occlusion condition ( HLoS ≤ Hm) to trigger blockages for the PA-user communication. The detailed obstacle’s moving trajectory is simulated and demonstrated in Section V-A. The primary metric for system performance is the effective throughput Reff . The system configurations are strictly aligned with 5G/6G mmWave standards, immersive communication service requirements, and practical hardware constraints. Specifically, the system parameters are set below.  
+
+> •
+
+Communication Settings: The system operates at a mmWave carrier frequency of fc = 28 GHz [19], corresponding to a wavelength of λs = λc ≈ 10 .71 mm, and the bandwidth of 
+
+Bc = 400 MHz. Physical transmission parameters include an amplitude coupling coefficient ρ = 0.89 , waveguide attenuation αwg = 0 .05 m−1, receiver noise floor σ2g = −80 
+
+dBm, and transmit power Pp = 23 dBm (following 3GPP TS 38.101-2 Power Class 3). To support uncompressed XR streaming at a 90 Hz refresh rate, the minimum QoS requirement is RQoS = 500 Mbps with a synchronized frame length of Tframe = 11 .1 ms.  
+
+> •
+
+Sensing Settings: The sensing bandwidth is Bs = 2 GHz with a sensing antenna gain of 12 dBi. The chirp configura-tion includes a sampling rate fs = 40 MHz, N = 1024 
+
+samples per chirp, and a PRF of 20 kHz. The mobile obstacle’s radar cross-section is modeled as σrcs = 0 .4 m2
+
+[20]. Aligning with 3GPP flexible symbol limits, the max-imum sensing duty cycle is bounded at ηmax = 25% ,Under the defined room dimensions, this ηmax satisfies the worst-case link condition in (30) at the maximum tolerable link distance dmax c , continuously guaranteeing the required 
+
+RQoS . And an angular resolution ∆θreq = 15 ◦ via (C1) in 
+
+P1. To counteract sensing uncertainties, the robust guard band confidence multiplier is set to κ = 3 , guaranteeing a 99.73% confidence level under the 3σ rule [21].  
+
+> •
+
+Hardware Kinematic Constraints: The PA’s movement is bounded by a maximum velocity vmax p = 12 .0 m/s and TABLE I: Structures of four compared baselines (including ours, CA1, CA2, and CA3)                                               
+
+> Algorithms Our Solution CA1 - Static Physical Blockage CA2 - Fixed Sensing CA3 - Fixed PA
+> Effective Radius ˜Rm=Rm+∥ˆvk∥τ+κσ m[19] Rm˜Rm=Rm+∥ˆvk∥τ+κσ m[19] N/A
+> Sensing Ratio η∗(Optimal) [25] η∗(Optimal) [25] η=ηmax η= 0
+> PA Position Eq. (27) mode optimization x∗
+> pEq. (27) mode optimization x∗
+> pEq. (27) mode optimization x∗
+> pFixed xp= 5 .0m
+
+an acceleration ap = 980 m/s 2, reflecting the limits of industrial high-speed linear synchronous motors [14]. Next, we demonstrate three experiments and their results. 
+
+A. Anti-blockage Movement of the PA 
+
+This experiment validates the anti-blockage movement of the PA under a simulated dynamic trajectory of the obstacle. The entire experiment lasts 30 seconds, comprising a total of 2702 frames. Fig. 4 illustrates the spatial evolution of the PA’s position, the user equipment (anchored at X = 3 .5 m), and the moving mobile obstacle’s trajectory. We can observe that the PA proactively performs the anti-blockage movement strategy as the moving obstacle approaches. Initially (before epoch 600), the PA maintains a stable LoS connection in Mode 1 (Safety) , as the unconstrained optimum position satisfies 
+
+xopt p ∈ X safe near X = 2 .6 m. As the obstacle approaches and xopt p falls within the robust blockage zone ˜Zb, the system initiates Mode 2 (Escaping) . As depicted by the yellow trajectory in this mode, the PA first evades the obstacle by shifting to the valid extreme edges of Xsafe on this local side to determine the constrained optimal point x∗
+
+> p
+
+. Subsequently, when the PA is pushed to the spatial extreme (around epoch 1000, X ≈ 10 m) and ˜Zb completely occupies the feasible interval on the current side, local boundary evaluation becomes invalid. Driven by the cycle, the PA must cross the robust blockage zone ˜Zb to reach the newly determined x∗ 
+
+> p
+
+∈ X safe 
+
+on the opposite side. After crossing, the PA resumes Mode 1 (Safety) and stabilizes at x∗ 
+
+> p
+
+= xopt p . Based on the simulated mobile obstacle’s trajectory in this experiment, the subsequent experiments will evaluate long-term system performance over 30 seconds, i.e., the full 2702 frames. 
+
+B. Communication Performance under Comparative Baselines 
+
+To verify the communication performance of our solution in maintaining effective throughput, three baseline comparative approaches (CA) are established below. These CAs have structural differences in terms of the effective radius, sensing ratio, and PA positioning strategy as summarized in Table I.  
+
+> •
+
+Static Physical Blockage (CA1): This scheme retains the joint optimization of the sensing ratio η and the PA position 
+
+x∗
+
+> p
+
+, but disables the uncertainty and latency compensation mechanisms. It relies solely on the static physical boundary for anti-blockage movement (i.e., ˜Rm = Rm). This config-uration aims to isolate and validate the critical contribution of the formulated robust blockage zone ˜Zb in combatting the unknown kinematics of indoor obstacles.  
+
+> •
+
+Fixed Sensing (CA2): This scheme employs the full dynamic effective radius ˜Rm and optimizes the PA position x∗
+
+> p
+
+, but omits the dynamic allocation of sensing resources by per-manently fixing the sensing ratio at its predefined maximum 
+
+Fig. 5: Long-term communication performance of our solution by averaging throughput and outage rate over 2702 running frames (in Section V-A) versus different user positions. (i.e., η = ηmax ). This baseline highlights the fundamental necessity of the pre-optimized sensing parameters in balanc-ing the sensing accuracy and the transmission window.  
+
+> •
+
+Fixed PA (CA3): This scheme serves as a conventional non-sensing baseline by fixing the PA at the center of the waveguide (e.g., xp = 5 .0 m) and completely disables the “sensing-movement-communication” cycle (i.e., η = 0 ). It establishes the performance lower bound of traditional sys-tems that lack anti-blockage movement capabilities, demon-strating their vulnerability to unknown indoor obstacles. Fig. 5 evaluates the communication performance of our solution against three benchmarks under varying initial user positions ( Xuser ∈ {2.0, 3.5, 5.0, 6.5, 8.0} m). The results demonstrate that our solution guarantees an outage rate of 
+
+0.9% while sustaining a throughput range of 2850-3000 Mbps across all evaluated spatial scenarios. The Fixed PA scheme (CA3) achieves a higher throughput in non-obstructed edge scenarios (e.g., Xuser = 2.0 or 8.0 m). This is because CA3 disables the “sensing-movement-communication” cycle (η = 0 ), dedicating all temporal resources to data transmis-sion. However, this temporal advantage introduces positional vulnerability. When the user is located at Xuser = 3 .5 m, the mobile obstacle’s trajectory eclipses the communication link, leading to an outage spike of 29 .5% and a drop in average throughput. This demonstrates that traditional fixed-antenna strategies are highly vulnerable to the unknown positions of blockages. Furthermore, despite possessing mechanical mo-bility, the Strict Physical Blockage Scheme (CA1) yields the highest outage rate (peaking at 64 .1% ) and a throughput degra-dation to 1100 Mbps. This occurs because CA1 relies solely on raw physical boundaries without the robust margin ˜Rm,failing to absorb the tracking uncertainties of the obstacle’s unknown kinematics. Alternatively, the Fixed Sensing Ratio Scheme (CA2) successfully avoids occlusions and maintains a low outage rate. However, because CA2 rigidly fixes the Fig. 6: Impact of maximum mechanical speed vmax p and required angular sensing resolution ∆θreq on the solution. sensing ratio at its upper bound ( ηmax ) without using the pre-optimized sensing parameters, it excessively consumes temporal resources even when the blockage threat is low, resulting in a consistently lower throughput than our solution. 
+
+C. Impacts of System-level Parameters 
+
+This experiment is to evaluate the performance impact of two system-level parameters: angular resolution ∆θreq 
+
+and maximum mechanical velocity vmax p , under a fixed user position of xu = 5 m. As shown in Fig. 6, mechanical agility establishes the lower bound for movement safety, while sensing resolution restricts the communication capacity upper bound. This coupling is governed by the radar chirp count 
+
+M . When vmax p ≤ 6 m/s and ∆θreq ≤ 10 ◦, excessive sensing time ( M > 50 ) bottlenecks capacity, causing up to a 17 .1% 
+
+outage at 2 m/s since the PA cannot outrun the occlusion. In the intermediate regime ( vmax p ∈ [6 , 10] m/s, ∆θreq ∈
+
+[15 ◦, 25 ◦]), compressing the sensing ratio η degrades signal quality and expands the robust blockage zone ˜Zb. This causes minor outage fluctuations ( ≈ 1.0% ), which are resolvable by elevating the velocity to 12 m/s. However, extreme settings (e.g., ∆θreq = 30 ◦ at 12 m/s) drop the chirp count below the accuracy threshold ( M < 20 ). This sensing failure renders spatial evasion infeasible and triggers a 5.6% outage spike. For practical deployments, the system should operate beyond the kinematic bottleneck ( vmax p ≥ 6 m/s) with a relaxed angular resolution ( ∆θreq ∈ [15 ◦, 25 ◦]). Operating within this optimal regime ensures that the constrained optimization minimizes the sensing overhead η, translating the PA’s mobility into sustained communication capacity for immersive applications. VI. C ONCLUSION 
+
+This paper developed a sensing-assisted anti-blockage PASS solution to address the mmWave blockage vulnerability in indoor immersive communications. To overcome a critical limitation of unknown obstacle positions, our solution inte-grated FMCW radar sensing to PASS and executes a peri-odic “sensing-movement-communication” cycle. This solution enabled dynamic detection of mobile obstacles and proac-tively guides the PA to a safe zone (“escaping”) within the waveguide. Furthermore, we derived the pre-optimized sensing parameters to determine the efficient time allocation ratio and the scanning velocity of the PA during the sensing. Numerical results confirmed that our solution successfully minimizes temporal overhead, effectively suppressing the outage rate to near-zero levels while sustaining the pseudo-continuous, ultra-high capacity required by future 6G indoor immersive communication networks. REFERENCES [1] J. Wang, R. Shi, W. Zheng, W. Xie, D. Kao, and H.-N. Liang, “Effect of frame rate on user experience, performance, and simulator sickness in virtual reality,” IEEE Trans. Vis. Comput. Graph. , vol. 29, 2023. [2] Huawei Technologies Co., Ltd., “Embracing 5.5g to advance the intelligent world,” HuaweiTech, Tech. Rep. Issue 96, Jan. 2024, official Corporate Technical Journal. [Online]. Available: https://www.huawei.com/en/publications/huaweitech [3] T. Bai, R. Vaze, and R. W. Heath, “Analysis of blockage effects on urban cellular networks,” IEEE Trans. Wireless Commun. , vol. 13, no. 9, pp. 5070–5083, 2014. [4] G. R. MacCartney, T. S. Rappaport, and S. Rangan, “Rapid fading due to human blockage in pedestrian crowds at 5g millimeter-wave frequencies,” in 2017 IEEE GLOBECOM. , 2017. [5] Y. Liu, H. Jiang, X. Gan, X. Xu, J. Guo, Z. Wang, C. Ouyang, X. Mu, Z. Ding, A. Nallanathan, O. A. Dobre, G. K. Karagiannidis, and R. Schober, “A survey of pinching-antenna systems (PASS),” arXiv preprint arXiv:2601.18927 , 2026. [6] Y. Liu, H. Jiang, X. Xu, Z. Wang, J. Guo, C. Ouyang, X. Mu, Z. Ding, A. Nallanathan, G. K. Karagiannidis et al. , “Pinching-antenna systems (pass): A tutorial,” IEEE Transactions on Communications , 2026. [7] Y. Liu, Z. Wang, X. Mu, C. Ouyang, X. Xu, and Z. Ding, “Pinching-antenna systems: Architecture designs, opportunities, and outlook,” 
+
+IEEE Communications Magazine , vol. 64, no. 1, pp. 190–196, 2026. [8] K. Wang, Z. Ding, and R. Schober, “Antenna activation for noma assisted pinching-antenna systems,” IEEE Wireless Communications Letters , vol. 14, no. 5, pp. 1526–1530, 2025. [9] Y. Wang, Y. Liu, Y. Fu, and Y. Liu, “Uplink rate maximization for pinching antenna-assisted covert backscatter communication,” IEEE Transactions on Vehicular Technology , pp. 1–6, 2026. [10] Z. Ding and H. Vincent Poor, “Los blockage in pinching-antenna systems: Curse or blessing?” IEEE Wireless Communications Letters ,vol. 14, no. 9, pp. 2798–2802, 2025. [11] Y. Sun, Z. Ding, and G. K. Karagiannidis, “A stochastic geometric analysis on multi-cell pinching-antenna systems under blockage effect,” 
+
+IEEE Wireless Communications Letters , vol. 15, pp. 1085–1089, 2026. [12] Y. Xu, Z. Ding, O. A. Dobre, and T.-H. Chang, “Pinching-antenna sys-tem design with los blockage: Does in-waveguide attenuation matter?” 
+
+IEEE Trans. Wireless Commun. , vol. 25, pp. 17 322–17 337, 2026. [13] R. Zhao, S. Hu, D. Mishra, and D. W. K. Ng, “Robust and secure blockage-aware pinching antenna-assisted wireless communication,” 
+
+IEEE Trans. Mob. Comput. , pp. 1–18, 2026. [14] K. Sato, “High-precision and high-speed positioning of 100 g linear synchronous motor,” Precision Engineering , vol. 39, pp. 31–37, 2015. [15] G. Pyo, C.-Y. Kim, and S. Hong, “Single-antenna fmcw radar cmos transceiver ic,” IEEE Transactions on Microwave Theory and Tech-niques , vol. 65, no. 3, pp. 945–954, 2016. [16] A. Moreira, P. Prats-Iraola, M. Younis, G. Krieger, I. Hajnsek, and K. P. Papathanassiou, “A tutorial on synthetic aperture radar,” IEEE Geoscience and Remote Sensing Magazine , vol. 1, no. 1, pp. 6–43, 2013. [17] W. Jiang and H. Schotten, “Pinching-antenna-assisted terahertz commu-nications: Modeling and benchmarking,” 05 2026. [18] S. Suleymanov, “Design and implementation of an fmcw radar signal processing module for automotive applications,” University of TWENTE ,2016. [19] Z. Zhang, Z. Wang, X. Mu, B. He, J. Chen, and Y. Liu, “Integrated sensing and communications for pinching-antenna systems (pass),” IEEE Communications Letters , vol. 29, no. 12, pp. 2929–2933, 2025. [20] M. I. Skolnik, “Radar handbook,” IEEE Aerospace Electronic Systems Magazine , vol. 23, no. 5, pp. 41–41, 2008. [21] L. Blackmore, M. Ono, and B. C. Williams, “Chance-constrained optimal path planning with obstacles,” IEEE Transactions on Robotics ,vol. 27, no. 6, pp. 1080–1094, 2011.

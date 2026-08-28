@@ -1,0 +1,1036 @@
+Title: Efficient DCT-Based Estimation and Compensation of Nonlinear Channels for OFDM Systems
+
+URL Source: https://arxiv.org/pdf/2608.25847v1
+
+Published Time: Thu, 27 Aug 2026 01:06:25 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Efficient DCT-Based Estimation and Compensation of Nonlinear Channels for OFDM Systems 
+
+Marc Martinez-Gost ∗, Ana P´ erez-Neira ∗†‡ , Miguel ´ Angel Lagunas †∗Centre Tecnol` ogic de Telecomunicacions de Catalunya, Spain 
+
+> †
+
+Dept. of Signal Theory and Communications, Universitat Polit` ecnica de Catalunya, Spain 
+
+> ‡
+
+ICREA Acad` emia, Spain Corresponding author: mmartinez@cttc.es 
+
+Abstract —This paper proposes a maximum-likelihood (ML) framework for estimating nonlinear frequency-selective channels in orthogonal frequency-division multiplexing (OFDM) commu-nication systems. The nonlinear distortions are modeled using a Discrete Cosine Transform (DCT)-based representation, which results in a well-conditioned estimation problem with favor-able convergence properties. The proposed method combines a compact parameterization with low computational complexity, enabling fast adaptation and efficient real-time implementation. Numerical results show that the proposed channel estimation can be used for multiple nonlinear compensation methods and achieve near-ideal BER performance with very limited training overhead. This performance is maintained down to approximately 15 dB SNR in the presence of both amplitude and phase nonlinearities, and down to -10 dB when only amplitude distortions are present. 
+
+I. I NTRODUCTION 
+
+Orthogonal frequency-division multiplexing (OFDM) has become the dominant waveform in modern wireless commu-nication systems due to its high spectral efficiency, robustness against multipath propagation, and compatibility with high-order modulation schemes. However, OFDM signals inher-ently exhibit a high peak-to-average power ratio (PAPR), producing large signal peaks that can push the power amplifier (PA) into its nonlinear operating region [1]. Preventing this distortion requires operating the PA with a substantial input back-off, which significantly reduces its power efficiency. This trade-off is particularly critical in power-constrained systems such as satellite communications [2], where efficient operation of the onboard PA is essential to maximize the available transmit power. Therefore, compensating for PA nonlinearities remains an important challenge in the design of efficient OFDM communication systems. Digital predistortion (DPD) has long been the predominant approach for mitigating PA nonlinearities by linearizing the transmitter before amplification [3]. Its effectiveness, however, relies on accurately identifying the PA nonlinear response, a task that has become increasingly challenging in modern com-munication systems [4]. The wider bandwidths and stronger nonlinear behavior encountered in current standards demand higher sampling rates and increasingly sophisticated behav-ioral models, substantially increasing computational complex-ity. Furthermore, the adoption of flexible physical-layer con-
+
+> This work is part of the project SOFIA PID2023-147305OB-C32 funded by MICIU/AEI/10.13039/501100011033 and FEDER/UE.
+
+figurations requires adaptive DPD schemes capable of con-tinuously tracking PA variations, which introduces additional training overhead. As a result, closed-loop PA estimation at the transmitter side becomes increasingly demanding in terms of power consumption. Digital postdistortion (DPoD) has emerged as an attractive alternative to DPD [5]. DPoD performs the compensation at the receiver, potentially accounting for impairments accumu-lated along the transmission chain. The effectiveness of DPoD, however, still depends on accurate estimation of the nonlinear channel. Existing approaches often assume that the multipath channel is known or that it can be estimated independently of nonlinear distortions, an assumption that is difficult to satisfy in practical systems (see [5] and references therein). Further-more, existing methods do not provide a unified framework capable of jointly estimating the multipath channel response together with amplitude and phase distortions. More recently, data-driven approaches based on neural net-works have been proposed to avoid explicit modeling and esti-mation of the nonlinear channel [6]–[8]. Although these meth-ods claim considerable modeling flexibility, their receiver-side nonlinear processing introduces additional challenges. In par-ticular, nonlinear transformations of the received signal alter the statistical properties of the noise, potentially amplifying its impact and making the learning process more difficult. Consequently, neural network-based DPoD approaches typi-cally require large model architectures and extensive training datasets to achieve satisfactory performance. This high training complexity significantly limits their applicability in adaptive scenarios where the nonlinear channel must be continuously tracked. These limitations are expected to become increasingly rel-evant as future wireless systems place greater emphasis on uplink communications. Accurate knowledge of the nonlinear channel at the user equipment (UE) enables more efficient transmission strategies. Since UEs operate under stringent computational and energy constraints, shifting the nonlinear estimation task to the receiver provides an attractive alterna-tive to conventional transmitter-centric approaches. Moreover, receiver-side estimation naturally captures the aggregate non-linear behavior of the entire transmission chain, rather than only the PA characteristics, making it applicable to a broader range of practical impairments. arXiv:2608.25847v1 [eess.SP] 26 Aug 2026 Motivated by these challenges, this work proposes a unified framework for nonlinear frequency-selective channel estima-tion for OFDM systems. The proposed formulation is fully consistent with the maximum-likelihood (ML) principle and models amplitude and phase nonlinear distortions using a Discrete Cosine Transform (DCT) model. Unlike conventional polynomial models, the cosine basis of the DCT fundamen-tally improve the conditioning of the estimation problem by effectively decorrelating the optimization variables and minimizing the eigenvalue spread of the parameter space [9]. This property enables efficient gradient-based optimization with low computational complexity and fast convergence. In particular, the resulting algorithm is well suited to real-time operation in time-varying scenarios where channel statistics are unknown or continuously evolving. The contributions of this work 1 are as follows: 1) We propose an ML–based estimation framework for nonlinear frequency-selective channels, jointly capturing multipath, amplitude and phase distortions. 2) The nonlinear channel is represented with a DCT-based model, which provides a compact and flexible param-eterization of the nonlinear responses. The favorable spectral properties of the DCT lead to fast and well-conditioned convergence. In addition, the formulation does not require step-size tuning or the estimation of second-order statistics. Consequently, the proposed framework enables fast adaptation with low computa-tional complexity, making it particularly well suited for real-time operation. 3) We show how the proposed estimation framework can be integrated into different compensation strategies. In particular, for predistortion, the DCT structure can be exploited to efficiently approximate the inverse nonlinear response with low computational complexity. The remaining part of the paper proceeds as follows: Section II presents the system model, followed by Section III, which proposes the nonlinear channel estimation design. Section IV then describes the compensation techniques and discusses their integration with the channel estimation framework. Section V presents the performance evaluation and Section VI concludes the paper. 
+
+Notation: Bold lowercase and uppercase letters denote vectors and matrices, respectively. The operators (·)T , (·)∗,and (·)H denote transpose, complex conjugate, and Hermitian transpose, respectively. The sets of real and complex numbers are denoted by R and C. The operator diag( ·) forms adiagonal matrix from its argument and I is the identity matrix. The expectation operator is denoted by E(·). The real part, imaginary part and phase of a complex scalar are denoted by 
+
+ℜ(·), ℑ(·), and ∠(·), respectively. The notation O(·) denotes the asymptotic order in the Big-O sense. 
+
+> 1This article is an extended version of a previously published conference paper [10], in which only amplitude distortions are considered.
+
+Fig. 1: System model of the OFDM transmission chain, including signal generation, nonlinear distortion, multipath channel propagation and additive noise. II. S YSTEM MODEL 
+
+This section describes the complete OFDM transmission model, including signal generation and nonlinear frequency-selective distortion. We further introduce a DCT-based parametrization of the nonlinear amplitude and phase distor-tions, which is used throughout the remainder of the work for modeling and estimation. The overall system model is illustrated in Figure 1. 
+
+A. OFDM transmitted signal 
+
+In OFDM, an incoming serial stream of bits {b1, . . . , b M }
+
+is parallelized into multiple streams and each one mapped to a complex symbol stream using some modulation constellation 
+
+M(·). Each symbol Xk ∈ C is mapped to an orthogonal sub-carrier signal and transmitted simultaneously. This procedure is realized with an inverse discrete Fourier transform (iDFT) and results in the so-called OFDM symbol: 
+
+xn = F−1 (Xk) = 
+
+> K−1
+
+X
+
+> k=0
+
+Xkej 2πkn K , n = 0 , . . . , K − 1, (1) where K is the resolution of the DFT and determines the number of subcarriers. Typically, a cyclic prefix of length CP ≥ L − 1 is in-corporated by appending the last CP samples of (1) at the beginning of the signal to combat intersymbol interference (ISI) and simplify channel estimation. We can express the resulting signal as follows: 
+
+˜xn =
+
+
+
+xn+NDFT −CP , n = 0 , . . . , CP − 1,xn−CP , n = CP , . . . , N DFT + CP − 1
+
+(2) The OFDM signal ˜xn passes through a memoryless non-linear PA, whose behavior is characterized by amplitude-to-amplitude (AM-AM) and amplitude-to-phase (AM-PM) dis-tortions. We will also refer to these nonlinearities as magnitude and phase distortions. The resulting output signal can be expressed as 
+
+f (xn) = fAM (|xn|) ej(ϕn+fPM (|xn|)) , (3) where fAM (·) and fPM (·) denote the AM-AM and AM-PM characteristics of the PA, respectively, and ϕn = ∠ xn.This formulation encompasses commonly used memoryless PA models, such as the Saleh, Rapp and Ghorbani models [11], where the amplitude of the signal dictates the distortions at the output of the amplifier. We assume that the AM-AM characteristic is normalized such that 0 ≤ | fAM (xn)| ≤ 1.B. Nonlinear Channel 
+
+The signal is then transmitted through a frequency-selective channel with multipath propagation. The channel is modeled as a finite impulse response (FIR) filter h ∈ CL, where L denotes the number of taps. The channel coefficients are assumed to be i.i.d. complex Gaussian, hℓ ∼ CN (0 , 1/L ), ensuring unit-normalized channel power. Throughout this work, we assume a block-fading channel, so that the channel remains constant over the duration of a processing block. The received signal is given by 
+
+˜yn = hH f (˜ xn) + wn =
+
+> L−1
+
+X
+
+> ℓ=0
+
+h∗ 
+
+> ℓ
+
+f (˜ xn−ℓ) + wn, (4) where xn = [ xn, x n−1, . . . , x n−L]T collects L consecutive transmitted samples, the nonlinearity is applied element-wise, and wn is circularly symmetric complex Gaussian noise with variance σ2.Assuming that the cyclic prefix length satisfies CP ≥ L−1,the receiver removes the cyclic prefix and obtains the useful OFDM symbol 
+
+yn =
+
+> L−1
+
+X
+
+> ℓ=0
+
+h∗ 
+
+> ℓ
+
+f  x[n−ℓ mod NDFT ]
+
+ + wn+CP , (5) where [( ·) mod NDFT ] denotes the modulo-NDFT operation. Under this condition, the linear channel convolution is trans-formed into an equivalent circular convolution over the useful OFDM symbol interval. For the derivations that follow, we restrict the analysis to the samples n = L − 1, . . . , N DFT − 1. Since these indices do not involve wrap-around, the modulo operation can be omitted and the received signal can be expressed using the equivalent linear-convolution notation. The receiver cannot distinguish between the phase rotation introduced by the channel and that introduced by the nonlinear distortion, since both contributions appear additively in the received phase. To resolve this ambiguity, we assume without loss of generality that the first channel tap has zero phase (i.e., 
+
+h0 ∈ R) and absorb the corresponding phase rotation into the nonlinear phase distortion model. Although this ambiguity cannot be resolved without additional information, it does not affect the receiver operation, whose ultimate objective is to compensate the overall phase distortion introduced by the nonlinear channel. The considered system model corresponds to a Hammer-stein structure, in which an instantaneous nonlinear block is followed by a linear FIR filter [3]. A more general formula-tion capable of describing nonlinearities with memory would require a Wiener-Hammerstein model, where a linear FIR filter precedes the instantaneous nonlinearity. Such an extension would allow the representation of dynamic nonlinear effects and memory-dependent distortions. However, the incorpora-tion of memory effects into the nonlinear model is beyond the scope of this work and is left for future research. 
+
+C. The DCT-based model for nonlinearities 
+
+The receiver needs to model the nonlinear distortions in (3) with a parametrized model. In this work we propose to use the DCT [9]. For a nonlinear function ˆf (·), its DCT representation is 
+
+ˆf (z) = 
+
+> Q
+
+X
+
+> q=1
+
+Fq cos 
+
+ π
+
+2NDCT 
+
+(2 q − 1)(2 z + 1) 
+
+
+
+, (6) where Fq ∈ R are the DCT coefficients, Q is the total number of coefficients, z ∈ [0 , N DCT − 1] is a discrete index and NDCT 
+
+is the number of discrete samples that defines the resolution of the DCT. Although the DCT is defined over a discrete input, it can represent any input signal because the cosine basis functions provide interpolation between those points. Thus, keeping NDCT large enough (e.g., 512) is sufficient and the DCT has no hyperparameters beyond Q.Since the nonlinear model is defined over a normalized input magnitude domain |xn| ∈ [0 , 1] , a linear mapping is introduced to project this interval onto the discrete DCT index domain: 
+
+zn = ( NDCT − 1) xn + 1 2 (7) This transformation ensures compatibility between the continuous-valued signal magnitude and the discrete grid required by the DCT representation. Moreover, this mapping effectively extends the domain to [−1, 1] 7 → [0 , N DCT − 1] ,which is a deliberate modeling choice used to enforce an odd-symmetric structure in the approximated nonlinear function around xn = 0 . Although the input magnitude is inherently nonnegative, this symmetry assumption is introduced to guar-antee that the nonlinear response satisfies ˆf (xn = 0) = 0 ,which reflects the natural constraint that no distortion should be present in the absence of an input signal. Additionally, this structural property enables a sparse parameterization of the model, since only odd-indexed DCT coefficients contribute to the representation. This is enforced by the term (2 q −1) in (6), which significantly reduces the number of parameters required to describe the nonlinear function. Finally, equation (6) can be expressed as ˆf (zn) = f T cn,where f = [ F1, F 2, . . . , F Q]T ∈ RQ contains the Q DCT coefficients and cn ∈ RQ contains the cosines evaluated at 
+
+zn. We can generalize this notation when the input is a vector 
+
+xn to ˆf (xn) = CTn f , where 
+
+Cn = cn, cn−1, . . . , cn−ℓ, . . . , cn−(L−1) 
+
+ ∈ RQ×L (8) As introduced in [9], the output ˆf (xn) can be compared with a reference signal f (xn) to generate an error signal and update the DCT coefficients. In this work we will use the DCT to model the distortions estimates ˆfAM (·) and ˆfPM (·) at the receiver side, and define the corresponding error signals required to update the coefficients. The proposed DCT-based model extends the conventional Least mean squares (LMS) framework by introducing non-linearity through the basis expansion while preserving linear adaptation with respect to the filter coefficients. Owing to the orthogonality and boundedness of the DCT kernels, the resulting input correlation matrix becomes diagonal and inde-pendent of the input statistics, Rc = E cncTn = 12 I. This leads to simplified step-size selection, predictable convergence behavior and minimum eigenvalue spread. As a result, the proposed approach provides an efficient and theoretically well-conditioned framework for adaptive estimation of nonlinear distortions [9]. The following section shows how this frame-work can be integrated into the considered OFDM receiver to jointly estimate the linear and nonlinear distortions introduced by the channel. III. N ONLINEAR CHANNEL ESTIMATION 
+
+In conventional multi-carrier receivers, the channel response is typically estimated in the frequency domain, where the chan-nel decomposes into K narrowband subchannel responses. However, when the transmitted signal undergoes magnitude distortion, channel estimation becomes more challenging be-cause the nonlinear distortion occurs in the time domain and it creates inter-carrier interference (ICI) in the frequency domain. Moreover, there is no analytical expression describing its effect on the distorted signal in the frequency domain. To address this limitation, we propose to estimate the full effective nonlinear channel response in the time domain. Thus, the whole OFDM symbol (i.e., the full sequence of bits {b1, . . . , m M }) is treated as a pilot observation for joint channel and nonlinearity estimation. Next, we first formalize the estimation problem and intro-duce the optimal design criterion. Because the resulting opti-mization problem is nonconvex, we develop a block coordinate descent algorithm and leverage the DCT properties to enable efficient computation and fast convergence. 
+
+A. Optimal Design Criterion 
+
+An optimal ML receiver operates by first characterizing the communication channel, in order to model the transformations experienced by the transmitted signal. Then, the receiver should select the most probable ˆxn given yn. Under additive white Gaussian noise (AWGN) and complete knowledge of the nonlinear channel response, the conditional probability density function of the received signal is 
+
+p  yn | hH f (xn) = 1
+
+πσ 2 exp − yn − hH f (xn) 2
+
+σ2
+
+!
+
+(9) and ˆxn is obtained maximizing the log-likelihood, 
+
+log p  yn | hH f (xn). This results in 
+
+ˆxn = arg min yn − hH f (xn) 2, (10) revealing that the ML solution corresponds to the xn that min-imizes the mean squared error (MSE) between the observed data yn and the signal replica hH f (xn). Therefore, the optimal ML estimator must replicate the Hammerstein model. Given a pilot sequence xn and estimates of both the channel taps, ˆh, and the nonlinear distortion, ˆf (·), the receiver computes an estimate of the received signal, 
+
+ˆyn = ˆhH ˆf (xn) = 
+
+> L−1
+
+X
+
+> ℓ=0
+
+ˆh∗ 
+
+> ℓ
+
+ˆfAM (|xn−ℓ|) ej(ϕn−ℓ+ ˆfPM (|xn−ℓ|))
+
+(11) This signal can be expressed in terms of the nonlinear DCT model as 
+
+ˆyn =
+
+> L−1
+
+X
+
+> ℓ=0
+
+ˆh∗ 
+
+> ℓ
+
+f T
+
+> AM
+
+cn−ℓ ej(ϕn−ℓ+f T
+
+> PM cn−ℓ
+
+)= ˆhH DnCTn fAM , (12) where fAM and fPM represent the coefficients of the magnitude and phase distortions, respectively. Matrix Dn = diag 
+
+
+
+ej(ϕn+CTn fPM )
+
+∈ CL×L,
+
+ϕn = ϕn, ϕ n−1, . . . , ϕ n−(L−1) 
+
+T contains the phases of the original reference signal, and the complex exponential is applied element-wise. Finally, the receiver formulates the instantaneous error by comparing the observed and estimated received signals, 
+
+εn = yn − ˆyn = yn − ˆhH DnCTn fAM , (13) and the nonlinear channel is estimated by minimizing the MSE, 
+
+minimize   
+
+> ˆh,fAM ,fPM
+
+E |εn|2 , (P1) where the expectation is taken with respect to the transmitted data and the channel noise realization. Nevertheless, the optimization problem in (P1) is not jointly convex, because the estimated signal ˆyn contains multiplicative couplings between the channel coefficients and the magnitude DCT coefficients, and the phase distortion parameters appear inside a complex exponential. This renders the MSE noncon-vex, which precludes the use of standard convex optimization tools to obtain a closed-form global solution. To address this issue, we adopt a block-coordinate descent strategy, where one set of parameters is optimized at a time while the remaining variables are held fixed. In particular, the optimization alternates among the channel taps ˆh, the mag-nitude DCT coefficients fAM , and the phase DCT coefficients 
+
+fPM . In the following, we study each subproblem individually, examining its convexity properties. We ultimately develop an efficient iterative algorithm to compute a stationary point of the original nonconvex formulation. 
+
+B. Frequency-selective Channel 
+
+This section focuses on the estimation of the channel taps 
+
+h. We assume that the receiver has approximate estimates of the nonlinear functions, ˆfAM (·) and ˆfPM (·). In practice, we initialize the procedure with a linear model for the magnitude, 
+
+ˆfAM (xn) = xn, and a distortionless phase, ˆfPM (xn) = 0 .In Section V we will show that this simple initialization is sufficient to ensure reliable convergence and fast performance in all considered scenarios. The channel length L is assumed to be known at the receiver. Considering that the nonlinear coefficients are fixed and that 
+
+εn is linear in ˆh, we rewrite problem (P1) as 
+
+minimize 
+
+> ˆh
+
+E
+
+
+
+yn − ˆhH un
+
+> 2
+
+
+
+, (P2) where un = DnCTn fAM is the effective input signal to the linear channel estimator. This optimization problem is quadratic and reduces to the standard minimum MSE (MMSE) estimation. The optimal filter coefficients are given by 
+
+ˆh⋆ = R−1 
+
+> u
+
+ruy = 2
+
+|| fAM || 2 ruy , (14) where Ru = E{unuHn } is the autocorrelation matrix of the effective input signal, and ruy = E{uny∗
+
+> n
+
+} is the cross-correlation vector between the effective input and the received signal. As shown in Appendix A, the structure induced by the DCT basis leads to Ru = ( || fAM || 2/2) I, which only depends on the energy of the magnitude DCT coefficients. The conventional MMSE solution requires explicit estima-tion of second-order statistics and a matrix inversion, both of which are costly and must be recomputed whenever the signal statistics vary. In contrast, the DCT-induced isotropy removes the need for matrix inversion entirely, reducing the solution to a simple scaling of the cross-correlation vector. This sig-nificantly lowers complexity and improves numerical stability, while avoiding any reliance on eigenvalue decomposition or matrix conditioning. The same structure also motivates an adaptive implemen-tation. Instead of computing ensemble averages, the channel can be estimated online using a stochastic gradient strategy that updates the solution using the current observation. This leads to a normalized LMS algorithm of the form 
+
+ˆh{n+1 } = ˆh{n} − μ ∂|εn|2
+
+∂ ˆh = ˆh{n} + 2α
+
+|| un|| 2 unε∗
+
+> n
+
+= ˆh{n} + 4α
+
+|| fAM || 2 unε∗
+
+> n
+
+, (15) where μ = α/ || un|| 2 is the normalized step-size and α cor-responds to the miss-adjustment parameter. The last equality follows from the unitary modulus of Dn and the diagonal structure of Rc.A key consequence of the DCT model is that it eliminates direct dependence on the second-order statistics of the original input signal xn, replacing it with a structured and deterministic feature space induced by an orthogonal basis expansion. In this setting, the covariance matrix Ru becomes diagonal, implying complete statistical decoupling between channel coefficients and yielding an eigenvalue spread equal to one, which pro-vides optimal conditioning and uniform convergence across all channel taps. 
+
+C. Nonlinear Magnitude Distortion 
+
+This section focuses on the estimation of the magnitude DCT coefficients fAM . Since ˆyn is scalar-valued, (12) can be rewritten as 
+
+ˆyn = f T
+
+> AM
+
+CnDn ˆh∗, (16) which is linear in fAM . Thus, we can rewrite problem (P1) as 
+
+minimize 
+
+> fAM
+
+E
+
+n
+
+yn − f T
+
+> AM
+
+vn
+
+> 2
+
+o
+
+(P3) where vn = CnDn ˆh∗ is the effective input signal to the linear estimator. As with problem (P2), this problem also reduces to the MMSE estimation, with the following optimal filter coefficients: 
+
+f ⋆ 
+
+> AM
+
+= ℜ{ Rv }−1 ℜ{ rvy } =
+
+
+
+E
+
+n
+
+|| ˆh|| 2Rc
+
+o −1
+
+ℜ{ rvy }
+
+= 2
+
+Q|| ˆh|| 2 ℜ{ rvy }, (17) where Rv = E{vnvHn } is the autocorrelation matrix of the effective input signal, and rvy = E{vny∗
+
+> n
+
+} is the cross-correlation vector between the effective input and the received signal. A detailed derivation of this result is provided in Appendix B. As in the channel estimation problem, the orthogonality of the DCT basis induces a diagonal covariance matrix. Conse-quently, the estimation of the nonlinear magnitude coefficients also admits an efficient stochastic gradient implementation that avoids explicit covariance estimation and matrix inversion. The gradient of the instantaneous error with respect to the magnitude coefficients is 
+
+∂|εn|2
+
+∂fAM 
+
+= ∂ε n
+
+∂fAM 
+
+ε∗ 
+
+> n
+
++ ∂ε ∗
+
+> n
+
+∂fAM 
+
+εn = −vnε∗ 
+
+> n
+
+− v∗
+
+> n
+
+εn
+
+= −2ℜ (vnε∗
+
+> n
+
+) , (18) and the corresponding LMS recursion is given by 
+
+f {n+1 } 
+
+> AM
+
+= f {n} 
+
+> AM
+
+− μ ∂|εn|2
+
+∂fAM 
+
+= f {n} 
+
+> AM
+
++ 2α
+
+|| vn|| 2 ℜ { vnε∗
+
+> n
+
+}
+
+= f {n} 
+
+> AM
+
++ 4αQ|| ˆh|| 2 ℜ { vnε∗
+
+> n
+
+} (19) Therefore, the same benefits observed in the adaptive chan-nel estimation stage are preserved in the estimation of the nonlinear magnitude distortion. 
+
+D. Nonlinear Phase Distortion 
+
+This section focuses on the estimation of the phase DCT coefficients fPM . Although the phase distortion is linear with respect to the parameter vector, i.e., ˆfPM (xn) = f T
+
+> PM
+
+cn, the parameters appear inside a complex exponential. Therefore, the MSE in (P1) becomes nonconvex, which prevents the existence of a closed-form global solution. To circumvent this issue, we reformulate the estimation problem in the phase domain, where the dependence on the parameters remains linear. We first remove ISI using the current estimates of the channel and nonlinear magnitude distortion, leading to the equalized received signal, 
+
+yeq  
+
+> n
+
+= yn −
+
+> L−1
+
+X
+
+> ℓ=1
+
+ˆh∗ 
+
+> ℓ
+
+ˆf (xn−ℓ) ≈ f (xn) + wn, (20) where the equalization is performed in the time domain. If the channel and nonlinear magnitude estimates are sufficiently ac-curate, the residual ISI becomes negligible and the remaining perturbation is dominated by AWGN. Under this assumption, the phase of the equalized observation, ∠ yeq  
+
+> n
+
+, provides the ML estimate of the underlying signal phase [12, Chapter 5]. At sufficiently high signal-to-noise ratio (SNR), ∠ yeq  
+
+> n
+
+ad-mits the first-order approximation: 
+
+∠ yeq  
+
+> n
+
+≈ ∠ f (xn) + ℑ
+
+ wn
+
+f (xn)
+
+
+
+= ϕn + fPM (|xn|) + ℑ
+
+ wn
+
+f (xn)
+
+
+
+, (21) where the phase of the equalized received signal decomposes into an additive structure, which enables a direct linear param-eterization of the nonlinear phase distortion using the DCT model. The receiver models the phase of the equalized signal as 
+
+∠ ˆyeq  
+
+> n
+
+= ϕn + ˆfPM (|xn|) = ϕn + f T
+
+> PM
+
+cn, (22) where the phase of the original OFDM sample ϕn is obtained from the corresponding pilot sample xn.Defining the estimation error directly over the phase angles is problematic because phase is a circular variable defined modulo 2π. Thus, small angular differences near the phase discontinuities at ±π may produce arbitrarily large Euclidean errors. To avoid these discontinuities, the error is instead defined over the unit circle: 
+
+ϵ2 
+
+> n
+
+= ej∠ yeq  
+
+> n
+
+− ej∠ ˆyeq 
+
+> n
+> 2
+
+= 2 − 2 cos ( ∠ yeq  
+
+> n
+
+− ∠ ˆyeq  
+
+> n
+
+) (23) The DCT coefficients are then designed to minimize this phase error, which can be rewritten as 
+
+maximize 
+
+> fPM
+
+E cos  ∠ yeq  
+
+> n
+
+− f T
+
+> PM
+
+cn − ϕn
+
+ (P4) Problem (P4) is maximized when the phase difference approaches zero, driving the DCT coefficients toward the nonlinear phase distortion. This cost function is commonly encountered in phase synchronization and phase-locked loop (PLL) architectures [12, Chapter 5]. Since problem (P4) remains nonconvex and does not admit a closed-form solution, we resort to a stochastic gradient-based procedure to iteratively update the DCT coefficients. The gradient of (P4) with respect to the phase parameters is given by 
+
+∂|| ϵn|| 2
+
+∂fPM 
+
+= −2cn sin ( ∠ yeq  
+
+> n
+
+− ∠ ˆyeq  
+
+> n
+
+) , (24) which yields the recursive update 
+
+f {n+1 } 
+
+> PM
+
+= f {n} 
+
+> PM
+
+− μ ∂|| ϵn|| 2
+
+∂fAM 
+
+= f {n} 
+
+> PM
+
++ 4αQ cn sin  ∠ yeq  
+
+> n
+
+− f T
+
+> PM
+
+cn − ϕn
+
+ , (25) where the step-size normalization is chosen with respect to the power of the effective input signal, i.e., || cn|| 2 = Q/ 2.Although the update is not LMS in the strict MMSE sense, the orthogonal DCT representation preserves the same con-ditioning advantages, including diagonal covariance structure and uniform convergence behavior. Finally, it is important to emphasize that this phase-domain reformulation comes at a cost: The extraction of the phase is a nonlinear operation that destroys the additive and Gaussian structure of the noise. Therefore, operating in the phase domain requires sufficiently high SNR conditions in order for (21) and the subsequent estimation to remain valid. In the simulation section, we will illustrate that this requirement corresponds to approximately 10 dB of SNR. 
+
+E. Joint Estimation Algorithm 
+
+In the previous subsections we derived the optimal estimates of the channel coefficients and the DCT-based nonlinear distor-tion parameters separately. However, each derivation assumed that the remaining parameter set was known. To address this limitation, we now propose a joint estimation framework. We consider an alternating optimization strategy summa-rized in Algorithm 1. Given a training sequence {xn} and the corresponding received samples {yn}, the receiver iteratively updates (i) the multipath channel coefficients, (ii) the magni-tude DCT coefficients, and (iii) the phase DCT coefficients. Each update is performed using a stochastic gradient rule over all Nsamples OFDM samples. Since the gradients are properly normalized, a single step-size parameter α is used for all updates. This alternating procedure is repeated Niter iterations until convergence of the MSE. Figure 2 illustrates the corresponding receiver architecture for nonlinear frequency-selective channel estimation. The es-timated channel and nonlinear distortion parameters are then used in the equalizer (EQ) block. For simplicity, the sample phase ϕn is subtracted from the received signal yn.Although not essential to the estimation procedure itself, parameter normalization significantly improves numerical sta-bility and convergence. Specifically, the AM distortion is assumed to be bounded and normalized. Assuming that fAM (·)
+
+is non-decreasing, the maximum is achieved at the boundary of the domain. For the DCT model, this boundary corresponds to z = 0 , yielding 
+
+ˆf (0) = 
+
+> Q
+
+X
+
+> q=1
+
+Fq cos 
+
+ π(2 q − 1) 2NDCT 
+
+
+
+≈
+
+> Q
+
+X
+
+> q=1
+
+Fq , (26) where the approximation holds for NDCT ≫ Q. This motivates the normalization of the AM coefficients after each update as 
+
+fAM ← fAM 
+
+| P 
+
+> q
+
+FAM ,q | (27) Algorithm 1: Joint estimation of the nonlinear frequency-selective channel 
+
+Input: {xn}, {yn}, L, Q, α, Niter 
+
+Output: ˆh, fAM , fPM 
+
+Initialize fAM , fPM randomly (e.g., line coefficients) 
+
+for i = 1 , 2, . . . , N iter do for n = 1 , 2, . . . , N samples do 
+
+un = DnCTn fAM 
+
+εn = yn − ˆhH un
+
+ˆh{n+1 } = ˆh{n} + 4α 
+
+> || fAM || 2
+
+unε∗
+
+> n
+
+end for n = 1 , 2, . . . , N samples do 
+
+vn = CnDn ˆh∗
+
+εn = yn − fAM T vn
+
+f {n+1 } 
+
+> AM
+
+= f {n} 
+
+> AM
+
++ 4αQ|| fAM || 2 ℜ { vnε∗
+
+> n
+
+}
+
+end for n = 1 , 2, . . . , N samples do 
+
+yeq  
+
+> n
+
+= yn − PL−1 
+
+> ℓ=1
+
+ˆh∗ 
+
+> ℓ
+
+ˆf (xn−ℓ)
+
+ϵn = ∠ yeq  
+
+> n
+
+−
+
+
+
+fPM T cn + ϕn
+
+
+
+f {n+1 } 
+
+> PM
+
+= f {n} 
+
+> PM
+
++ 4αQ cn sin ( ϵn)
+
+end end 
+
+F. Computational Complexity 
+
+Algorithm 1 consists of three main blocks:  
+
+> •
+
+Adaptation of ˆh: The computation of un involves the product of a matrix with a vector and a diagonal matrix, which requires O(Q2) operations. The error signal εn
+
+requires a length-L inner product, contributing O(L)
+
+operations. Finally, the update of ˆh involves computing a norm, a vector scaling and addition of length L, resulting in O(Q+L) operations. Therefore, the complexity of the linear channel adaptation stage is O(Q2 + L) per sample.  
+
+> •
+
+Adaptation of fAM : The computation of vn requires two vector products, which incurs O(QL ) operations. The error computation involves a length-Q inner product, resulting in O(Q) complexity, while the LMS update consists of a vector scaling and addition of length Q,also O(Q). Hence, the overall complexity of the fAM 
+
+adaptation step is O(QL ) per sample.  
+
+> •
+
+Adaptation of fPM : The equalization step requires O(L)
+
+operations and the computation of the error term ϵn
+
+requires O(Q) operations per sample. The LMS update scales linearly with Q, leading to O(Q) operations. Therefore, the fPM adaptation stage has total complexity of O(L + Q) per sample. Since these three blocks are executed within nested loops, the overall computational complexity of the algorithm is 
+
+O  Niter Nsamples (Q2 + QL ).This result underscores the relevance of the proposed non-linear model: Thanks to its high representational efficiency, the DCT can accurately capture nonlinear responses using only a limited number of coefficients (e.g., Q = 6 ), substantially re-ducing the computational cost. In addition, the proposed DCT-based model naturally leads to a simple LMS implementation that avoids matrix inversions, further improving computational efficiency. IV. N ONLINEAR COMPENSATION TECHNIQUES 
+
+ML decoding is computationally infeasible because the number of possible transmitted symbols grows exponentially with the number of subcarriers, making exhaustive search pro-hibitive. Therefore, OFDM systems instead rely on transmitter or receiver-side compensation techniques to mitigate distor-tions. This section revisits nonlinear compensation methods for OFDM signals and proposes their integration with the channel estimation method presented in this work. 
+
+A. Predistortion 
+
+Predistortion is a transmitter-side technique aimed at lin-earizing nonlinear distortions [3]. The predistorted signal is obtained by independently modifying the magnitude and phase of the OFDM signal xn through two nonlinear functions, 
+
+gAM (·) and gPM (·). These functions are designed such that the cascade of predistorter and nonlinearity approximates an identity mapping: 
+
+g(f (xn)) = gAM (fAM (|xn|)) ej(ϕn+fPM (|xn|)+ gPM (|xn|)) (28) From this expression, the conditions for perfect linearization, 
+
+g(f (xn)) = xn, are 
+
+gAM (·) = f −1
+
+> AM
+
+(·) gPM (·) = −fPM (·) (29) Hence, phase predistortion reduces to a direct cancellation of the AM–PM distortion, whereas magnitude predistortion re-quires the computation of the inverse AM–AM characteristic, which constitutes an additional nonlinear regression problem. To estimate this inverse, we propose a self-supervised learning framework based on the DCT model, as illustrated in Figure 3(a): A reference signal xn, which may coincide with the training signal used for channel identification, is processed through the estimated magnitude distortion ˆfAM (·)
+
+and subsequently through a parametric inverse model ˆf −1
+
+> AM
+
+(·).The resulting output is 
+
+ˆxn = ˆf −1
+
+> AM
+
+ ˆfAM (xn)
+
+
+
+, (30) which is directly compared to the input sequence xn, yielding a self-supervised error signal. When the inverse is represented using a DCT model, the estimate can be written as ˆxn = gT
+
+> AM
+
+cn, where gAM ∈ RQ
+
+contains the DCT coefficients of the inverse magnitude distor-tion. The error signal is therefore 
+
+ξn = xn − ˆxn = xn − gT 
+
+> AM
+
+cn, (31) Fig. 2: Receiver architecture for estimating the nonlinear frequency-selective channel. Dashed arrows denote auxiliary information provided to the corresponding processing blocks.      
+
+> (a) Proposed DCT-based self-supervised learning framework to learn the inverse predistortion function ˆf−1
+> AM (·)given ˆfAM (·).
+> (b) Predistortion architecture implementing the learned inverse model.
+
+Fig. 3: Proposed learning-based predistortion framework. which is linear in the coefficients. Once again, this structure enables efficient adaptation using the LMS algorithm: 
+
+g{n+1 } 
+
+> AM
+
+= g{n} 
+
+> AM
+
++ 4αQ cnξn (32) Regarding the phase predistortion, the receiver computes the corresponding DCT coefficients as gPM = −fPM . Figure 3(b) illustrates the deployment of the proposed predistortion framework, where both magnitude and phase distortions are compensated once the inverse functions have been learned. As a result, the transmitted OFDM signal is effectively linearized, enabling conventional one-tap frequency-domain channel equalization at the receiver. This formulation preserves the advantages of the DCT model: decorrelated coefficients, bounded gradients and stable convergence behavior. However, since the inverse function is generally more complex than the forward nonlinear character-istic, a larger number of coefficients Q might be required. This only increases convergence time proportionally, which can be theoretically bounded by 
+
+Tκ = Q ln(1 /κ )2α , (33) where κ indicates convergence when the residual error in the coefficients has reduced to κ [9]. Furthermore, the self-supervised learning process is fully local (i.e., at the transmit-ter or receiver only) and operates under idealized conditions with infinite SNR, such that performance is determined solely by the representational capacity of the DCT model, i.e., required number of coefficients. The computational complexity of estimating the inverse function using the DCT-based model scales linearly with both the number of training samples and the number of coefficients, yielding an overall complexity of O(Nsamples Q). Similarly, the computational complexity of the predistortion stage is dominated by the evaluation of the DCT-based model, which scales with Q. Therefore, the overall predistortion complexity per sample is O(Q).An important remark is that directly estimating the inverse function at the receiver is not advisable. Although such an approach may appear to simplify the processing chain, it violates the ML structure of the estimation problem and leads to degraded performance even at high SNR. This degradation arises because nonlinear inversion at the receiver transforms additive Gaussian noise into a signal-dependent and non-Gaussian process, significantly complicating estimation and potentially amplifying noise. For this reason, the preferred ap-proach is to first estimate the forward nonlinear characteristic 
+
+ˆfAM (·) and subsequently derive its inverse in a controlled manner, as proposed. We refer the reader to [13] for acomprehensive theoretical comparison and evaluation of both approaches. Finally, the proposed predistortion scheme differs from conventional approaches in two key aspects. First, it employs a DCT-based model, which significantly reduces the complex-ity of estimation. Second, the inverse estimation might be performed at the receiver. In traditional digital predistortion architectures, adaptation is carried out at the transmitter, which requires additional hardware to capture the output signal, perform analog-to-digital conversion, and ensure precise syn-chronization between transmitted and feedback signals. These requirements become increasingly demanding as communica-tion bandwidths grow, leading to higher sampling frequencies and increased power consumption. In contrast, the proposed approach leverages the existing receiver processing chain, thereby avoiding dedicated feedback hardware and benefiting from already available digital signal processing resources. 
+
+B. Postdistortion 
+
+Postdistortion techniques are receiver-side compensation methods that aim to correct nonlinear distortion after it has already affected the transmitted signal [5]. The frequency-domain received signal at subcarrier k can be written as 
+
+Yk = F (yn) = Hk F (f (xn)) + Wk
+
+= HkGk,k Xk + Hk
+
+X
+
+> m̸=k
+
+Gk,m Xm
+
+| {z }
+
+> ICI
+
++Wk, (34) where Hk denotes the linear channel frequency response, 
+
+Wk is the additive noise in the frequency domain and Gk,m 
+
+represents the nonlinear coupling coefficients induced by f (·),mapping subcarrier m onto subcarrier k. The off-diagonal capture the ICI introduced by the nonlinear transmitter. Despite the presence of ICI, the linear multipath channel still appears as a multiplicative per-subcarrier factor Hk. This preserves the applicability of conventional one-tap frequency-domain equalization. Given a channel estimate ˆHk = F(ˆhn),the equalized signal becomes 
+
+Y eq  
+
+> k
+
+= Yk
+
+ˆHk
+
+≈ Gk,k Xk + X
+
+> m̸=k
+
+Gk,m Xm + Wk
+
+Hk
+
+(35) This shows that channel equalization effectively removes the linear multipath effect, while nonlinear distortion remains embedded as ICI terms. In the time domain, (35) corresponds to 
+
+yeq  
+
+> n
+
+= F−1(Y eq  
+
+> k
+
+) ≈ f (xn) + ˜ w, (36) which highlights that the linear and nonlinear distortion can be separated under the assumption of a known channel response. A large class of compensation techniques builds on the assumption that an accurate channel estimate ˆh is available at the receiver. These include:  
+
+> •
+
+Iterative decoding ([14], [15]): reconstructs the distortion at the receiver using a known model of the distortion and detected data symbols, and successively refines and subtracts this estimated distortion from the received sig-nal to improve symbol estimation. It operates in the frequency domain and assumes perfect knowledge of both the nonlinear response and the frequency-selective channel for quasi-ML detection.  
+
+> •
+
+Neural network ([6]): learns the inverse of the nonlinear channel, enabling direct reconstruction of the undistorted signal without requiring an explicit analytical model. The frequency-selective channel response is provided as input.  
+
+> •
+
+Decision-aided reconstruction ([16]): restores the clipped signal using ML detection to recover regrown peaks, replacing clipped samples with reconstructed values and repeating the process until convergence. It assumes one-tap frequency-domain equalization is available to com-pensate for multipath propagation.  
+
+> •
+
+Clipping noise cancellation ([17], [18]): estimates the clipping distortion by regenerating and re-clipping atime-domain signal constructed from detected symbols, then subtracts the estimated distortion from the received signal. It assumes one-tap frequency-domain equalization is available to compensate for multipath propagation.  
+
+> •
+
+Compressive sensing ([19], [20]): exploits the sparsity of the clipping distortion in the time domain and re-constructs it from a subset of received subcarriers using sparse recovery methods such as Least Absolute Shrink-age and Selection Operator (LASSO). It assumes one-tap frequency-domain equalization is available to compensate for multipath propagation. While these methods differ in their assumptions and scope (see [5] for a detailed discussion), they generally rely on the availability of accurate side information, including an estimate of the frequency-selective channel ˆh and, in some cases, an estimate of the nonlinear distortion ˆf (·). In practice, however, these quantities are not directly available in nonlinear scenarios with induced ICI. Most existing approaches therefore implic-itly assume that such estimates can be obtained, despite the fact that the underlying estimation problem is itself nontrivial. This highlights the need for a dedicated channel estimation framework that can operate under nonlinear conditions, which is precisely the gap addressed in this work. Among the receiver-side compensation techniques discussed above, iterative decoding plays a central role due to its exploitation of the nonlinear distortion knowledge. These algorithms assume the following decomposition: 
+
+f (xn) = xn + dn, (37) where dn encapsulates the nonlinear component of the signal, which is treated as noise. This linearization allows to work with OFDM in the frequency domain, as if there was no ICI. First, hard-decoding is applied over each subcarrier to obtain an estimate of the transmitted digital symbol, ˆXk = ⟨Yk/ ˆHk⟩.Then, the additive distortion dn is estimated in the time domain and used to correct the decoding in an iterative fashion. These decision-feedback algorithms assume perfect knowl-edge of both the nonlinear response and the frequency-selective channel, which can be provided by the proposed estimation algorithm. V. S IMULATION RESULTS 
+
+This section focuses on a satellite communication use case, where nonlinear distortions introduced by high-power ampli-fiers (HPAs) constitute a fundamental performance bottleneck [2]. In order to maintain power efficiency, satellite transceivers are typically operated close to saturation, which exacerbates nonlinear amplitude and phase distortions. While classical mitigation strategies based on input back-off can alleviate these impairments, they compromise power efficiency, making them poorly suited for modern non-terrestrial networks where energy are particularly stringent. This challenge is further exacerbated in OFDM systems, which have historically been regarded as problematic in space applications due to their in-herently high PAPR, which necessitates large back-off margins and thus further reduces the effective utilization of onboard amplifier power. Within this context, we first evaluate the proposed algorithm for nonlinear channel estimation. We then use the resulting channel estimates within two compensation schemes to study their effectiveness in mitigating nonlinear effects at the trans-mitter and receiver, respectively. 
+
+A. Experimental setup 
+
+The simulations are performed using an OFDM system with 
+
+NDFT = 1024 subcarriers, 16-quadrature amplitude modula-tion (16-QAM) on each symbol and a cyclic prefix of length 16. The multipath channel has length L = 3 . At the receiver, an overestimated channel length of ˆL = 6 is assumed, which might be truncated afterwards. Algorithm 1 is configured with α = 0 .1 and Niter = 5 
+
+iterations. A total of Nsamples = 25 .000 samples are transmit-ted, corresponding to 24 OFDM symbols or 2 transmission time intervals (TTI). For the DCT model, a resolution of 
+
+NDCT = 512 samples is used, with Q = 6 coefficients for the amplitude distortion and Q = 12 for the phase distortion. We consider two HPA models: a traveling-wave tube am-plifier (TWTA) and a solid-state power amplifier (SSPA). For the TWTA we adopt the Saleh model [21] to characterize its nonlinear behavior, given by 
+
+fAM (x) = αAM |x|
+
+1 + βAM |x|2 , fPM (x) = αPM |x|2
+
+1 + βPM |x|2 , (38) with parameters αAM = 1 .7, βAM = 0 .7, αPM = 26 and βPM =25 . For the SSPA, which exhibits only amplitude distortions, we retain fAM (x) and set fPM (x) = 0 .The proposed DCT model was compared in [13] against classical polynomial-based representations (e.g., Volterra se-ries) as well as neural network-based models. The results showed that, even in an additive white Gaussian noise (AWGN) scenario with an ideal channel, the DCT-based model achieves substantially lower MSE and significantly faster convergence across all tested configurations. For this reason, in the present work we do not include further comparisons with alternative nonlinear representations, as they have been shown to be less effective and are not expected to outperform the proposed approach. Finally, we assume that the estimation and subsequent communication (i.e., compensation) happen within the same coherence block, so that the nonlinear channel response does not change. Otherwise, the distortions are static and the selective-fading can be re-estimated with conventional pilot-assisted techniques. 
+
+B. Nonlinear Channel Estimation 
+
+To assess the robustness of the proposed estimation scheme, we define the pre-detection SNR at the receiver input as SNR pre =
+
+E
+
+n
+
+hH f (xn) 2o
+
+σ2 (39) We first address the more challenging case of the TWTA. Figure 4 shows the estimated nonlinear channel components together with their corresponding MSE, normalized by the power of the true responses. Figure 4(a) corresponds to the estimation at 30 dB, where all channel components are recov-ered with negligible error. The phase nonlinearity exhibits the largest estimation error, as justified in the theoretical analysis. The proposed method continues to provide accurate estimates down to approximately 15 dB, as illustrated Figure 4(b), which can be regarded as a practical lower operating limit. This requirement is generally not restrictive, since OFDM systems are typically operated at higher SNR values. Figure 5 presents the results for the SSPA case. We only illustrate the nonlinear response, since the underlying mul-tipath response is perfectly estimated across all considered SNR regimes. Not having to estimate the phase distortion simplifies Algorithm 1, leading to two key advantages: first, reliable channel estimation is achieved down to SNR = 0 dB, and even at SNR = −10 dB the estimation errors remain small enough to ensure excellent nonlinear compensation performance. Second, the proposed approach is highly efficient in terms of training overhead, requiring only 2 OFDM symbols (i.e., 2048 time samples) to accurately capture the nonlinear frequency-selective channel, compared to 24 OFDM symbols in the general setup. The robustness of the proposed estimation framework is further assessed with respect to the initialization, convergence behavior and assumed channel length. Although the underlying optimization problem is non-convex and the alternate opti-mization strategy cannot guarantee convergence to the global optimum, the proposed algorithm consistently converges to a local minimum that accurately identifies the channel compo-nents under all the considered SNR conditions and nonlinear configurations. This behavior is largely enabled by the adopted initialization, which represents the most general case by as-suming an initially linear channel with no nonlinear distortion. Regarding the channel length, underestimating the number of multipath components prevents accurate channel recovery, whereas overestimating it is a safer strategy since redundant components can be removed afterwards. In all simulations, the proposed estimator automatically suppresses the additional multipath components by driving their corresponding coeffi-cients to zero, without introducing artificial channel paths. This behavior is consistent with the ML formulation adopted in this work, where the receiver jointly estimates the complete nonlinear channel response and avoids ambiguous solutions arising from independent fitting of multipath and nonlinear distortion components. MSE = 1 .3 × 10 −90 200 400 600 800 1000 Carrier index 0.0 0.5 1.0 1.5 |H(ej )|       
+
+> True Estimate Error 0200 400 600 800 1000 Carrier index -1.0 -0.5 0.0 0.5 |H(ej )|
+> True Estimate Error
+
+MSE = 3 .0 × 10 −60.0 0.2 0.4 0.6 0.8 1.0  
+
+> x
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> fAM (x) True Estimate Error
+
+MSE = 9 .0 × 10 −50.0 0.2 0.4 0.6 0.8 1.0 
+
+> x
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> fPM (x) True Estimate Error
+
+(a) SNR pre = 30 dB. 
+
+MSE = 1 .9 × 10 −60 200 400 600 800 1000 Carrier index 0.0 0.5 1.0 1.5 |H(ej )|       
+
+> True Estimate Error 0200 400 600 800 1000 Carrier index -1.0 -0.5 0.0 0.5 |H(ej )|
+> True Estimate Error
+
+MSE = 5 .0 × 10 −50.0 0.2 0.4 0.6 0.8 1.0  
+
+> x
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> fAM (x) True Estimate Error
+
+MSE = 5 .7 × 10 −40.0 0.2 0.4 0.6 0.8 1.0 
+
+> x
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> fPM (x) True Estimate Error
+
+(b) SNR pre = 15 dB. 
+
+Fig. 4: Nonlinear channel estimation for different noise configurations. From left to right, the columns show the magnitude response of the frequency-selective channel, the phase response of the frequency-selective channel, the nonlinear amplitude distortion and the nonlinear phase distortion. For each estimate, the corresponding MSE is indicated. 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> x
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> f(x)
+> Actual Estimated (SNR = 10 dB) Estimated (SNR = 0 dB) Estimated (SNR = -10 dB)
+
+Fig. 5: SSPA magnitude distortion and estimated response at different SNR levels. 
+
+C. Nonlinear Channel Compensation 
+
+Once the nonlinear channel is estimated, we propose two different mitigation strategies:  
+
+> •
+
+Predistortion : The inverse nonlinear response is repre-sented using Q = 64 coefficients. The LMS adaptation rule in (32) is implemented with the same step size 
+
+α = 0.1. Training the inverse model requires 2, 000 
+
+samples, in agreement with the theoretical prediction in (33) for κ = 10 −3. 
+
+> •
+
+Iterative-decoding : The estimated phase distortion is fed back to the transmitter and compensated through predis-tortion, while the estimated magnitude distortion is used at the receiver to decode the information. The iterative procedure is run for Nstep = 5 iterations. Figure 6 reports the uncoded BER of the OFDM sys-tem under different nonlinear distortions and compensation schemes, using channel estimates obtained at various SNR levels. Figure 6(a) presents the results for the TWTA model. Although the phase estimate is not fully accurate at 15 dB, as observed in Figure 4(b), the estimated channel is still suf-ficiently accurate to enable effective compensation with both techniques. Predistortion achieves performance that is nearly indistinguishable from that of an ideal linear OFDM system, owing to the invertibility of the TWTA magnitude response. In contrast, iterative decoding exhibits a small performance degradation, since it relies on a quasi-ML procedure and is therefore inherently suboptimal. When the channel is estimated at 0 dB, an error floor appears at high SNR due to residual estimation inaccuracies. However, up to approximately 30 dB, the performance remains close to that obtained with higher-quality estimates, indicating that the proposed estimator still provides sufficiently accurate channel information for effective nonlinear compensation. Figure 6(b) shows the SSPA case. In this case, the channel estimation remains reliable even at −10 dB. Both compensa-tion schemes exhibit comparable performance, following the same general trend observed in the TWTA case. Table I compares the proposed methods in terms of sample size (i.e., the number of transmitted discrete-time samples required for estimation), sample complexity (i.e., the total number of sample usages across training iterations required to reach a target estimation performance) and model size. Predistortion incurs in a larger model size to represent the inverse magnitude distortion, which does not highly increase the sample complexity because the process is dominated by the channel estimation. 0 5 10 15 20 25 30 35 40 Eb/N0 (dB) 10 4   
+
+> 10 3
+> 10 2
+> 10 1
+> Uncoded BER
+> Theoretical Predistortion (SNR = 30 dB) Predistortion (SNR = 15 dB) Predistortion (SNR = 0 dB) Iterative-decoding (SNR = 30 dB) Iterative-decoding (SNR = 15 dB) Iterative-decoding (SNR = 0 dB)
+
+(a) TWTA. 0 5 10 15 20 25 30 35 40 Eb/N0 (dB) 10 4   
+
+> 10 3
+> 10 2
+> 10 1
+> BER
+> Theoretical Predistortion (SNR = 10 dB) Predistortion (SNR = -10 dB) Iterative-decoding (SNR = 10 dB) Iterative-decoding (SNR = -10 dB)
+
+(b) SSPA. 
+
+Fig. 6: Comparison of BER performance under different non-linear distortions, evaluating different compensation schemes with channel estimation performed at different SNR levels. In practice, the choice of technique is likely to be driven by implementation constraints and deployment considerations. In particular, predistortion shifts most of the computational burden to the transmitter, but it relies on the assumption that the magnitude distortion is invertible, which can limit its ap-plicability in strongly nonlinear regimes. In contrast, iterative decoding distributes the processing across both transmitter and receiver. However, this method is more sensitive to severe nonlinearities, even if invertible, under which its performance may degrade or even fail to converge. Table I also contrasts the proposed DCT-based methods with neural networks. Neural networks are purely data-driven, operate at the receiver and learn an implicit inverse mapping directly from observations. However, they are structurally less efficient: while the proposed methods rely on a compact set of 10 − 10 2 parameters, neural networks require on the order of 10 5 parameters, along with substantially higher training and sample complexity. In particular, they require up to 
+
+×10 5 more training samples and ×10 9 more data samples to reach convergence. In contrast, the proposed approach is more transparent, as it explicitly characterizes the channel response through a DCT representation, enabling a physically interpretable decomposition of the distortion. This structure also improves efficiency in two key aspects: (i) it reduces data requirements due to the compact parameterization of the channel, and (ii) it accelerates convergence by exploiting the energy compaction and decorrelation properties of the DCT. Furthermore, unlike neural networks, that are typically trained for specific modulation formats, the proposed methods operate in the time domain and remain independent of the underlying OFDM modulation scheme. VI. C ONCLUSION 
+
+In this paper, we have proposed a ML framework for estimating nonlinear frequency-selective channels in OFDM communication system. This work addresses the lack of general and computationally efficient estimation procedures capable of jointly handling multipath, nonlinear amplitude and phase distortions in a unified manner. The nonlinear distortions are modeled using a DCT-based representation, which provides a compact and flexible parametrization while leading to a well-conditioned estimation problem with favorable convergence properties. These characteristics enable fast convergence and eliminate the need for step-size tuning or the estimation of second-order statistics. Numerical results show that the proposed channel estimation can be effectively integrated into different nonlinear compensation strategies, including predistortion and iterative decoding. Across these methods, the resulting system achieves near-ideal BER performance with very limited training overhead. This performance is maintained down to approximately 15 dB SNR in the presence of both amplitude and phase nonlinearities, and down to −10 dB when only amplitude distortions are present. Overall, the proposed approach combines structural efficiency and low computational complexity, enabling fast and robust adaptation, and making it well suited for real-time implementation in multicarrier communication systems under nonlinear channel conditions. APPENDIX AIn this appendix, we derive the autocorrelation matrix Ru.The (i, j )th entry of Ru can be written as 
+
+[Ru]i,j = E
+
+n
+
+f T
+
+> AM
+
+cn−icTn−j fAM ej(ψi−ψj )o
+
+= f T
+
+> AM
+
+E cn−icTn−j fAM E
+
+n
+
+ej(ψi−ψj )o
+
+, (40) where ψi = ϕn−i +f T
+
+> PM
+
+cn−i. The second equality follows from the independence assumption between the phase and amplitude processes in an OFDM signal. Regarding the phase, ϕn is usually modeled as i.i.d. random variable with distribution ϕn ∼ U (0 , 2π). Thus, we obtain 
+
+E
+
+n
+
+ej(ψi−ψj )o
+
+=
+
+(
+
+1 if i = j
+
+0 if i̸ = j (41) and off-diagonal entries reduce to [Ru]i,j = 0 . For diagonal entries, we have: 
+
+[Ru]i,i = f T
+
+> AM
+
+E cn−icTn−i fAM = f T
+
+> AM
+
+RcfAM = || fAM || 2
+
+2 ,
+
+(42) which follows from the orthogonality of the DCT basis and the assumption of independent realizations across time. □TABLE I: Comparison of different nonlinear compensation methods. (TX = Transmitter; RX = Receiver) 
+
+Method Distortion type Deployment Sample size Sample complexity Model size Limitations 
+
+DCT-based predistortion AM-AM TX 2 × 10 3 3 × 10 4 73 Distortions must be invertible AM-AM, AM-PM TX 2 × 10 4 1 × 10 5 85 
+
+DCT-based iterative decoding AM-AM RX 2 × 10 3 1 × 10 5 9 Fails under severe distortions AM-AM, AM-PM TX, RX 2 × 10 4 1 × 10 5 21 
+
+Neural network [6] Any RX 2 × 10 9 5 × 10 14 6 × 10 5 Depends on modulation 
+
+APPENDIX BIn this appendix we derive the optimal solution of (P3). First, we expand the cost function: 
+
+E |εn|2 = E |yn|2 − 2ℜ f T
+
+> AM
+
+rvy + f T
+
+> AM
+
+Rv fAM , (43) where Rv = E{vnvHn } is the autocorrelation matrix of the effective input signal, and rvy = E{vny∗
+
+> n
+
+} is the cross-correlation vector between the effective input and the received signal. Since the objective function of (P3) is quadratic in fAM and the problem in unconstrained, the optimal solution is obtained by setting the gradient of the cost function to zero: 
+
+∂E{| εn|2}
+
+∂fAM 
+
+= −2ℜ{ rvy } +  Rv + RHv
+
+ fAM 
+
+= −2ℜ{ rvy } + 2 ℜ{ Rv }fAM (44) Setting the gradient equal to zero yields the optimal solution in (17). The analytical expression of Rv follows directly from the same arguments used in the derivation of Ru in Appendix A. 
+
+□
+
+REFERENCES [1] Seung Hee Han and Jae Hong Lee, “An overview of peak-to-average power ratio reduction techniques for multicarrier transmission,” IEEE Wireless Communications , vol. 12, no. 2, pp. 56–65, 2005. [2] Ovais Bin Usman and Andreas Knopp, “Digital predistortion in high throughput satellites: Architectures and performance,” IEEE Access , vol. 9, pp. 42291–42304, 2021. [3] Fadhel M. Ghannouchi and Oualid Hammi, “Behavioral modeling and predistortion,” IEEE Microwave Magazine , vol. 10, no. 7, pp. 52–64, 2009. [4] David L´ opez Bueno, Machine learning techniques for adaptive poly-nomial and neural network digital predistorters , Phd thesis, UPC, Department of Signal Theory and Communications, 2023. [5] Hammam Orabi, Ahmad Dalbah, Mohamed Helaoui, and Fadhel M. Ghannouchi, “An alternative to predistortion? postdistortion for transmit-ter’s nonlinearity mitigation at the receiver,” IEEE Microwave Magazine ,vol. 27, no. 2, pp. 14–31, 2026. [6] Jaakko Pihlajasalo, Dani Korpi, Mikko Honkala, Janne M. J. Huttunen, Taneli Riihonen, Jukka Talvitie, Alberto Brihuega, Mikko A. Uusitalo, and Mikko Valkama, “Deep learning ofdm receivers for improved power efficiency and coverage,” IEEE Transactions on Wireless Communica-tions , vol. 22, no. 8, pp. 5518–5535, 2023. [7] Marcele O. K. Mendonc ¸a, Francisco J. Mart´ ın Vega, Geoffrey Eappen, Carla E. Garcia Moreta, Abuzar Babikir Mohammad Adam, Jorge Querol, Beatriz Soret, and Symeon Chatzinotas, “A machine learning-based receiver for mitigating nonlinear distortion in OFDM systems for 5G,” in 2025 IEEE International Mediterranean Conference on Communications and Networking (MeditCom) , 2025, pp. 1–6. [8] Hao Ye, Geoffrey Ye Li, and Biing-Hwang Juang, “Power of deep learning for channel estimation and signal detection in OFDM systems,” 
+
+IEEE Wireless Communications Letters , vol. 7, no. 1, pp. 114–117, 2018. [9] Ana I. Perez-Neira, Marc Martinez, and Miguel A. Lagunas, “Adaptive function approximation based on the discrete cosine transform (DCT),” in 2023 27th International Conference on Circuits, Systems, Communi-cations and Computers (CSCC) , 2023, pp. 224–231. [10] Marc Martinez-Gost, Ana P´ erez-Neira, and Miguel ´ Angel Lagunas, “The DCT neuron for estimation and compensation of amplitude distortions in OFDM systems,” arXiv preprint arXiv:2603.29680 , 2026. [11] John Liebetreu, David Falconer, Tom Kolze, and Yigal Leiba, “Proposed system impairment models,” Tech. Rep. IEEE 802.16.1pp-00/15, IEEE 802.16 Broadband Wireless Access Working Group, March 2000, IEEE 802.16.1 PHY Presentation. [12] J.G. Proakis and M. Salehi, Digital Communications , McGraw-Hill International Edition. McGraw-Hill, 2008. [13] Ana P´ erez-Neira, Marc Martinez-Gost, and Miguel ´Angel Lagunas, “Before AI takes over: Rethinking nonlinear signal processing in com-munications,” arXiv preprint arXiv:2511.02493 , 2025. [14] J. Tellado, L.M.C. Hoo, and J.M. Cioffi, “Maximum likelihood detection of nonlinearly distorted multicarrier symbols by iterative decoding,” in 
+
+Seamless Interconnection for Universal Services. Global Telecommu-nications Conference. GLOBECOM’99. (Cat. No.99CH37042) , 1999, vol. 5, pp. 2493–2498 vol.5. [15] Fernando H. Gregorio, Stefan Werner, Juan Cousseau, Jose Figueroa, and Risto Wichman, “Receiver-side nonlinearities mitigation using an extended iterative decision-based technique,” Signal Processing , vol. 91, no. 8, pp. 2042–2056, 2011. [16] Dukhyun Kim and G.L. Stuber, “Clipping noise mitigation for ofdm by decision-aided reconstruction,” IEEE Communications Letters , vol. 3, no. 1, pp. 4–6, 1999. [17] Hangjun Chen and A.M. Haimovich, “Iterative estimation and cancella-tion of clipping noise for ofdm signals,” IEEE Communications Letters ,vol. 7, no. 7, pp. 305–307, 2003. [18] Jun Tong, Li Ping, Zhonghao Zhang, and Vijay K. Bhargava, “Iterative soft compensation for ofdm systems with clipping and superposition coded modulation,” IEEE Transactions on Communications , vol. 58, no. 10, pp. 2861–2870, 2010. [19] Ebrahim B. Al-Safadi and Tareq Y. Al-Naffouri, “Peak reduction and clipping mitigation in ofdm by augmented compressive sensing,” IEEE Transactions on Signal Processing , vol. 60, no. 7, pp. 3834–3839, 2012. [20] Damilola S. Owodunni, Anum Ali, Ahmed A. Quadeer, Ebrahim B. Al-Safadi, Oualid Hammi, and Tareq Y. Al-Naffouri, “Compressed sensing techniques for receiver based post-compensation of transmitter’s nonlinear distortions in ofdm systems,” Signal Processing , vol. 97, pp. 282–293, 2014. [21] A.A.M. Saleh, “Frequency-independent and frequency-dependent non-linear models of twt amplifiers,” IEEE Transactions on Communications ,vol. 29, no. 11, pp. 1715–1720, 1981.

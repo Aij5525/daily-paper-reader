@@ -1,0 +1,987 @@
+Title: Radio Imaging and Resource Allocation in Frugal Multistatic D-MIMO ISAC Systems
+
+URL Source: https://arxiv.org/pdf/2608.27041v1
+
+Published Time: Fri, 28 Aug 2026 01:13:41 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Radio Imaging and Resource Allocation in Frugal Multistatic D-MIMO ISAC Systems 
+
+Sauradeep Dey, Musa Furkan Keskin, Senior Member, IEEE , Dario Tagliaferri, Member, IEEE ,Gonzalo Seco-Granados, Fellow, IEEE , Henk Wymeersch, Fellow, IEEE 
+
+Abstract —Emerging integrated sensing and communication (ISAC) systems based on distributed MIMO (D-MIMO) enable radio imaging by exploiting spatial diversity across multiple access points (APs). However, joint operation of sensing and communication in such systems introduces fundamental chal-lenges due to mutual interference between the communication and sensing signals. In this paper, we propose a downlink D-MIMO ISAC framework that allocates orthogonal subcarriers to sensing and communication to eliminate the inter-function interference. We consider a phase-coherent architecture in which single-antenna APs simultaneously serve communication user equipments (UEs) while constructing a reflectivity image of the environment. We develop a two-timescale resource allocation framework that minimizes the entropy of the reconstructed image subject to communication spectral efficiency (SE) con-straint. The proposed design follows a communication-centric resource allocation policy, where imaging is supported using the resources left after satisfying the communication requirement. The long-timescale optimization (LTO) determines AP modes (transmission or reception) and subcarrier assignment, includ-ing the partitioning of the subcarriers between communication and sensing functions and the allocation of sensing subcarriers among transmit APs, based on synthetic scenarios with random UE and target distributions. The short-timescale optimization (STO) dynamically adapts the communication-sensing power-splitting factor to preserve the SE constraint based on the current scenario. Numerical evaluations demonstrate that the proposed orthogonal subcarrier allocation achieves a superior sensing–communication trade-off compared with conventional su-perposition scheme, where the sensing and communication signals share the same subcarriers. Finally, we evaluate coherent and non-coherent imaging receivers and identify the synchronization regimes under which each approach achieves superior imaging and localization performance. 
+
+Index Terms —Distributed MIMO, Integrated sensing and com-munication, phase-coherent, imaging, entropy. 
+
+I. I NTRODUCTION 
+
+Distributed multiple-input multiple-output (D-MIMO) has emerged as a promising architecture for sixth-generation (6G) wireless systems [1]. Multiple geographically distributed ac-cess points (APs) operating in a phase-coherent manner effec-tively form a large virtual antenna array [2], [3]. This improves 
+
+This work was partly supported by the SNS JU project 6G-DISAC under the EU’s Horizon Europe research and innovation program under Grant Agreement No 101139130, the Swedish Research Council (VR) through the project 6G-PERCEF under Grant 2024-04390, the Spanish R+D project PID2023-152820OB-I00, and the AGAUR-ICREA Academia Program. S. Dey, M. F. Keskin and H. Wymeersch are with the Department of Electrical Engineering, Chalmers University of Technology, Gothenburg, Sweden (emails: {deysa, furkan, henkw }@chalmers.se) D. Tagliaferri is with the Department of Electronics, Information and Bioengineering, Politecnico di Milano, 20133, Milano, Italy (e-mail: dario.tagliaferri@polimi.it). G. Seco-Granados is with the Department of Telecommunications and Systems Engineering, Universitat Autonoma de Barcelona, Spain (email: gonzalo.seco@uab.cat). 
+
+the communication through coherent transmission and macro-diversity gains [4], while enabling high-resolution sensing by coherent combination of observations from spatially dis-tributed viewpoints [2], [3], [5]. These capabilities make phase-coherent D-MIMO an attractive platform for integrated sensing and communication (ISAC) [2], [3], [6], [7]. Early D-MIMO ISAC research mainly focused on target localization, where the objective is to estimate the target position, velocity, or orientation. Recently, attention has shifted toward radio imaging [5], [8]–[10], which reconstructs a two-or three-dimensional reflectivity map of the environment. Such environmental awareness is essential for emerging applications such as digital twins, autonomous systems, and extended reality. In parallel, existing D-MIMO ISAC works have in-vestigated resource-allocation strategies for jointly optimizing sensing and communication performance. These works formu-late resource-allocation problems to maximize communication performance subject to sensing constraints [11], [12], sensing performance subject to communication constraints [13]–[15], or optimize a weighted combination of sensing and com-munication metrics [16], [17]. Typical optimization variables include AP modes (transmit/receive), beamforming, power allocation, and waveform design [11]–[20]. The sensing performance in the aforementioned works is primarily evaluated using sensing signal-to-noise ratio (SNR) [11], [13]–[15], [17], probability of detection [18], or target position Cram´ er-Rao lower bound (CRLB) [3], [20] based metrics. Although sensing SNR is a useful indicator of signal quality, it does not necessarily translate into improved target detection or localization performance. Similarly, works using the probability of detection are often limited to simple single-target scenarios [18]. Moreover, CRLB-based formu-lations require prior knowledge of the target locations [20]. Consequently, these metrics are insufficient for characteriz-ing sensing performance in multi-target environments with unknown target locations. A separate modeling limitation in several of these works is that communication and sensing are described using different channel models. In particular, communication links are typically modeled using stochastic fading channels, whereas sensing links rely on LoS-only channels [11]–[14], [17], [19]. This simplifies the analysis but overlooks the physical coupling between sensing and communication through the same propagation environment. Finally, the works discussed above [11]–[20] focus on target localization or tracking, where only the target parameters are estimated. They do not reconstruct the surrounding environ-ment and therefore cannot provide a spatial map of the scene. In contrast to target localization, applications such as digital twins, autonomous systems, and extended reality require a richer understanding of the environment. This has motivated arXiv:2608.27041v1 [eess.SP] 27 Aug 2026 2
+
+growing interest in radio imaging for D-MIMO ISAC systems, where the goal is to reconstruct a reflectivity map of the coverage area rather than estimate only a few target parame-ters [21], [22]. The distributed geometry of D-MIMO is well suited for this task. Spatially separated APs observe the scene from different viewpoints, which improves spatial resolution and robustness to occlusions [5], [23], [24]. Recent works have therefore investigated imaging in distributed wireless systems [9], [25]–[30]. However, many of these approaches rely on multi-antenna APs or large antenna arrays to obtain spatial resolution, which increases the hardware complexity. From an algorithmic perspective, the aforementioned works employ compressed sensing, message passing, or covariance-based imaging methods. Compressed sensing and message passing require iterative optimization and can become com-putationally expensive for large imaging grids. Covariance-based methods require multiple temporal snapshots to esti-mate a reliable covariance matrix, which is less suitable for dynamic environments. To overcome these limitations, back-projection (BP) imaging has attracted significant attention [31]. BP provides a linear, single-step imaging framework that reconstructs the environment with low computational com-plexity and only a single snapshot [31]. Among BP-based approaches, our previous work [31] investigated downlink multistatic imaging in phase-coherent D-MIMO networks. This framework superposed AP-specific sensing waveforms onto the communication signals, allowing both functions to share the entire system bandwidth. However, sharing the same subcarriers introduced mutual interference between sensing and communication, degrading both the imaging quality and the communication performance. In addition, the framework assumed partial prior knowledge of the target locations by restricting them to a predefined region of interest. The sens-ing signals were beamformed toward this region to reduce interference with the communication signal. In this paper, we address the above limitations by consider-ing a frugal downlink D-MIMO ISAC architecture with single-antenna APs, and orthogonal subcarrier allocation. The design allocates disjoint subcarriers to sensing and communication, thereby eliminating sensing-communication interference. We develop coherent and non-coherent BP imaging receivers to reconstruct the reflectivity map of the coverage area. The AP transmit/receive modes, subcarrier allocation, and sensing-communication power split are optimized to minimize the reconstructed-image entropy while satisfying communication constraints. The subcarrier allocation includes both the parti-tioning between communication and sensing functions and the allocation of sensing subcarriers among transmit APs. Unlike CRLB-, detection probability-, or sensing SNR-based metrics, entropy directly measures image quality in multi-target envi-ronments without requiring prior target locations [32]–[34]. The main contributions of this paper are listed as follows:  
+
+> •
+
+Orthogonal subcarrier-based D-MIMO ISAC frame-work and entropy-based sensing evaluation : We pro-pose a frugal multistatic downlink D-MIMO ISAC frame-work with single-antenna APs and orthogonal frequency-domain multiplexing of sensing and communication sig-nals. The sensing subcarriers are further allocated dis-jointly across the transmit APs, making the AP-specific echoes separable at the receive APs. Sensing is performed via image reconstruction of the coverage area, which is used to detect and localize multiple point targets. To evaluate the sensing performance, we employ the image entropy. It quantifies the overall spatial concentration of the reconstructed image without any prior knowledge about the targets.  
+
+> •
+
+Two-timescale optimization algorithm : We develop an optimization framework to minimize the ex-pected image entropy while ensuring communication sum-spectral-efficiency (SE) constraints, by selecting AP transmit/receive modes, sensing subcarriers, and sensing-communication power split. This reflects acommunication-centric design in which imaging is per-formed using the resources available after meeting the communication requirement. To ensure computational feasibility and practical implementation, the optimization is decoupled across two timescales. A long-timescale optimization (LTO) operates offline to determine the dis-crete AP transmit/receive modes and sensing subcarrier assignments based on one or more synthetic scenarios, with random target and UE distributions. Subsequently, a short-timescale optimization (STO) operates online to dynamically adapt the continuous sensing-communication power splitting factor according to instantaneous channel conditions.  
+
+> •
+
+Sensing-communication trade-offs and robustness analysis : We numerically demonstrate that the pro-posed orthogonal subcarrier allocation achieves a superior sensing-communication trade-off compared to the super-posed coding scheme in [31]. The proposed framework consistently attains lower image entropy over a wide range of communication sum-SE budgets, and improved multi-target localization accuracy, measured by the gen-eralized optimal sub-pattern assignment (GOSPA) met-ric [35]. We also show that maximizing the frequency diversity of each bistatic transmitter-receiver pair through interleaved subcarrier allocation provides better sensing performance than clustered allocation, where the sensing subcarriers occupy contiguous frequency bands. Finally, we evaluate the robustness of the proposed framework to imperfect AP synchronization and investigate coherent and non-coherent imaging performance. II. S YSTEM MODEL AND PROBLEM STATEMENT 
+
+In this section we present the downlink D-MIMO ISAC system model, along with the corresponding transmit and receive signal models, and the channel model. 
+
+A. Scenario 
+
+We consider a D-MIMO system, as illustrated in Fig. 1, where G single-antenna APs are deployed arbitrarily over a coverage area A. The system simultaneously serves L single-antenna UEs in downlink and senses multiple targets. Target sensing is performed by first generating a high-resolution image of the coverage area, and then detecting the peaks to estimate the target locations. We assume that the APs 3     
+
+> Tx AP Rx AP UE Target Frequency Power
+> Communication Sensing
+> Figure 1: System model of a D-MIMO ISAC network with orthogonal subcarrier allocation. Arbitrarily distributed single-antenna APs operate in transmit and receive modes, serving communication UEs and sensing point targets distributed over the coverage area. The illustrated links highlight the dual functionality: direct communication links to UEs ( ); sensing illumination paths from transmit APs to targets ( ), reflected paths from targets to receive APs ( ); and the reflected paths from targets to UEs (). The lower plot shows the frequency-domain resource allocation, where sensing and communication signals occupy orthogonal subcarriers.
+
+are phase-synchronized and the g-th AP is located at pg =[xg , y g ]⊤, while the ℓ-th UE and q-th target are located at 
+
+uℓ = [ ux,ℓ , u y,ℓ ]⊤ and rq = [ rx,q , r y,q ]⊤, respectively. We split the total set of G APs between N transmit APs, indexed by the set T , and M = G − N receive APs, indexed by set R.The APs employ orthogonal frequency division multiplex-ing (OFDM) waveform to transmit downlink data to the UEs and pilot signals for target sensing, over S subcarriers with subcarrier spacing ∆f . The S subcarriers are partitioned into 
+
+Ssen sensing subcarriers, and Scom = S −Ssen communication subcarriers, enforcing orthogonality between communication and sensing. The sensing and communication subcarriers are indexed by the sets Ssen and Scom , respectively. The sensing subcarriers are further split among the N transmit APs into disjoint sets {S n, sen }n∈T , where Sn, sen , with cardinality κn,denotes the set of subcarriers allocated to the n-th AP for sensing. The limiting case where κn = 1 , ∀n ∈ T , i.e. each transmit AP uses one subcarrier for sensing, is referred to as 
+
+phase only sensing (POSE) . The Scom communication subcar-riers are jointly used by all transmit APs for data transmission. 
+
+B. Signal and Channel Model 
+
+The transmit signal vector over the s-th subcarrier is denoted by x[s] ∈ CN ×1 and is given as follows: 
+
+x[s] = 
+
+(Fcom [s] acom [s] for s ∈ S com 
+
+asen [s] for s ∈ S sen 
+
+. (1) The vector acom [s] ∈ CL×1 contains the data symbols of the L UEs transmitted on the s-th subcarrier. These symbols are precoded by Fcom [s] ∈ CN ×L, which is normalized as ∥Fcom [s]∥2 
+
+> F
+
+= L. The data symbols are assumed to be uncorrelated and equally powered, i.e., E{acom [s]aHcom [s]} = 
+
+> αP LS com
+
+IL, where P is the total transmit power and α ∈ [0 , 1] is the fraction of power allocated to communication. The vector 
+
+asen [s] ∈ CN ×1 represents the sensing pilot signal transmitted over the s-th subcarrier, with E{∥ asen [s]∥2} = (1 −α)P/S sen .To ensure orthogonal allocation of sensing subcarriers across the transmitting APs, we set asen [s] = p(1 − α)P/S sen 1n(s)
+
+where 1n(s) ∈ BN ×1 is a one-hot vector with a single non-zero entry at index n(s) ∈ T . This ensures that only the n(s)-th transmitter transmits the s-th sensing subcarrier. No precoding is applied to the sensing pilots, as the transmitting APs use orthogonal sensing subcarriers. The communication channel between N transmitting APs and L UEs on the s-th subcarrier (s ∈ S com ) is denoted by 
+
+G[s] ∈ CL×N , and can be decomposed as follows [36] 
+
+G[s] = Glos [s] + Gscat [s] , (2) where Glos [s] ∈ CL×N captures the line of sight (LoS) component of the channel, and Gscat [s] ∈ CL×N models the scattering of the transmit signal by the targets in the coverage area. The (ℓ, n )-th entry of each matrix corresponds to the respective channel component between the n-th transmit AP and ℓ-th UE, and are given as follows [31], [37] 
+
+[Glos [s]] ℓn = λ0e−jϕ ℓ e−j 2πc (f0+s∆f )d(pn,uℓ)
+
+4πd (pn, uℓ) (3) 
+
+[Gscat [s]] ℓn =
+
+Z ξ[r]λ0e−jϕ ℓ e−j 2πc (f0+s∆f )( d(pn,r)+ d(r,uℓ)) 
+
+(4 π) 32 d(pn, r)d(r, uℓ) dr(4) where λ0 and f0 are the carrier wavelength and frequency respectively, and c is the speed of light. The ℓ-th UE has an unknown phase offset ϕℓ with respect to the AP network [38]. The term ξ[r]dr represents the complex reflectivity of location 
+
+r in the coverage area A. We use d(x, y) = ∥x−y∥2 to denote the distance between the coordinates x and y.The sensing channel from the N transmit APs to the M
+
+receive APs on subcarrier s ∈ S sen is denoted by H[s] ∈
+
+CM ×N , with its (m, n )-th element given by [37] 
+
+[H[s]] mn =
+
+Z ξ[r]λ0e−j 2πc (f0+s∆f )( d(pn,r)+ d(r,pm)) 
+
+(4 π) 32 d(pn, r)d(r, pm) dr. (5) Since the AP locations are fixed and known a-priori, the LoS paths between the transmitting and receiving APs can be accurately determined and their contribution, similar to the works in [12]–[15], is assumed to be mitigated. The received signal at the UEs on the s-th subcarrier (s ∈Scom ) is given as 
+
+y[s] = G[s] Fcom [s] acom [s] + n[s] (6) where n[s] ∼ CN (0, σ 2
+
+> n
+
+IL) is the additive Gaussian noise (AWGN), assumed to be uncorrelated among UEs and sub-carriers. The receive signal at the M receive APs over the 
+
+s-th subcarrier (s ∈ S sen ) is given as 
+
+z[s] = H[s] asen [s] + w[s] (7) where w[s] ∼ CN (0, σ 2
+
+> n
+
+IM ) is the AWGN, assumed to be uncorrelated among the receiving APs and subcarriers. 
+
+C. Problem Statement 
+
+The objective of the considered D-MIMO ISAC system is to simultaneously support communication for the UEs and sensing of targets in the environment. Given the received sensing signals {z[s]}s∈S sen in (7), target sensing is performed by reconstructing an image of the environment, followed by peak detection to estimate the target locations. To quantify the image quality, we use entropy [32]–[34], detailed in Section 4
+
+IV-A1. Unlike CRLB- or detection-probability based metrics, it does not require prior knowledge of the target locations and can easily be applied to complex multi-target scenarios. Since sensing and communication functions share the avail-able transmit power and bandwidth, and are constrained through AP transmit/receive mode selection, they are inher-ently coupled. The system design therefore requires joint optimization of the AP transmit/receive modes, the sens-ing/communication subcarrier allocation {S sen /Scom }, and the power allocation factor α to maximize the sensing perfor-mance, quantified by the image entropy, while satisfying the required communication quality, quantified by a sum-SE con-straint. To achieve this, we develop a two-timescale optimiza-tion framework, where the AP modes and sensing subcarriers are optimized offline in long-timescale based on synthetic scenarios, and the power-factor is updated dynamically in the short-timescale using the instantaneous channel conditions. III. R ECEIVER -S IDE PROCESSING : I MAGING AND TARGET 
+
+LOCALIZATION 
+
+This section presents the receiver-side processing frame-work for sensing. We first describe the imaging principle and consider both coherent and non-coherent image reconstruction approaches. We then discuss target detection and localization from the reconstructed image. 
+
+A. Imaging of the Environment 
+
+We reconstruct the image of the coverage area using BP over a uniformly spaced grid of pixels {r} covering the entire sensing region, with an inter-pixel spacing of 0.025 m [39]. BP is a widely used imaging benchmark and provides an estimate of the reflectivity ξ[r] at each pixel. Although nonlinear imaging techniques can improve image quality, they incur significantly higher computational complexity [40]. We first construct a pairwise image for each transmit-receive AP pair. The one-hot structure of the sensing transmit signal 
+
+asen [s] ensures that, for s ∈ S n, sen , the received sensing signal 
+
+[z[s]] m at the m-th AP contains only the echo associated with the AP pair (n, m ). For each candidate pixel r, this echo is matched to the expected propagation phase along the path 
+
+pn → r → pm and then coherently combined across the sensing subcarriers assigned to the n-th transmit AP Sn, sen .The resulting pairwise image is given by 
+
+Imn [r] = X
+
+> s∈S n, sen
+
+[z[s]] mψmns [r], (8) where ψmns [r] = ej
+
+  2πc (f0+s∆f )( d(pn,r)+ d(r,pm)) 
+
+
+
+is the matched filter kernel. The final image is obtained by combin-ing the images from different transmit-receive AP pairs. De-pending on whether the frequency and phase coherence across AP pairs is exploited, two image reconstruction methods are possible: coherent imaging and non-coherent imaging. 
+
+1) Coherent Imaging: Coherent imaging exploits phase coherence across all APs. The pairwise images are therefore added coherently to form the final image [31] 
+
+I[r] = X
+
+> m∈R
+
+X
+
+> n∈T
+
+Imn [r]. (9) At the target location, the phase-compensated contributions from different AP pairs add constructively, producing a strong and narrow peak. At non-target locations, the matched con-tributions are associated with negligible reflectivity, resulting in low-amplitude image background after coherent combina-tion. Consequently, coherent imaging improves image contrast and enhances target detection and localization accuracy. This coherent gain is particularly important in the POSE regime, where each transmit AP uses only a single sensing subcarrier. Although each AP pair provides no carrier frequency diversity, different transmit APs operate on different sensing subcarriers. Coherent combination of the pairwise images exploits the spa-tial and frequency diversity for reliable image reconstruction. 
+
+2) Non-coherent Imaging: Non-coherent imaging does not exploit phase synchronization across different AP pairs. The image is obtained by combining the magnitudes of the single images in (8), as 
+
+|Inc [r]|2 = X
+
+> m∈R
+
+X
+
+> n∈T
+
+|Imn [r]|2. (10) This formulation avoids the need for network-wide phase synchronization, but sacrifices the gain obtained by coherent combination across different AP pairs. In the POSE regime (κ = 1 ), each transmit AP occupies only a single sensing subcarrier, so each AP pair contributes only one complex observation, eliminating the intra-pair frequency diversity. As a result, non-coherent imaging becomes ineffective. 
+
+B. Target Localization 
+
+The target localization process converts the reconstructed image into a set of discrete target location estimates {brq } eQq=1 1,where eQ denotes the number of detected targets. Target detec-tion is first performed using a constant false alarm rate (CFAR) detector [41]. The target peaks returned by CFAR provide coarse estimates on the discretized imaging grid. The resulting set of detected target locations is defined as Q = rq
+
+> eQq=1
+
+.
+
+To improve the localization accuracy beyond the grid res-olution, each detected peak is further refined using gradient ascent on the image intensity function. Starting from the coarse estimate rq , the target location is refined by applying gradient ascent to the continuously evaluated BP image intensity I[r] as 
+
+brq = GA  |I[r]|2, rq
+
+, (11) where GA( f (x), x) denotes the gradient ascent procedure applied to f (x) using x as the initialization point [42]. The set of final target estimates is defined as bQ = {brq } eQq=1 .IV. T RANSMITTER -S IDE PROCESSING :TWO -T IMESCALE RESOURCE ALLOCATION 
+
+This section focuses on the transmitter-side design of the considered D-MIMO ISAC system. The objective is to de-termine: (i) the AP transmit/receive modes, (ii) the sens-ing/communication subcarrier allocation {S sen /Scom }, and 
+
+(iii) the power allocation factor α, to maximize the sensing performance while satisfying the communication requirement. We first introduce the sensing and communication performance metrics, and then formulate the resource allocation problem.         
+
+> 1In the target-localization analysis, we consider point targets without explicit clutter. If clutter is present, clutter suppression can be applied to the image before target detection; the design of such processing is outside the scope of this paper. 5
+
+A. Performance Metrics 
+
+We use the image entropy and sum-SE to evaluate the sensing and communication performance, respectively. 
+
+1) Entropy: The entropy of the image quantifies the spatial concentration of the reconstructed image energy. Lower en-tropy indicates that the image energy is concentrated around sharp and well-localized target responses, whereas higher entropy indicates increased energy dispersion caused by side-lobes and reconstruction artifacts [31], [43]. In contrast to sensing metrics, such as CRLB, detection probability and sensing SNR [11], [13]–[15], [17], [18], [20], image entropy quantifies the image quality in a generic multi-target scenario, without any prior target knowledge 2 [32]–[34]. To evaluate the entropy, we first normalize the image amplitudes, so that it can be interpreted as a probability distribution over the coverage area: I[r] = |I[r]|2/ P
+
+> r′∈A
+
+|I[r′]|2, where A represents the coverage area. The entropy is then calculated as follows: 
+
+E[I] = − X
+
+> r∈A
+
+I[r] log 2(I[r]) . (12) 
+
+2) Sum-SE: The communication performance is quantified using the sum-SE, obtained by summing the SEs of the L
+
+UEs over the communication subcarriers and normalizing by the total system bandwidth, as follows: 
+
+R = 1
+
+S
+
+> L
+
+X
+
+> ℓ=1
+
+X
+
+> s∈S com
+
+log 2(1 + SINR ℓ,s ), where 
+
+SINR ℓ,s =
+
+> αP LS com
+
+P
+
+> n∈T
+
+[G[s]] ℓn [Fcom [s]] nℓ 
+
+> 2
+
+P 
+
+> ℓ′̸=ℓαP LS com
+
+P
+
+> n∈T
+
+[G[s]] ℓn [Fcom [s]] nℓ ′
+
+> 2
+
++ σ2
+
+> n
+
+. (13) 
+
+B. Problem Formulation 
+
+We begin by introducing the following optimization vari-ables: (i) the AP mode vector b ∈ BG×1, where [b]n = 1 
+
+indicates that the n-th AP is a transmitter, and [b]n = 0 that it is a receiver; (ii) the subcarrier allocation matrix S ∈ BG×S ,where [S]gs = 1 indicates that the g-th AP uses the s-th subcarrier for sensing; and (iii) the power splitting factor 
+
+α ∈ [0 , 1] . The joint resource allocation problem can be formulated as a image entropy minimization problem subject to a communication sum-SE constraint, as follows: 
+
+P1: min   
+
+> b,S, α
+
+E(b, S, α ) (14a) s.t. [b]g ∈ { 0, 1}, ∀ g, (14b) 
+
+[S]gs ∈ { 0, 1}, ∀ g, ∀ s, (14c) 
+
+α ∈ [0 , 1] , (14d) 
+
+[S]gs ≤ [b]g , ∀ g, ∀ s, (14e) 
+
+> G
+
+X
+
+> g=1
+
+[S]gs ≤ 1, ∀ s, (14f) 
+
+R( b, S, α ) ≥ γ. (14g) The constraints (14b) and (14c) enforce the variables b and S
+
+to take Boolean values, and the constraint (14d) restricts the 
+
+> 2A low-entropy image does not necessarily imply accurate target recon-struction, as image energy may remain concentrated around incorrect target locations. Therefore, target detection and localization performance must also be evaluated using metrics such as GOSPA [35], as done in Section V.
+
+power-splitting factor α between [0 , 1] . The constraint (14e) ensures that sensing subcarriers are assigned only to transmit-ting APs, and the constraint (14f) ensures that each transmit AP uses orthogonal sensing subcarriers. The constraint (14g) ensures the sum-SE meets the minimum threshold γ. The threshold γ is set as a fraction of the maximum achievable sum-SE Rmax , i.e., γ = βRmax . Here Rmax is obtained by setting all G APs as transmitters, S = 0, and α = 1 .The parameter β ∈ (0 , 1) specifies the normalized sum-SE budget, i.e., the fraction of Rmax that must be guaranteed. Consequently, problem P1 seeks the best sensing configuration while satisfying the communication requirement. The formu-lation applies to both coherent and non-coherent imaging by evaluating E(b, S, α ) using the corresponding reconstructed image in (9) or (10), respectively. The joint optimization of {b, S, α } in (14) results in a mixed-integer non-convex problem. The complexity arises from the binary variables {b, S} and the non-convex entropy objective. The objective is non-convex because the entropy is computed from the normalized reconstructed-image intensity, where the image intensity itself is a function of AP modes, sensing subcarrier allocation, and power factor through the received AP signals z[s]. Consequently, standard convex op-timization techniques cannot be directly applied. Finding the global optimum, therefore, requires exhaustive search over the combinatorial solution space, whose size grows exponentially with the network size. This makes solving (14) at every transmission snapshot computationally impractical for large-scale D-MIMO networks. Furthermore, updating the AP trans-mit/receive modes or reallocating sensing subcarriers requires network-wide coordination, resulting in significant backhaul overhead [44]. In contrast, the power allocation factor α is a continuous scalar that can be rapidly updated according to the instantaneous channel conditions [15]. To address these challenges, we adopt a two-timescale optimization framework consisting of an LTO and an STO stage. The LTO stage is performed offline using synthetic scenarios with randomly distributed UEs and targets. For each normalized communication budget β, it jointly optimizes b,
+
+S, and α to minimize the expected image entropy, while satisfying the sum-SE constraint. The optimized pair (b∗, S∗)
+
+is stored as a codebook entry for online use. During the STO stage, (b∗, S∗) initializes the online optimization, and α is recomputed according to the instantaneous channel realization to satisfy the sum-SE constraint. If the sum-SE constraint is not satisfied even with α = 1 , the (b∗, S∗) are further refined to restore feasibility. Since STO starts from a near-optimal LTO solution, the online updates incur only limited computational overhead. The implementation details of the LTO and STO stages are presented next. 
+
+C. Long-Timescale Optimization (LTO) 
+
+The LTO stage is performed offline using a collection of synthetic scenarios, generated by randomly distributing UEs and targets in the coverage area. For each scenario, the corresponding sensing and communication channels are generated based on the system model. Using these channels, we formulate the expected image entropy and sum-SE metrics 6
+
+for each synthetic scenario. The variables b, S, and α are then jointly optimized to minimize the maximum expected image entropy across all scenarios, while satisfying a constraint on the average sum-SE across the synthetic scenarios for a given value of β.
+
+1) Scenario Generation for LTO: The LTO stage is per-formed using a set of K synthetic scenarios. In the k-th scenario, Q point targets and L UEs are randomly dropped in the coverage area. Let {eu(k) 
+
+> ℓ
+
+}Lℓ=1 and {er(k) 
+
+> q
+
+}Qq=1 denote the UE and target locations, respectively. Using these positions, the synthetic communication and sensing channel matrices, 
+
+eG(k)[s] and eH(k)[s] ∀s ∈ S , are generated according to (2) and (5), respectively. The resulting channel realizations for all K scenarios are pre-computed and stored for use dur-ing the LTO stage. 
+
+2) Sensing and Communication Metrics for LTO: To evaluate the sensing performance offline, we simulate the received sensing observations using the synthetic channels 
+
+eH(k)[s]. Specifically, for a given transmit-receive AP pair 
+
+(n, m ) on subcarrier s ∈ S n, sen , the synthetic observation using (7) for the k-th scenario is modeled as: 
+
+[ez(k)[s]] m =
+
+s
+
+(1 − α)PSsen 
+
+[ eH(k)[s]] mn + [ w(k)[s]] m, (15) where [w(k)[s]] m ∼ CN (0 , σ 2
+
+> n
+
+) is the AWGN at the m-th receive AP. The resulting image intensity eI(k)[r; b, S, α ] is computed by substituting [ez(k)[s]] m in (9). The image intensity can be decomposed into a signal-dependent component and a noise-dependent component as follows 
+
+eI(k)[r; b, S, α ] = eI(k)sig [r; b, S, α ] + W (k)[r], (16) where the signal component eI(k)sig [r; b, S, α ], and the noise component W (k)[r] are given as 
+
+eI(k)sig [r; b, S, α ] = 
+
+s
+
+(1 −α)PSsen 
+
+X
+
+> m∈R (b)
+
+X 
+
+> n∈T (b)
+> s∈S n, sen
+
+[ eH(k)[s]] mn ψmns [r]
+
+≜
+
+s
+
+(1 −α)PSsen 
+
+eJ(k)(r; b, S) (17) 
+
+W (k)[r] = X
+
+> m∈R (b)
+
+X 
+
+> n∈T (b)
+
+X
+
+> s∈S n, sen
+
+[w(k)[s]] m ψmns [r]. (18) Since w(k)[s] is independent across subcarriers and receive APs, and the sensing subcarrier sets {S n, sen }n∈T are dis-joint, the noise component W (k)[r] has zero mean, i.e., 
+
+E{W (k)[r]} = 0 and its variance is given by 
+
+E{| W (k)[r]|2} = σ2
+
+> n
+
+M S sen . (19) The expected image intensity for the k-th scenario is given as: 
+
+E{| eI(k)[r; b, S, α ]|2} = (1 −α)PSsen 
+
+eJ(k)(r; b, S) 2+σ2
+
+> n
+
+M (b)Ssen .
+
+The corresponding expected entropy for the k-th scenario is 
+
+eE(k)(b, S, α ) = −X
+
+> r∈A
+
+˘I(k)[r; b, S, α ] log 2
+
+˘I(k)[r; b, S, α ]
+
+
+
+.(20) where ˘I(k)[r; b, S, α ] = E{| eI(k)[r; b, S, α ]|2}/ P
+
+> r′∈A
+
+E{| eI(k)[r′;
+
+b, S, α ]|2}. This serves as the objective for the LTO. To enforce the communication requirement in LTO, we evaluate the system sum-SE for each synthetic scenario, denoted by 
+
+eR(k)(b, S, α ). It is obtained by substituting the instantaneous channels G[s] by the synthetic channels eG(k)[s] in (13). 
+
+3) Problem Formulation for LTO: We now formulate the LTO problem, which jointly optimizes {b, S, α } to minimize the maximum expected image entropy across all synthetic scenarios, while satisfying the constraint on the average sum-SE across the scenarios. Optimizing the power factor α during the LTO stage ensures that the AP mode and subcarrier allocation are obtained under the best possible power allo-cation. However, only the optimized pair (b∗, S∗) is stored as the codebook entry for a given budget β. During the STO stage, α is re-optimized according to the instantaneous channel realizations, while using (b∗, S∗) to initialize the optimization. The LTO problem is cast as follows 
+
+P2: min   
+
+> b,S,α
+
+max 
+
+> k∈K
+
+eE(k)(b, S, α ) (21a) s.t. [b]g ∈ { 0, 1}, ∀ g, (21b) 
+
+α ∈ (0 , 1) (21c) 
+
+[S]gs ∈ { 0, 1}, ∀ g, ∀ s, (21d) 
+
+[S]gs ≤ [b]g , ∀ g, ∀ s, (21e) 
+
+> G
+
+X
+
+> g=1
+
+[S]gs ≤ 1, ∀ s, (21f) 
+
+eRavg (b, S, α ) ≥ eγavg . (21g) Here eRavg (b, S, α ) = 1 /K PKk=1 eR(k)(b, S, α ) represents the average sum-SE across K scenarios. The average sum-SE threshold eγavg is set as β/K PKk=1 eR(k)max , where eR(k)max =
+
+eR(k)(b = 1G, S = 0, α = 1) is the maximum achievable sum-SE for the k-th synthetic scenario. To solve P2 , we adopt a greedy-search-based optimization technique. We first study the AP mode selection, sensing subcarrier allocation, and power factor optimization individually. Using insights from them, we develop a joint LTO strategy for solving P2 .
+
+4) AP Mode Selection: We determine the AP mode vector 
+
+b using the greedy search in Algorithm 1. Let l denote the iteration index and b(l) the AP mode vector at iteration 
+
+l. The search is initialized from a communication-favorable configuration with N (0) = G − 1 transmit APs and M (0) = 1 
+
+receive AP. The initial receive AP is selected as the AP closest to the center of the coverage area. At each iteration, we examine all single-AP mode changes. Specifically, for each g ∈ {1, . . . , G }, the g-th entry of b(l) is flipped to generate the candidate AP mode vector b(l,g ). For each candidate, the sensing subcarrier allocation (κ(l,g ), S(l,g )) and power factor α(l,g ) are optimized using the procedures detailed later in Sections IV-C5 and IV-C6, respectively. Candidates that do not satisfy the constraint on the average sum-SE, 
+
+eRavg (b(l,g ), S(l,g ), α (l,g )) ≥ eγavg , are discarded. Among the remaining candidates, the AP mode vector that minimizes the maximum image entropy across the synthetic scenarios is selected. The procedure terminates when no single-AP mode change yields further improvement. 
+
+5) Subcarrier Allocation: For a given AP mode vector 
+
+b, with N = ∥b∥0 transmit APs, problem P2 allows a general sensing allocation in which different transmit APs can employ different number of sensing subcarriers, denoted by 
+
+{κn}n∈T . To simplify the design, we consider a structured version of P2 that imposes an equal allocation constraint, 7
+
+Algorithm 1: Long-Timescale Optimization 
+
+Input: AP positions {pg }, synthetic channels 
+
+( eG(k)[s], eH(k)[s]) ∀s ∀k, sum-SE budget β
+
+Output: b∗, κ∗, S∗, α ∗ 
+
+> 1
+
+Set eγavg = β/K KP
+
+> k=1
+
+eR(k)max  
+
+> 2
+
+Initialize b(0) with N (0) = G − 1 and M (0) = 1  
+
+> 3
+
+Set F (0) ← ∞  
+
+> 4
+
+while true do  
+
+> 5
+
+for g = 1 , . . . , G do  
+
+> 6
+
+Generate b(l,g ) by flipping g-th entry of b(l) 
+
+> 7
+
+if eRavg (b(l,g ), κ (l,g ) = 1 , α = 1) ≥ eγavg then  
+
+> 8
+
+Compute κ(l,g )max using (23) with b(l,g ) 
+
+> 9
+
+for κ ∈ { 1, . . . , κ (l,g )max } do  
+
+> 10
+
+Set S(l,g ) 
+
+> κ
+
+using (22) with κ 
+
+> 11
+
+Calculate α(l,g ) 
+
+> κ
+
+using (24)  
+
+> 12
+
+Set F (l,g ) 
+
+> κ
+
+= max 
+
+> k∈K
+
+eE(k)(b(l,g )
+
+, S(l,g ) 
+
+> κ
+
+, α (l,g ) 
+
+> κ
+
+) 
+
+> 13
+
+end  
+
+> 14
+
+F (l,g ) ← min  
+
+> κ
+
+F (l,g ) 
+
+> κ
+
+κ(l,g ) ← arg min 
+
+> κ
+
+F (l,g ) 
+
+> κ
+
+,
+
+S(l,g ) ← S(l,g ) 
+
+> κ(l,g )
+
+, α(l,g ) ← α(l,g ) 
+
+> κ(l,g )
+> 15
+
+else  
+
+> 16
+
+Set F (l,g ) ← +∞ 
+
+> 17
+
+end  
+
+> 18
+
+end  
+
+> 19
+
+end  
+
+> 20
+
+Select g∗ = arg min 
+
+> g
+
+F (l,g ) 
+
+> 21
+
+if F (l) − F (l,g ∗) > ϵ then  
+
+> 22
+
+Update b(l+1) ← b(l,g ∗), κ(l+1) ← κ(l,g ∗),
+
+S(l+1) ← S(l,g ∗), α(l+1) ← α(l,g ∗),
+
+F (l+1) ← F (l,g ∗), l ← l + 1  
+
+> 23
+
+end  
+
+> 24
+
+else  
+
+> 25
+
+break  
+
+> 26
+
+end  
+
+> 27
+
+end  
+
+> 28
+
+Set (b∗, κ ∗, S∗, α ∗) ← (b(l), κ (l), S(l), α (l)) 
+
+> 29
+
+return b∗, κ ∗, S∗, α ∗
+
+whereby each transmitting AP is assigned the same number of sensing subcarriers κ. Consequently, the total number of sensing subcarriers becomes Ssen = κN , while the remaining 
+
+Scom = S − κN subcarriers are allocated for communication. The sensing subcarriers are assigned to the transmit APs using a maximally interleaved allocation. Let the N transmit APs be indexed as n ∈ { 1, . . . , N }. The sensing subcarriers assigned to the n-th transmitter are given by 
+
+Sn, sen = {n, n + N, n + 2 N, . . . , n + ( κ − 1) N }. (22) Under this allocation, each transmit AP is assigned κ uni-formly spaced sensing subcarriers with stride N , spanning an effective bandwidth of κN ∆f . The bistatic range resolution of each transmit-receive AP pair (n, m ) is inversely proportional to the effective bandwidth spanned by Sn, sen . Therefore, the interleaved allocation improves the range resolution by 
+
+Algorithm 2: Short-Timescale Optimization 
+
+Input: {b, S} from LTO stage, current communication channels {G[s]}, sum-SE budget β, AP positions {pg }Gg=1 , UE positions 
+
+{uℓ}Lℓ=1 .
+
+Output: Optimal α∗ 
+
+> 1
+
+Set γ ← βRmax , where 
+
+Rmax = R( b = 1G, κ = 0 , α = 1) using current channels {G[s]} 
+
+> 2
+
+while R( b, S, α = 1) < γ do  
+
+> 3
+
+if κ > 1 then  
+
+> 4
+
+Set κ ← κ − 1 
+
+> 5
+
+Update Sn, sen using (22) ∀n 
+
+> 6
+
+end  
+
+> 7
+
+else  
+
+> 8
+
+Identify the weakest UE  
+
+> 9
+
+ℓ∗ = arg min 
+
+> ℓ
+
+Rℓ(b, S, α = 1)  
+
+> 10
+
+Find the closest receive AP  
+
+> 11
+
+g∗ = arg min 
+
+> g∈R (b)
+
+∥pg − uℓ∗ ∥ 
+
+> 12
+
+Update bg∗ ← 1 
+
+> 13
+
+Update Sg∗,sen using (22) with current κ 
+
+> 14
+
+end  
+
+> 15
+
+end  
+
+> 16
+
+Evaluate α∗ using (25)  
+
+> 17
+
+return α∗
+
+maximizing this effective bandwidth, even for small κ values. The feasible range of κ is {1, . . . , κ max }, where κmax is the largest integer satisfying the constraint on the average sum-SE with fixed b and at α = 1 :
+
+κmax = max κ ∈ Z+ : eRavg (b, Sκ, α = 1) ≥ eγavg . (23) For a given b and each feasible κ ∈ { 1, . . . , κ max }, the sensing subcarrier allocation matrix Sκ is constructed using (22). 
+
+6) Power Factor Selection: For the resulting pair (b, Sκ),the power allocation factor α is selected as the minimum value required to satisfy the average sum-SE constraint, i.e., 
+
+α∗ = min α ∈ [0 , 1] : eRavg (b, Sκ, α ) ≥ eγavg . (24) Since eRavg (b, Sκ, α ) is monotonically increasing with α, the optimal α∗ can be obtained using bisection search over [0 , 1] .
+
+7) Joint LTO Framework: The overall LTO framework jointly optimizes {b, S, α } to solve P2 . The optimization is initialized from a communication-favorable operating point with: i) N (0) = G − 1 transmit APs and M (0) = 1 receive AP, where the receive AP is selected closest to the center of the coverage area; and ii) κ(0) = 1 subcarrier per transmit AP. Under this initialization, only G − 1 subcarriers are used for sensing, and S − (G − 1) subcarriers for communication. Since S ≫ G, the bandwidth reduction relative to the communication-only reference is small. Therefore, this initial-ization provides a communication-favorable starting point for the greedy search. The complete LTO procedure is summarized in Algorithm 1. 
+
+D. Short-Timescale Optimization (STO) 
+
+The STO stage is initialized using the AP mode vector and subcarrier allocation matrix (b, S) obtained from the LTO 8                                      
+
+> Scenario Generation
+> For k= 1 ,· · · , K generate synthetic target and UE locations {erq(k)}Qq=1 ,{eu(k)
+> ℓ}Lℓ=1
+> Evaluate  eG(k)[s],eH(k)[s]Kk=1 using (3), (4), and (5) AP locations {pg}Gg=1
+> Return  eG(k)[s],eH(k)[s]Kk=1
+> AP mode and sensing subcarrier selection
+> Solve P2 using Algorithm 1 to obtain optimal AP modes and sensing subcarriers {b, κ, S}.Return (b∗κ∗S∗)
+> Normalized rate budget β
+> Long timescale optimization (LTO) Short timescale optimization (STO)
+> Communication channels G[s]
+> UE locations {uℓ}Lℓ=1
+> AP positions {pg}Gg=1
+> Feasibility check and power factor optimization
+> Perform STO using Algorithm 2 involving: 1) Feasibility check: Update (b, κ, S)if rate constraint is not satisfied for α= 1 .2) Power factor optimization: Evaluate αusing (25), by applying bisection method. Return α∗
+
+Figure 2: Flowchart of the joint optimization framework, illustrating the interaction between long-timescale optimization (AP mode selection and subcarrier allocation), and short-timescale optimization (power-factor allocation). 
+
+stage. The corresponding LTO power factor α is discarded. For a given communication budget β and instantaneous channels 
+
+G[s], the sum-SE threshold is computed as γ = βRmax , where 
+
+Rmax = R( b = 1G, κ = 0 , α = 1) denotes the maximum achievable sum-SE for the current channel realization, when all resources are allocated for communication. Starting from the LTO-generated configuration (b, S), the STO first checks the feasibility of the instantaneous sum-SE constraint under full communication power, i.e., R( b, S, α =1) ≥ γ. If the constraint is satisfied, the optimal α is set as the minimum value required to meet the sum-SE threshold: 
+
+α∗ = min α ∈ [0 , 1] : R( b, S, α ) ≥ γ . (25) Since R( b, S, α ) is monotonically increasing with α, the opti-mal α∗ can be determined using a bisection search over [0 , 1] .If the sum-SE constraint is violated even at α = 1,i.e., R( b, S, α = 1) < γ, the LTO-generated configuration becomes infeasible for the instantaneous channel realization. In this case, feasibility is restored by two sequential updates: 1) First, the number of sensing subcarriers per transmit AP κ is decremented in steps κ ← κ − 1, provided 
+
+κ > 1. The corresponding subcarrier allocation matrix 
+
+Sκ is updated via (22). This step systematically releases 
+
+N sensing subcarriers for communication per iteration, while preserving the AP topology and spatial imaging diversity. The resulting κ is chosen as the maximum value that restores feasibility at α = 1 :
+
+κ∗ = max κ ≥ 1 : R( b, κ, α = 1) ≥ γ . (26) If no such κ exists, the algorithm sets κ = 1 and proceeds to the next step. 2) If the communication constraint remains infeasible after reducing κ to its minimum value, κ = 1 , the AP mode vector b is updated iteratively by converting receive APs into transmit APs. At each iteration, the UE with the minimum SE is identified as 
+
+ℓ∗ = arg min 
+
+> ℓ
+
+Rℓ(b, κ = 1 , α = 1) , (27) where Rℓ(b, κ = 1, α ) = 1/S P 
+
+> s∈S com
+
+log 2(1 + SINR ℓ,s ). The receive AP closest to this UE is then selected as 
+
+g∗ = arg min 
+
+> g∈R (b)
+
+∥pg − uℓ∗ ∥, (28) and switched to transmit mode, i.e., [b]g∗ ← 1. The sensing subcarrier allocation is subsequently updated using (22) with κ = 1 . This process continues until the communication constraint is satisfied. Once the communication constraint is satisfied through up-dated κ and b, optimal α is determined using (25). The complete STO procedure is summarized in Algorithm 2. The overall interaction between the offline LTO stage and the online STO updates is summarized in Fig. 2. 
+
+E. Convergence Analysis 
+
+We next analyze the convergence of the LTO and STO stages of the proposed resource allocation framework. 
+
+1) Convergence of LTO: Algorithm 1 performs a greedy coordinate-descent search over the AP mode vector b, while jointly optimizing (κ, S) and α to minimize the maximum expected image entropy across K scenarios. Algorithm 1 is guaranteed to terminate at a local optimum of the restricted search problem induced by the interleaved equal-subcarrier allocation, as explained in the following paragraph. For G APs, the AP mode vector b ∈ { 0, 1}G admits at most 2G configurations. For a fixed b, the parameter κ is bounded as 1 ≤ κ ≤ κmax (b), where κmax (b) is obtained using (23). For a finite number of subcarriers S, κmax (b)
+
+is also finite. The sensing allocation matrix S is uniquely determined by (b, κ ) using (22). For fixed (b, S), the power factor α is obtained from (24), using bisection search over 
+
+[0 , 1] . Since eRavg (b, S, α ) is continuous and non-decreasing function of α, the bisection search converges in a finite number of steps. Hence, the overall feasible search space is fi-nite. Further, at iteration l, a candidate update is accepted only if: i) it satisfies the constraint on the average sum-SE, i.e., eRavg (b(l,g ), κ (l,g ) = 1 , α = 1) ≥ eγavg ; and ii) it strictly decreases the maximum expected entropy objective, i.e., F (l+1) < F (l). Hence, the sequence {F (l)} is mono-tonically decreasing and lower bounded by zero. The strict descent criterion also prevents revisiting previously explored configurations, avoiding cyclic updates. Since the feasible set is finite, Algorithm 1 is guaranteed to terminate after a finite number of iterations at a local optimum [45]. 
+
+2) Convergence of STO: The STO stage consists of a sum-SE feasibility check, followed by a bisection search over α.The convergence of the two stages are analyzed separately. 9
+
+a) Termination of the Feasibility Check Stage: The fea-sibility check stage is designed to recover communication feasibility when the LTO configuration does not satisfy the instantaneous sum-SE constraint. It consists of two sequential steps. In the first step, the number of sensing subcarriers per transmit AP κ is iteratively reduced as κ ← κ−1 until the sum-SE constraint is satisfied or the lower bound κ = 1 is reached. Since κ is integer-valued, bounded, and strictly decreases at each iteration, this stage terminates in a finite number of steps. If the sum-SE constraint remains violated at κ = 1 ,the algorithm proceeds to the second step. At each iteration, one receive AP is switched to transmit mode via [b]g∗ ← 1,where g∗ is obtained using (28). Since b ∈ { 0, 1}G admits 2G
+
+configurations, and the updates are unidirectional, previously visited states cannot reoccur. Consequently, the AP mode update stage also terminates in a finite number of iterations. Therefore, both stages operate over finite search spaces with monotonic updates, guaranteeing finite-time termination. 
+
+b) Convergence of the Bisection Search: Once feasible 
+
+(b, S) is obtained, the power factor α is computed using bisection over [0 , 1] . For fixed (b, S), the sum-SE R( b, S, α ) is continuous and non-decreasing in α. Feasibility at α = 1 , i.e., 
+
+R( b, S, α = 1) ≥ γ, ensures at least one solution α∗ ∈ [0 , 1] 
+
+satisfying R( b, S, α ∗) ≥ γ exists. We select the smallest feasible power factor, α∗ = inf {α ∈ [0 , 1] : R( b, S, α ) ≥ γ} .
+
+The bisection method converges to α∗ by iteratively shrinking the interval [0 , 1] based on feasibility checks. This yields convergence after a finite number of iterations. V. N UMERICAL RESULTS 
+
+In this section, we evaluate the communication and imaging performance of the proposed framework and investigate the resulting sensing-communication trade-offs. 
+
+A. Simulation Setup and Performance Metrics 
+
+We consider a network of G = 100 single-antenna APs deployed on a regular grid over a 10 m × 10 m area. We assume L = 5 UEs and Q = 3 targets present in the coverage area. The system operates at f0 = 1 GHz, with S = 1000 
+
+subcarriers and subcarrier spacing ∆f = 120 kHz, resulting in a total bandwidth of W = 120 MHz. The total transmit power 
+
+P is set to 10 dBm, and the precoder Fcom [s] is designed based on maximal-ratio (MR) principle. The noise power at both the receive APs and the UEs is given by σ2 
+
+> n
+
+= N0∆f ,where N0 = −174 dBm/Hz is the noise power spectral density [4]. For the LTO stage, we use one representative synthetic scenario to keep the offline entropy-based search computationally tractable. The LTO configuration is tested over multiple independent STO realizations with randomly generated UE and target locations. We next introduce the performance metrics used in the numerical evaluation. For communication, we use the sum-SE defined in Section IV-A2. For sensing, we consider both image quality and target estimation accuracy. Image quality is evaluated using the entropy metric defined in Section IV-A1, while target detection and localization performance are eval-uated using the generalized optimal sub-pattern assignment (GOSPA) metric [35]. GOSPA jointly accounts for localization error, missed detections, and false alarms.        
+
+> (a)
+> (b)
+> Figure 3: Normalized reconstructed image intensity for a representative STO realization for (a) β= 0 .25 and (b) β= 0 .9, where βdenotes the required fraction of the maximum communication sum-SE.
+
+B. Imaging Performance Under Different Sum-SE Budgets 
+
+We begin by visualizing the normalized image intensities in Fig. 3 for one representative STO realization under two sum-SE budgets, β = {0.25 , 0.9}. In both cases, the true target locations appear as dominant peaks. However, for β = 0 .25 ,the sidelobe levels are significantly lower, resulting in an image entropy of 9.43 bits. In contrast, for β = 0 .9, the entropy increases to 11 .69 bits, and produces more pronounced secondary peaks. Fig. 4a and Fig. 4b show the CDFs of the image entropy and GOSPA metric, respectively, over 100 
+
+STO realizations with random UE and target locations. As 
+
+β increases, both CDFs shift toward higher values, indicating degraded imaging and reduced target detection and localization performance. Specifically, for β = {0.25 , 0.75 , 0.9}, approx-imately {93 , 67 , 53 }% of the realizations achieve GOSPA <
+
+10 −3, corresponding to correct detection and accurate local-ization of all targets, without missed detections or false alarms. This degradation arises because a larger β allocates more power and subcarriers to communication and requires more APs to operate in transmit mode, reducing both the sensing resources and the flexibility of AP mode selection. 
+
+C. Sensing-Communication Tradeoff 
+
+We next characterize the sensing-communication trade-off achieved by the proposed framework. For each sum-SE budget 
+
+β, the optimizer is executed over B = 100 independent STO realizations. The image entropy and the sum-SE are averaged across all realizations. The trade-off curve is obtained by plotting the average image entropy against the average sum-SE for different β values. We also plot the average of 10           
+
+> 810 12 00.20.40.60.81
+> Entropy (bits) CDF
+> β=0.25
+> β=0.75
+> β=0.9 (a)
+> 10 −610 −510 −410 −310 −210 −110 0
+> 00.20.40.60.81
+> GOSPA CDF
+> β=0.25
+> β=0.75
+> β=0.9 (b)
+> Figure 4: CDF of the (a) reconstructed-image entropy and (b) GOSPA over
+> 100 STO realizations for different normalized communication budgets β.
+
+the maximum achievable sum-SE, Rmax = 1 /B PBb=1 R(b)max ,
+
+where R(b)max = R( b = 1, S = 0 , α = 1) denotes the maximum sum-SE for the b-th STO realization. Finally, the CDF of the GOSPA metric is plotted over the same STO realizations. 
+
+1) Impact of AP Mode Selection: We first compare the pro-posed framework with a baseline employing a fixed AP-mode configuration. In the baseline, N = ⌈G/ 2⌉ APs are assigned to transmit mode and the remaining M = G − N APs to receive mode. The APs in the grid are arranged in an alternating pattern, resulting in the AP-mode vector bBL = [0 , 1, 0, · · · ]⊤.It provides a sensing-oriented deployment with a large number of uniformly distributed bistatic pairs. Unlike the proposed framework, bBL is fixed during LTO and STO. During LTO, the sensing subcarriers are optimized using (22) and (23), and the power factor using (24) for fixed AP mode bBL . During STO, the sensing subcarrier allocation obtained from LTO, and the power factor are adapted using (26) and (25) to satisfy the instantaneous sum-SE constraint. The average of the maximum sum-SEs across STO realizations for the baseline is computed as RBL max = 1 /B PBb=1 R(b)(bBL , S = 0, α = 1) .Fig. 5a plots the average image entropy against the average sum-SE for the proposed framework and the baseline. The proposed framework attains lower average image entropy while simultaneously achieving a higher average sum-SE. Fig. 5b shows the GOSPA CDF for β = 0 .75 . The proposed framework achieves GOSPA < 10 −4 in 72% of the STO realizations, compared with 58% for the baseline. These real-izations correspond to correct detection and localization of all targets without missed detections or false alarms. The results                  
+
+> 0510 15 20 810 12
+> Average sum-SE (bits/sec/Hz) Average Entropy (bits) Baseline RBL max
+> Proposed Rmax
+> (a)
+> 10 −610 −510 −410 −310 −210 −110 0
+> 00.20.40.60.81
+> GOSPA CDF Proposed Baseline (b)
+> Figure 5: Comparison of the proposed framework with a fixed AP-mode benchmark. (a) Average image entropy versus average communication sum-SE for different values of β. (b) CDF of the GOSPA metric over 100 different STO realizations for β= 0 .75 .
+
+demonstrate that a fixed AP-mode configuration limits the achievable sensing-communication trade-off, whereas adaptive AP mode selection provides greater flexibility, improving imaging performance without sacrificing communication. 
+
+2) Impact of Sensing Subcarrier Allocation: We compare the performance of different sensing subcarrier allocation strategies in Fig. 6. The proposed framework employs the max-imally interleaved subcarrier allocation in (22). We compare it with two baseline strategies denoted by SA-1 and SA-2. In SA-1, each transmit AP is assigned a contiguous block of 
+
+κ subcarriers, and the blocks occupy consecutive frequency intervals. In SA-2, the block of κ subcarriers assigned to each transmit AP are uniformly distributed across the available bandwidth. Mathematically, the sensing subcarriers assigned to the n-th transmit AP are SA-1: Sn, sen = {(n − 1) κ + 1 , (n − 1) κ + 2 , . . . , nκ } ,
+
+SA-2: Sn, sen = {(n − 1)( κ + ∆) + 1 , . . . , n (κ + ∆) − ∆} ,
+
+where ∆ = ⌊S − N κ/ (N − 1) ⌋. We also consider the POSE configuration with κ = 1 .We plot the average image entropy versus the average sum-SE by varying β in Fig. 6a, and the GOSPA CDF with 
+
+β = 0.75 in Fig. 6b. Fig. 6a shows that the proposed interleaved allocation achieves the lowest average entropy over the sum-SE regime. Fig. 6b further shows that the proposed scheme correctly detects and localizes all targets, in 72% of the STO realizations. The same is achieved in 60% of the STO realizations for both SA-1 and SA-2, and in 57% of the STO realizations for POSE. The proposed strategy performs best because each transmit AP spans a large effective bandwidth, 11                   
+
+> 0510 15 20 810 12
+> Average sum-SE (bits/sec/Hz) Average Entropy (bits) POSE SA-1 SA-2 Proposed Rmax
+> (a)
+> 10 −610 −510 −410 −310 −210 −110 010 1
+> 00.20.40.60.81
+> GOSPA CDF Proposed SA-1 SA-2 POSE (b)
+> Figure 6: Comparison of sensing subcarrier allocation strategies: (a) Average image entropy versus the average communication sum-SE; (b) CDF of the GOSPA metric for different STO realizations for β= 0 .75 .
+
+improving their range resolution. In contrast, SA-1 and SA-2 use locally clustered subcarriers, limiting the bandwidth of each transmit AP. Although SA-2 distributes these clusters across the full bandwidth, its per-transmit AP bandwidth remains limited. This leads to performance similar to SA-1. POSE performs worst because only one sensing subcarrier per transmit AP is used, and therefore has no frequency diversity. 
+
+D. Comparison with Superposition Scheme 
+
+We compare the proposed framework with the superposition based ISAC scheme in [31]. Unlike the proposed frame-work, which assigns orthogonal sensing and communication subcarriers, the superposition scheme transmits both signals over all S subcarriers. Each transmit AP superposes pseudo-orthogonal sensing signals with the communication signals using power-splitting factor α. This results in mutual sensing-communication interference. The proposed scheme eliminates this interference through orthogonal subcarrier allocation. Fig. 7a plots the average image entropy versus the aver-age sum-SE over 100 STO realizations for different β. The proposed framework consistently achieves a better sensing-communication trade-off than the superposition and POSE schemes. Furthermore, the superposition scheme outperforms POSE in the low-sum-SE regime, whereas POSE achieves a better trade-off at higher sum-SEs. At low sum-SE require-ments (β < 0.5) , the superposition scheme benefits from transmitting sensing signals over all S subcarriers. At higher sum-SE requirements (β > 0.5) , higher fraction of transmit power is allocated to communication, reducing the sensing power. In superposition scheme, the stronger communication                  
+
+> 0510 15 20 810 12 14
+> Average sum-SE (bits/sec/Hz) Average Entropy (bits) Superposed POSE Proposed
+> Rmax
+> (a)
+> 10 −610 −510 −410 −310 −210 −110 0
+> 00.20.40.60.81
+> GOSPA CDF Superposed Proposed POSE (b)
+> Figure 7: Comparison between the proposed orthogonal, superposition, and POSE schemes: (a) sensing-communication trade-off by plotting average image entropy versus average sum-SE for different values of β; (b) CDF of GOSPA values over 100 STO realizations for β= 0 .75 .
+
+signal interferes with sensing, as both functions share the same subcarriers, further degrading the image quality. In contrast, POSE uses orthogonal sensing and communication subcarriers, avoiding this interference. Since POSE already operates with the minimum sensing-subcarrier allocation, κ = 1 , its imaging performance degrades more mildly in the high-SE regime. Fig. 7b shows the GOSPA CDFs for β = 0 .75 . The proposed scheme correctly detects and localizes all targets in 72% of the STO realizations, compared with 58% for both the superpo-sition scheme and POSE. Even when all targets are detected, the superposition scheme has larger localization errors than the orthogonal scheme. This is because sensing-communication interference distorts the reconstructed target peaks, reducing localization accuracy despite successful detection. 
+
+E. Convergence and Complexity Analysis 
+
+We next investigate the convergence and complexity of the LTO (Algorithm 1). Fig. 8a plots the entropy and sum-SE of the synthetic scenario versus the runtime for β = {0.75 , 0.5}.For both values of β, the entropy decreases monotonically and converges within approximately 15 iterations, corresponding to a runtime of about 5 × 10 3 s. The sum-SE is initially close to Rmax since the LTO is initialized at a communication-favorable operating point. It then drops in the first iteration to satisfy the prescribed sum-SE budget and remains constant. Fig. 8b shows the CDF of the STO runtime in Algorithm 2 for β = {0.5, 0.75 }. The runtime CDF exhibits a stair-case behavior because the sum-SE feasibility-restoration stage performs a discrete number of resource-allocation updates. Depending on the channel and UE geometry of each STO 12           
+
+> 02,000 4,000 6,000 910 11 12
+> Runtime (sec) Entropy Entropy ( β= 0 .75 )Entropy ( β= 0 .5)Sum-SE ( β= 0 .75 )Sum-SE ( β= 0 .5)
+> 10 15 20
+> Sum-SE (bits/sec/Hz) (a)
+> 0.40.60.8100.20.40.60.81
+> Runtime (sec) CDF
+> β=0.75
+> β=0.5 (b)
+
+Figure 8: (a) Convergence of the LTO algorithm: Image entropy and sum-SE versus cumulative runtime for β = {0.75 , 0.5}. (b) CDF of the runtime of the STO algorithm for β = {0.75 , 0.5}.
+
+realization, the algorithm may reduce κ several times and then switch one or more receive APs to transmit mode. Realizations requiring the same number of updates have similar runtimes, producing visible jumps in the CDF. A larger β imposes a stricter sum-SE constraint, making the initial LTO solution more likely to be infeasible and requiring more restoration iterations. It also results in a larger communication subcarrier set, increasing the cost of each sum-SE evaluation. Hence, the runtime distribution shifts toward higher values as β increases. 
+
+F. Performance Evaluation for Phase Unsynchronized APs 
+
+We next evaluate the sensing and communication perfor-mance of the framework under phase synchronization errors across the APs. During LTO, the AP modes and sensing sub-carrier allocation are optimized assuming perfectly synchro-nized APs in the synthetic scenario. During STO, the APs are phase-unsynchronized. Specifically, each transmit/receive AP is assumed to introduce an independent phase error {ϕg }Gg=1 ,where ϕg ∼ U (−ϕmax , ϕ max ), to its transmit/receive signal. Fig. 9 shows the normalized image for the representative STO realization as in Fig. 3a, assuming phase-unsynchronized APs with ϕmax = π/ 2 rad. Fig. 9a corresponds to coherent imaging (Section III-A1), whereas Fig. 9b corresponds to non-coherent imaging (Section III-A2). The coherent image in Fig. 9a with entropy 12 .09 bits, is severely degraded, as compared to Fig. 3a, by numerous spurious peaks. This is because coherent imaging relies on inter-AP phase coherence, which is disrupted here by synchronization errors. In contrast, the non-coherent image in Fig. 9b, which does not rely on inter-AP phase coherence, produces clean peaks at the target locations with entropy 11 .21 bits. However, compared with the 
+
+> (a)
+> (b)
+
+Figure 9: Normalized image intensity under phase synchronization errors (ϕmax = π/ 2 rad) for a representative STO realization. (a) Coherent imaging. (b) Non-coherent imaging.                      
+
+> 00.511.522.53810 12
+> Maximum Phase Error ϕmax (rad) Entropy
+> Entropy (Non-coherent, β= 0 .75 )Entropy (Non-coherent, β= 0 .5)Entropy (Coherent, β= 0 .5)Entropy (Coherent, β= 0 .75 )Sum-SE ( β= 0 .75 )Sum-SE ( β= 0 .5)
+> 510 15
+> Average sum-SE (bits/sec/Hz)
+
+Figure 10: Average image entropy (coherent and non-coherent imaging), and average sum-SE across different STO realizations versus maximum phase error ϕmax .
+
+coherent image with perfectly synchronized APs in Fig. 3a, the peaks have reduced sharpness. We next plot the average image entropy for coherent and non-coherent imaging, and the average sum-SE over the STO realizations versus the maximum phase error ϕmax in Fig. 10. The system is optimized for β = {0.5, 0.75 }. For both 
+
+β values, the entropy of coherent imaging increases with 
+
+ϕmax , whereas the entropy of non-coherent imaging remains constant. This is because non-coherent imaging does not rely on phase coherence across APs. Coherent imaging achieves lower entropy for small phase errors, but its performance degrades beyond non-coherent imaging for ϕmax > 1 rad, indicating the regime in which coherent processing remains beneficial. For both β values, the average sum-SE decreases as ϕmax increases. This is because the phase errors distort the 13 
+
+coherent combining of the distributed AP signals at the UEs, reducing the intended beamforming gain. VI. C ONCLUSION 
+
+In this paper, we proposed an orthogonal subcarrier–based ISAC framework for phase-coherent D-MIMO systems, en-abling joint communication and multi-static sensing through radio imaging. By separating sensing and communication in the frequency domain and distributing sensing subcarriers across APs, the proposed design eliminates inter-function interference. We develop a two-timescale optimization frame-work that jointly selects AP modes, sensing subcarriers, and sensing–communication power splitting, minimizing the entropy of the reconstructed image under communication constraints. Simulation results demonstrate that the proposed orthogonal design consistently outperforms conventional su-perposed coding in terms of sensing–communication trade-offs, achieving lower entropy and improved localization ac-curacy across a wide range of operating conditions. We also investigate the robustness of coherent imaging with unsynchronized APs, identifying the transition point beyond which non-coherent processing becomes preferable. Overall, the proposed framework offers a high-resolution ISAC solution for distributed MIMO systems, advancing toward reliable environmental awareness in future 6G networks. REFERENCES [1] O. T. Demir et al. , “Foundations of user-centric cell-free massive MIMO,” Found. Trends Signal Process. , vol. 14, pp. 162–472, 2021. [2] V. Tentu et al. , “Phase-coherent D-MIMO ISAC: Multi-target esti-mation and spectral efficiency trade-offs,” in IEEE 6th International Symposium on Joint Communications & Sensing (JC&S) . IEEE, 2026, pp. 1–6. [3] A. Sakhnini et al. , “Near-field coherent radar sensing using a massive MIMO communication testbed,” IEEE Transactions on Wireless Com-munications , vol. 21, no. 8, pp. 6256–6270, 2022. [4] E. Bj¨ ornson et al. , “Scalable cell-free massive MIMO systems,” IEEE Trans. Commun. , vol. 68, no. 7, pp. 4247–4261, Jul. 2020. [5] D. Tagliaferri et al. , “Cooperative coherent multistatic imaging and phase synchronization in networked sensing,” IEEE J. Sel. Areas Commun. , vol. 42, no. 10, pp. 2905–2921, 2024. [6] N. Gonzalez-Prelcic et al. , “The Integrated Sensing and Communication Revolution for 6G : Vision, Techniques, and Applications,” Proc. IEEE ,2024. [7] S. Buzzi et al. , “Why user-centric cell-free distributed MIMO systems will be the disruptive 6G technology,” IEEE Commun. Mag. , 2026. [8] B. Zheng et al. , “Random Signal Design for Joint Communication and SAR Imaging Towards Low-Altitude Economy,” IEEE Wireless Commun. Lett. , pp. 1–1, 2024. [9] H. S. Rou et al. , “Integrated Sensing and Communications for 3D Object Imaging via Bilinear Inference,” IEEE Trans. Wireless Commun. ,vol. 23, no. 8, pp. 8636–8653, 2024. [10] H. Luo et al. , “Integrated Imaging and Communication with Recon-figurable Intelligent Surfaces,” in 2023 57th Asilomar Conference on Signals, Systems, and Computers , 2023, pp. 151–156. [11] W. Zhu et al. , “Energy-efficient RIS-aided cell-free massive MIMO ISAC systems: Joint AP operation mode selection and beamforming design,” IEEE Sensors J. , 2025. [12] M. Elfiatoure et al. , “Cell-free massive MIMO for ISAC: Access point operation mode selection and power control,” in IEEE GLOBECOM Workshops . IEEE, 2023, pp. 104–109. [13] U. Demirhan et al. , “Cell-free ISAC MIMO systems: Joint sensing and communication beamforming,” IEEE Trans. Commun. , vol. 73, no. 6, pp. 4454–4468, 2025. [14] S. Liu et al. , “Cooperative cell-free ISAC networks: Joint BS mode selection and beamforming design,” in IEEE Wireless Commun. Netw. Conf. (WCNC) , 2024, pp. 1–6. [15] Z. Ren et al. , “Two-timescale design for AP mode selection and power allocation of cooperative ISAC networks,” IEEE Trans. Wireless Commun. , 2025. [16] X. Li et al. , “Distributed multinode cooperative integrated sensing and communication systems: Joint beamforming and grouping design,” 
+
+IEEE Internet Things J. , vol. 12, no. 12, pp. 20 377–20 392, 2025. [17] X. Sun et al. , “Performance analysis and optimization for network-assisted full-duplex cell-free multi-static ISAC systems,” IEEE Trans. Green Commun. Netw. , 2025. [18] X. Lou et al. , “Beamforming optimization in distributed ISAC system with integrated active and passive sensing,” IEEE Trans. Commun. ,vol. 73, no. 3, pp. 1607–1620, 2025. [19] K. Meng et al. , “Cooperative ISAC networks: Performance analy-sis, scaling laws, and optimization,” IEEE Trans. Wireless Commun. ,vol. 24, no. 2, pp. 877–892, 2025. [20] W. Yan et al. , “Communicate or sense? AP mode selection in mmwave cell-free massive MIMO-ISAC,” in 2024 58th Asilomar Conference on Signals, Systems, and Computers . IEEE, 2024, pp. 889–893. [21] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [22] A. Moreira et al. , “A tutorial on synthetic aperture radar,” IEEE Geosci. Remote Sens. Mag. , vol. 1, no. 1, pp. 6–43, 2013. [23] N. Gonza lez Prelcic et al. , “Six integration avenues for ISAC in 6G and beyond,” IEEE Veh. Technol. Mag. , vol. 20, no. 1, pp. 18–39, 2025. [24] M. Manzoni et al. , “Wavefield Networked Sensing: Principles, Algo-rithms, and Applications,” IEEE Open J. Commun. Soc. , vol. 6, pp. 181–197, 2025. [25] X. Tong et al. , “Environment sensing considering the occlusion effect: A multi-view approach,” IEEE Trans. Signal Process. , vol. 70, pp. 3598–3615, 2022. [26] J. Li et al. , “Networked Integrated Sensing and Communications for 6G Wireless Systems,” IEEE Internet Things J. , vol. 11, no. 17, pp. 29 062–29 075, 2024. [27] K. Zhi et al. , “Near-Field Integrated Imaging and Communication in Distributed MIMO Networks,” CoRR , vol. abs/2508.17526, 2025, arXiv preprint. [28] T. Yang et al. , “Near-Field Imaging by Exploiting Frequency Correlation in Wireless Communication Networks,” CoRR , vol. abs/2510.15459, 2025, arXiv preprint. [29] Q. Yang et al. , “Illumination Design for Near field Joint Imaging and Wireless Power Transfer Systems,” IEEE Internet Things J. , vol. 12, no. 13, pp. 22 577–22 586, 2025, published 25 February 2025. [30] J. Gao et al. , “Covariance-based imaging and multi-view fusion for networked sensing,” arXiv e-prints , pp. arXiv–2511, 2025. [31] D. Tagliaferri et al. , “Integrating phase-coherent multistatic imaging in downlink D-MIMO networks,” 2025. [Online]. Available: https: //arxiv.org/abs/2510.04240 [32] A. C. Frery et al. , “Entropy-based statistical analysis of PolSAR data,” 
+
+IEEE Trans. Geosci. Remote Sens. , vol. 51, no. 6, pp. 3733–3743, 2013. [33] D. Mathur et al. , “Motion compensation for multiple-input-multiple-output inverse synthetic aperture imaging of automotive targets,” in 
+
+2025 URSI Asia-Pacific Radio Science Meeting (AP-RASC) , 2025, pp. 1–4. [34] X. Chen et al. , “Fast high-quality enhanced imaging algorithm for layered dielectric targets based on MMW MIMO-SAR system,” IEEE Trans. Instrum. Meas. , vol. 74, pp. 1–10, 2025. [35] A. S. Rahmathullah et al. , “Generalized optimal sub-pattern assign-ment metric,” in 20th International Conference on Information Fusion (Fusion) . IEEE, 2017, pp. 1–8. [36] A. Fascista et al. , “Joint localization, synchronization and mapping via phase-coherent distributed arrays,” IEEE J. Sel. Topics Signal Process ,vol. 19, no. 2, pp. 412–429, 2025. [37] D. Tornielli Bellini et al. , “Enabling NLOS Imaging Capabilities at the Initial Access of 6G Base Stations,” CoRR , vol. abs/2511.15416, 2025, arXiv preprint. [38] S. Dey et al. , “POLO: Phase-only localization in uplink distributed MIMO systems,” 2025. [Online]. Available: https://arxiv.org/abs/2512. 10879 [39] M. Manzoni et al. , “Wavefield networked sensing: Principles, algo-rithms, and applications,” IEEE Open J. Commun. Soc. , vol. 6, pp. 181–197, 2025. [40] L. C. Potter et al. , “Sparsity and compressed sensing in radar imaging,” 
+
+Proceedings of the IEEE , vol. 98, no. 6, pp. 1006–1020, 2010. [41] A. Jalil et al. , “Analysis of CFAR techniques,” in 2016 13th Inter-national Bhurban Conference on Applied Sciences and Technology (IBCAST) . IEEE, 2016, pp. 654–659. 14 
+
+[42] S. P. Boyd et al. , Convex optimization . Cambridge university press, 2004. [43] J. Cassetti et al. , “Entropy estimators in SAR image classification,” 
+
+Entropy , vol. 24, p. 509, 2022. [44] H. Q. Ngo et al. , “Cell-free massive MIMO: Uniformly great service for everyone,” in 2015 IEEE 16th international workshop on signal processing advances in wireless communications (SPAWC) . IEEE, 2015, pp. 201–205. [45] A. Aubry et al. , “A new sequential optimization procedure and its appli-cations to resource allocation for wireless systems,” IEEE Transactions on Signal Processing , vol. 66, no. 24, pp. 6518–6533, 2018.
