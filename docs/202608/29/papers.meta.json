@@ -1,0 +1,39 @@
+{
+  "label": "2026-08-29",
+  "date": "2026-08-29",
+  "generated_at": "2026-08-29T03:20:22",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202608/29/2608.25535v1-resilient-decentralized-wireless-federated-learning-via-gradient-tracking-with-adamw",
+      "section": "deep",
+      "title_en": "Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW",
+      "authors": "Nguyen Van Thieu, Ti Ti Nguyen, Ons Aouedi, Vu Nguyen Ha, Symeon Chatzinotas",
+      "date": "2026-08-26",
+      "pdf": "https://arxiv.org/pdf/2608.25535v1",
+      "score": "9.0",
+      "evidence": "面向无线通信网络的机器学习",
+      "tldr": "无线物联网边缘网络需要可靠的去中心化学习，但现有方法在严格空口预算、衰落信道和丢包下性能下降。提出QEF-GT-AdamW，结合梯度跟踪、AdamW自适应优化及双流偏置量化与误差反馈，并采用本地回退应对不可靠广播。在异构MNIST和CIFAR-10上验证了其鲁棒性和收敛性提升，实现更好的精度-通信权衡。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Wireless Internet-of-Things (IoT) edge networks require decentralized learning (DecL) methods that can operate reliably under both heterogeneous local data and communication-constrained wireless links. However, existing decentralized optimization schemes often incur substantial communication overhead and degraded performance when transmissions are constrained by strict airtime budgets, fading channels, and packet losses. This paper proposes QEF-GT-AdamW, a communication-efficient and outage-resilient algorithm for DecL over wireless communication (WCom) networks. The proposed method combines gradient tracking to mitigate the effect of non-IID data, AdamW-based adaptive optimization to improve training stability, and dual-stream biased quantization with error feedback to reduce communication payloads for both model and tracking exchanges. To address unreliable broadcast communication, the proposed framework further employs a local fallback strategy when scheduled packets are not successfully received. We explicitly model the effect of bandwidth, transmit power, airtime constraints, and fading channels on DecL performance, and establish convergence guarantees for the proposed algorithm under compressed and unreliable wireless communication. Experimental results on heterogeneous MNIST and CIFAR-10 settings show that QEF-GT-AdamW consistently improves robustness and convergence performance over representative DecL baselines while achieving favorable accuracy-communication trade-offs under limited wireless resources.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/29/2608.25543v1-goodput-maximization-for-large-language-model-edge-inference-a-two-phase-maskable-ppo-approach",
+      "section": "quick",
+      "title_en": "Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach",
+      "authors": "Xiaojing Chen, Qi Zhang, Wei Ni, Shunqing Zhang, Yanzan Sun",
+      "date": "2026-08-26",
+      "pdf": "https://arxiv.org/pdf/2608.25543v1",
+      "score": "7.0",
+      "evidence": "基于强化学习的无线边缘网络大模型推理资源分配与任务卸载",
+      "tldr": "针对无线边缘网络中LLM推理服务的SLO合规与吞吐优化问题，提出TP-MPPO两阶段算法。第一阶段用带动作掩码的MPPO优化任务卸载，避免无效动作；第二阶段用闭式解与贪心算法分别分配上下行带宽。两阶段交替直至收敛，仿真显示系统奖励提升33.3%–87.5%，并实现最高goodput。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "This paper presents a novel two-phase maskable proximal policy optimization (TP-MPPO) algorithm, which maximizes the system goodput counting request throughput with strict service level objective (SLO) compliance for large language model (LLM) inference services in wireless edge networks. In the first phase of TP-MPPO, we optimize the task offloading decisions by MPPO with action masking mechanism, effectively avoiding exploring invalid actions and reducing the action space. In the second phase, closed-form solutions are derived for uplink bandwidth allocation; a greedy algorithm is designed for downlink bandwidth allocation to provide immediate rewards for the MPPO in the next round. The two stages alternate till convergence. Simulation results demonstrate that TP-MPPO can improve the system reward by 33.3%--87.5% compared to its benchmarks and achieve the highest goodput.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

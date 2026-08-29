@@ -1,0 +1,98 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-29T03:18:57.188562+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2608.25535v1",
+      "source": "arxiv",
+      "title": "Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW",
+      "abstract": "Wireless Internet-of-Things (IoT) edge networks require decentralized learning (DecL) methods that can operate reliably under both heterogeneous local data and communication-constrained wireless links. However, existing decentralized optimization schemes often incur substantial communication overhead and degraded performance when transmissions are constrained by strict airtime budgets, fading channels, and packet losses. This paper proposes QEF-GT-AdamW, a communication-efficient and outage-resilient algorithm for DecL over wireless communication (WCom) networks. The proposed method combines gradient tracking to mitigate the effect of non-IID data, AdamW-based adaptive optimization to improve training stability, and dual-stream biased quantization with error feedback to reduce communication payloads for both model and tracking exchanges. To address unreliable broadcast communication, the proposed framework further employs a local fallback strategy when scheduled packets are not successfully received. We explicitly model the effect of bandwidth, transmit power, airtime constraints, and fading channels on DecL performance, and establish convergence guarantees for the proposed algorithm under compressed and unreliable wireless communication. Experimental results on heterogeneous MNIST and CIFAR-10 settings show that QEF-GT-AdamW consistently improves robustness and convergence performance over representative DecL baselines while achieving favorable accuracy-communication trade-offs under limited wireless resources.",
+      "authors": [
+        "Nguyen Van Thieu",
+        "Ti Ti Nguyen",
+        "Ons Aouedi",
+        "Vu Nguyen Ha",
+        "Symeon Chatzinotas"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DC",
+        "cs.NI"
+      ],
+      "published": "2026-08-26T08:46:46+00:00",
+      "link": "https://arxiv.org/pdf/2608.25535v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Machine learning for wireless communication networks",
+      "llm_evidence_cn": "面向无线通信网络的机器学习",
+      "llm_evidence": "面向无线通信网络的机器学习",
+      "canonical_evidence": "面向无线通信网络的机器学习",
+      "llm_tldr_en": "Proposes QEF-GT-AdamW, a communication-efficient and outage-resilient decentralized wireless federated learning algorithm combining gradient tracking, AdamW, and dual-stream biased quantization.",
+      "llm_tldr_cn": "无线物联网边缘网络需要能处理数据异构和受限无线链路的去中心化学习算法，而现有方案在严格发送时间预算、衰落和丢包下开销大、性能差。论文提出QEF-GT-AdamW算法，结合梯度跟踪缓解非独立同分布数据影响、AdamW提高训练稳定性、双流偏置量化降低通信开销。实验表明该方法在通信受限环境中保持高抗毁性和收敛性能，为无线去中心化联邦学习提供了一种鲁棒方案。",
+      "llm_tldr": "无线物联网边缘网络需要能处理数据异构和受限无线链路的去中心化学习算法，而现有方案在严格发送时间预算、衰落和丢包下开销大、性能差。论文提出QEF-GT-AdamW算法，结合梯度跟踪缓解非独立同分布数据影响、AdamW提高训练稳定性、双流偏置量化降低通信开销。实验表明该方法在通信受限环境中保持高抗毁性和收敛性能，为无线去中心化联邦学习提供了一种鲁棒方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.25543v1",
+      "source": "arxiv",
+      "title": "Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach",
+      "abstract": "This paper presents a novel two-phase maskable proximal policy optimization (TP-MPPO) algorithm, which maximizes the system goodput counting request throughput with strict service level objective (SLO) compliance for large language model (LLM) inference services in wireless edge networks. In the first phase of TP-MPPO, we optimize the task offloading decisions by MPPO with action masking mechanism, effectively avoiding exploring invalid actions and reducing the action space. In the second phase, closed-form solutions are derived for uplink bandwidth allocation; a greedy algorithm is designed for downlink bandwidth allocation to provide immediate rewards for the MPPO in the next round. The two stages alternate till convergence. Simulation results demonstrate that TP-MPPO can improve the system reward by 33.3%--87.5% compared to its benchmarks and achieve the highest goodput.",
+      "authors": [
+        "Xiaojing Chen",
+        "Qi Zhang",
+        "Wei Ni",
+        "Shunqing Zhang",
+        "Yanzan Sun"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.AI"
+      ],
+      "published": "2026-08-26T08:55:37+00:00",
+      "link": "https://arxiv.org/pdf/2608.25543v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "RL-based resource allocation and task offloading for LLM inference in wireless edge networks",
+      "llm_evidence_cn": "基于强化学习的无线边缘网络大模型推理资源分配与任务卸载",
+      "llm_evidence": "基于强化学习的无线边缘网络大模型推理资源分配与任务卸载",
+      "canonical_evidence": "基于强化学习的无线边缘网络大模型推理资源分配与任务卸载",
+      "llm_tldr_en": "This paper proposes TP-MPPO, a two-phase maskable PPO algorithm that maximizes goodput for large language model edge inference by jointly optimizing task offloading and uplink/downlink bandwidth allocation in wireless edge networks under SLO constraints.",
+      "llm_tldr_cn": "无线边缘网络中提供大语言模型推理服务时,如何满足服务等级目标并最大化系统有效吞吐量是关键问题。本文提出两阶段可掩蔽PPO算法(TP-MPPO):第一阶段用带动作掩蔽的MPPO优化任务卸载,第二阶段用闭式解和贪心算法分配上下行带宽,两阶段交替直至收敛。该方法能有效避免无效探索并缩小动作空间,在保证SLO的同时提高请求吞吐率,为无线边缘大模型推理的资源配置提供了高效方案。",
+      "llm_tldr": "无线边缘网络中提供大语言模型推理服务时,如何满足服务等级目标并最大化系统有效吞吐量是关键问题。本文提出两阶段可掩蔽PPO算法(TP-MPPO):第一阶段用带动作掩蔽的MPPO优化任务卸载,第二阶段用闭式解和贪心算法分配上下行带宽,两阶段交替直至收敛。该方法能有效避免无效探索并缩小动作空间,在保证SLO的同时提高请求吞吐率,为无线边缘大模型推理的资源配置提供了高效方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
