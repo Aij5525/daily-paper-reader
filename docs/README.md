@@ -44,14 +44,14 @@
       <span class="dpr-home-dashboard-kicker">2026-08-29</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 2 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 6 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>1</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>4</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-29 03:20:18 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-29 22:26:24 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,9 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读1篇高分论文，速读1篇，聚焦无线联邦学习鲁棒性与大模型边缘推理优化。</p>
-<p>最值得看：梯度追踪+AdamW提升去中心化联邦学习抗干扰能力；两阶段可掩蔽PPO方法最大化边缘大模型有效吞吐。</p>
-<p>建议优先精读联邦学习新机制，再借鉴边缘推理的调度思路做交叉验证。</p>
+<p>今日共读6篇，其中2篇精读聚焦联邦学习优化与流体天线网络设计，4篇速读覆盖边缘推理与调制技术。最值得关注的是将AdamW与梯度跟踪结合实现弹性分布式联邦学习，以及流体天线辅助多小区网络的个性化联邦波束成形方案。建议后续优先跟进联邦学习在无线边缘场景中的稳健性提升与通信效率优化。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -73,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW">Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW">Resilient Decentralized Wireless Federated Learning via Gradient Tracking with AdamW</span></li><li><span class="dpr-home-dashboard-paper-title" title="Joint Beamforming Design and Port Selection in Fluid Antenna-Assisted Multi-Cell Networks: A Personalized Federated Learning Approach">Joint Beamforming Design and Port Selection in Fluid Antenna-Assisted Multi-Cell Networks: A Personalized Federated Learning Approach</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -86,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">4 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach">Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="CST: Collaborative Selective Transmission for Communication-Efficient Multimodal Edge Inference">CST: Collaborative Selective Transmission for Communication-Efficient Multimodal Edge Inference</span></li><li><span class="dpr-home-dashboard-paper-title" title="Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach">Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach</span></li><li><span class="dpr-home-dashboard-paper-title" title="Receive Diversity for Differential Binary Noise Modulation">Receive Diversity for Differential Binary Noise Modulation</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
 </section>
 </div>
 

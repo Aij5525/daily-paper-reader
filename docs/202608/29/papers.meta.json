@@ -1,8 +1,8 @@
 {
   "label": "2026-08-29",
   "date": "2026-08-29",
-  "generated_at": "2026-08-29T03:20:22",
-  "count": 2,
+  "generated_at": "2026-08-29T22:26:27",
+  "count": 6,
   "papers": [
     {
       "paper_id": "202608/29/2608.25535v1-resilient-decentralized-wireless-federated-learning-via-gradient-tracking-with-adamw",
@@ -20,6 +20,36 @@
       "selection_source": "fresh_fetch"
     },
     {
+      "paper_id": "202608/29/2608.25514v1-joint-beamforming-design-and-port-selection-in-fluid-antenna-assisted-multi-cell-networks-a-personalized-federated-learning-approach",
+      "section": "deep",
+      "title_en": "Joint Beamforming Design and Port Selection in Fluid Antenna-Assisted Multi-Cell Networks: A Personalized Federated Learning Approach",
+      "authors": "Liwen Gao, Li Zheng, Xing Hao, Ziru Chen, Lin X. Cai",
+      "date": "2026-08-26",
+      "pdf": "https://arxiv.org/pdf/2608.25514v1",
+      "score": "8.0",
+      "evidence": "面向无线网络波束成形与端口选择的个性化联邦深度学习方法",
+      "tldr": "针对多小区流体天线辅助网络中的联合波束成形与端口选择问题，两者通过小区内与小区间干扰强耦合，传统集中优化难以适应异构小区。提出一种基于联邦表示学习的位置感知双分支深度网络，输入信道状态与端口位置编码，并行输出波束成形向量与端口选择。训练中跨基站共享波束参数，端口参数保留本地，实现个性化协同。仿真显示，该方法在加权和速率上超越传统联邦学习与端口选择基准，展示了分布式资源优化的潜力。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "This paper investigates joint beamforming and port selection in multi-cell fluid antenna-assisted (FAS) networks. In such networks, active beamforming and discrete FA port selection are coupled through intra-cell and inter-cell interference and are jointly optimized to maximize the weighted sum-rate (WSR). We develop a federated representation learning (FedRep) framework with a position-aware dual-branch deep neural network (PA-DNN). The PA-DNN uses channel state information and port positional encoding as inputs, and jointly outputs beamforming vectors and port selections through two task-specific branches. To support decentralized training across heterogeneous cells, the FedRep framework shares global beamforming-related parameters among base stations while keeping port-selection parameters local for cell-specific adaptation. Simulation results show that the proposed scheme achieves a higher weighted sum-rate than conventional FL and port-selection benchmark schemes.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/29/2608.22115v1-cst-collaborative-selective-transmission-for-communication-efficient-multimodal-edge-inference",
+      "section": "quick",
+      "title_en": "CST: Collaborative Selective Transmission for Communication-Efficient Multimodal Edge Inference",
+      "authors": "Hai Chi, Junrui Zhang, Rui Ning, Chonggang Wang, Robert Gazda, Huanrui Yang, Hongyi Wu",
+      "date": "2026-08-22",
+      "pdf": "https://arxiv.org/pdf/2608.22115v1",
+      "score": "7.0",
+      "evidence": "面向多模态边缘推理的主设备定向查询-响应传输机制，降低通信开销",
+      "tldr": "多模态边缘推理中，辅助设备传输高维表征带来巨大通信开销，而现有压缩、语义编码或特征选择方法未显式考虑主设备已含信息，导致冗余传输。为此提出协同选择性传输（CST），一种主设备引导的查询-响应框架，仅取回与当前主表征互补的辅助信息，基于部分信息分解学习样本自适应且辅助特定的稀疏检索支持，同时抑制主端或辅助间重复语义。在三个真实基准上，CST仅传输至多14.18%的辅助特征值即取得最佳或接近最佳性能；在五节点Jetson Orin Nano测试床上，5-100Mbps下相比全量传输最高提速4.27倍，有效降低端到端延迟。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Collaborative multimodal inference improves edge perception by combining observations from distributed sensing devices, but transmitting high-dimensional helper representations incurs substantial communication overhead and can lead to high end-to-end latency. Existing communication-efficient methods reduce payloads through compression, semantic coding, or feature selection, yet typically optimize compactness or task relevance without explicitly accounting for information already represented at the main device. Consequently, task-relevant but redundant helper features may still consume bandwidth. We present Collaborative Selective Transmission (CST), a main-directed query--response framework that retrieves only helper information complementary to the current main representation. Inspired by Partial Information Decomposition and the Multiview Redundancy Assumption, CST learns sample-adaptive, helper-specific sparse retrieval supports while discouraging retrieval of semantics already covered by the main device or duplicated across helpers. During inference, the main device transmits only support indices, and each helper returns the corresponding latent values, avoiding dense helper-feature exchange. Across three real-world multimodal sensing benchmarks, CST transmits no more than 14.18% of helper feature values while achieving best or near-best task performance among the evaluated methods. Experiments on a five-node NVIDIA Jetson Orin Nano testbed across 5--100 Mbps demonstrate up to a $4.27\\times$ speedup over Transmit-All in end-to-end inference, confirming practical end-to-end latency reductions.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
       "paper_id": "202608/29/2608.25543v1-goodput-maximization-for-large-language-model-edge-inference-a-two-phase-maskable-ppo-approach",
       "section": "quick",
       "title_en": "Goodput Maximization for Large Language Model Edge Inference: A Two-Phase Maskable PPO Approach",
@@ -31,6 +61,36 @@
       "tldr": "针对无线边缘网络中LLM推理服务的SLO合规与吞吐优化问题，提出TP-MPPO两阶段算法。第一阶段用带动作掩码的MPPO优化任务卸载，避免无效动作；第二阶段用闭式解与贪心算法分别分配上下行带宽。两阶段交替直至收敛，仿真显示系统奖励提升33.3%–87.5%，并实现最高goodput。",
       "tags": "query:wireless-llm",
       "abstract_en": "This paper presents a novel two-phase maskable proximal policy optimization (TP-MPPO) algorithm, which maximizes the system goodput counting request throughput with strict service level objective (SLO) compliance for large language model (LLM) inference services in wireless edge networks. In the first phase of TP-MPPO, we optimize the task offloading decisions by MPPO with action masking mechanism, effectively avoiding exploring invalid actions and reducing the action space. In the second phase, closed-form solutions are derived for uplink bandwidth allocation; a greedy algorithm is designed for downlink bandwidth allocation to provide immediate rewards for the MPPO in the next round. The two stages alternate till convergence. Simulation results demonstrate that TP-MPPO can improve the system reward by 33.3%--87.5% compared to its benchmarks and achieve the highest goodput.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/29/2608.23950v1-receive-diversity-for-differential-binary-noise-modulation",
+      "section": "quick",
+      "title_en": "Receive Diversity for Differential Binary Noise Modulation",
+      "authors": "Paulo V. B. Tomé, André A. dos Anjos, Hugerles S. Silva, Daniel C. Araújo, Robson D. Vieira, Ertugrul Basar",
+      "date": "2026-08-25",
+      "pdf": "https://arxiv.org/pdf/2608.23950v1",
+      "score": "6.0",
+      "evidence": "差分二元噪声调制在κ-μ衰落下的精确误码率分析",
+      "tldr": "差分二进制噪声（DBN）调制将信息编码在复用噪声的极性转换中，无需信道状态信息与载波相位恢复。本文提出其单输入多输出（SIMO）接收方案，采用相关后决策统计量合并与零阈值判决，并导出无高斯近似的精确条件误比特率。进一步在 κ-μ 衰落及共享能量上平均，得到任意权重的精确误比特率，并指出分集阶数受观察长度限制为 min(Mμ,N)。闭式最优权重融合软合并与功率加权，65 GHz 室内非视距实测评估了空间分集与观察长度的折中。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Differential binary noise (DBN) modulation encodes information in the polarity transition of a reused noise realization, dispensing channel state information and carrier-phase recovery. This letter proposes single-input multiple-output (SIMO) reception for DBN via post-correlation decision-statistic combining, followed by one zero-threshold decision. The combined statistic is a Hermitian quadratic form in complex Gaussian vectors, yielding an exact conditional bit error probability (BEP) with no Gaussian approximation. Averaging it over $κ$-$μ$ fading and the reused energy gives the exact BEP for arbitrary weights. Because that energy is shared, its deep fades are common to every branch, and the observation length caps the diversity order at $\\min(Mμ,N)$. The deflection-optimal weights follow in closed form and interpolate soft combining and power weighting. Measured 65 GHz indoor non-line-of-sight (NLoS) results quantify the trade-off between spatial resources and observation length.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/29/2608.25996v1-visualizing-wireless-propagation-and-polarization-in-augmented-reality-with-espargos",
+      "section": "quick",
+      "title_en": "Visualizing Wireless Propagation and Polarization in Augmented Reality with ESPARGOS",
+      "authors": "Florian Euchner, Stephan ten Brink",
+      "date": "2026-08-26",
+      "pdf": "https://arxiv.org/pdf/2608.25996v1",
+      "score": "6.0",
+      "evidence": "利用信道测量在增强现实中可视化无线传播与极化",
+      "tldr": "无线多径、波束赋形和极化是无线电系统的核心概念，但射频场不可见，难以直观观测。本文利用ESPARGOS天线阵列的相位相干WiFi信道测量，结合增强现实技术，将估计的二维波束空间表示与相机视图配准，实时叠加角谱、路径时延和极化信息。系统直接基于实测数据生成直观的“WiFi相机”，可用于科学传播、教学和实验调试。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Wireless multipath propagation, beamforming, and polarization are central concepts in radio systems, but they are difficult to observe directly because radio-frequency fields are invisible to humans. This paper presents an augmented-reality visualization system that turns phase-coherent WiFi channel measurements from the ESPARGOS antenna array into a live camera overlay. The system estimates a two-dimensional beamspace representation, registers it with the optical camera view, and overlays the resulting angular spectrum onto the physical scene. Additional visual layers show relative path delay and polarization, the latter computed using Jones calculus from channel measurements captured from two separate antenna feeds. The result is an intuitive ``WiFi camera'' for science communication, teaching, and experimental debugging, while all displayed quantities remain directly derived from measured channel data.",
       "source": "arxiv",
       "selection_source": "fresh_fetch"
     }

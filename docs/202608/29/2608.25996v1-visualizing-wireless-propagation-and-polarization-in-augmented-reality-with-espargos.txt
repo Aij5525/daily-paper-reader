@@ -1,0 +1,290 @@
+Title: Visualizing Wireless Propagation and Polarization in Augmented Reality with ESPARGOS
+
+URL Source: https://arxiv.org/pdf/2608.25996v1
+
+Published Time: Thu, 27 Aug 2026 01:25:02 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+# Visualizing Wireless Propagation and Polarization in Augmented Reality with ESPARGOS 
+
+Florian Euchner , Stephan ten Brink 
+
+Institute of Telecommunications, Pfaffenwaldring 47, University of Stuttgart, 70569 Stuttgart, Germany 
+
+{euchner,tenbrink }@inue.uni-stuttgart.de 
+
+Abstract —Wireless multipath propagation, beamforming, and polarization are central concepts in radio systems, but they are difficult to observe directly because radio-frequency fields are invisible to humans. This paper presents an augmented-reality visualization system that turns phase-coherent WiFi chan-nel measurements from the ESPARGOS antenna array into a live camera overlay. The system estimates a two-dimensional beamspace representation, registers it with the optical camera view, and overlays the resulting angular spectrum onto the physical scene. Additional visual layers show relative path delay and polarization, the latter computed using Jones calculus from channel measurements captured from two separate antenna feeds. The result is an intuitive “WiFi camera” for science communication, teaching, and experimental debugging, while all displayed quantities remain directly derived from measured channel data. 
+
+I. I NTRODUCTION 
+
+Coherent multi-antenna channel measurements provide a detailed, multi-dimensional view of the physical radio en-vironment. They reveal where signal energy arrives from, how signals are delayed by reflections, and how polariza-tion changes along the propagation path. Despite this rich information content, such measurements are usually inspected through abstract plots or processed by communication or localization algorithms. This makes them difficult to interpret for non-specialists and cumbersome to make sense of even for researchers who want to quickly debug an experiment, demonstrate a propagation effect, or reason about the physical meaning of measured channel state information (CSI). Previously, we introduced ESPARGOS as an ultra-low-cost, real-time-capable, phase-coherent multi-antenna WiFi channel sounder for wireless sensing experiments [1]. Subsequent work used ESPARGOS to record public CSI datasets [2] and to demonstrate passive target localization with distributed WiFi sensing setups [3]. This paper follows a complementary direction: instead of using CSI only as input to an offline algorithm, we use it as the basis for a live, camera-registered visualization of wireless propagation. The resulting system can be understood as an augmented-reality layer for channel sounding. A conventional camera provides the optical scene, while an ESPARGOS array provides a view of the same scene in the 2.4 GHz WiFi band of the radio frequency (RF) spec-trum. By aligning both views, received power, multipath delay, 
+
+This work is supported by the German Federal Ministry of Research, Technology and Space (BMFTR) within the SENSATION project (grant no. 16KIS2532). 
+
+Fig. 1: “ESPARGOS One” antenna array: WiFi-based fully digital phased array with dual slant-polarized patch antennas. and polarization can be displayed directly at the apparent directions of the corresponding sources or scatterers. Prior immersive and augmented-reality systems visualize predicted radio maps, signal strength, or network-planning metrics [4]– [6]. In contrast, our system overlays spatial information about the RF signal itself, exposing angular structure, delay, and po-larization in a camera-registered view. The main contribution of this paper is the compact signal-processing and rendering pipeline that connects optical and RF views in real time. II. S YSTEM AND VISUALIZATION PIPELINE 
+
+This section describes the processing chain from phase-coherent WiFi CSI to an augmented-reality overlay. Our open-source implementation 1 also supports other spatial-spectrum estimators, such as MUltiple SIgnal Classification (MUSIC) [7], but we focus on the fast Fourier transform (FFT)-based beamspace method because it is simple, fast, and hence well suited for real-time visualization. 
+
+A. ESPARGOS Receiver Setup 
+
+ESPARGOS is used here as a receive-only, phase-coherent WiFi sensing array. The current hardware generation, shown in Fig. 1, consists of a 2 × 4 patch antenna array with two switchable feeds per element for ±45 ◦ slant polarization, and operates in the 2.4 GHz WiFi band. The WiFi receivers are synchronized using a shared clock and phase reference distribution network, as shown in Fig. 2. Larger apertures are formed by combining several such subarrays into a single rectangular array. The software configuration specifies how the antenna positions of the individual boards map to the rows and 
+
+> 1
+
+Available from https://github.com/ESPARGOS/pyespargos arXiv:2608.25996v1 [eess.SP] 26 Aug 2026 ESP32 ESP32 ESP32 ESP32 ESP32 ESP32 ESP32 ESP32 Power Splitter 
+
+> 40 MHz
+> Freq. Ref. Clock REF in
+
+Fig. 2: Block diagram of a single 2 × 4 ESPARGOS antenna array, with a focus on the synchronization and antenna signals. The symbols denote the antenna patches with two feeds for 
+
+±45 ◦ slant polarization. columns of the combined array. The raw CSI is corrected using the receiver gain values reported by the WiFi chips, phase-calibrated across receivers, and arranged according to the configured array mapping. The resulting measured frequency-domain channel is denoted by 
+
+Hm,n,k ∈ C, m = 0 , . . . , M − 1, n = 0 , . . . , N − 1,
+
+where M and N are the numbers of array rows and columns, 
+
+(m, n ) indexes the antenna element, and k indexes the or-thogonal frequency division multiplex (OFDM) subcarrier at frequency fk. The antenna spacing d is chosen on the order of d = λ/ 2, where λ is the carrier wavelength. Each antenna provides two switchable feeds, denoted by 
+
+R and L. Those correspond to the two ±45 ◦ slant-polarized feeds and include the intentional cross-polarization response of the patch design. Because the receivers behind each antenna can only observe one feed at a time, receivers switch randomly and independently between R and L. Measurements are tagged with their RF switch state, stored in a short backlog and combined under a quasi-static scene assumption. The channel estimates for each packet are time-aligned such that the first significant impulse response peak is aligned to a fixed reference tap. By combining multiple measurements from the backlog, the signal-to-noise ratio (SNR) can be improved by averaging, and the relative phases of both feeds of all antennas can be recovered. Due to carrier frequency offset (CFO), each packet has an unknown global phase offset, so an iterative global phase alignment algorithm is needed to combine multiple packets coherently. The resulting dual-feed snapshot is stacked into the mea-sured R/L feed vector 
+
+hRL  
+
+> m,n,k
+
+=
+
+HR
+
+> m,n,k
+
+HL
+
+> m,n,k
+
+
+
+∈ C2.
+
+For polarization visualization, this feed vector is transformed into separated vertical and horizontal field components by an empirically determined Jones matrix [8]. The matrix cap-tures the effective slant-feed response, the intentional cross-polarization terms of the patch, and the physical orientation of antenna (m, n ) in the combined array. With Jm,n denoting this effective feed response, we obtain the corresponding Jones vector in the vertical / horizontal ( V/H) basis, used for all vectors from now on, as 
+
+hVH  
+
+> m,n,k
+
+= J−1
+
+> m,n
+
+hRL 
+
+> m,n,k
+
+. (1) 
+
+B. From CSI to Angular Spectrum 
+
+For a planar array with half-wavelength spacing, a plane wave arriving from azimuth φ and elevation ϑ causes approx-imately linear phase progressions [9] 
+
+Ψx = π cos( ϑ) sin( φ), Ψy = π sin( ϑ) (2) over the two array axes. The pair (Ψ x, Ψy) is the beamspace coordinate, also interpretable as the phase difference between neighboring antenna elements along the horizontal and vertical array axes. Not every point in the beamspace corresponds to a physical arrival direction. We call the subset that maps to real azimuth and elevation angles the visible region . For half-wavelength antenna spacing, this region is the disk Ψ2x +Ψ 2y ≤
+
+π2. We can transform the measured channel into beamspace domain using the two-dimensional Fourier transform 
+
+bVH  
+
+> k
+
+(Ψ x, Ψy) = 1
+
+M N  
+
+> M−1
+
+X 
+
+> m=0
+> N−1
+
+X
+
+> n=0
+
+hVH  
+
+> m,n,k
+
+e−j( mΨy +nΨx). (3) In practice, (3) is evaluated at a set of discretized beamspace coordinates (Ψ x, Ψy) by zero-padding the m, n axes of hVH 
+
+> m,n,k
+
+and applying a two-dimensional FFT. The result is a beam-and frequency-dependent Jones vector 
+
+bVH  
+
+> k
+
+(Ψ x, Ψy) = 
+
+BV 
+
+> k
+
+(Ψ x, Ψy)
+
+BH 
+
+> k
+
+(Ψ x, Ψy)
+
+
+
+∈ C2,
+
+with BV and BH denoting the beamspace channel responses of the vertical and horizontal components, respectively. The beamspace-domain power is averaged over subcarriers as 
+
+P (Ψ x, Ψy) = 1
+
+K
+
+X
+
+> k
+
+bVH  
+
+> k
+
+(Ψ x, Ψy) 22 .
+
+Here, K is the number of subcarriers included in the average. In the implementation, the spatial FFT is accelerated by exploiting time-domain sparsity: We transform the frequency-domain data to the delay domain first and retain only a short window around the synchronized first-arrival tap, for which the beamspace transform is computed. Afterwards, the beamspace-delay domain data can be transformed back to the frequency domain, which is, overall, still faster than computing the beamspace transform for all subcarriers. 
+
+C. Camera-Registered Augmented Reality Overlay 
+
+The augmented-reality display requires a mapping from beamspace to camera pixels. Using (2), a beamspace coor-dinate is first converted to angles by 
+
+ϑ = arcsin 
+
+ Ψy
+
+π
+
+
+
+, φ = arcsin 
+
+ Ψx
+
+π cos( ϑ)
+
+
+
+. (4) Assuming aligned array and camera boresights, and neglecting the small parallax between camera and array center, these an-gles are projected into the camera image with a pinhole model using the standard field-of-view normalization of perspective projection [10]. For camera field-of-view angles Φx and Φy,the normalized image coordinates (u, v ) ∈ [0 , 1] 2 are 
+
+u = 12 + 12tan( φ)tan(Φ x/2) , v = 12 + 12tan( ϑ)cos( φ) tan(Φ y/2) . (5) Fixed azimuth and elevation offsets can be applied to com-pensate small manual alignment errors between antenna and camera orientations. 
+
+D. Delay and Polarization Visualization 
+
+For delay visualization, we assume that each resolved beam with beamspace coordinates (Ψ x, Ψy) is dominated by a single propagation delay. The adjacent-subcarrier phase increment then provides a simple and fast relative delay estimate 
+
+ˆτ (Ψ x, Ψy) = arg  P 
+
+> k
+
+ bVH  
+
+> k
+
+(Ψ x, Ψy)H bVH 
+
+> k+1
+
+(Ψ x, Ψy)
+
+2π∆f ,
+
+where ∆f is the subcarrier spacing. The relative delays in the scene are mapped to color hue, while brightness remains controlled by beamspace power. For polarization visualization, we assume that within each beam, the relative vertical and horizontal field components are approximately constant over the observed band, 
+
+bVH  
+
+> k
+
+(Ψ x, Ψy) ≈ αk(Ψ x, Ψy)ηVH (Ψ x, Ψy), ηVH  
+
+> 2
+
+= 1 .
+
+Here, αk is an arbitrary complex scalar response and ηVH ∈
+
+C2 is the Jones vector describing polarization. We want to visualize relative phases across beams (Ψ x, Ψy), so the otherwise arbitrary phase of ηVH is fixed by the gauge 
+
+αk0 (Ψ x, Ψy) ∈ R+, where k0 is the center subcarrier; hence 
+
+ηVH carries the center-subcarrier beam phase. We estimate 
+
+ηVH as follows: Let r ∈ { V, H} be the globally stronger polarization component and N (x) = x/∥x∥2. For each beam, 
+
+ˆηVH (Ψ x, Ψy) = N X
+
+> k
+
+bVH  
+
+> k
+
+(Ψ x, Ψy) ( Brk(Ψ x, Ψy)) ∗
+
+!
+
+· ej arg Brk0 (Ψ x,Ψy ).
+
+For rendering, one common phase rotation is applied to all beams such that P 
+
+> Ψx,Ψy
+
+P (Ψ x, Ψy)ˆ ηV(Ψ x, Ψy) ∈ R+. This stabilizes the remaining scene-wide animation phase across frames without changing relative phases between beams. The visualization shows polarization as the strongly slowed-down trajectory traced by the tip of the electric field phasor, 
+
+eVH (t; Ψ x, Ψy) = ℜ
+
+n
+
+ˆηVH (Ψ x, Ψy)e jωt o
+
+, (6) where t is the visualization time and ω is the chosen angular frequency of the animation. The phasors from (6) are drawn as animated dots (with a trailing trace line) on a regular grid in the camera image. Vertical, horizontal, slanted, and circular or elliptical polarization states therefore appear as different motion patterns. Because the visualization preserves relative 
+
+Fig. 3: Setup: Four ESPARGOS boards and a webcam, with a total of 32 antenna elements. The CSI is streamed to a laptop over Ethernet for real-time processing and visualization. phases between beams, out-of-phase beams with similar po-larization can still be distinguished by their different starting phases. 
+
+E. Hardware-Accelerated Rendering 
+
+The rendering pipeline is split between the central pro-cessing unit (CPU) and graphics processing unit (GPU). The CPU computes low-resolution textures containing discretized beamspace power P (Ψ x, Ψy) and, optionally, delay or po-larization information ˆτ (Ψ x, Ψy) or ˆηVH (Ψ x, Ψy). A vertex shader performs the camera-to-beamspace coordinate interpo-lation according to (4) and (5). A fragment shader blends the resulting texture samples with the camera’s video feed and draws the electric field traces for polarization visualization. III. E XPERIMENTS AND RESULTS 
+
+The experiments use the combined 4 × 8 ESPARGOS array shown in Fig. 3. All results are captured and rendered live, with the laptop running the visualization pipeline described in Section II. In operation, the display is video-like and interactive: the overlay updates continuously at high frame rate. Since this paper can only show static images, Fig. 4 presents representative screenshots from the live visualization. 
+
+A. Angular Spectrum: Beamspace and Augmented Reality 
+
+Fig. 4a shows the full visible beamspace region of the array together with the smaller region covered by the optical camera. This illustrates that the array observes a wider angular field of view than the camera, while the augmented-reality overlay uses the camera-covered subset to place the measured angular spectrum on the optical image. 
+
+B. Visualizing Delay 
+
+Fig. 4b illustrates that ESPARGOS separates multipath components in both angle and delay: the direct and ground-(a) Field of view of a typical webcam com-pared to the ESPARGOS antenna array’s field of view (azimuth / elevation grid), both in beamspace. 
+
+(b) Outdoor paths; the transmitter is held by the person at the bottom. Color shows delay: direct or ground reflection in blue, building-corner reflection in green. 
+
+(c) Two dipole antennas transmitting the same signal, but with different polarizations and phase offsets. 
+
+(d) Visualization of an LHCP-polarized sig-nal from a circularly polarized transmit an-tenna received over a line-of-sight path: dots rotating in a circle, counterclockwise. 
+
+(e) Same circularly polarized transmitter from Fig. 4d, but now received over areflection from a metallic wall: dots with clockwise rotation indicate a change from LHCP to RHCP. 
+
+(f) Same circularly polarized transmitter as in Fig. 4d, but now with a wire rack in the propagation path, acting as a polarization-selective filter. 
+
+Fig. 4: Screenshots from the augmented-reality demo: example visualizations for selected scenarios. reflected components appear earliest, while the angularly sep-arated building-corner reflection appears later. 
+
+C. Visualizing Polarization 
+
+Figs. 4c–4f show that ESPARGOS can separate propagation components by angle and polarization at the same time. In Fig. 4c, two dipoles transmitting the same signal are resolved with different polarization and phase. Figs. 4d and 4e show a circularly polarized signal whose rotation changes between the line-of-sight and reflected path, while Fig. 4f shows a wire rack acting as a polarization-selective object. IV. S UMMARY AND OUTLOOK 
+
+This paper presented a camera-registered ESPARGOS vi-sualization pipeline that overlays measured beamspace power, relative delay, and polarization onto the optical scene. Our hardware and software make angular propagation, multipath, and field-orientation effects visible in the physical coordinate frame. In the future, we plan to extend our system with a more compact, handheld hardware device and to explore the radar sensing (phase-coherent transmission) capabilities of ESPARGOS with a similar visualization approach. REFERENCES [1] Florian Euchner, Tim Schneider, Marc Gauger, and Stephan ten Brink. ESPARGOS: An Ultra Low-Cost, Realtime-Capable Multi-Antenna WiFi Channel Sounder. In 26th International ITG Workshop on Smart Antennas . VDE, 2023. [2] Florian Euchner and Stephan ten Brink. ESPARGOS: Phase-Coherent WiFi CSI Datasets for Wireless Sensing Research. In 2024 Kleinheubach Conference , 2024. [3] Florian Euchner, David Kellner, Phillip Stephan, and Stephan ten Brink. Passive Channel Charting: Locating Passive Targets Using Wi-Fi Channel State Information. In 2025 IEEE 26th International Workshop on Signal Processing and Artificial Intelligence for Wireless Communications (SPAWC) , 2025. [4] George Koutitas, Varun Kumar Siddaraju, and Vangelis Metsis. In Situ Wireless Channel Visualization Using Augmented Reality and Ray Tracing. Sensors , 20(3):690, 2020. [5] Alexander Rowden, S¨ uleyman Aslan, Eric Krokos, Kirsten Whitley, and Amitabh Varshney. WaveRider: Immersive Visualization of Indoor Signal Propagation. In Proceedings of the 2022 ACM Symposium on Spatial User Interaction , SUI ’22, New York, NY, USA, 2022. Association for Computing Machinery. [6] Naoya Okubo, Jin Nakazato, and Kei Sakaguchi. Field Trial of AR-Based Radio Signal Visualization for Better Deployment of mmWave 5G and Beyond. In 2023 IEEE 98th Vehicular Technology Conference (VTC2023-Fall) . IEEE, 2023. [7] Ralph O. Schmidt. Multiple Emitter Location and Signal Parameter Es-timation. IEEE Transactions on Antennas and Propagation , 34(3):276– 280, 1986. [8] R. Clark Jones. A New Calculus for the Treatment of Optical Systems. I. Description and Discussion of the Calculus. Journal of the Optical Society of America , 31(7):488–493, 1941. [9] Harry L. Van Trees. Optimum Array Processing: Part IV of Detection, Estimation, and Modulation Theory . Wiley-Interscience, New York, NY, USA, 2002. [10] Matt Pharr, Wenzel Jakob, and Greg Humphreys. Physically Based Rendering: From Theory to Implementation . Morgan Kaufmann, Cam-bridge, MA, USA, 3 edition, 2017. Chapter 6, Cameras, Section 6.2.2, Perspective Camera.

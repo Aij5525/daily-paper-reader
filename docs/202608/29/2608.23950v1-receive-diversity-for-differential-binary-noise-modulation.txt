@@ -1,0 +1,606 @@
+Title: Receive Diversity for Differential Binary Noise Modulation
+
+URL Source: https://arxiv.org/pdf/2608.23950v1
+
+Published Time: Wed, 26 Aug 2026 00:23:45 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Receive Diversity for Differential Binary Noise Modulation 
+
+Paulo V. B. Tom´ e, Andr´ e A. dos Anjos, Hugerles S. Silva, Daniel C. Ara´ ujo, Robson D. Vieira, and Ertugrul Basar 
+
+Abstract 
+
+Differential binary noise (DBN) modulation encodes information in the polarity transition of a reused noise realization, dispensing channel state information and carrier-phase recovery. This letter proposes single-input multiple-output (SIMO) reception for DBN via post-correlation decision-statistic combining, followed by one zero-threshold decision. The combined statistic is a Hermitian quadratic form in complex Gaussian vectors, yielding an exact conditional bit error probability (BEP) with no Gaussian approximation. Averaging it over κ-μ fading and the reused energy gives the exact BEP for arbitrary weights. Because that energy is shared, its deep fades are common to every branch, and the observation length caps the diversity order at min( M μ, N ). The deflection-optimal weights follow in closed form and interpolate soft combining and power weighting. Measured 65 GHz indoor non-line-of-sight (NLoS) results quantify the trade-off between spatial resources and observation length. 
+
+Index Terms 
+
+DBN modulation, noncoherent detection, SIMO, receive diversity, decision-statistic combining, diversity order, IoT. 
+
+I. I NTRODUCTION 
+
+Internet of things (IoT) and machine-type communication systems must support many low-power devices under tight energy and complexity constraints [1], which motivates keeping the transmitter simple and shifting processing to the gateway, so as to avoid the circuit-power cost of carrier synchronization, channel estimation, and coherent demodulation [2], [3]. Noise-based modulation suits this regime by embedding information in the statistical behavior of random waveforms rather than in deterministic constellation points. Representative schemes include variance-switching noise modulation (NoiseMod) [4], on-off digital noise (OODN) [5], [6], and arXiv:2608.23950v1 [eess.SP] 25 Aug 2026 2
+
+pilot-aided, multi-user, spreading-based, and Gaussian-mixture variants [7], [8], [9], [10]. Within this family, differential binary noise (DBN) [11] reuses one noise realization across consecutive symbols and encodes information in their polarity transition, so a receiver decides from the sign of an inter-symbol correlation statistic, with no channel state information (CSI), noise variance estimation, carrier phase recovery, or adaptive thresholding. Its reliability, however, is tied to the number of samples per bit N , since a larger N buys processing gain but lengthens the observation interval and raises the memory and correlation cost per bit. This raises a natural question: can spatial diversity replace part of the temporal processing gain while preserving the noncoherent receiver? The question matters for IoT, where devices carry one transmit antenna whereas gateways carry M receive antennas. Rather than combining complex received samples as in equal-gain combining (EGC) or maximal-ratio combining (MRC), the receiver proposed here forms one DBN decision statistic per branch and combines these real-valued statistics through a generalized weighting rule, recovering soft combining, single-input single-output (SISO) operation, and arbitrary weighted combining as particular cases. The answer is bounded in a way that a single-antenna analysis cannot reveal. Because the transmitter reuses one realization for every branch, the energy of that realization is shared by all antennas and cannot be averaged out by adding more of them, so the diversity order is capped by the observation length rather than by the array size. This paper contributes a generalized single-input multiple-output (SIMO)-DBN receiver based on weighted noncoherent decision-statistic combining, which preserves the original transmitter and zero-threshold detector. Recognizing the combined statistic as a Hermitian quadratic form in complex Gaussian vectors [12] yields an exact conditional bit error probability (BEP), valid for every N and free of any Gaussian approximation, from which the exact average BEP over generalized κ-μ fading follows, evaluated under measured 65 GHz indoor millimeter wave (mmWave) non-line-of-sight (NLoS) conditions. An asymptotic analysis then establishes the diversity order min( M μ, N ) with its exact leading constant, in which μ is the number of multipath clusters of the fading model. Furthermore, the deflection-optimal combining weights follow in closed form, interpolating soft combining and power weighting according to the branch signal-to-noise ratio (SNR). 3bk differential encoder DAC up-converter                            
+
+> skxk
+> delay Tb
+> sk−1
+> noise realization
+> u∼ CN (0, σ 2
+> uIN)
+> Nsamples, one per frame
+> xk(t)
+> antenna 1
+> down-converter and ADC
+> ∑Nn=1 R{·}
+> delay Tb
+> a1
+> y∗
+> k, 1[n]
+> yk−1,1[n]
+> Zk, 1
+> antenna M
+> down-converter and ADC
+> ∑Nn=1 R{·}
+> delay Tb
+> aM
+> y∗
+> k,M [n]
+> yk−1,M [n]
+> Zk,M
+> ......generalized weighted decision statistic
+> Tk
+> 0ˆbk
+> Tk=∑Mℓ=1 aℓR{Zk,ℓ }
+> ˆbk=
+> {0,Tk≥01,Tk<0
+
+Fig. 1. Proposed DBN transmitter and SIMO receiver architecture. A single noise realization u is generated once per frame and reused by every receive branch. 
+
+II. SIMO-DBN S YSTEM MODEL 
+
+Fig. 1 illustrates the proposed SIMO-DBN system. The input bits are differentially encoded and modulate a reused complex Gaussian noise realization, which propagates through M independent fading branches, each corrupted by additive white Gaussian noise (AWGN). Consider a binary sequence bk ∈ { 0, 1} transmitted during the k-th bit interval [( k − 1) Tb, kT b), where Tb denotes the bit duration. As in DBN [11], the bits are differentially encoded into a bipolar sequence 
+
+sk ∈ { +1 , −1}, such that 
+
+sk = sk−1(1 − 2bk), dk ≜ sksk−1 = 1 − 2bk, (1) with an arbitrary initial condition s0 ∈ { +1 , −1}. Thus, the differential symbol is dk = +1 
+
+for bk = 0 and dk = −1 for bk = 1 . Within a frame, a single realization u ∼ CN (0, σ 2
+
+> u
+
+IN )
+
+is generated and reused across consecutive intervals, giving the transmitted vector xk = sku,with IN being the N × N identity matrix and σ2 
+
+> u
+
+denoting the per-sample variance of the noise realization. Its instantaneous energy Eu ≜ ∥u∥2 follows a Gamma distribution with shape N and scale σ2
+
+> u
+
+. Normalizing it as ε ≜ Eu/σ 2 
+
+> u
+
+removes that scale from the analysis and gives 
+
+fε(ε) = ε N −1 exp( −ε)Γ( N ) , ε ≥ 0, (2) which is the form used throughout. With a single transmit antenna and M receive antennas, the ℓ-th branch observes yk,ℓ =
+
+hk,ℓ xk +wk,ℓ , ℓ = 1 , . . . , M , where hk,ℓ is the complex fading coefficient and wk,ℓ ∼ CN (0, σ 2
+
+> w
+
+IN ),with σ2 
+
+> w
+
+being the noise variance per complex sample, is an AWGN vector independent across antennas, time, and symbols. Adopting the standard two-symbol block-fading assumption of differential detection, hk,ℓ ≈ hk−1,ℓ ≜ hℓ, valid when the symbol duration is shorter than the 4
+
+channel coherence time, the combining is carried out entirely at the decision-statistic level, keeping channel and combining independent. III. G ENERALIZED WEIGHTED DECISION STATISTIC 
+
+At the ℓ-th receive antenna, the DBN differential correlation statistic is 
+
+Zk,ℓ ≜ yH
+
+> k,ℓ
+
+yk−1,ℓ =
+
+> N
+
+X
+
+> n=1
+
+y∗
+
+> k,ℓ
+
+[n] yk−1,ℓ [n], (3) where (·)H denotes the Hermitian transpose and (·)∗ denotes the complex conjugate. The proposed receiver combines these branch statistics according to an arbitrary weighting coefficient aℓ,yielding the decision variable 
+
+Tk ≜
+
+> M
+
+X
+
+> ℓ=1
+
+aℓ R{Zk,ℓ }, a = [ a1, . . . , a M ]. (4) The final decision follows the DBN zero-threshold rule, ˆbk = 0 for Tk ≥ 0 and ˆbk = 1 otherwise. Unlike EGC and MRC, which combine phase-aligned complex samples, the proposed receiver operates entirely at the decision-statistic level, requiring no carrier-phase recovery, channel-amplitude estimation, or noise-variance estimation, and thus preserving the noncoherent DBN structure. Soft combining is the particular case aℓ = 1 for all ℓ, while other weighting rules leave the analytical framework unchanged. Substituting xk = sku and yk,ℓ = hℓxk + wk,ℓ into (3) gives 
+
+Zk,ℓ = |hℓ|2dkEu + h∗ 
+
+> ℓ
+
+skuHwk−1,ℓ 
+
++ hℓsk−1wH
+
+> k,ℓ
+
+u + wH
+
+> k,ℓ
+
+wk−1,ℓ , (5) so that, taking the real part and summing over the M antennas as in (4), 
+
+Tk = dkEuMX
+
+> ℓ=1
+
+aℓ|hℓ|2 +
+
+> M
+
+X
+
+> ℓ=1
+
+aℓξk,ℓ , (6) where ξk,ℓ collects the two signal-noise cross terms and the noise-noise term, and the combined instantaneous channel power gain is GM ≜ PMℓ=1 aℓ|hℓ|2. The useful term depends on |hℓ|2 and not on the channel phase, as a direct consequence of the product h∗ 
+
+> ℓ
+
+hℓ arising from differential correlation, so phase rotations common to two adjacent symbols do not affect the sign of the useful decision component. The weighting vector is treated as deterministic throughout. 5
+
+IV. P ERFORMANCE ANALYSIS 
+
+The combined decision statistic Tk in (4) needs no distributional approximation. Grouping the two symbols of each sample into vℓ,n = [ yk,ℓ [n], y k−1,ℓ [n]] T, (4) becomes a Hermitian quadratic form in complex Gaussian vectors, whose characteristic function ϕT (ω) ≜ E[exp( ȷωT k)] , in which ω is the transform variable, is classical. For a complex Gaussian vector of mean m
+
+and covariance Σ, it reads exp[ ȷω mH(I − ȷω ΣF )−1Fm ]/ det( I − ȷω ΣF ) [12]. Here, F is a Hermitian matrix with eigenvalues ±12 and eigenvectors [1 , ±1] T/√2; under dk = −1 the mean lies entirely along the −12 one, so with soft combining the product over ℓ and n collapses to 
+
+ϕT (ω) = exp[ −ȷω EuGM /(1 + ȷωσ 2
+
+> w
+
+/2)] /(1 + ω2σ4
+
+> w
+
+/4) M N , which depends on the reused energy and on the channel only through the single scalar 
+
+x ≜ Eu GM
+
+σ2
+
+> w
+
+. (7) With equal weights every branch contributes the same factor, and the scale of ω is immaterial because only the sign of Tk decides. Then ϕT is that of binary differential phase-shift keying with L = M N diversity branches and total SNR x. Inverting ϕT yields the classical result [13, Sec. 13.4], 
+
+Pe(x) = e−x
+
+22L−1
+
+> L−1
+
+X
+
+> k=0
+
+βk xk, βk = 1
+
+k!
+
+> L−1−k
+
+X
+
+> n=0
+
+2L − 1
+
+n
+
+
+
+. (8) Two physical remarks follow. First, x in (7) is the total energy collected by the M N correlator taps, normalized by the noise variance, so the conditional error depends on M and N only through their product, each antenna and each sample contributing one more tap to the same sum. Second, the differential receiver correlates two noisy copies of the same waveform rather than a waveform against a clean template, which is why L = M N appears both in the number of branches and in the noise-noise floor of (8) instead of only in the useful term. Unequal weights scale the factor that each receive branch contributes to ϕT by its own aℓ, so the branches no longer share a common scale in ω and (8) no longer applies. The conditional BEP then follows from the same ϕT by the Gil-Pelaez inversion [14], which recovers Pr {Tk < 0} from a characteristic function through a single real integral. Unequal weights leave the diversity order untouched, since the density of P 
+
+> ℓ
+
+aℓ|hℓ|2 still vanishes as gM μ −1 for any strictly positive weights and only its constant changes, so weighting buys array gain and not diversity. Unless otherwise stated, 
+
+aℓ = 1 in what follows, and Section IV-C returns to the general case. 6
+
+A. Average BEP 
+
+Let ¯γ ≜ σ2
+
+> u
+
+/σ 2 
+
+> w
+
+denote the average per-sample SNR, so that x = ¯ γ ε G M , with ε distributed as in (2). Since the transmitted energy and the fading process are independent, the average BEP is the two-dimensional integral 
+
+¯Pe =
+
+Z ∞
+
+> 0
+
+Z ∞
+
+> 0
+
+Pe(¯ γ ε g ) fε(ε) fGM (g) d ε dg. (9) The inner average is available in closed form. Since (8) is a polynomial in x times e−x, and 
+
+x = ¯ γεg is linear in ε, each term meets the Gamma density of (2) in a single integral, 
+
+Z ∞
+
+> 0
+
+εN −1+ ke−(1+ c)ε dε = Γ( N + k)(1 + c)N +k , c ≜ ¯γ g, 
+
+so that averaging (8) over the reused energy gives 
+
+Pe(g) = 122L−1
+
+> L−1
+
+X
+
+> k=0
+
+βk
+
+Γ( N + k)Γ( N )
+
+ck
+
+(1 + c)N +k . (10) Expression (10) is exact rather than a quadrature, and it reduces (9) to the single integral 
+
+¯Pe = R ∞ 
+
+> 0
+
+Pe(g)fGM (g) d g. It returns 1/2 as c → 0, since only the k = 0 term survives and 
+
+β0 = 2 2L−2. As in (7), the branch gain enters only through c, the average post-correlation SNR per unit of reused energy. For independent and identically distributed (i.i.d.) κ-μ branches with common average power 
+
+Ω = E[|hℓ|2], in which E[·] is the expectation operator, and for soft combining, GM is the power of an equivalent κ-μ random variable with κeq = κ, μeq = M μ , and Ωeq = M Ω [15], whose power-domain probability density function (PDF) is 
+
+fGM (g) = μeq (1 + κeq )μeq +1 2 g μeq −12
+
+κ 
+
+> μeq −12
+> eq
+
+eμeq κeq Ω
+
+> μeq +1 2
+> eq
+
+exp 
+
+
+
+−μeq (1 + κeq )g
+
+Ωeq 
+
+
+
+× Iμeq −1 2μeq 
+
+s
+
+κeq (1 + κeq )g
+
+Ωeq 
+
+!
+
+, g ≥ 0, (11) in which Iν (·) is the modified Bessel function of the first kind and order ν, κ is the power ratio between the dominant component and the scattered waves, and μ is associated with the number of multipath clusters. Setting κ = 0 and μ = 1 recovers Rayleigh fading, μ = 1 with κ > 0 gives Rician fading, and κ → 0 gives Nakagami-m with m = μ.7
+
+Applying z = μeq (1 + κeq )g/ Ωeq to the remaining integral turns the κ-μ density into a Laguerre weight and gives 
+
+¯Pe ≈ (κeq μeq )1−μeq 
+
+> 2
+
+eμeq κeq 
+
+> n1
+
+X
+
+> i=1
+
+wi z 
+
+> μeq −12
+> i
+
+Iμeq −1
+
+ 2√κeq μeq zi
+
+
+
+× Pe
+
+ ¯γ z i Ωeq 
+
+μeq (1 + κeq )
+
+
+
+, (12) with zi and wi being the Laguerre roots and weights, respectively, and n1 being the number of nodes. Expression (12) is accurate while the average is dominated by channel gains of the order of E[GM ], which is where the Laguerre nodes lie. 
+
+B. Diversity Order 
+
+Let Y ≜ ε G M , so x = ¯ γY . Near the origin the densities (2) and (11) behave as εN −1 and 
+
+gμeq −1, so fY (y) behaves as C y d−1, with d the smaller of the two exponents and C a constant fixed below, giving 
+
+d = min ( μeq , N ) = min ( M μ, N ) (13) and, after rescaling u = ¯ γy in (9), 
+
+¯Pe → C K d ¯γ−d, Kd =
+
+Z ∞
+
+> 0
+
+ud−1Pe(u) d u. (14) The coefficient C follows the same comparison. For μeq < N the fading sets the exponent and 
+
+C = B Γ( N − μeq )/Γ( N ), with B being the small-argument coefficient of (11). For μeq > N the reused energy sets it and C = E[G−NM ]/Γ( N ), with E[G−NM ] the N -th negative moment of the combined gain under (11). Each form holds where its own factor converges, Γ( N − μeq ) below the crossing and E[G−NM ] above it. At high SNR an error requires the useful term of (6) to collapse, and only two things can make it collapse. The first is that all M branches fade together. They fade independently, so 
+
+Pr {GM < t } falls as tμeq for small t and every antenna added makes it rarer. The second is that the reused realization comes out weak, and here antennas do not help. The same u multiplies every branch, so one small Eu wipes out all M of them at once and Pr {ε < t } falls as tN no matter how large the array. Either event alone produces the error, so the more likely of the two sets the slope, which is (13). Past M μ = N the weak realization is the more likely one, and extra antennas only raise the received power. 8
+
+C. Combining Weight Design 
+
+Write γℓ ≜ Eu|hℓ|2/σ 2 
+
+> w
+
+for the per-branch post-correlation SNR. Conditioned on Eu and on the branch gains, (6) has mean dk
+
+P 
+
+> ℓ
+
+aℓγℓ and variance P 
+
+> ℓ
+
+a2 
+
+> ℓ
+
+(γℓ + N/ 2) in units of σ4
+
+> w
+
+, in which γℓ comes from the two cross terms of (5) and N/ 2 from its noise-noise term wH
+
+> k,ℓ
+
+wk−1,ℓ .Maximizing the deflection Ψ( a) = aTp/(aTDa )1/2, with pℓ = γℓ and D = diag( γℓ + N/ 2) , is a generalized Rayleigh quotient, solved by a⋆ ∝ D−1p with maximum Ψ⋆ = ( pTD−1p)1/2, that is 
+
+a⋆ℓ ∝ γℓ
+
+γℓ + N/ 2, Ψ⋆ =
+
+" MX
+
+> ℓ=1
+
+γ2
+
+> ℓ
+
+γℓ + N/ 2
+
+#1/2
+
+. (15) The denominator of (15) is the variance contributed by a branch, a signal-noise term proportional to γℓ plus a noise-noise term proportional to N/ 2, so a branch is down-weighted only while its own noise-noise floor dominates its useful energy. The rule gives aℓ → 1 for γℓ ≫ N/ 2,recovering soft combining, and aℓ ∝ | hℓ|2 for γℓ ≪ N/ 2, the square-law rule. Two properties make (15) practical. First, D is diagonal, so the weights decouple across branches and no matrix inversion is needed. Second, u and hℓ stay constant over a frame, and with them γℓ, so the weights are computed once and reused for the K decisions of that frame, at a cost negligible against the M N products per bit. The two implementations differ only in how γℓ is obtained. Evaluating (15) with the exact 
+
+γℓ requires Eu and |hℓ|2 separately, which no noncoherent receiver has, so that version is a benchmark rather than a receiver. A receiver instead needs γℓ only in absolute terms, and the received energy already carries it, since 
+
+E∥yk,ℓ ∥2 = Eu|hℓ|2 + N σ 2 
+
+> w
+
+= σ2 
+
+> w
+
+(γℓ + N ) . (16) Inverting (16) with the frame-averaged received energy ˆEℓ in place of the expectation of ∥yk,ℓ ∥2
+
+gives 
+
+ˆγℓ = max ˆEℓ
+
+σ2
+
+> w
+
+− N, 0
+
+!
+
+, ˆEℓ = 1
+
+K + 1 
+
+> K
+
+X
+
+> k=0
+
+∥yk,ℓ ∥2, (17) which fed back into (15) yields a blind rule needing no CSI, no pilots and no phase reference, at the cost of knowing the receiver noise floor. Both versions then combine exactly as in (4) and decide on the same zero threshold, and Algorithm 1 collects the blind one end to end. V. N UMERICAL RESULTS AND DISCUSSION 
+
+Table I lists the simulation parameters. The Monte Carlo runs the full link with no approximation of the decision statistic. Each point accumulates at least 200 bit errors, which keeps its relative 9
+
+Algorithm 1 SIMO-DBN reception of one frame 
+
+Require: {yk,ℓ }, k = 0 , . . . , K , ℓ = 1 , . . . , M ; noise floor σ2
+
+> w
+
+, window N
+
+Ensure: decoded bits ˆb1, . . . , ˆbK 
+
+> 1:
+
+for ℓ = 1 to M do  
+
+> 2:
+
+ˆEℓ ← 1
+
+> K+1
+
+PKk=0 ∥yk,ℓ ∥2, ˆγℓ ← max( ˆEℓ/σ 2 
+
+> w
+
+− N, 0) ▷ (17)  
+
+> 3:
+
+aℓ ← ˆγℓ/(ˆ γℓ + N/ 2) ▷ (15), aℓ ← 1 is soft combining  
+
+> 4:
+
+for k = 1 to K do  
+
+> 5:
+
+for ℓ = 1 to M do  
+
+> 6:
+
+Zk,ℓ ← yH
+
+> k,ℓ
+
+yk−1,ℓ ▷ (3), no phase reference  
+
+> 7:
+
+Tk ← PMℓ=1 aℓ R{Zk,ℓ } ▷ (4)  
+
+> 8:
+
+ˆbk ← 0 if Tk ≥ 0 else 1 ▷ fixed zero threshold, ˆbk from (1) −10 0 10 20 30 40 10 −4
+
+# 10 −2
+
+# 10 0
+
+# ¯γ (dB) BEP 
+
+M = 1, N = 100, d = 0 .84 
+
+M = 16, N = 6, d = 6 
+
+M = 128, N = 1, d = 1 exact, (9) with (8) simulation asymptote (14) quadrature (12)            
+
+> Fig. 2. BEP versus ¯γunder measured 65 GHz indoor NLoS fading, κ= 1 .08 and μ= 0 .84 , at a fixed budget M N ≈100 .
+
+uncertainty below 8% , and points below 10 −5 are not simulated. Throughout, curves come from the analysis and markers from simulation. Fig. 2 shows the BEP of three configurations under soft combining at an approximately constant budget M N ≈ 100 . Four curve types appear. Solid lines with open markers are (9) evaluated with the exact conditional BEP (8), and filled markers are the simulated link. Dashed lines are the asymptote (14), and dotted lines are the quadrature (12). 10 10 0 10 1 10 2
+
+# 10 0
+
+# 10 1
+
+# 10 2
+
+# receive antennas M
+
+> diversity order
+
+d = M μ N = 1 
+
+N = 4 
+
+N = 12 
+
+N = 40 
+
+Fig. 3. High-SNR slope of (9) versus M under measured 65 GHz indoor NLoS fading, κ = 1 .08 and μ = 0 .84 . The slope tracks M μ and then saturates at N , confirming (13). TABLE I SIMULATION PARAMETERS 
+
+Parameter Value Signaling DBN, differential binary, zero threshold Combining soft, aℓ = 1 , except in Fig. 4 
+
+M , N 1 to 128 and 1 to 100 , M N ≈ 100 
+
+Frame length 100 symbols per noise realization Fading κ-μ, block fading over two symbols 65 GHz indoor NLoS κ = 1 .08 , μ = 0 .84 [11], [16] Branch power, noise variance Ωℓ = σ2 
+
+> w
+
+= 1 , so ¯γ = σ2
+
+> u
+
+/σ 2
+
+> w
+
+SNR grid −10 to 40 dB, step 2.5 dB Stopping rule 200 errors, floor 10 −5
+
+Integration of (9) log-domain grid, step 0.02 in ln 
+
+Quadrature of (12) n1 = 64 generalized Laguerre nodes 
+
+Three observations follow from Fig. 2. First, the analysis matches the simulation over the whole range and for every configuration, which validates (8) and (9) together. Second, the configurations differ in slope and not only in offset, and those slopes are the ones (13) predicts, six for M = 16 
+
+with N = 6 and one for M = 128 with N = 1 . The latter is barely above the single-antenna link, so 127 extra antennas move the curve sideways rather than tilting it. Third, the asymptote 11 −10 −8 −6 −4 −2 0 2 4 610 −4
+
+# 10 −2
+
+# 10 0
+
+# ¯γ (dB) BEP 
+
+random soft power blind genie analysis simulation       
+
+> Fig. 4. Weighting strategies under measured 65 GHz indoor NLoS fading, M= 4 and N= 25 .
+
+(14) settles onto the analysis in both slope and constant, to within 1% beyond 24 dB, so it can size a link budget on its own, whereas the quadrature (12) follows the analysis only up to about 
+
+10 dB, for the reason given in Section IV-A. Fig. 3 plots the high-SNR slope of (9) against M for four observation lengths. Each curve climbs along M μ and then flattens, and it flattens at the very N that produced it, so the four plateaus are the four observation lengths. That is (13) read off the figure. Antennas set the diversity order only while M μ < N , and past the crossing the reused realization sets it, so the ceiling does not move over more than two decades in M . No array size buys diversity beyond that point, which is what separates SIMO-DBN from a receiver whose branches carry independent waveforms. Fig. 4 compares weighting rules for M = 4 and N = 25 , all sharing the same statistic and threshold and differing only in aℓ. Soft combining uses aℓ = 1 , the square-law (power) rule 
+
+aℓ ∝ | hℓ|2, and the random rule draws aℓ from the uniform distribution on [0 .05 , 1] once per frame with no knowledge of the channel. The genie rule evaluates the deflection-optimal (15) with the exact γℓ, making it a benchmark rather than a receiver, and the blind rule feeds that same expression with the estimate (17), as in Algorithm 1. Weighting without knowing the branches is worse than not weighting at all. The random 12 
+
+choice falls 1.34 dB below soft combining. The genie rule gains 0.70 dB, and the square law is indistinguishable from it, since the average is carried by deep fades, where γℓ ≪ N/ 2 and (15) degenerates into aℓ ∝ | hℓ|2. The gain thus comes from the noise floor rather than from the fading. The blind rule recovers nearly all of it without CSI, so (17) resolves γℓ finely. The gains are largely unchanged when the average branch powers differ, which suggests that weighting draws mainly on the instantaneous imbalance within a frame rather than on any persistent asymmetry between antennas. VI. C ONCLUSION 
+
+This paper proposes a receive-diversity scheme for DBN modulation based on generalized noncoherent decision-statistic combining. Recognizing the combined statistic as a Hermitian quadratic form in complex Gaussian vectors yields an exact conditional BEP for every observation length. Averaging it over κ-μ fading and over the reused-energy law gives the exact BEP, validated against Monte Carlo of the full link. The asymptotic analysis establishes the diversity order 
+
+min( M μ, N ). The deflection-optimal combining weights follow in closed form, interpolating soft combining and power weighting, and a blind version of the same rule attains them without CSI. Multiple-input single-output (MISO) and space-time extensions remain as future work. REFERENCES 
+
+[1] C.-X. Wang et al., “On the Road to 6G: Visions, Requirements, Key Technologies, and Testbeds,” IEEE Commun. Surv. Tutor. , vol. 25, no. 2, pp. 905–974, Feb. 2023. [2] Z. Kapetanovic, M. Morales, and J. R. Smith, “Communication by Means of Modulated Johnson Noise,” Proc. of the National Academy of Sciences , vol. 119, no. 49, Nov. 2022. [3] E. Basar, “Communication by Means of Thermal Noise: Toward Networks With Extremely Low Power Consumption,” 
+
+IEEE Trans. Commun. , vol. 71, no. 2, pp. 688–699, Feb. 2023. [4] ——, “Noise Modulation,” IEEE Wirel. Commun. Lett. , vol. 13, no. 3, pp. 844–848, Mar. 2024. [5] A. A. D. Anjos and H. S. Silva, “On–Off Digital Noise Modulation,” IEEE Wirel. Commun. Lett. , vol. 14, no. 11, pp. 3595–3599, Nov. 2025. [6] A. A. D. Anjos, V. H. F. Braga, H. S. Silva, and R. D. Vieira, “On-Off Digital Noise Modulation: Optimal Likelihood Threshold and Exact BEP in AWGN and α-μ Fading,” IEEE Wirel. Commun. Lett. , vol. 15, pp. 1474–1478, Jan. 2026. [7] H. Shen, Z. Yang, and Y. Chen, “Channel Estimation via Thermal Noises,” IEEE Wireless Commun. Lett. , vol. 14, no. 1, pp. 178–182, Jan. 2025. [8] E. Yapici, Y. Islam Tek, and E. Basar, “Noise-Domain Non-Orthogonal Multiple Access,” IEEE Open J. Commun. Soc. ,vol. 6, pp. 8410–8421, Sep. 2025. [9] H. Zayyani, M. Salman, F. A. P. de Figueiredo, and R. A. A. de Souza, “Spread Spectrum Noise Modulation: Analysis and Detection,” IEEE Commun. Lett. , vol. 30, pp. 1106–1110, 2026. 13 
+
+[10] H. Zayyani, F. A. P. D. Figueiredo, M. Salman, and R. A. A. d. Souza, “3-D 8-Ary Noise Modulation Using Bayesian- and Kurtosis-Based Detectors,” IEEE Open J. Commun. Soc. , vol. 7, pp. 3574–3584, 2026. [11] A. A. d. Anjos, J. a. V. F. Borges, H. S. Silva, and R. D. Vieira, “Differential Binary Noise Modulation,” IEEE Wireless Commun. Lett. , vol. 15, pp. 3746–3750, 2026. [12] G. L. Turin, “The characteristic function of Hermitian quadratic forms in complex normal variables,” Biometrika , vol. 47, no. 1/2, pp. 199–201, 1960. [13] J. G. Proakis and M. Salehi, Digital Communications , 5th ed. New York, NY, USA: McGraw-Hill, 2008. [14] J. Gil-Pelaez, “Note on the inversion theorem,” Biometrika , vol. 38, no. 3-4, pp. 481–482, 1951. [15] M. D. Yacoub, “The κ-μ Distribution and the η-μ Distribution,” IEEE Antennas Propag. Mag. , vol. 49, no. 1, pp. 68–81, Feb. 2007. [16] T. R. R. Marins et al , “Fading Evaluation in the mm-Wave Band,” IEEE Trans. Commun. , vol. 67, no. 12, pp. 8725–8738, Dec. 2019.
