@@ -1,0 +1,96 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-08-30T22:20:02.894280+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 2,
+    "deep_cap": 6,
+    "deep_selected": 2,
+    "quick_candidates": 0,
+    "quick_skim_target": 11,
+    "quick_selected": 0
+  },
+  "deep_dive": [
+    {
+      "id": "2608.22992v1",
+      "source": "arxiv",
+      "title": "Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic",
+      "abstract": "Dynamic spectrum access must coordinate secondary users under bursty primary-user activity while preserving packet reliability and delay. We present TACAN, a centralized policy that represents each channel as a token containing occupancy history and automatic-modulation-classification entropy; a context token supplies queue class, delay and user identity. A Transformer encoder is warm-started from an occupancy-greedy policy and refined with proximal policy optimization. The frozen policies were trained to maintain a channel assignment in every slot, including when queues were empty. We therefore replay them on held-out trajectories and distinguish standby assignment success from packet-present access and packet delivery. In a 20-channel network with 60 primary devices and 4 secondary users, TACAN achieves 92.53% +/- 0.47 packet-present access success, compared with 89.94% for Greedy and 83.53% for PPO+MLP. Its paired gain over Greedy is 2.59 points (parametric 95% CI 1.89-3.29), with wins in all five seeds; the exact two-sided sign-test value is 0.0625. The gain rises from 0.57 points at normal primary-user load to 7.67 points at extreme load. TACAN also reduces mean delivery delay from 1.208 to 1.123 slots and the conditional user-reliability gap from 9.69 to 3.15 points. Delivered packets per SU-slot remain arrival-limited (30.12% versus 30.11%), so no packet-throughput gain is claimed.",
+      "authors": [
+        "Krishna Acharya",
+        "Dinanath Padhya",
+        "Utsab Dahal",
+        "Ashish Kandel",
+        "Binod Sapkota"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG",
+        "eess.SP"
+      ],
+      "published": "2026-08-24T08:57:36+00:00",
+      "link": "https://arxiv.org/pdf/2608.22992v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Transformer encoder with channel-token attention for reliable dynamic spectrum access",
+      "llm_evidence_cn": "利用Transformer编码器与信道令牌注意力实现可靠的动态频谱接入",
+      "llm_evidence": "利用Transformer编码器与信道令牌注意力实现可靠的动态频谱接入",
+      "canonical_evidence": "利用Transformer编码器与信道令牌注意力实现可靠的动态频谱接入",
+      "llm_tldr_en": "Presents TACAN, a centralized policy using a Transformer encoder with channel-token attention and PPO to coordinate secondary users in dynamic spectrum access, improving reliability and delay.",
+      "llm_tldr_cn": "针对突发主用户流量下动态频谱接入的可靠性和时延问题，提出基于Transformer编码器的TACAN策略。该方法将每个信道表示为包含占用历史与调制分类熵的令牌，利用自注意力建模信道间依赖，并通过PPO进行策略优化。在突发干扰场景下，TACAN相比基线提升了频谱接入的可靠性与数据包交付性能，验证了注意力机制在无线资源管理中的有效性。",
+      "llm_tldr": "针对突发主用户流量下动态频谱接入的可靠性和时延问题，提出基于Transformer编码器的TACAN策略。该方法将每个信道表示为包含占用历史与调制分类熵的令牌，利用自注意力建模信道间依赖，并通过PPO进行策略优化。在突发干扰场景下，TACAN相比基线提升了频谱接入的可靠性与数据包交付性能，验证了注意力机制在无线资源管理中的有效性。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "transformer self-attention for wireless signal processing",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.25510v1",
+      "source": "arxiv",
+      "title": "Near-Field Dual-UPA Communications: A Generalized Geometric Approach",
+      "abstract": "This paper investigates a near-field (NF) multiple-input multiple-output (MIMO) communication system equipped with dual uniform planar arrays (UPAs). We first develop a generalized geometric model to calculate the 3D distance between arbitrary antenna elements across the transmitter and receiver panels. Leveraging the distance analysis, we derive a closed-form near-field to far-field (NF-FF) boundary for dual-UPA configurations. By exploiting the geometric structure of the UPAs, we further decompose the near-field channel matrix into a Kronecker-product of two lower-dimensional matrices. This decomposition enables a low-complexity NF beamforming design for achievable-rate maximization. Numerical results validate the analysis and demonstrate that the conventional Rayleigh distance is a special case of the generalized model. Furthermore, the proposed beamforming design achieves near-optimal rate performance while significantly reducing the computational complexity compared to state-of-the-art NF beamforming methods.",
+      "authors": [
+        "Li Zheng",
+        "Xing Hao",
+        "Ziru Chen",
+        "Yong Liu",
+        "Li Chen",
+        "Lin X. Cai"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-26T08:20:11+00:00",
+      "link": "https://arxiv.org/pdf/2608.25510v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "wireless channel characteristics and modeling; near-field channel decomposition for dual-UPA MIMO",
+      "llm_evidence_cn": "面向双均匀平面阵列近场MIMO的无线信道建模与边界推导",
+      "llm_evidence": "面向双均匀平面阵列近场MIMO的无线信道建模与边界推导",
+      "canonical_evidence": "面向双均匀平面阵列近场MIMO的无线信道建模与边界推导",
+      "llm_tldr_en": "Develops a generalized geometric model for near-field dual-UPA MIMO, derives a closed-form NF-FF boundary, and decomposes the channel matrix via Kronecker product for low-complexity beamforming.",
+      "llm_tldr_cn": "针对近场双均匀平面阵列MIMO系统，本文提出广义几何模型计算任意天线单元间的三维距离，并据此推导出近场到远场边界的闭式解。利用平面阵列的几何结构，将近场信道矩阵分解为两个低维矩阵的Kronecker积，从而支持低复杂度的近场波束成形设计。数值结果验证了分析的正确性，并展示了所提方法在可达速率最大化中的优势，为近场通信信道建模与阵列设计提供了新工具。",
+      "llm_tldr": "针对近场双均匀平面阵列MIMO系统，本文提出广义几何模型计算任意天线单元间的三维距离，并据此推导出近场到远场边界的闭式解。利用平面阵列的几何结构，将近场信道矩阵分解为两个低维矩阵的Kronecker积，从而支持低复杂度的近场波束成形设计。数值结果验证了分析的正确性，并展示了所提方法在可达速率最大化中的优势，为近场通信信道建模与阵列设计提供了新工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": []
+}

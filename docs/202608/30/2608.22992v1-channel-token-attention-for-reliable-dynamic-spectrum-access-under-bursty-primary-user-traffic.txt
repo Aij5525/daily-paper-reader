@@ -1,0 +1,423 @@
+Title: Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic
+
+URL Source: https://arxiv.org/pdf/2608.22992v1
+
+Published Time: Tue, 25 Aug 2026 01:49:31 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic 
+
+Krishna Acharya, Dinanath Padhya, Utsab Dahal, Ashish Kandel, and Binod Sapkota 
+
+Department of Electronics and Computer Engineering, Thapathali Campus Institute of Engineering, Tribhuvan University, Kathmandu 44600, Nepal Equal contribution: Krishna Acharya, Dinanath Padhya. Supervisor: Binod Sapkota. 
+
+Abstract —Dynamic spectrum access must coordinate sec-ondary users under bursty primary-user activity while preserving packet reliability and delay. We present TACAN, a centralized policy that represents each channel as a token containing occu-pancy history and automatic-modulation-classification entropy; a context token supplies queue class, delay and user identity. A Transformer encoder is warm-started from an occupancy-greedy policy and refined with proximal policy optimization. The frozen policies were trained to maintain a channel assignment in every slot, including when queues were empty. We therefore replay them on held-out trajectories and distinguish standby assignment success from packet-present access and packet delivery. In a 20-channel network with 60 primary devices and 4 secondary users, TACAN achieves 92.53% ± 0.47 packet-present access success, compared with 89.94% for Greedy and 83.53% for PPO+MLP. Its paired gain over Greedy is 2.59 points (parametric 95% CI 1.89–3.29), with wins in all five seeds; the exact two-sided sign-test value is 0.0625. The gain rises from 0.57 points at normal primary-user load to 7.67 points at extreme load. TACAN also reduces mean delivery delay from 1.208 to 1.123 slots and the conditional user-reliability gap from 9.69 to 3.15 points. Delivered packets per SU-slot remain arrival-limited (30.12% versus 30.11%), so no packet-throughput gain is claimed. 
+
+Index Terms —Cognitive radio, Dynamic spectrum access, Re-inforcement learning, Resource allocation, Internet of Things, QoS. 
+
+I. I NTRODUCTION 
+
+Spectrum scarcity is the binding constraint on dense IoT deployment. Sixth generation networks are expected to carry ultra-reliable low-latency communication (URLLC), massive machine-type communication (mMTC) and enhanced mobile broadband (eMBB) over shared bands [1]. Cognitive radio lets secondary users (SUs) transmit in the gaps left by licensed primary users (PUs), but IoT traffic is bursty, heavy tailed and class dependent, so deciding which gap to use is a hard sequential decision problem. Deep reinforcement learning (DRL) has become a standard tool for this problem [2], [3]. Foundational agents usually flatten the channel history, although graph encoders and attention-based policies now supply relational structure [4]– [7]. We study a representation that combines relational channel structure with a compact uncertainty statistic derived from automatic modulation classification (AMC). Modern AMC can recover modulation classes from raw I/Q samples [8]; here, only normalized posterior entropy is used, not the predicted modulation label. In the simulator, class-conditioned posterior templates make this entropy weakly correlated with primary-user holding time. Section VI-G measures the contribution and limits of that synthetic feature. TACAN addresses these limitations by tokenising the spec-trum. Each channel becomes one token whose features are its occupancy history and its per-channel AMC entropy, and a single additional QoS context token encodes the class and the normalised queueing delay of the packet the SU is currently trying to send. A Transformer encoder over these 
+
+K + 1 tokens gives two capabilities that a flat encoder cannot express cheaply. Channel tokens attend to one another, so the representation of one band can incorporate the state of the others and compare its persistence against the load across the spectrum. And the QoS token attends over the channels, so the same network implements a different effective policy depending on whether it is currently serving a latency-critical URLLC packet or a delay-tolerant mMTC report. The policy is warm-started by behaviour cloning an occupancy-greedy heuristic and refined with PPO. A learnable occupancy prior is added to the policy logits. The reward uses class-dependent access and delay weights, a PU-collision penalty and an explicit URLLC deadline penalty. These com-ponents were trained jointly; the current experiments do not isolate their individual effects. We also expose the policy through a controller interface and measure the simulation-mode Python decision path. This timing is an implementation microbenchmark, not a live SDN deployment result. 
+
+A. Contributions  
+
+> •
+
+Channel tokens with a QoS query. Building on prior relational spectrum policies, we represent each channel by its temporal occupancy and AMC entropy and add a QoS context token that re-ranks the channels for the ser-vice class in flight. Complexity is O(L(K+1) 2d) rather than the O(( HKM )2d) of attention over the flattened observation.  
+
+> •
+
+Packet-aware checkpoint re-evaluation. We separate continuous standby assignment success from access suc-cess on slots with queued packets, packet delivery, delay and per-user reliability. The replay uses frozen policies and identical held-out trajectories.  
+
+> •
+
+Load-dependent reliability analysis. We evaluate mixed and fixed primary-user load regimes over 5 independently arXiv:2608.22992v1 [cs.NI] 24 Aug 2026 trained seeds and report paired effect sizes, parametric intervals and exact sign tests rather than treating slots as independent samples. II. R ELATED WORK 
+
+DRL for dynamic spectrum access. The canonical for-mulation treats access as a POMDP solved by a deep Q-network over an occupancy history. Wang et al. [9] established this for correlated multichannel access and compared against the Whittle index; Naparstek and Cohen [10] extended it to distributed multi-user access without coordination signalling; Yu et al. [2] learned a MAC protocol from scratch for het-erogeneous coexistence. Li et al. [11] added joint sensing and bandwidth aggregation, Tan et al. [12] used recurrent networks under centralised training with decentralised execution, and Zhang et al. [13] scaled distributed access to IoT. Wang et al. [3] compress occupancy history for a double DQN, while Chang et al. [14] combine recurrent state with model-generated experience under partial observability. Policy gradient meth-ods have since proved stronger in dense settings: Shraa and Alauthman [15] report large latency reductions for PPO over DQN, Fasihi and Mark [16] add priority-aware rewards for NR-U coexistence, and Song et al. [17] apply DRL to spectrum management under uncertainty. Broader context appears in the surveys of Luong et al. [18]. Most of these agents use flat or recurrent encoders. A parallel line instead imposes graph structure: Jiang et al. [4] map traffic and interference graphs to access decisions, Yuan et al. [5] combine graph attention with DQN for channel and power allocation, and Li et al. [19] couple a GNN and DQN for IoT DSA. These methods establish the value of relational inductive bias, but their nodes encode users or interference relations rather than per-channel temporal and PHY observations. 
+
+Attention in cognitive radio. Attention first entered mainly through sensing. Lan et al. [20] combine graph attention with a Transformer for cooperative sensing ; Gao et al. [21] use attention to fuse sensing reports across agents; Zhang et al. [22] apply self-attention to wideband detection . Policy-side attention is no longer absent. Bai et al. [23] weight users in a centralised critic; Elfikky et al. [6] place self-attention in a distributed optical channel-access policy; and Tondwalkar and Kwasinski [7] add attention to both PPO actor and critic for cognitive-radio power control. Zhao et al. [24] use a Transformer for cellular resource allocation, where the sequences represent users and resources. TACAN therefore does not claim attention itself as novel. Its distinction is the token content and conditioning: each policy token denotes one radio channel and jointly carries occupancy history and an AMC-derived feature, while a QoS query token makes the channel ranking class-conditional. 
+
+PHY-aware access. O’Shea et al. [8] established that deep AMC recovers modulation class from raw I/Q over the air, and AMC is now a mature standalone capability on commodity SDR front ends. The literature predominantly treats it as an end in itself: the classifier output is a report, not a policy input. To our knowledge, prior DSA policies do not feed an AMC-derived uncertainty signal into channel-selection reinforcement learning. TACAN closes that loop, and Sec. VI-G measures what the resulting signal is actually worth. 
+
+QoS-differentiated access. Traffic-aware DSA predates deep learning: Liu et al. [25] use estimated PU traffic to order channel sensing. Recent learning methods include the rule-assisted, SU-traffic-aware MARL policy of Si et al. [26]. Iqbal et al. [27] allocate channels by priority class for vehicular IoT and Qian et al. [28] share spectrum across operators for massive IoT. Barqi et al. [29] and Jalil et al. [30] target fairness in distributed access. These condition on class through separate policies, per-class weights or fixed priority rules. We condition a single shared policy through a learned QoS token that participates in the attention mechanism, so one set of weights serves all classes and the class identity re-ranks the channels rather than re-selecting the network. 
+
+SDN for cognitive radio. Kobo et al. [31] and Akyildiz et al. [32] argue for SDN as the control plane of wireless systems. Liu et al. [33] pair reinforcement learning with a software-defined controller for industrial IoT spectrum access using a flat network. We keep the architectural premise and replace the agent, and we report measured controller loop latency rather than assuming it is negligible. 
+
+Traffic modelling. Realistic IoT traffic is neither Poisson nor saturated. El Fawal et al. [34] model machine-to-machine heterogeneous traffic with Markov-modulated Poisson pro-cesses, Paxson and Floyd [35] document the failure of Poisson modelling at scale, and Gajewski et al. [36] argue for Pareto service times under burstiness. Motivated by this literature, our implemented generator is a discrete-time ON/OFF semi-Markov process with Bernoulli activation and clipped-Pareto busy periods. This temporal persistence makes the current-slot genie of Sec. VI a useful reactive reference. 
+
+Positioning. Attention, relational encoders, SDN integra-tion, QoS-aware rewards and heavy-tailed traffic all have precedents. TACAN’s claimed novelty is their specific policy representation: per-channel tokens fuse occupancy history with AMC entropy, and a QoS query token makes one shared policy class-conditional. Table I separates that representation from attention over users, interference graphs, sensing reports and generic state sequences. III. S YSTEM MODEL 
+
+A. Network Scenario 
+
+We consider K orthogonal channels C = {1, . . . , K } shared by NP U primary IoT devices and NSU secondary users coordinated by a centralised SDN controller (Fig. 1). Each PU belongs to one of the three 3GPP service classes and is assigned to one channel. SUs opportunistically transmit on channels they believe to be idle. If two SUs pick the same channel both fail, so the controller must also avoid self-collisions. 2TABLE I POSITION OF TACAN RELATIVE TO THE CLOSEST PRIOR WORK . A TT . TARGET IS WHAT ATTENTION OPERATES OVER ; PHY DENOTES PHYSICAL -LAYER FEATURES IN THE OBSERVATION .
+
+Work Att. target Where QoS PHY SDN 
+
+[2], [9] none n/a no no no [10], [12] none n/a no no no [21], [22] sensing reports detector no I/Q no [20] sensor nodes detector no I/Q no [23] users critic no no no [4], [5] graph neighbours policy traffic no no [6] state sequence policy no no no [7] state features actor+critic no no no [24] user requests policy no no no [27] none n/a rule no no [33] none n/a no no yes 
+
+TACAN channels policy token AMC yes            
+
+> f1f2f3f4f5f6f7f8
+> Spectrum Channels
+> UME
+> URLLC mMTC eMBB
+> Primary users (IoT device classes)
+> SU 1SU 2· · · NSU secondary users
+> SDN Controller (TACAN Agent)
+> PHY Bridge sense state OpenFlow
+> Legend
+> URLLC (Pri: 3) mMTC (Pri: 1) eMBB (Pri: 2) Idle
+
+Fig. 1. SDN-enabled cognitive radio network. Primary IoT devices of three service classes occupy channels with class-specific traffic and modulation. The controller runs the TACAN policy and produces channel-assignment recommendations for the secondary users. 
+
+B. Traffic and PHY Model 
+
+Each PU device follows a discrete-time ON/OFF semi-Markov process. While idle, it activates with probability 
+
+pact = 1 − e−λdl, the probability of at least one event in a Poisson interval at load multiplier l. At activation, its busy duration is a rounded, clipped Pareto draw, 
+
+τ = round   min {H, max {L, x m(1 + Y )}} ,Y ∼ Pareto( α), (1) which produces persistent, heavy-tailed busy periods with endpoint clipping. Class parameters are given in Table II. Each simulated class carries a characteristic distribution over M = 10 modulation schemes. URLLC is dominated by BPSK and QPSK, mMTC by OOK and BPSK, and eMBB by 16QAM. At each step the simulator samples a class-conditioned AMC posterior mt,k ∈ RM per channel, from which we compute the normalised entropy 
+
+et,k = − 1log M
+
+> M
+
+X
+
+> j=1
+
+mt,k,j log mt,k,j . (2) 
+
+TABLE II IOT TRAFFIC CLASS PARAMETERS . D URATIONS ARE IN SLOTS .
+
+Class Pri. λ α Dur. Dominant mod. 
+
+URLLC 3 1/8 0.8 1 to 10 BPSK 40%, QPSK 50% mMTC 1 1/60 0.5 1 to 5 OOK 35%, BPSK 40% eMBB 2 1/12 1.5 5 to 40 16QAM 50%, 8PSK 15% 
+
+We use entropy because it is permutation invariant and com-presses M dimensions to one, keeping the per-channel token small. It preserves posterior concentration, not the identity of the predicted modulation. The class-conditioned templates have different concentration and therefore make entropy class-correlated in this simulation; validating that correlation with a real noisy AMC front end remains outside the present evidence. 
+
+C. Decision Problem 
+
+The task is a partially observable Markov decision process 
+
+⟨S , A, P, R, γ ⟩. Secondary user i observes 
+
+st,i =  Ot Et qi di ui
+
+, (3) where Ot ∈ { 0, 1}H×K is the occupancy history over the last 
+
+H slots, Et ∈ [0 , 1] H×K the matching modulation entropy history from (2), qi ∈ { 0, 1}3 a one-hot class indicator for the head-of-line packet, di its normalised queueing delay, and 
+
+ui a one-hot SU identifier. With H = 8, K = 20 and 
+
+NSU = 4 this gives 328 dimensions per SU. The action 
+
+at,i ∈ { 1, . . . , K } is a channel index; the controller emits NSU 
+
+actions per slot. This implementation maintains an assignment for every SU in every slot. If a queue is empty, the assignment is a standby channel recommendation rather than a packet transmission. Section VI therefore reports assignment success over all slots separately from access success on slots where a packet is queued. The objective is the usual discounted return 
+
+J(π) = Eτ ∼π
+
+ P  
+
+> t
+
+γt P 
+
+> i
+
+rt,i 
+
+.3IV. T HE TACAN A RCHITECTURE 
+
+Fig. 2 shows the complete pipeline. The design question is how to turn (3), a flat vector, into something whose structure matches the problem. 
+
+A. Spectrum Tokenisation 
+
+For channel k we assemble a token from the three quantities the agent needs about that band: its occupancy history, its modulation-entropy history, and its mean occupancy, which is exactly the statistic the greedy heuristic acts on and which therefore gives the network direct access to the baseline signal: 
+
+xk =
+
+h
+
+o:,k e:,k 1
+
+> H
+
+P 
+
+> h
+
+oh,k 
+
+i
+
+∈ R2H+1 , (4) 
+
+zk = GELU  LN( Wexk + be) ∈ Rd. (5) The QoS context of the serving SU is projected by a separate head into one additional token zQoS =GELU(LN( Wq [qi∥di] + bq )) . Learnable positional embed-dings P ∈ R(K+1) ×d are added to the sequence Z =[zQoS , z1, . . . , zK ].Unlike a flat encoder, Eq. (4) applies one shared feature extractor to all channels. The subsequent attention layers compare the resulting channel representations. 
+
+B. Encoder and Heads 
+
+L pre-norm Transformer blocks are applied, 
+
+Z′ = Z + MHA  LN( Z), (6) 
+
+Z′′ = Z′ + FFN  LN( Z′), (7) with NH heads and a two-layer GELU feed-forward network of width 4d. Writing H = [ hQoS , h1, . . . , hK ] for the output, the policy takes per-channel logits through a shared linear head and adds a learnable residual on the greedy occupancy prior, 
+
+ℓk = w⊤ 
+
+> π
+
+hk − αgHX
+
+> h=1
+
+oh,k , π(a=k | s) = softmax k(ℓ),
+
+(8) where αg is a scalar parameter learned jointly with the rest of the network. The second term encodes the heuristic that emptier channels are better; learning αg lets the agent decide how much to trust it, and the network output supplies the correction. The value head reads the QoS token pooled with the channel mean, V (s) = MLP( hQoS + 1
+
+> K
+
+P 
+
+> k
+
+hk). An aux-iliary head predicts next-slot occupancy per channel from hk;its loss is added with weight 0.1 and acts as a representation regulariser that forces the encoder to be predictive rather than merely descriptive. Attention over K + 1 tokens costs O(L(K+1) 2d) per for-ward pass. Applying attention to the raw observation instead would cost O(( HKM )2d), which for our configuration is four orders of magnitude larger. 
+
+C. QoS-Differentiated Reward 
+
+For SU i serving a class-c packet at step t,
+
+rt,i = w(c) 
+
+> T
+
+I(success i) − w(c) 
+
+> D
+
+min 
+
+ di 
+
+> dmax
+
+, 1
+
+
+
+− β I(PU collision i) − δ I(c = URLLC , d i > 10) ,
+
+(9) with β = 1 .5, δ = 5 .0 and dmax = 50 . The executed class weights are (wT , w D ) = (3 .0, 2.0) for URLLC, (1 .0, 0.2) 
+
+for mMTC and (1 .5, 0.5) for eMBB. Thus URLLC receives the largest success weight, a delay weight ten times that of mMTC and an additional penalty after ten slots. The reported checkpoints use no switching or fairness bonus; those optional implementation coefficients are zero. During legacy training, empty queues receive a zero-valued queue context and are treated as mMTC for reward lookup, while collision-free standby assignments still receive the success term. The packet-aware analysis in Sec. VI removes these standby outcomes from packet-attempt and delivery metrics, but it does not retrain the policies. 
+
+D. Training 
+
+Training has two stages. First the policy is behaviour cloned for 20,000 steps against the occupancy-greedy heuristic, which places it in a competent region of policy space and avoids the long random-exploration phase in which PPO would otherwise collide constantly. Then PPO [37] with generalised advantage estimation optimises the clipped surrogate 
+
+LCLIP (θ) = Et
+
+h
+
+min  ρt ˆAt, clip( ρt, 1−ϵ, 1+ ϵ) ˆAt
+
+i
+
+, (10) 
+
+ρt = πθ (at|st)/π θold (at|st), with the value, entropy and auxiliary-prediction losses added. Transitions from all NSU 
+
+users share one buffer with per-minibatch advantage normali-sation. The learning rate is cosine annealed from 3 × 10 −4 to 
+
+10 −5 after a 3% warmup, the entropy coefficient from 0.03 to 
+
+0.01 , and gradients are clipped at 0.5. TACAN and PPO+MLP share the PPO schedule, reward, warm start and seeds. TACAN additionally has the auxiliary prediction head, the learned greedy-prior term and 485,892 parameters, whereas the MLP has 155,413 parameters. Their comparison therefore evaluates complete training configurations and does not isolate attention from supervision, prior structure or capacity. V. C ONTROLLER INTEGRATION 
+
+The trained policy is exposed through a three-stage con-troller interface. A simulation bridge collects occupancy, AMC posteriors, history and queue state; a decision engine builds the observation in Eq. (3); and a rule builder converts channel as-signments into Python dictionaries with OpenFlow-like fields. The default polling interval is 500 ms. The repository also contains prototype Ryu and Mininet-WiFi adapters inspired by [38]. They are not exercised in the reported experiments: the live bridge uses placeholder queue state, and no OpenFlow transport, switch installation or radio retuning is included in the latency measurement. Section VI-H therefore reports only the simulation-mode decision path. 4PHY-Aware Environment TACAN Agent (Transformer)              
+
+> ON/OFF Traffic Generator Spectrum Channels K
+> & Mod. Classes M
+> Occupancy ot+ Mod mt
+> SU Queues Qi
+> PHY Bridge
+> State Aggregation
+> Channel Token Embedding QoS Context Token Transformer Encoder (Llayers, Hheads) Policy Head
+> π(a|s)
+> Value Head
+> V(s)
+> SDN Controller
+> OpenFlow Rule Gen.
+> Actions
+> {ai}NSU
+> i=1
+> QoS-Aware Reward rt
+> sttokens update
+> Fig. 2. TACAN pipeline. The PHY bridge aggregates occupancy and AMC output into the observation. Each channel becomes one token; the serving SU’s traffic class and delay become a QoS context token. A Transformer encoder mixes them, per-channel logits form the policy and the QoS token drives the value head. The controller converts assignments into rule descriptions.
+
+VI. E VALUATION 
+
+A. Setup 
+
+The environment has K = 20 channels, NP U = 60 primary devices, NSU = 4 secondary users, history length H = 8 and episodes of 200 slots. At reset, the load multiplier is sampled as 1.0, 1.5 or 2.5 with probabilities 0.50, 0.35 and 0.15. TACAN and PPO+MLP are trained for 500,000 environment steps under 5 seeds (42, 123, 7, 2024, 314). We replay each frozen policy for 10,000 steps on matched held-out seeds under mixed load and each fixed primary-user load. No retraining is performed for the packet-aware analysis. A slot is a simulation decision epoch without an assumed mapping to wall-clock duration; delay values are therefore reported in slots rather than milliseconds. We distinguish four outcomes. Assignment success is the legacy metric: the recommended channel is free of PU and SU contention, including standby assignments made for empty queues. Packet-present access success is the fraction of queued transmission attempts that deliver a packet. Delivery rate is delivered packets per SU-slot, and delivery delay is measured in slots. Packet accounting includes synthetic reset packets, stochastic arrivals, silent queue-capacity drops and packets censored at episode boundaries. The comparison includes a coordinated random policy that selects distinct channels, Greedy , PPO+MLP , TACAN and a 
+
+current-slot genie . The PPO+MLP configuration shares the observation, reward, warm start, PPO schedule and seeds, but it is smaller and lacks TACAN’s auxiliary head and greedy-prior term; it is not an attention-only ablation. DDQN is omitted because only a cached scalar, not a matched checkpoint, is available. 
+
+B. Overall Performance 
+
+Table III separates standby assignment from packet service. The legacy TACAN assignment-success rate is 92.93%, but 67.59% of its successful assignments occur while the queue is empty. This value is therefore not packet throughput. On slots with a queued packet, TACAN succeeds on 92.53% ± 0.47 of attempts, compared with 89.94% for Greedy and 83.53% for PPO+MLP. Delivered packets per SU-slot are nearly equal for TACAN (30.12%) and Greedy (30.11%) because the fixed 30% arrival process limits offered traffic. We therefore claim improved access reliability and delay, not higher packet throughput. TACAN’s mean delivery delay is 1.123 slots, against 1.208 for Greedy and 1.359 for PPO+MLP. 
+
+C. Paired Uncertainty 
+
+Table IV reports paired differences across the five indepen-dently trained seeds. TACAN improves packet-present access over Greedy by 2.59 points, with a parametric 95% interval of 1.89 to 3.29 points, and wins in 5/5 seeds. However, five pairs are too few for a distribution-free significance claim: the exact two-sided sign-test value is 0.0625. We therefore emphasize the paired effect size, interval and consistency rather than treating a small-sample t-test as decisive. The PPO+MLP difference is larger but remains a whole-configuration com-parison, not an attention-only effect. 
+
+D. Behaviour Under Load 
+
+Fig. 3 and Table V decompose packet-present access by primary-user load; SU arrivals remain fixed. TACAN and Greedy are close at normal load (93.85% versus 93.28%), a 0.57-point difference. At extreme load the difference grows to 7.67 points (88.96% versus 81.29%). This pattern holds in every seed and is consistent with temporal context becoming more useful as idle periods become scarce. It does not establish the mechanism causally because the complete TACAN and Greedy configurations differ in several ways. 
+
+E. Per-Class Service and Fairness 
+
+Table VI shows that TACAN’s packet-present access success is similar across classes: 92.56% for URLLC, 92.53% for mMTC and 92.50% for eMBB. The corresponding Greedy values are 89.72%, 90.01% and 89.99%. Mean delivery delays are also lower with TACAN in all three classes. The URLLC 5TABLE III PACKET -AWARE RE -EVALUATION OF THE FROZEN POLICIES (MEAN ± STANDARD DEVIATION OVER FIVE SEEDS ). A SSIGNMENT SUCCESS INCLUDES STANDBY ASSIGNMENTS ; ACCESS SUCCESS IS CONDITIONED ON A QUEUED PACKET . D EL ./ SLOT IS DELIVERED PACKETS PER SU-SLOT , AND USER GAP IS THE MAX –MIN CONDITIONAL -ACCESS GAP .
+
+Method Assignment (%) Packet-present access (%) Del./slot (%) Mean delay P95 delay User gap (pp) 
+
+Random (coordinated) 51.65 ± 0.60 50.26 ± 0.85 29.67 3.760 11.850 1.29 Greedy 91.60 ± 0.32 89.94 ± 0.57 30.11 1.208 2.000 9.69 PPO+MLP 86.11 ± 0.77 83.53 ± 0.98 30.08 1.359 3.000 9.75 
+
+TACAN 92.93 ± 0.14 92.53 ± 0.47 30.12 1.123 2.000 3.15 
+
+Current-slot genie 88.30 ± 0.41 88.13 ± 0.32 30.10 1.203 2.000 1.45 The policies were trained under continuous per-slot channel assignment. These packet-aware metrics are a post hoc replay of the frozen checkpoints; no retraining was performed. TABLE IV PAIRED PACKET -AWARE DIFFERENCES FOR TACAN. C ONFIDENCE INTERVALS ARE PARAMETRIC STUDENT -t INTERVALS ; THE EXACT SIGN TEST IS REPORTED BECAUSE ONLY FIVE TRAINED SEEDS ARE AVAILABLE .                                    
+
+> TACAN vs. Metric Mean 95% CI Wins Exact p
+> Greedy Access success (pp) +2.59 [1.89, 3.29] 5/5 0.0625 Greedy Mean-delay reduction +0.09 [0.06, 0.11] 5/5 0.0625 Greedy User-gap reduction (pp) +6.54 [5.82, 7.27] 5/5 0.0625 PPO+MLP Access success (pp) +9.00 [7.94, 10.06] 5/5 0.0625 PPO+MLP Mean-delay reduction +0.24 [0.17, 0.30] 5/5 0.0625 PPO+MLP User-gap reduction (pp) +6.60 [4.87, 8.33] 5/5 0.0625
+
+Normal High Extreme 
+
+70 80 90 100 
+
+Primary-user load Packet-present access success (%)  Greedy PPO+MLP TACAN 
+
+Fig. 3. Packet-present access success by primary-user load, mean ±1 standard deviation over 5 seeds. 
+
+miss rate is 0.00% for TACAN and 0.16% for Greedy. Because the class weights, deadline penalty and QoS token are not ablated separately, these differences cannot be assigned to one component. 
+
+TABLE V PACKET -PRESENT ACCESS SUCCESS (%) BY PRIMARY -USER LOAD ,
+
+> AVERAGED OVER FIVE SEEDS
+
+.
+
+Method Normal High Extreme 
+
+Greedy 93.28 89.08 81.29 PPO+MLP 87.67 82.41 74.59 
+
+TACAN 93.85 92.30 88.96 
+
+Current-slot genie 90.34 87.04 82.69 TABLE VI PACKET -PRESENT ACCESS SUCCESS AND MEAN DELIVERY DELAY BY TRAFFIC CLASS , AVERAGED OVER FIVE SEEDS .                          
+
+> URLLC mMTC eMBB Method Access (%) Delay Access (%) Delay Access (%) Delay
+> Greedy 89.72 1.209 90.01 1.211 89.99 1.196 PPO+MLP 83.14 1.353 83.43 1.367 84.26 1.339
+> TACAN 92.56 1.121 92.53 1.124 92.50 1.121
+
+Table VII separates two fairness questions. TACAN reduces the max–min conditional-access gap from 9.69 to 3.15 points and the mean-delay gap from 0.312 to 0.066 slots. In contrast, the per-slot delivery-rate gaps are nearly identical (0.97 versus 0.98 points) because delivery is limited by the common arrival process. We therefore claim improved reliability and delay bal-ance, not improved delivered-throughput fairness. Sequential masking prevents same-slot duplicate channel choices for both TACAN and Greedy; their fairness difference is not caused by SU self-collisions. 
+
+TABLE VII PACKET -AWARE INTER -USER FAIRNESS . G APS ARE MAX –MIN DIFFERENCES AVERAGED OVER FIVE SEEDS .
+
+Method Access gap (pp) Delivery gap (pp) Delay gap Access Jain 
+
+Greedy 9.69 0.97 0.312 0.9983 PPO+MLP 9.75 0.98 0.350 0.9980 
+
+TACAN 3.15 0.98 0.066 0.9998 
+
+F. What the Attention Learns 
+
+Fig. 4 plots the attention of the QoS token over the channel tokens in the final encoder block, against each channel’s occupancy rank in the current window. These are the trained weights the policy actually uses, extracted from the encoder’s self-attention rather than from a separate probe. Channel iden-tity is arbitrary and differs by seed, so ranking by occupancy is the only meaningful alignment. The distribution is non-uniform and U-shaped. Mass con-centrates on the least occupied channels, which are the trans-mission candidates, and on the most occupied ones, which are the dominant interferers, while mid-rank channels sit at or below uniform 1/K . The peaks reach roughly twice uniform, rising from 0.0999 at nominal load to 0.1417 under extreme 60 5 10 15 5 · 10 −2
+
+0.10.15  
+
+> uniform ( 1/N )
+
+Channel occupancy rank (0 = least occupied) Mean attention weight   
+
+> Normal load High load Extreme load
+
+Fig. 4. Trained attention of the QoS token over channel tokens (final block, averaged over heads and 5 seeds) against occupancy rank. The distribution is U-shaped and departs substantially from uniform 1/K (dashed). 
+
+load. Attention to busy channels may summarize channel persistence and overall congestion, but the weights alone do not establish a causal mechanism. This pattern is therefore treated as descriptive. 
+
+G. Ablations 
+
+Table VIII separates two questions that are often conflated. Group (a) compares complete encoders: TACAN has chan-nel tokens, attention and an auxiliary occupancy head (485,892 parameters), whereas PPO+MLP is a 155,413- parameter flat network without the auxiliary loss or greedy-prior term. The 6.82-point assignment-success gap therefore compares full configurations and does not isolate attention. Group (b) is input perturbation: the trained policy is left untouched and one modality is suppressed at inference. Zero-ing the modulation entropy costs 2.89 points and collapsing the history to its most recent frame costs 4.77 points in standby assignment success. These numbers must be read with care. Zeroing drives a feature to a value the policy never observes during training, so the drop mixes loss of information with distribution shift; group (c) separates the two for the AMC feature. The unperturbed row reproduces the stored assignment-success result exactly. 
+
+TABLE VIII STANDBY -ASSIGNMENT ABLATION . G ROUP (A) COMPARES COMPLETE RETRAINED ENCODERS ; THE MLP IS SMALLER AND LACKS TACAN’ SAUXILIARY HEAD , SO THE ROW IS NOT AN ATTENTION -ONLY ABLATION .GROUP (B) SUPPRESSES AN INPUT MODALITY AT INFERENCE TIME FOR THE same TRAINED TACAN POLICY . ∆A IS THE ASSIGNMENT -SUCCESS CHANGE IN PERCENTAGE POINTS .                               
+
+> Configuration Assignment success (%) Assignment failure (%) ∆A(pp) TACAN (full) 92.93 ±0.14 7.07 n/a
+> (a) Complete encoder comparison (independently retrained, shared PPO schedule)
+> PPO+MLP (155k, no auxiliary head) 86.11 ±0.77 13.89 −6.82
+> (b) Input-perturbation ablation (same trained policy, feature suppressed at inference)
+> Unmodified observation 92.93 ±0.14 7.07 n/a
+> −AMC-entropy feature 90.04 ±1.31 9.96 −2.89
+> −Occupancy history (single frame) 88.16 ±0.24 11.84 −4.77
+
+Group (c) separates information from distribution shift for the AMC feature. Instead of zeroing it, we blend a uniform posterior into the simulated AMC output at evaluation time. At full blending the posterior is uniform on every channel, so the feature carries no information about the emitter, yet it stays inside its natural range. The standby assignment-success cost is 0.35 points, an order of magnitude smaller than the 2.89 points obtained by zeroing. The honest reading is that most of the zeroing penalty is distribution shift, and that the AMC signal is worth roughly 0.35 assignment points in this environment. Degradation is monotone in the blending rate, so a realistic front end with partial confidence loss would sit between these endpoints. 
+
+TABLE IX STANDBY -ASSIGNMENT SENSITIVITY TO AMC POSTERIOR FLATTENING , 
+
+> OVER
+
+5 MATCHED SEEDS . T HE MIXING RATE IS THE FRACTION OF A UNIFORM POSTERIOR BLENDED INTO THE SIMULATED AMC OUTPUT .
+
+Uniform mix (%) Assignment success (%) ∆A (pp) Failure (%) 
+
+0 (original) 92.93 ± 0.14 +0.00 7.07 25 92.89 ± 0.17 -0.04 7.11 50 92.72 ± 0.31 -0.21 7.28 75 92.64 ± 0.35 -0.29 7.36 100 92.59 ± 0.32 -0.35 7.41 
+
+H. Simulation Decision-Path Cost 
+
+Table X reports a Python microbenchmark of the simulation-mode decision path. State extraction, policy in-ference and rule-dictionary construction take 5.01 ms at the median and 17.27 ms at the 95th percentile on one CPU core. Policy inference dominates at 4.943 ms. The measurement excludes sensing, AMC inference, OpenFlow serialization and transport, switch rule installation, and radio retuning; it is therefore not an end-to-end networking latency. With 485,892 parameters, the model occupies a few megabytes in single precision. 
+
+TABLE X SIMULATION -MODE CONTROLLER DECISION -PATH LATENCY (1000 
+
+> CYCLES
+
+, SINGLE CPU CORE ). T HE MEASUREMENT EXCLUDES SENSING ,AMC INFERENCE , O PEN FLOW TRANSPORT AND INSTALLATION , AND RADIO CHANNEL SWITCHING .
+
+Component Median (ms) 95th pct. (ms) 
+
+Simulation state extraction 0.041 0.087 Policy inference 4.943 17.097 Rule-dictionary construction 0.033 0.069 
+
+Total measured path 5.01 17.27 
+
+VII. D ISCUSSION 
+
+A. Interpreting the Packet-Aware Result 
+
+The packet-aware replay changes the meaning of the legacy result. A high standby assignment-success rate does not imply high packet throughput because most queues are empty under the 30% arrival process. TACAN and Greedy therefore deliver almost the same number of packets per SU-slot. The discrimi-nating result is conditional reliability: when a packet is queued, TACAN is more likely to assign a collision-free channel, particularly under high PU load. This reduces delivery delay 7and conditional reliability imbalance. It does not demonstrate increased offered traffic or packet throughput. 
+
+B. What Each Component Contributes 
+
+The evidence supports the TACAN configuration as a pack-age. Relative to PPO+MLP, packet-present access improves by 9.00 points and mean delay falls by 0.24 slots. The comparison also changes tokenisation, attention, auxiliary supervision, the greedy-prior term and capacity, so it does not identify the contribution of attention alone. The AMC-derived entropy feature contributes a small but consistent gain, and the size of that gain depends on how it is measured. Zeroing it costs 2.89 standby assignment points, but destroying its information content while keeping it in range costs only 0.35 points, so the larger number is mostly distribu-tion shift rather than lost information. Even the smaller result is not evidence that the policy identifies modulation order, since entropy discards the posterior argmax; the simulated class templates differ in concentration, so entropy is merely correlated with traffic class and hence with holding time. The feature is a genuine but modest contributor here, and its value under a real AMC front end is untested. Packet-present reliability is similar across URLLC, mMTC and eMBB, and TACAN improves it over Greedy in each class. The reward weights, deadline penalty and QoS token all affect these results; their individual contributions are not isolated. Behaviour cloning and the learned greedy-prior term pro-vide an engineering warm start. No no-warm-start experiment was run, so neither convergence stability nor final reliability is attributed to those components individually. 
+
+C. Cost and Integration Scope 
+
+The whole model is 485,892 parameters, a few megabytes in single precision, and the measured simulation decision path costs 5.01 ms (Sec. VI-H). Attention over K channel tokens is O(K2d), which at K = 20 is negligible; the quadratic term would begin to matter only for wideband deployments with hundreds of channels, where the standard remedies of local windows or channel grouping apply directly because the token axis is the frequency axis. Nothing here requires a GPU at inference. 
+
+D. Limitations 
+
+Five limitations bound the result. First, the policies were trained with continuous per-slot assignments, including standby assignments for empty queues; packet-aware metrics are a post hoc replay rather than packet-gated retraining. Sec-ond, only five trained seeds are available. Parametric intervals are reported, but the exact sign test cannot reject zero at 5% with five all-positive pairs. Third, PPO+MLP is not capacity-or supervision-matched to TACAN. Fourth, sensing is ideal and AMC posteriors come from synthetic class-conditioned templates; only one channel/user configuration is trained. Fifth, evaluation is entirely simulated, and the controller timing excludes the live networking path. These limitations preclude claims of attention causality, packet-throughput gain, general scaling or deployed SDN performance. VIII. C ONCLUSION 
+
+TACAN treats the spectrum as a token sequence rather than a flat vector, gives each channel token an AMC-derived entropy feature alongside its occupancy history, and lets a QoS context token query the resulting representation so one policy adapts to queue context. A packet-aware replay of the five frozen checkpoints yields 92.53% packet-present access success, compared with 89.94% for Greedy and 83.53% for PPO+MLP. TACAN also lowers mean delivery delay to 1.123 slots and reduces the conditional user-reliability gap to 3.15 points. The gain over Greedy increases with primary-user load and appears in all five seeds. Packet deliveries per SU-slot remain essentially unchanged because the experiment is arrival-limited, so no packet-throughput gain is claimed. The result supports the complete TACAN configuration as a reliability-oriented channel-assignment policy within the evaluated simulator. Section VII-D summarizes the scope of that evidence. REFERENCES [1] ITU-R, “IMT vision: Framework and overall objectives of the future development of IMT for 2020 and beyond,” International Telecommu-nication Union, Recommendation ITU-R M.2083-0, 2015. [2] Y. Yu, T. Wang, and S. C. Liew, “Deep-reinforcement learning multiple access for heterogeneous wireless networks,” IEEE Journal on Selected Areas in Communications , vol. 37, no. 6, pp. 1277–1290, 2019. [3] X. Wang, Y. Teraki, M. Umehira, H. Zhou, and Y. Ji, “A usage aware dynamic spectrum access scheme for interweave cognitive radio network by exploiting deep reinforcement learning,” Sensors , vol. 22, no. 18, p. 6949, 2022. [4] H. Jiang, H. He, and L. Liu, “Dynamic spectrum access for femtocell networks: A graph neural network based learning approach,” in Proc. International Conference on Computing, Networking and Communica-tions (ICNC) , 2020, pp. 927–931. [5] S. Yuan, Y. Zhang, T. Ma, Z. Cheng, and D. Guo, “Graph convolu-tional reinforcement learning for resource allocation in hybrid overlay– underlay cognitive radio network with network slicing,” IET Communi-cations , vol. 17, no. 2, pp. 215–227, 2023. [6] A. Elfikky, Z. Ali, Z. Rezki, and Y. Boumhaout, “Reinforcement learning with attention for dynamic spectrum access in optical networks,” in Proc. International Conference on Advanced Communication Technologies and Networking (CommNet) , 2025, pp. 1–6. [7] A. Tondwalkar and A. Kwasinski, “Attention accelerates learning of proximal policy optimization reinforcement learning in distributed and uncoordinated cognitive radio networks,” in Proc. International Confer-ence on Communication Systems and Networks (COMSNETS) , 2026, pp. 491–497. [8] T. J. O’Shea, T. Roy, and T. C. Clancy, “Over-the-air deep learning based radio signal classification,” in IEEE Journal of Selected Topics in Signal Processing , vol. 12, no. 1, 2018, pp. 168–179. [9] S. Wang, H. Liu, P. H. Gomes, and B. Krishnamachari, “Deep reinforce-ment learning for dynamic multichannel access in wireless networks,”             
+
+> IEEE Transactions on Cognitive Communications and Networking ,vol. 4, no. 2, pp. 257–265, 2018. [10] O. Naparstek and K. Cohen, “Deep multi-user reinforcement learning for distributed dynamic spectrum access,” IEEE Transactions on Wireless Communications , vol. 18, no. 1, pp. 310–323, 2019. [11] Y. Li, W. Zhang, C.-X. Wang, J. Sun, and Y. Liu, “Deep reinforcement learning for dynamic spectrum sensing and aggregation in multi-channel wireless networks,” IEEE Transactions on Cognitive Communications and Networking , vol. 6, no. 2, pp. 464–475, 2020. [12] X. Tan, L. Zhou, H. Wang, Y. Sun, H. Zhao, B.-C. Seet, J. Wei, and V. C. M. Leung, “Cooperative multi-agent reinforcement-learning-based distributed dynamic spectrum access in cognitive radio networks,” IEEE Internet of Things Journal , vol. 9, no. 19, pp. 19 477–19 488, 2022.
+
+8[13] X. Zhang, Z. Chen, Y. Zhang, Y. Liu, M. Jin, and T. Qiu, “Deep-reinforcement-learning-based distributed dynamic spectrum access in multiuser multichannel cognitive radio internet of things networks,” 
+
+IEEE Internet of Things Journal , vol. 11, no. 10, pp. 17 495–17 509, 2024. [14] H.-H. Chang, N. Mohammadi, R. Safavinejad, Y. Yi, and L. Liu, “Dyna-ESN: Efficient deep reinforcement learning for partially observable dynamic spectrum access,” IEEE Transactions on Wireless Communi-cations , vol. 24, no. 6, pp. 4517–4531, 2025. [15] T. Shraa and A. Alauthman, “Deep reinforcement learning-driven dy-namic spectrum access in dense Wi-Fi environments,” IEEE Access ,vol. 13, pp. 1–15, 2025. [16] M. R. Fasihi and B. L. Mark, “Traffic priority-aware 5g nr-u/wi-fi coexistence with deep reinforcement learning,” in Proc. IEEE 100th Vehicular Technology Conference (VTC2024-Fall) , 2024, pp. 1–6. [17] H. Song, L. Liu, J. Ashdown, and Y. Yi, “A deep reinforcement learning framework for spectrum management in dynamic spectrum access,” 
+
+IEEE Internet of Things Journal , vol. 8, no. 14, pp. 11 208–11 218, 2021. [18] N. C. Luong, D. T. Hoang, S. Gong, D. Niyato, P. Wang, Y.-C. Liang, and D. I. Kim, “Applications of deep reinforcement learning in communications and networking: A survey,” IEEE Communications Surveys & Tutorials , vol. 21, no. 4, pp. 3133–3174, 2019. [19] F. Li, J. Yang, K.-Y. Lam, B. Shen, and G. Wei, “Dynamic spectrum access for internet-of-things with joint GNN and DQN,” Ad Hoc Networks , vol. 163, p. 103596, 2024. [20] D. T. Lan, Q. T. Ngo, L. V. Nguyen, and O.-J. Lee, “A multi-branch network for cooperative spectrum sensing via attention-based and CNN feature fusion,” Scientific Reports , vol. 16, p. 36031, 2026. [21] A. Gao, Q. Wang, Y. Wang, C. Du, Y. Hu, W. Liang, and S. X. Ng, “Attention enhanced multi-agent reinforcement learning for cooperative spectrum sensing in cognitive radio networks,” IEEE Transactions on Vehicular Technology , vol. 73, no. 7, pp. 10 464–10 477, 2024. [22] W. Zhang, Y. Wang, X. Chen, Z. Cai, and Z. Tian, “Spectrum trans-former: An attention-based wideband spectrum detector,” IEEE Trans-actions on Wireless Communications , vol. 23, no. 9, pp. 12 343–12 353, 2024. [23] W. Bai, G. Zheng, W. Xia, Y. Mu, and Y. Xue, “Multi-user opportunistic spectrum access for cognitive radio networks based on multi-head self-attention and multi-agent deep reinforcement learning,” Sensors , vol. 25, no. 7, p. 2025, 2025. [24] D. Zhao, Z. Zheng, P. Qin, H. Qin, and B. Song, “Resource allocation in multi-user cellular networks: A transformer-based deep reinforcement learning approach,” China Communications , vol. 21, no. 5, pp. 77–96, 2024. [25] C.-H. Liu, J. A. Tran, P. Pawelczak, and D. Cabric, “Traffic-aware channel sensing order in dynamic spectrum access networks,” IEEE Journal on Selected Areas in Communications , vol. 31, no. 11, pp. 2312– 2323, 2013. [26] C. Si, J. Zhang, and J. Deng, “SU-traffic-aware deep reinforcement learning for distributed dynamic spectrum access,” in Proc. IEEE 101st Vehicular Technology Conference (VTC2025-Spring) , 2025, pp. 1–6. [27] A. Iqbal, T. Khurshaid, Y. A. Qadri, A. Nauman, and S. W. Kim, “Intelligent priority-aware spectrum access in 5G vehicular IoT: A reinforcement learning approach,” Sensors , vol. 25, no. 15, p. 4554, 2025. [28] B. Qian, H. Zhou, T. Ma, K. Yu, Q. Yu, and X. Shen, “Multi-operator spectrum sharing for massive IoT coexisting in 5g/b5g wireless networks,” IEEE Journal on Selected Areas in Communications , vol. 39, no. 3, pp. 881–895, 2021. [29] S. Barqi Janiar and V. Pourahmadi, “Deep-reinforcement learning for fair distributed dynamic spectrum access in priority buffered heterogeneous wireless networks,” IET Communications , vol. 15, no. 10, pp. 1302– 1312, 2021. [30] S. Q. Jalil, M. H. Rehmani, and S. Chalup, “A deep reinforcement learning approach to fair distributed dynamic spectrum access,” in Proc. 17th EAI Int. Conf. Mobile and Ubiquitous Systems (MobiQuitous) ,2020, pp. 236–244. [31] H. I. Kobo, A. M. Abu-Mahfouz, and G. P. Hancke, “A survey on software-defined wireless sensor networks: Challenges and design requirements,” IEEE Access , vol. 5, pp. 1872–1899, 2017. [32] I. F. Akyildiz, P. Wang, and S.-C. Lin, “SoftAir: A software defined networking architecture for 5g wireless systems,” Computer Networks ,vol. 85, pp. 1–18, 2015. [33] X. Liu, C. Sun, W. Yu, and M. Zhou, “Reinforcement-learning-based dynamic spectrum access for software-defined cognitive industrial in-ternet of things,” IEEE Transactions on Industrial Informatics , vol. 18, no. 6, pp. 4244–4253, 2022. [34] A. H. El Fawal, A. Mansour, and A. Nasser, “Markov-modulated pois-son process modeling for machine-to-machine heterogeneous traffic,” 
+
+Applied Sciences , vol. 14, no. 18, p. 8561, 2024. [35] V. Paxson and S. Floyd, “Wide area traffic: The failure of poisson modeling,” IEEE/ACM Transactions on Networking , vol. 3, no. 3, pp. 226–244, 1995. [36] P. Gajewski, J. Łopatka, and P. Łubkowski, “Performance analysis of public safety cognitive radio MANET for diversified traffic,” Sensors ,vol. 22, no. 5, p. 1927, 2022. [37] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Prox-imal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 ,2017. [38] R. d. R. Fontes, S. Afzal, S. H. B. Brito, M. A. S. Santos, and C. E. Rothenberg, “Mininet-WiFi: Emulating software-defined wireless networks,” in Proc. 11th International Conference on Network and Service Management (CNSM) , 2015, pp. 384–389. 
+
+9

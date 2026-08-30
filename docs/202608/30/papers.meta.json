@@ -1,0 +1,39 @@
+{
+  "label": "2026-08-30",
+  "date": "2026-08-30",
+  "generated_at": "2026-08-30T22:21:44",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202608/30/2608.22992v1-channel-token-attention-for-reliable-dynamic-spectrum-access-under-bursty-primary-user-traffic",
+      "section": "deep",
+      "title_en": "Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic",
+      "authors": "Krishna Acharya, Dinanath Padhya, Utsab Dahal, Ashish Kandel, Binod Sapkota",
+      "date": "2026-08-24",
+      "pdf": "https://arxiv.org/pdf/2608.22992v1",
+      "score": "9.0",
+      "evidence": "利用Transformer编码器与信道令牌注意力实现可靠的动态频谱接入",
+      "tldr": "突发主用户流量下，动态频谱接入既需协调次级用户，又须保障包可靠性与低延迟，构成关键挑战。本文提出TACAN，将信道占用历史与AMC熵编码为信道token，结合携带队列、延迟和用户身份的上下文token，用Transformer编码器并采用PPO从贪婪策略热启动优化。在20信道、60主设备和4次级用户场景中，TACAN的包存在访问成功率达92.53%，较贪婪策略高2.59个百分点，极端负载下增益提升至7.67点，且交付延迟和可靠性差距均下降。该工作为突发流量下的动态频谱接入提供了可靠且可扩展的集中式分配方案。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Dynamic spectrum access must coordinate secondary users under bursty primary-user activity while preserving packet reliability and delay. We present TACAN, a centralized policy that represents each channel as a token containing occupancy history and automatic-modulation-classification entropy; a context token supplies queue class, delay and user identity. A Transformer encoder is warm-started from an occupancy-greedy policy and refined with proximal policy optimization. The frozen policies were trained to maintain a channel assignment in every slot, including when queues were empty. We therefore replay them on held-out trajectories and distinguish standby assignment success from packet-present access and packet delivery. In a 20-channel network with 60 primary devices and 4 secondary users, TACAN achieves 92.53% +/- 0.47 packet-present access success, compared with 89.94% for Greedy and 83.53% for PPO+MLP. Its paired gain over Greedy is 2.59 points (parametric 95% CI 1.89-3.29), with wins in all five seeds; the exact two-sided sign-test value is 0.0625. The gain rises from 0.57 points at normal primary-user load to 7.67 points at extreme load. TACAN also reduces mean delivery delay from 1.208 to 1.123 slots and the conditional user-reliability gap from 9.69 to 3.15 points. Delivered packets per SU-slot remain arrival-limited (30.12% versus 30.11%), so no packet-throughput gain is claimed.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202608/30/2608.25510v1-near-field-dual-upa-communications-a-generalized-geometric-approach",
+      "section": "deep",
+      "title_en": "Near-Field Dual-UPA Communications: A Generalized Geometric Approach",
+      "authors": "Li Zheng, Xing Hao, Ziru Chen, Yong Liu, Li Chen, Lin X. Cai",
+      "date": "2026-08-26",
+      "pdf": "https://arxiv.org/pdf/2608.25510v1",
+      "score": "9.0",
+      "evidence": "面向双均匀平面阵列近场MIMO的无线信道建模与边界推导",
+      "tldr": "近场MIMO系统中双UPA结构的距离计算和信道建模是难点。本文提出广义几何模型，精确计算任意天线单元间的3D距离，并导出NF-FF边界的闭式表达式。进一步利用UPA的几何结构，将近场信道矩阵分解为两个低维矩阵的Kronecker积，实现低复杂度波束成形以实现速率最大化。仿真证明传统瑞利距离为特例，所提设计在接近最优速率的同时大幅降低复杂度，从而为近场双UPA通信提供高效解决方案。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "This paper investigates a near-field (NF) multiple-input multiple-output (MIMO) communication system equipped with dual uniform planar arrays (UPAs). We first develop a generalized geometric model to calculate the 3D distance between arbitrary antenna elements across the transmitter and receiver panels. Leveraging the distance analysis, we derive a closed-form near-field to far-field (NF-FF) boundary for dual-UPA configurations. By exploiting the geometric structure of the UPAs, we further decompose the near-field channel matrix into a Kronecker-product of two lower-dimensional matrices. This decomposition enables a low-complexity NF beamforming design for achievable-rate maximization. Numerical results validate the analysis and demonstrate that the conventional Rayleigh distance is a special case of the generalized model. Furthermore, the proposed beamforming design achieves near-optimal rate performance while significantly reducing the computational complexity compared to state-of-the-art NF beamforming methods.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

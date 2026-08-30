@@ -1,0 +1,491 @@
+Title: Near-Field Dual-UPA Communications: A Generalized Geometric Approach
+
+URL Source: https://arxiv.org/pdf/2608.25510v1
+
+Published Time: Thu, 27 Aug 2026 00:40:33 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Near-Field Dual-UPA Communications: A Generalized Geometric Approach 
+
+Li Zheng 1, Xing Hao 2* , Ziru Chen 3, Yong Liu 4, Li Chen 1, Lin X. Cai 3
+
+> 1
+
+College of Computer Science, 2School of Electronic Information, Northwest University, Xi’an, China 
+
+> 3
+
+Department of Electrical and Computer Engineering, Illinois Institute of Technology, Chicago, USA 
+
+> 4
+
+School of Electronic Science and Engineering, South China Normal University, Foshan, China lzheng@stumail.nwu.edu.cn, *xhao@nwu.edu.cn, zchen@ofinno.com, yliu@m.scnu.edu.cn, chenli@nwu.edu.cn, lincai@ieee.org 
+
+Abstract —This paper investigates a near-field (NF) multiple-input multiple-output (MIMO) communication system equipped with dual uniform planar arrays (UPAs). We first develop a generalized geometric model to calculate the 3D distance between arbitrary antenna elements across the transmitter and receiver panels. Leveraging the distance analysis, we derive a closed-form near-field to far-field (NF-FF) boundary for dual-UPA configurations. By exploiting the geometric structure of the UPAs, we further decompose the near-field channel matrix into a Kronecker-product of two lower-dimensional matrices. This decomposition enables a low-complexity NF beamforming design for achievable-rate maximization. Numerical results validate the analysis and demonstrate that the conventional Rayleigh distance is a special case of the generalized model. Furthermore, the proposed beamforming design achieves near-optimal rate perfor-mance while significantly reducing the computational complexity compared to state-of-the-art NF beamforming methods. 
+
+Index Terms —Near-field Communication, Multiple-input Multiple-output (MIMO), Uniform Planar Array (UPA), Near-field and Far-field Boundary, NF beamforming. 
+
+I. I NTRODUCTION 
+
+6G wireless networks are expected to support high data rates, reliable transmission, and high energy efficiency [1]. To meet these demands, extremely large-scale multiple-input multiple-output (XL-MIMO) systems [2], reconfigurable in-telligent surfaces (RIS) [3] and high-frequency communica-tion technologies, such as millimeter-wave (mmWave) and terahertz (THz) communications [4], have attracted increasing attention. Driven by the enlarged array apertures and short-ened carrier wavelengths, the conventional far-field planar-wave model is no longer accurate for characterizing wireless propagation, thereby posing new challenges for beamforming design. When the propagation distance is much larger than the array aperture, the wireless propagation can be approximated by planar waves, which corresponds to far-field (FF) com-munication. In this regime, the channel mainly depends on the angular information. As the array aperture increases and the carrier wavelength decreases, the planar-wave assumption becomes inaccurate. In this case, the propagation model should 
+
+> This work is supported in part by the Scientific Research Program of Shaanxi Provincial Education Department under Grant 24JK0674 and Natural Science Foundation of Shaanxi Province under Grant 2025JC-YBQN-889. (Corresponding author:Xing Hao )
+
+be characterized by spherical-wave [5], corresponding to near-field (NF) communication, where the channel depends on both the angle and the distance. The typical way for distinguishing the FF and NF com-munication regions is the classical Rayleigh distance, given by rRayl = 2 D2/λ , where D denotes the physical aperture of the antenna array and λ is the signal wavelength [6]. However, this criterion is mainly based on a single uniform planar array (UPA), i.e., point-to-array propagation. With the development of large-scale antenna arrays, dual-UPA MIMO systems, where both the transmitter and receiver are equipped with UPAs, are becoming increasingly relevant for near-field communications. In such systems, the NF-FF boundary may be affected by the joint effect of both array apertures. As the NF-FF boundary is closely related to the array geom-etry, geometric analysis has been widely used to characterize spherical-wave propagation and NF-FF region boundaries. Ex-isting studies have modeled spherical-wave propagation using point-to-line configurations for uniform linear arrays (ULAs) [7] and point-to-planar configurations for UPAs [8], [9], where maximum ratio transmission beamforming is adopted to max-imize the received signal-to-noise ratio. To the best of our knowledge, the NF-FF boundary analysis and beamforming design for dual-UPA MIMO systems remains underexplored. In addition, due to the high dimensionality of the NF channel matrix in MIMO systems, conventional beamforming designs often require full-dimensional decomposition of the entire channel matrix [10], [11]. Specifically, the work in [10] maximized the achievable rate by designing the beamforming matrix via the singular value decomposition (SVD) [11] of the entire channel matrix. Such a required full-dimensional SVD may incur high computational complexity, especially for large-scale arrays. In this paper, we study a near-field MIMO wireless commu-nication network, where both the transmitter and the receiver are equipped with UPAs. We first develop a generalized geometric model to calculate the 3D distance between ar-bitrary antenna elements across the transmitter and receiver panels. The 3D distance is mathematically proven to be formulated as two independent additive terms. Based on this model, we derive a closed-form boundary between the NF and FF regions as a function of the wavelength and the arXiv:2608.25510v1 [eess.SP] 26 Aug 2026 apertures of the transmitter and receiver UPAs. Furthermore, by exploiting the geometric structure of the UPAs, the NF channel matrix is expressed in a Kronecker-product form with two lower-dimensional matrices. We then develop a closed-form, low-complexity beamforming design for achievable-rate maximization. Finally, numerical results validate the derived boundary and show that the conventional Rayleigh distance is a special case of the proposed boundary, while the proposed beamforming design achieves near-optimal rate performance with reduced computational complexity. II. SYSTEM MODEL AND PROBLEM FORMULATION 
+
+A. Array Geometry and Coordinate System 
+
+As shown in Fig. 1, we consider a downlink near-field MIMO communication network, where the transmitter and the receiver are both equipped with UPAs. To characterize the array geometry, we establish a three-dimensional (3D) Cartesian coordinate system. The geometric center of the transmitter UPA is taken as the origin Ot(0 , 0, 0) , and the array is assumed to be located on the x − y plane (i.e., z = 0 ). The transmitter UPA comprises N = NxNy antennas, where Nx
+
+and Ny denote the numbers of antennas along the x-axis and 
+
+y-axis, respectively. The spacing between adjacent transmit antennas is denoted by dT and the aperture of the transmitter UPA is DT = p(NxdT )2 + ( Ny dT )2. Let Or (x0, y 0, z 0)
+
+denote the geometric center of the receiver UPA, and the center-to-center distance between the transmitter UPA and the receiver UPA is defined as 
+
+d0 =
+
+q
+
+x20 + y20 + z20 . (1) The receiver UPA is parallel to the transmitter UPA and consists of M = MxMy antennas, where Mx and My denote the numbers of antennas aligned with the x-axis and y-axis, respectively. The spacing between adjacent receive antennas is denoted by dR and the aperture of the receiver UPA is 
+
+DR = p(MxdR)2 + ( Ny dR)2.Without loss of generality, let pn and qm denote the position vectors of an arbitrary antenna on the transmitter UPA and the receiver UPA, respectively. Let (xn, y n) denote the relative planar coordinates of the considered transmitter antenna with respect to the transmitter UPA center, and let 
+
+(xm, y m) denote the planar coordinates of the considered receiver antenna with respect to the center of the receiver UPA. Since the arrays are parallel to the x − y plane, their position vectors in the coordinate system are given by 
+
+pn = [ xn, y n, 0] , qm = [ x0 + xm, y 0 + ym, z 0]. (2) Accordingly, the Euclidean distance between the considered transmit antenna and receive antenna is given by 
+
+dm,n =
+
+q
+
+(x0 + xm − xn)2 + ( y0 + ym − yn)2 + z20 . (3)  
+
+> Fig. 1. Geometric Model of the Near-Field MIMO wireless communications with a 3D Coordinate System
+
+B. Communication Model 
+
+Under the uniform spherical wave model, the near-field channel coefficient hm,n between the considered transmit and receive antennas is directly determined by the derived distance 
+
+dm,n in (3). Specifically, it is given by 
+
+hm,n = λ
+
+4πd 0
+
+e−j 2πλ dm,n , (4) where λ is the carrier wavelength. Let H ∈ CM ×N denotes the near-field channel matrix between the transmitter and the receiver. The channel matrix H is formed by the channel coefficients in (4), given by 
+
+H =
+
+
+
+h1,1 h1,2 · · · h1,N 
+
+h2,1 h2,2 · · · h2,N 
+
+... ... . . . ...
+
+hM, 1 hM, 2 · · · hM,N 
+
+ , (5) Let s ∈ CL denote the transmitted data stream vector, where L ≤ min {M, N } is the number of data streams. Let 
+
+W ∈ CN ×L denote the transmit beamforming matrix at the transmitter. The transmitted signal is given by x = Ws .During the downlink transmission, the received signal at the receiver is expressed as 
+
+y = HWs + n, (6) where n ∼ CN (0, σ 2IM ) is the additive white Gaussian noise vector. 
+
+C. Problem Formulation 
+
+According to the received signal model in (6), the achievable rate of the receiver is given by 
+
+R = log 2 det 
+
+
+
+IM + 1
+
+σ2 HWW H HH
+
+
+
+. (7) The transmit beamforming design is formulated as the following achievable-rate maximization problem under the transmit power constraint 
+
+(P1) : max  
+
+> W
+
+R (8a) s.t. Tr( WW H ) ≤ Pmax . (8b) where Pmax denotes the maximum transmit power at the transmitter. III. B OUNDARY BETWEEN NEAR -FIELD AND FAR -FIELD 
+
+REGIONS 
+
+We first process the exact Euclidean distance dm,n derived in the system model. By expanding the quadratic terms inside the square root and extracting the center-to-center distance d0,the (3) is rewritten as as (9), shown at the bottom of this page. Since the array aperture is typically much smaller than the transmission distance, the fractional term inside the square root is significantly less than 1. By applying the Taylor expansion [12], [13], i.e., √1 + x ≈ 1 + x 
+
+> 2
+
+for |x| < 1, the distance is given by 
+
+dm,n ≈ d0 + x2 
+
+> m
+
++x2 
+
+> n
+
++2 x0xm −2x0xn −2xmxn
+
+2d0
+
++ y2 
+
+> m
+
++y2 
+
+> n
+
++2 y0ym −2y0yn −2ymyn
+
+2d0
+
+.
+
+(10) To simplify notation and facilitate the matrix decomposition, let dxm,n and dym,n be algebraic components decoupled from the horizontal and vertical coordinates, respectively, given by 
+
+dxm,n = x2 
+
+> m
+
++ x2 
+
+> n
+
++ 2 x0xm − 2x0xn − 2xmxn
+
+2d0
+
+, (11) 
+
+dym,n = y2 
+
+> m
+
++ y2 
+
+> n
+
++ 2 y0ym − 2y0yn − 2ymyn
+
+2d0
+
+. (12) The (10) can be rewritten as dm,n = d0 + dxm,n + dym,n .The corresponding phase shift cause by the signal propagation through dm,n is ϕm,n = − 2πd m,n  
+
+> λ
+
+.If we use the phase shift caused by the wireless propagation between the centers of the transmitter and receiver UPAs as the reference, denoted by ϕref , the relative phase difference associated with the channel between the n-th transmit antenna and the m-th receive antenna, denoted by ˆϕm,n , can be formulated as 
+
+ˆϕm,n = ϕm,n − ϕref = − 2πλ (dm,n − d0). (13) Under the planar-wave assumption, the far-field propagation distance between the n-th transmit antenna and the m-th receive antenna is written as 
+
+dfar  
+
+> m,n
+
+= d0 + x0(xm − xn) + y0(ym − yn)
+
+d0
+
+. (14) Accordingly, the distance difference between d0 and dfar 
+
+> m,n
+
+is given by d0 − dfar  
+
+> m,n
+
+= − x0(xm−xn)+ y0(ym−yn) 
+
+> d0
+
+. The cor-responding relative phase difference under the planar-wave assumption, denoted by ˆϕf ar m,n , can be written as 
+
+ˆϕf ar m,n = ϕf ar m,n − ϕref = − 2πλx0(xm − xn) + y0(ym − yn)
+
+d0
+
+.
+
+(15) Let ∆Φ m,n denote the phase difference for the link between the n-th transmit antenna and the m-th receive antenna. Based on (10) and (14), ∆Φ m,n is given by 
+
+∆Φ m,n = ˆϕm,n − ˆϕfar 
+
+> m,n
+
+= 2πλ dm,n − dfar 
+
+> m,n
+
+= πλd 0
+
+[( xm − xn)2 + ( ym − yn)2].
+
+(16) The boundary between the near-field and far-field regions is defined as the boundary where the maximum phase difference of the received signal by using spherical wave and planar wave assumption on the antenna array does not exceed a given threshold ϕ. Therefore, the planar-wave approximation is inaccurate if the maximum phase difference satisfy the threshold constraint 
+
+max 
+
+> m,n
+
+2πλ
+
+(xm − xn)2 + ( ym − yn)2
+
+2d0
+
+≤ ϕ. (17) This condition leads to the following boundary 
+
+d0 ≥ max 
+
+> m,n
+
+π  (xm − xn)2 + ( ym − yn)2
+
+λϕ . (18) Since the coordinates of the transmit and receive antennas are defined with respect to their array centers, we have px2 
+
+> n
+
++ y2 
+
+> n
+
+≤ DT 
+
+> 2
+
+and px2 
+
+> m
+
++ y2 
+
+> m
+
+≤ DR 
+
+> 2
+
+. Based on the triangle inequality, we have 
+
+p(xm − xn)2 + ( ym − yn)2 ≤ px2 
+
+> m
+
++ y2 
+
+> m
+
++ px2 
+
+> n
+
++ y2
+
+> n
+
+≤ DT + DR
+
+2 .
+
+(19) It follows that 
+
+(xm − xn)2 + ( ym − yn)2 ≤ (DT + DR)2
+
+4 . (20) 
+
+dm,n =
+
+q
+
+d20 + ( xm − xn)2 + 2 x0(xm − xn) + ( ym − yn)2 + 2 y0(ym − yn)= d0
+
+s
+
+1 + (xm − xn)2 + 2 x0(xm − xn) + ( ym − yn)2 + 2 y0(ym − yn)
+
+d20
+
+(9) Accordingly, the boundary (18) can be sufficiently guaranteed by 
+
+d0 ≥ π(DT + DR)2
+
+4λ ¯ϕ . (21) IV. B EAMFORMING DESIGN 
+
+In this section, we propose a geometry-based low-complexity beamforming design for problem ( P1). Specifi-cally, based on the distance reformulation in (10), we first express the NF channel matrix in a Kronecker-product form. A Kronecker-SVD-based beamforming design is then developed by performing two low-dimensional SVDs followed by water-filling power allocation. Finally, the computational complexity of the proposed design is analyzed and compared with that of the conventional full-dimensional SVD-based method. 
+
+A. Kronecker Product-Based Channel 
+
+Without loss of generality, the channel hm,n between the 
+
+m-th receive antenna and the n-th transmit antenna can be rewritten as 
+
+hm,n = λ
+
+4πd 0
+
+e−j 2πλ dm,n 
+
+≈ λ
+
+4πd 0
+
+e−j 2πλ (d0+dxm,n +dym,n )
+
+= γ0e−j 2πλ dxm,n e−j 2πλ dym,n ,
+
+(22) where γ0 = λ 
+
+> 4πd 0
+
+e−j 2πλ d0 denotes the complex channel at-tenuation and phase shift determined by the center-to-center distance d0. The (22) shows that each channel coefficient is factorized into a γ0, a term depending only on the y-coordinates, and a term depending only on the x-coordinates. According to the algebraic definition of the Kronecker prod-uct, this element-wise multiplication translates into a matrix-level product of two lower-dimensional exponential matrices. Specifically, the channel matrix H can be written as 
+
+H = γ0
+
+
+
+e−j 2πλ (dx 
+
+> 1,1+dy
+> 1,1)
+
+· · · e−j 2πλ (dx  
+
+> 1,N +dy
+> 1,N )
+
+... . . . ...
+
+e−j 2πλ (dxM, 1+dyM, 1) · · · e−j 2πλ (dxM,N +dyM,N )
+
+
+
+= γ0
+
+
+
+e−j 2πλ dy 
+
+> 1,1
+
+· · · e−j 2πλ dy
+
+> 1,Ny
+
+... . . . ...
+
+e−j 2πλ dyMy , 1 · · · e−j 2πλ dyMy ,Ny 
+
+
+
+⊗
+
+
+
+e−j 2πλ dx 
+
+> 1,1
+
+· · · e−j 2πλ dx
+
+> 1,Nx
+
+... . . . ...
+
+e−j 2πλ dxMx, 1 · · · e−j 2πλ dxMx,Nx 
+
+
+
+= γ0(Hy ⊗ Hx)
+
+(23) where ⊗ denotes the Kronecker product, Hy ∈ CMy ×Ny and 
+
+Hx ∈ CMx×Nx denote the low-dimensional component ma-trices associated with the vertical and horizontal dimensions, respectively. Specifically, the entries in the my -th row, ny -th column of Hy and the mx-th row, nx-th column of Hx are given by 
+
+[Hy ]my , n y = e−j 2πλ dym,n , [Hx]mx, n x = e−j 2πλ dxm,n . (24) These component matrices are mathematical constructs de-rived from the algebraic distance decoupling, which provide a tractable Kronecker product structure to reduce the computa-tional complexity of beamforming design. 
+
+B. Near Field Beamforming Design 
+
+For the achievable rate maximization problem in (P1), we exploit the Kronecker product structure of the channel matrix derived in (23) to propose a low-complexity beamforming design. Specifically, instead of performing the SVD on the channel matrix H, we apply the SVD independently on the low-dimensional component matrices in (23). We perform the SVDs of Hx and Hy as 
+
+Hx = UxΣxVHx , Hy = Uy Σy VHy , (25) where Ux ∈ CMx×Mx , Vx ∈ CNx×Nx , Uy ∈ CMy ×My ,and Vy ∈ CNy ×Ny are unitary matrices. The matrices Σx ∈
+
+CMx×Nx and Σy ∈ CMy ×Ny are rectangular diagonal matri-ces containing the singular values of the respective dimensions. By substituting (25) into (23) and employing the mixed-product property of the Kronecker product, i.e., (A ⊗ B)( C ⊗
+
+D) = ( AC ) ⊗ (BD ), H is reformulated as 
+
+H = γ0
+
+ Uy Σy VHy
+
+ ⊗  UxΣxVHx
+
+
+
+= γ0(Uy ⊗ Ux)( Σy ⊗ Σx)( Vy ⊗ Vx)H
+
+= Ueq Σeq VH 
+
+> eq
+
+,
+
+(26) where Ueq = Uy ⊗ Ux ∈ CM ×M and Veq = Vy ⊗
+
+Vx ∈ CN ×N serve as the left and right singular matrices, respectively. The equivalent singular value matrix is given by 
+
+Σeq = γ0(Σy ⊗ Σx) ∈ CM ×N , and the singular values in Σeq 
+
+can be given by the pairwise products 
+
+λi,j = |γ0| σy,i σx,j , i = 1 , . . . , r y , j = 1 , . . . , r x, (27) where rx = min( Mx, N x) and ry = min( My , N y ) denote the maximum numbers of non-zero singular values for the horizontal and vertical dimensions, respectively. σx,j and σy,i 
+
+denote the diagonal entries of Σx and Σy , respectively. We sort {λi,j } in descending order and select the L largest values. Let eVL ∈ CN ×L denote the matrix formed by the corresponding L columns of Vy ⊗ Vx. By applying the determinant identity det( I + AB ) = det( I + BA ) and the unitary invariance property det( I + UAU H ) = det( I + A),the proposed beamforming matrix is given by 
+
+Wprop = eVLP1/2, (28) where P = diag {p1, . . . , p d} ∈ CL×L is the power allocation matrix, and the optimal power pℓ is obtained by the water-filling algorithm [14] under the transmit power constraint PLℓ=1 pℓ ≤ Pmax .C. Complexity Analysis 
+
+We compare the computational complexity of the conven-tional SVD beamforming design and the proposed Kronecker-SVD-based design. For the conventional method, the main computational burden comes from performing the SVD of the channel matrix, i.e., H = UΣV H , where U ∈ CM ×M
+
+and V ∈ CN ×N are unitary matrices, and Σ ∈ CM ×N is a rectangular diagonal matrix. The corresponding complexity is 
+
+O(MxMy NxNy min( MxMy , N xNy )) . (29) For the proposed method, we only need to compute the SVDs of the two lower-dimensional channel matrices Hx ∈
+
+CMx×Nx and Hy ∈ CMy ×Ny . Therefore, the complexity of the proposed Kronecker-SVD method is 
+
+O(MxNx min( Mx, N x) + My Ny min( My , N y )) . (30) V. S IMULATION RESULTS 
+
+In this section, we present numerical results to evaluate the proposed near-far-field boundary analysis and the low-complexity beamforming design. We first validate the derived boundary by showing the boundary distance under different numbers of transmitter antennas, phase difference thresholds, and carrier frequencies. The results also illustrate the rela-tionship between the proposed boundary and the conventional Rayleigh distance. Then, we evaluate the proposed Kronecker-SVD beamforming design in terms of achievable rate and CPU running time. For comparison, we consider several benchmark schemes, including full-dimensional SVD over the NF channel with water-filling, full-dimensional SVD over the NF channel with equal power allocation, and far-field SVD beamforming based on the planar-wave channel approximation. 
+
+A. Simulation Setup 
+
+We consider a downlink near-field planar MIMO system operating at a carrier frequency of fc = 60 GHz, with the corresponding wavelength denoted by λ = 0 .005 m. Both the transmitter and the receiver are equipped with UPAs, where the antenna spacing is set to a half-wavelength, i.e., dT =
+
+dR = λ/ 2. The transmitter is located at the origin of the 3D coordinate system, and the receiver UPA is placed parallel to the transmitter UPA at a center-to-center distance of r0,where r0 is assumed to be within the NF region. The number of transmitter antennas is set to N = Nx × Ny = 40 × 40 ,and the number of receiver antennas is M = Mx × My =16 × 16 . The number of transmitted data streams is set to 
+
+L = 4 ≤ min {M, N } and the maximum transmit power at the transmitter is set to Pmax = 10 dBm. 
+
+B. Numerical Results 
+
+Fig. 2 shows the phase difference ∆Φ m,n between the near-field spherical-wave model and the far-field planar-wave model versus the center-to-center distance under different carrier frequencies. For the same propagation distance, a higher carrier frequency results in a larger phase difference, since the wavelength λ becomes shorter and the phase difference   
+
+> Fig. 2. The phase difference versus center-to-center distance.
+> Fig. 3. NF-FF boudnary in (21) versus the number of transmitter antenna.
+
+is proportional to 1/λ . Therefore, under the same threshold 
+
+¯ϕ = π/ 8, the derived boundary distance becomes larger as the carrier frequency increases. where Specifically, the 90 GHz case requires the largest boundary distance, while the 30 GHz case has the smallest one. This result shows that high-frequency systems are more likely to operate in the near-field region, which further supports the necessity of spherical-wave channel modeling for mmWave/THz MIMO systems. Fig. 3 illustrates the boundary distance calculated from (21) versus the number of transmitter antennas under dif-ferent threshold ϕ. It can be observed that the boundary distance increases with the number of transmitter antennas. This is because increasing the number of antennas enlarges the transmitter aperture. According to (21), the derived boundary distance scales with (DT + DR)2 and thus increases with the array aperture. It is also observed that the proposed boundary is equivalent to the Rayleigh distance when ¯ϕ = π/ 8. Moreover, a smaller threshold leads to a larger boundary distance, which is consistent with the inverse proportional relationship between the boundary distance and ¯ϕ.Fig. 4. The achievable rate versus the number of transmitter antenna. 
+
+Fig. 5. CPU running time versus the number of transmit antennas on an Intel Core i7-9750H CPU @ 2.60 GHz with 16 GB RAM. 
+
+Fig. 4 and Fig. 5 evaluate the achievable rate and CPU running time versus the number of transmitter antennas, re-spectively. As shown in Fig. 4, the proposed Kronecker-SVD beamforming design approaches the performance of the full-dimensional SVD with water-filling, while outperforming the equal-power and far-field SVD schemes. This indicates that the proposed geometric channel decomposition preserves the main structure of the original NF channel and that water-filling is necessary for efficient power allocation across different streams. Meanwhile, Fig. 5 shows that the proposed beam-forming design requires much less CPU running time than the full-dimensional benchmark, since it replaces the SVD of the full channel matrix with two lower-dimensional SVDs. The running-time advantage becomes more evident as the number of transmitter antennas increases, demonstrating the scalability of the proposed design for large-scale planar arrays. Therefore, the proposed beamforming design achieves near-optimal rate performance with reduced computational cost. VI. C ONCLUSION 
+
+This paper investigated a near-field MIMO communication system equipped with dual UPAs. By developing a general-ized geometric model to analyze the 3D distance between arbitrary antenna elements, we derived a closed-form NF-FF boundary for dual-UPA configurations. Furthermore, by exploiting the geometric structure of the arrays, the near-field channel matrix was decomposed into a Kronecker-product of two lower-dimensional matrices. This decomposition enabled a low-complexity beamforming design for achievable-rate maximization. Numerical results validated that our derived boundary generalizes the conventional Rayleigh distance, and the proposed beamforming design achieves near-optimal rate performance with reduced computational complexity. REFERENCES [1] C.-X. Wang, X. You, X. Gao, X. Zhu, Z. Li, C. Zhang, H. Wang, Y. Huang, Y. Chen, H. Haas, J. S. Thompson, E. G. Larsson, M. D. Renzo, W. Tong, P. Zhu, X. Shen, H. V. Poor, and L. Hanzo, “On the road to 6g: Visions, requirements, key technologies, and testbeds,” IEEE Communications Surveys & Tutorials , vol. 25, no. 2, pp. 905–974, 2023. [2] Y. Lu, J. Zhang, E. Shi, P. Zhang, D. W. Kwan Ng, D. Niyato, and B. Ai, “Energy-efficient ris-aided cell-free massive mimo systems: Application, opportunities, and challenges,” IEEE Wireless Communications , vol. 32, no. 4, pp. 148–155, 2025. [3] X. Hao, Z. Chen, L. X. Cai, H. Zhou, and T. H. Luan, “Joint device selection and power control for energy sustainable ris-noma-enhanced wireless iot networks,” IEEE Internet of Things Journal , vol. 12, no. 14, pp. 28 809–28 822, 2025. [4] E. Sopin, D. Moltchanov, A. Maslov, V. Begishev, A. Samuylov, K. Samouylov, and Y. Koucheryavy, “User persistence in 5g/6g mmwave/sub-thz systems with blockage: Does it pay off?” IEEE Trans-actions on Wireless Communications , vol. 23, no. 10, pp. 14 864–14 878, 2024. [5] M. Cui, Z. Wu, Y. Lu, X. Wei, and L. Dai, “Near-field mimo communica-tions for 6g: Fundamentals, challenges, potentials, and future directions,” 
+
+IEEE Communications Magazine , vol. 61, no. 1, pp. 40–46, 2023. [6] K. T. Selvan and R. Janaswamy, “Fraunhofer and fresnel distances: Uni-fied derivation for aperture antennas,” IEEE Antennas and Propagation Magazine , vol. 59, no. 4, pp. 12–15, 2017. [7] H. Lu and Y. Zeng, “Communicating with extremely large-scale ar-ray/surface: Unified modeling and performance analysis,” IEEE Trans-actions on Wireless Communications , vol. 21, no. 6, pp. 4039–4053, 2022. [8] Z. Chen, L. X. Cai, and X. Hao, “Near-field and far-field beamforming design for ris-enabled millimeter wave systems,” in 2024 IEEE 99th Vehicular Technology Conference (VTC2024-Spring) , 2024, pp. 1–6. [9] S. Alamdar, S.-W. Tam, S. Bagherkhani, F. De Flaviis, Z. Chen, D. Poehl, M. Towliat, R. Cao, J. Baxter, J. Sun et al. , “A 16 × 16 array composed of 4 × 4 fully scalable reconfigurable intelligent surfaces (ris) for 2.4 ghz wi-fi using rfid distributed control,” IEEE Transactions on Microwave Theory and Techniques , vol. 73, no. 8, pp. 5507–5520, 2025. [10] Z. Wang, C. Ouyang, and Y. Liu, “Beamforming design for continuous aperture array (capa)-based mimo systems,” IEEE Transactions on Wireless Communications , vol. 25, pp. 2167–2182, 2026. [11] O. E. Ayach, S. Rajagopal, S. Abu-Surra, Z. Pi, and R. W. Heath, “Spatially sparse precoding in millimeter wave mimo systems,” IEEE Transactions on Wireless Communications , vol. 13, no. 3, pp. 1499– 1513, 2014. [12] M. Cui and L. Dai, “Channel estimation for extremely large-scale mimo: Far-field or near-field?” IEEE Transactions on Communications , vol. 70, no. 4, pp. 2663–2677, 2022. [13] Y. Lu and L. Dai, “Near-field channel estimation in mixed los/nlos envi-ronments for extremely large-scale mimo systems,” IEEE Transactions on Communications , vol. 71, no. 6, pp. 3694–3707, 2023. [14] P. He, L. Zhao, S. Zhou, and Z. Niu, “Water-filling: A geometric ap-proach and its application to solve generalized radio resource allocation problems,” IEEE Transactions on Wireless Communications , vol. 12, no. 7, pp. 3637–3647, 2013.
