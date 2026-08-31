@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-08-30</span>
+      <span class="dpr-home-dashboard-kicker">2026-08-31</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 2 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 9 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>0</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>3</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-08-30 22:21:42 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-08-31 23:51:49 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,9 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读2篇高影响力论文，聚焦动态频谱接入与近场通信两大前沿方向。</p>
-<p>最值得关注的是突发流量下基于信道令牌注意力的可靠频谱接入，以及近场双UPA通信的广义几何建模，均获9.0高分。</p>
-<p>建议优先细读这两篇，理解其核心机制与建模思路，可快速把握该领域近期热点。</p>
+<p>今日共推荐9篇论文，精读6篇、速读3篇，重点覆盖干扰抑制与通感一体化方向。最值得关注的是两篇9.0分精读：异构干扰信道中Siamese网络选择性干扰抑制，以及异步OFDM通感一体化的均值场变分贝叶斯方法。建议优先精读这两篇高分工作，可快速把握当前通信感知融合与智能干扰管理的前沿进展。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -73,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">2 篇</strong>
+    <strong class="dpr-home-dashboard-count">6 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic">Channel-Token Attention for Reliable Dynamic Spectrum Access under Bursty Primary-User Traffic</span></li><li><span class="dpr-home-dashboard-paper-title" title="Near-Field Dual-UPA Communications: A Generalized Geometric Approach">Near-Field Dual-UPA Communications: A Generalized Geometric Approach</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Selective Interference Suppression of Siamese-Net in Heterogeneous Interference Channels">Selective Interference Suppression of Siamese-Net in Heterogeneous Interference Channels</span></li><li><span class="dpr-home-dashboard-paper-title" title="Data-Aided Asynchronous OFDM Integrated Sensing and Communications: A Mean-Field Variational Bayes Approach">Data-Aided Asynchronous OFDM Integrated Sensing and Communications: A Mean-Field Variational Bayes Approach</span></li><li><span class="dpr-home-dashboard-paper-title" title="Toward Secure Communications for a UAV Swarm with Movable Antennas in SAGIN: CKM-Enabled Multi-Agent Reinforcement Learning Framework">Toward Secure Communications for a UAV Swarm with Movable Antennas in SAGIN: CKM-Enabled Multi-Agent Reinforcement Learning Framework</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -86,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">0 篇</strong>
+    <strong class="dpr-home-dashboard-count">3 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p class="dpr-home-dashboard-empty">今日暂无推荐。</p>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Real-Time Reconstruction of Markov Sources over MPR Channels">Real-Time Reconstruction of Markov Sources over MPR Channels</span></li><li><span class="dpr-home-dashboard-paper-title" title="Low-Altitude Fluid Antenna Network with Multi-Agent Reinforcement Learning">Low-Altitude Fluid Antenna Network with Multi-Agent Reinforcement Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="A Unified Framework for Fair and Personalized Decentralized Learning under Communication Constraints">A Unified Framework for Fair and Personalized Decentralized Learning under Communication Constraints</span></li></ul>
   </div>
-
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>3</strong></span></div>
 </section>
 </div>
 

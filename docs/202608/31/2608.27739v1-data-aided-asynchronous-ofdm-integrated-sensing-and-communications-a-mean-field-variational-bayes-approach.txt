@@ -1,0 +1,1583 @@
+Title: Data-Aided Asynchronous OFDM Integrated Sensing and Communications: A Mean-Field Variational Bayes Approach
+
+URL Source: https://arxiv.org/pdf/2608.27739v1
+
+Published Time: Mon, 31 Aug 2026 00:17:37 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Data-Aided Asynchronous OFDM Integrated Sensing and Communications: A Mean-Field Variational Bayes Approach 
+
+Van-Chung Luu ∗† , Nuria González-Prelcic †, and Duy H. N. Nguyen ∗∗Department of Electrical and Computer Engineering, San Diego State University, San Diego, CA, USA 
+
+†Department of Electrical and Computer Engineering, University of California, San Diego, CA, USA 
+
+Abstract—Integrated sensing and communication (ISAC) is regarded as a key technology for sixth-generation wireless networks, allowing sensing and communication operations to jointly utilize the same spectrum and hardware infrastructure. However, in practical uplink ISAC systems, timing offset (TO) and carrier-frequency offset (CFO) introduce phase distortions across subcarriers and OFDM symbols, which can severely degrade both data detection and sensing-parameter estimation. In this paper, we propose a data-aided variational Bayesian (VB) framework for asynchronous uplink OFDM-ISAC sys-tems. Specifically, the received signal is modeled as a sparse multipath superposition, where the transmitted data symbols, complex path gains, spatial frequencies, delay-Doppler pa-rameters, and synchronization parameters are jointly inferred. To enable tractable inference, we develop a mean-field VB algorithm in which von Mises distributions are used for gridless updates of the angular and delay-Doppler phase parameters, while a Gamma-Gaussian prior is adopted to promote path sparsity. A key feature of the proposed framework is its data-aided sensing capability: after initial pilot-based estimation, the detected data symbols are exploited as additional observations to refine the channel and sensing parameters. This substantially increases the effective sensing resources without requiring extra pilot overhead. The simulation results demonstrate that the proposed approach achieves superior performance compared with SAGE, SBL, AB2FM, and pilot-only VB baselines in terms of symbol error rate, channel reconstruction accuracy, path-parameter estimation, TO/CFO estimation, and 3D lo-calization accuracy. The results also demonstrate that ignoring TO and CFO leads to severe sensing degradation, highlight-ing the importance of synchronization-aware and data-aided receiver design for ISAC systems. Index Terms—ISAC, OFDM, timing offset, carrier frequncy offset, variational Bayes. 
+
+I. Introduction Integrated Sensing and Communications (ISAC) is widely regarded as a cornerstone technology for fu-ture 6G wireless networks. Depending on the primary objective, these systems are generally categorized into communication-centric or sensing-centric frameworks [1], [2]. The communication-centric approach is particularly compelling, as it enables the reuse of existing infrastruc-ture, hardware, and spectral resources for dual-functional tasks, thereby maximizing overall system efficiency [3]. Achieving this integration in practical wireless networks requires a waveform that can accommodate both func-tionalities within a common transmission structure. In this context, orthogonal frequency division multiplexing (OFDM) has emerged as one of the most practical waveform foundations for ISAC, owing to its widespread adoption in modern wireless systems and its flexible time-frequency structure, which enables sensing functions to be embedded into communication frames with relatively small architectural changes [4]–[8]. Beyond early studies that allocated subcarriers or power between communica-tion and sensing [9]–[12], more recent OFDM-ISAC re-search has advanced toward cross-domain waveform opti-mization, dual-functional precoding, and sensing-oriented resource allocation strategies that jointly balance commu-nication rate, sensing resolution, sidelobe suppression, and robustness [7], [8], [13], [14]. The multicarrier structure of OFDM makes it well suited for wideband transmission in frequency-selective channels. This feature is particularly beneficial in high-frequency bands, such as the Ku-band, where large bandwidths can be leveraged to improve both communication throughput and sensing resolution [15]. While promising in theory, the practical realization of ISAC gains is hindered by significant hardware and environmental constraints. Specifically, ISAC systems are subject to several practical impairments, such as synchro-nization mismatch, mobility, and multipath propagation [16]–[19]. In high-frequency and wideband scenarios, these impairments become even more critical, as synchronization mismatch introduces timing offset (TO) and carrier fre-quency offset (CFO), mobility leads to Doppler shifts, and multipath propagation further complicates signal process-ing. While TO stems from symbol timing misalignment and CFO arises from oscillator mismatch or relative motion, both can severely degrade system performance. Unlike conventional communication systems that treat delay and Doppler simply as interference to be mitigated, ISAC systems must precisely estimate these parameters to extract sensing information. Hence, ISAC introduces a unique paradigm shift in handling these distortions. However, achieving high sensing accuracy is particularly challenging in asynchronous deployments, where the lack of common timing and frequency references necessitates sophisticated estimation strategies. To cope with such impairments, a variety of estima-tion and compensation methods have been developed. In arXiv:2608.27739v1 [eess.SP] 27 Aug 2026 2
+
+classical communication systems, CFO is often effectively mitigated by calculating the auto-correlation of training sequences [20]. Alternatively, from a Bayesian learning perspective, joint channel and CFO estimation can be cast as a maximum-likelihood problem and addressed effec-tively using the space-alternating generalized expectation-maximization (SAGE) method [21], [22]. To further im-prove accuracy, prior statistical knowledge of the unknown parameters can be exploited through belief propagation for maximum a posteriori estimation [23], [24]. In this context, [25] proposes a joint channel and CFO estimation method for multiuser MIMO-OFDM systems based on a Bernoulli– Gaussian prior for the channel and a Gaussian mixture model for CFO. Beyond statistical priors, the inherent structure of the signal can be exploited; specifically, since the phase shift induced by CFO exhibits sparsity in the angle-delay domain, bilinear message-passing algorithms have been proposed to solve the resulting sparsity recovery problem [26]. For asynchronous ISAC systems, several approaches have been developed to address clock mismatch. One straightforward solution is to employ a GPS-disciplined oscillator (GPSDO) for timing synchronization in dis-tributed radar systems [27]. However, this approach relies on costly hardware and may not be practical for low-cost deployments. Alternatively, some methods exploit the observation that TO and CFO are common across antennas. For example, cross-antenna cross-correlation (CACC) has been used to mitigate the effects of TO and CFO [18], [28]. Similarly, [29]–[31] computes the ratios of channel state information between a reference antenna and the remaining antennas, referred to as the cross-antenna signal ratio (CASR), to compensate for clock asynchronization. More recently, [32] extended this line of research to bistatic hybrid-array uplink sensing by first constructing a clean line-of-sight reference signal, then applying a signal-ratio operation to cancel CFO and TO, and finally performing low-complexity, high-resolution joint Doppler-delay estimation using the AoA-Based 2D-FFT-MUSIC (AB2FM) algorithm. Another line of work explicitly estimates TO and CFO prior to sensing and then compensates for their effects. In contrast to CACC and CASR, this approach neither depends on antenna-specific received signals nor assumes the presence of a dominant line-of-sight path between the transmitter and receiver. For instance, [33] estimates TO through correlation and estimates CFO under the assumption that a reference static path exists. Likewise, in [34], [35], the angle of arrival (AoA) is first estimated and then used to distinguish static and dynamic paths for clock asynchronization compensation and Doppler estimation. In addition to synchronization mismatch, ISAC systems must also contend with the limited pilot resources avail-able for reliable sensing and parameter estimation. Most existing ISAC studies rely primarily on pilot-centric de-signs, which restrict sensing to known reference signals and consequently underutilize the rich information embedded in data-carrying symbols, even though pilots typically occupy only a small fraction of the transmission frame [36], [37]. Moreover, recent ISAC studies suggest that pilot sequences alone may be insufficient for robust high-resolution sensing [32], [38]. These observations motivate the use of detected data symbols for sensing, could be referred to as data-aided sensing, as a promising means of enhancing estimation performance without sacrificing communication throughput or incurring additional sig-naling overhead [39], [40]. However, the blind reuse of data symbols can degrade system performance if symbol detection errors propagate into the sensing algorithms [38]. Recent work has begun addressing this trade-off; for instance, [37] demonstrates that reusing detected data can significantly enhance sensing accuracy while maintaining precoding gains. Furthermore, specialized architectures are being developed to manage this complexity, such as the two-stage deep learning framework in [41]. This approach first employs a neural network for data detection and subsequently utilizes those detected symbols to estimate the Angle of Arrival (AoA) and time delay via the Multiple Signal Classification (MUSIC) algorithm. To solve the transmitter-parameter association problem in orthogonal time frequency space vehicular networks, [42] proposes a constrained bilinear recovery model. Their message passing approach enables high-accuracy joint channel estimation, signal detection, and sensing association. Although exploiting data symbols can improve effi-ciency, it introduces significant computational complexity and high-dimensional estimation challenges that neces-sitate advanced statistical frameworks. In this context, sparse Bayesian learning (SBL) has recently emerged as a powerful paradigm for sensing-oriented parameter estima-tion in mmWave and OFDM-ISAC systems. In particular, SBL has been adopted for clutter-aware joint angle and velocity estimation [43], and has also been applied to extended-target localization in the presence of Doppler-induced inter-carrier interference (ICI) and clutter [44], [45]. Despite these advancements, conventional SBL-based methods typically rely on high-resolution dictionaries, which can impose a significant storage burden and com-putational overhead in large-scale systems. Furthermore, existing studies remain primarily localization-oriented and are largely developed for radar or monostatic settings, rather than a fully asynchronous uplink OFDM-ISAC receiver. As a result, the coupled effects of moving targets, static scatterers, TO, CFO, and unknown communication data have not yet been jointly addressed within a unified probabilistic framework. To bridge this gap, we propose an efficient mean-field variational Bayesian (VB) frame-work for bistatic uplink OFDM-ISAC systems, where all synchronization, propagation, and communication-related unknowns are modeled as random variables and inferred jointly within a single receiver architecture. Our contributions can be summarized as follows:  
+
+> •
+
+We propose a mean-field VB framework for asyn-chronous bistatic uplink OFDM-ISAC, in which TO, CFO, propagation parameters, and transmitted data symbols are jointly inferred in a unified probabilistic 3
+
+receiver, thereby enabling integrated sensing, channel estimation, and data-aided detection under limited reference-signal resources.  
+
+> •
+
+In the proposed framework, all unknown parame-ters, including complex path gains, angles of arrival (AoAs), delays, Doppler shifts, TO, and CFO, are modeled as random variables with suitable prior dis-tributions. In particular, von Mises distributions are employed for the angular parameters and the phase terms associated with delay/TO and Doppler/CFO, while Gaussian distributions are adopted for the complex path gains. This modeling choice leads to closed-form updates for all latent variables.  
+
+> •
+
+We assess the proposed method using symbol error rate (SER) and channel-parameter normalized mean squared error (NMSE). Simulation results show that the proposed method consistently outperforms the SBL, AB2FM, and SAGE baselines in all evaluated metrics. In addition, the results confirm that leverag-ing data payload symbols can significantly enhance estimation accuracy without sacrificing communica-tion performance. The remainder of this paper is organized as follows. Section II presents the system model and formulates the problem. Section III discusses the unambiguous delay and Doppler ranges. Section IV introduces the variational Bayesian framework and details the proposed solution. Section V presents the numerical results and evaluates the effectiveness of the proposed method. Finally, Section VI concludes the paper. II. System Model and Problem Formulation This section presents the signal model and problem for-mulation for the considered asynchronous uplink OFDM-ISAC system. We first describe the bistatic uplink trans-mission model, where the BS receives both the direct propagation path and multiple reflected paths from static scatterers and moving targets. Then, we introduce the UPA response model and characterize TO and CFO. Finally, we formulate the objective of joint data detec-tion, channel estimation, synchronization, and sensing-parameter estimation. A. System Model We consider a bistatic uplink OFDM-ISAC system, as illustrated in Fig. 1. The UE transmits an OFDM frame containing both pilot and data symbols, while the BS receives a superposition of the direct path and multiple reflected propagation components. The BS is equipped with a UPA consisting of NH and NV antenna elements along the horizontal and vertical directions, respectively, with a total number of receive antennas M = NH NV . The propagation environment contains one moving target and several static scatterers between the UE and the BS. Each coherent processing interval (CPI) contains K
+
+OFDM symbols over N orthogonal subcarriers. Let (n, k ) 
+
+> Fig. 1. will be replaced.
+
+denote the resource element (RE) corresponding to the 
+
+n-th subcarrier and the k-th OFDM symbol, where 
+
+n ∈ { 0, 1, . . . , N − 1}, k ∈ { 0, 1, . . . , K − 1}.
+
+Let ∆f denote the subcarrier spacing, while the duration of each OFDM symbol is 
+
+Tsym = 1∆f
+
++ TCP ,
+
+where TCP is the cyclic-prefix duration. The transmitted symbol on RE (n, k ) is given by 
+
+xn,k =
+
+{
+
+x(p)
+
+> n,k
+
+, (n, k ) ∈ P ,x(d) 
+
+> n,k
+
+∈ X , (n, k ) ∈ D , (1) where P and D denote the pilot and data sets, respectively, and X is the data constellation. After cyclic-prefix removal and FFT, the received array snapshot at the BS on resource element (RE) (n, k ) can be expressed as 
+
+yn,k = xn,k ξn,k L∑
+
+> ℓ=1
+
+αℓe−j2 πn ∆f τℓ+j2 πν ℓkT sym b(ωℓ, ψ ℓ)+ wn,k ,
+
+(2) where yn,k ∈ CM denotes the received signal vector and 
+
+wn,k ∼ CN (0, N −10 IM ) is the additive white Gaussian noise vector. In addition, αℓ ∈ C, τℓ, and νℓ represent the complex gain, delay, and Doppler shift of the ℓ-th resolvable path, respectively, while b(ωℓ, ψ ℓ) ∈ CM
+
+denotes the UPA steering vector associated with that path. Let the i-th antenna element be indexed by 
+
+mi = mod( i − 1, N H ), ni =
+
+⌊ i − 1
+
+NH
+
+⌋
+
+,
+
+so that its position is given by 
+
+pi = [0 mi∆ ni∆]T .4
+
+for a plane wave impinging from direction (θℓ, φ ℓ), the corresponding array response at the i-th antenna element is 
+
+bi(ωℓ, ψ ℓ) = exp 
+
+(
+
+j 2πλ ∆(mi cos θℓ sin φℓ + ni sin θℓ
+
+))
+
+,
+
+by defining 
+
+ωℓ ≜ 2πλ ∆ cos θℓ sin φℓ, ψℓ ≜ 2πλ ∆ sin θℓ,
+
+the array response can be written as 
+
+bi(ωℓ, ψ ℓ) = e jωℓmi ejψℓni ,
+
+accordingly, with 
+
+ai(ωℓ) ≜ ejωℓmi , ci(ψℓ) ≜ ejψℓni ,
+
+the steering vector admits the separable form 
+
+b(ωℓ, ψ ℓ) = a(ωℓ) ⊙ c(ψℓ).
+
+The multiplicative factor ξn,k models the residual syn-chronization mismatch and is expressed as 
+
+ξn,k = e −j2 πn ∆f τ0,k ej2 πf 0,k kT sym , (3) where τ0,k and f0,k denote the TO and CFO, respectively. The above signal model is established under the following assumptions:  
+
+> •
+
+Common oscillator within each array: All transmit antennas are driven by a common local oscillator (LO), and all receive antennas share another common LO.  
+
+> •
+
+Quasi-static channel: The physical path parameters are assumed to remain approximately constant over a single CPI.  
+
+> •
+
+Dominant LoS-path: In the considered uplink sce-nario, we assume the presence of a dominant LoS path. In addition, this path is assumed to be among the earliest effective-delay paths. In the sequel, this dominant early-arriving path is used for obtaining TO. The objective of this work is to design a synchronization-aware ISAC receiver that jointly detects the transmitted data symbols {xn,k }, estimates the multipath channel parameters {αℓ, τ ℓ, ν ℓ, ω ℓ, ψ ℓ}Lℓ=1 , and recovers the residual synchronization parameters τ0 and f0. These estimates are then used for both reliable communication and accurate sensing, including target localization and velocity estima-tion. III. Unambiguous Delay and Doppler Ranges The delay and Doppler characteristics of the ℓ-th prop-agation path are represented through the discrete phase sequences 
+
+gℓ[n] = e −j2 πn ∆f τ ℓ , (4) and 
+
+uℓ[k] = e j2 πkν ℓTsym , (5) respectively, where τℓ and νℓ denote the path delay and Doppler shift. The identifiability of these parameters is fundamentally determined by the periodicity of the associ-ated complex exponentials. As a result, delay and Doppler can only be uniquely identified within their corresponding unambiguous intervals. A. Delay Ambiguity We first consider the delay-dependent term gℓ[n]. Two distinct delays, τℓ and τ ′
+
+> ℓ
+
+, are indistinguishable if they generate the same phase progression over all subcarriers, namely, 
+
+e−j2 πn ∆f τ ℓ = e −j2 πn ∆f τ ′ 
+
+> ℓ
+
+, ∀n. (6) This condition is equivalent to 
+
+e−j2 πn ∆f (τℓ−τ ′  
+
+> ℓ)
+
+= 1 , ∀n, (7) which requires 
+
+∆f (τℓ − τ ′
+
+> ℓ
+
+) ∈ Z. (8) Therefore, the delay parameter is periodic with period 
+
+τper = 1∆f . (9) To ensure uniqueness, τℓ must be restricted to an interval of width 1/∆f . Since physical propagation delays are non-negative, the unambiguous delay region is naturally chosen as 
+
+τℓ ∈
+
+[
+
+0, 1∆f
+
+)
+
+. (10) B. Doppler Ambiguity A similar argument applies to the Doppler-dependent term qℓ[k]. Two Doppler shifts, νℓ and ν′
+
+> ℓ
+
+, are indistin-guishable if 
+
+ej2 πkν ℓTsym = e j2 πkν ′ 
+
+> ℓTsym
+
+, ∀k. (11) This implies 
+
+(νℓ − ν′
+
+> ℓ
+
+)Tsym ∈ Z, (12) from which the Doppler periodicity follows as 
+
+νper = 1
+
+Tsym 
+
+. (13) Accordingly, the Doppler shift can only be uniquely identified within an interval of width 1/T sym . A common symmetric choice for the unambiguous Doppler range is 
+
+νℓ ∈
+
+[
+
+− 12Tsym 
+
+, 12Tsym 
+
+)
+
+. (14) C. Impact of Pilot Subsampling The above ambiguity limits are further affected during the pilot-based initialization stage, where observations are available only on every Df -th pilot subcarrier. Letting 
+
+n = pD f , with p denoting the pilot index, the delay-dependent phase term becomes 
+
+gℓ[p] = e −j2 πpD f ∆f τ ℓ . (15) Under this subsampled structure, two delays are indistin-guishable if 
+
+Df ∆f (τℓ − τ ′
+
+> ℓ
+
+) ∈ Z, (16) 5
+
+which leads to a reduced delay periodicity given by 
+
+τ (p) 
+
+> per
+
+= 1
+
+Df ∆f . (17) Hence, when only pilot subcarriers are used for initializa-tion, the unambiguous delay interval is narrowed to 
+
+τℓ ∈
+
+[
+
+0, 1
+
+Df ∆f
+
+)
+
+. (18) This shows that pilot subsampling reduces the delay identifiability range, which may lead to ambiguity in the initialization stage when the true delay exceeds this interval. IV. Variational Bayesian Inference In this section, we develop a mean-field VB algorithm for the considered asynchronous uplink OFDM-ISAC system. The proposed inference framework jointly estimates the transmitted data symbols, multipath channel parameters, and residual synchronization parameters, thereby enabling data-aided sensing under TO and CFO impairments. Specifically, we first briefly review the VB framework and introduce the adopted mean-field factorization. Then, based on the proposed probabilistic model, we derive tractable update rules for all latent variables, including the data symbols, path gains, sparsity precisions, spatial frequencies, delay-Doppler phase parameters, synchroniza-tion offsets, and noise precision. A. Background on VB This section briefly reviews variational Bayes (VB). Let 
+
+y drepresent the observed variables, while x denotes the latent variables and model parameters. Since the posterior 
+
+p(x | y) is generally intractable, VB approximates it by a distribution q(x) ∈ Q obtained from [46], [47] 
+
+q⋆(x) = arg min  
+
+> q(x)∈Q
+
+KL( q(x) ∥ p(x | y)) (19) which is equivalent to maximizing the evidence lower bound (ELBO) 
+
+ELBO( q) = Eq(x)
+
+[ ln p(x, y)] − Eq(x)
+
+[ ln q(x)]. (20) Under the mean-field assumption 
+
+q(x) = 
+
+> m
+
+∏
+
+> i=1
+
+qi(xi), (21) the optimal factor is given by 
+
+q⋆i (xi) ∝ exp 
+
+{
+
+⟨ln p(x, y)⟩q−i
+
+}
+
+, (22) where q−i = ∏  
+
+> j̸=i
+
+qj (xj ). Sequentially updating 
+
+{qi(xi)}mi=1 yields the coordinate-ascent variational infer-ence (CAVI) algorithm, which monotonically increases the ELBO and converges to a local optimum [46], [47]. B. Proposed Variational Bayesian Inference Algorithm We define γ ≜ 1/N 0 as the noise precision and treat it as an unknown random variable to be inferred within the VB framework. Given the received observations Y ≜ {yn,k },the objective is to jointly infer the transmitted symbols 
+
+X ≜ {xn,k }, the path gains α ≜ [α1, . . . , α ˆL]T , the path-dependent delay-Doppler parameters, the spatial frequen-cies {ωℓ, ψ ℓ}ˆLℓ=1 , and the synchronization parameters. For notational convenience, we use the phase-domain variables 
+
+θ0, ϕ0, θℓ, and ϕℓ, and define 
+
+g0[n] ≜ ejnθ 0 , u0[k] ≜ ejkϕ 0 ,gℓ[n] ≜ ejnθ ℓ , uℓ[k] ≜ ejkϕ ℓ . (23) The corresponding variational means are denoted by 
+
+ˆg0[n] ≜ 〈ejnθ 0 〉 , ˆu0[k] ≜ 〈ejkϕ 0 〉 ,
+
+ˆgℓ[n] ≜ 〈ejnθ ℓ
+
+〉 , ˆuℓ[k] ≜ 〈ejkϕ ℓ
+
+〉 . (24) Let bℓ ≜ b(ωℓ, ψ ℓ) denote the array response vector associated with the ℓ-th path. Then, the channel at time-frequency index (n, k ) is written as 
+
+hn,k = g0[n]u0[k]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+αℓbℓgℓ[n]uℓ[k]. (25) The received signal is modeled as 
+
+yn,k = xn,k hn,k + wn,k , wn,k ∼ CN (0, γ −1IM ).
+
+(26) Following the mean-field VB framework, the posterior distribution is approximated as 
+
+p(X, α, β, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ | Y)
+
+≈ q(X)q(γ)q(θ0)q(ϕ0)
+
+> ˆL
+
+∏
+
+> ℓ=1
+
+q(αℓ)q(βℓ)q(θℓ)q(ϕℓ)q(ωℓ)q(ψℓ).
+
+(27) The corresponding joint distribution can be factorized as 
+
+p(Y, X, α, β, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ )= p(Y | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ )p(X)p(γ)p(θ0)p(ϕ0)
+
+×
+
+> ˆL
+
+∏
+
+> ℓ=1
+
+p(αℓ | βℓ)p(βℓ)p(θℓ)p(ϕℓ)p(ωℓ)p(ψℓ), (28) where the sparse Gamma-Gaussian prior is imposed as 
+
+p(αℓ | βℓ) = CN (αℓ; 0 , β −1 
+
+> ℓ
+
+), p(βℓ) = Gamma( aβ , b β ).
+
+(29) To isolate the contribution of the ℓ-th path, we define the residual signal 
+
+r(ℓ) 
+
+> n,k
+
+≜ yn,k − xn,k h(−ℓ)
+
+> n,k
+
+= xn,k αℓbℓg0[n]u0[k]gℓ[n]uℓ[k] + wn,k , (30) where 
+
+h(−ℓ) 
+
+> n,k
+
+≜ g0[n]u0[k] ∑ 
+
+> i̸=ℓ
+
+αibigi[n]ui[k]. (31) 6
+
+By construction, r(ℓ) 
+
+> n,k
+
+contains only the signal component associated with the ℓ-th path plus noise, and is used to decouple the per-path variational updates. 1) Updating q(xn,k ): By taking the expectation over the joint distribution of all latent variables other than xn,k ,we obtain 
+
+q(xn,k ) ∝ exp 
+
+{〈
+
+ln p(yn,k | xn,k , hn,k , γ ) + ln p(xn,k )
+
+〉
+
+> −xn,k
+
+}
+
+.
+
+(32) For a discrete constellation X , the probability of xn,k = s,
+
+s ∈ X , is given by 
+
+q(xn,k = s) ∝ pS (s) exp 
+
+(
+
+2ˆ γℜ
+
+{
+
+s∗ ˆhHn,k yn,k 
+
+}
+
+− ˆγ|s|2En,k 
+
+)
+
+,
+
+(33) where 
+
+ˆhn,k ≜ ⟨hn,k ⟩
+
+= ˆ g0[n]ˆ u0[k]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+ˆαℓ ˆbℓ ˆgℓ[n]ˆ uℓ[k], (34) and 
+
+En,k ≜ 〈∥hn,k ∥2〉 . (35) Since |g0[n]| = |u0[k]| = 1 , the second moment can be expressed as 
+
+En,k =
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+(|ˆαℓ|2 + ταℓ
+
+) ∥ˆbℓ∥2
+
++
+
+> ˆL
+
+∑
+
+> ℓ=1 ˆL
+
+∑ 
+
+> i=1
+> i̸=ℓ
+
+ˆαℓ ˆα∗ 
+
+> i
+
+ˆbHi ˆbℓ ˆgℓ[n]ˆ g∗ 
+
+> i
+
+[n]ˆ uℓ[k]ˆ u∗ 
+
+> i
+
+[k], (36) with 
+
+ˆαℓ ≜ ⟨αℓ⟩, ταℓ ≜ 〈|αℓ|2〉 − | ˆαℓ|2. (37) 2) Updating q(αℓ): Computing the expectation of the joint distribution over all latent variables except αℓ, the variational distribution of αℓ is given by 
+
+q(αℓ) ∝ exp 
+
+{〈
+
+ln p
+
+(
+
+{r(ℓ)
+
+> n,k
+
+} | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ 
+
+)
+
++ ln p(αℓ | βℓ)
+
+〉
+
+> −αℓ
+
+}
+
+.
+
+(38) This yields the complex Gaussian distribution 
+
+q(αℓ) = CN (αℓ; ˆ αℓ, τ αℓ ), (39) where 
+
+ταℓ =
+
+(
+
+ˆγS ℓ + ˆβℓ
+
+)−1
+
+,
+
+ˆαℓ = ταℓ ˆγt ℓ. (40) Here, 
+
+tℓ ≜ ∑
+
+> n,k
+
+ˆx∗ 
+
+> n,k
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ g∗ 
+
+> ℓ
+
+[n]ˆ u∗ 
+
+> ℓ
+
+[k]ˆbHℓ
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+,Sℓ ≜ ∑
+
+> n,k
+
+vn,k ∥ˆbℓ∥2 = ∥ˆbℓ∥2 ∑
+
+> n,k
+
+vn,k , (41) with 
+
+ˆxn,k ≜ ⟨xn,k ⟩, vn,k ≜ 〈|xn,k |2〉 , ˆβℓ ≜ ⟨βℓ⟩. (42) 3) Updating q(βℓ): Taking the expectation with respect to all latent variables except βℓ, we have 
+
+q(βℓ) ∝ exp 
+
+{〈
+
+ln p(αℓ | βℓ) + ln p(βℓ)
+
+〉
+
+> −βℓ
+
+}
+
+= Gamma (aβ + 1 , b β + |ˆαℓ|2 + ταℓ
+
+) .
+
+(43) Therefore, the variational mean of βℓ is 
+
+ˆβℓ = aβ + 1 
+
+bβ + |ˆαℓ|2 + ταℓ
+
+. (44) 4) Updating q(γ): By taking the expectation over the joint distribution of all latent variables other than γ, the variational distribution of γ is given by 
+
+q(γ) ∝ exp 
+
+{〈
+
+ln p(Y | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ )+ ln p(γ)
+
+〉
+
+> −γ
+
+}
+
+= Gamma ( a0 + M N sc Ksym , b 0 + Eerr ) .
+
+(45) where 
+
+Eerr ≜ ∑
+
+> n,k
+
+〈∥yn,k − xn,k hn,k ∥2〉
+
+= ∑
+
+> n,k
+
+(
+
+∥yn,k ∥2 − 2ℜ
+
+{
+
+ˆx∗ 
+
+> n,k
+
+ˆhHn,k yn,k 
+
+}
+
++ vn,k En,k 
+
+)
+
+.
+
+(46) Hence, 
+
+ˆγ = a0 + M N sc Ksym 
+
+b0 + Eerr 
+
+. (47) 5) Updating q(ωℓ): By taking the expectation over the joint distribution of all latent variables other than ωℓ, we obtain 
+
+q(ωℓ) ∝ exp 
+
+{〈
+
+ln p
+
+(
+
+{r(ℓ)
+
+> n,k
+
+} | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ 
+
+)
+
++ ln p(ωℓ)
+
+〉
+
+> −ωℓ
+
+}
+
+.
+
+(48) After discarding terms independent of ωℓ, we have 
+
+ln q(ωℓ) ∝ ℜ 
+
+{
+
+2ˆ γ ˆα∗ 
+
+> ℓ
+
+b(ωℓ, ˆψℓ)H zℓ
+
+}
+
++ ln p(ωℓ), (49) where 
+
+zℓ ≜ ∑
+
+> n,k
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+ˆx∗ 
+
+> n,k
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ g∗ 
+
+> ℓ
+
+[n]ˆ u∗ 
+
+> ℓ
+
+[k]. (50) Let mi and ni denote the horizontal and vertical antenna indices, respectively. Then, 
+
+ln q(ωℓ) ∝ ℜ 
+
+{
+
+2ˆ γ ˆα∗
+
+> ℓ
+
+∑
+
+> i
+
+zℓ,i e−j ˆψℓni e−jω ℓmi
+
+}
+
++ ln p(ωℓ).
+
+(51) 7
+
+Grouping the terms with the same horizontal index mi,define 
+
+η(ω) 
+
+> ℓ
+
+[m] ≜ 2ˆ γ ˆα∗
+
+> ℓ
+
+∑
+
+> i:mi=m
+
+zℓ,i e−j ˆψℓni . (52) Therefore, 
+
+q(ωℓ) ∝ p(ωℓ) exp 
+
+(
+
+ℜ
+
+{∑
+
+> m
+
+η(ω) 
+
+> ℓ
+
+[m]e−jmω ℓ
+
+}) 
+
+. (53) We approximate q(ωℓ) by a single von Mises (VM) distribution with mean direction ˆωℓ and concentration parameter κωℓ . Specifically, we employ the Heuristic 2 procedure in [48], which maps a distribution q(ωℓ) to a VM approximation and returns the corresponding mean direction ˆωℓ and concentration parameter κωℓ . Its mo-ments are used to compute the expected steering vector 
+
+ˆa(ωℓ).6) Updating q(ψℓ): Similarly, fixing ωℓ = ˆ ωℓ and taking the expectation with respect to all latent variables except 
+
+ψℓ, we obtain 
+
+q(ψℓ) ∝ exp 
+
+{〈
+
+ln p
+
+(
+
+{r(ℓ)
+
+> n,k
+
+} | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ 
+
+)
+
++ ln p(ψℓ)
+
+〉
+
+> −ψℓ
+
+}
+
+.
+
+(54) After discarding terms independent of ψℓ, we have 
+
+ln q(ψℓ) ∝ ℜ {2ˆ γ ˆα∗ 
+
+> ℓ
+
+b(ˆ ωℓ, ψ ℓ)H zℓ
+
+} + ln p(ψℓ). (55) Equivalently, 
+
+ln q(ψℓ) ∝ ℜ 
+
+{
+
+2ˆ γ ˆα∗
+
+> ℓ
+
+∑
+
+> i
+
+zℓ,i e−j ˆωℓmi e−jψ ℓni
+
+}
+
++ ln p(ψℓ).
+
+(56) Grouping the terms with the same vertical index ni, define 
+
+η(ψ) 
+
+> ℓ
+
+[n] ≜ 2ˆ γ ˆα∗
+
+> ℓ
+
+∑
+
+> i:ni=n
+
+zℓ,i e−j ˆωℓmi . (57) Thus, 
+
+q(ψℓ) ∝ p(ψℓ) exp 
+
+(
+
+ℜ
+
+{∑
+
+> n
+
+η(ψ) 
+
+> ℓ
+
+[n]e−jnψ ℓ
+
+}) 
+
+. (58) The distribution q(ψℓ) is also approximated by a von Mises distribution, and its moments are used to compute the expected steering vector ˆc(ψℓ).7) Updating q(θℓ): By taking the expectation over the joint distribution of all latent variables other than θℓ, the variational distribution of θℓ is given by 
+
+q(θℓ) ∝ exp 
+
+{〈
+
+ln p
+
+(
+
+{r(ℓ)
+
+> n,k
+
+} | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ 
+
+)
+
++ ln p(θℓ)
+
+〉
+
+> −θℓ
+
+}
+
+.
+
+(59) After expanding the squared norm and removing the terms independent of θℓ, we obtain 
+
+ln q(θℓ) ∝ ℜ 
+
+2ˆ γ ∑
+
+> n,k
+
+ˆx∗ 
+
+> n,k
+
+ˆα∗ 
+
+> ℓ
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ u∗ 
+
+> ℓ
+
+[k]ˆbHℓ
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+e−jnθ ℓ
+
+
+
++ ln p(θℓ). (60) Therefore, 
+
+q(θℓ) ∝ p(θℓ) exp 
+
+(
+
+ℜ
+
+{∑
+
+> n
+
+η(θ) 
+
+> ℓ
+
+[n]e−jnθ ℓ
+
+}) 
+
+, (61) where 
+
+η(θ) 
+
+> ℓ
+
+[n] ≜ 2ˆ γ ∑
+
+> k
+
+ˆx∗ 
+
+> n,k
+
+ˆα∗ 
+
+> ℓ
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ u∗ 
+
+> ℓ
+
+[k]ˆbHℓ
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+. (62) 8) Updating q(ϕℓ): Taking the expectation with respect to all latent variables except ϕℓ, the variational distribu-tion of ϕℓ is given by 
+
+q(ϕℓ) ∝ exp 
+
+{〈
+
+ln p
+
+(
+
+{r(ℓ)
+
+> n,k
+
+} | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ 
+
+)
+
++ ln p(ϕℓ)
+
+〉
+
+> −ϕℓ
+
+}
+
+.
+
+(63) After removing the terms independent of ϕℓ, we obtain 
+
+ln q(ϕℓ) ∝ ℜ 
+
+2ˆ γ ∑
+
+> n,k
+
+ˆx∗ 
+
+> n,k
+
+ˆα∗ 
+
+> ℓ
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ g∗ 
+
+> ℓ
+
+[n]ˆbHℓ
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+e−jkϕ ℓ
+
+
+
++ ln p(ϕℓ). (64) Equivalently, 
+
+q(ϕℓ) ∝ p(ϕℓ) exp 
+
+(
+
+ℜ
+
+{∑
+
+> k
+
+η(ϕ) 
+
+> ℓ
+
+[k]e−jkϕ ℓ
+
+}) 
+
+, (65) where 
+
+η(ϕ) 
+
+> ℓ
+
+[k] ≜ 2ˆ γ ∑
+
+> n
+
+ˆx∗ 
+
+> n,k
+
+ˆα∗ 
+
+> ℓ
+
+ˆg∗ 
+
+> 0
+
+[n]ˆ u∗
+
+> 0
+
+[k]ˆ g∗ 
+
+> ℓ
+
+[n]ˆbHℓ
+
+〈
+
+r(ℓ)
+
+> n,k
+
+〉
+
+. (66) 9) Updating q(θ0): By taking the expectation over the joint distribution of all latent variables other than θ0, we obtain 
+
+q(θ0) ∝ exp 
+
+{〈
+
+ln p(Y | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ )+ ln p(θ0)
+
+〉
+
+> −θ0
+
+}
+
+.
+
+(67) To derive the update, we rewrite the observation model as 
+
+yn,k = xn,k ˜h(θ0) 
+
+> n,k
+
+ejnθ 0 + wn,k , (68) where 
+
+˜h(θ0) 
+
+> n,k
+
+≜ u0[k]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+αℓbℓgℓ[n]uℓ[k]. (69) 8
+
+Since |ejnθ 0 |2 = 1 , the quadratic term is independent of 
+
+θ0. Hence, 
+
+ln q(θ0) ∝ ℜ 
+
+2ˆ γ ∑
+
+> n,k
+
+ˆx∗
+
+> n,k
+
+(¯h(θ0)
+
+> n,k
+
+)H
+
+yn,k e−jnθ 0
+
+ + ln p(θ0),
+
+(70) where 
+
+¯h(θ0) 
+
+> n,k
+
+≜
+
+〈˜h(θ0)
+
+> n,k
+
+〉
+
+> −θ0
+
+= ˆ u0[k]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+ˆαℓ ˆbℓ ˆgℓ[n]ˆ uℓ[k]. (71) Thus, 
+
+q(θ0) ∝ p(θ0) exp 
+
+(
+
+ℜ
+
+{∑
+
+> n
+
+η(θ)0 [n]e−jnθ 0
+
+}) 
+
+, (72) where 
+
+η(θ)0 [n] ≜ 2ˆ γ ∑
+
+> k
+
+ˆx∗
+
+> n,k
+
+(¯h(θ0)
+
+> n,k
+
+)H
+
+yn,k . (73) 10) Updating q(ϕ0): Finally, taking the expectation with respect to all latent variables except ϕ0, we have 
+
+q(ϕ0) ∝ exp 
+
+{〈
+
+ln p(Y | X, α, θ, ϕ, ω, ψ, θ 0, ϕ 0, γ )+ ln p(ϕ0)
+
+〉
+
+> −ϕ0
+
+}
+
+.
+
+(74) We rewrite the observation model as 
+
+yn,k = xn,k ˜h(ϕ0) 
+
+> n,k
+
+ejkϕ 0 + wn,k , (75) where 
+
+˜h(ϕ0) 
+
+> n,k
+
+≜ g0[n]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+αℓbℓgℓ[n]uℓ[k]. (76) Since |ejkϕ 0 |2 = 1 , the quadratic term is independent of 
+
+ϕ0. Therefore, 
+
+ln q(ϕ0) ∝ ℜ 
+
+2ˆ γ ∑
+
+> n,k
+
+ˆx∗
+
+> n,k
+
+(¯h(ϕ0)
+
+> n,k
+
+)H
+
+yn,k e−jkϕ 0
+
+ + ln p(ϕ0),
+
+(77) where 
+
+¯h(ϕ0) 
+
+> n,k
+
+≜
+
+〈˜h(ϕ0)
+
+> n,k
+
+〉
+
+> −ϕ0
+
+= ˆ g0[n]
+
+> ˆL
+
+∑
+
+> ℓ=1
+
+ˆαℓ ˆbℓ ˆgℓ[n]ˆ uℓ[k]. (78) Hence, 
+
+q(ϕ0) ∝ p(ϕ0) exp 
+
+(
+
+ℜ
+
+{∑
+
+> k
+
+η(ϕ)0 [k]e−jkϕ 0
+
+}) 
+
+, (79) where 
+
+η(ϕ)0 [k] ≜ 2ˆ γ ∑
+
+> n
+
+ˆx∗
+
+> n,k
+
+(¯h(ϕ0)
+
+> n,k
+
+)H
+
+yn,k . (80) Algorithm 1 Proposed Asynchronous JED-VB Algorithm 
+
+Require: Y, P, D, X , ˆL, Imax 
+
+Ensure: ˆX, ˆH, ˆγ, ˆθ0, ˆϕ0, { ˆαℓ, ˆβℓ, ˆωℓ, ˆψℓ, ˆθℓ, ˆϕℓ}ˆLℓ=1 
+
+Pilot-based initialization 
+
+1: Extract pilot observations Yp and set Yres  
+
+> p
+
+← Yp.
+
+2: for ℓ = 1 , . . . , ˆL do 
+
+3: Initialize (ˆ ωℓ, ˆψℓ, ˆθℓ, ˆϕℓ, ˆαℓ, ˆbℓ) from Yres  
+
+> p
+
+.
+
+4: Remove the initialized path contribution from Yres  
+
+> p
+
+.
+
+5: end for 
+
+6: Refine ˆα by ridge LS over pilot REs. 
+
+7: Initialize ˆβℓ, ˆταℓ , ˆγ, ˆxn,k , ˆθ0, and ˆϕ0.
+
+8: Construct the initial channel estimate ˆH using (34). Joint estimation and detection 
+
+9: for i = 1 , . . . , I max do 
+
+10: Reorder paths according to |ˆαℓ|2 + ˆ ταℓ .
+
+11: Update q(xn,k ) for all data REs using (33)–(36). 
+
+12: Update q(θ0) and q(ϕ0) using (72) and (79). 
+
+13: for ℓ = 1 , . . . , ˆL do 
+
+14: Form ⟨r(ℓ) 
+
+> n,k
+
+⟩ and compute zℓ using (30) and (50). 
+
+15: Update q(ωℓ) and q(ψℓ) using (53) and (58). 
+
+16: Update q(θℓ) and q(ϕℓ) using (61) and (65). 
+
+17: Update q(αℓ) and q(βℓ) using (40) and (44). 
+
+18: end for 
+
+19: Reconstruct ˆH using (34). 
+
+20: Update q(γ) using (46)–(47). 
+
+21: end for 
+
+TABLE I Simulation Parameters BS array size (NH , N V ) (8 , 8) 
+
+Total number of BS antennas M =
+
+NH NV
+
+64 
+
+Number of OFDM subcarriers Nsc 1024 
+
+Number of OFDM symbols Ksym 10 
+
+System bandwidth B 100 MHz OFDM symbol duration Tsym 1/∆f = 10 .24 μsPilot spacing Df 16 
+
+Number of pilot subcarriers Np 64 
+
+Number of true channel paths Ltrue 6
+
+Number of candidate paths L 12 
+
+Number of moving targets 2
+
+Elevation angle ψ U(−π/ 3, π/ 3) 
+
+Azimuth angle ω U(−π/ 3, π/ 3) 
+
+Delay τ U(0 , τ max )
+
+Maximum delay τmax 
+
+0.92Df ∆f = 288 ns Carrier frequency fc 15 GHz Maximum speed vmax 50 m/s Maximum Doppler νmax vmax /λ c = 2 .5 kHz Elevation angle θ U(−π/ 3, π/ 3) 
+
+Azimuth angle ϕ U(−π/ 3, π/ 3) 
+
+Relative path delay τt U(0 .152 μs, 0.288 μs)
+
+Doppler νt for static paths 0
+
+Doppler νt for moving path U(−νmax , ν max )
+
+V. Simulation Results In this section, simulation results are provided to evaluate the performance of the proposed approach in asynchronous uplink OFDM-ISAC systems. The data-detection performance is measured by the BER, while 9
+
+channel reconstruction is assessed by 
+
+NMSE( ̂ h) = 10 log 10 
+
+(
+
+∥h −̂ h∥22
+
+∥h∥22
+
+)
+
+, (81) where h and ̂ h denote the true and estimated channels, respectively. For the physical parameters, we report 
+
+MSE( ̂ z) = 10 log 10 
+
+(∥z −̂ z∥22
+
+) , (82) where z and ̂ z denote the true and estimated parameter vectors, respectively. This metric is evaluated for the path gains, delays, Doppler shifts, azimuth angles, and elevation angles, denoted by ̂ α,̂ τ ,̂ ν,̂ ω, and ̂ ψ, respectively. The simulation parameters used throughout this study are summarized in Table I. The proposed method is compared with the following baselines:  
+
+> •
+
+SBL [43]: SBL models the received pilot signal with a sparse parametric dictionary over angle, delay phase, and Doppler phase, and refines the dictionary grid points iteratively in an off-grid Bayesian inference procedure. In our asynchronous adaptation, the al-gorithm first estimates the effective path parameters, after which TO τ0 is recovered by LoS anchoring and CFO ν0 is estimated from the static-path cluster to recover the physical Dopplers.  
+
+> •
+
+SAGE [22]: SAGE is adapted to the asynchronous bistatic setting as a space-alternating generalized EM estimator with sequential conditional updates of the effective path parameters. The common CFO is up-dated once per iteration from the static-path cluster, while the TO remains absorbed in the effective delays and is recovered afterward via LoS anchoring.  
+
+> •
+
+AB2FM [32]: AB2FM first estimates the AoAs and constructs a clean LoS reference signal. The common CFO and TO are then suppressed through a signal-ratio operation, after which AB2FM jointly estimates the Doppler and the delay relative to the LoS path using the pre-estimated AoAs.  
+
+> •
+
+VB pilot: This is a reduced version of the proposed method that excludes the data-detection stage. It re-lies only on pilot observations for channel-parameter estimation. Fig. 2 presents the SER performance versus SNR. All considered methods achieve reliable data detection in the simulated SNR range. Nevertheless, the proposed method consistently attains a slightly lower SER than the baselines, mainly due to its channel refinement stage. By jointly refining the channel estimate and detecting the transmitted symbols, the proposed framework improves the reliability of both channel estimation and data detec-tion. Fig. 3 presents the channel reconstruction NMSE ver-sus SNR. The pilot-only VB method already provides promising performance compared with SAGE, SBL, and AB2FM, indicating the effectiveness of the proposed VB inference framework for channel estimation. After incorpo-rating the detected data symbols in the refinement stage, the proposed method achieves a substantial performance -10 -8 -6 -4 10 -5             
+
+> 10 -4
+> 10 -3
+> 10 -2
+> Fig. 2. SER performance versus SNR. -10 -8 -6 -4 -2 0246810 -60 -55 -50 -45 -40 -35 -30 -25 -20 -15 -10
+> SBL SAGE AB2FM VB pilot Proposed method
+> Fig. 3. Channel reconstruction NMSE versus SNR for different estimation schemes.
+
+improvement, with an approximately 10 dB NMSE gain over the pilot-only case. This confirms that reliable data detection can provide additional information for channel refinement, thereby enhancing the accuracy of channel estimation. Fig. 4 presents the MSE of complex path-gain estima-tion as a function of SNR. The pilot-only VB method achieves performance comparable to SAGE and SBL, which is expected since these approaches all rely on statistical inference to exploit the sparse multipath struc-ture. By incorporating detected data symbols into the refinement stage, the proposed JED-VB method substan-tially improves the path-gain estimation accuracy and consistently outperforms all baselines. Figs. 5 and 6 show the MSE performance of azimuth-and elevation-angle estimation as a function of SNR. The proposed method achieves the best performance for both angular components over the entire SNR range. The pilot-only VB method also performs slightly better than 10 -10 -8 -6 -4 -2 0 2 4 6 8 10 -45 -40 -35 -30 -25 -20 -15 -10 -5 
+
+> SBL SAGE AB2FM VB pilot Proposed method
+
+Fig. 4. Complex path-gain estimation MSE versus SNR. -10 -8 -6 -4 -2 0 2 4 6 8 10 -70 -60 -50 -40 -30 -20 -10 0
+
+> SBL SAGE AB2FM VB pilot Proposed method
+
+Fig. 5. MSE of azimuth-angle estimation versus SNR. -10 -8 -6 -4 -2 0 2 4 6 8 10 -80 -70 -60 -50 -40 -30 -20 -10 0
+
+> SBL SAGE AB2FM VB pilot Proposed method
+
+Fig. 6. MSE of elevation-angle estimation versus SNR. 
+
+SAGE and SBL, indicating the advantage of the proposed Bayesian inference formulation for gridless angular esti-mation. Specifically, instead of relying on an exhaustive search or a predefined angular dictionary, the proposed method approximates the angular posterior distributions by von Mises distributions, which leads to efficient and tractable updates. Furthermore, the data-aided refinement stage provides additional reliable observations through the detected data symbols, thereby substantially improving the accuracy of both azimuth and elevation estimation. -10 -8 -6 -4 -2 0 2 4 6 8 10 -100 -90 -80 -70 -60 -50 -40 -30 -20 -10 
+
+> SBL SAGE AB2FM VB pilot Proposed method
+
+Fig. 7. MSE of path-delay estimation versus SNR. -10 -8 -6 -4 -2 0 2 4 6 8 10 -90 -85 -80 -75 -70 -65 -60 -55 -50 
+
+> SBL SAGE AB2FM VB pilot Proposed method
+
+Fig. 8. MSE of timing-offset estimation versus SNR. 
+
+Figs. 7 and 8 show the MSE performance of path-delay and timing-offset estimation, respectively. The proposed method consistently outperforms all baseline schemes across the considered SNR range. In the pilot-only case, the VB method achieves accuracy comparable to SAGE and SBL, which demonstrates the effectiveness of the proposed inference formulation for delay-domain param-eter estimation. AB2FM performs worse than the other baselines, especially at moderate and high SNR, which suggests that it is more sensitive to residual synchro-11 
+
+nization mismatch and multipath coupling. SAGE, SBL, and pilot-only VB follow similar trends because they rely mainly on pilot observations. Their performance improves with SNR but the gain becomes limited at high SNR, likely due to limited pilot resources, grid mismatch in SBL, and local convergence sensitivity in SAGE. With the data-aided refinement stage, the proposed method further improves the estimation accuracy by exploiting the detected data symbols as additional observations. This leads to a substantial performance gain for both path-delay and TO estimation, confirming the advantage of the proposed JED-VB framework in asynchronous OFDM-ISAC systems. -10 -8 -6 -4 -2 0 2 4 6 8 10 -45 -40 -35 -30 -25 -20 -15 -10 -5 0            
+
+> SBL SAGE AB2FM VB pilot Proposed method
+> Fig. 9. MSE of velocity estimation versus SNR. -10 -8 -6 -4 -2 0246810 -55 -50 -45 -40 -35 -30 -25 -20 -15 -10
+> SBL SAGE AB2FM VB pilot Proposed method
+> Fig. 10. MSE of CFO estimation versus SNR.
+
+Figs. 9 and 10 present the MSE performance of velocity and CFO estimation, respectively. The proposed method achieves the best performance over the entire SNR range. For velocity estimation, the pilot-only VB method already outperforms SAGE, SBL, and AB2FM, demonstrating the effectiveness of the proposed inference framework for Doppler estimation. For CFO estimation, the baselines exhibit clear performance saturation, while the VB-based methods continue to improve with SNR because the CFO is explicitly modeled and jointly updated with the channel parameters. With data-aided refinement, the proposed method further reduces the estimation error by exploiting detected data symbols as additional observations. A. 3D Target Position Estimation This subsection illustrates the impact of residual TO and CFO on sensing performance in the considered OFDM-ISAC system. Let pU ∈ R3 and pB ∈ R3 denote the known UE and BS positions, respectively, and let 
+
+p ∈ R3 denote the target position. Suppose that the BS estimates the target azimuth and elevation as (ˆ ω, ˆψ). The corresponding unit direction vector is 
+
+ˆu =
+
+
+
+cos ˆψ cos ˆ ω
+
+cos ˆψ sin ˆ ω
+
+sin ˆψ
+
+ . (83) Hence, the target lies on the ray 
+
+p = pB + rˆu, (84) where r ≥ 0 is the BS-to-target distance. Let 
+
+dUB ≜ ∥pU − pB∥ (85) denote the UE-BS baseline. If ˆτ denotes the estimated bistatic excess delay relative to the direct UE-BS path, then 
+
+cˆτ = ∥p − pU∥ + ∥p − pB∥ − dUB . (86) Substituting (84) into (86) gives 
+
+r + ∥pB + rˆu − pU∥ = dUB + cˆτ . (87) Define 
+
+b ≜ pU − pB, d ≜ ∥b∥, s ≜ d + cˆτ . (88) Then 
+
+r + ∥rˆu − b∥ = s. (89) Squaring both sides and using ∥ˆu∥ = 1 yields 
+
+r2 − 2rˆuT b + d2 = s2 − 2sr + r2, (90) which leads to 
+
+ˆr = s2 − d2
+
+2 ( s − ˆuT b) . (91) Therefore, the 3D target position estimate is 
+
+ˆp = pB + ˆ r ˆu. (92) Equivalently, in Cartesian coordinates, 
+
+ˆx = xB + ˆ r cos ˆψ cos ˆ ω, (93) 
+
+ˆy = yB + ˆ r cos ˆψ sin ˆ ω, (94) 
+
+ˆz = zB + ˆ r sin ˆψ. (95) Fig. 11 shows the 3D position and velocity estima-tion results at SNR = 10 dB. With TO and CFO compensation, the proposed method accurately recovers 12 
+
+Fig. 11. 3D position and velocity estimation of moving targets with and without TO/CFO compensation. 
+
+the moving targets. However, when TO and CFO are ignored, the estimated target states deviate significantly from the true ones. This demonstrates that residual timing and frequency offsets can cause severe localization and velocity-estimation errors in OFDM-ISAC systems. Hence, it is important to design receivers that jointly account for synchronization, communication, and sensing tasks to ensure reliable data detection and accurate target parameter estimation. VI. Conclusion In this paper, we developed a joint channel estima-tion, synchronization, and data detection framework for asynchronous uplink OFDM-ISAC systems. By explic-itly modeling the residual TO and CFO, the proposed method jointly infers the transmitted data symbols, multi-path channel parameters, and synchronization parameters within a unified VB framework. In particular, the UPA steering response was expressed in a separable form, which enables efficient gridless estimation of the angular parameters through von Mises distributions. Furthermore, a data-aided refinement stage was introduced to exploit the detected data symbols as additional observations, thereby improving both communication and sensing per-formance. Simulation results demonstrated that the pro-posed method outperforms SBL, SAGE, AB2FM, and the pilot-only VB method across various metrics, including SER, channel NMSE, channel’s parameters estimation, as well as TO and CFO estimation. The results further indicate that neglecting TO and CFO significantly impairs localization accuracy and velocity estimation. This under-scores the need for synchronization-aware receiver designs in ISAC systems. Overall, the findings demonstrate that the proposed JED-VB framework enables robust data detection and precise sensing-parameter estimation in asynchronous OFDM-ISAC scenarios. References 
+
+[1] A. Zhang, M. L. Rahman, X. Huang, Y. J. Guo, S. Chen, and R. W. Heath, “Perceptive mobile networks: Cellular networks with radio vision via joint communication and radar sensing,” IEEE Veh. Technol. Mag., vol. 16, no. 2, pp. 20–30, 2020. [2] Y. Cui, F. Liu, X. Jing, and J. Mu, “Integrating sensing and communications for ubiquitous IoT: Applications, trends, and challenges,” IEEE Netw., vol. 35, no. 5, pp. 158–167, 2021. [3] N. González-Prelcic, M. F. Keskin, O. Kaltiokallio, M. Valkama, D. Dardari, X. Shen, Y. Shen, M. Bayraktar, and H. Wymeersch, “The integrated sensing and communication revolution for 6G: Vision, techniques, and applications,” Proc. IEEE, vol. 112, no. 7, pp. 676–723, 2024. [4] C. B. Barneto, T. Riihonen, M. Turunen, L. Anttila, M. Fleis-cher, K. Stadius, J. Ryynänen, and M. Valkama, “Full-duplex OFDM radar with LTE and 5G NR waveforms: Challenges, solutions, and measurements,” IEEE Trans. Microw. Theory Tech., vol. 67, no. 10, pp. 4042–4054, 2019. [5] M. Bayraktar, N. González-Prelcic, M. Valkama, H. Chen, and C. Jianzhong Zhang, “Integrated monostatic sensing and full-duplex multiuser communication for mmWave systems,” IEEE Trans. Wirel. Commun., vol. 25, pp. 10 904–10 920, 2026. [6] N. T. Nguyen, N. Shlezinger, Y. C. Eldar, and M. Juntti, “Multiuser MIMO wideband joint communications and sensing system with subcarrier allocation,” IEEE Trans. Signal Process., vol. 71, pp. 2997–3013, 2023. [7] F. Zhang, T. Mao, R. Liu, Z. Han, S. Chen, and Z. Wang, “Cross-domain dual-functional OFDM waveform design for accurate sensing/positioning,” IEEE J. Sel. Areas Commun., vol. 42, no. 9, pp. 2259–2274, 2024. [8] Y. He, G. Yu, Z. Tang, J. Wang, and H. Luo, “A dual-functional sensing-communication waveform design based on OFDM,” IEEE Trans. Wirel. Commun., vol. 23, no. 11, pp. 16 962–16 975, 2024. [9] Z. Cheng, Z. He, and B. Liao, “Hybrid beamforming design for ofdm dual-function radar-communication system,” IEEE J. Sel. Top. Signal Process., vol. 15, no. 6, pp. 1455–1467, 2021. [10] F. Wang, H. Li, and M. A. Govoni, “Power allocation and co-design of multicarrier communication and radar systems for spectral coexistence,” IEEE Trans. Signal Process., vol. 67, no. 14, pp. 3818–3831, 2019. [11] C. Shi, F. Wang, S. Salous, and J. Zhou, “Joint subcarrier assignment and power allocation strategy for integrated radar and communications system based on power minimization,” IEEE Sens. J., vol. 19, no. 23, pp. 11 167–11 179, 2019. [12] A. Ahmed, Y. D. Zhang, A. Hassanien, and B. Himed, “OFDM-based joint radar-communication system: Optimal sub-carrier allocation and power distribution by exploiting mutual infor-mation,” in 2019 53rd Proc. Asilomar Conf. Signals, Systems, and Comp. IEEE, 2019, pp. 559–563. [13] S. Mura, D. Tagliaferri, M. Mizmizi, U. Spagnolini, and A. Petropulu, “Optimized waveform design for OFDM-based ISAC systems under limited resource occupancy,” IEEE Trans. Wirel. Commun., 2025. [14] P. Li, M. Li, R. Liu, Q. Liu, and A. L. Swindlehurst, “Sensing-oriented adaptive resource allocation designs for OFDM-ISAC systems,” IEEE Trans. Signal Process., vol. 73, pp. 5121–5135, 2025. [15] N. González-Prelcic, D. Tagliaferri, M. F. Keskin, H. Wymeer-sch, and L. Song, “Six integration avenues for ISAC in 6G and beyond: A forward-looking vision,” IEEE Veh. Technol. Mag., 2025. [16] K. Wu, J. Pegoraro, F. Meneghello, J. A. Zhang, J. O. Lacruz, J. Widmer, F. Restuccia, M. Rossi, X. Huang, D. Zhang et al., “Sensing in bistatic ISAC systems with clock asynchronism: A signal processing perspective,” IEEE Signal Process. Mag., vol. 41, no. 5, pp. 31–43, 2024. [17] J. Zhao, Z. Lu, J. A. Zhang, S. Dong, and S. Zhou, “Multiple-target Doppler frequency estimation in ISAC with clock asyn-chronism,” IEEE Trans. Veh. Technol., vol. 73, no. 1, pp. 1382– 1387, 2024. [18] Z. Ni, J. A. Zhang, X. Huang, K. Yang, and J. Yuan, “Up-link sensing in perceptive mobile networks with asynchronous transceivers,” IEEE Trans. Signal Process., vol. 69, pp. 1287– 1300, 2021. 13 
+
+[19] H. Luo, Y. Wang, D. Luo, J. Zhao, H. Wu, S. Ma, and F. Gao, “Integrated sensing and communications in clutter environment,” IEEE Trans. Wirel. Commun., vol. 23, no. 9, pp. 10 941–10 956, 2024. [20] T. M. Schmidl and D. C. Cox, “Low-overhead, low-complexity [burst] synchronization for OFDM,” in Proc. ICC/SUPERCOMM-Int. Conf. Commun., vol. 3. IEEE, 1996, pp. 1301–1306. [21] M.-O. Pun, M. Morelli, and C.-C. J. Kuo, “Iterative detection and frequency synchronization for OFDMA uplink transmis-sions,” IEEE Trans. Wirel. Commun., vol. 6, no. 2, pp. 629–639, 2007. [22] T.-H. Pham, A. Nallanathan, and Y.-C. Liang, “Joint channel and frequency offset estimation in distributed MIMO flat-fading channels,” IEEE Trans. Wirel. Commun., vol. 7, no. 2, pp. 648– 656, 2008. [23] G. Sun, Y. Li, X. Yi, W. Wang, X. Gao, L. Wang, F. Wei, and Y. Chen, “Massive grant-free OFDMA with timing and frequency offsets,” IEEE Trans. Wirel. Commun., vol. 21, no. 5, pp. 3365–3380, 2021. [24] C. Wei, H. Jiang, J. Dang, L. Wu, and H. Zhang, “Accurate channel estimation for mmWave massive MIMO with partially coherent phase offsets,” IEEE Commun. Lett., vol. 26, no. 9, pp. 2170–2174, 2022. [25] K. Ito, T. Takahashi, K. Ishibashi, K. Igarashi, and S. Ibi, “Joint channel, CFO, and data estimation via Bayesian inference for multi-user MIMO-OFDM systems,” IEEE Trans. Wirel. Commun., vol. 24, no. 3, pp. 1898–1915, 2024. [26] N. J. Myers and R. W. Heath, “Message passing-based joint CFO and channel estimation in mmWave systems with one-bit ADCs,” IEEE Trans. Wirel. Commun., vol. 18, no. 6, pp. 3064– 3077, 2019. [27] J. A. Zhang, K. Wu, X. Huang, Y. J. Guo, D. Zhang, and R. W. Heath, “Integration of radar sensing into communications with asynchronous transceivers,” IEEE Commun. Mag., vol. 60, no. 11, pp. 106–112, 2022. [28] X. Li, J. A. Zhang, K. Wu, Y. Cui, and X. Jing, “CSI-ratio-based Doppler frequency estimation in integrated sensing and communications,” IEEE Sens. J., vol. 22, no. 21, pp. 20 886– 20 895, 2022. [29] Z. Ni, J. A. Zhang, K. Wu, and R. P. Liu, “Uplink sensing using CSI ratio in perceptive mobile networks,” IEEE Trans. Signal Process., vol. 71, pp. 2699–2712, 2023. [30] Y. Zeng, D. Wu, J. Xiong, E. Yi, R. Gao, and D. Zhang, “Farsense: Pushing the range limit of WiFi-based respiration sensing with CSI ratio of two antennas,” Proc. ACM Interact. Mob. Wearable Ubiquitous Technol., vol. 3, no. 3, pp. 1–26, 2019. [31] Y. Zeng, D. Wu, J. Xiong, J. Liu, Z. Liu, and D. Zhang, “Multisense: Enabling multi-person respiration sensing with commodity WiFi,” Proc. ACM Interact. Mob. Wearable Ubiq-uitous Technol., vol. 4, no. 3, pp. 1–29, 2020. [32] L. Zhao, Z. Ni, Y. Feng, J. Li, X. Bu, and J. Andrew Zhang, “High-resolution uplink sensing in Millimeter-Wave ISAC sys-tems,” IEEE Trans. Commun., vol. 73, no. 11, pp. 12 680–12 695, 2025. [33] J. Pegoraro, J. O. Lacruz, T. Azzino, M. Mezzavilla, M. Rossi, J. Widmer, and S. Rangan, “JUMP: Joint communication and sensing with unsynchronized transceivers made practical,” IEEE Trans. Wirel. Commun., vol. 23, no. 8, pp. 9759–9775, 2024. [34] J. Zhao, Z. Lu, J. A. Zhang, S. Dong, and S. Zhou, “Multiple-target Doppler frequency estimation in ISAC with clock asyn-chronism,” IEEE Trans. Veh. Technol., vol. 73, no. 1, pp. 1382– 1387, 2023. [35] G. Ventura, M. Rossi, and J. Pegoraro, “Asymov: Integrated sensing and communications with asynchronous moving de-vices,” IEEE Trans. Wirel. Commun., vol. 25, pp. 11 480–11 496, 2026. [36] Y. Li, Y. Zhang, C. Masouros, S. Pollin, and F. Liu, “Rethinking signaling design for ISAC: From pilot-based to payload-based sensing,” IEEE Commun. Stand. Mag., 2026. [37] C. Xu, X. Yu, F. Liu, and S. Jin, “Exploiting both pilots and data payloads for integrated sensing and communications,” IEEE Trans. Wirel. Commun., 2025. [38] D. Brunner, L. G. de Oliveira, C. Muth, S. Mandelli, M. Hen-ninger, A. Diewald, Y. Li, M. B. Alabd, L. Schmalen, T. Zwick et al., “Bistatic OFDM-based ISAC with over-the-air synchro-nization: System concept and performance analysis,” IEEE Trans. Microw. Theory Tech., vol. 73, no. 5, pp. 3016–3029, 2024. [39] S. Park, J. W. Choi, J.-Y. Seol, and B. Shim, “Expectation-maximization-based channel estimation for multiuser MIMO systems,” IEEE Trans. Commun., vol. 65, no. 6, pp. 2397–2410, 2017. [40] S. Nassirpour, T.-V. Nguyen, H. Q. Ngo, L.-N. Tran, T. Rat-narajah, and D. H. Nguyen, “Variational Bayesian channel estimation and data detection for cell-free massive MIMO with low-resolution quantized fronthaul links,” IEEE J. Sel. Top. Signal Process., 2025. [41] J. Hu, I. Valiulahi, and C. Masouros, “ISAC receiver design: A learning-based two-stage joint data-and-target parameter estimation,” IEEE Wirel. Commun. Lett., vol. 13, no. 8, pp. 2105–2109, 2024. [42] X. Yang, H. Li, Q. Guo, J. A. Zhang, X. Huang, and Z. Cheng, “Sensing aided uplink transmission in OTFS ISAC with joint parameter association, channel estimation and signal detection,” IEEE Trans. Veh. Technol., vol. 73, no. 6, pp. 9109–9114, 2024. [43] P. Maity, S. Srivastava, A. K. Jagannatham, and L. Hanzo, “Joint angle and velocity-estimation for target localization in bistatic mmWave MIMO radar in the presence of clutter,” IEEE Trans. Commun., vol. 73, no. 10, pp. 9846–9860, 2025. [44] P. Maity, D. Harish, S. Srivastava, A. K. Jagannatham, and L. Hanzo, “Super-resolution-based Bayesian learning for the localization of extended targets in mmWave MIMO OFDM systems,” IEEE Open J. Veh. Technol., vol. 6, pp. 3000–3016, 2025. [45] ——, “Variational Bayesian learning for 3-D localization of extended targets in mmwave MIMO OFDM isac systems,” IEEE Open J. Commun. Soc., vol. 6, pp. 4421–4436, 2025. [46] C. M. Bishop and N. M. Nasrabadi, Pattern Recognition and Machine Learning. Springer, 2006, vol. 4, no. 4. [47] M. W. et al, “Graphical Models, Exponential Families, and Variational Inference,” Foundations and Trends® in Machine Learning, vol. 1, no. 1–2, pp. 1–305, 2008. [48] M.-A. Badiu, T. L. Hansen, and B. H. Fleury, “Variational Bayesian inference of line spectral,” IEEE Trans. Signal Pro-cess., vol. 65, no. 9, pp. 2247–2261, 2017.

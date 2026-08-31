@@ -1,0 +1,1653 @@
+Title: Real-Time Reconstruction of Markov Sources over MPR Channels
+
+URL Source: https://arxiv.org/pdf/2608.27116v1
+
+Published Time: Fri, 28 Aug 2026 01:19:57 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> IEEE TRANSACTIONS ON COMMUNICATIONS 1
+
+# Real-Time Reconstruction of Markov Sources over MPR Channels 
+
+Pansee S. Elessawy and Nikolaos Pappas 
+
+Abstract —This paper studies the real-time reconstruction and remote actuation of two binary Markov sources over a shared wireless channel with multi-packet reception (MPR). Unlike many existing collision-based formulations that discard simulta-neous transmissions, we exploit MPR and evaluate communica-tion through reconstruction and actuation errors rather than raw delivery rates. We consider two sensors observing the sources and aim to find sampling policies that minimize the weighted real-time reconstruction error (RTE), or equivalently the weighted cost of actuation error (CAE) for the considered binary sources, under per-sensor sampling constraints. We first obtain closed-form expressions for the RTE and CAE in terms of the effective update probabilities. When the sensors randomize independently, the MPR-induced update-rate map becomes bilinear, and the constrained optimization is nonconvex. We exploit the geometry of the achievable update-rate region to show that the search over Pareto-efficient independently randomized policies reduces to a finite set of one-dimensional boundary-branch searches with closed-form candidates. As a benchmark, we allow time sharing among joint sensor actions, and we prove that at most two Pareto-extreme modes are sufficient, and use this benchmark to quantify the loss caused by independent randomization. Numerical results reveal that MPR capability alone is not sufficient; simultaneous decoding improves the task-oriented objective only when con-current reception is reliable for both sources; otherwise, policies that avoid simultaneous transmissions can be equally effective. 
+
+Index Terms —Goal-oriented and semantics-aware communi-cation, real-time reconstruction, cost of actuation error, Markov sources, multi-packet reception. 
+
+I. I NTRODUCTION 
+
+# REAL-TIME monitoring, tracking, and remote actuation are central to emerging cyber-physical and autonomous systems, including industrial automation, swarm robotics, au-tonomous transportation, and networked control [1]–[3]. In such systems, sensing devices observe a time-varying source and transmit status updates to a remote receiver that recon-structs the state and drives an actuation process. As these sys-tems scale, the generated data grows rapidly while bandwidth, channel-access opportunities, and energy remain limited [4], making it inefficient, and often infeasible, to transmit every observation. The key question is therefore not how to deliver 
+
+more data, but how to deliver the right data at the right time, so that the reconstruction and the actuation remain effective. Traditional communication design is largely content-agnostic, treating all packets as equally important and opti-mizing rate- or delay-oriented metrics. This is not suitable for                  
+
+> This work was supported by ELLIIT. A shorter version of this paper has been accepted for presentation at the 2026 IEEE Information Theory Workshop (ITW 2026). The authors are with the Department of Computer and Informa-tion Science, Link¨ oping University, 581 83 Link¨ oping, Sweden (e-mail: pansee.elessawy@liu.se; nikolaos.pappas@liu.se).
+
+task-oriented systems, where the value of an update depends on what it conveys and on how it affects the receiver’s decisions [3], [5]. The semantics-aware and goal-oriented 
+
+paradigm addresses this gap by jointly designing the genera-tion, transmission, and utilization of information according to its significance for the underlying task [6]–[10]. Within this paradigm, several semantic metrics quantify timeliness and relevance. The Age of Information (AoI) [11]–[13] measures freshness but is agnostic to content; the Age of Incorrect Information (AoII) [14]–[18] couples staleness with estimation error; and the Version Age of Information (VAoI) [19] counts how many versions the receiver lags behind the source. State-and context-aware extensions [20], [21]. A common limitation, however, is that these metrics treat all reconstruction errors as equally costly, which is rarely the case in control and actuation. To capture the state-dependent consequences of erroneous actuation, the CAE was introduced in [2] and subsequently adopted [1], [22] as a task-oriented distortion measure that assigns possibly asymmetric, non-commutative costs to the mismatch states between the source and its reconstruction. Together with the related real-time reconstruction error, it directly reflects the impact of stale or incorrect information on the receiver’s decisions, and is thus a natural objective for remote tracking for actuation. Semantics-aware joint sampling and transmission policies for real-time tracking of Markov sources [1], [22] show that change-aware policies can outperform content-agnostic ones, and that transmitting fewer but more significant updates can be optimal. Fundamental limits of remote estimation under communication constraints were studied in [23], [24]. The multi-source setting, in which an agent must schedule updates from several Markov sources over a constrained chan-nel, has been addressed in [4], [25]–[27] through constrained Markov decision process (CMDP) formulations, structural analyses of the optimal policy, and low-complexity online algorithms. Pull-based remote tracking with correlated or partial observations has been studied in [28]–[30]. AoI has been analyzed in multiple-access systems [31] with multi-packet reception (MPR) [32], and unreliable wireless networks with scheduling for weighted AoI minimization [33], [34]. Recent works have studied status updating over ALOHA-based random access channels [35], [36]. The works [37], [38] studied two-state Markov source monitoring including joint model estimation with unknown source statistics and analytical renewal–reward characterizations under random and reactive access policies. Multi-source AoI over shared queues was characterized in [39]. In this paper, we study two independent binary Markov arXiv:2608.27116v1 [cs.IT] 27 Aug 2026 IEEE TRANSACTIONS ON COMMUNICATIONS 2
+
+sources that share a wireless multiple-access channel with MPR. Unlike collision-based access, MPR allows the receiver to decode more than one simultaneous transmission with nonzero probability. The update probability of each source depends not only on its own sampling decisions, but also on the sampling decisions of the other sensor. This coupling creates an interaction between physical-layer reception and task-oriented reconstruction and actuation performance. While prior work has mainly studied goal-oriented sampling over point-to-point links or AoI in random access, the role of MPR in real-time reconstruction of multiple sources and actuation has not been thoroughly investigated . The main contributions are as follows.  
+
+> •
+
+We derive closed-form expressions for the steady-state RTE and CAE of each binary Markov source under synchronize-or-hold estimation.  
+
+> •
+
+We formulate the sampling-constrained independent MPR optimization problem. We then derive a budget-aware total-success envelope that separates dominant-transmitter and cooperative MPR operating regimes.  
+
+> •
+
+We establish a Pareto-reduction result for independent policies: a Pareto-efficient policy does not require both sensors to randomize between the two sources. This re-duces the policy search to a finite set of one-dimensional boundary-branch problems with closed-form candidates.  
+
+> •
+
+We introduce a coordinated MPR time-sharing bench-mark and prove that an optimal coordinated policy re-quires time sharing between at most two Pareto-extreme joint-action modes. This benchmark quantifies the perfor-mance loss caused by independent randomization.  
+
+> •
+
+Numerical results compare collision, capture, and MPR channels, showing that MPR is useful only when simul-taneous reception is reliable for both sources. II. S YSTEM MODEL AND TASK -O RIENTED METRICS 
+
+We consider a time-slotted remote monitoring system with two sensors, two independent binary Markov sources, and a common receiver communicating over a shared wireless channel with multi-packet reception (MPR) as shown in Fig. 1. Time is indexed by t ∈ { 0, 1, 2, . . . }. The state of source 
+
+i ∈ { 1, 2} at slot t is denoted by Xi(t) ∈ { 0, 1} and evolves according to the transition matrix 
+
+Pi =
+
+1 − αi αi
+
+βi 1 − βi
+
+
+
+, αi, β i ∈ (0 , 1) , (1) where αi and βi are the transition probabilities from state 0
+
+to state 1 and from state 1 to state 0, respectively. We define the source correlation parameter 
+
+λi ≜ 1 − αi − βi, i ∈ { 1, 2}. (2) Thus, λi > 0 corresponds to positively correlated source evolution, λi = 0 to memoryless evolution, and λi < 0 to negatively correlated evolution. At each slot, sensor k ∈ { 1, 2} selects an action ak(t) ∈{0, 1, 2}, where ak(t) = 0 denotes silence, while ak(t) = i
+
+means that sensor k samples and transmits the current state of source Xi(t). We focus on stationary randomized sampling policies, where 
+
+Pr {ak(t) = j} = ak,j , j ∈ { 0, 1, 2}, (3) with ak, 0 + ak, 1 + ak, 2 = 1 and ak,j ≥ 0. The policy of sensor k is denoted by ak ≜ (ak, 0, a k, 1, a k, 2), and the joint action by a(t) ≜ (a1(t), a 2(t)) . The randomized decisions are independent across sensors and slots and are not conditioned on the current source values. Let Zk(t) ∈ {0, 1} denote the decoding outcome of sensor k, where Zk(t) = 1 if the packet from sensor k is successfully decoded and Zk(t) = 0 
+
+otherwise. The MPR channel is described by four success probabilities. When only sensor 1 transmits, its packet is decoded with probability p1/1; when only sensor 2 transmits, its packet is decoded with probability p2/2. When both sensors transmit simultaneously, the packet of sensor 1 is decoded with probability p1/1,2 and the packet of sensor 2 is decoded with probability p2/2,1. Naturally, we consider 
+
+p1/1 ≥ p1/1,2, p2/2 ≥ p2/2,1. (4) The MPR probabilities provide a physical-layer abstraction of the wireless reception process and may depend, in a specific channel model, on fading statistics, path loss, interference, and decoding thresholds [40]. For compactness, we introduce the channel notation 
+
+s1 ≜ p1/1, s2 ≜ p2/2, a ≜ p1/1,2, b ≜ p2/2,1,
+
+(5) let P0/{1,2} denote the probability that no packet is decoded when sensors 1 and 2 transmit simultaneously. When both sensors transmit packets carrying information from the same source, a successful update occurs if at least one packet is decoded. Hence, we define 
+
+c ≜ 1 − P0/{1,2}. (6) The receiver maintains an estimate ˆXi(t) ∈ { 0, 1} of each source. A successful update for source i occurs if at least one successfully decoded packet carries the current value Xi(t).Hence, 
+
+Ui(t) ≜ 1
+
+n
+
+(a1(t) = i, Z 1(t) = 1) or (a2(t) = i, Z 2(t) = 1) 
+
+o
+
+,i ∈ { 1, 2}.
+
+(7) The receiver follows a synchronize-or-hold estimator: 
+
+ˆXi(t) = 
+
+(
+
+Xi(t), Ui(t) = 1 ,
+
+ˆXi(t − 1) , Ui(t) = 0 , i ∈ { 1, 2}. (8) The effective update probability of source i is qi ≜
+
+Pr {Ui(t) = 1 }, i ∈ { 1, 2}.Under the independent stationary randomized policy, the effective update probabilities are obtained by summing over the joint actions that deliver the corresponding source, giving 
+
+q1 = s1a1,1a2,0 + s2a1,0a2,1 + ca 1,1a2,1
+
++ aa 1,1a2,2 + ba 1,2a2,1. (9) Similarly, the effective update probability of source X2 is 
+
+q2 = s1a1,2a2,0 + s2a1,0a2,2 + ca 1,2a2,2
+
++ aa 1,2a2,1 + ba 1,1a2,2. (10) 
+
+A. Real-Time Reconstruction Error 
+
+We characterize the reconstruction quality of each source by studying the joint process Yi(t) ≜ (Xi(t), ˆXi(t)) , whose state space is S = {(0 , 0) , (0 , 1) , (1 , 0) , (1 , 1) }. We order the states as s1 = (0 , 0) , s2 = (0 , 1) , s3 = (1 , 0) , s4 = (1 , 1) . Within IEEE TRANSACTIONS ON COMMUNICATIONS 3
+
+INFORMATION SOURCES SOURCE X1(t)     
+
+> 01(1 −α1)
+> α1
+> β1
+> (1 −β1)
+
+Transition Matrix P1
+
+SOURCE X2(t)     
+
+> 01(1 −α2)
+> α2
+> β2
+> (1 −β2)
+
+Transition Matrix P2
+
+SENSOR 1 
+
+policy a1
+
+SENSOR 2 
+
+policy a2
+
+MPR 
+
+CHANNEL 
+
+RECEIVER 
+
+R
+
+ˆX1(t) 
+
+> Estimate of X1
+
+ˆX2(t) 
+
+> Estimate of X2
+
+a1,1
+
+a2,1
+
+a1,2
+
+a2,2
+
+> U1(t) = 1
+> (Success)
+> U2(t) = 1
+> (Success) MPR Probabilities:
+> p1/1, p 2/2, p 1/1,2, p 2/2,1
+
+Fig. 1: System model for status updates from independent binary Markov sources through an MPR-capable channel. each slot, the source first evolves, and then a successfully decoded update synchronizes the receiver estimate with the current source value. If no update is decoded, the receiver keeps its previous estimate. Under this convention, Yi(t) is a four-state Markov chain with transition matrix Ti, whose entries are 
+
+Ti(k, ℓ ) = Pr {Yi(t + 1) = sℓ | Yi(t) = sk}. (11) Using (1) and (8), direct enumeration gives 
+
+Ti =
+
+
+
+1 − αi 0 αi(1 − qi) αiqi
+
+qi(1 − αi) (1 − αi)(1 − qi) 0 αi
+
+βi 0 (1 − βi)(1 − qi) qi(1 − βi)
+
+βiqi βi(1 − qi) 0 1 − βi
+
+ .
+
+(12) 
+
+For example, starting from (0 , 0) , the process moves to (1 , 0) 
+
+with probability αi(1 − qi) when the source changes from 0 to 
+
+1 but no update is received, and to (1 , 1) with probability αiqi
+
+when the source change is followed by a successful update. Let πi = πi(0 , 0) , π i(0 , 1) , π i(1 , 0) , π i(1 , 1)  denote the stationary distribution of Yi(t). Then 
+
+πi = πiTi, X
+
+> (x, ˆx)∈S
+
+πi(x, ˆx) = 1 . (13) Following the real-time reconstruction metric in [1], the in-stantaneous reconstruction error of source i is 
+
+Ei(t) ≜ 1{Xi(t)̸ = ˆXi(t)}. (14) The steady-state real-time reconstruction error (RTE) is there-fore 
+
+Ei ≜ Pr {Xi(t)̸ = ˆXi(t)} = πi(0 , 1) + πi(1 , 0) . (15) 
+
+Theorem 1 (Closed-form RTE) . For source i ∈ { 1, 2} and 
+
+qi > 0, the two mismatch states have equal stationary probabilities, 
+
+πi(0 , 1) = πi(1 , 0) ≜ ζi, (16) 
+
+where 
+
+ζi = αiβi(1 − qi)(αi + βi)(αi + βi) − qi(αi + βi − 1)  . (17) 
+
+Consequently, the steady-state RTE using λi = 1 − αi − βi,
+
+Ei(qi) = 2αiβi(1 − qi)(1 − λi)1 − λi(1 − qi) . (18) 
+
+Proof: Let 
+
+π00 ≜ πi(0 , 0) , π01 ≜ πi(0 , 1) ,π10 ≜ πi(1 , 0) , π11 ≜ πi(1 , 1) .
+
+Since the receiver estimate does not affect the source evo-lution, the marginal stationary distribution of Xi(t) is the stationary distribution of the binary Markov chain in (1). Hence, 
+
+π00 + π01 = βi
+
+αi + βi
+
+, π10 + π11 = αi
+
+αi + βi
+
+. (19) From the stationary equations associated with the mismatch states, we have 
+
+π01 = (1 − qi)(1 − αi)π01 + βiπ11 
+
+, (20) and 
+
+π10 = (1 − qi)αiπ00 + (1 − βi)π10 
+
+. (21) Using (19) to eliminate π00 and π11 in (20)–(21) and subtract-ing the resulting equations, gives 
+
+qi(π01 − π10 ) = 0 . (22) Since qi > 0, it follows that π01 = π10 ≜ ζi. Substituting this equality back into either balance equation gives (17). Finally, since Ei = π01 + π10 = 2 ζi, we obtain by rewriting the denominator using λi = 1 − αi − βi which gives (18). It is useful for the optimization analysis to introduce 
+
+Ki ≜ 2αiβi
+
+1 − λi
+
+, Di(qi) ≜ 1 − λi(1 − qi). (23) Then the RTE can be written compactly as 
+
+Ei(qi) = Ki
+
+1 − qi
+
+Di(qi) . (24) 
+
+Remark 1 (Zero-update-rate endpoint) . The stationary charac-terization in Theorem 1 applies to qi > 0. When qi = 0 , no update is ever received, the estimate remains frozen at its initial value, and the joint chain Yi(t) is reducible. Consequently, the time-average error depends on the initial estimate: it equals 
+
+αi/(αi + βi) if ˆXi(0) = 0 , and βi/(αi + βi) if ˆXi(0) = 1 .For the optimization analysis, we define the value at zero by continuous extension 
+
+Ei(0) ≜ lim  
+
+> qi↓0
+
+Ei(qi) = 2αiβi
+
+(αi + βi)2 . (25) Accordingly, every occurrence of qi = 0 in the optimization and candidate sets is understood in this vanishing-positive-IEEE TRANSACTIONS ON COMMUNICATIONS 4
+
+update-rate sense, rather than as the error of an exact zero-update process under an arbitrary initial estimate. 
+
+Theorem 2 (Monotonicity and curvature of the RTE) . For 
+
+qi ∈ [0 , 1] , with Ei(0) defined by the continuous extension in Remark 1, the RTE satisfies 
+
+E′
+
+> i
+
+(qi) = − Ki
+
+Di(qi)2 < 0, (26) 
+
+and 
+
+E′′  
+
+> i
+
+(qi) = 2Kiλi
+
+Di(qi)3 . (27) 
+
+Hence, Ei(qi) is strictly decreasing in the effective update probability. Moreover, it is convex in qi when λi > 0, linear when λi = 0 , and concave when λi < 0.Proof: Differentiating (24) with respect to qi gives (26). Differentiating once more gives (27). Since Di(qi) > 0 for 
+
+qi ∈ [0 , 1] and |λi| < 1, the sign of E′′  
+
+> i
+
+(qi) is determined by the sign of λi.For the two-source system, the weighted RTE is 
+
+F (q1, q 2) = w1E1(q1) + w2E2(q2), w1, w 2 > 0. (28) Here, wi captures the relative semantic or actuation importance of source i. Since each Ei(qi) is strictly decreasing in qi,increasing either effective update probability improves the corresponding reconstruction quality. 
+
+B. Cost of Actuation Error 
+
+We next assign costs to erroneous reconstruction states. For source i, let Cx, ˆxi denote the cost incurred when the true state is x while the reconstructed state is ˆx̸ = x. The cost of actuation error (CAE) of source i is 
+
+¯Ci ≜ X
+
+> x̸=ˆ x
+
+Cx, ˆxi πi(x, ˆx). (29) For the binary source, the only erroneous states are (0 , 1) and 
+
+(1 , 0) , so 
+
+¯Ci = C0,1 
+
+> i
+
+πi(0 , 1) + C1,0 
+
+> i
+
+πi(1 , 0) . (30) Using Theorem 1, for qi > 0 we have πi(0 , 1) = πi(1 , 0) = ζi.Therefore, 
+
+¯Ci =  C0,1 
+
+> i
+
++ C1,0
+
+> i
+
+ζi. (31) Substituting (17) gives 
+
+¯Ci(qi) = 
+
+ C0,1 
+
+> i
+
++ C1,0
+
+> i
+
+αiβi(1 − qi)(αi + βi)(αi + βi) − qi(αi + βi − 1)  . (32) Equivalently, 
+
+¯Ci(qi) = C0,1 
+
+> i
+
++ C1,0
+
+> i
+
+2 Ei(qi). (33) The weighted total CAE is 
+
+¯C(q1, q 2) = w1 ¯C1(q1) + w2 ¯C2(q2). (34) 
+
+Remark 2. The reduction in (33) does not require symmetric actuation costs. The costs C0,1 
+
+> i
+
+and C1,0 
+
+> i
+
+may be different. The reason CAE becomes proportional to RTE is that, under the considered binary Markov model and synchronize-or-hold estimator, the two mismatch states have equal steady-state probabilities. Therefore, weighted CAE minimization is equivalent to weighted RTE minimization with modified weights 
+
+˜wi = wi
+
+C0,1 
+
+> i
+
++ C1,0
+
+> i
+
+2 , i ∈ { 1, 2}. (35) This equivalence is specific to the considered binary-source setting. For multi-state sources, or for state-dependent sam-pling policies whose update decisions depend on Xi(t) or on the mismatch state (Xi(t), ˆXi(t)) , different error states need not have equal stationary probabilities, and the CAE is not generally a scaled RTE. In the remainder of the paper, we use the weighted RTE objective in (28) with the understanding that the same analysis applies to the weighted CAE objective after replacing wi by the modified weights in (35). III. S AMPLING -C ONSTRAINED INDEPENDENT MPR OPTIMIZATION 
+
+We now optimize the stationary independent randomized sampling policy under per-sensor sampling constraints. For each sensor k ∈ { 1, 2}, let Γk ∈ (0 , 1] denote the maximum allowable sampling rate, i.e., the maximum probability with which sensor k is allowed to transmit in a slot. Since sensor k
+
+transmits whenever it selects action 1 or action 2, the sampling constraint is 
+
+ak, 1 + ak, 2 ≤ Γk, k ∈ { 1, 2}. (36) Using the task-oriented objective in (28), the sampling-constrained independent MPR optimization problem is 
+
+F ⋆
+
+> ind
+
+(Γ) = min  
+
+> {ak}2
+> k=1
+
+F (q1, q 2) (37) s.t. ak,j ≥ 0, k ∈ { 1, 2}, j ∈ { 0, 1, 2}, (38) 
+
+ak, 0 + ak, 1 + ak, 2 = 1 , k ∈ { 1, 2}, (39) 
+
+ak, 1 + ak, 2 ≤ Γk, k ∈ { 1, 2}. (40) where q1 and q2 are the MPR-induced effective update probabilities in (9)–(10). To make the structure of (37)–(40) explicit, define 
+
+u1 ≜ a1,1, u2 ≜ a1,2, v1 ≜ a2,1, v2 ≜ a2,2.
+
+(41) The corresponding idle probabilities are u0 = 1 − u1 − u2 and 
+
+v0 = 1 − v1 − v2. The feasible set can therefore be written as 
+
+AΓ = ∆ Γ1 × ∆Γ2 , (42) where 
+
+∆Γk ≜ (x1, x 2) ∈ R2+ : x1 + x2 ≤ Γk , k ∈ { 1, 2}.
+
+(43) Thus, ∆Γk is the budget-constrained action triangle of sensor 
+
+k in the non-idle action coordinates. Using (5)–(6), define 
+
+γ11 ≜ c − s1 − s2, γ12 ≜ a − s1, γ21 ≜ b − s2. (44) Since a ≤ s1 and b ≤ s2, γ12 ≤ 0 and γ21 ≤ 0. Substituting 
+
+u0 = 1 − u1 − u2 and v0 = 1 − v1 − v2 into (9)–(10) gives 
+
+q1(u, v ) = s1u1 + s2v1 + γ11 u1v1 + γ12 u1v2 + γ21 u2v1, (45) 
+
+q2(u, v ) = s1u2 + s2v2 + γ11 u2v2 + γ12 u2v1 + γ21 u1v2. (46) Thus, independent randomization induces bilinear update probabilities, making the policy-space optimization generally nonconvex. IV. A CHIEVABLE UPDATE -R ATE GEOMETRY 
+
+The problem in Section III is generally nonconvex because 
+
+q1(u, v ) and q2(u, v ) are bilinear. Since the objective depends only on the induced pair (q1, q 2), we analyze the feasible update-rate region. IEEE TRANSACTIONS ON COMMUNICATIONS 5
+
+A. Update-Rate Region 
+
+Define the policy-to-update mapping 
+
+TΓ : AΓ → R2, TΓ(u, v ) =  q1(u, v ), q 2(u, v ), (47) where AΓ is the independent feasible set in (42), and q1, q 2
+
+are given by (45)–(46). The achievable update-rate region is 
+
+QΓ ≜ TΓ(AΓ) = (q1(u, v ), q 2(u, v )) : ( u, v ) ∈ A Γ . (48) Thus, QΓ contains all update-rate pairs that can be generated by feasible independent randomized policies. The independent optimization problem can equivalently be written in the update-rate plane as 
+
+F ⋆
+
+> ind
+
+(Γ) = min 
+
+> (q1,q 2)∈Q Γ
+
+F (q1, q 2). (49) 
+
+Lemma 1 (Equivalent update-rate optimization) . The policy-space problem in (37) –(40) and the update-rate problem in 
+
+(49) have the same optimal value. Proof: Every feasible policy (u, v ) ∈ A Γ induces exactly one point (q1(u, v ), q 2(u, v )) ∈ Q Γ. Conversely, every point in QΓ is generated by at least one feasible policy by definition. Since the objective depends on (u, v ) only through (q1, q 2),minimizing over AΓ is equivalent to minimizing over QΓ.A point q ∈ Q Γ is Pareto dominated if there exists eq ∈ Q Γ
+
+such that eqi ≥ qi for i = 1 , 2, with at least one strict inequality. The Pareto frontier ∂PQΓ is the set of nondominated points. 
+
+Theorem 3. Every global minimizer of (49) lies on the Pareto frontier ∂PQΓ.Proof: Suppose that q⋆ = ( q⋆ 
+
+> 1
+
+, q ⋆ 
+
+> 2
+
+) is a global minimizer but is dominated by some eq = ( eq1, eq2). Since each Ei(qi) is strictly decreasing in qi, we have Ei(eqi) ≤ Ei(q⋆i ), i ∈{1, 2}. with strict inequality for at least one source. Since 
+
+w1, w 2 > 0, F (eq1, eq2) < F (q⋆ 
+
+> 1
+
+, q ⋆ 
+
+> 2
+
+). which contradicts the optimality of q⋆. Hence no dominated point can be globally optimal. 
+
+B. Total-Success Envelope 
+
+We next derive a budget-aware upper bound on the total update success q1 + q2 that identifies regimes in which the Pareto frontier has a simple structure. The total update success can be written as 
+
+q1 + q2 = s1(u1 + u2)v0 + s2u0(v1 + v2)+ c(u1v1 + u2v2) + ( a + b)( u1v2 + u2v1). (50) Let 
+
+t1 ≜ u1 + u2, t2 ≜ v1 + v2. (51) Under the sampling constraints, 0 ≤ t1 ≤ Γ1 and 0 ≤ t2 ≤ Γ2.Since 
+
+u1v1 + u2v2 + u1v2 + u2v1 = t1t2,
+
+and c ≤ a + b, 1 we obtain 
+
+q1 + q2 ≤ s1t1(1 − t2) + s2(1 − t1)t2 + ( a + b)t1t2. (52) 
+
+Theorem 4 (Budget-aware total-success envelope) . For every feasible independent policy (u, v ) ∈ A Γ,
+
+q1(u, v ) + q2(u, v ) ≤ BΓ, (53)                            
+
+> 1Conditioned on both sensors transmitting, let Ek≜{Zk(t) = 1 }. Then
+> a= Pr {E 1},b= Pr {E 2}, and c= Pr {E 1∪ E 2}. Inclusion–exclusion gives
+> c=a+b−Pr {E 1∩ E 2} ≤ a+b,Ek⊆ E 1∪ E 2implies c≥max {a, b }.
+
+where 
+
+BΓ = max 
+
+n
+
+Γ1s1, Γ2s2,s1Γ1(1 − Γ2) + s2(1 − Γ1)Γ 2 + ( a + b)Γ 1Γ2
+
+o
+
+.
+
+(54) 
+
+Moreover, each of the three values inside the maximum is achievable by a feasible independent policy. Proof: Define 
+
+G(t1, t 2) ≜ s1t1(1 − t2) + s2(1 − t1)t2 + ( a + b)t1t2. (55) By (52), q1 +q2 ≤ G(t1, t 2). The function G(t1, t 2) is bilinear in (t1, t 2). Over the rectangle [0 , Γ1]×[0 , Γ2], it can be written as the convex combination 
+
+G(t1, t 2) = 
+
+
+
+1 − t1
+
+Γ1
+
+ 
+
+1 − t2
+
+Γ2
+
+
+
+G(0 , 0) + t1
+
+Γ1
+
+
+
+1 − t2
+
+Γ2
+
+
+
+G(Γ 1, 0) +
+
+
+
+1 − t1
+
+Γ1
+
+ t2
+
+Γ2
+
+G(0 , Γ2) + t1t2
+
+Γ1Γ2
+
+G(Γ 1, Γ2).
+
+(56) Hence G(t1, t 2) cannot exceed the maximum of its four corner values. Evaluating the corners gives G(0 , 0) = 0 , G(Γ 1, 0) = Γ1s1, G(0 , Γ2) = Γ 2s2, and 
+
+G(Γ 1, Γ2) = s1Γ1(1 −Γ2)+ s2(1 −Γ1)Γ 2 +( a+b)Γ 1Γ2. (57) This proves (53). The value Γ1s1 is achieved by setting v1 = v2 = 0 and 
+
+u1 + u2 = Γ 1. The value Γ2s2 is achieved by setting u1 =
+
+u2 = 0 and v1 + v2 = Γ 2. The cooperative value G(Γ 1, Γ2)
+
+is achieved, for example, by 
+
+u1 = Γ 1, u2 = 0 , v1 = 0 , v2 = Γ 2,
+
+for which simultaneous transmissions always carry different information from sources. 
+
+C. Dominant-Transmitter Regimes 
+
+The envelope in (54) separates regimes according to which transmission mode gives the largest possible total update success. We first consider the case in which sensor 1 alone attains the largest envelope value. 
+
+Theorem 5 (Sensor-1 dominant frontier) . Suppose that 
+
+Γ1s1 ≥ max 
+
+n
+
+Γ2s2,s1Γ1(1 − Γ2) + s2(1 − Γ1)Γ 2 + ( a + b)Γ 1Γ2
+
+o
+
+.
+
+(58) 
+
+Then the line segment 
+
+L1 = (q1, q 2) : q1 + q2 = Γ 1s1, q 1 ≥ 0, q 2 ≥ 0 , (59) 
+
+is an achievable Pareto frontier segment of QΓ. It is generated by the policy edge 
+
+v1 = v2 = 0 , u1 = Γ 1θ, u2 = Γ 1(1 −θ), 0 ≤ θ ≤ 1.
+
+(60) 
+
+If the inequality in (58) is strict, then every Pareto-efficient point of QΓ lies on L1.Proof: By Theorem 4, every feasible update-rate point satisfies q1 + q2 ≤ Γ1s1. The policy edge (60) gives 
+
+q1 = Γ 1s1θ, q2 = Γ 1s1(1 − θ),
+
+and therefore generates the full segment L1.Now take any feasible point q = ( q1, q 2) with q1 + q2 <
+
+Γ1s1. Let ∆ = Γ 1s1 − q1 − q2 > 0. Then eq = ( q1 + ∆ , q 2) lies on L1 and dominates q. Hence no point strictly below the line 
+
+q1 + q2 = Γ 1s1 can be Pareto efficient. No point on the line IEEE TRANSACTIONS ON COMMUNICATIONS 6
+
+can be dominated, because increasing one coordinate without decreasing the other would violate the envelope. Therefore, 
+
+L1 is a Pareto frontier segment. If (58) is strict, no other envelope-attaining mode can generate an additional Pareto-efficient segment at the same total-success level. The sensor 2 dominant case is symmetric. 
+
+D. Closed-Form Optimization on a Dominant Frontier 
+
+In the dominant-transmitter regimes of Theorem 5, the independent optimization reduces to a one-dimensional mini-mization over the dominant Pareto segment. Let 
+
+S =
+
+(
+
+Γ1s1, sensor 1 dominant ,
+
+Γ2s2, sensor 2 dominant . (61) Along the corresponding segment, write q1 = Sθ and q2 =
+
+S(1 − θ), 0 ≤ θ ≤ 1. The restricted objective is 
+
+ϕ(θ) = w1E1(Sθ ) + w2E2(S(1 − θ)) . (62) 
+
+Theorem 6 (Closed-form dominant-frontier candidate) . Let 
+
+η ≜ pw2K2/(w1K1). If 
+
+S(λ2 + ηλ 1)̸ = 0 , (63) 
+
+then the unique interior stationary candidate of (62) is 
+
+θ◦ = 1 − λ2 + λ2S − η(1 − λ1)
+
+S(λ2 + ηλ 1) . (64) 
+
+The global minimizer over the dominant frontier is obtained by evaluating 
+
+θ ∈ { 0, 1} ∪ { θ◦ : 0 < θ ◦ < 1}, (65) 
+
+and selecting the point with the smallest value of ϕ(θ).Proof: Differentiating (62) gives ϕ′(θ) = Sw 1E′
+
+> 1
+
+(Sθ ) −
+
+Sw 2E′
+
+> 2
+
+(S(1 − θ)) . Using (26), an interior stationary point satisfies w1K1
+
+D1(Sθ )2 = w2K2
+
+D2(S(1 − θ)) 2 . (66) Since Di(q) > 0, taking the positive square root gives 
+
+D2(S(1 − θ)) = ηD 1(Sθ ). (67) Now 
+
+D1(Sθ ) = 1 − λ1 + λ1Sθ, 
+
+and 
+
+D2(S(1 − θ)) = 1 − λ2 + λ2S(1 − θ).
+
+Substituting these affine expressions into (67) and solving for θ
+
+gives (64). Since the minimum over the compact interval [0 , 1] 
+
+is attained either at an endpoint or at an interior stationary point, the candidate set in (65) is sufficient. 
+
+E. Cooperative Envelope Regime 
+
+The third envelope value in (54) corresponds to using both sampling budgets and exploiting simultaneous transmissions to different sources. This cooperative envelope is 
+
+Bcoop Γ ≜ s1Γ1(1 − Γ2) + s2(1 − Γ1)Γ 2 + ( a + b)Γ 1Γ2.
+
+(68) It is achieved, for example, by u1 = Γ 1, u2 = 0 , v1 = 0 ,
+
+v2 = Γ 2, which gives 
+
+q1 = s1Γ1(1 − Γ2) + aΓ1Γ2, (69) 
+
+q2 = s2(1 − Γ1)Γ 2 + bΓ1Γ2. (70) The opposite different-source allocation u1 = 0 , u2 = Γ 1,
+
+v1 = Γ 2, v2 = 0 induces the mirrored pair, i.e., (69)–(70) with the values of q1 and q2 interchanged. When Bcoop Γ is the largest term in (54), simultaneous different-source transmission gives the largest total-success envelope. Unlike the dominant-transmitter case, this does not by itself imply that the full Pareto frontier is a single line segment. The structure of Pareto-efficient independent randomized policies in this regime is treated in Section V. 
+
+Remark 3 (Strong MPR and constrained operation) . Consider the full-budget case Γ1 = Γ2 = 1, and define M ≜
+
+max {s1, s 2} as the best single-sensor success probability. The cooperative different-source mode is useful only if its total simultaneous update success exceeds this best single-sensor term. In particular, if a + b < M , the cooperative simultaneous-transmission term cannot be active. Hence, the dominant update-rate frontier is generated by a single sensor, sensor 1 if s1 ≥ s2 and sensor 2 otherwise, and an optimal tradeoff can be achieved with one sensor silent. Under sampling constraints, the corresponding condition becomes budget dependent. In particular, the cooperative en-velope is active only if 
+
+Bcoop Γ ≥ max {Γ1s1, Γ2s2},
+
+or equivalently, 
+
+s2(1 −Γ1)+Γ 1(a+b−s1) ≥ 0, s1(1 −Γ2)+Γ 2(a+b−s2) ≥ 0.
+
+If these inequalities fail, the total-success envelope is dom-inated by a single-transmitter mode, and the Pareto-relevant operation is generated by a policy in which one sensor remains silent while the other allocates its budget between the two sources. V. P ARETO REDUCTION OF INDEPENDENT 
+
+RANDOMIZATION 
+
+The previous section characterized regimes in which the Pareto frontier is generated by a dominant transmitter. We now consider the general independent randomized problem under the sampling constraints t1 ≤ Γ1 and t2 ≤ Γ2. The main result of this section is that, for fixed transmission intensities, a Pareto-efficient independent policy does not require both sensors to randomize between the two sources. Equivalently, at least one sensor can be chosen to select a single source whenever it transmits. 
+
+A. Transmission Intensities and Conditional Source Selection 
+
+Recall that t1 = u1 + u2 and t2 = v1 + v2, where 0 ≤ t1 ≤
+
+Γ1 and 0 ≤ t2 ≤ Γ2. When t1, t 2 > 0, define the conditional source-selection probabilities 
+
+p ≜ u1
+
+t1
+
+, q ≜ v1
+
+t2
+
+. (71) Thus, u1 = t1p, u2 = t1(1 − p), v1 = t2q, and v2 = t2(1 − q),with p, q ∈ [0 , 1] . The variables t1, t 2 determine how often the two sensors transmit, while p, q determine which source is selected conditional on transmission. Define the sum and difference of the induced update prob-abilities as 
+
+Q ≜ q1 + q2, D ≜ q1 − q2. (72) Then 
+
+q1 = Q + D
+
+2 , q2 = Q − D
+
+2 . (73) IEEE TRANSACTIONS ON COMMUNICATIONS 7m = p + q ! 1     
+
+> -1 -0.8 -0.6 -0.4 -0.2 00.2 0.4 0.6 0.8 1
+> r = p ! q
+> -1 -0.8 -0.6 -0.4 -0.2 00.2 0.4 0.6 0.8 1
+> jmj+jrj51Fixed-DSegment Fully Mixed Point Best Boundary Point
+
+Fig. 2: Fixed-D segment and its intersection with the diamond constraint in (74). Hence, for a fixed value of D, increasing Q increases both q1
+
+and q2 simultaneously. We further introduce m ≜ p + q − 1 and r ≜ p − q, so that 
+
+p = (1 + m + r)/2 and q = (1 + m − r)/2. The constraint 
+
+p, q ∈ [0 , 1] is equivalent to the diamond 
+
+|m| + |r| ≤ 1. (74) For fixed t1, t 2, the total update success can be written as 
+
+Q = C0 + t1t2
+
+2
+
+a + b + c + ( a + b − c)( r2 − m2) , (75) where 
+
+C0 ≜ s1t1(1 − t2) + s2(1 − t1)t2. (76) Moreover, the imbalance D = q1 − q2 is affine in (m, r ),
+
+D = Am + Br , with 
+
+A ≜ s1t1(1 − t2) + s2(1 − t1)t2 + t1t2c, B ≜ s1t1(1 − t2) − s2(1 − t1)t2 + t1t2(a − b). (77) 
+
+B. Boundary Maximization at Fixed Imbalance 
+
+The following lemma is the key geometric step. It shows that, for any fixed feasible transmission intensities, the best way to improve the update-rate pair without changing the split imbalance D is to move to the boundary of the conditional source-selection square. 
+
+Lemma 2 (Boundary maximization at fixed imbalance) . As-sume t1, t 2 > 0 and physically consistent channel probabilities satisfying a, b ≥ 0 and max {a, b } ≤ c ≤ a + b. For fixed t1, t 2
+
+and any feasible imbalance D = q1 − q2, the total update success Q = q1 + q2 is maximized over p, q ∈ [0 , 1] at a point satisfying 
+
+p ∈ { 0, 1} or q ∈ { 0, 1}. (78) 
+
+Equivalently, the maximizer lies on the boundary |m|+|r| = 1 
+
+of the diamond in (74) .Proof: For fixed t1, t 2, the constraint of fixed imbalance is the line 
+
+Am + Br = D. 
+
+The feasible set for (m, r ) is the diamond |m| + |r| ≤ 1.Therefore, the feasible set at fixed D is either empty, a point, or a compact line segment as shown in Fig. 2. First consider the case a+b = c. Then the coefficient a+b−c
+
+in (75) vanishes,and hence Q = C0 + t1t2 
+
+> 2
+
+(a+b+c). Therefore, all feasible points with the same imbalance D have the same total update success Q.Because D is feasible, the intersection of Am + Br = D
+
+with the diamond is nonempty. If (A, B )̸ = (0 , 0) , this intersection is a compact, possibly degenerate, line segment whose endpoint or endpoints lie on the diamond boundary 
+
+|m| + |r| = 1 . If A = B = 0 , feasibility requires D = 0 ,and any point on the diamond boundary may be selected. Therefore, a boundary point exists with the same D and the same Q. Thus, the result holds when a + b = c, including the degenerate case A = |B|.In the remainder, assume a + b > c . Since c ≥ max {a, b },this strict inequality implies that a > 0 and b > 0.By (75), maximizing Q over the fixed-D feasible segment is then equivalent to maximizing 
+
+r2 − m2.
+
+We first show that A > |B|. Since c ≥ max {a, b }, we have 
+
+c + a − b ≥ a > 0 and c − a + b ≥ b > 0. Therefore, 
+
+A + B = 2 s1t1(1 − t2) + t1t2(c + a − b) > 0, (79) and 
+
+A − B = 2 s2(1 − t1)t2 + t1t2(c − a + b) > 0. (80) Thus, A > |B|.If B̸ = 0 , the line constraint gives 
+
+r = D − Am B .
+
+Substituting into r2 − m2 yields 
+
+ D − Am B
+
+2
+
+− m2,
+
+which is a strictly convex quadratic function of m because 
+
+A2 > B 2. A strictly convex function attains its maximum over a compact interval at an endpoint. If B = 0 , then the constraint fixes m = D/A , and maximizing r2 − m2 is equivalent to maximizing r2, which is also attained at an endpoint of the feasible segment. Hence, in all cases, the maximum is attained at an endpoint of the intersection between the line Am + Br = D and the diamond |m| + |r| ≤ 1. Such endpoints lie on the diamond boundary |m| + |r| = 1 , which corresponds exactly to p = 0 ,
+
+p = 1 , q = 0 , or q = 1 .
+
+C. No Fully Mixed Pareto-Optimal Source Selection 
+
+Lemma 2 directly implies that fully mixed conditional source selection is unnecessary for Pareto optimality. 
+
+Theorem 7 (No fully mixed Pareto-optimal source selec-tion) . Under the physically consistent channel conditions of Lemma 2, consider any feasible independent policy satisfying 
+
+0 < t 1 ≤ Γ1, 0 < t 2 ≤ Γ2, and p, q ∈ (0 , 1) . Then there exists another feasible independent policy with the same transmis-sion intensities t1, t 2, the same imbalance D = q1 − q2, and a weakly larger total update success Q = q1 +q2. Consequently, a Pareto-efficient independent policy can be chosen such that 
+
+p ∈ { 0, 1} or q ∈ { 0, 1}. (81) 
+
+Thus, a fully mixed conditional source-selection policy is not required for Pareto optimality under the sampling constraints. Proof: Fix a feasible policy with p, q ∈ (0 , 1) and trans-mission intensities t1, t 2. In the (m, r ) plane, this corresponds to an interior point of the diamond. Fix the induced value of IEEE TRANSACTIONS ON COMMUNICATIONS 8
+
+Fig. 3: Branch-level Pareto reduction for branch p = 1.The feasible triangle conv {P0, P 1, P 2} reduces to the Pareto-relevant segment A–B, on which the branch optimum q⋆ lies. 
+
+D = q1 − q2. By Lemma 2, there exists a boundary point 
+
+( em, er) with the same D and with eQ ≥ Q.Since D is unchanged, eq1 = ( eQ + D)/2 and eq2 = ( eQ −
+
+D)/2. Therefore, eq1 ≥ q1 and eq2 ≥ q2. The new policy has the same t1, t 2, and hence still satisfies t1 ≤ Γ1 and t2 ≤
+
+Γ2. Since Ei(qi) is strictly decreasing in qi, the boundary policy weakly improves the objective and strictly improves it whenever eQ > Q . Hence no strictly Pareto-optimal policy requires p, q ∈ (0 , 1) .
+
+D. Reduction to Four Boundary Branches 
+
+Theorem 7 reduces the search over the conditional source-selection square (p, q ) ∈ [0 , 1] 2 to the four boundary branches 
+
+p = 1 , p = 0 , q = 1 , q = 0 , (82) on each of which one sensor is source-deterministic while the other sensor may still randomize over its constrained action triangle. On a fixed branch, with the transmission intensity of the sensor fixed, the update-rate vector induced by the other sensor is an affine image of its action probabilities, and therefore lies in the convex hull of three vertex-induced update-rate vectors P (·)0 , P (·)1 , P (·)2 . For each branch, two of these three points lie on a common coordinate axis, so the update-rate triangle is summarized by an axis point A(·)
+
+and an off-axis point B(·). The detailed branch-by-branch expressions for P (·) 
+
+> ℓ
+
+, A(·), and B(·), together with the convex-hull representation, are collected in Appendix A; here we proceed directly to the branch-level Pareto reduction. 
+
+E. Branch-Level Pareto Reduction 
+
+The previous branch descriptions show that, after fixing one boundary branch and the transmission intensity of the source-deterministic sensor, the remaining sensor induces a triangle in the update-rate plane. The next result shows that only one edge of this triangle is relevant. 
+
+Lemma 3 (Branch-level Pareto reduction) . Fix one of the four branches in (82) and fix the transmission intensity of the sensor. Then the other sensor can be chosen to randomize between at most two constrained vertex actions. Equivalently, for fixed outer intensity, the two-dimensional optimization over the other sensor’s constrained action triangle reduces to a one-dimensional optimization over the segment joining the corresponding points A and B.Proof: For fixed outer intensity, the update-rate set generated by the other sensor is the convex hull of three points conv {P0, P 1, P 2}. In each of the four branches, two of these points lie on the same coordinate axis. Any convex combination of those two axis points is weakly dominated by the larger axis point defined as A. Therefore, every point in the triangle is weakly dominated by a point on the segment joining A and the off-axis point B. Since F (q1, q 2) is strictly decreasing in both coordinates, a dominated point cannot be strictly optimal. Hence, for fixed outer intensity, an optimal point can be chosen on the segment between A and B, which corresponds to randomizing between at most two constrained vertex actions of the other sensor. 
+
+Lemma 4 (Closed-form candidate on a Pareto segment) . Let 
+
+U = (U1, U 2) and V = (V1, V 2) be two Pareto-relevant update-rate points ordered such that U1 ≥ V1 and U2 ≤ V2.Parameterize the segment between them as 
+
+q(θ) = (1 − θ)U + θV, 0 ≤ θ ≤ 1. (83) 
+
+Equivalently, 
+
+q1(θ) = U1 − L1θ, q2(θ) = U2 + L2θ, (84) 
+
+where L1 = U1 − V1 ≥ 0 and L2 = V2 − U2 ≥ 0. If L1 = 0 
+
+or L2 = 0 , the segment minimum is obtained by checking the endpoints. Otherwise, define 
+
+ηe ≜
+
+r L2w2K2
+
+L1w1K1
+
+, (85) 
+
+and 
+
+dU 
+
+> 1
+
+≜ 1 − λ1 + λ1U1, dU 
+
+> 2
+
+≜ 1 − λ2 + λ2U2. (86) 
+
+If λ2L2 + ηeλ1L1̸ = 0 , the only interior stationary candidate is 
+
+θ◦ = ηedU 
+
+> 1
+
+− dU
+
+> 2
+
+λ2L2 + ηeλ1L1
+
+. (87) 
+
+Hence, the segment minimum is obtained by evaluating 
+
+θ ∈ { 0, 1} ∪ { θ◦ : 0 < θ ◦ < 1}. (88) 
+
+Proof: For L1, L 2 > 0, the restricted objective is 
+
+ϕ(θ) = w1E1(q1(θ)) + w2E2(q2(θ)) .
+
+Using E′
+
+> i
+
+(q) = −Ki/D i(q)2, an interior stationary point satisfies L1w1K1/D 1(q1(θ)) 2 = L2w2K2/D 2(q2(θ)) 2. Since 
+
+Di(q) > 0, taking the positive square root gives D2(q2(θ)) = 
+
+ηeD1(q1(θ)) . Moreover, 
+
+D1(q1(θ)) = dU 
+
+> 1
+
+− λ1L1θ, D2(q2(θ)) = dU 
+
+> 2
+
++ λ2L2θ. 
+
+Solving the resulting affine equation gives (87). Since the minimum on a compact segment is attained either at an endpoint or at an interior stationary point, the candidate set in (88) is sufficient. 
+
+F. Branch Value Functions 
+
+For each boundary branch and fixed outer transmission intensity, Lemma 3 reduces the feasible update-rate set to a Pareto-relevant segment with ordered endpoints U and V . The exact minimizer on this segment is obtained from Lemma 4. For example, on the branch p = 1, let U (p=1) (x) and 
+
+V (p=1) (x) denote the ordered nondominated endpoints gen-erated at fixed x ∈ [0 , Γ1]. The branch value is 
+
+Φp=1 (x) = min  
+
+> 0≤θ≤1
+
+F  (1 − θ)U (p=1) (x) + θV (p=1) (x), (89) where the inner minimum is evaluated using Lemma 4. The remaining branches are defined analogously, with F ⋆p=r ≜
+
+min 0≤x≤Γ1 Φp=r (x) and F ⋆q=r ≜ min 0≤z≤Γ2 Φq=r (z), r ∈{0, 1}. Hence, the independent optimum is 
+
+F ⋆
+
+> ind
+
+(Γ) = min F ⋆p=1 , F ⋆p=0 , F ⋆q=1 , F ⋆q=0 . (90) IEEE TRANSACTIONS ON COMMUNICATIONS 9
+
+Fig. 3 illustrates the branch-level reduction for the branch 
+
+p = 1 at a fixed outer intensity. Although the remaining sensor generates the full triangle conv {P0, P 1, P 2}, every interior point q is weakly dominated by a feasible replacement point 
+
+¯q on the segment A–B.Consequently, the branch optimization does not need to search over the two-dimensional triangle. It is sufficient to optimize over the one-dimensional Pareto-relevant segment, where the optimal point q⋆ is attained. VI. C OORDINATED MPR T IME SHARING AND TWO -M ODE 
+
+OPTIMALITY 
+
+The independent policies studied in the previous sections impose a factorization on the joint action probabilities. We now introduce a coordinated time-sharing policy class in which a scheduler directly selects the joint action of the two sensors. 
+
+A. Coordinated Joint-Action Policy 
+
+Let 
+
+τrs ≜ Pr {a1(t) = r, a 2(t) = s}, r, s ∈ { 0, 1, 2}, (91) where action 0 denotes silence, action 1 denotes transmission of source X1, and action 2 denotes transmission of source 
+
+X2. The coordinated policy τ = {τrs : r, s ∈ { 0, 1, 2}} is nonnegative and satisfies a simplex constraint together with per-sensor sampling-budget constraints, giving the feasible set 
+
+TΓ ≜
+
+
+
+τ ∈ R9+ :
+
+> 2
+
+X
+
+> r=0 2
+
+X
+
+> s=0
+
+τrs = 1 ,
+
+> 2
+
+X
+
+> r=1 2
+
+X
+
+> s=0
+
+τrs ≤ Γ1,
+
+> 2
+
+X
+
+> r=0 2
+
+X
+
+> s=1
+
+τrs ≤ Γ2
+
+
+
+.
+
+(92) Each deterministic joint action (r, s ) induces an update-rate vector drs = ( drs  
+
+> 1
+
+, d rs  
+
+> 2
+
+). Using the channel notation already defined, these vectors are 
+
+d00 = (0 , 0) , d10 = ( s1, 0) , d20 = (0 , s 1),d01 = ( s2, 0) , d02 = (0 , s 2), d11 = ( c, 0) ,d22 = (0 , c ), d12 = ( a, b ), d21 = ( b, a ).
+
+(93) Therefore, under a coordinated policy τ , the effective update probabilities are linear in τqi(τ ) = 
+
+> 2
+
+X
+
+> r=0 2
+
+X
+
+> s=0
+
+τrs drs i , i ∈ { 1, 2}. (94) Equivalently, 
+
+q1(τ ) = s1τ10 + s2τ01 + cτ 11 + aτ 12 + bτ 21 , (95) 
+
+q2(τ ) = s1τ20 + s2τ02 + cτ 22 + bτ 12 + aτ 21 . (96) The coordinated sampling-constrained problem is 
+
+F ⋆ 
+
+> c
+
+(Γ) = min  
+
+> τ∈T Γ
+
+F (q1(τ ), q 2(τ )) , (97) where F (q1, q 2) = w1E1(q1) + w2E2(q2).
+
+B. Coordinated Achievable Update-Rate Region 
+
+Define the coordinated achievable update-rate region as 
+
+Qc 
+
+> Γ
+
+≜ {(q1(τ ), q 2(τ )) : τ ∈ T Γ} . (98) Then (97) can be written in the update-rate plane as 
+
+F ⋆ 
+
+> c
+
+(Γ) = min 
+
+> (q1,q 2)∈Q c
+> Γ
+
+F (q1, q 2). (99) 
+
+Lemma 5 (Coordinated update-rate polygon) . The set Qc 
+
+> Γ
+
+is a compact convex polygon in R2.Proof: The set TΓ is a compact polytope because it is defined by finitely many linear equalities and inequalities. The mapping τ 7 → (q1(τ ), q 2(τ )) is linear by (94). Hence, 
+
+Qc 
+
+> Γ
+
+is the linear image of a compact polytope. Therefore, it is a compact convex polytope in R2, i.e., a compact convex polygon. 
+
+Corollary 1 (Pareto-frontier localization) . Assume w1, w 2 >
+
+0. Every global minimizer of (99) lies on the Pareto frontier of Qc
+
+> Γ
+
+.Proof: Suppose that q⋆ = ( q⋆ 
+
+> 1
+
+, q ⋆ 
+
+> 2
+
+) is a global minimizer and is dominated by another point eq = ( eq1, eq2) ∈ Q c
+
+> Γ
+
+. Then 
+
+eqi ≥ q⋆i for i ∈ { 1, 2}, with at least one strict inequality. Since each Ei(qi) is strictly decreasing, F (eq1, eq2) < F (q⋆ 
+
+> 1
+
+, q ⋆ 
+
+> 2
+
+)
+
+which contradicts the optimality of q⋆. Hence no dominated point can be globally optimal. 
+
+C. Two-Mode Optimality 
+
+A Pareto-extreme point of Qc 
+
+> Γ
+
+is a vertex of Qc 
+
+> Γ
+
+that lies on its Pareto frontier. For each Pareto-extreme point, choose any feasible coordinated policy in TΓ that induces it; we refer to such a policy as a Pareto-extreme coordinated mode. 
+
+Theorem 8 (Two-mode optimality of coordinated MPR) .
+
+There exists a globally optimal coordinated policy whose induced update-rate point lies either at a Pareto-extreme point of Qc 
+
+> Γ
+
+or on a Pareto edge connecting two adjacent Pareto-extreme points. Consequently, an optimal update-rate vector can be achieved by time sharing between at most two Pareto-extreme coordinated modes. Proof: By Corollary 1, a global minimizer lies on the Pareto frontier of Qc
+
+> Γ
+
+. By Lemma 5, Qc 
+
+> Γ
+
+is a compact convex polygon. Every boundary point of a polygon is either a vertex or lies on an edge connecting two adjacent vertices. Restricting this statement to the nondominated boundary gives the claim for Pareto-extreme points and Pareto edges. If the optimal point lies on an edge between two Pareto-extreme points U and V , then it can be written as (1 −θ)U +θV 
+
+for some θ ∈ [0 , 1] . Let τ U , τ V ∈ T Γ be feasible coordinated policies that induce U and V , respectively. Since TΓ is convex, 
+
+τ θ = (1 − θ)τ U + θτ V is feasible and induces (1 − θ)U + θV 
+
+by linearity of (94). Therefore, two Pareto-extreme coordinated modes are sufficient. Theorem 8 reduces the coordinated optimization to the Pareto vertices and Pareto edges of Qc
+
+> Γ
+
+. For any Pareto edge with ordered endpoints U = ( U1, U 2) and V = ( V1, V 2),where U1 ≥ V1 and U2 ≤ V2, the edge minimizer is obtained directly from Lemma 4. Hence, the coordinated optimization can be solved by evaluating all Pareto vertices and the closed-form candidate θ◦ on each Pareto edge. 
+
+D. Pareto-Edge Search 
+
+The previous results lead to a finite search over the coordi-nated Pareto frontier. 
+
+Theorem 9 (Global optimality of Pareto-edge search) . Algo-rithm 1 returns a global minimizer of the problem (99) .Proof: By Corollary 1, a global minimizer lies on the Pareto frontier of Qc
+
+> Γ
+
+. Since Qc 
+
+> Γ
+
+is a polygon, this frontier consists of finitely many vertices and edges. Algorithm 1 includes all Pareto vertices in the candidate set. On each Pareto edge, Lemma 4 shows that the minimum is attained either at IEEE TRANSACTIONS ON COMMUNICATIONS 10 
+
+Algorithm 1 Pareto-Edge Search for Coordinated MPR Time Sharing  
+
+> 1:
+
+Input: Source parameters αi, β i, w i, channel parameters 
+
+s1, s 2, a, b, c , and budgets Γ1, Γ2. 
+
+> 2:
+
+Construct the coordinated feasible set TΓ in (92).  
+
+> 3:
+
+Compute the coordinated update-rate polygon Qc 
+
+> Γ
+
+in (98).  
+
+> 4:
+
+Extract the Pareto vertices Vc 
+
+> P
+
+and Pareto edges Ec 
+
+> P
+
+of Qc
+
+> Γ
+
+. 
+
+> 5:
+
+Initialize C ← V c
+
+> P
+
+. 
+
+> 6:
+
+for each Pareto edge (U, V ) ∈ E c 
+
+> P
+
+do  
+
+> 7:
+
+Order the endpoints such that U1 ≥ V1 and U2 ≤ V2. 
+
+> 8:
+
+Compute L1 = U1 − V1 and L2 = V2 − U2. 
+
+> 9:
+
+if L1 > 0 and L2 > 0 then  
+
+> 10:
+
+Compute ηe from (85).  
+
+> 11:
+
+Compute θ◦ from (87).  
+
+> 12:
+
+if 0 < θ ◦ < 1 then  
+
+> 13:
+
+Add q◦ = (1 − θ◦)U + θ◦V to C. 
+
+> 14:
+
+end if  
+
+> 15:
+
+end if  
+
+> 16:
+
+end for  
+
+> 17:
+
+Select q⋆ ∈ arg min q∈C F (q1, q 2). 
+
+> 18:
+
+Output: The optimal coordinated update-rate vector q⋆
+
+and a corresponding coordinated time-sharing policy. an endpoint or at the feasible interior stationary candidate. The endpoints are already included as Pareto vertices, and the algorithm adds every feasible interior candidate. Therefore, minimizing F (q1, q 2) over the constructed candidate set gives a global minimizer over Qc
+
+> Γ
+
+, and hence over TΓ.The coordinated formulation therefore reduces the MPR scheduling benchmark to a finite geometric search over a convex update-rate polygon. VII. I NDEPENDENT –C OORDINATED GAP 
+
+We compare independent randomized policies with coordi-nated time sharing under the same sampling budgets. Because independent randomization restricts joint-action probabilities to a product form, the independent class is a subset of the coordinated class. 
+
+Lemma 6 (Embedding of independent policies into coordi-nated policies) . For every feasible independent policy in AΓ,there exists a feasible coordinated policy in TΓ that induces the same update-rate pair (q1, q 2). Consequently, 
+
+QΓ ⊆ Q c
+
+> Γ
+
+. (100) 
+
+Proof: Take any feasible independent policy 
+
+(u1, u 2, v 1, v 2) ∈ A Γ and define 
+
+a1,0 = 1 − u1 − u2, a1,1 = u1, a1,2 = u2,
+
+and 
+
+a2,0 = 1 − v1 − v2, a2,1 = v1, a2,2 = v2.
+
+Construct a coordinated policy by 
+
+τrs = a1,r a2,s , r, s ∈ { 0, 1, 2}. (101) Then τrs ≥ 0 and P2
+
+> r=0
+
+P2 
+
+> s=0
+
+τrs =  P 2 
+
+> r=0
+
+a1,r 
+
+  P 2 
+
+> s=0
+
+a2,s 
+
+ = 1. Moreover, 
+
+P2
+
+> r=1
+
+P2 
+
+> s=0
+
+τrs = a1,1 + a1,2 = u1 + u2 ≤ Γ1 and 
+
+P2
+
+> r=0
+
+P2 
+
+> s=1
+
+τrs = a2,1 + a2,2 = v1 + v2 ≤ Γ2. Hence 
+
+τ ∈ TΓ. Finally, substituting (101) into (95)–(96) gives exactly the independent update probabilities in (45)–(46). Therefore, every update-rate pair achievable by an independent policy is achievable by a coordinated policy. TABLE I: Default numerical parameters.                  
+
+> Parameter Value
+> (α1, β 1)(0 .52 ,0.18) (α2, β 2)(0 .45 ,0.22) (λ1, λ 2)(0 .30 ,0.33) (s1, s 2)(0 .92 ,0.82) (a, b )(0 .58 ,0.50)
+> c0.79 (Γ 1,Γ2)(0 .65 ,0.65) (w1, w 2)(0 .5,0.5)
+
+Theorem 10 (Coordinated lower bound) . The coordinated optimum is a lower bound on the independent randomized optimum 
+
+F ⋆ 
+
+> c
+
+(Γ) ≤ F ⋆
+
+> ind
+
+(Γ) . (102) 
+
+Proof: By Lemma 6, QΓ ⊆ Q c
+
+> Γ
+
+. Since both optimization problems minimize the same objective F (q1, q 2) over their respective update-rate regions, minimizing over the larger set 
+
+Qc 
+
+> Γ
+
+cannot give a larger value than minimizing over the smaller set QΓ. Hence (102) follows. The independent–coordinated gap is defined as 
+
+∆Γ ≜ F ⋆
+
+> ind
+
+(Γ) − F ⋆ 
+
+> c
+
+(Γ) . (103) By Theorem 10, ∆Γ ≥ 0. This gap quantifies the performance loss caused by restricting the two sensors to act independently. 
+
+Corollary 2 (Zero-gap condition) . The gap satisfies ∆Γ = 0 
+
+if and only if at least one coordinated optimal update-rate point is also achievable by a feasible independent randomized policy, i.e., 
+
+arg min 
+
+> q∈Q c
+> Γ
+
+F (q1, q 2) ∩ Q Γ̸ = ∅. (104) 
+
+Proof: If a coordinated optimal point belongs to QΓ, then the independent problem can achieve the coordinated optimal value, so F ⋆
+
+> ind
+
+(Γ) = F ⋆ 
+
+> c
+
+(Γ) . Conversely, if ∆Γ = 0 , then the minimum value over QΓ equals the minimum value over 
+
+Qc
+
+> Γ
+
+. Since QΓ ⊆ Q c
+
+> Γ
+
+, an independent optimal point is also coordinated-optimal, proving (104). 
+
+Remark 4. The condition in Corollary 2 is expressed in the update-rate plane. It does not require the coordinated optimizer itself to have a product-form representation in τ ; it only re-quires that the same optimal update-rate pair can be generated by some feasible independent policy. If no independent policy can generate any coordinated optimal update-rate point, then the gap is strictly positive. Thus, the coordinated formulation provides a benchmark for the best sampling-constrained MPR performance, while ∆Γ
+
+measures the cost of decentralized independent randomization. VIII. N UMERICAL RESULTS 
+
+We evaluate the proposed independent and coordinated MPR sampling schemes using the parameter set in Table I. 
+
+A. Geometry of the Update-Rate Regions 
+
+Fig. 4 illustrates the achievable update-rate regions under the parameters in Table I. Since the objective is decreasing in both q1 and q2, the optimum lies on the Pareto frontier. The coordinated region contains the independent region and therefore reaches a lower objective contour, showing the benefit of enlarging the feasible update-rate tradeoff through coordination. IEEE TRANSACTIONS ON COMMUNICATIONS 11 q1        
+
+> 00.2 0.4 0.6 0.8
+> q2
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+> F(q1; q 2) contours
+> Q!samples
+> @PQ!
+> Qc
+> !
+> @PQc
+> !
+> q?
+> ind
+> q?
+> c
+
+Fig. 4: Achievable update-rate regions under sampling con-straints. 
+
+Fig. 5: Regimes induced by the budget-aware bound. 
+
+B. Regimes and Dominant Frontiers 
+
+We next illustrate the budget-aware total-success envelope 
+
+BΓ = max {Γ1s1, Γ2s2, B coop } which separates the indepen-dent update-rate geometry into different structural regimes. This experiment uses the same parameters in Table I, but re-duces the simultaneous-transmission probabilities to a = 0 .12 
+
+and b = 0.10 . Fig. 5 confirms the three cases predicted by the analysis. In the sensor-1 dominant region, the largest envelope value is Γ1s1, and the Pareto frontier is generated by allocating the available updates through sensor 1. In the sensor-2 dominant region, the largest value is Γ2s2, and the symmetric dominant-frontier result applies. In the cooperative region, the largest value is Bcoop , which means that using both budgets for simultaneous different-source transmissions provides the largest total-success potential. 
+
+C. Policy-Class Comparison Across MPR Regimes and Sam-pling Budgets 
+
+We compare the considered policy classes under three physical-layer regimes: collision, capture, and MPR. The regimes differ only in the simultaneous-transmission success probabilities. In the collision channel, no packet is decoded under simultaneous transmission, i.e., a = b = 0 , c = 0 . In the capture channel, only one of the two simultaneous packets can be decoded, with a = 0 .58 , b = 0 , and c = 0 .58 . In the MPR channel, both simultaneous packets can be decoded with nonzero probability, with a = 0 .58 , b = 0 .50 , and c = 0 .79 .
+
+Both the collision and capture channels satisfy a + b = c.Hence, the boundary-case argument in Lemma 2 applies, including the possible degeneracy A = |B|. Consequently, Theorem 7 and the four-branch reduction in (82) remain valid for both regimes. The optimized independent collision and capture policies reported below are therefore obtained by minimizing over the same four boundary branches used for the general MPR channel. We compare four policy classes. The uniform independent baseline assigns each sensor’s sampling budget equally to the two sources, i.e., u1 = u2 = Γ 1/2
+
+and v1 = v2 = Γ2/2, without coordination between the sensors. The optimized TDMA baseline is the best single-active coordinated policy, where time sharing is restricted to the five joint actions (0 , 0) , (1 , 0) , (2 , 0) , (0 , 1) , and (0 , 2) , so simultaneous transmissions are not allowed. Equivalently, the sensors are orthogonalized in time and the long-term fractions 
+
+ρ11 , ρ 12 , ρ 21 , ρ 22 are optimized, where ρki denotes the fraction of slots in which sensor k transmits source Xi. These fractions satisfy ρ11 + ρ12 ≤ Γ1, ρ21 + ρ22 ≤ Γ2 together with the TDMA orthogonality constraint ρ11 + ρ12 + ρ21 + ρ22 ≤ 1.The optimized independent MPR policy solves the inde-pendent randomized problem over (u1, u 2, v 1, v 2) using the MPR update-rate expressions. Finally, the coordinated MPR benchmark allows time sharing over all nine joint actions, including simultaneous transmissions. Fig. 6 studies the effect of the common sampling budget 
+
+Γ1 = Γ2 = Γ. In the collision channel, the coordinated MPR benchmark coincides with TDMA because overlapping transmissions do not yield useful receptions, while the uniform independent policy degrades at large budgets due to the increased number of collisions. The capture channel shows a similar behavior: although one packet may be decoded during simultaneous transmission, the resulting update-rate tradeoff does not improve the task-oriented objective over optimized single-active scheduling. In the MPR channel, both the optimized independent MPR policy and the coordinated MPR benchmark outperform TDMA at larger budgets. At small budgets, overlap is rarely needed and the policies remain close. As the budget increases, single-active access cannot fully exploit the available sampling opportunities, whereas MPR can use simultaneous transmissions. Thus, the benefit of MPR appears only when the physical layer supports useful concurrent reception for both sources. IX. C ONCLUSION 
+
+We studied the real-time reconstruction and remote actua-tion of two binary Markov sources over a shared MPR channel. We derived closed-form expressions for the RTE and CAE under synchronize-or-hold estimation and showed that, for the considered binary-source model, CAE minimization reduces to a weighted RTE minimization problem. We then characterized the sampling-constrained independent randomized problem through the geometry of the achievable update-rate region. The analysis shows that, although the MPR-induced update-rate map is bilinear and the optimization is nonconvex, Pareto-efficient independent policies can be searched through a finite set of one-dimensional boundary branches. We also introduced a coordinated time-sharing benchmark and proved that an optimal coordinated policy requires time sharing between at most two Pareto-extreme modes. Numerical results show that MPR does not automatically improve the task-oriented objective. In collision and capture channel, simultaneous trans-missions provide no gain over single-active scheduling. A IEEE TRANSACTIONS ON COMMUNICATIONS 12 
+
+Fig. 6: Policy comparison across collision, capture, and MPR regimes versus common sampling budget. clear improvement appears only when concurrent reception is sufficiently reliable for both sources, especially at larger sampling budgets where orthogonal access cannot fully exploit the available transmission opportunities. APPENDIX ABRANCH -L EVEL UPDATE -R ATE EXPRESSIONS 
+
+This appendix collects the detailed update-rate expressions for the four boundary branches in (82), which underlie the branch-level Pareto reduction of Section V. Theorem 7 reduces the search over the conditional source-selection square (p, q ) ∈ [0 , 1] 2 to the four boundary branches. On each branch, one sensor is source-deterministic, while the other sensor may still randomize over its constrained action. For each branch, let P (·) 
+
+> ℓ
+
+(·) ∈ R2, ℓ ∈ { 0, 1, 2}, denote the update-rate vector (q1, q 2) induced by the ℓth constrained vertex action of the non-deterministic sensor. In the branches 
+
+p = 1 and p = 0 , the fixed intensity is denoted by x ∈
+
+[0 , Γ1], and ℓ = 0 , 1, 2 correspond to the sensor 2 vertices are (v1, v 2) = (0 , 0) , (Γ 2, 0) , (0 , Γ2). In the branches q =1 and q = 0 , the fixed intensity is denoted by z ∈ [0 , Γ2],and ℓ = 0 , 1, 2 correspond to the sensor. The vertices are 
+
+(u1, u 2) = (0 , 0) , (Γ 1, 0) , (0 , Γ1).
+
+Lemma 7 (Convex-hull representation on a fixed branch) .
+
+Fix one of the four boundary branches in (82) and fix the transmission intensity of the sensor with deterministic source selection. The update-rate vector induced by any feasible randomized action of the other sensor belongs to the convex hull of the three vertex-induced update-rate vectors. Proof: On a fixed branch, the policy variables of the source-deterministic sensor are fixed. Hence, by (45)–(46), the mapping from the other sensor’s two action probabilities to 
+
+(q1, q 2) is affine. Consider the case where sensor 2 is the non-deterministic sensor. Any feasible (v1, v 2) satisfying v1, v 2 ≥ 0 and v1 +
+
+v2 ≤ Γ2 can be written as 
+
+(v1, v 2) = μ0(0 , 0) + μ1(Γ 2, 0) + μ2(0 , Γ2), (105) where 
+
+μ0 = 1 − v1 + v2
+
+Γ2
+
+, μ1 = v1
+
+Γ2
+
+, μ2 = v2
+
+Γ2
+
+. (106) The coefficients are nonnegative and satisfy μ0 + μ1 + μ2 =1. Since affine mappings preserve convex combinations, the induced update-rate vector satisfies 
+
+(q1, q 2) = μ0P (·)0 + μ1P (·)1 + μ2P (·)2 . (107) Thus, it belongs to the convex hull of the three vertex-induced update-rate vectors. The same argument applies when sensor 1 is the non-deterministic sensor, using the constrained vertices 
+
+(0 , 0) , (Γ 1, 0) , and (0 , Γ1).
+
+1) Branch p = 1 : In this branch, 
+
+u1 = x, u2 = 0 , 0 ≤ x ≤ Γ1. (108) According to the vertex indexing defined above, the three update-rate vectors are 
+
+P (p=1) 0 (x) = ( s1x, 0) , (109) 
+
+P (p=1) 1 (x) =  s1x(1 − Γ2) + s2(1 − x)Γ 2 + cx Γ2, 0,
+
+(110) 
+
+P (p=1) 2 (x) =  s1x(1 − Γ2) + ax Γ2, s 2(1 − x)Γ 2 + bx Γ2
+
+.
+
+(111) By Lemma 7, for fixed x,
+
+(q1, q 2) ∈ conv 
+
+n
+
+P (p=1) 0 (x), P (p=1) 1 (x), P (p=1) 2 (x)
+
+o
+
+. (112) Since P (p=1) 0 (x) and P (p=1) 1 (x) lie on the q1-axis, only their coordinate-wise dominant point is Pareto relevant. Define 
+
+A(p=1) (x) = 
+
+
+
+max  P (p=1) 0 (x)
+
+> 1
+
+, P (p=1) 1 (x) 
+
+> 1
+
+, 0
+
+
+
+,B(p=1) (x) = P (p=1) 2 (x).
+
+(113) 
+
+2) Branch p = 0: Here sensor 1 transmits source X2
+
+whenever it is active 
+
+u1 = 0 , u2 = x, 0 ≤ x ≤ Γ1. (114) For fixed x, the three constrained vertices of sensor 2 induce 
+
+P (p=0) 0 (x) = (0 , s 1x), (115) 
+
+P (p=0) 1 (x) =  s2(1 − x)Γ 2 + bx Γ2, s 1x(1 − Γ2) + ax Γ2
+
+,
+
+(116) 
+
+P (p=0) 2 (x) =  0, s 1x(1 − Γ2) + s2(1 − x)Γ 2 + cx Γ2
+
+.
+
+(117) The first and third points lie on the q2-axis. Define 
+
+A(p=0) (x) = 
+
+
+
+0, max  P (p=0) 0 (x)
+
+> 2
+
+, P (p=0) 2 (x)
+
+> 2
+
+
+
+,B(p=0) (x) = P (p=0) 1 (x).
+
+(118) 
+
+3) Branch q = 1: Here sensor 2 transmits source X1
+
+whenever it is active 
+
+v1 = z, v2 = 0 , 0 ≤ z ≤ Γ2. (119) IEEE TRANSACTIONS ON COMMUNICATIONS 13 
+
+For fixed z, the three constrained vertices of sensor 1 induce 
+
+P (q=1) 0 (z) = ( s2z, 0) , (120) 
+
+P (q=1) 1 (z) =  s2z(1 − Γ1) + s1(1 − z)Γ 1 + cΓ1z, 0,
+
+(121) 
+
+P (q=1) 2 (z) =  s2z(1 − Γ1) + bΓ1z, s 1(1 − z)Γ 1 + aΓ1z.
+
+(122) The first two points lie on the q1-axis. Define 
+
+A(q=1) (z) = 
+
+
+
+max  P (q=1) 0 (z)
+
+> 1
+
+, P (q=1) 1 (z) 
+
+> 1
+
+, 0
+
+
+
+,B(q=1) (z) = P (q=1) 2 (z).
+
+(123) 
+
+4) Branch q = 0 : This branch is symmetric to the branch 
+
+q = 1 under the interchange of the source labels 1 and 
+
+2. In particular, sensor 2 transmits source X2 whenever it is active, i.e., v1 = 0 and v2 = z, with 0 ≤ z ≤ Γ2.The corresponding vertex-induced points are obtained from (120)–(123) by swapping the two update-rate coordinates and interchanging the roles of source X1 and source X2.REFERENCES [1] M. Salimnejad, M. Kountouris, and N. Pappas, “Real-time reconstruction of Markov sources and remote actuation over wireless channels,” IEEE Trans. Commun. , vol. 72, no. 5, 2024. [2] N. Pappas and M. Kountouris, “Goal-oriented communication for real-time tracking in autonomous systems,” in IEEE ICAS , 2021, pp. 1–5. [3] D. G¨ und¨ uz, Z. Qin, I. E. Aguerri, H. S. Dhillon, Z. Yang, A. Yener, K. K. Wong, and C.-B. Chae, “Beyond transmitting bits: Context, seman-tics, and task-oriented communications,” IEEE J. Sel. Areas Commun. ,vol. 41, no. 1, pp. 5–41, 2023. [4] J. Luo and N. Pappas, “Semantic-aware remote estimation of multiple Markov sources under constraints,” IEEE Trans. Commun. , vol. 73, no. 11, pp. 11 093–11 105, 2025. [5] A. Mostaani, T. X. Vu, S. K. Sharma, V.-D. Nguyen, Q. Liao, and S. Chatzinotas, “Task-oriented communication design in cyber-physical systems: A survey on theory and applications,” IEEE Access , vol. 10, pp. 133 842–133 868, 2022. [6] A. Li, S. Wu, S. Meng, R. Lu, S. Sun, and Q. Zhang, “Toward goal-oriented semantic communications: New metrics, framework, and open challenges,” IEEE Wireless Commun. , vol. 31, no. 5, pp. 238–245, 2024. [7] P. Popovski, O. Simeone, F. Boccardi, D. G¨ und¨ uz, and O. Sahin, “Semantic-effectiveness filtering and control for post-5G wireless con-nectivity,” J. Indian Inst. Sci. , vol. 100, no. 2, pp. 435–443, 2020. [8] E. Calvanese Strinati and S. Barbarossa, “6G networks: Beyond Shannon towards semantic and goal-oriented communications,” Comput. Netw. ,vol. 190, p. 107930, 2021. [9] E. Uysal, O. Kaya, A. Ephremides, J. Gross, M. Codreanu, P. Popovski, M. Assaad, G. Liva, A. Munari, B. Soret, T. Soleymani, and K. H. Johansson, “Semantic communications in networked systems: A data significance perspective,” IEEE Netw. , vol. 36, no. 4, pp. 233–240, 2022. [10] T. M. Getu, G. Kaddoum, and M. Bennis, “A survey on goal-oriented semantic communication: Techniques, challenges, and future directions,” 
+
+IEEE Access , vol. 12, pp. 51 223–51 274, 2024. [11] A. Kosta, N. Pappas, and V. Angelakis, “Age of information: A new concept, metric, and tool,” Found. Trends Netw. , vol. 12, no. 3, pp. 162– 259, 2017. [12] R. D. Yates, Y. Sun, D. R. Brown, S. K. Kaul, E. Modiano, and S. Ulukus, “Age of information: An introduction and survey,” IEEE J. Sel. Areas Commun. , vol. 39, no. 5, pp. 1183–1210, 2021. [13] Y. Sun, E. Uysal-Biyikoglu, R. D. Yates, C. E. Koksal, and N. B. Shroff, “Update or wait: How to keep your data fresh,” IEEE Trans. Inf. Theory ,vol. 63, no. 11, pp. 7492–7508, 2017. [14] A. Maatouk, S. Kriouile, M. Assaad, and A. Ephremides, “The age of incorrect information: A new performance metric for status updates,” 
+
+IEEE/ACM Trans. Netw. , vol. 28, no. 5, pp. 2215–2228, 2020. [15] A. Maatouk, M. Assaad, and A. Ephremides, “The age of incorrect in-formation: An enabler of semantics-empowered communication,” IEEE Trans. Wireless Commun. , vol. 22, no. 4, pp. 2621–2635, 2023. [16] I. Cosandal, N. Akar, and S. Ulukus, “Multi-threshold AoII-optimum sampling policies for continuous-time Markov chain information sources,” IEEE Trans. Inf. Theory , vol. 71, no. 9, pp. 6968–6988, 2025. [17] C. Kam, S. Kompella, and A. Ephremides, “Age of incorrect information for remote estimation of a binary Markov source,” in IEEE INFOCOM Workshops , 2020. [18] I. Cosandal, N. Akar, and S. Ulukus, “Modeling AoII in push- and pull-based sampling of continuous time Markov chains,” in IEEE INFOCOM Workshops , 2024. [19] R. D. Yates, “The age of gossip in networks,” in IEEE ISIT , 2021. [20] G. Stamatakis, N. Pappas, and A. Traganitis, “Control of status updates for energy harvesting devices that monitor processes with alarms,” in 
+
+IEEE GLOBECOM Workshops , 2019, pp. 1–6. [21] X. Zheng, S. Zhou, and Z. Niu, “Urgency of information for context-aware timely status updates in remote control systems,” IEEE Trans. Wireless Commun. , vol. 19, no. 11, pp. 7237–7250, 2020. [22] M. Salimnejad, M. Kountouris, and N. Pappas, “State-aware real-time tracking and remote reconstruction of a Markov source,” J. Commun. Netw. , vol. 25, no. 5, pp. 657–669, 2023. [23] J. Chakravorty and A. Mahajan, “Fundamental limits of remote esti-mation of autoregressive Markov processes under communication con-straints,” IEEE Trans. Autom. Control , vol. 62, no. 3, pp. 1109–1124, 2017. [24] Y. Sun, Y. Polyanskiy, and E. Uysal, “Sampling of the Wiener process for remote estimation over a channel with random delay,” IEEE Trans. Inf. Theory , vol. 66, no. 2, pp. 1118–1135, 2020. [25] M. Salimnejad, M. Kountouris, and N. Pappas, “Real-time remote monitoring of correlated Markovian sources,” IEEE Open J. Commun. Soc. , vol. 7, pp. 2777–2793, 2026. [26] N. Akar and S. Ulukus, “Query-based sampling of heterogeneous CTMCs: Modeling and optimization with binary freshness,” IEEE Trans. Commun. , vol. 72, no. 12, pp. 7705–7714, 2024. [27] S. Kriouile and M. Assaad, “Minimizing the age of incorrect information for real-time tracking of Markov remote sources,” in IEEE ISIT , 2021. [28] A. Zakeri, M. Moltafet, and M. Codreanu, “Goal-oriented remote tracking through correlated observations in pull-based communications,” 
+
+IEEE Commun. Lett. , vol. 29, no. 12, pp. 2805–2809, 2025. [29] I. Cosandal, S. Ulukus, and N. Akar, “Which sensor to observe? timely tracking of a joint Markov source with model predictive control,” in 
+
+IEEE ISIT , 2025. [30] F. Chiariotti, J. Holm, A. E. Kalør, B. Soret, S. K. Jensen, T. B. Pedersen, and P. Popovski, “Query age of information: Freshness in pull-based communication,” IEEE Trans. Commun. , vol. 70, no. 3, pp. 1606–1622, 2022. [31] R. D. Yates and S. K. Kaul, “Status updates over unreliable multiaccess channels,” in IEEE ISIT , 2017, pp. 331–335. [32] Z. Chen, N. Pappas, E. Bj¨ ornson, and E. G. Larsson, “Optimizing information freshness in a multiple access channel with heterogeneous devices,” IEEE Open J. Commun. Soc. , vol. 2, pp. 456–470, 2021. [33] I. Kadota, A. Sinha, E. Uysal-Biyikoglu, R. Singh, and E. Modiano, “Scheduling policies for minimizing age of information in broadcast wireless networks,” IEEE/ACM Trans. Netw. , vol. 26, no. 6, pp. 2637– 2650, 2018. [34] I. Kadota, A. Sinha, and E. Modiano, “Scheduling algorithms for optimizing age of information in wireless networks with throughput constraints,” IEEE/ACM Trans. Netw. , vol. 27, no. 4, pp. 1359–1372, 2019. [35] A. Munari, “Modern random access: An age of information perspective on irregular repetition slotted ALOHA,” IEEE Trans. Commun. , vol. 69, no. 6, pp. 3572–3585, 2021. [36] H. H. Yang, Z. Chen, N. Pappas, and T. Q. S. Quek, “Age of information: A wireless networking perspective®,” Found. Trends Netw. , vol. 16, no. 3-4, pp. 171–242, 2025. [37] H. Asgari, A. Munari, G. Liva, and G. Cocco, “Remote monitoring of two-state Markov sources in random access channels: Joint model and state estimation,” in ITG SCC , 2025. [38] H. Asgari, G. Cocco, and A. Munari, “Random-access monitoring of Markov sources: Analytical characterization of uncertainty,” in IEEE ISIT , 2026. [39] R. D. Yates and S. K. Kaul, “The age of information: Real-time status updating by multiple sources,” IEEE Trans. Inf. Theory , vol. 65, no. 3, pp. 1807–1827, 2019. [40] V. Naware, G. Mergen, and L. Tong, “Stability and delay of finite-user slotted ALOHA with multipacket reception,” IEEE Trans. Inf. Theory ,vol. 51, no. 7, pp. 2636–2656, 2005.

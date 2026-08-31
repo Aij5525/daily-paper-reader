@@ -1,0 +1,513 @@
+Title: Selective Interference Suppression of Siamese-Net in Heterogeneous Interference Channels
+
+URL Source: https://arxiv.org/pdf/2608.27635v1
+
+Published Time: Mon, 31 Aug 2026 00:09:53 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+> 1
+
+# Selective Interference Suppression of Siamese-Net in Heterogeneous Interference Channels 
+
+Arkadeep Sinha, Shubham Paul, R. Manivasakan, Nambi Seshadri, and R. David Koilpillai 
+
+Abstract —We study an end-to-end learnt short-block codes for a N -user real Gaussian interference channel with heterogeneous pairwise interference strengths, while keeping single-user decod-ing at every receiver. In this paper, we study the case wherein only a few dominant interferers exist and investigate whether Siamese-style coupled training can adapt selectively to encode (& decode) to ensure optimal performance corresponding to best tradeoff between orthogonality and coding gain or it enforces unnecessary global orthogonality oblivious of the reality. Our work focuses on a 4-user unequal-interference configuration with one dominant pair (1 , 2) (of strength Λ) and a weak pair (with weak background coupling ( λ)), through which we demonstrate a selective interference suppression phenomenon where the learned codebooks become near-orthogonal primarily for the dominant pair, while weakly coupled pairs retain alignment needed for coding gain. We quantify this behaviour using latent-space cross-user similarity statistics (worst-case coherence measure, average similarity measure, etc) and connect these geometric signatures to the observed BLER robustness under unequal interference. It seems that the SiameseNet selectively suppresses the interferences from various interferring user pairs to yield optimal tradeoff between coding gain and BLER dictated by orthogonality. 
+
+Index Terms —Deep learning, autoencoders, interference chan-nel, multi-user coding, Siamese networks, single-user decoding. 
+
+I. I NTRODUCTION 
+
+Dense wireless systems are increasingly interference-limited [1], [2], [3] motivating signalling and coding strategies [4], [5] that go beyond strict orthogonalization. While advanced multi-user receivers such as successive interference cancel-lation (SIC) can mitigate interference, their complexity and sensitivity to mismatch often limit practicality, especially as the number of users grow. An alternative is to design signalling schemes that simultaneously provide noise immunity through coding gain and interference suppression, while retaining a simple and scalable decoding mechanism. The SiameseNet framework was originally proposed in [6] to address this goal. The core idea was to jointly train encoders so that they learn representations which reduce not only their own decoding errors but also the interference they induce on other users, while training decoders that can reliably recover the messages in the presence of interference without joint 
+
+decoding. However, [6] primarily focused on a symmetric two-user setting, where all interference relationships are struc-turally similar. In our prior work [7], we extended Siamese-trained autoen-coders to support a larger number of users and studied the 
+
+A. Sinha, S. Paul, R. Manivasakan, and R. D. Koilpillai are with the Indian Institute of Technology Madras, Chennai, India. N. Seshadri is with the University of California San Diego, USA. 
+
+trade-off between interference suppression and noise immunity across different user counts and interference levels. We also reported preliminary observations under unequal interference strengths. The results suggested that the learned encoder geometry does not always enforce uniform separation across all users, but instead adapts to the underlying interference conditions. In this paper, we make a more focused contribution by studying heterogeneous interference scenarios in which only a small subset of user pairs are strongly coupled, while the remaining pairs mutually interfere weakly. In a dense, cellular, indoor wireless network environment, a user is often dominated by one or a few neighbouring interferers, instead of all users interfering equally. In such cases, enforcing uniform orthogonality across all user pairs can be wasteful (since it may sacrifice coding gain for pairs that do not require strong mutual suppression) which is central to this work. In our work, we show that Siamese-coupled training nat-urally yields the much desired selective interference sup-pression through codebooks with optimal coherence struc-ture : strongly interfering user pairs get nearly orthogonal codebooks, whereas weakly coupled pairs whose codebooks, remain more correlated, thus retaining high coding gain. We also provide a clear exposition of the underlying mechanism for this behavior, using the gradient coupling induced by the interference channel. We show that SiameseNet training is consistent with approximately minimizing a weighted frame potential (WFP) , in which pairwise correlations are penalized according to the corresponding interference strengths. The WFP minimization, here, has a distinct physical in-terpretation: the weights arise directly from the considered interference topology. Our key contribution is to identify that Siamese training approximately induces a weighted Grassman-nian design problem motivated by our interference structure. This viewpoint provides a logical explanation for selective sup-pression and connects learned multi-user coding with classical geometric ideas from frame theory and code design. II. S YSTEM MODEL AND TRAINING 
+
+Our system model consists of N users, with each having its own, SiameseNet driven encoder and decoder with real interference channel, allowing asymmetric interference among themselves (See Figs. 1 and 2). The above system model allows one to study the impact of asymmetric interference on the performance of wireless system. As in [6] Users i ∈{1, . . . , N } transmits a k-bit long message Mi, encoded to a arXiv:2608.27635v1 [cs.IT] 27 Aug 2026 2
+
+real codeword zi(Mi) ∈ Rn of length n, by an encoder Eθi (·)
+
+defined below: 
+
+Eθi : Mi → zi; i ∈ 1, 2, ..N (1) 
+
+E ∥zi∥22
+
+ = n (2) where θi is the encoder parameter for the ith encoder. The magnitude of interference due to user j on user i is given by 
+
+αij . We assume αij = αji unless stated otherwise. For the homogeneous interference case, αij = αik ∀ j, k .For the heterogeneous case, αij ̸ = αik for j̸ = k. The vector received at the ith decoder is 
+
+yi = zi +
+
+> N
+
+X 
+
+> j=1 , j ̸=i
+
+αij zj + wi, wi ∼ N (0, σ 2I), (3) where αij ≥ 0 and wi denotes white noise. Each receiver uses a single-user decoder Dϕi (·) producing ˆMi from yi.
+
+Dϕi : yi → ˆMi; i ∈ 1, 2, ..N , (4) 
+
+Pe = P ( ˆMj̸ = Mj ), (5) Eqns (1) & (4) depict the encoder and decoder (parameter-ized by θ and ϕ respectively) mathematically. The probability of bit error is captured in Eq (5). Fig. 2 shows the Siamese network architecture extended to N users. We are enabling joint encoder learning at encoders and the encoder parameter ( θj ) gets updates from other users as well; as shown in the Fig. 2 (See Algorithm 2 in [6]). In contrast, decoders are learned independent of other user inputs (no joint decoding). This is indicated by backpropagation arrows: cross-entropy losses Lj from the jth user feed only to the jth decoder (no other input to decoder j) and jth encoder (apart from all other user’s Li ∀ i̸ = j). The ith user’s cross-entropy loss is defined in [6] as: 
+
+Li ≜ −log (P (Mi = m|yi)) (6) We refer the reader to [6] for further details about the model, training and the Algorithm we have employed. The SiameseNet aims to minimize the net cross-entropy loss: 
+
+Lsum ≜
+
+> N
+
+X
+
+> i=1
+
+Li
+
+by adopting the steepest decent by computing the gradient 
+
+∇zj Lsum , for every jth user. From the expression for Lsum , it is difficult to interpret and visualize different tradeoff parameters while designing the codebook for all users, resulting in optimal coherence among the generated codeword pairs to suppress the respective interference. The following subsection tries to identify an equivalent objective function which explicitly portrays such a tradeoff, in its expression. III. S ELECTIVE INTERFERENCE SUPPRESSION FOR 
+
+HETEROGENOUS INTERFERENCE 
+
+A. Gradient Coupling and Interference-Weighted Repulsion 
+
+To understand the selective interference suppression be-haviour of SiameseNet, we examine the gradient of Lsum , the Encoder 1  
+
+> Encoder N
+> Decoder 1
+> Decoder N
+> Noise
+> Encoder 2 Decoder 2
+
+Fig. 1. System Model for N users Encoder 1  
+
+> Training message
+> Codeword
+> Decoder 1
+> Decoded message
+> Categorical Cross Entropy Loss
+> Noise
+> Interference from (N-1) users
+> Back-propagation from (N-1) users
+> Categorical Cross Entropy Loss from
+> 2nd User
+> Categorical Cross Entropy Loss from N th
+> User
+> Decoder 2
+> Decoder N
+
+Fig. 2. The Siamese Network Architecture and Training (extended to N users). 
+
+cross-entropy loss for the jth user w.r.t its own codebook (∇zj Lsum ). In order to compute this gradient, we need to compute the Jacobian of yi with respect to zj , so that chain rule could be used to compute the gradient ∇zj Lsum . From (3), one can deduce 
+
+J = ∂yi
+
+∂zj
+
+= αij I, (i̸ = j). (7) where αij are the interference coefficients as mentioned in (3). Computing the Jacobian (7) and applying the chain rule to compute the gradients of the corresponding cross-entropy losses in Eqn. Lsum ≜ PNi=1 Li, we get ∇zj Lsum as: 
+
+∇zj Lsum = ∇zj Lj + X
+
+> i̸=j
+
+αij ∇yi Li. (8) where P 
+
+> i̸=j
+
+αij ∇yi Li propagate the gradients from other users back to the jth encoder, scaled by interference coef-ficients αij .The first term is self-gradient of cross-entropy loss indicat-ing, how jth user’s own loss reacts to its own codeword. This net effective gradient, is the central mechanistic result and it plays a critical role in the selective interference supression behaviour of the SiameseNet. The update of each ( jth user’s) encoder’s codeword zj not only depends on gradient of it’s own cross-entropy loss Lj , but also on the gradient of other user’s cross-entropy loss Li, i ̸ = j and this implies an user’s own codeword leaks into the cross-entropy losses of other users. The above cross-coupling among all participating users 3
+
+in SiameseNet, is such that if codewords overlap, the gradients push them apart in a Grassmannian space (to yield orthogonal codewords) else retain the alignment yielding high coding gain. Proper scaling of the Jacobian (via αij and normaliza-tion) ensures that gradient descent attribute of SiameseNet converges to a codebook minimizing the Weighted Frame Potential (WFP) (See (9) below). In case, αij takes a moderate to high value allowing the SiameseNet to optimize on its en-coding ability by achieving near orthogonal code-books. This means users connected by strong interference links are pushed toward geometric separation (near-orthogonal codewords) by SiameseNet encoder. If αij is small (weakly coupled users), the SiameseNet retains the alignment optimized for high coding gain. When ( αij ≈ 0), the second term in (8) vanishes and the encoder j trains effectively only on its own cross-entropy loss. 
+
+B. Implicit Weighted Frame Potential (WFP) Objective Func-tion 
+
+The expression for Lsum through the definition of Li,doesn’t explicitly depict the measured cross-correlation among generated codeword pairs mitigating the interference (yielding minimum cost). The objective of this subsection is to derive a mathematical framework which captures the above tradeoff explicitly. Towards this end, we recall the frame potential as defined in [13]. Given a set of vectors (codewords), 
+
+{z1, z2, . . . , zN } the WFP is given by, 
+
+F (z1, z2, . . . , zN ) ∝
+
+> N
+
+X
+
+> i=1
+> N
+
+X
+
+> j=1
+
+wij |⟨ zi, zj ⟩| 2, w ij = α2 
+
+> ij
+
+(9) The key component in WFP in the SiameseNet context is the squared inner product |⟨ zi, zj ⟩| 2 for i̸ = j which naturally aligns with our interference framework for three reasons: (i) interference power at receiver i due to user j scales as α2 
+
+> ij
+
+,so the physical interference cost is quadratic in amplitude; (ii) squared coherence is the standard quantity in frame potential theory, yielding a connection to the classical Welch bound; and (iii) gradient analysis of cross-entropy losses at the optimal codebook produces terms proportional to |⟨ zi, zj ⟩| 2 in the Taylor expansion for Li, as shown in the proof of Lemma 1 below. The classical (unweighted) Grassmannian subspace pack-ing based design results in Welch (lower) bound on 
+
+max i̸=j |⟨ zi, zj ⟩| . This leads to the well-known frame po-tential, given the set of code vectors. This leads to richer perspective and interpretation of our interference model. Con-sequently, our interference channel induces the softer objective in (9): a weighted sum of squared coherences, with weights encoding the physical coupling topology. It is minimized by codebooks that are adapted to the interference topology. These are not necessarily globally equiangular, but selectively orthogonal according to wij .
+
+Lemma 1: SiameseNet training minimizes 
+
+F(z1, . . . , zN ) ∝ X
+
+> i̸=j
+
+α2 
+
+> ij
+
+|⟨ zi, zj ⟩| 2
+
+.
+
+Proof: We start from the gradient coupling result (8) and evaluate ∇yi Li explicitly. The cross-entropy loss Li ≜
+
+− log P (Mi = m|yi) uses the softmax decoder: 
+
+P (Mi = m|yi) = exp  −∥ yi − zi(m)∥2/σ 2P 
+
+> m′
+
+exp( −∥ yi − zi(m′)∥2/σ 2) . (10) Expanding the log and differentiating with respect to yi:
+
+∇yi Li = 2
+
+σ2
+
+X
+
+> m′
+
+pm′ zi(m′) − zi(m)
+
+!
+
+, (11) where pm′ = P (Mi = m′|yi) are the softmax probabilities. We expand Li in a Taylor series around the optimal point y∗ 
+
+> i
+
+= zi(m), with perturbation δi = yi − zi(m) = P  
+
+> j̸=i
+
+αij zj (mj ) + wi:
+
+Li(yi) = Li δ=0 + ∇yi Li
+
+> ⊤
+> δ=0
+
+δi + 12 δ⊤ 
+
+> i
+
+Hi δi + O ∥δi∥3 .
+
+(12) The zeroth-order term vanishes because a good codebook decodes correctly. The first-order term vanishes because, at yi = zi(m), every wrong codeword satisfies d2 
+
+> mm ′
+
+=
+
+∥zi(m) − zi(m′)∥2 > 0, so in the high-SNR limit ( σ2 → 0): 
+
+pm′ = exp( −d2 
+
+> mm ′
+
+/σ 2)1 + P  
+
+> m′′ ̸=m
+
+exp( −d2 
+
+> mm ′′
+
+/σ 2)
+
+> σ2→0
+
+−−−−→ 0, ∀ m′̸ = m, 
+
+(13) giving P 
+
+> m′
+
+pm′ zi(m′) → zi(m), and hence ∇yi Li δ=0 = 0
+
+from (11). In the same limit the Hessian simplifies to Hi ≈ 
+
+> 2
+> σ2
+
+I, so the dominant second-order term gives: 
+
+Li ≈ 1
+
+σ2 ∥δi∥2 = 1
+
+σ2
+
+X 
+
+> j̸=i
+
+αij zj (mj ) + wi
+
+> 2
+
+. (14) Expanding the squared norm: 
+
+Li ≈ 1
+
+σ2
+
+" X 
+
+> j̸=i
+
+α2 
+
+> ij
+
+∥zj ∥2 + 2 X 
+
+> j,k ̸=ij<k
+
+αij αik ⟨zj (mj ), zk(mk)⟩
+
++ 2 X 
+
+> j̸=i
+
+αij ⟨zj (mj ), wi⟩ + ∥wi∥2
+
+#
+
+. (15) Taking expectation over noise wi ∼ N (0, σ 2I) and messages 
+
+mj : the noise cross-term vanishes ( E[⟨zj , wi⟩] = 0 ), the noise self-term E[∥wi∥2] = nσ 2 is constant, and the power terms are fixed by ∥zj ∥2 = n. The only codebook-dependent terms surviving in E[Lsum ] = P 
+
+> i
+
+E[Li] are the cross-user inner products: 
+
+E[Lsum ] ⊃ 2
+
+σ2
+
+X
+
+> i
+
+X 
+
+> j,k ̸=ij<k
+
+αij αik E[⟨zj (mj ), zk(mk)⟩] . (16) Differentiating Li with respect to zj and retaining the domi-nant term gives ∂L i 
+
+> ∂zj
+
+≈ 2α2 
+
+> ij
+> σ2
+
+zj , so differentiating E[Lsum ] with respect to ⟨zi, zj ⟩ yields: 
+
+∂ E[Lsum ]
+
+∂⟨zi, zj ⟩ ∝ α2 
+
+> ij
+
+· ⟨ zi, zj ⟩ = 12
+
+∂∂⟨zi, zj ⟩
+
+X
+
+> i̸=j
+
+α2 
+
+> ij
+
+|⟨ zi, zj ⟩| 2.
+
+(17) 4
+
+Hence, at stationarity ( ∇zj Lsum = 0), the encoder dynamics are consistent with minimizing F (9) subject to the power constraint ∥zi∥2 = n. The weights wij = α2 
+
+> ij
+
+encode the interference topology directly: strongly coupled pairs drive 
+
+|⟨ zi, zj ⟩| 2 → 0, while weakly coupled pairs retain coding gain. Empirical validation through the coherence results in Section IV supports this claim. □
+
+C. Coherence Metrics 
+
+We formalise the notion of selective orthogonalisation using a pairwise codebook coherence measure. Let the codebook for user i be given as: Zi ≜ {zi(m)}; where m ∈ { 1, 2, ..., 2k}.Define the pairwise cosine similarity between codewords 
+
+ρij (m, m ′) ≜ ⟨zi(m), zj (m′)⟩∥zi(m)∥2 ∥zj (m′)∥2
+
+, i̸ = j, (18) and we compute two statistics: 
+
+βij ≜ max  
+
+> m,m ′
+
+|ρij (m, m ′)| , (19) 
+
+¯ρij ≜ 1(2 k)22k
+
+X
+
+> m=1 2k
+
+X
+
+> m′=1
+
+ρij (m, m ′) (20) While βij captures the worst-case cross-user correlation (most relevant to error floors), ¯ρij captures the average in-terference geometry across all codewords for codebooks Zi
+
+and Zj . To quantify selective interference suppression, we first identify the strongest links directly from the interference matrix and the corresponding sets. For the strongly interfering links, we define the worst-case cross-user coherence as, 
+
+βstrong ≜ βi⋆j⋆ , (i⋆, j ⋆) = arg max  
+
+> i≤N,j ≤N
+
+αij .
+
+where βij is defined in (19). A small value of βstrong indicates that the codebooks corresponding to the dominant interferers have been pushed close to orthogonality. However, weakly interfering links may be allowed to retain correlation in order to preserve coding gain. Thus, selective interference suppression corresponds to si-multaneously pushing down the coherence of strongly coupled users and preserving the alignment of weakly coupled users. In other words, SiameseNet training aims to produce βstrong ≪ 1
+
+(indicating dominant interference links have been selectively suppressed). Weak interference links have not been unnecessarily orthog-onalised. This is consistent with the Lsum minimization: links with large αij contribute stronger cross-user gradients and, therefore, experience stronger correlation suppression, while links with small αij contribute weakly to the loss and are allowed to retain correlation. For any two (normalized) codewords zm, zn with angle 
+
+θmn ∈ [0 , π ], the cosine correlation is ρmn ≜ ⟨zm, zn⟩ =cos( θmn ). To quantify deviation from orthogonality, we define the deviation from 90 ◦ as 
+
+∆ϕmn ≜ θmn − π 
+
+> 2
+
+∈ 0, π
+
+> 2
+
+.Since θmn = π 
+
+> 2
+
+± ∆ϕmn , it follows that 
+
+|ρmn | = cos   π 
+
+> 2
+
+± ∆ϕmn 
+
+ = | sin(∆ ϕmn )|,                                 
+
+> Fig. 3. Per-user BLER under unequal interference strengths ( N= 4 ,k= 4 ,
+> n= 8 ,Λ = 1 ,λ= 0 .1), using single-user decoders.
+> Fig. 4. Interference topology schematics for the four cases studied. Thick edges denote strong interference (αij =Λ); thin edges denote weak background coupling ( αij =λ), Λ≫λ. (a) Homogeneous: all pairs equally coupled. (b) Case 1 (Single-Dominant-Pair): only the (1 ,2) link is strong. (c) Case 2 (Two-Dominant-Pairs): links (1 ,2) and (3 ,4) are strong.
+
+and equivalently 
+
+∆ϕmn = arcsin( |ρmn |) . (21) Therefore, if we define the (worst-case) coherence as μ ≜
+
+max m̸=n |ρmn |, the corresponding worst-case angular devia-tion is 
+
+∆ϕmax = arcsin( μ) (equivalently, μ = sin(∆ ϕmax )). In the near-orthogonal regime, sin(∆ ϕ) ≈ ∆ϕ for small ∆ϕ
+
+(in radians), yielding the useful approximation μ ≈ ∆ϕmax .IV. R ESULTS :After training our SiameseNet model, we plug in the test data into our trained model which has developed the optimized interference-aware parameters for the Encoder ( θi) and De-coder ( ϕi) for the corresponding mapping of the input coded block for the ith encoder and decoder pair of the model. To calculate the performance, we make use of Eq. (5) to calculate the error and plot the BLER performance as in Fig. 3. 5
+
+Fig. 5. (a) Case 3 (Star: all links to node 1 strong). (b) Case 4 (all links from node 1 strong) TABLE I MINIMUM AND MAXIMUM ANGULAR DEVIATION ∆ϕij (DEG ) FROM 
+
+ORTHOGONALITY (90 ) B ETWEEN USER -i AND USER -j LATENT 
+
+CODEWORDS FOR FOUR HETEROGENEOUS INTERFERENCE TOPOLOGIES , 
+
+> WHERE
+
+∆ϕ = |θ − 90 | AND θ = arccos( ρ).
+
+Topology (1,2) (1,3) (1,4) (3,1) (3,2) (3,4) 
+
+Case 1: Single-Dominant-Pair (α12 = α21 = Λ , others = λ)Max ∆ϕ (deg) 0.45 3.42 3.56 3.42 2.71 2.67 Min ∆ϕ (deg) 0.24 3.36 1.37 3.36 3.56 4.09 
+
+Case 2: Two-Dominant-Pairs (α12 = α21 = α34 = α43 = Λ , others = λ)Max ∆ϕ (deg) 0.80 3.16 3.00 3.16 2.64 0.37 Min ∆ϕ (deg) 0.56 2.16 1.40 2.16 3.44 0.38 
+
+Case 3: Star Topology (αj1 = Λ for all j̸ = 1 , others = λ)Max ∆ϕ (deg) 0.77 1.16 0.42 1.16 3.64 3.37 Min ∆ϕ (deg) 0.41 0.16 0.32 0.16 3.44 2.38 
+
+Case 4: Multiple Strong to One (α1j = Λ for all j̸ = 1 , others = λ)Max ∆ϕ (deg) 1.80 1.16 0.92 — — —Min ∆ϕ (deg) 0.96 1.16 1.40 — — —
+
+A. Unequal-Interferences 
+
+We adopt the short-block setup used in the base system: 
+
+k = 4 bits per user, n = 8 real symbols per block (rate 
+
+r = k/n = 0 .5). Training samples SNR uniformly over a range and evaluation sweeps Eb/N0 from 0 to 8 dB. For each topology, we partition user pairs into strong ( αij = Λ )and weak ( αij = λ) sets. ∆ϕ ≈ 0 indicates strong pairs are near-orthogonal while ∆ϕ > 2 denote weak pairs and they retain coding structure. 1) Single-Dominant Pair of Interferer : We consider a heterogeneous case with unequal interference strengths: 
+
+α12 = α21 = Λ , and αij = λ ∀ i̸ = j, (i, j )̸ =(1 , 2) , (2 , 1) where Λ > λ . Thus, user pair (1,2) forms a dominant interference coupling, while all remaining pairs are weakly coupled. Fig. 3 reports BLER versus SNR. Despite the strong in-terference on User 1, it achieves reliable communication. In fact it is better than purely orthogonal TDMA by 0.6 dB. This is achieved because User 1 is made orthogonal w.r.t User 2 only, and not Users 3 and 4. Again, User 4 for which there is no strong interference, shows a gain of 2.8 dB w.r.t TDMA. This is explained by coding gain which is possible because no orthogonalisation constraints are imposed. Table II validates the underlying mechanism: the learned representations reduce cross-user correlation predomi-nantly for the strong pair (1 , 2) , consistent with selective suppression. In contrast, for weak pairs orthogonaliza-tion is unnecessary (Case 1 in Table I), preserving coding gain. 
+
+TABLE II STANDARD DEVIATION OF THE CORRELATION METRICS .                                                                                                  
+
+> Topology User 1 User 2 User 3 User 4
+> Case 1: Single-Dominant-Pair (α12 =α21 = Λ , others =λ)
+> User 1 N/A 0.07 0.2 0.17
+> User 2 0.07 N/A 0.22 0.16
+> User 3 0.2 0.22 N/A 0.21
+> User 4 0.17 0.16 0.21 N/A
+> Case 2: Two-Dominant-Pairs (α12 =α21 =α34 =α43 = Λ , others =λ)
+> User 1 N/A 0.07 0.2 0.17
+> User 2 0.07 N/A 0.22 0.16
+> User 3 0.22 0.21 N/A 0.06
+> User 4 0.16 0.16 0.06 N/A
+> Case 3: Star Topology (αj1= Λ for all j̸= 1 , others =λ)
+> User 1 N/A 0.068 0.069 0.072
+> User 2 0.068 N/A 0.22 0.25
+> User 3 0.069 0.22 N/A 0.24
+> User 4 0.072 0.25 0.24 N/A
+> Case 4: Multiple Strong to One (α1j= Λ for all j̸= 1 , others =λ)
+> User 1 N/A 0.068 0.069 0.072
+> User 2 0.068 N/A 0.24 0.26
+> User 3 0.069 0.24 N/A 0.27
+> User 4 0.072 0.26 0.27 N/A
+
+Fig. 6. Case 1: Strong pair (1 , 2) exhibits markedly lower correlation than the weak pairs, (1 , 3) and (1 , 4) .
+
+Fig. 8 validates the underlying mechanism: the learned representations reduce cross-user correlation predomi-nantly for the strong pair (1 , 2) , consistent with selective suppression (i.e., S ≪ 1). In contrast, weak pairs are not over-orthogonalised, preserving coding gain where spreading is unnecessary. Specifically, we set Λ = 1 
+
+and λ = 0 .1, obtaining βstrong ≈ 0.01 and βweak ≈ 0.17 ,giving S ≈ 0.06 ≪ 1.2) Two-Dominant-Pairs of Interferers (Case 2 in Ta-ble I): We consider N = 4 users with two strong interfering pairs, e.g., (1 , 2) and (3 , 4) . We set α12 =
+
+α21 = Λ and α34 = α43 = Λ, while all remain-ing cross-couplings are weak, αij = λ for (i, j ) /∈{(1 , 2) , (2 , 1) , (3 , 4) , (4 , 3) }. As shown in Fig. 6 and Fig. 9, the orthogonality is enforced only between the strongly coupled pairs. 3) One Strong interferer to multiple receivers (Case 3 in Table I): We study a heterogeneous “dominant neighbour” regime where one user participates in many 6        
+
+> Fig. 7. Cross-user correlation standard deviation σ(ρij )for all four interfer-ence topologies.
+> Fig. 8. Case 1: Strong pair (1 ,2) exhibits markedly lower correlation than the weak pairs.
+
+strong interference links, i.e., αj1 = Λ for all j̸ = 1 .Fig. 10 and Fig. 11 demonstrate that User 1 is suppressed more strongly than other users, confirming selective suppression. 4) Multiple Strong Interferers to One receiver (Case 4 in Table I): We construct a case where multiple users strongly interfere into a single receiver, specifically user 1 with α1j = Λ for all j̸ = 1. This experi-ment probes the regime where strong interference is 
+
+not sparse, characterising when selective suppression transitions toward broader orthogonalisation, as shown in Fig. 12. Cross-user correlation standard deviation is depicted in Fig. 7. Each cell reports σ(ρij ) between User i (row) and User j
+
+(column); darker blue indicates higher variability (weakly sup-          
+
+> Fig. 9. Case 2: Strong pair (3 ,4) exhibits markedly lower correlation than the weak pairs, (3 ,2) and (3 ,1) .
+> Fig. 10. Case 3: All codebooks show orthogonalization with User 1.
+
+pressed pairs that retain coding structure), lighter shading in-dicates tight near-orthogonality. Red borders mark the strongly coupled pairs ( αij = Λ ). In every case the red-bordered cells are the lightest, confirming that Siamese training selectively suppresses dominant interference links while leaving weakly coupled pairs free to retain coding gain. V. C ONCLUSION 
+
+This letter discusses selective interference suppression for heterogeneous interference channels via Siamese-Net trained short codes. This work shows that Siamese-coupled training over a heterogeneous interference channel does not enforce uniform codeword separation. The learned encoders orthogo-nalise the dominant interference links while leaving weakly coupled pairs aligned, and the residual cross-user coherence is allocated to the weakest links in a manner consistent with minimising an interference-weighted frame potential. This translates into a measurable BLER advantage for the weakly coupled users. With single-user decoding, the proposed 7
+
+Fig. 11. Case 3: Receiver 3 shows orthogonalization only with User 1 and not with others. 
+
+Fig. 12. Case 4: Strong pairs (1 , 2) , (1 , 3) , (1 , 4) exhibit markedly lower correlation, showing transition toward broader orthogonalisation. 
+
+scalable training induces encoder representations that become near-orthogonal for dominant interferers, while retaining cod-ing gain for weakly coupled users. This behaviour is demon-strated in our results through codebook coherence metrics. This further explains the observed BLER robustness under unequal interference. More broadly, these results suggest that end-to-end learned communication systems need not impose uniform separation across users: the learned representation can adapt its geometry to the interference graph, which offers a route to interference-aware coding that scales with the sparsity of the interference rather than with the number of users. REFERENCES [1] Andrews, J.G., Buzzi, S., Choi, W., Hanly, S.V., Lozano, A., Soong, A.C. and Zhang, J.C., 2014. What will 5G be?. IEEE Journal on selected areas in communications, 32(6), pp.1065-1082. [2] M. Kamel, W. Hamouda and A. Youssef, ”Ultra-Dense Networks: A Survey,” in IEEE Communications Surveys & Tutorials, vol. 18, no. 4, pp. 2522-2545, Fourthquarter 2016, doi: 10.1109/COMST.2016.2571730. [3] J. Liu, M. Sheng, L. Liu and J. Li, ”Interference Management in Ultra-Dense Networks: Challenges and Approaches,” in IEEE Network, vol. 31, no. 6, pp. 70-77, November/December 2017 [4] Berahmand, K., Daneshfar, F., Salehi, E.S. et al. Autoencoders and their applications in machine learning: a survey. Artif Intell Rev 57, 28 (2024). [5] T. O’Shea and J. Hoydis, “An introduction to deep learning for the physical layer,” IEEE Transactions on Cognitive Communications and Networking, vol. 3, no. 4, pp. 563–575, 2017. [6] S. Paul, S. Senthil, P. Seshadri, N. Seshadri, and R. D. Koilpillai, “Learning robust representations for communications over interference-limited channels,” in Proc. IEEE WCNC , 2025, pp. 01–06. [7] Arkadeep, Shubham, Manivasakan, Nambi and David, ”Interference Sup-pression ...,” technical Report’ 2026 [8] Arkadeep, Shubham, Manivasakan, Nambi and David, ”Deep Learning-Based Multi-User Communication Design for Dense IoT Networks: Interference-Aware Finite-Blocklength Communication and Preliminary MIMO Extensions,” ICSCST’2026 [9] V. Raj and S. Kalyani, “Design of communication systems using deep learning: A variational inference perspective,” IEEE Trans. Cogn. Com-mun. Netw. , vol. 6, no. 4, pp. 1320–1334, 2020. [10] X. Zhang and M. Vaezi, “Deep autoencoder-based Z-interference chan-nels,” in Proc. IEEE WCNC , 2023, pp. 1–6. [11] B. Clerckx et al. , “A primer on rate-splitting multiple access: Tutorial, myths, and frequently asked questions,” IEEE J. Sel. Areas Commun. ,vol. 41, no. 5, pp. 1265–1308, 2023. [12] G. Arora and A. Jaiswal, “Zero SIC based rate splitting multiple access technique,” IEEE Commun. Lett. , vol. 26, no. 10, pp. 2430–2434, 2022. [13] Benedetto, J.J., Fickus, M. Finite Normalized Tight Frames. Advances in Computational Mathematics 18, 357–385 (2003). [14] Benedetto, J.J. and Donatelli, J.J., 2007. Ambiguity function and frame-theoretic properties of periodic zero-autocorrelation waveforms. IEEE Journal of Selected Topics in Signal Processing , 1(1), pp.6-20.
