@@ -1,0 +1,801 @@
+Title: Beamforming Design Via GNN in mmWave Cell-Free Massive MIMO Using Sub-6 GHz CSI
+
+URL Source: https://arxiv.org/pdf/2608.30524v1
+
+Published Time: Tue, 01 Sep 2026 02:21:25 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# Beamforming Design Via GNN in mmWave Cell-Free Massive MIMO Using Sub-6 GHz CSI 
+
+Sina Tavakolian ⋆, Abolfazl Zakeri ⋆, Ahmed Alkhateeb †, Markku Juntti ⋆, and Nhan Thanh Nguyen ⋆, 
+
+> ⋆
+
+Centre for Wireless Communications, University of Oulu, P.O.Box 4500, FI-90014, Finland 
+
+> †
+
+School of Electrical, Computer, and Energy Engineering, Arizona State University, AZ, USA 
+
+{sina.tavakolian, abolfazl.zakeri, nhan.nguyen, markku.juntti }@oulu.fi, alkhateeb@asu.edu 
+
+Abstract —Beamforming methods in millimeter-wave (mmWave) cell-free massive multiple-input multiple-output (CFmMIMO) systems require accurate channel state information (CSI), whose acquisition entails significant training overhead. This paper shows that fully digital cell-free mmWave beamforming can be effectively learned from sub-6 GHz CSI using a graph neural network (GNN). Specifically, we represent a CFmMIMO system as a wireless graph, and The GNN is trained to approximate beamformers that maximize the downlink sum-rate, based on the available sub-6 GHz CSI. A message passing mechanism is proposed to capture inter-user interference and inter-basestation cooperation across different network topologies. Simulation results demonstrate that the proposed sub-6 GHz–assisted GNN-based beamformer achieves competitive and often superior sum-rate performance compared to classical baselines that rely on full mmWave CSI. 
+
+Index Terms —Beamforming, graph neural networks, out-of-band assisted communication, millimeter-wave, cell-free systems. 
+
+I. I NTRODUCTION 
+
+Cell-free massive multiple-input multiple-output (CFm-MIMO) has emerged as a promising architecture for future wireless networks, where multiple distributed base stations (BSs) jointly serve user equipments (UEs) and are all con-nected to a central processing unit (CPU) [1], [2]. When operating at millimeter-wave (mmWave) frequencies, however, beamforming becomes essential due to the severe propagation loss and the use of large antenna arrays [3]. Conventional mmWave beamforming designs typically rely on channel state information (CSI). However, acquiring mmWave CSI in CFm-MIMO systems entails significant training overhead. Several works have explored the use of out-of-band (OOB) side information, particularly sub-6 GHz CSI [4]–[8]. Such sub-6 GHz channels can be estimated much more efficiently than mmWave channels using conventional pilot-based proce-dures, making them a useful source of side information for mmWave beamforming design. Early studies exploited cross-band spatial correlation for beam selection [4], while more recent machine learning (ML)-based approaches use neural networks to predict mmWave beams directly from sub-6 GHz CSI [5], [6]. Particularly, graph neural network (GNN)-based methods have also been explored for OOB-assisted mmWave beamforming [7], [8]. However, existing OOB-assisted ap-proaches, including [7], [8], primarily focus on single-BS or multi-cell systems. Specifically, [7] considers only a single BS, whereas in [8], each UE is assigned to one predetermined mmWave BS, allowing the graph edges to be a priori classified as desired or interfering links; moreover, they assume partial mmWave CSI is also required. These assumptions do not apply to CFmMIMO systems, where multiple distributed BSs jointly serve each UE without a fixed desired/interfering-link partition. Therefore, beamforming design for CFmMIMO systems using solely sub-6 GHz CSI remains unexplored. To address the above gap, in this work, we study downlink beamforming design in a CFmMIMO system where only uplink sub-6 GHz CSI is available at the CPU. We formu-late the beamforming problem as an ML task and develop a GNN framework that learns digital beamformers directly from sub-6 GHz CSI. The CFmMIMO system is modeled as a graph, and the proposed GNN performs customized message passing over this graph to capture both multi-user interference at each BS and cooperative transmission across BSs. Importantly, the proposed framework is trained end-to-end to directly maximize the sum-rate, without relying on supervised labels (e.g., optimal beamforming vectors). More-over, the graph-based formulation allows the learned model to naturally adapt to different and dynamic network topologies, e.g., varying number of users. Numerical results demonstrate that the learned beamformers achieve performance close to the baselines that rely on full mmWave CSI, including minimum mean-square error (MMSE) beamforming. Moreover, the pro-posed framework maintains good performance across varying network topologies and remains robust when only partial sub-6 GHz CSI is available. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+We consider a downlink cell-free dual-band single-carrier communications system. The system consists of B distributed BSs connected to a CPU and jointly serving U UEs. Each BS is equipped with two co-located antenna arrays: a sub-6 GHz array with N s antennas, and a mmWave array with 
+
+N mW antennas. Each UE employs a single antenna at both sub-6 GHz and mmWave frequency bands. Downlink data transmission is carried out in the mmWave band. We adopt the geometric channel model in [5] for both the sub-6 GHz uplink and the mmWave downlink. Although the propagation environment is wideband and includes multi-ple paths with distinct delays, as described in [5, Eq. (3)], the following processing and analysis are performed over arXiv:2608.30524v1 [eess.SP] 31 Aug 2026 a single subcarrier for simplicity. Let hs 
+
+> b,u
+
+∈ CN s×1 and 
+
+hmW  
+
+> b,u
+
+∈ CN mW ×1 denote the corresponding sub-6 GHz and mmWave channel vectors, respectively. Their parameters are generated through 3D ray-tracing simulations, which account for realistic frequency-dependent propagation effects and pre-serve spatial consistency across the two frequency bands, as detailed in [5]. Let sb = [ sb, 1, s b, 2, . . . , s b,U ]T ∈ CU ×1 denote the data symbol vector transmitted by BS b, where sb,u is the data symbol intended for UE u ∈ U and E[sbsH 
+
+> b
+
+] = IU . Each BS employs a beamformer Fb ∈ CN mW ×U to precode the transmitted signal, resulting in the transmit vector Fbsb. The received signal at UE u ∈ U is then given by 
+
+yu =
+
+> B
+
+X
+
+> b=1
+
+hmW 
+
+> b,u
+> H
+
+Fbsb + nu, (1) where nu ∼ CN (0 , σ 2) denotes the additive white Gaussian noise. Assuming that symbol sb,u is intended for UE u from BS b, we can write: 
+
+yu =
+
+> B
+
+X
+
+> b=1
+
+hmW 
+
+> b,u
+> H
+
+fb,u sb,u 
+
+| {z }
+
+> Desired signal
+
++
+
+> B
+
+X
+
+> b=1
+
+X 
+
+> j∈U
+> j̸=u
+
+hmW 
+
+> b,u
+> H
+
+fb,j sb,j 
+
+| {z }
+
+> Inter-UE interference
+
++nu, (2) where fb,u denotes the u-th column of Fb. The downlink SINR at UE u is therefore given as 
+
+γu =
+
+PBb=1 hmW 
+
+> b,u
+> H
+
+fb,u 
+
+> 2
+
+P 
+
+> j∈U ,j ̸=u
+
+PBb=1 hmW 
+
+> b,u
+> H
+
+fb,j 
+
+> 2
+
++ σ2
+
+. (3) Accordingly, the achievable downlink rate of UE u is 
+
+Ru = log 2(1 + γu). The sum-rate of the system is then given by 
+
+Rsum =
+
+> U
+
+X
+
+> u=1
+
+Ru. (4) 
+
+B. Problem Formulation 
+
+The goal is to design the fully digital beamformers {Fb}Bb=1 
+
+that maximize the downlink sum-rate in (4). The beamforming design problem can be written as maximize 
+
+> {Fb}Bb=1
+
+Rsum (5a) subject to ∥Fb∥2 
+
+> F
+
+= Pb, ∀ b, (5b) where Pb denotes the power budget at BS b. The transmit power constraint is enforced as an equality in (5b) because, for sum-rate maximization, the optimal solution often utilizes the fully available transmit power [9]. Solving problem (5) directly would require the mmWave downlink CSI, which is supposed to be unavailable in our considered scenario. Instead, only the uplink sub-6 GHz CSI is available at the CPU, and we aim to solve the design problem centrally using this information. This assumption is motivated by the fact that the fully digital sub-6 GHz arrays provide direct baseband access to all antenna signals, enabling effi-cient pilot-based CSI estimation with low overhead, whereas estimating the mmWave channel typically involves extensive beam training [10]. The uplink sub-6 GHz CSI is collected as 
+
+Hs = Hs1, . . . , Hs
+
+> B
+
+ ∈ CB×U ×N s
+
+, (6) where 
+
+Hs 
+
+> b
+
+=
+
+
+
+(hs
+
+> b, 1
+
+)⊤
+
+...
+
+(hs 
+
+> b,U
+
+)⊤
+
+ ∈ CU ×N s
+
+. (7) To perform beamforming design in (5) without the mmWave CSI, we aim to learn a mapping from the available sub-6 GHz CSI to the digital beamformers, i.e., 
+
+Φs(Hs) = {Fb}Bb=1 , (8) where Φs(·) is learned such that the resulting beamformer maximizes the sum-rate in (4) while satisfying the per-BS power constraint in (5b). Finding the mapping Φs(·) in closed form is analytically intractable [5]. This motivates the use of a data-driven ML framework that approximates Φs(·) di-rectly from sub-6 GHz channels. GNNs provide a suitable ML architecture for this problem, as they can effectively model interactions among multiple BSs and UEs whose wireless channels jointly determine the beamforming decisions. To this end, we develop a GNN-based framework that learns the mapping in (8) and generalizes to different network topologies, as described next. III. P ROPOSED GNN-B ASED FRAMEWORK 
+
+We model the considered CF-mMIMO system as a wireless graph , defined as G := ( V, E, TV ), where the node set is given by V = VBS ∪ V UE , consisting of the BS nodes 
+
+VBS = {1, . . . , B } and UE nodes VUE = {1, . . . , U }. The edge set E = {(b, u ) | b ∈ VBS , u ∈ VUE } captures all communication links between BSs and UEs. The node-type mapping is specified by TV = {BS , UE }. For each edge (b, u ) ∈ E , we assign a feature vector extracted from the corresponding sub-6 GHz channel hs
+
+> b,u
+
+. Furthermore, each BS and UE node is associated with a learnable embedding vector, denoted by ρb ∈ Rd and ρu ∈ Rd, respectively. These embeddings are later optimized jointly with the GNN parameters. The parameter d represents the dimensionality of all feature and embedding vectors. 
+
+A. GNN Architecture 
+
+With the graph representation described above, we aim to design a GNN that generates the beamformers efficiently. GNNs operate by iteratively propagating information across the graph through message passing, enabling each element, i.e., each node or edge, to incorporate information from its neighbors [11], [12]. Following this principle, the proposed GNN method consists of three phases: 1) Initialization (Phase 1): Let z(t) 
+
+> b
+
+and z(t) 
+
+> u
+
+denote the hidden states of BS b and UE u at message-passing iteration t,respectively. Similarly, let e(t) 
+
+> b,u
+
+represent the hidden state of edge (b, u ). At the initialization step, i.e., t = 0 , the node hidden states are set to the learnable embeddings introduced in the previous subsection, while the edge hidden states are obtained from the sub-6 GHz channel features, i.e., 
+
+z(0)  
+
+> b
+
+= ρb, z(0)  
+
+> u
+
+= ρu, e(0)  
+
+> b,u
+
+= φinit edge 
+
+ hs
+
+> b,u
+
+ , (9) where φinit edge (·) is a learnable affine mapping, i.e., a fully linear network without an activation layer, that projects the sub-6 GHz channel features into a d-dimensional embedding space. The initialized hidden states z(0)  
+
+> b
+
+, z(0)  
+
+> u
+
+, and e(0)  
+
+> b,u
+
+serve as the starting representations that will be progressively refined through the message passing process described next. 2) Message Passing (Phase 2): At each iteration t, the hidden states of the edges are updated by aggregating infor-mation from neighboring BS-UE edges. Our message passing mechanism is inspired by the graph attention layer with edge features (EdgeGATConv) in [13]. However, unlike [13], which aggregates edge information into node embeddings, we adapt the attention mechanism so that each edge directly aggregates information from its neighboring edges. For an edge (b, u ), we consider two neighborhoods: (i) the edges connected to the same BS b, and (ii) the edges connected to the same UE u. We denote the BS-side neighborhood by 
+
+E(b) = {(b, u ′) | u′ ∈ N (b)} and the UE-side neighborhood by 
+
+E(u) = {(b′, u ) | b′ ∈ N (u)}. In the following equations, we use the superscripts “ BS ” and “ UE ” for parameters associated with the BS and UE, respectively. We first compute attention coefficients that quantify the relevance of neighboring edges. For the BS-side neighborhood, we define the attention weights as 
+
+α(t) 
+
+> b,u ←v
+
+= softmax 
+
+
+
+a⊤ 
+
+> BS
+
+σ concat  WBS  
+
+> e
+
+e(t)
+
+> b,u
+
+, WBS  
+
+> e
+
+e(t) 
+
+> b,v
+
+,
+
+WBS  
+
+> b
+
+z(t)
+
+> b
+
+ 
+
+, (10) where aBS is an attention vector used to score the impor-tance of neighboring edges in the BS-side aggregation. Here, 
+
+WBS  
+
+> e
+
+, WBS  
+
+> b
+
+∈ Rd×d are trainable projection matrices that transform the edge and BS-node features into a common latent space before attention is computed. The operator concat( ·) de-notes concatenation, and σ(·) denotes the leaky rectified linear unit (LeakyReLU) activation function. Using these attention weights, we compute the BS-side aggregated message as 
+
+mBS  
+
+> b,u
+
+= X
+
+> (b,v )∈E (b)
+
+α(t)
+
+> b,u ←v
+
+
+
+WBS  
+
+> e
+
+e(t) 
+
+> b,v
+
++ WBS  
+
+> b
+
+z(t) 
+
+> b
+
++ WBS  
+
+> u
+
+z(t)
+
+> u
+
+
+
+,
+
+(11) where WBS  
+
+> u
+
+∈ Rd×d transforms the UE-node features into the BS-side latent space before aggregation. Analogously, for the UE-side neighborhood we compute UE-side attention coefficients for edge (b, u ) as 
+
+β(t) 
+
+> b←w,u
+
+= softmax 
+
+
+
+a⊤ 
+
+> UE
+
+σ concat  WUE  
+
+> e
+
+e(t)
+
+> b,u
+
+, WUE  
+
+> e
+
+e(t)
+
+> w,u
+
+,
+
+WUE  
+
+> u
+
+z(t)
+
+> u
+
+ 
+
+, (12) and we compute the corresponding message as 
+
+mUE  
+
+> b,u
+
+= X
+
+> (w,u )∈E (u)
+
+β(t)
+
+> b←w,u
+
+
+
+WUE  
+
+> e
+
+e(t) 
+
+> w,u
+
++ WUE  
+
+> b
+
+z(t) 
+
+> b
+
++ WUE  
+
+> u
+
+z(t)
+
+> u
+
+
+
+,
+
+(13) where WUE  
+
+> b
+
+, WUE  
+
+> e
+
+, WUE  
+
+> u
+
+∈ Rd×d are trainable matrices. We then fuse the two aggregated messages in (11) and (13) as 
+
+m(t) 
+
+> b,u
+
+= 12
+
+
+
+mBS  
+
+> b,u
+
++ mUE 
+
+> b,u
+
+
+
+. (14) Finally, we update the hidden state of edge (b, u ) using a residual rule such that 
+
+e(t+1)  
+
+> b,u
+
+= Wupd e(t) 
+
+> b,u
+
++ m(t)
+
+> b,u
+
+. (15) Here Wupd is a learnable matrix that linearly transforms the current edge state, forming the residual component of the update. Note that in equations (10)–(15), we omit the bias terms, following the design of EdgeGATConv in [13]. We stack T such message passing layers to progressively refine the edge representations. 3) Readout (Phase 3): After T message passing layers, for a given edge (b, u ), we collect information from two groups of neighboring edges and summarize them through mean aggregation. Specifically, one group include the edges connected to the same BS b, namely (b, u ′) ∈ E(b) with 
+
+u′̸ = u, and the other group is for the edges connected to the same UE u, namely (b′, u ) ∈ E (u) with b′̸ = b. We construct the contextual feature vector as 
+
+cb,u = concat 
+
+
+
+e(T ) 
+
+> b,u
+
+, cintra  
+
+> b,u
+
+, cinter 
+
+> b,u
+
+
+
+, (16) where cintra  
+
+> b,u
+
+and cinter  
+
+> b,u
+
+are the mean aggregated edge features from the BS-side and UE-side neighborhoods, obtained as 
+
+cintra  
+
+> b,u
+
+= 1
+
+|E (b)| − 1
+
+X 
+
+> (b,u ′)∈E (b)
+> u′̸=u
+
+e(T ) 
+
+> b,u ′
+
+, (17) 
+
+cinter  
+
+> b,u
+
+= 1
+
+|E (u)| − 1
+
+X 
+
+> (b′,u )∈E (u)
+> b′̸=b
+
+e(T )
+
+> b′,u
+
+. (18) Thus, cb,u captures the direct BS-UE relation together with mean-aggregated contextual information from neighboring BS and UE connections. We then transform these contextual features into beamform-ing vectors {fb,u } using a mapping φout (·) implemented by a multilayer perceptron (MLP), i.e., 
+
+fb,u = φout (cb,u ) ∈ CN mW 
+
+. (19) We form the digital beamformer at BS b as 
+
+Fb = fb, 1, . . . , fb,U 
+
+. Finally, we normalize Fb to satisfy the per-BS transmit power constraint in (5b) as 
+
+Fb ←
+
+s
+
+Pb
+
+∥Fb∥2
+
+> F
+
+Fb. (20) 
+
+B. Offline Training and Online Operation Offline Training: The proposed GNN is trained in a self-supervised manner by directly optimizing the communication performance metric, without relying on labelled beamforming targets. We train the network to maximize the downlink sum-rate defined in (4), and the loss function is defined as the negative sum-rate, i.e., L = −Rsum . The overall training procedure of the proposed framework is summarized in Algorithm 1. After constructing the dataset from the sub-6 GHz CSI as shown in steps 1–5, the GNN performs a forward pass following the architecture in Section III-A, where node and edge states are initialized as in step 9 and refined through T message-passing layers, following steps 10–14. The readout stage generates the beamforming vectors, which are normalized to satisfy the per-BS power constraints, according to steps 15–18. Given the beamformers obtained from the forward pass, the achievable rates and the loss function are computed. For this purpose, the mmWave CSI is required only during the training phase . Let the global mmWave CSI be 
+
+HmW = HmW 1 , . . . , HmW 
+
+> B
+
+ ∈ CB×U ×N mW 
+
+, (21) where each block HmW  
+
+> b
+
+∈ CU ×N mW 
+
+contains the mmWave channels from BS b to all UEs. Using HmW together with the predicted beamformers {Fb}Bb=1 , the loss is evaluated, following Steps 19–20. The model parameters are then updated iteratively over minibatches and training epochs to minimize the loss, as shown in Steps 21–22. 
+
+Online Operation: At inference time (i.e., during model deployment), only the sub-6 GHz CSI Hs is required to feed the (pretrained) model. Given a new graph constructed from 
+
+Hs, the trained GNN generates the beamforming vectors 
+
+{Fb}Bb=1 through a single forward pass. The complexity of the proposed method is dominated by the GNN forward pass, particularly the message passing and aggregation over BS–UE edges, which scales with the number of links and their neighborhoods. However, the main com-plexity reduction is at the system level, where the proposed approach avoids explicit mmWave CSI acquisition and instead infers beamformers from sub-6 GHz CSI, which requires sig-nificantly lower training and feedback overhead. IV. N UMERICAL RESULTS 
+
+Simulation Setup: We generate the sub-6 GHz and mmWave channels using the DeepMIMO dataset [14] under the O1 
+
+scenario, which is based on ray-tracing simulations obtained from Remcom Wireless InSite. Specifically, we use the O1_28 
+
+and O1_3p5 configurations corresponding to the 28 GHz mmWave band and the 3.5 GHz sub-6 GHz band, respectively. We consider B = 3 BSs that jointly serve the UEs. Each BS employs N mW = 32 antennas for the mmWave array and 
+
+N s = 8 antennas for the sub-6 GHz array, both with half-wavelength spacing. The bandwidths are set to 0.1 GHz and 0.01 GHz for the mmWave and sub-6 GHz bands, respectively, and the number of propagation paths is fixed to L = 15 .Using the available sub-6 GHz CSI, we construct the graphs described in Section III. For each graph, we randomly select the number of UEs from the range [3 , 8] and connect them to all BSs, forming a complete BS-UE bipartite structure. We generate a dataset of 10 ,000 graphs and randomly split it into training (80%) and testing (20%) sets. 
+
+Algorithm 1: Training of the Proposed Framework 
+
+Input: Global sub-6 GHz CSI Hs; global mmWave CSI 
+
+HmW ; per-BS powers {Pb}Bb=1 .
+
+Output: Trained GNN parameters Θ and predicted digital beamformers {Fb}Bb=1 .
+
+Parameters: B; U ; T ; total number of graph samples N ;batch size M ; learning rate η; optimizer Opt ;number of training epochs E.
+
+// Dataset construction  
+
+> 1
+
+D ← ∅ ; 
+
+> 2
+
+for i ← 1 to N do  
+
+> 3
+
+Construct G(i) = ( V(i), E(i), TV ) from the sub-6 GHz CSI Hs according to Section III;  
+
+> 4
+
+Store  G(i) in D; 
+
+> 5
+
+Split D into training/test sets and form batches of size M ; 
+
+> 6
+
+Initialize GNN parameters Θ;
+
+// End-to-end training  
+
+> 7
+
+for e ← 1 to E do  
+
+> 8
+
+for each minibatch ⊂ D train do 
+
+// Phase 1: Initialization  
+
+> 9
+
+Initialize node and edge hidden states using (9) 
+
+// Phase 2: Message passing  
+
+> 10
+
+for t ← 0 to T − 1 do  
+
+> 11
+
+Compute BS-side attention coefficients α(t)
+
+> b,u ←v
+
+using (10), and UE-side attention coefficients 
+
+β(t) 
+
+> b←w,u
+
+using (12);  
+
+> 12
+
+Compute BS-side messages mBS  
+
+> b,u
+
+using (11), and UE-side messages mUE  
+
+> b,u
+
+using (13);  
+
+> 13
+
+Fuse the two messages according to (14);  
+
+> 14
+
+Update the edge hidden states according to (15); 
+
+// Phase 3: Readout  
+
+> 15
+
+Construct the contextual features cb,u according to Section III-A;  
+
+> 16
+
+Generate beamforming vectors fb,u = φout (cb,u ) 
+
+> 17
+
+Form the digital beamformer at each BS as 
+
+Fb = fb, 1, . . . , fb,U 
+
+ 
+
+> 18
+
+Normalize each beamformer to satisfy the per-BS power constraint using (20) 
+
+// Loss computation  
+
+> 19
+
+Compute the user rates {Ru}Uu=1 with the predicted beamformers {Fb}Bb=1 and the corresponding mmWave CSI HmW ; 
+
+> 20
+
+Compute the loss L = −Rsum ;
+
+// Parameter update  
+
+> 21
+
+Compute gradients ∇ΘL by backpropagation;  
+
+> 22
+
+Update parameters using the chosen optimizer and learning rate: Θ ← Opt (Θ, ∇ΘL, η )
+
+We implement the proposed GNN with T = 3 message-passing layers and hidden dimension d = 64 . The attention blocks use the LeakyReLU activation with slope 0.2. The readout module uses a 3-layer MLP with rectified linear unit activations to generate the beamforming vectors. The model is trained using the Adam optimizer with learning rate of 10 −4
+
+and decay factor of 10 −5. We use a batch size of M = 10 
+
+graphs and train the model for 15 epochs. 
+
+Convergence Behavior: We evaluate the convergence of the proposed GNN-based beamforming training described in Algorithm 1 in Fig. 1. The figure shows the training loss over 1 3 5 7 9 11 13 15   
+
+> Training Epoch
+> -13.0 -12.0 -11.0 -10.0 -9.0 -8.0 -7.0 -6.0
+> Training Loss (Negative Sum Rate)
+> Pb= 1.0 W Pb= 3.0 W
+
+Fig. 1. Training loss convergence of the proposed framework for two representative per-BS transmit powers, Pb ∈ { 1, 3} W. 2 3 4 5 6 7 8
+
+> Number of Sub-6 GHz Antennas Used During Test Phase
+> 10.5 11.0 11.5 12.0 12.5 13.0
+> Average Sum Rate [bps/Hz]
+
+Fig. 2. Sum-rate of the GNN-based framework versus the number of available sub-6 GHz antennas at inference for Pb = 3 W. 1 2 3 4 5 6 7 8 9  
+
+> Per-BS Transmit Power Pb[W]
+> 6.0 8.0 10.0 12.0 14.0 16.0 18.0
+> Average Sum Rate [bps/Hz]
+> Sub-6 GHz CSI (Proposed)
+> GNN-based
+> Full mmWave CSI (Benchmarks)
+> MMSE MMSE (Uniform) ZF MRT
+
+Fig. 3. Sum-rate versus per-BS transmit power 
+
+Pb for the proposed GNN-based beamformer and benchmark beamformers. 
+
+epochs for Pb = 1 W and Pb = 3 W. In both cases, the training loss decreases rapidly during the first few epochs and gradually stabilizes afterward, indicating stable convergence. 
+
+Impact of the Number of Sub-6 GHz Antennas: Fig. 2 shows the downlink sum-rate for Pb = 3 W versus the number of sub-6 GHz antennas for which CSI is available during inference. It is seen that the performance improves consistently as the number of available antennas increases. For instance, increasing the number of antennas from 3 to 8 improves the sum-rate from 11 .10 bps/Hz to 12 .95 bps/Hz. Using only 3
+
+antennas already achieves about 85 .7% of the performance obtained with all sub-6 GHz antennas. 
+
+Sum-Rate Maximization Results: We compare the sum-rate achieved by the proposed GNN-based beamforming scheme with three baselines using full mmWave CSI: zero-forcing (ZF), MMSE, and maximum-ratio transmission (MRT) [15]. ZF and MMSE are implemented centrally at the CPU, while MRT is applied locally at each BS. Fig. 3 shows the average downlink sum-rate versus the per-BS transmit power Pb. All methods use the same GNN-induced per-UE power allocation, where the power assigned by BS b to UE u is given by pGNN 
+
+b,u = ∥fb,u ∥22. The proposed beamformer consistently outperforms ZF and MRT, while remaining close to MMSE. For example, at Pb = 5 W, the proposed method achieves 15 .18 bps/Hz, compared to 15 .15 
+
+bps/Hz achieved by MMSE, 13 .95 bps/Hz by ZF, and 10 .59 
+
+bps/Hz by MRT. To isolate the benefit of the learned power allocation, Fig. 3 also includes the MMSE beamformer with uniform power allocation, denoted by “MMSE (Uniform).” At 
+
+Pb = 5 W, the GNN-induced allocation increases its sum-rate from 13 .66 to 15 .15 bps/Hz, corresponding to a 10 .9% 
+
+performance improvement. V. C ONCLUSION 
+
+This paper studied fully digital downlink beamforming in CFmMIMO systems using only uplink sub-6 GHz CSI. We proposed a GNN-based framework that represents the system as a graph and learns beamformers through customized message passing over BS-UE links. Numerical results showed that the proposed approach generalizes well across different network topologies, remains robust under partial sub-6 GHz CSI at inference, and achieves sum-rate performance close to fully digital benchmark schemes that rely on full mmWave CSI. As future work, this framework can be extended to hybrid beamforming architectures. ACKNOWLEDGMENT 
+
+This work was supported by the Research Council of Fin-land through 6G Flagship Program (grant 369116) and projects DIRECTION (grant 354901), DYNAMICS (grant 24305016), and CHIST-ERA PASSIONATE (grant 359817). REFERENCES [1] H. Q. Ngo et al. , “Cell-free massive MIMO versus small cells,” IEEE Trans. Wireless Commun. , vol. 16, no. 3, pp. 1834–1850, 2017. [2] E. Bj¨ ornson and L. Sanguinetti, “Scalable cell-free massive MIMO systems,” IEEE Trans. Commun. , vol. 68, no. 7, pp. 4247–4261, 2020. [3] R. W. Heath et al. , “An overview of signal processing techniques for millimeter wave MIMO systems,” IEEE J. Sel. Topics Signal Process. ,vol. 10, no. 3, pp. 436–453, 2016. [4] M. Hashemi, C. E. Koksal, and N. B. Shroff, “Out-of-band millimeter wave beamforming and communications to achieve low latency and high energy efficiency in 5G systems,” IEEE Trans. Commun. , vol. 66, no. 2, pp. 875–888, 2018. [5] M. Alrabeiah and A. Alkhateeb, “Deep learning for mmwave beam and blockage prediction using sub-6 GHz channels,” IEEE Trans. Commun. ,vol. 68, no. 9, pp. 5504–5518, 2020. [6] S. Tavakolian et al. , “Knowledge distillation for mmwave beam pre-diction using sub-6 GHz channels,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Processing , pp. 22642–22646, 2026. [7] W. Deng et al. , “CSI transfer from sub-6G to mmwave: Reduced-overhead multi-user hybrid beamforming,” IEEE J. Sel. Areas Commun. ,vol. 43, no. 3, pp. 973–987, 2025. [8] Z. Huang, Z. Wang, and S. Chen, “Sub-6GHz assisted mmwave hybrid beamforming with heterogeneous graph neural network,” IEEE Trans. Commun. , vol. 72, no. 11, pp. 6917–6928, 2024. [9] E. Bj¨ ornson, J. Hoydis, and L. Sanguinetti, Massive MIMO Networks: Spectral, Energy, and Hardware Efficiency . Now Foundations and Trends, 2017. [10] H. Song et al. , “Joint channel estimation and data detection in cell-free massive MU-MIMO systems,” IEEE Trans. Wireless Commun. , vol. 21, no. 6, pp. 4068–4084, 2022. [11] J. Zhou et al. , “Graph neural networks: A review of methods and applications,” CoRR , vol. abs/1812.08434, 2018. [12] J. Gilmer et al. , “Neural message passing for quantum chemistry,” in 
+
+Proc. ICML (D. Precup and Y. W. Teh, eds.), vol. 70 of PMLR , pp. 1263– 1272, 06–11 Aug 2017. [13] T. Monninger et al. , “Scene: Reasoning about traffic scenes using heterogeneous graph neural networks,” IEEE Robot. Autom. Lett. , vol. 8, no. 3, pp. 1531–1538, 2023. [14] A. Alkhateeb, “DeepMIMO: A generic deep learning dataset for mil-limeter wave and massive MIMO applications,” in Proc. Inf. Theory Appli. Workshop (ITA) , (San Diego, CA), pp. 1–8, Feb 2019. [15] R. W. Heath Jr and A. Lozano, Foundations of MIMO Communication .Cambridge Univ. Press, 2018.

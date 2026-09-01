@@ -1,0 +1,459 @@
+Title: Movable Antenna Arrays with Imperfect Channel State Information in Rich Scattering Environments
+
+URL Source: https://arxiv.org/pdf/2608.29182v1
+
+Published Time: Tue, 01 Sep 2026 00:38:27 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Movable Antenna Arrays with Imperfect Channel State Information in Rich Scattering Environments 
+
+Yizhen Zhao, Amna Irshad and Emil Björnson 
+
+Department of Communication Systems, KTH Royal Institute of Technology, Stockholm, Sweden Email: {yizhen,amnai,emilbjo}@kth.se 
+
+Abstract—The growing demand for high spectral efficiency in 6G and beyond has driven research into adaptive antenna architectures capable of exploiting the spatial structure of mul-tipath propagation channels. Conventional base station arrays are deployed with fixed element positions and cannot adapt to the instantaneous spatial structure of the propagation channel. In contrast, movable antenna (MA) systems enable dynamic reconfiguration of antenna positions, allowing the array geom-etry to track the channel characteristics of the current user set. While prior MA studies have demonstrated significant gains under perfect or statistical channel state information (CSI) assumptions, the interplay between imperfect instantaneous CSI, antenna placement optimization, and precoder design has received limited attention. This paper addresses this gap by proposing a practical end-to-end framework encompassing uplink pilot transmission, MMSE channel estimation under a clustered multipath model, and downlink ZF precoding designed from estimated CSI. Antenna positions are optimized via particle swarm optimization under two objectives: sum-rate maximization and max-min fairness. Simulation results show that MA gains are most pronounced under sparse, near-LoS propagation and diminish as channel richness increases. Furthermore, we reveal a fundamental coupling between array geometry and precoder design: a fairness-oriented antenna geometry encodes spatial fairness information that is only recoverable when evaluated with a compatible power allocation strategy. A mismatched precoder can completely mask the geometric advantage, leading to misleading conclusions about the robustness of antenna placement to the choice of opti-mization objective. These findings provide practically relevant guidance for the design and evaluation of movable antenna systems under realistic operating conditions. Index Terms—Movable antennas, MMSE channel estima-tion, particle swarm optimization, multi-user MIMO, clustered channel model. 
+
+I. Introduction Massive MIMO has become a cornerstone of 5G wireless systems, offering substantial improvements in spectral efficiency and spatial multiplexing capability [1], [2]. Extending these gains to beyond-5G and 6G scenarios typically requires scaling up the number of antennas, which significantly increases hardware cost and system complexity. This challenge motivates the investigation of flexible antenna architectures capable of achieving high performance with a reduced number of elements. Never-theless, most existing systems employ antenna elements 
+
+The research was supported by the Grant 2022-04222 from the Swedish Research Council. 
+
+fixed at predetermined positions on the array aperture, typically with half-wavelength spacing between elements. While such fixed geometries are simple to deploy and analyze, they are fundamentally constrained because, once deployed, the array cannot adapt to the actual user distribution or propagation environment, both of which are time-varying. Recent years have seen growing interest in movable antenna (MA) systems [2], also referred to as fluid antennas [3] or mechanically reconfigurable arrays, in which individual antenna elements can reposition within a bounded deployment region [4], [5]. By adjusting antenna positions, the BS can reconfigure its structure to better align with the dominant directions of signal propagation, more efficiently exploit spatial degrees of freedom, and reduce spatial correlation among user channels. These properties make MA systems particularly attractive for multi-user downlink scenarios, where inter-user interfer-ence suppression depends critically on the spatial separa-bility of user channels. Motivated by these advantages, substantial research effort has been directed toward MA-aided communication systems. The capacity benefits of MA systems in single-user scenarios were characterized in [5], showing that antenna position optimization can achieve spatial mul-tiplexing gains approaching theoretical bounds. In multi-user systems, optimizing MA positions has been shown to improve achievable rates [4], [6], suppress inter-user interference, and enable flexible beamforming. Further-more, position optimization based on statistical CSI [7] has been studied to reduce dependence on instantaneous channel knowledge. Despite these promising results, most existing works assume either perfect instantaneous CSI or ideal statistical CSI at the BS, which do not reflect the conditions encountered in practical deployments. In practice, the BS must estimate user channels from uplink pilot signals, and this estimation is inherently imperfect due to noise and finite pilot length. The resulting errors degrade both the precoding quality and the reliability of any utility function used to drive antenna placement. Optimizing ergodic rates provides a principled way to handle this uncertainty, as they average over chan-nel estimation errors across coherence intervals. While arXiv:2608.29182v1 [eess.SP] 29 Aug 2026 pilot-based estimation for MA systems has been studied under field-response channel models [8]–[11], these works focus on reconstructing the spatial channel function across the aperture rather than quantifying how estimation error propagates through the precoder and into the placement objective. To the best of our knowledge, no prior work has evaluated the complete chain of uplink pilot transmission, MMSE channel estimation, ZF precoding, and PSO-based antenna placement within a unified framework that explicitly accounts for imperfect CSI throughout. Contributions The main contributions of this paper are as follows:  
+
+> •
+
+We propose a complete end-to-end framework for MA-assisted multi-user downlink systems that incor-porates uplink MMSE channel estimation, precoding, and PSO-based antenna placement optimization, using ergodic rate expressions that capture imperfect CSI.  
+
+> •
+
+We show that the performance gains of movable antennas are highly dependent on channel structure: significant improvements are obtained in sparse, highly directional channels, while the advantage diminishes in rich scattering environments.  
+
+> •
+
+We reveal a fundamental coupling between array ge-ometry and precoder design: a fairness-oriented MA geometry only yields min-rate gains when evaluated with a compatible power allocation strategy, and a mismatched precoder can completely suppress the geometric advantage. The remainder of this paper is organized as follows. Section II presents the system model, including the chan-nel model and pilot-based channel estimation. Section III formulates the antenna position optimization problem. Section IV describes the proposed solution approach. Simulation results and performance analysis are provided in Section V, followed by conclusions in Section VI. II. System Model We consider a multi-user downlink system where a base station (BS) equipped with N MAs serves K single-antenna users. The propagation channel between the BS and k-th user is modeled using a clustered channel representation [12]. More precisely, each user channel consists of Ncl scattering clusters whose directions are distributed around the line-of-sight (LoS) direction with a limited angular spread as shown in Fig. 1. We consider time-division duplexing, so the channels are identical in uplink and downlink. A. Clustered Channel Model Let ϕk,i and θk,i denote the azimuth and elevation angles associated with the i-th cluster of the k-th user. 
+
+Fig. 1: Block diagram of the system where a base station serves K users having clustered multipath channels. The corresponding wave vector is defined as 
+
+kk,i = 2πλ
+
+
+
+cos θk,i cos ϕk,i 
+
+cos θk,i sin ϕk,i 
+
+sin θk,i 
+
+ . (1) If the n-th antenna element is located at the position 
+
+tn ∈ R3, the array response vector for the i-th cluster becomes 
+
+a(ϕk,i , θ k,i ) = 
+
+[
+
+ejkT 
+
+> k,i t1
+
+, . . . , e jkT
+
+> k,i tN
+
+]T
+
+, (2) where λ is the carrier wavelength. The channel vector of the k-th user is modeled as 
+
+hk =
+
+> Ncl
+
+∑
+
+> i=1
+
+ck,i a(ϕk,i , θ k,i ), (3) where ck,i ∼ CN (0 , β k,i ) is the complex fading coefficient of the i-th cluster and βi is the cluster power [13]. The corresponding spatial covariance matrix is 
+
+Rk = E{hkhH 
+
+> k
+
+} =
+
+> Ncl
+
+∑
+
+> i=1
+
+βk,i a(ϕk,i , θ k,i )aH(ϕk,i , θ k,i ). (4) B. Pilot-Based MMSE Channel Estimation During the uplink training phase, each user transmits an orthogonal pilot sequence of length τp ≥ K. The received pilot matrix at the BS is 
+
+Y = √pt HΦ T + N, (5) where pt is the common pilot transmit power, H =[h1, . . . , hK ], Φ ∈ Cτp×K is the pilot matrix satisfying 
+
+ΦH Φ = τpIK , and N is the additive complex Gaussian noise with independent CN (0, N 0I)-entries, where N0
+
+is the noise variance. The BS obtains MMSE channel estimates from uplink pilots. The estimate of hk is given by [14] ˆhk = √ptτp Rk Ψ−1 
+
+> k
+
+zk, (6) where Ψk = ptτp Rk + N0I. The channel estimation error 
+
+˜hk = hk − ˆhk is independent of ˆhk by the orthogonality principle and Gaussian distribution, and its covariance matrix is 
+
+Ck = Rk − ptτp Rk Ψ−1 
+
+> k
+
+Rk. (7) C. Downlink Precoding and Achievable Ergodic Sum Rate The BS applies linear precoding based on the es-timated channels, where the precoding vectors W =[w1, w2, · · · , wK ] are designed to suppress inter-user in-terference based on the estimated channel matrix. Power is allocated across users by water-filling over the effective channel gains |ˆhH 
+
+> k
+
+wk|2. Due to the imperfect channel estimate, the received signal at k-th user contains residual interference from the estimation error. The resulting downlink received signal is 
+
+yk = ˆhH 
+
+> k
+
+wksk +
+
+> K
+
+∑ 
+
+> i=1
+> i̸=k
+
+ˆhH 
+
+> k
+
+wisi +
+
+> K
+
+∑
+
+> i=1
+
+˜hH 
+
+> k
+
+wisi + nk, (8) where sk ∼ CN (0 , P k) is the transmitted data symbol and 
+
+nk ∼ CN (0 , σ 2) is receiver noise. We assume that the UEs also know the imperfect channel estimates, which implies that the received signal contains residual interference caused by imperfect CSI. By treating the interference and estimation errors as worst-case Gaussian noise, a standard ergodic achievable rate can be obtained [14]. For k-th user, the ergodic achievable rate is 
+
+Rk = E {log 2(1 + SINR k)} , (9) where the effective instanteneous SINR is 
+
+SINR k = Pk |ˆhH 
+
+> k
+
+wk|2
+
+∑  
+
+> i̸=k
+
+Pi |ˆhH 
+
+> k
+
+wi|2 + ∑Ki=1 wH 
+
+> i
+
+Ckwi + σ2 . (10) The SINR’s denominator explicitly includes the term ∑Ki=1 wH 
+
+> i
+
+Ckwi, which captures the aggregate interference power arising from channel estimation errors. This term is absent in ideal CSI analysis, and its inclusion is essential for an accurate evaluation of system performance under practical conditions. III. Problem Formulation The objective of this paper is to optimize the positions of the N BS antenna elements to maximize a general network utility function of the user rates. Specifically, we consider 
+
+maximize 
+
+> t1,..., tN
+
+U (R1, . . . , R K
+
+) (11) 
+
+subject to tn ∈ C n, ∀ n, (12) 
+
+∥ti − tj ∥ ≥ λ
+
+2 , ∀ i̸ = j. (13) Constraint (12) restricts each antenna element to move within a corresponding bounded feasible region Cn,representing mechanical deployment constraints. Con-straint (13) enforces a minimum inter-element spacing of λ/ 2 to limit mutual coupling effects [15], and Rk is given in (9). The rate expression in (9) explicitly captures the impact of imperfect CSI through the estimation error covariance Ck, making the optimization fundamentally different from ideal-CSI formulations. The utility function 
+
+U (·) is assumed to be monotonically increasing in each argument and can represent different design objectives, such as:  
+
+> •
+
+Sum-rate maximization: U = ∑Kk=1 Rk 
+
+> •
+
+Max-min fairness: U = min k Rk
+
+This general formulation enables a unified treatment of different performance objectives without modifying the underlying optimization framework. The problem in (11)– (13) is non-convex due to the nonlinear dependence of 
+
+Rsum on antenna positions through the steering vectors, and the combinatorial nature of the minimum-spacing constraint. Moreover, the objective function evaluated at each candidate geometry requires a full channel estima-tion and precoding computation, making gradient-based methods impractical. These characteristics motivate the use of a population-based algorithm, as described in the following section. IV. Proposed PSO-Based Solution To solve the antenna placement optimization prob-lem, we use particle swarm optimization (PSO) [16], a population-based algorithm that is well-suited to non-convex, high-dimensional, and constrained optimization problems. PSO requires no gradient information and can escape local optima through the cooperative interaction of a population of candidate solutions. A. PSO Formulation Each particle p in the swarm represents a candidate antenna configuration T(p) = [ t(p)1 , . . . , t(p) 
+
+> N
+
+]. The fitness of each particle is a general utility function U (R1, . . . , R K )
+
+evaluated using the achievable rates in (9). This allows the same framework to optimize different objectives, such as sum-rate maximization and max-min fairness. This computation is done using the estimated channels {ˆhk}
+
+obtained from MMSE estimation. This is a critical design choice: by using estimated rather than true channels to evaluate fitness, the optimization is performed under realistic imperfect CSI conditions, consistent with what is available at the BS in practice [17]. At each iteration 
+
+t, the velocity and position of particle p are updated as 
+
+v(p) 
+
+> t+1
+
+= w v(p) 
+
+> t
+
++ c1r1(T(p)best − T(p) 
+
+> t
+
+) + c2r2(T∗ 
+
+> best
+
+− T(p) 
+
+> t
+
+),
+
+(14) 
+
+T(p) 
+
+> t+1
+
+= T(p) 
+
+> t
+
++ v(p)
+
+> t+1
+
+, (15) where w is the inertia weight, c1 and c2 are cognitive and social acceleration coefficients, r1, r 2 ∼ U (0 , 1) are random scalings, T(p)best is the personal best position of particle p, and T∗ 
+
+> best
+
+is the global best position found by the swarm. B. Constraint Handling The minimum inter-element spacing constraint (13) is incorporated into the PSO objective via a penalty term. The modified fitness function evaluated by each particle is 
+
+fpen 
+
+(
+
+T(p))
+
+= U (R1, . . . , R K ) − α · g
+
+(
+
+T(p))
+
+, (16) where 
+
+g
+
+(
+
+T(p))
+
+= max  
+
+> i̸=j
+
+[ λ
+
+2 −
+
+∥∥∥t(p) 
+
+> i
+
+− t(p)
+
+> j
+
+∥∥∥]+
+
+(17) is the maximum spacing constraint violation across all antenna pairs, [·]+ = max(0 , ·) denotes the positive part, and α > 0 is the penalty weight, set to α = 1 in all experiments. Particles violating the spacing constraint incur a fitness reduction proportional to the degree of vi-olation, guiding the swarm toward feasible configurations over successive iterations. The box constraints in (12) are enforced exactly through variable bounds in the PSO solver, ensuring each antenna element always remains within its feasible region Cn.C. PSO Algorithm The complete PSO-based antenna placement procedure is summarized in Algorithm 1. Steps 3–5 highlight the key feature of this framework: the MMSE estimation and ZF precoding pipeline is embedded inside the fitness evaluation loop, so that every candidate antenna geome-try is assessed using the same realistic estimated-channel based utility function that the deployed system would achieve. In the simulation results, the PSO is configured with Np = 120 particles, I = 180 iterations, inertia weight w = 0 .5, coefficients c1 = 1 .2 and c2 = 2 , and penalty coefficient α = 5 ; the algorithm terminates after 
+
+I iterations. D. Computational Complexity The dominant cost per PSO fitness evaluation is MMSE channel estimation, requiring inversion of an M × M
+
+matrix per user at O(KM 3), and ZF null-space computa-tion at O(K2M 2). Since M ≥ K, the former dominates. Averaged over NMC realizations and across the full PSO loop of Np particles and I iterations, the total complex-ity per scenario is O(Np I N MC 
+
+(KM 3 + K2M 2)) , which evaluates to approximately 7 × 10 10 operations for the parameter values in Table I. The optimization is thus suited to offline deployment, where it is re-run only when large-scale channel statistics change. V. Numerical Results We evaluate the system performance with the pa-rameter settings summarized in Table I. Monte Carlo simulations are performed over 100 user drops. In each realization, 50 independent channel realizations ( NMC )are considered, and K = 10 users are dropped uniformly within an annular sector at azimuth angles in [−60 ◦, 60 ◦]
+
+Algorithm 1 PSO-Based MA Placement under Imperfect CSI 
+
+Require: User positions, cluster directions {k(k) 
+
+> i
+
+}, system params Ensure: Optimized antenna layout T∗ 
+
+> 1:
+
+Initialize swarm: draw Np particles T(p) uniformly from 
+
+Cn; initialize velocities v(p) = 0; set T(p)pbest ← T(p) 
+
+> 2:
+
+for each particle p do  
+
+> 3:
+
+Build array A from positions T(p) 
+
+> 4:
+
+Compute hk , Rk via clustered channel model  
+
+> 5:
+
+Run MMSE estimation → ˆhk , Ck 
+
+> 6:
+
+Run ZF precoding + water-filling → W 
+
+> 7:
+
+Compute user rates {Rk } and evaluate 
+
+U (R1, . . . , R K )( ˆhk , Ck , W) via (9)  
+
+> 8:
+
+Evaluate fpen (T(p)) via (16)  
+
+> 9:
+
+end for  
+
+> 10:
+
+Set T∗ 
+
+> gbest
+
+← arg max p fpen (T(p)) 
+
+> 11:
+
+for t = 1 to I do  
+
+> 12:
+
+for each particle p do  
+
+> 13:
+
+Update v(p) and T(p) via PSO velocity equations  
+
+> 14:
+
+Clip T(p) to box bounds Cn (enforce (12))  
+
+> 15:
+
+Evaluate fpen (T(p)) (Steps 3–8 above)  
+
+> 16:
+
+if fpen (T(p)) > f pen (T(p)pbest ) then  
+
+> 17:
+
+T(p)pbest ← T(p) 
+
+> 18:
+
+end if  
+
+> 19:
+
+if fpen (T(p)) > f pen (T∗
+
+> gbest
+
+) then  
+
+> 20:
+
+T∗ 
+
+> gbest
+
+← T(p) 
+
+> 21:
+
+end if  
+
+> 22:
+
+end for  
+
+> 23:
+
+end for  
+
+> 24:
+
+return T∗ = T∗
+
+> gbest
+
+TABLE I: Simulation Parameters                          
+
+> Parameter Value Carrier frequency fc3 GHz Wavelength λ0.1 m Number of BS antennas N16 ( 4×4)Number of users K10 Number of clusters Ncl 5 (varied: 1, 5, 10) Pilot length τpK
+> Pilot transmit power pt5Downlink SNR 10 dB Noise power N01 (normalized) Downlink power PSNR linear ×N0
+> BS height 20 λ
+
+and distances between 10 m and 50 m from the BS [18], [19]. The cluster directions for each realization are generated once and shared across all antenna geometry evaluations, ensuring a fair comparison. Linear precoding is employed at the BS, with ZF precoding based on the es-timated channel matrix to suppress inter-user interference to the extent possible with imperfect CSI. Each antenna moves within a dedicated 5λ × 5λ cell, spanning a total aperture of 20 λ × 20 λ.To isolate the contributions of antenna geometry and CSI quality independently, each antenna configuration is evaluated under two channel conditions:  
+
+> •
+
+Estimated channel ( ˆhk, solid lines): The ZF precoder is designed from the MMSE estimate, and the SINR in (10) includes Ck. This is the realistic operating condition.  
+
+> •
+
+True channel / genie-aided ( hk, dashed lines): The ZF precoder is designed from the true channel with 
+
+Ck = 0. This is the perfect CSI upper bound for each geometry where ˆhk = hk.The vertical gap between a scheme’s dashed and solid CDF curves directly quantifies the performance loss due to imperfect CSI for that geometry. We consider two MA configurations depending on the optimization objective: sum-rate (MA-SR) and max–min fairness (MA-MM). In addition to MA, traditional fixed BS schemes are also considered and are:  
+
+> •
+
+Sparse Uniform Planar Array (F-USPA): A fixed sparse planar array with an inter-element spacing of 20 λ/ 3. 
+
+> •
+
+Half-wavelength Uniform Planar Array (F-HwUPA): A conventional fixed planar array with a λ/ 2-element spacing. A. Impact of Channel Structure To investigate how channel richness affects MA per-formance, we evaluate the system for varying Ncl . Both MA configurations (MA-SR and MA-MM) are evaluated under a common ZF precoding scheme with waterfilling power allocation. The optimization follows the imperfect CSI model described in Section V. Fig. 2 shows CDFs of achievable ergodic sum rates for Ncl ∈ { 1, 10 } at SNR =10 dB with τp = K = 10 . For Ncl = 1 , the channel is near-LoS and highly directional. The low-rank (approximately rank-one) spatial covariance Rk gives strong spatial separation between users, and MA-PSO achieves the best performance: the genie-aided MA curve (solid yellow) is the highest, followed by MA with estimated channels (dashed yellow), then F-USPA (solid then dashed blue), and F-HwUPA performing the worst. The gap between dashed and solid curves is moderate, indicating that MMSE estimation remains accurate under the highly structured single-cluster channel. As Ncl increases to 10, the channel becomes richer in angular diversity and Rk
+
+increases in rank. User channels increasingly overlap in the angular space, reducing the spatial selectivity that MA repositioning exploits. Consequently, the CDF curves of MA and F-USPA, for both estimated and true channels, converge. Similar trends were observed for other user configurations (e.g., K = 5 ), and are omitted for brevity. The key finding is that the MA advantage over fixed arrays is largest under sparse, near-LoS propagation and diminishes as scattering richness increases. B. Cross-Objective Performance and the role of the precoder Fig. 3(a) shows the CDF of the minimum ergodic user rate for the same setup as in Section V-A, focusing on the sparse channel case ( Ncl = 1 ). The two MA configurations differ only in the optimization objective used during PSO (sum-rate vs. max–min), while evaluation may use different precoders. Despite being optimized for fairness, MA-MM does not outperform MA-SR in terms of min-rate. This reveals that waterfilling actively counteracts the spatial fairness gains from the geometry: by allocating more power to users with stronger effective channels, the precoder suppresses the benefit of antenna positions that were found to geometrically favor weak users. In other words, the precoder dominates the geometry in this regime, and the geometric advantage of MA-MM vanishes when paired with a sum-rate-oriented power allocation. In the second case, we pair MA-MM with equal-power ZF precoding, which does not penalize weak users through power allocation. To isolate the effect of the precoder, the antenna geometries obtained from PSO are kept fixed. Fig. 3(b) shows that under this matched precoder, MA-MM achieves a clearly higher ergodic min-rate CDF than MA-SR, demonstrating that the geometry found by PSO-MaxMin genuinely encodes fairness information in the spatial domain. MA-SR retains its waterfilling precoder in this comparison, since it was optimized under that assumption. These two cases together expose an important coupling between array geometry and precoder design: a fairness-oriented geometry only manifests its advantage when evaluated with a compatible precoder. This suggests that joint optimization of antenna place-ment and power allocation strategy is necessary to fully realize the benefits of movable antenna systems in multi-user scenarios. The key insight is that the performance of movable antenna systems is fundamentally governed by the interaction between array geometry and precoder design. Geometry optimized for fairness provides gains only when paired with a compatible power allocation strategy, while mismatched designs can completely mask these benefits. VI. Conclusion This paper presented a practical end-to-end framework for evaluating movable antenna systems under realistic imperfect CSI conditions. The framework encompasses uplink MMSE channel estimation, linear ZF precoding with waterfilling power allocation, and PSO-based an-tenna placement optimization driven solely by channel es-timates. By reporting performance under both estimated and true channels for each antenna geometry, the frame-work directly quantifies the cost of CSI imperfection as a function of geometry and system parameters. The results demonstrate that the performance gains of movable an-tennas depend strongly on the propagation environment. In sparse, near-LoS channels with low angular spread, antenna repositioning yields substantial improvements over fixed deployments, whereas in rich-scattering envi-ronments these gains largely vanish as spatial selectivity (a) Ergodic sum rate for near-LoS case. (b) Ergodic sum rate for rich-scattering case. 
+
+Fig. 2: CDF of the sum rate for MA and fixed arrays under (a) sparse ( Ncl = 1 ) and (b) rich ( Ncl = 10 ) channels. 
+
+(a) Minimum user rate with WF power allocation for both MA-SR and MA-MM. 
+
+(b) Minimum user rate with equal power allocation for MA-MM. 
+
+Fig. 3: CDF of the minimum rate for MA-SR and MA-MM ( Ncl = 1 ): (a) ZF with waterfilling and (b) ZF with equal power. decreases. A key finding concerns the coupling between array geometry and precoder design. When both MA configurations are evaluated under the same ZF precoder with waterfilling, the sum-rate-optimized array appears competitive with the fairness-optimized array even on min-rate metrics. However, this apparent robustness is a consequence of the waterfilling precoder masking the fairness information encoded in the geometry. When the fairness-oriented array is paired with a compatible equal-power precoder, it clearly outperforms the sum-rate array on the minimum ergodic user rate. This demonstrates that the benefits of a fairness-oriented antenna geometry are only realized when the precoder does not work against it; a precoder-geometry mismatch can completely mask the spatial advantage. These findings highlight that movable antenna performance is scenario-dependent and that joint consideration of channel structure, optimization objective, and precoder design is essential for accurate system evaluation. Future work will investigate joint optimization of pilot sequences and antenna positions, extension to wideband frequency-selective channels, and adaptive positioning for time-varying multiple antenna user distributions. References      
+
+> [1] T. L. Marzetta, “Noncooperative cellular wireless with unlim-ited numbers of base station antennas,” IEEE Trans. Wirel. Commun., vol. 9, no. 11, pp. 3590–3600, 2010. [2] E. Björnson, L. Sanguinetti, H. Wymeersch, J. Hoydis, and T. L. Marzetta, “Massive MIMO is a reality—What is next? Five promising research directions for antenna arrays,” Digital Signal Processing, vol. 94, pp. 3–20, 2019. [3] W. K. New, K.-K. Wong, C. Wang, C.-B. Chae, R. Murch, H. Jafarkhani, and Y. Hao, “Fluid antenna systems: Redefining reconfigurable wireless communications,” IEEE J. Sel. Areas Commun., vol. 44, pp. 1013–1044, 2026. [4] L. Zhu, W. Ma, W. Mei, Y. Zeng, Q. Wu, B. Ning, Z. Xiao, X. Shao, J. Zhang, and R. Zhang, “A tutorial on movable antennas for wireless networks,” IEEE Commun. Surv. Tutor., vol. 28, pp. 3002–3054, 2026. [5] L. Zhu, W. Ma, and R. Zhang, “Movable antennas for wireless communication: Opportunities and challenges,” Comm. Mag., vol. 62, no. 6, p. 114–120, Jun. 2024.
+
+[6] A. Irshad, A. Kosasih, V. Petrov, and E. Björnson, “Pre-optimized irregular arrays versus movable antennas in multi-user MIMO systems,” IEEE Wirel. Commun. Lett., vol. 14, no. 8, pp. 2656–2660, 2025. [7] Y. Ma, K. Liu, L. Zhu, Y. Liu, Y. Zhu, and D. B. d. Costa, “Movable antenna-enhanced secure communication: Opportu-nities, challenges, and solutions,” IEEE Wirel. Commun., pp. 1–8, 2026. [8] Z. Zhang, J. Zhu, L. Dai, and R. W. Heath, “Successive bayesian reconstructor for channel estimation in fluid antenna systems,” IEEE Trans. Wirel. Commun., vol. 24, no. 3, p. 1992– 2006, Mar. 2025. [9] W. Ma, L. Zhu, and R. Zhang, “Compressed sensing based channel estimation for movable antenna communications,” IEEE Commun. Lett., vol. 27, no. 10, pp. 2747–2751, 2023. [10] Z. Xiao, S. Cao, L. Zhu, Y. Liu, B. Ning, X.-G. Xia, and R. Zhang, “Channel estimation for movable antenna commu-nication systems: A framework based on compressed sensing,” IEEE Trans. Wirel. Commun., vol. 23, no. 9, pp. 11 814–11 830, 2024. [11] R. Zhang, L. Cheng, W. Zhang, X. Guan, Y. Cai, W. Wu, and R. Zhang, “Channel estimation for movable-antenna MIMO systems via tensor decomposition,” IEEE Wirel. Commun. Lett., vol. 13, no. 11, pp. 3089–3093, 2024. [12] A. Saleh and R. Valenzuela, “A statistical model for indoor multipath propagation,” IEEE J. Sel. Areas Commun., vol. 5, no. 2, pp. 128–137, 1987. [13] A. F. Molisch, Wireless Communications, 2nd ed. Chichester, UK: Wiley-IEEE Press, 2011. [14] E. Björnson, J. Hoydis, and L. Sanguinetti, Massive MIMO Networks: Spectral, Energy, and Hardware Efficiency, 2017, vol. 11, no. 3-4. [15] H. Hong, K.-K. Wong, H. Li, H. Xu, H. Xiao, H. Shin, K.-F. Tong, and Y. Zhang, “FAS meets OFDM: Enabling wideband 5G NR,” IEEE Trans. Commun., vol. 73, no. 11, pp. 12 884– 12 898, 2025. [16] S. Sakamoto, T. Oda, M. Ikeda, L. Barolli, and F. Xhafa, “A pso-based simulation system for node placement in wireless mesh networks: Evaluation results for different replacement methods,” in 2015 10th International Conference on Broadband and Wireless Computing, Communication and Applications (BWCCA), 2015, pp. 213–219. [17] E. Björnson and Ö. T. Demir, Introduction to multiple antenna communications and reconfigurable surfaces. Now Publishers, Inc., 2024. [18] 3GPP, “Spatial channel model for multiple input multiple out-put (MIMO) simulations,” 3rd Generation Partnership Project, Tech. Rep. TR 25.996 v16.0.0, Jul. 2020. [19] K. Yu and B. Ottersten, “Models for MIMO propagation channels: A review,” Wirel. Commun. Mob. Comput., vol. 2, no. 7, pp. 653–666, Nov. 2002.

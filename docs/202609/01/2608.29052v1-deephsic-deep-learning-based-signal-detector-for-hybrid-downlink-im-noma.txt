@@ -1,0 +1,264 @@
+Title: DeepHSIC: Deep Learning-based Signal Detector for Hybrid Downlink IM-NOMA
+
+URL Source: https://arxiv.org/pdf/2608.29052v1
+
+Published Time: Tue, 01 Sep 2026 00:28:21 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# DeepHSIC: Deep Learning-based Signal Detector for Hybrid Downlink IM-NOMA 
+
+Dung Nguyen Tran 1,5, Toan D. Gian 2, Tien-Hoa Nguyen 5, Mai Xuan Trang 3⋆,Tien-Cuong Nguyen 4, and Thien Van Luong 1 
+
+> 1
+
+Business AI Lab, College of Technology, National Economics University, Vietnam  
+
+> 2
+
+College of Engineering, Northeastern University, Boston, MA, USA  
+
+> 3
+
+A2I Lab, Phenikaa School of Computing, Phenikaa University, Hanoi, Vietnam  
+
+> 4
+
+VNPT AI, VNPT Group, Hanoi, Vietnam  
+
+> 5
+
+School of EEE, Hanoi University of Science and Technology, Hanoi, Vietnam 
+
+trandung280502@gmail.com, toan.g@northeastern.edu, hoa.nguyentien@hust.edu.vn, trang.maixuan@phenikaa-uni.edu.vn, nguyentiencuong@vnpt.vn, thienlv@neu.edu.vn 
+
+Abstract. DeepHSIC is introduced as a neural receiver for hybrid down-link IM-NOMA transmission. The considered scheme combines power-domain NOMA with a composite OFDM/OFDM-IM waveform, so that user information is mapped jointly onto constellation symbols, subcarrier-index patterns, and different power levels. Although maximum-likelihood detection can achieve strong reliability for this model, its search space grows rapidly with the number of users and subcarriers. Conventional SIC reduces part of this burden, but its sequential cancellation may still accumulate errors and does not fully exploit the structure of IM-NOMA signals. To address this limitation, the proposed detector embeds ded-icated deep neural network modules into the receiver and replaces the most computationally demanding SIC operations with learned inference blocks. The receiver is trained for Rayleigh fading channels and uses pre-processed channel-output features to recover user symbols. Simulation results show that DeepHSIC reaches BER performance close to model-based detectors under both perfect and imperfect CSI while requiring substantially lower detection time. These results indicate that learned SIC-style detection is a practical candidate for scalable hybrid downlink IM-NOMA receivers. 
+
+Keywords: hybrid IM-NOMA · OFDM-IM · non-orthogonal multiple access · learned receiver · deep neural network · SIC · BER · runtime complexity 
+
+## 1 Introduction 
+
+The rapid expansion of user connectivity has placed stronger requirements on wireless systems in terms of efficiency, reliability, and scalability [1]. In response  
+
+> ⋆
+
+Corresponding author. arXiv:2608.29052v1 [cs.IT] 29 Aug 2026 D. N. Tran et al. 
+
+to these requirements, Orthogonal Frequency Division Multiplexing (OFDM) and its related variants have become important transmission techniques for mod-ern wireless communications. OFDM is widely adopted because it can effectively cope with frequency-selective fading and multipath propagation while maintain-ing high spectral utilization. Nevertheless, the continuous growth in traffic vol-ume, data-rate demand, and spectrum scarcity has encouraged the development of more advanced OFDM-based schemes. One promising direction is to combine conventional OFDM with the principle of Index Modulation (IM) [2], leading to OFDM with Index Modulation (OFDM-IM) [3]. In this technique, information is carried not only by the constellation symbols, such as their amplitude and phase, but also by the activation pattern of selected subcarriers. By allowing only a portion of subcarriers to be active during transmission, OFDM-IM can improve spectrum usage while also lowering the peak-to-average power ratio compared with conventional OFDM systems [4]. The indices of the active subcarriers are exploited as an additional information-bearing domain, which enables extra bits to be transmitted without requiring all subcarriers to carry modulated symbols. Owing to this mechanism, OFDM-IM is considered a suitable alternative in communication scenarios where spectral resources are constrained. Its main benefit is the ability to provide a practical compromise among spectral efficiency, energy consumption, and implementation complexity, making it a potential candidate for future wireless network designs [5]. In addition to modulation techniques, multiple access schemes are essential for supporting the massive connectivity expected in next-generation networks. Among these schemes, Non-Orthogonal Multiple Access (NOMA) has attracted considerable attention because it can increase system capacity and improve user fairness by enabling different users to occupy the same time-frequency resources [6]. In power-domain NOMA, the transmitter superimposes user signals with different power allocations, whereas the receiver applies successive interference cancellation (SIC) to recover the individual signals from the composite received waveform. However, SIC performs effectively only when the received power levels of the users are sufficiently distinguishable. For this reason, OFDM and OFDM-IM have been explored to support the coexistence of grant-free ultra-reliable low-latency communication (URLLC) and grant-based latency-tolerant services [7]. When URLLC traffic appears, the available resources can be shared between these services, while K-repetition transmission and maximum-ratio combining are employed to strengthen URLLC reliability. Furthermore, the NOMA princi-ple has also been combined with space-domain IM in [7], [8]. In the current work, we investigate the Hybrid IM-NOMA system [9], which integrates conventional OFDM and OFDM-IM through the superposition coding mechanism of NOMA. In this scheme, subcarriers are selectively activated based on index information, and distinct power levels are assigned to users within the same frequency band. This enables the concurrent transmission of multiple data streams with minimal mutual interference, as each stream is distinguished by its power level and subcarrier index. This system offers numerous benefits, including enhanced spectral efficiency by multiplexing multiple data streams over the same DeepHSIC for Hybrid Downlink IM-NOMA 
+
+spectrum and improved energy efficiency through selective subcarrier activation [10]. The flexibility in adapting power levels and subcarrier usage according to user conditions allows for robust and efficient communication, accommodating varying channel conditions and user requirements. This adaptability is partic-ularly beneficial in diverse communication environments where user conditions can vary significantly [11]. However, implementing Hybrid IM-NOMA systems presents significant challenges, especially in the area of signal detection. Tradi-tional signal detection techniques such as maximum likelihood (ML) detection, although optimal, are computationally prohibitive when dealing with a large number of users and subcarriers. Meanwhile, SIC more computationally feasi-ble, suffers from issues like error floor [7] and is inefficient when the power levels of users are not sufficiently distinct. These challenges emphasis the need for more advanced and efficient signal detection approach. Leveraging the power of deep learning (DL), various studies [12–15] have suc-cessfully employed DL for signal detection in wireless networks. Inspired by this, we introduce a novel deep learning-based detector, termed DeepHSIC, specifi-cally designed for hybrid IM-NOMA systems. DeepHSIC replaces the computa-tional block in the SIC detector with dedicated deep learning blocks, leveraging the power of deep neural networks (DNNs) to perform signal detection [16]. This innovative approach offers near-optimal performance compared to tradi-tional ML and SIC techniques, while maintaining low complexity. The DeepH-SIC detector is capable of handling the complexities of the hybrid modulation scheme, providing a robust solution that scales well with system size and com-plexity. Through this learning capability, the proposed detector can identify hid-den patterns in noisy received signals, thereby improving detection reliability while reducing the computational cost required for practical implementation.  
+
+> Fig. 1. Overview of the hybrid downlink IM-NOMA transmitter. D. N. Tran et al.
+
+## 2 Hybrid IM-NOMA system model and baseline detectors 
+
+The hybrid downlink IM-NOMA system exemplifies a cutting-edge approach to maximizing spectral efficiency and user capacity in wireless communications. This system ingeniously combines the strengths of OFDM-IM and NOMA, re-sulting in a versatile and efficient transmission framework. 
+
+2.1 Hybrid Downlink IM-NOMA System 
+
+In this system, data transmission occurs over multiple blocks, each corresponding to different users or user groups. This layered approach allows simultaneous data transmission across the same frequency spectrum, significantly enhancing spectral efficiency. 
+
+Traditional OFDM Block In the conventional OFDM layer, all N subcarri-ers are available for symbol transmission. For user i, each subcarrier carries an 
+
+M -ary constellation point, such as a QAM symbol. This full-subcarrier mapping provides a standard and robust baseline for multicarrier transmission, particu-larly in frequency-selective environments where the cyclic-prefix OFDM struc-ture helps mitigate inter-symbol interference. The baseband OFDM signal of user i, xOFDM ∈ C1×N , is represented as: 
+
+xOFDM = [ ci(1) , c i(2) , ..., c i(N )] T , (1) where the ci(n) represents the constellation symbol transmitted on the n-th subcarrier. 
+
+OFDM-IM Block In the OFDM-IM layer, only selected subcarriers are ac-tivated. Therefore, the information bits are mapped not only to the symbols and their phases but also to the indices of the active subcarriers. The signal 
+
+xOFDM-IM ∈ C1×N is intended for the far user through N subcarriers, and its entries are defined as: 
+
+xOFDM-IM =
+
+(
+
+cn, if n ∈ αi
+
+0, if n / ∈ αi
+
+∀ n = 1 , 2, , ..., N, (2) Here, c n is the M -ary constellation symbol assigned to the n-th subcarrier, and 
+
+αi denotes the active-index set of the OFDM-IM user. The total number of bits in one OFDM-IM symbol includes the modulation bits and the index bits carried by the activated subcarriers: 
+
+ptotal = pmod + pindex = [log 2
+
+NK
+
+
+
+] + K log 2 M, (3) where pmod and pindex denote the bits conveyed by the modulation symbols and the index pattern, respectively. Set K to be the number of active subcarriers. DeepHSIC for Hybrid Downlink IM-NOMA 
+
+Among N subcarriers, there are C(N,K) possible active-index choices, and each active tone carries log 2 M bits. The active set can be selected either by a com-binatorial rule or by a lookup table [3]. 
+
+NOMA Block The NOMA layer multiplexes users in the power domain before transmission. User signals assigned to different power coefficients are superposed and sent over the same frequency resource. In the receiver, each user detects its desired component from the composite signal. In this downlink setting, the far-user stream is allocated higher power because it is more affected by path loss and by the OFDM-IM structure, whereas the near-user stream is recovered after subtracting the reconstructed far-user component. In the frequency domain, the base-station signal is: 
+
+x =
+
+> L
+
+X
+
+> i=1
+
+pPixi, (4) where Xi is the signal vector of user i, Pi is the allocated power coefficient of user i, and L is the number of users. This superposition enables simultaneous resource sharing and can improve spectral efficiency. The transmission occurs over Rayleigh fading channels, which accurately model multipath propagation effects in wireless environments. The received sig-nal at user i-th via N subcarriers is: 
+
+yi = hix + ni = hix =
+
+> L
+
+X
+
+> i=1
+
+pPixi + ni, (5) here hi = [ hi(1) , h i(2) , . . . , h i(N )] T and ni = [ ni(1) , n i(2) , . . . , n i(N )] T . The vector hi contains the complex channel gains of user i, and ni denotes additive white Gaussian noise (AWGN) with zero mean and variance σ2. Under this model, the BS broadcasts the composite block to all users, which then recover their target signals using detection methods. Previous research has primarily focused on two key methods: ML and SIC detection. The following sections will explore these methods, along with their associated challenges and limitations. 
+
+2.2 Conventional Signal Detectors Maximum Likelihood Detection (ML) ML detection is considered a theo-retically optimal method for signal detection, as it seeks to find the best solution in the signal space that minimizes detection errors. For the IM-NOMA signal model, ML selects the solution that minimizes the Euclidean distance between 
+
+yi and all feasible transmitted candidates x. The decision rule is: 
+
+ˆx = arg min  
+
+> xi∈δ
+
+yi − hiLX
+
+> i=1
+
+pPi xi
+
+> 2
+
+, (6) D. N. Tran et al. Pre-Processing Argmax Argmax     
+
+> DNN 1 DNN 2
+> Fig. 2. Signal flow of the proposed DeepHSIC detector for user 2 (i.e., l= 2 ).
+
+where h is the channel matrix, and δ represents the possible transmitted signals. Although ML is accurate, it becomes computationally expensive as the number of users and subcarriers grows. 
+
+Successive Interference Cancellation (SIC) In the IM-NOMA system, users are typically differentiated by their power levels, with users receiving stronger signals having higher power to compensate for greater path loss. SIC of-fers a more practical alternative to ML, with reduced computational complexity, especially in NOMA systems. Compared with ML, SIC requires less computa-tion, but its performance depends on the separation between user power levels. At the receiver, the highest-power signal is detected first, often corresponding to the user with the weakest channel condition: 
+
+ˆx1 = h1y −
+
+> L
+
+X
+
+> i=2
+
+pPixi. (7) After this component is estimated, it is removed from the received signal, and the receiver proceeds to decode the next strongest component: 
+
+ˆx2 = y − h1 ˆx1. (8) This process repeats until all user signals are recovered. SIC provides a bal-anced approach between error performance and computational complexity. Yet, it can suffer from error propagation, where errors in detecting the first user can negatively impact the detection of subsequent users. SIC, with its lower complex-ity, is more suitable for practical applications, though it may not always achieve the optimal performance seen with ML, especially under challenging channel conditions. 
+
+## 3 Proposed DeepHSIC detector 
+
+This section details the architecture and operational principles of the DeepHSIC detector also training procedure. DeepHSIC for Hybrid Downlink IM-NOMA ReLU ReLU Batch Normalization Softmax Dense layer Dense layer Dense layer 
+
+Fig. 3. Detailed architecture of the proposed i-th DNN of our DeepHSIC. 
+
+3.1 Proposed Network Architecture 
+
+The architecture of the DeepHSIC detector, as illustrated in Fig. 2, includes a pre-processing stage followed by two DNN blocks. For the two-user case, the detector consists of a preprocessing unit followed by two DNN blocks. In the preprocessing unit, the received vector y and the channel-state information h
+
+are converted into a feature vector z. The processing is based on a zero-forcing equalization step, which reduces channel distortion and produces an input that is easier for the neural detector to learn. Specifically, the inverse channel matrix is applied to y, yielding ˜y = h−1y, where ˜y denotes the equalized signal. The real and imaginary parts of ˜y are then concatenated to form z:
+
+z = Re(˜ y), Im(˜ y), (9) where Re( .) and Im( .) are represent for real and imaginary parts. This transfor-mation is crucial as it normalizes and conditions the data, making it suitable for deep learning models. The output z serves as the input to the first DNN block. The core of the DeepHSIC detector consists of two DNN blocks, each re-sponsible for detecting the transmitted symbols for a specific user, enhancing detection accuracy. Initially, the pre-processed signal z is input into the first DNN block (DNN1), producing an initial estimate ˆu1 for the first user, de-scribed as ˆu1 = f1(z; θ1), where f1 is the DNN-based function and θ1 represents its learnable parameters. This estimate, along with the input signal z, is pro-vided to the second DNN to refine the detection of the next user , describe as ˆu2 = f2(ˆ u1, z; θ2), where f2 is the DNN-based function and θ2 represents its learnable parameters. This process mitigates inter-user interference and im-proves the final decision’s accuracy. The outputs from each DNN are processed through an argmax function to yield the detected symbols. 
+
+3.2 Detailed DNN Structure 
+
+Each DNN block contains fully connected layers combined with activation and normalization operations, as depicted in Fig. 3. Firstly, the input vector under-goes the FC layer with ReLU activation function, defined as: 
+
+qi = ReLU (W1ici + b1i), (10) 
+
+ki = ReLU (W2iqi + b2i), (11) D. N. Tran et al. 
+
+where W1i, W2i, b1i, and b2i (all known as θi) is weight and bias of FC layer 
+
+1 and 2 of user i, respectively, while ci is the input vector of user i, in which 
+
+c1 = z and c2 = [ z; ˆ u1] The output then undergoes batch normalization, which normalizes the activations over a batch of data, improving training stability and convergence speed. The final layer maps the hidden features to a probability distribution over all feasible transmitted symbols using Softmax, and the de-tected symbol is selected as the index with the largest output value. Finally, the corresponding symbol is determined based on the index of unit element in the one-hot vector ¯ui.
+
+3.3 Training procedure 
+
+The training process begins with the creation of a comprehensive dataset, con-sisting of randomly generated b-bit sequences for L users, encoded into vectors 
+
+xi and corresponding one-hot vectors ui, where i ∈ L. The network is trained by minimizing the mean-squared error between the predicted vector ˆui and the target one-hot vector ui, defined as: 
+
+L(ui, ˆui) = 1
+
+L
+
+> L
+
+X
+
+> i=1
+
+(ui − ˆui)2, (12) where ˆui is the output of the DNN model and ui is the ground-truth label. To optimize the parameters, The Adam optimizer [17] adjusts the learning rates adaptively to minimize this loss, updating parameters θ based on the gradients: 
+
+θ ← θ − η∇θ L(ui, ˆui), (13) where η represents the learning rate. Adam’s adaptive learning rates and momen-tum [17] assist in accelerating convergence and avoiding local minimal. During training, the signal-to-noise ratio (SNR), denoted as λtrain , is varied to expose the model to different channel conditions. This variation improves the model’s ability to operate across a range of environments and strengthens its robustness. 
+
+## 4 Simulation results 
+
+This section reports the numerical evaluation of DeepHSIC. The experiments compare the proposed detector with ML and SIC in terms of BER and detection runtime, thereby assessing both reliability and implementation feasibility for the hybrid IM-NOMA system 
+
+4.1 Simulation Parameter Setup 
+
+The simulation parameters for DeepHSIC are summarized in Table 1.The system is configured with two users, using index modulation parameters (N, K, M ) = (4 , 1, 4) , which are defined in Section 2. The power allocation coefficients for the users are P1 = 0 .8 and P2 = 0 .2. The hidden layers of DNN are configured DeepHSIC for Hybrid Downlink IM-NOMA                           
+
+> Table 1. Simulation setup used in the experiments Parameter Value Number of users L2Parameters of Index Modulation ( N,K,M)4, 1, 4 Power allocation coefficient P1–P20.8–0.2 Hidden nodes of DNN 1 32–64 Hidden nodes of DNN 2 128–256 Activation function for hidden layers ReLU Activation function for output layers Softmax Training SNR λtrain 35 dB Learning rate η0.001 Batch size 1000 Number of training epochs 100 Training data size 2×10 6
+> Testing data size 10 6
+> Optimizer Adam [17]
+
+with 32 -64 nodes for DNN 1 and 128 -256 nodes for DNN 2. ReLU is used in the hidden layers, and Softmax is used at the output. The training SNR is fixed at 35 dB, the learning rate is η = 0.001, the batch size is 1000, and the model is trained for 100 epochs. Channel-estimation errors are included to test robustness. The estimated channel is modeled as ˆhl = hl + e, where e follows a Gaussian distribution with zero mean and variance σ2 
+
+> e
+
+. Two cases are considered: perfect CSI with σ2 
+
+> e
+
+= 0 
+
+and imperfect CSI with σ2 
+
+> e
+
+= 0 .01 . This setting allows the DeepHSIC detector to be evaluated under both ideal and nonideal channel knowledge. 
+
+4.2 BER Performance 
+
+We compare DeepHSIC with ML and SIC detectors. First, BER is evaluated under perfect CSI for SNR values from 0 dB to 50 dB. As shown in Fig. 4, DeepHSIC achieves near-optimal BER relative to the model-based baselines, with only a small gap from SNR = SNR = 15 to high-SNR values. This deviation may be due to the inappropriate setting of λtrain for DNN-based detection under high SNRs. The results indicate that DeepHSIC can learn SIC effectively when trained with data from a single SNR. In the Fig. 5, the BER of DeepHSIC is compared under imperfect CSI condi-tions. Despite the degradation due to CSI, DeepHSIC still achieves comparable performance to traditional detectors, leveraging DNNs to decode soft information for each symbol. This emphasises our approach remains effectively in imperfect CSI condition and significantly reduced computational complexity, as discussed in the next section. D. N. Tran et al.  
+
+> Fig. 4. BER results of DeepHSIC and conventional detectors under perfect CSI.
+
+4.3 Runtime Complexity 
+
+Runtime is measured during the testing phase for each detected sample. Ta-ble 2 shows that DeepHSIC requires substantially less detection time than ML and SIC. Specifically, DeepHSIC reduces computational time by up to 7 times compared to ML and 3 times compared to SIC. This demonstrates the com-putational efficiency of DeepHSIC, making it particularly suitable for real-time applications, where processing speed is critical.               
+
+> Table 2. . Per-sample detection runtime of DeepHSIC, ML, and SIC in milliseconds
+> (N, K, M )ML SIC DeepHSIC (4,1,4) 7.65 ×10 −43.32 ×10 −41.14 ×10 −4
+
+## 5 Conclusions 
+
+We proposed DeepHSIC, a detector for hybrid downlink IM-NOMA systems that replaces the computationally intensive SIC decision block with DNN modules. The detector jointly addresses the OFDM-IM and OFDM signal components without modifying the mathematical system model. Simulation results show DeepHSIC for Hybrid Downlink IM-NOMA 
+
+Fig. 5. BER results of DeepHSIC and conventional detectors under imperfect CSI. 
+
+near-optimal BER compared with conventional detectors under both perfect and imperfect CSI, while achieving lower runtime. Therefore, DeepHSIC provides a scalable receiver design for modern communication systems and can be extended to larger user configurations and time-varying channels. 
+
+## Acknowledgement 
+
+This research was supported by National Economics University under grant num-ber NEU1-2025.02, and by Vietnam National Foundation for Science and Tech-nology Development (NAFOSTED) under grant number 102.05-2025.57. 
+
+## References 
+
+1. X. Wang and Y. Liu and D. W. K. Ng and R. Schober.: Exploring the potential of index modulation in wireless networks: Advances and applications. IEEE Commu-nications Surveys & Tutorials 22 (4), 2648–2672 (2020). 2. E. Basar.: Index modulation techniques for 5G wireless networks. IEEE Communi-cations Magazine 54 (7), 168–175 (2016). 3. E. Basar and U. Aygolu and E. Panayirci and H. V. Poor.: Orthogonal frequency di-vision multiplexing with index modulation. IEEE Transactions on Signal Processing 
+
+61 (22), 5536–5549 (2013). D. N. Tran et al. 4. Y. Cai and Z. Qin and F. Cui and G. Y. Li and J. A. McCann.: Modulation and mul-tiple access for 5G networks. IEEE Communications Surveys and Tutorials 20 (1), 629–646 (2018). 5. E. Basar and U. Aygolu and E. Panayirci and H. V. Poor.: Orthogonal frequency di-vision multiplexing with index modulation. IEEE Transactions on Signal Processing 
+
+61 (22), 5536–5549 (2013). 6. Z. Ding and X. Lei and G. K. Karagiannidis and R. Schober and J. Yuan and V. K. Bhargava.: A survey on non-orthogonal multiple access for 5G networks: Research challenges and future trends. IEEE Journal on Selected Areas in Communications 
+
+35 (10), 2181–2195 (2017). 7. M. B. Shahab and S. J. Johnson and M. Shirvanimoghaddam and M. Chafii and E. Basar and M. Dohler.: Index modulation aided uplink NOMA for massive machine type communications. IEEE Wireless Communications Letters 9(12), 2159–2162 (2020). 8. A. Almohamad and M. O. Hasna and S. Althunibat and K. Qaraqe.: A novel down-link IM-NOMA scheme. IEEE Open Journal of the Communications Society 2,235–244 (2021). 9. A. Tusha and S. Dogan and H. Arslan.: A hybrid downlink NOMA with OFDM and OFDM-IM for beyond 5G wireless networks. IEEE Signal Processing Letters 
+
+27 , 491–495 (2020). 10. E. Basar.: Index modulation techniques for 5G wireless networks. IEEE Commu-nications Magazine 54 (7), 168–175 (2016). 11. Y. Mao and J. Wu.: A novel NOMA-OFDM with index modulation for 5G ultra-dense networks. IEEE Communications Letters 22 (3), 598–601 (2018) 12. T. Gian and V.-D. Ngo and T.-H. Nguyen and T. T. Nguyen and T. V. Luong.: Deep neural network-based detector for single-carrier index modulation NOMA. In: 2022 Asia-Pacific Signal and Information Processing Association Annual Summit and Conference (APSIPA ASC), pp. 1805–1809 (2022). 13. T. Van Luong and N. Shlezinger and C. Xu and T. M. Hoang and Y. C. Eldar and L. Hanzo.: Deep learning based successive interference cancellation for the non-orthogonal downlink. IEEE Transactions on Vehicular Technology 71 (11), 11876– 11888 (2022). 14. T. Gian and T.-H. Nguyen and T. T. Nguyen and V.-C. Pham and T. V. Lu-ong.: Transformer-based deep learning detector for dual-mode index modulation 3D-OFDM. In: 2023 Asia Pacific Signal and Information Processing Association Annual Summit and Conference (APSIPA ASC), pp. 291–296 (2023). 15. T. V. Luong and Y. Ko and N. A. Vien and D. H. N. Nguyen and M. Matthaiou.: Deep learning-based detector for OFDM-IM. IEEE Wireless Communications Let-ters 8(4), 1159–1162 (2019). 16. T. Van Luong and N. Shlezinger and C. Xu and T. M. Hoang and Y. C. Eldar and L. Hanzo.: Deep learning based successive interference cancellation for the non-orthogonal downlink. IEEE Transactions on Vehicular Technology 71 (11), 11876– 11888 (2022). 17. D. P. Kingma and J. Ba.: Adam: A method for stochastic optimization. In: ICLR (2014)

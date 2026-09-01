@@ -1,0 +1,234 @@
+Title: Foundation Models for Wireless Localization: Pretraining, Adaptation, and Utilization
+
+URL Source: https://arxiv.org/pdf/2608.30540v1
+
+Published Time: Tue, 01 Sep 2026 02:22:32 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+> 1
+
+# Foundation Models for Wireless Localization: Pretraining, Adaptation, and Utilization 
+
+Guangjin Pan, Member, IEEE , Jiajia Guo, Member, IEEE , Zheng Xing, Member, IEEE , Hui Chen, Member, IEEE ,Chao-Kai Wen, Fellow, IEEE , Shi Jin, Fellow, IEEE , Henk Wymeersch, Fellow, IEEE 
+
+Abstract —Accurate wireless localization is a key enabler for 6G networks, yet remains challenging under diverse and rapidly changing propagation conditions. Model-based methods degrade when multipath channels are non-resolvable and model mis-matches occur, while supervised deep learning demands large labeled datasets and generalizes poorly to new deployments. Inspired by foundation models (FMs) in language and vision, this article presents a unified framework for FM-based wireless localization that learns transferable channel representations from large-scale unlabeled channel state information and adapts to new environments with minimal or even no supervision. We review the fundamentals of FMs, compare the FM paradigm with existing localization approaches, and introduce a three-stage framework spanning large-scale pretraining, localization-oriented fine-tuning, and context-augmented inference, together with the location-aware applications it enables. Ray-tracing-based case studies show improved positioning accuracy and cross-environment generalization. Finally, we present an outlook on key research directions toward AI-native networks for wireless localization. 
+
+Index Terms —Wireless localization, foundation models, AI-native networks, 6G. 
+
+I. I NTRODUCTION 
+
+Accurate wireless localization is a critical enabler for sixth-generation (6G) networks, where it plays two complementary roles. On the one hand, it underpins a wide range of location-based services and emerging vertical applications, including autonomous driving, smart factories, the low-altitude economy, and large-scale internet of things (IoT) [1]. On the other hand, accurate position information feeds back into the wireless network itself, enabling location-aware optimization such as predictive beamforming, proactive handover, and mobility-aware resource allocation that improve communication effi-ciency and reliability [2]. 
+
+Guangjin Pan, and Henk Wymeersch are with Department of Electrical Engineering, Chalmers University of Technology, 41296 Gothenburg, Sweden (e-mail: guangjin.pan; henkw@chalmers.se). Jiajia Guo is with the Department of Electronic and Computer Engineering, The Hong Kong University of Science and Technology, Hong Kong (Email: jiajiaguo@seu.edu.cn). Zheng Xing is with College of Computer Science and Software Engi-neering, Shenzhen University, Shenzhen, 518060, Guangdong, China (e-mail: zhengx@szu.edu.cn). H. Chen is with the Department of Electrical Engineering, Uppsala University, SE-75105 Uppsala, Sweden (e-mail: hui.chen@angstrom.uu.se). (Corresponding author: Hui Chen). Chao-Kai Wen is with the Institute of Communications Engineer-ing, National Sun Yat-sen University, Kaohsiung 80424, Taiwan (e-mail: chaokai.wen@mail.nsysu.edu.tw). Shi Jin is with the National Mobile Communications Research Laboratory, Southeast University, Nanjing 210096, China (e-mail: jinshi@seu.edu.cn). 
+
+Achieving such accuracy under the heterogeneous and rapidly evolving conditions of real wireless networks remains fundamentally challenging. Classical model-based methods estimate geometric parameters such as time-of-arrival (ToA) and angle-of-arrival (AoA) using parametric channel models, but their performance degrades due to a large number of un-knowns introduced by non-line-of-sight (NLoS) environments. Data-driven supervised approaches bypass explicit channel modeling by learning direct mappings from channel state information (CSI) to positions. However, they demand large labeled datasets and tend to overfit to specific environments, failing when deployed in new settings [2]. Meanwhile, the rise of foundation models (FMs) in artificial intelligence, exemplified by large language models (LLMs) and vision transformers, has fundamentally reshaped how machine learning systems are built [3]. Instead of training a separate model for each task, FMs are first pretrained on massive unlabeled data using self-supervised learning (SSL) to acquire general-purpose representations, and then adapted to downstream tasks with minimal supervision. Motivated by these strengths, FMs have recently begun to permeate wire-less communications [4]. Early efforts have explored large-scale channel pretraining and self-supervised representation learning for physical-layer tasks such as channel estimation, CSI feedback, beam management, and channel prediction, showing that a single pretrained backbone can benefit multiple tasks [5]. In particular, for wireless localization, the large wire-less localization model [6] leverages a pretraining-based FM to improve both positioning accuracy and cross-environment generalization. Similarly, the work in [7] explores a masked-autoencoder-based FM to enable self-supervised CSI repre-sentation learning for localization. More recently, the study in [8] introduces a foundation localization model focusing on indoor, multi-modal localization. Although it discusses the advantages of employing FMs for wireless localization, it does not detail how such an FM is pretrained and adapted, nor the utilization techniques through which external context can be injected at inference time. Building on and complementing these efforts, this article takes a channel-centric perspective and organizes FM-based wireless localization along the pre-training–adaptation–utilization lifecycle [9], with emphasis on how self-supervised pretraining extracts transferable channel features and how these features, together with injected context, enable localization under variable wireless deployments. Building on this insight, we first review the foundational principles of FMs and situate the FM paradigm against existing localization approaches, highlighting its advantages in cross-arXiv:2608.30540v1 [eess.SP] 31 Aug 2026 2Self-supervised learning on broad, unlabeled data.             
+
+> ①PRETRAINING: Building Foundation Knowledge
+> ②ADAPTATION: Specialized Training
+> Fine-tuning on a small labeled dataset.
+> ③UTILIZATION: Solving Tasks with Tools
+> Reasoning with external context (knowledge). The infant observes the world and learns broadly without labels. The student receives structured guidance and feedback in a chosen field. The engineer solves new problems using tools and external resources.
+> Fig. 1. The three-stage lifecycle of FMs (pretraining, adaptation, and utilization), illustrated as a learning journey from a curious child to a tool-augmented expert.
+
+environment generalization, label efficiency, and task reusabil-ity. We then propose an FM-based localization framework that instantiates the three-stage FM lifecycle for positioning. It progresses from large-scale channel pretraining on diverse unlabeled CSI, to localization-oriented fine-tuning with lim-ited labeled data, and to context-augmented inference that injects site-specific knowledge, local databases, and multi-modal observations. The resulting estimates then feed location-aware applications spanning wireless network optimization and vertical services. To validate the framework, we conduct case studies showing that diverse pretraining substantially improves localization accuracy and that retrieval-based context augmentation effectively closes the accuracy gap in unseen environments. Finally, we discuss how this framework fits into the broader vision of AI-native wireless networks and outline an outlook on the key research directions for the future. II. FM AS A NEW PARADIGM FOR WIRELESS 
+
+LOCALIZATION 
+
+A. Fundamentals of Foundation Models 
+
+FMs are pretrained neural networks that leverage SSL on broad, diverse data to obtain general-purpose representations adaptable to a wide range of downstream tasks [9]. The lifecycle of an FM can be organized into three stages: pretrain-ing the encoder on massive unlabeled data to learn general-purpose representations, adaptation to specialize the model for a specific task through weight updates, and utilization 
+
+at inference time through context injection without weight updates. As summarized in Fig. 1, this lifecycle captures the progression of an FM from broad knowledge acquisition, through task-specific specialization, to inference-time problem solving with external context or knowledge. This progression mirrors a human learning journey: from an infant who acquires broad knowledge of the world through unlabeled observation, to a student who receives formal education with structured guidance and feedback in a chosen field, and finally to a practicing engineer who tackles new tasks with the aid of manuals, databases, and other external tools rather than by relearning from scratch. 
+
+1) Pretraining: In this stage SSL pretraining constructs pretext tasks from the data’s structure and trains a large encoder on massive unlabeled datasets. Three categories of SSL strategies are most prevalent [10].  
+
+> •
+
+Generative SSL trains the model to generate or recon-struct parts of the data from other parts, so that the encoder learns representations capturing the underlying statistical structure of the input. Typical instantiations include masked modeling, autoregressive modeling, and denoising or diffusion-based modeling [10].  
+
+> •
+
+Contrastive SSL operates in the latent space: semanti-cally similar samples (positive pairs) are pulled closer together, while dissimilar samples (negative pairs) are pushed apart, encouraging the encoder to learn discrimi-native representations that preserve semantic similarity.  
+
+> •
+
+Hybrid SSL combines generative and contrastive objec-tives to leverage their complementary strengths, yielding representations that are both context-aware and semanti-cally discriminative. Because these SSL objectives are applied to large and diverse unlabeled datasets, the resulting encoder captures rich, trans-ferable representations that encode the statistical structure of the domain rather than overfitting to any single task. 
+
+2) Adaptation: Adaptation specializes the pretrained en-coder for a downstream task using a small amount of labeled data. The encoder may be frozen with only a task head trained, or updated jointly with the head via full or parameter-efficient fine-tuning (PEFT).  
+
+> •
+
+Full fine-tuning trains both the pretrained encoder and a task-specific decoder end-to-end on a downstream labeled dataset. It offers the strongest adaptation but is computa-tionally expensive and risks catastrophic forgetting.  
+
+> •
+
+PEFT updates only a small fraction of parameters, reduc-ing computational cost. Representative methods include partial fine-tuning that freezes early layers, low-rank adaptation (LoRA) injecting low-rank trainable matrices, and adapter layers inserting small bottleneck modules. The choice among these strategies depends on the available labeled data, computational budget, and the degree of domain shift between pretraining and deployment. 
+
+3) Utilization: This stage resembles an expert tackling new tasks with external tools and knowledge. Utilization deploys the pretrained or adapted FM at inference time and can further enhance performance by injecting external context. The following techniques are widely used.  
+
+> •
+
+Prompt engineering augments the input with additional task-relevant signals that guide the frozen FM toward the desired behavior. In language models, such signals are typically hand-crafted text instructions or structured templates. More generally, prompt engineering injects auxiliary information into the FM through the input interface, either directly or via an auxiliary encoder.  
+
+> •
+
+In-context learning (ICL) provides the FM with a few reference examples embedded directly in the input, from which the model infers the task pattern and produces the desired output for the new query. This allows the model to learn from a handful of demonstrations at inference time, without any parameter update. 3           
+
+> TABLE I COMPARISON OF WIRELESS LOCALIZATION PARADIGMS .
+> Paradigm Label Requirement Generalization / Accuracy Key Limitation Relation to FM Paradigm
+> Model-Based None (model-driven) High in LoS / calibrated wideband or massive-MIMO; degrades under severe NLoS Requires accurate model and tight synchronization; suffers from limited resolution, multi-bounce, and LoS blockage. FM features can complement geometric estimators (e.g., ToA/AoA-based) Supervised Learning Large labeled dataset per environment High in-domain; poor across environments Catastrophic failure in new environments FM provides transferable pretrained features that replace per-environment retraining Channel Charting None for charting; labels for anchoring Unsupervised representation learning; extends toward universal CSI embeddings Lacks absolute coordinate anchoring and robust cross-scenario calibration FM extends CC-style embeddings with pretraining; adds absolute anchoring Channel Knowledge Map Location-indexed channel knowledge (site-specific prior) Good within the mapped area Construction and update cost as the environment changes Site-specific prior injected into the FM as retrieval context or prompts
+> Foundation Model Few labeled samples Strong cross-environment; high accuracy Pretraining compute cost —
+> •
+
+Retrieval-augmented generation (RAG) extends ICL by maintaining an external database of pre-stored reference examples. At inference time, a retrieval module fetches the most relevant ones as in-context references. Since task-specific knowledge resides in the database rather than the model, it can be updated without retraining. Utilization techniques are particularly attractive for dynamic deployment environments, where new data can be incorporated directly through the external context, thereby enabling strong cross-scenario transfer, few-shot and zero-shot generalization, and seamless knowledge updating. 
+
+B. Paradigm Comparison and Key Advantages 
+
+Wireless localization has been approached from several distinct paradigms. Before presenting the FM-based approach, we briefly review the existing paradigms and highlight their key limitations, as summarized in Table I: 
+
+1) Model-based methods: estimate geometric channel pa-rameters such as ToA and AoA using parametric signal processing, based on high-resolution methods such as multiple signal classification (MUSIC). They require no training data, but their accuracy is limited by the available bandwidth and aperture and by stringent synchronization requirements, and it degrades in complex NLoS scenarios with dense multi-bounce propagation or LoS blockage, where the parametric model no longer matches the true channel. 
+
+2) Supervised learning (SL): approaches, such as finger-printing, learn direct CSI-to-position mappings from large labeled datasets. They achieve high in-domain accuracy but memorize environment-specific fingerprint patterns, leading to catastrophic degradation in new environments. 
+
+3) Channel charting (CC): is an unsupervised representation-learning paradigm that maps unlabeled CSI into a low-dimensional embedding space preserving spatial neighborhood structure, rather than directly optimizing for localization. Classical CC produces relative topology rather than absolute positions, requiring post-hoc anchoring, while recent work extends CC toward more universal CSI embeddings. Its main limitations lie in absolute coordinate anchoring and cross-scenario calibration. 
+
+4) Channel knowledge maps (CKMs): provide site-specific, location-indexed channel knowledge (e.g., path loss, delay spread, or full CSI) that serves as an environment prior. Such priors can be constructed through ray-tracing, dense measurements, digital twins, interpolation, or generative and parametric environment-aware models. Although originally designed to predict channel knowledge from location for environment-aware communication, CKMs can also be ex-ploited for localization, e.g., by matching a new measurement against the prior to retrieve the most likely position. Their main cost lies in constructing and updating the prior as the environment changes or coverage extends. By combining the strengths of the above paradigms, the FM paradigm offers a unifying framework that inher-its the label-free representation learning of channel chart-ing, the context injection of CKMs, and the direct CSI-to-position mapping of supervised fingerprinting within a single pretraining–adaptation–utilization pipeline. Additionally, al-though FM-based localization is less interpretable than model-based estimators, its pretraining objective drives the FM to learn the underlying structure and propagation knowledge of the channel, which to some extent compensates for this lack of explicit modeling. Building on these properties, FM-based localization provides the following key advantages.  
+
+> •
+
+Cross-environment generalization. By learning general-purpose representations from diverse channel datasets, FMs capture invariant propagation characteristics that persist across environments and system configurations. Therefore, a single pretrained FM encoder can be reused across multiple deployment scenarios, significantly im-proving scalability [11].  
+
+> •
+
+Label-efficient adaptation. Leveraging the rich knowl-edge embedded during pretraining, FM-based localization can adapt to new environments in few-shot or even zero-shot settings. This substantially reduces the data collection effort and deployment overhead compared to SL and CKM approaches [6].  
+
+> •
+
+Shared representations across channel-related tasks. 
+
+Since localization, communication, and sensing share the same wireless propagation mechanisms, a single pre-trained FM can yield channel representations reusable 4(1). Large-Scale Channel Pretraining Pre-training Methods Unlabeled Wireless Channel Generative SSL Contrastive SSL Hybrid SSL      
+
+> Labeled Wireless Channel
+> BS 1 BS 2 BS 𝑁
+> …
+> Fine-tuning Methods
+> Full fine-tuning PEFT BS 1 BS 𝑁′ BS 2
+> …
+
++                 
+
+> Target: General wireless representation learning
+> (3). Context-Augmented Localization
+> Target: Augment location estimation Target: Applications Enabled by Localization
+> -Beamforming -User Tracking -Handover -Mobility-Aware Resource Allocation -Radio SLAM -…-Smart Factory -Autonomous Driving -Low-Altitude Economy -Robot Navigation -IoT -…
+> Wireless-related Tasks Real-World Applications
+> Applications
+> FM Encoder
+> Pre-training Decoder
+> (2). Localization-Oriented Fine-Tuning
+> Target: Adaptation to localization representation
+> SSL Target FM Encoder
+> Localization Decoder Location
+> FM Encoder
+> Localization Decoder
+> Prompt Engineering In-context Learning Retrieval-augmented Generation
+> Maps Trajectory Cross-modal Sensor Data Fingerprint Database Reference Samples
+> In-context Augmentation Location
+> Radio Maps
+> Trainable Frozen Optional
+
+/
+
+/
+
+/
+
+Fig. 2. The proposed three-stage FM-based localization framework: (1) large-scale channel pretraining, (2) localization-oriented fine-tuning, and (3) context-augmented inference, together with the location-aware applications they enable. 
+
+across these tasks. 1 Accurate location estimates can in turn enhance communication functions such as beam management and channel prediction, creating a bidirec-tional synergy [4].  
+
+> •
+
+Multi-BS and multi-modal fusion. FMs fuse observa-tions from multiple BSs and heterogeneous modalities (e.g., radio, vision, inertial) within a unified represen-tation space, where cross-modal alignment during pre-training enables seamless integration of complementary information. When some modalities become unavailable, the FM can still perform localization using the remaining observations, enhancing system resilience [8]. III. FM-BASED FRAMEWORK FOR WIRELESS 
+
+LOCALIZATION 
+
+As illustrated in Fig. 2, the proposed FM-based localization framework consists of 3 progressive stages together with the location-aware applications they enable. 
+
+1) Stage 1: Large-Scale Channel Pretraining: The FM-based localization system begins with SSL pretraining on large-scale unlabeled CSI data collected from diverse environ-ments, BS deployments, and system configurations (e.g., dif-ferent frequency bands, antenna geometries, and bandwidths). The objective is not to perform localization directly, but to learn general-purpose channel representations that capture in-variant propagation structures shared across different settings, yielding effective features for wireless channels. These repre-sentations encode fundamental channel properties and benefit not only localization but also other channel-related tasks such as channel estimation, beam prediction, and sensing. Since no labels are required, acquiring such datasets is technically straightforward. Meanwhile, the diversity of the collected data 
+
+> 1
+
+We primarily focus on wireless localization in this article. 
+
+has a direct impact on the quality of the extracted features. Therefore, the pretraining dataset should cover as many het-erogeneous deployment scenarios as possible, spanning a wide range of environments, BS configurations, and propagation conditions, so that the learned representations can generalize well to unseen settings. In addition, the effectiveness of the learned representations also depends on the choice of SSL algorithm, as different SSL objectives yield representations with varying strengths for different downstream tasks. Adetailed survey of SSL algorithms for wireless channels can be found in [5]. 
+
+2) Stage 2: Localization-Oriented Fine-Tuning: Stage 2 consists of the pretrained FM encoder and a localization-oriented decoder. Since the SSL representations are not specif-ically tailored for localization, the encoder can either be kept frozen, with only the decoder trained on labeled CSI-position datasets, or be fine-tuned jointly with it. Freezing is the most lightweight option and fully preserves the pretrained representations, but may leave a noticeable gap compared to a fully task-adapted model. Joint fine-tuning closes this gap by shifting the representations from task-general to localization-oriented at the cost of additional training. The choice depends on the available labeled data, the computational budget, and whether the backbone must remain shared with other down-stream tasks. Such labeled data can be collected from existing deployed networks, and thanks to the strong representation inherited from Stage 1, only a small amount is required. When fine-tuning is adopted, the strategy can be flexibly chosen. Full fine-tuning updates all encoder parameters for maximum adaptation. Alternatively, PEFT methods such as LoRA or Adapter layers can be applied to preserve pretrained knowl-edge while reducing computational cost. During inference, the incoming CSI is fed into the FM encoder to obtain channel representations, which, together with BS configuration infor-5
+
+mation, are passed through the localization decoder to produce position estimates. However, at this stage, the localization-oriented representations remain scenario-agnostic. They do not account for the specific propagation characteristics of a particular deployment environment, such as local scatterer distributions, building geometry, or site-specific NLoS condi-tions. As a result, while the model already delivers reasonable localization performance, there is still room for improvement by incorporating environment-specific information. 
+
+3) Stage 3: Context-Augmented Localization: After Stage 2 produces the localization-oriented representations, Stage 3 can either directly perform inference using the FM and the decoder from Stage 2, or exploit the opportunity to jointly leverage auxiliary information for further accuracy improvement. Such auxiliary information includes site-specific knowledge (e.g., floor plans, radio maps, deployment metadata), heterogeneous sensing observations (e.g., cameras, LiDAR, inertial sensors), local CSI-position databases, and trajectory history. In the for-mer case, the decoder is reused as is with no additional train-ing; in the latter, it is extended or replaced by a context-aware decoder that jointly processes the channel representations and the injected context, while the FM encoder can remain frozen. The utilization techniques, such as prompt engineering, ICL, and RAG, provide effective mechanisms to integrate these auxiliary signals into the FM-based localization:  
+
+> •
+
+Prompt engineering: Site-specific knowledge includes floor plans, radio maps from digital twins, and deploy-ment metadata. Such knowledge can be encoded via lightweight auxiliary encoders and injected into the FM as prompt-like representations, which condition the FM on local propagation characteristics. Since the prompts are static, they can be precomputed offline and reused across all queries in the same scenario. Different scenarios are then supported by swapping the corresponding prompts.  
+
+> •
+
+ICL: A small number of reference samples and recent tra-jectory segments observed in the current scenario can be provided directly alongside the input as demonstrations, guiding the FM to produce positioning outputs consistent with the local context. In this way, when migrating to a new scenario or when the environment changes, it suffices to update the reference set, without any model retraining.  
+
+> •
+
+RAG: External sources are queried at inference time to fetch relevant references. Same-modality retrieval, e.g., nearest-neighbor CSI-position pairs from a local database of the target environment, provides scenario-specific con-text to the FM and integrates naturally with ICL by supplying the retrieved samples as demonstrations. Cross-modal retrieval can further enable multi-modal fusion by incorporating real-time visual or LiDAR observations from co-located sensors. Unlike fingerprinting and CKM lookup, where retrieval itself acts as the estimator, FM-RAG retrieves in a pretrained representation space and uses the retrieved samples as context to an adapted FM. The local database thus acts as an updatable environment memory, while the FM provides transferable representa-tions across scenarios. Note that a labeled local database incurs a collection cost comparable to CKM construction. Its advantage lies in representation reuse and update efficiency rather than in reduced target-environment data. Unlike LLMs where utilization operates on a fully frozen FM, the wireless setting often requires the FM to first learn how to consume such auxiliary signals, e.g., by fine-tuning a small subset of parameters or training lightweight modules (auxiliary encoders for site-specific priors, fusion heads for retrieved references). Such adaptation is nonetheless far lighter than Stage 1 pretraining, and once completed, deployment in new scenarios proceeds without further weight updates. 
+
+4) Location-Aware Applications: The position estimates and location-aware representations obtained from the previ-ous stages can be leveraged to optimize a wide range of applications, where the reusable representations further allow channel-related tasks to share a single FM backbone. Within wireless systems, accurate location information enables predic-tive beamforming by anticipating user movement, facilitates user tracking for sustained connectivity, supports proactive handover based on trajectory prediction, and allows mobility-aware resource allocation that reduces interference and im-proves spectral efficiency. Location information together with channel representations also fits naturally into radio simultane-ous localization and mapping (SLAM) [12], where the system jointly estimates user positions and builds a map of the radio environment. Beyond wireless system optimization, FM-based localiza-tion serves as a key enabler for emerging location-critical applications, such as robot coordination in smart factories, positioning in autonomous driving under GNSS-denied condi-tions, reliable localization for unmanned aerial vehicles in the low-altitude economy, indoor robot navigation, and scalable localization for large-scale IoT deployments. Moreover, the location-aware features extracted by the FM can be seamlessly integrated with other application-level FMs, such as vision-language models, world models, or embodied AI agents, en-abling end-to-end cross-domain intelligence in which wireless sensing and high-level reasoning jointly drive the task. In this way, FM-based localization further paves the way toward AI-native wireless networks, where the localization capabilities of the wireless infrastructure and the needs of upper-layer applications are tightly integrated through a shared FM. IV. C ASE STUDY 
+
+To provide an illustrative case study, we conduct two experi-ments that respectively demonstrate the key advantages of FM-based localization: (i) the benefit of diverse channel pretraining for label-efficient adaptation, and (ii) the generalizability of the proposed framework. We generate multi-scenario CSI-position datasets using Sionna, a ray-tracing-based wireless simulation platform. Each scenario corresponds to a distinct propagation environment, differing in BS orientation, bandwidth config-uration, and building topology, and covers a 32 m × 32 m 
+
+area. For each scenario, 10 000 CSI samples are randomly collected at user positions for unlabeled pretraining, while labeled CSI-position pairs are drawn separately for fine-tuning and testing. The FM encoder adopts a lightweight transformer backbone pretrained via masked channel reconstruction, and a lightweight multi-layer perceptron (MLP) is attached as the localization decoder. 6                   
+
+> 500 1,000 1,500 2,000 12345
+> Number of labeled fine-tuning samples Mean localization error (m)  SL
+> K= 1 scenario
+> K= 10 scenarios
+> K= 100 scenarios Fig. 3. Impact of pretraining scenario diversity on label-efficient localization. As the number of pretraining scenarios Kincreases, the mean localization error after fine-tuning drops consistently across all labeled-data budgets. KNN SL FM FM+RAG
+> 024687.43 2.04 1.13 1.19 7.61 3.88 1.47 1.21
+> Mean localization error (m) Seen scenarios Unseen scenarios Fig. 4. Cross-environment localization performance under 4 schemes.
+
+A. Effect of Pretraining Scenario Diversity 
+
+This experiment examines how the diversity of pretraining data affects downstream label-efficient localization. We pre-train the FM encoder on K ∈ { 1, 10 , 100 } distinct scenarios. The pretrained encoder is then fine-tuned on one additional scenario using 500, 1000, 1500, or 2000 labeled CSI-position pairs, and evaluated on 1000 test samples from that scenario. As a baseline, we also train the same network directly on the labeled data without pretraining. Fig. 3 reports the mean localization error with different numbers of labeled fine-tuning samples. Fig. 3 shows that pretraining consistently outperforms training from scratch. With 500 labels, the model pretrained on 
+
+K = 100 scenarios attains a 1.80 m error, which corresponds to a 62% reduction from the no-pretraining baseline at 4.71 m and a 42% reduction from the K = 1 pretrained model at 3.10 m. Notably, however, going from K = 10 to K = 100 
+
+only marginally further reduces the error, by about 3% under 500-label fine-tuning, suggesting that the gain from further increasing scenario diversity tends to saturate. This saturation may partly reflect the limited channel diversity of our Sionna-based pretraining datasets, and constructing richer channel datasets that combine ray-tracing simulations with real-world measurements across diverse frequency bands and deployment scenarios remains an important direction for further unlocking the benefits of FM pretraining. 
+
+B. Cross-Environment Generalization 
+
+This experiment evaluates the FM-based framework in seen scenarios included in fine-tuning versus unseen scenarios that are not. Starting from the FM pretrained on 100 scenarios, we fine-tune it on 10 randomly selected scenarios, each providing 2000 labeled CSI-position samples. For seen scenarios, we draw 1000 additional test samples from the fine-tuned scenar-ios; for unseen scenarios, we generate 10 entirely new sce-narios. Four schemes are compared: (1) KNN, which directly matches the query CSI against a local database via channel similarity and outputs the position of the nearest samples; (2) SL, a supervised fingerprinting baseline trained directly on the labeled data without pretraining; (3) FM, with localization-oriented fine-tuning; and (4) FM+RAG, which further retrieves from a local database of 2000 labeled samples via KNN in the FM representation space. As shown in Fig. 4, on seen scenarios both FM and FM+RAG substantially outperform the KNN and SL baselines. On unseen scenarios, SL degrades sharply to 3.88 m, and the FM error rises to 1.47 m owing to the scenario-agnostic nature of its representations. KNN, in contrast, performs almost identically in both cases, since it involves no training and its accuracy is governed by the database density rather than by scenario familiarity. FM+RAG recovers most of the lost accuracy, achieving 1.21 m. As it dif-fers from KNN only in the space where similarity is measured, the gap between them shows that the FM provides a stronger representation, enabling far more informative neighbors to be retrieved from the same database. These results show that retrieval-based context augmentation is valuable in unseen environments, where it closes the gap without retraining the backbone. V. OUTLOOK The FM paradigm opens several research directions for wireless localization, each carrying both clear potential and open challenges. 
+
+1) FM representations across modalities and configura-tions: Beyond CSI, 6G networks will co-exist with diverse sensing modalities, including camera images, LiDAR point clouds, radar, and inertial measurements. Jointly pretraining the FM on multiple modalities to learn aligned cross-modal representations would enable seamless fusion at inference time, where visual or geometric context helps resolve ambigu-ities in NLoS CSI. Even within the radio modality, however, BSs operate under diverse configurations (antenna geometry, carrier frequency, bandwidth, subcarrier spacing), and rep-resentations must be robust to such differences to be truly reusable across deployments. Achieving this requires careful pretraining strategies, such as configuration augmentation or contrastive objectives that explicitly encourage invariance. 
+
+2) Uncertainty-aware and trustworthy localization: FM-based localization currently produces point estimates, but safety-critical applications such as autonomous driving and UAV navigation require calibrated uncertainty. Extending the FM output to a probabilistic distribution through generative modeling (e.g., conditional flow matching or diffusion-based decoders) would enable risk-aware decisions, such as trigger-ing fallbacks when the model is not confident [13]. Calibrated 7
+
+uncertainty is also a prerequisite for trustworthiness more broadly. Reliable behavior under adversarial perturbations, hardware impairments, and out-of-distribution inputs further calls for robust pretraining and run-time anomaly detection. 
+
+3) Efficient deployment across edge, BS, and cloud: 
+
+Transformer-based encoders have non-trivial inference costs that may exceed the latency budget of edge devices. Model compression techniques (such as knowledge distillation, quan-tization, pruning, and efficient attention variants), together with split inference across edge, BS, and cloud, are essential to meet stringent latency requirements without significantly degrading representation quality. Such a split also opens the possibility of sharing a single backbone across BSs while keeping only lightweight task heads at the edge, turning a deployment constraint into an architectural design choice. 
+
+4) Organization and integration of external context: Uti-lization techniques such as prompt engineering, ICL, and RAG inject external knowledge into the FM at inference time, but their effectiveness hinges on how that knowledge is organized and represented. Site-specific priors (e.g., floor plans, radio maps, deployment metadata) must be encoded into compact, FM-compatible representations through care-fully designed auxiliary encoders. Reference databases for ICL and RAG should further balance coverage, freshness, and scale, raising open questions on hierarchical indexing, cross-BS organization, and cost-effective labeling. 
+
+5) Agentic localization: A further direction is to develop FM-based agents for localization. Such an agent autonomously decides which tool to use, when to retrieve information, and whether further measurements are needed. When the current observation is insufficient, it could query a CKM or local fin-gerprint database, request additional BS or multi-modal mea-surements, and pass the resulting estimate and its uncertainty to downstream decisions. Here the FM supplies representation and reasoning capability, external databases supply knowledge, and the agent acts as the orchestration layer. Open problems include coordinating these components, defining the action space and termination criterion, and bounding the latency and signaling overhead of extra measurement requests. 
+
+6) Privacy-preserving and continually updated learning: 
+
+Pretraining benefits from data diversity that often spans mul-tiple operators, deployments, and user populations, which typically raises privacy concerns [14]. Federated pretraining can enable multi-operator collaboration without sharing raw CSI, and differential privacy can further protect user loca-tion information during both pretraining and local database construction for RAG. Keeping the model current poses a related problem, as real-world environments evolve due to construction, furniture rearrangement, or seasonal propagation changes. FM-based localization can adapt through two com-plementary mechanisms [15], namely incrementally updating the RAG database with newly collected measurements and periodically performing lightweight continual pretraining on fresh unlabeled CSI, though doing so under privacy constraints and without catastrophic forgetting remains open. 
+
+7) Standardization, benchmarking, and 3GPP integration: 
+
+The 3GPP NR positioning architecture has standardized AI-based positioning enhancements, treating localization as a representative use case of AI in wireless networks [2]. The proposed framework can further serve as a shared backbone for other 3GPP-defined AI tasks such as CSI feedback, beam man-agement, and channel prediction, enabling joint optimization across multiple AI functions within a unified model. Realizing this at scale requires infrastructure the wireless community currently lacks, including standardized benchmarks, evaluation protocols, and shared pretrained model repositories. Establish-ing common datasets and metrics, along with open pretrained checkpoints, is essential to accelerate progress and ensure fair comparison. VI. C ONCLUSION 
+
+In this article, we reviewed the fundamentals of FMs, compared existing wireless localization paradigms with the FM-based paradigm and introduced a unified FM-based lo-calization framework. Through case studies, we observed that increasing the diversity of pretraining scenarios consistently reduces the labeled data required to reach a given accuracy, and that retrieval-based context augmentation can recover most of the accuracy loss when the model is deployed in previously unseen scenarios. Finally, we presented an outlook on the key research directions for advancing FM-based wireless localiza-tion toward large-scale deployment. REFERENCES [1] H. Chen, H. Sarieddeen et al. , “A tutorial on terahertz-band localization for 6G communication systems,” IEEE Commun. Surveys Tuts. , vol. 24, no. 3, pp. 1780–1815, 2022. [2] G. Pan, Y. Gao et al. , “AI-driven wireless positioning: Fundamentals, standards, state-of-the-art, and challenges,” IEEE Commun. Surveys Tuts. , vol. 28, pp. 4394–4428, 2026. [3] N. Fei, Z. Lu et al. , “Towards artificial general intelligence via a multimodal foundation model,” Nature Commun. , 2022. [4] J. Guo, Y. Cui et al. , “Large AI models for wireless physical layer,”

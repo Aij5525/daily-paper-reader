@@ -1,0 +1,590 @@
+Title: Semantic-Aware Sub-Band Allocation for Terahertz Communications
+
+URL Source: https://arxiv.org/pdf/2608.30984v1
+
+Published Time: Tue, 01 Sep 2026 02:59:40 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Semantic-Aware Sub-Band Allocation for Terahertz Communications 
+
+Fatima Ismail, Hadi Sarieddeen, and Jihad Fahs Department of Electrical and Computer Engineering American University of Beirut, Beirut 1107 2020, Lebanon fmi15@mail.aub.edu, hadi.sarieddeen@aub.edu.lb, jihad.fahs@aub.edu.lb 
+
+Abstract —This paper studies semantic-aware sub-band al-location for terahertz (THz) communication systems, where frequency-selective molecular absorption creates highly non-uniform sub-band qualities. Unlike conventional formulations, semantic fidelity depends nonlinearly on the signal-to-noise ratio (SNR) and is also sentence-specific, leading to a non-separable assignment problem that is generally not solvable using simple ordering-based policies. To address this, we use a sentence-BERT (SBERT)-based surrogate model that predicts semantic fidelity from the sentence embedding and sub-band SNR. We propose an importance-aware scheduler that assigns sentences to sub-bands based on their semantic contribution using an oracle utility function that captures importance-weighted semantic similarity across sentence-sub-band pairs. A neural scheduler is then trained through imitation learning to approximate the oracle policy at more than 200 × lower runtime than full DeepSC-based oracle evaluation. Integrated with a deep-learning-enabled semantic communication (DeepSC) system, the proposed method consistently outperforms all benchmark schemes and approaches oracle-level performance under realistic THz channel conditions. 
+
+Index Terms —Semantic communication, Terahertz communi-cations, resource allocation, molecular absorption, SBERT 
+
+I. I NTRODUCTION 
+
+Future generations of wireless communication target mas-sive connectivity, ultra-low latency, and extremely high data rates [1], driven in part by semantic communication, which focuses on transmitting meaning rather than raw bits [2], and terahertz (THz) communication [3], which leverages the 0.1–10 THz band for ultra-high-capacity links (as algorithmic and spectral enablers, respectively). Semantic communication shifts the objective from bit-level accuracy to preserving task-relevant meaning [2], enabled by deep learning architec-tures such as deep learning-enabled semantic communication (DeepSC) [4] and its extensions [5]–[9]. Evaluation increas-ingly relies on embedding-based metrics such as sentence-BERT (SBERT, bidirectional encoder representations from transformers) [10], which better capture semantic fidelity than traditional metrics compared to the bilingual evaluation understudy (BLEU) score [11]. 
+
+This work is supported by the American University of Beirut University Research Board and Vertically Integrated Projects Program. © 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. 
+
+Recent works have explored resource allocation in semantic communication systems, where transmission is guided by task relevance. For instance, [12] optimizes semantic similarity under communication constraints, [13] proposes importance-aware allocation, and [14] develops task-oriented scheduling, while age of information (AoI)-based frameworks [15] priori-tize timely updates. However, these approaches typically rely on simplified channel models (e.g., additive white Gaussian noise (AWGN) or flat fading) or generic multicarrier settings. THz communication exhibits strong frequency-dependent attenuation due to molecular absorption [3], [16], lead-ing to structured spectral windows with highly heteroge-neous sub-band qualities, accurately characterized using the high-resolution transmission molecular absorption (HITRAN) database [17], [18]. Although sub-band allocation in THz systems has been studied [19], existing approaches remain bit-centric, optimizing throughput based on physical-layer quantities such as channel conditions and power while ig-noring the transmitted content. In contrast, semantic-aware allocation methods that account for content importance typi-cally overlooked the pronounced frequency selectivity of THz channels [12]–[15]. This creates a fundamental gap: THz allocation methods ignore semantics, while semantic-aware methods ignore THz spectral heterogeneity. To the best of our knowledge, semantic-aware resource allocation over frequency-selective THz bands has not yet been explored. We address this gap by proposing a formula-tion that jointly captures semantic importance and frequency-selective channel quality. This coupling fundamentally alters the problem structure: the utility of assigning a sub-band depends jointly on the sentence and the experienced signal-to-noise ratio (SNR), yielding a non-separable formulation that departs from conventional designs and precludes classical sorting-based solutions. Our main contributions are  
+
+> •
+
+We formulate a semantic-aware sub-band allocation problem for THz communication using DeepSC, jointly capturing sentence importance and frequency-selective channel conditions.  
+
+> •
+
+We show that semantic fidelity is nonlinear in SNR and sentence-dependent, leading to a non-separable as-signment problem that cannot, in general, be solved via sorting-based policies. We develop an SBERT-based surrogate model that efficiently approximates semantic fidelity as a function of sentence embeddings and SNR. arXiv:2608.30984v1 [eess.SP] 31 Aug 2026 • We design a neural scheduler trained via imitation learn-ing to approximate optimal oracle assignment at low complexity, achieving consistent gains over benchmark schemes under realistic THz channels. II. S YSTEM AND CHANNEL MODELS 
+
+We consider an end-to-end semantic communication sys-tem based on DeepSC [4], adopting the original DeepSC architecture, that transmits the semantic content of a sentence 
+
+v = [v1, . . . , v L]. The transmitter comprises a semantic encoder Sβ (·) and a channel encoder Cα(·), parameterized by β and α. The semantic encoder extracts task-relevant features, which the channel encoder maps to a symbol vector 
+
+x = Cα(Sβ (v)) ∈ CM ×1 for transmission over a THz channel within a coherence interval of length M .We consider a frequency-selective THz transmission win-dow [fmin , f max ] partitioned into S sub-bands with distinct channel conditions due to molecular absorption. This selec-tivity is governed by the absorption coefficient K(f ), which varies with frequency due to atmospheric gas resonances, causing stronger attenuation near absorption peaks and higher effective SNR within spectral windows. Transmission over sub-band s is modeled as ys = hsx + n, s = 1 , . . . , S , where 
+
+hs is the effective channel gain (including propagation and beamforming), and n ∼ CN (0, σ 2IM ) is circularly symmetric complex Gaussian noise vector. The per-symbol SNR is 
+
+γs = P |hs|2 
+
+> σ2
+
+, where P = E[|xm|2] is the average transmit power. At the receiver, the channel and semantic decoders reconstruct the sentence as ˆv = S−1 
+
+> χ
+
+(C−1 
+
+> δ
+
+(y)) .We generate realistic THz channels using the TeraMIMO simulator [18], based on a Saleh–Valenzuela clustered multi-path model with frequency-dependent propagation and molec-ular absorption (HITRAN data) under a subarray (SA) ar-chitecture. The transmitter and receiver comprise SAs with multiple antenna elements. At subcarrier k, the beamformed channel between transmit and receive SAs is [18] 
+
+hq(r),q (t) [k] = a(r)T
+
+Φ(r)0 q(r), q (r)
+
+
+
+Hq(r),q (t) [k]
+
+× a(t)
+
+Φ(t)0 q(t), q (t)
+
+
+
+,
+
+where q(t) and q(r) index the transmit and receive SAs, respectively, Φ(t)0 q(t), q (t) and Φ(r)0 q(r), q (r) denote their cor-responding beam-steering directions, a(t)(·) and a(r)(·) are the corresponding beamforming vectors, and Hq(r),q (t) [k] is the frequency-domain multiple-input multiple-output (MIMO) channel between the SAs, capturing THz-specific line-of-sight (LoS) and multipath losses, antenna gains, array responses, and molecular absorption. III. P ROBLEM FORMULATION 
+
+We consider a multi-user semantic communication system where a transmitter serves K users, each providing a sentence 
+
+v per slot. The THz window is partitioned into S orthogonal sub-bands with distinct SNRs due to path loss and frequency-selective molecular absorption. Following [19], we neglect inter-user interference and set S = K for one-to-one user– sub-band assignment. Each sentence v is encoded using DeepSC [4], transmitted over a sub-band with SNR γs, and reconstructed as ˆv. Semantic fidelity is measured via SBERT cosine similarity [10], m = cos  SBERT( v), SBERT(ˆ v).Since ˆv depends on both γs and v, we write m ≜ g(γs, v)
+
+for some nonlinear function g.
+
+A. Semantic Importance and Assignment Model 
+
+In each time slot, we assign each sentence vi, 1 ≤ i ≤
+
+K an importance score πi ∈ [0 , 1] capturing its seman-tic relevance. We compute πi using token-level importance weights {wi,ℓ }Lℓ=1 generated by meaning-aware response scor-ing (MARS) [20]. The sentence-level score is obtained via a combination of average and maximum importance, 
+
+πi = α 1
+
+L
+
+> L
+
+X
+
+> ℓ=1
+
+wi,ℓ + (1 − α) max  
+
+> ℓ
+
+wi,ℓ ,
+
+where α ∈ [0 , 1] balances global and peak contributions; we set α = 0 .5, though other values apply depending on the task. Let X = [ xi,s ], 1 ≤ i, s ≤ K, be a binary assignment matrix, where xi,s = 1 if sentence i is assigned to sub-band s, and 0
+
+otherwise. Assuming a one-to-one assignment per time-slot, each sentence is assigned to exactly one sub-band and each sub-band serves exactly one sentence. The semantic utility is 
+
+U (X) = 
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> s=1
+
+πi g(γs, vi) xi,s , (1) which captures the importance-weighted semantic fidelity achieved under assignment X. The optimal allocation is then, 
+
+max  
+
+> X
+
+U (X)
+
+s.t. 
+
+> S
+
+X
+
+> s=1
+
+xi,s = 1 , ∀i, 
+
+> K
+
+X
+
+> i=1
+
+xi,s = 1 , ∀s, xi,s ∈ { 0, 1}.
+
+B. Structure of the Optimal Assignment 
+
+We next characterize the structure of the optimal solution. 
+
+1) Pairwise Exchange Analysis: For a fixed sentence vi,the semantic similarity g(γ, vi) is non-decreasing in SNR, yet nonlinear and sentence-dependent. We highlight the impact of this relationship using a pairwise comparison example. Consider two sentences vi, vj and two sub-bands a, b with γa > γ b. Assigning vi → a, vj → b, the utility is 
+
+Uij = πig(γa, vi) + πj g(γb, vj ).
+
+By swapping the assignment, the utility becomes 
+
+U swap  
+
+> ij
+
+= πig(γb, vi) + πj g(γa, vj ).
+
+The current assignment is optimal if Uij ≥ U swap  
+
+> ij
+
+, yielding 
+
+πig(γa, vi) + πj g(γb, vj ) ≥ πig(γb, vi) + πj g(γa, vj )
+
+⇒ πi
+
+ g(γa, vi) − g(γb, vi) ≥ πj
+
+ g(γa, vj ) − g(γb, vj ).Offline neural networks training  Online Inference System Architecture 
+
+> Assignment
+> Matrix
+
+Stage 2        
+
+> X∗
+> v1
+> v2
+> vK
+> .
+> .π1π2
+> .
+> . πK
+> 𝑥 1,1 𝑥 1,𝑆
+> .
+> .
+> .
+> 𝑥 1,𝐾
+> ...
+> 𝑥 2,2
+> 𝑥 𝐾,𝑆 ...
+> .
+> .
+> .
+> .
+> .
+
+Stage 3    
+
+> s
+> Ch. Encoder
+> xAnalog
+> RF Chain
+> Sem. Encoder  Analog
+> RF Chain
+> Beamforming
+> Configuration
+> THz Channel
+> Ch. Decoder
+> ොx
+> Sem. Decoder
+> ොs.
+> .
+> .
+> .
+> .
+> .
+> .
+> .
+> .
+> .
+> .
+> .
+> ..
+> .
+> .
+> ..
+> .
+> .
+> .
+> ොv1
+> ොv2
+> ොvK
+> SBERT Encoder
+> E
+> SNR 1..S
+> ෡M
+> Utility matrix builder
+> π1..K
+> Hungarian algorithm
+> U
+> SBERT
+> Surrogate
+> Neural
+> Scheduler
+> Input layer
+> FC 512+ ReLU
+> Input layer
+> FC 256+ ReLU
+> FC 512+ ReLU
+> Output layer
+> FC 256+ ReLU
+> Output layer
+
+Stage 1 
+
+MARS   
+
+> SBERT
+> Encoder e1e2
+> .
+> . eK
+> Neural
+> Scheduler
+> SNR 1..S
+> supervision
+> π1..K
+> SNR 1..S
+> e1..K
+
+Fig. 1: Proposed pipeline including surrogate training, scheduler inference, and DeepSC-based transmission. This indicates that different sentences benefit differently from SNR improvements, so the marginal gain of assigning a higher-quality sub-band is sentence-dependent. As a result, the optimal assignment is driven by importance-weighted marginal gains rather than simple ordering. 
+
+2) Condition for Greedy Optimality: We identify a suffi-cient condition under which greedy sorting is globally optimal. Suppose all sentences share the same semantic response, i.e., 
+
+g(γ, vi) = h(γ) for all i, where h(γ) is non-decreasing. Let the importance scores and sub-band SNRs be sorted as 
+
+π1 ≥ π2 ≥ · · · ≥ πK , γ1 ≥ γ2 ≥ · · · ≥ γK .
+
+We claim that the sorted assignment s = i is optimal. Consider any non-sorted assignment. Then there exists i < j 
+
+such that γi < γ j despite πi ≥ πj . It is clear that swapping the two sub-bands does not decrease utility. Repeated exchanges yield the sorted assignment as globally optimal. IV. S YSTEM ARCHITECTURE 
+
+Fig. 1 shows the full pipeline: offline surrogate and scheduler training (Stage 1), online assignment inference (Stage 2), and DeepSC-based semantic transmission (Stage 3). In Stage 1, the SBERT-based surrogate predicts semantic similarity from sentence embeddings and SNR, enabling utility-matrix construction from {ei = SBERT (vi)}, {πi},and {γs}. The Hungarian algorithm then generates oracle assignments used to train the scheduler by imitation learning. In Stage 2, the surrogate is discarded, and the scheduler maps embeddings, MARS-based importance scores, and sub-band SNRs to an assignment matrix. In Stage 3, the selected allocation is applied to the DeepSC THz-band transceiver. 
+
+A. Model Architectures and Training 
+
+We employ two lightweight neural modules: an SBERT sur-rogate for semantic fidelity estimation and a neural scheduler for sub-band allocation. 
+
+a) SBERT Surrogate: The surrogate models the mapping 
+
+(sentence , γ ) 7 → semantic similarity, enabling efficient evalua-tion of g(γ, v) without requiring full DeepSC inference. This approximation is justified by the smooth SNR dependence of semantic similarity, enabling accurate regression from embed-dings and channel conditions. The input consists of a 769-dimensional vector (a 768-SBERT embedding concatenated with the SNR), which is processed by a 769 → 512 →
+
+512 → 1 multi-layer perceptron (MLP) with rectified linear unit (ReLU) activations and dropout of 0.1. The model is trained on Europarl sentences spanning multiple sub-bands and power levels (25-45 dBm) using the Adam optimizer (learning rate 10 −3, batch size 2048 ) for 60 epochs, with a mean squared error (MSE) loss. 
+
+b) Neural Scheduler: The scheduler learns apermutation-valued mapping from sentence semantics, importance, and channel state to sub-band assignments. Its input is [e1, . . . , e K , π 1, . . . , π K , SNR 1, . . . , SNR K ], and it uses an input → 256 → 256 → K2 MLP. The output is reshaped into a K × K score matrix and converted into a one-to-one assignment by selecting the highest-scoring available sub-band for each sentence (conflicts resolved greedily for low-complexity inference). Training uses imitation learning with Hungarian-based targets from the surrogate utility, optimized with Adam (lr 10 −3, batch size 
+
+256 ) for 100 epochs using row-wise cross-entropy and column regularization ( λcol = 0 .1). 
+
+B. Surrogate Error 
+
+The scheduler imitates oracle assignments derived from the surrogate, whose prediction error depends on training data, test sentences, and channel realizations. For sentence i and sub-band s, let ei,s ≜ ˆgi(γs) − gi(γs) denote the surrogate prediction error. Then the true and surrogate utility terms in the utility sum satisfy Ui,s = πigi(γs) and ˆUi,s = πi ˆgi(γs),giving the entry-wise perturbation ˆUi,s −Ui,s = πiei,s , leading the utility error to be directly controlled by the surrogate pre-diction error. For any feasible X, the aggregate perturbation is 
+
+∆U (X) ≜ ˆU (X) − U (X) = 
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> s=1
+
+πiei,s xi,s .
+
+Taking the expected absolute value gives 
+
+E[|∆U (X)|] = E
+
+" KX
+
+> i=1
+> K
+
+X
+
+> s=1
+
+πiei,s xi,s 
+
+#
+
+≤
+
+> K
+
+X
+
+> i=1
+> K
+
+X
+
+> s=1
+
+πixi,s E[|ei,s |] , (2) by the triangle inequality and linearity of expectation. For each sentence and subcarrier pair, define the expected absolute error and its worst-case value as ηi,s ≜ E[|ei,s |]
+
+and ηmax ≜ max i,s ηi,s , respectively. This avoids assuming identical error distributions across sentence–sub-band pairs. Using P 
+
+> s
+
+xi,s = 1 for every i, (2) becomes 
+
+E
+
+h
+
+| ˆU (X) − U (X)|
+
+i
+
+≤ ηmax 
+
+> K
+
+X
+
+> i=1
+
+πi. (3) Let X⋆ maximize the true utility U (X), and let ˆX⋆ maxi-mize the surrogate utility ˆU (X). The surrogate-induced oracle loss can be decomposed as 
+
+U (X⋆) − U ( ˆX⋆) =  U (X⋆) − ˆU (X⋆)+  ˆU (X⋆) − ˆU ( ˆX⋆)
+
++   ˆU ( ˆX⋆) − U ( ˆX⋆).
+
+The middle term is non-positive since ˆX⋆ maximizes ˆU , and 
+
+U (X⋆) − U ( ˆX⋆) ≥ 0 since X⋆ maximizes U . Hence, 
+
+U (X⋆) − U ( ˆX⋆) ≤ U (X⋆) − ˆU (X⋆)
+
++ ˆU ( ˆX⋆) − U ( ˆX⋆) .
+
+Taking expectations and applying (3) to both assignments yields 
+
+E
+
+h
+
+U (X⋆) − U ( ˆX⋆)
+
+i
+
+≤ 2ηmax 
+
+> K
+
+X
+
+> i=1
+
+πi. (4) Thus, the expected utility loss resulting from the surrogate-assisted oracle construction is controlled by the surrogate prediction error, hence linking the surrogate accuracy to the reliability of the oracle labels used for scheduler training. V. S TUDIED ALGORITHM 
+
+The offline pipeline has two stages: surrogate training (Alg. 1) and scheduler training by oracle imitation (Alg. 2). The surrogate predicts the semantic similarity ˆmi,s for each embedding–SNR pair, avoiding repeated DeepSC+SBERT evaluations. For each frame, it builds the utility matrix ˆUi,s =
+
+πi ˆmi,s from {ei}, {πi}, and {γs}, and the oracle assignment is obtained as Xoracle = H( ˆU), where H(·) denotes the Hungarian algorithm. The scheduler fθ then learns to map 
+
+(E, π, γ) to Xoracle using cross-entropy, where θ denotes its trainable parameters. At inference, both the surrogate and Hungarian solver are discarded, and fθ outputs assignments in a single forward pass. 
+
+Algorithm 1 SBERT Surrogate Training  
+
+> 1:
+
+Input: D = {(e(n), γ (n), m (n))}Nn=1 , surrogate 
+
+Msur (·; ϕ), learning rate ρ, epochs E, batch size 
+
+B 
+
+> 2:
+
+for epoch = 1 , . . . , E do  
+
+> 3:
+
+for mini-batch B ⊂ D do  
+
+> 4:
+
+Form z(n) = [e(n), γ (n)] and predict ˆm(n) =
+
+Msur (z(n); ϕ) 
+
+> 5:
+
+L = 1
+
+> |B|
+
+P
+
+> n∈B
+
+( ˆ m(n) − m(n))2, ϕ ← ϕ − ρ∇ϕL 
+
+> 6:
+
+end for  
+
+> 7:
+
+end for  
+
+> 8:
+
+Output: trained surrogate Msur (·; ϕ)
+
+Algorithm 2 Scheduler Training  
+
+> 1:
+
+Inputs: {si}, {ei}, {πi}, γ, Msur , H, fθ 
+
+> 2:
+
+for t = 1 , . . . , T do  
+
+> 3:
+
+Obtain {e(t) 
+
+> i
+
+}, π(t), γ(t) 
+
+> 4:
+
+Step 1: Surrogate utility: ˆmi,s = Msur (ei, SNR s),
+
+ˆUi,s = πi ˆmi,s , ∀i, s  
+
+> 5:
+
+Step 2: Oracle: Xoracle = H( ˆU) 
+
+> 6:
+
+Step 3: Prediction: bX = fθ (E(t), π(t), γ(t)) 
+
+> 7:
+
+Step 4: Update: L = CE( bX, Xoracle ), θ ← θ − η∇θ L 
+
+> 8:
+
+end for  
+
+> 9:
+
+Output: trained scheduler fθ
+
+VI. R ESULTS AND DISCUSSION 
+
+We evaluate the proposed importance-aware scheduler us-ing importance-weighted semantic utility and SBERT for the top-10% most important and bottom-10% least impor-tant sentences. We compare against: (i) random assignment (lower bound), (ii) PiOnly, which ranks sentences by πi
+
+and assigns them to a fixed random sub-band order, ig-noring THz sub-band heterogeneity, (iii) SNROnly, which ranks sub-bands by γs and assigns them to the randomized sentence order, ignoring semantic importance, (iv) greedy rank-based matching, which pairs higher-πi sentences with higher-γs sub-bands, (v) proxy Hungarian, which maximizes 
+
+Uproxy (X) = PKi=1 
+
+PKs=1 πiγsxi,s , obtained by replacing 
+
+g(γs, vi) in (1) with γs, where both greedy and proxy Hun-garian test whether simple combinations of importance and SNR are sufficient, and (vi) oracle Hungarian (upper bound), which maximizes the true SBERT-based utility U (X) =PKi=1 
+
+PKs=1 πig(γs, vi)xi,s .
+
+Simulation settings: We consider an indoor THz scenario over [fmin , f max ] including molecular absorption peaks (380– 450 GHz), with link distance d = 5 m. The band is parti-tioned into S = K sub-bands, each experiencing frequency-dependent attenuation due to molecular absorption, with path-loss exponent equal to 2 [21]. Here, K reflects the number of simultaneously scheduled users per frame; the scheduler is re-applied each frame, making it suitable for arbitrarily large user populations over time. Owing to the short THz wavelength, antenna elements are densely packed with half-−10 −5 0 5 10 15 00.20.40.60.81
+
+> SNR (dB) Mean SBERT  True Predicted
+
+Fig. 2: Average true E [gi(γs)] and predicted E [ˆ gi(γs)] 
+
+SBERT versus SNR γs.              
+
+> 25 30 35 40 45 036912 15
+> Pt(dBm) Normalized oracle gap (%)
+> K=S= 5
+> K=S= 10
+> K=S= 15
+
+Fig. 3: Empirical estimate of the normalized surrogate-induced oracle gap, E[U (X⋆)−U ( ˆX⋆)]   
+
+> E[U(X⋆)]
+
+×100% , versus transmit power Pt.wavelength spacing [22], enabling ultra-massive 4096 ×4096 
+
+arrays at both transmitter and receiver [23] and significant beamforming gains to mitigate path loss and absorption. The channel follows a clustered multipath model with Poisson-distributed clusters and Gaussian angular spreads. Simulations use Europarl (80k/10k train/test sentences). 
+
+A. Surrogate Accuracy 
+
+Fig. 2 shows that the surrogate closely tracks the true mean SBERT similarity across SNR. Using a test set of 56 ,250 
+
+samples, it achieves near-zero mean error, bμe = −2.45 ×10 −4,with mean absolute error (MAE) bη = 5 .33 × 10 −2. Since the utility perturbation satisfies ˆUi,s − Ui,s = πiei,s with 
+
+0 ≤ πi ≤ 1, this small prediction error implies limited typical distortion in the surrogate utility matrix. Although the empirical worst-case error ηmax ≈ 0.20 is larger due to outlier sentence–sub-band pairs at very low SNR, the much smaller average error indicates that the bound in (4) is conservative. We report in Fig. 3 the empirical normalized oracle gap. For each test frame, X⋆ is obtained from the true SBERT utility matrix, while ˆX⋆ is obtained from the surrogate-predicted matrix; both are evaluated using the true utility. The gap is largest at low transmit power and decreases rapidly with Pt,showing that the surrogate-based oracle approaches the true oracle in the reliable semantic operating regime. 
+
+B. Importance-Weighted Semantic Utility 
+
+We compare and report the utility of all allocation policies when K = 15 . The results for K = {5, 10 } show exactly similar trends and are omitted for visual clarity and space considerations. TABLE I: The proposed scheduler versus the surrogate-assisted Hungarian oracle for different values of K.              
+
+> KUtility Gap Sched. Latency Surr.+Hung. Latency (%) (ms) (ms) 50.197 0.491 1.044 10 0.092 0.487 1.020 15 0.239 0.490 1.319
+
+Fig. 4(a) shows that the proposed scheduler outperforms all practical baselines and closely approaches the oracle across all Pt, with the largest gains at low Pt, where frequency selectivity and nonlinear semantic degradation make alloca-tion critical. It effectively leverages semantic importance and channel heterogeneity, unlike PiOnly, SNROnly, and heuris-tic methods. As Pt increases, all methods converge due to semantic saturation at high SNR; The scheduler retains a consistent advantage, highlighting the importance of modeling sentence-dependent semantic responses, particularly in low-SNR regimes where naive policies fail. Fig. 4(b) reports semantic fidelity for the top-10% sen-tences. The proposed scheduler achieves near-oracle perfor-mance in all Pt, with the greatest gains at low power, con-firming effective prioritization of critical content. Baselines do not consistently align importance with channel quality: SNROnly and greedy rely on channel ordering, PiOnly ignores channel variation, and the proxy is limited by its linear approximation. For the bottom-10%, as shown in Fig. 4(c), the scheduler’s performance remains acceptable, indicating a favorable balance between prioritization and fairness. The sub-optimal performance at low Pt can be explained by allocating better resources to important sentences. As Pt increases, all methods converge due to semantic saturation; the scheduler consistently preserves both prioritization and fairness. 
+
+C. Scalability Analysis 
+
+Table I evaluates scalability for K = S ∈ { 5, 10 , 15 }.Averaged over Pt ∈ [25 , 45] dBm, the scheduler maintains a utility gap below 0.25% relative to the surrogate-assisted Hungarian oracle across all tested K; the learned policy gener-alizes across problem sizes. The scheduler assignment latency remains stable near 0.49 ms across all K, while the surrogate-assisted Hungarian latency is 2–3× higher; significant at a scale. This gap is expected to widen further at larger K,making the single-pass scheduler increasingly attractive as the number of users and sub-bands grows. These latency values reflect online assignment only; the full DeepSC oracle requires repeated DeepSC inference for true utility construction and is used only as an upper-bound reference in Fig. 4. 
+
+D. Latency Analysis 
+
+Runtime is measured on a single NVIDIA V100 GPU (32 GB, v100d32q) over the full 10 k-sentence test set. Simple heuristics are faster than the proposed scheduler, with greedy, proxy, SNROnly, PiOnly, and random requiring only 0.025% ,
+
+0.031% , 0.010% , 0.0036% , and 0.017% of its runtime, re-spectively. However, oracle construction is over 200 × slower 25 30 35 40 45 234
+
+Pt (dBm) Utility       
+
+> Oracle Scheduler Greedy Random Proxy PiOnly SNROnly
+
+(a) Importance-weighted utility     
+
+> 25 30 35 40 45 00.20.40.60.81
+
+Pt (dBm) Top-10% SBERT (b) Top-10% SBERT-important sentences     
+
+> 25 30 35 40 45 00.20.40.60.81
+
+Pt (dBm) Bottom-10% SBERT (c) Bottom-10% least important sentences 
+
+Fig. 4: Semantic-aware sub-band allocation vs. transmit power for K = S = 15 .because it requires explicit utility-matrix construction and combinatorial assignment. The trained scheduler avoids online Hungarian optimization and produces the assignment through a single feed-forward pass, providing a practical trade-off: higher cost than simple heuristics; orders-of-magnitude lower complexity than the oracle; near-oracle performance. VII. C ONCLUSION 
+
+We propose a semantic-aware sub-band scheduler for THz communication, integrating DeepSC with a lightweight neural policy trained via surrogate-assisted imitation learning. An SBERT-based surrogate enables efficient fidelity estimation, achieving near-oracle performance at low complexity. Results show that aligning semantic importance with sub-band quality significantly improves reliability in frequency-selective THz channels, underscoring the need for content-dependent re-source allocation beyond traditional designs. This highlights a shift from bit-centric to content-aware resource allocation, with future extensions incorporating more physically consis-tent models and physical-layer reconfigurability [24]. REFERENCES [1] H. Sarieddeen, M.-S. Alouini, and T. Y. Al-Naffouri, “An overview of signal processing techniques for terahertz communications,” Proc. IEEE , vol. 109, no. 10, pp. 1628–1665, 2021. [2] W. Yang, H. Du, Z. Q. Liew, W. Y. B. Lim, Z. Xiong, D. Niyato, X. Chi, X. Shen, and C. Miao, “Semantic communications for future internet: Fundamentals, applications, and challenges,” IEEE Commun. Surveys & Tuts. , vol. 25, no. 1, pp. 213–250, 2022. [3] H. Sarieddeen, N. Saeed, T. Y. Al-Naffouri, and M.-S. Alouini, “Next generation terahertz communications: A rendezvous of sensing, imag-ing, and localization,” IEEE Commun. Mag. , vol. 58, no. 5, pp. 69–75, 2020. [4] H. Xie, Z. Qin, G. Y. Li, and B.-H. Juang, “Deep learning enabled semantic communication systems,” IEEE Trans. on Signal Process. ,vol. 69, pp. 2663–2675, 2021. [5] G. Zhang, Q. Hu, Z. Qin, Y. Cai, and G. Yu, “A unified multi-task semantic communication system with domain adaptation,” in Proc. IEEE GLOBECOM , 2022, pp. 3971–3976. [6] Z. Weng, Z. Qin, and G. Y. Li, “Semantic communications for speech signals,” in Proc. IEEE ICC , 2021, pp. 1–6. [7] T. S. Do, T. P. Truong, Q. T. Do, and S. Cho, “TranGDeepSC: Leveraging ViT knowledge in CNN-based semantic communication system,” ICT Express , vol. 11, no. 2, pp. 335–340, 2025. [8] X. Peng, Z. Qin, X. Tao, J. Lu, and L. Hanzo, “A robust semantic text communication system,” IEEE Trans. Wireless Commun. , vol. 23, no. 9, pp. 11 372–11 385, 2024. [9] K. Alhaj, R. Tajeddine, and H. Sarieddeen, “SignDeepSC: A semantic signature-based approach for robust semantic communication,” arXiv preprint arXiv:2607.25676 , 2026. [10] N. Reimers and I. Gurevych, “Sentence-bert: Sentence embeddings using siamese bert-networks,” in Proc. Conf. Empirical Methods Nat-ural Language Process. Int. Joint Conf. Natural Language Process. (EMNLP-IJCNLP) , 2019, pp. 3982–3992. [11] K. Papineni, S. Roukos, T. Ward, and W.-J. Zhu, “Bleu: a method for automatic evaluation of machine translation,” in Proc. 40th Annu. Meeting Assoc. Comput. Linguist. (ACL) , 2002, pp. 311–318. [12] L. Yan, Z. Qin, R. Zhang, Y. Li, and G. Y. Li, “Resource allocation for text semantic communications,” IEEE Wireless Commun. Lett. , vol. 11, no. 7, pp. 1394–1398, 2022. [13] L. Wang, W. Wu, F. Zhou, Z. Yang, Z. Qin, and Q. Wu, “Adaptive resource allocation for semantic communication networks,” IEEE Trans. Commun. , vol. 72, no. 11, pp. 6900–6916, 2024. [14] H. Zhang, H. Wang, Y. Li, K. Long, and V. C. Leung, “Toward in-telligent resource allocation on task-oriented semantic communication,” 
+
+IEEE Wireless Commun. , vol. 30, no. 3, pp. 70–77, 2023. [15] R. D. Yates, Y. Sun, D. R. Brown, S. K. Kaul, E. Modiano, and S. Ulukus, “Age of information: An introduction and survey,” IEEE J. Sel. Areas Commun. , vol. 39, no. 5, pp. 1183–1210, 2021. [16] C. Han, W. Gao, N. Yang, and J. M. Jornet, “Molecular absorption effect: A double-edged sword of terahertz communications,” IEEE Wireless Commun. , vol. 30, no. 4, pp. 140–146, 2022. [17] L. S. Rothman, “History of the HITRAN database,” Nature Reviews Physics , vol. 3, no. 5, pp. 302–304, 2021. [18] S. Tarboush, H. Sarieddeen, H. Chen, M. H. Loukil, H. Jemaa, M.-S. Alouini, and T. Y. Al-Naffouri, “TeraMIMO: A channel simulator for wideband ultra-massive MIMO terahertz communications,” IEEE Trans. Veh. Technol. , vol. 70, no. 12, pp. 12 325–12 341, 2021. [19] A. Shafie, N. Yang, S. A. Alvi, C. Han, S. Durrani, and J. M. Jornet, “Spectrum allocation with adaptive sub-band bandwidth for terahertz communication systems,” IEEE Trans. Commun. , vol. 70, no. 2, pp. 1407–1422, 2022. [20] Y. F. Bakman, D. N. Yaldiz, B. Buyukates, C. Tao, D. Dimitriadis, and S. Avestimehr, “MARS: Meaning-aware response scoring for un-certainty estimation in generative LLMs,” in Proc. 62nd Annu. Meeting Assoc. Comput. Ling. (ACL), vol. 1, Long Papers , 2024, pp. 7752–7767. [21] J. He, Y. Chen, Y. Wang, Z. Yu, and C. Han, “Channel measurement and path-loss characterization for low-terahertz indoor scenarios,” in 
+
+ICC Workshops , 2021, pp. 1–6. [22] N. H. M. Adnan, I. M. Rafiqul, and A. H. M. Z. Alam, “Effects of inter element spacing on large antenna array characteristics,” in Proc. IEEE 4th Int. Conf. Smart Instrum., Meas. Appl. (ICSIMA) , 2017, pp. 1–5. [23] A. Faisal, H. Sarieddeen, H. Dahrouj, T. Y. Al-Naffouri, and M.-S. Alouini, “Ultramassive MIMO systems at terahertz bands: Prospects and challenges,” IEEE Veh. Technol. Mag. , vol. 15, no. 4, pp. 33–42, 2020. [24] A. Dkhan, S. Tarboush, H. Sarieddeen, R. W. Heath Jr, H. Bagci, and T. Y. Al-Naffouri, “Physically consistent channel modeling and signal processing for reconfigurable wireless systems,” arXiv preprint arXiv:2608.17122 , 2026.

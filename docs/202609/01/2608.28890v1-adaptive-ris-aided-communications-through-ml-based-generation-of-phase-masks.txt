@@ -1,0 +1,113 @@
+Title: Adaptive RIS-aided Communications through ML-based Generation of Phase Masks
+
+URL Source: https://arxiv.org/pdf/2608.28890v1
+
+Published Time: Tue, 01 Sep 2026 00:16:47 GMT
+
+Number of Pages: 3
+
+Markdown Content:
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+# Adaptive RIS-aided Communications through ML-based Generation of Phase Masks 
+
+Corwin Carpenter ∗, Thomas Daltzis † George C. Trichopoulos † Jacek Kibilda ∗, and Joao F. Santos ∗,
+
+∗Commonwealth Cyber Initiative , Virginia Tech , USA, e-mail: {ccarpenter, jkibilda, joaosantos}@vt.edu 
+
+†Arizona State University , USA, e-mails: {tdaltzis, gtrichop}@asu.edu 
+
+Abstract —Reconfigurable Intelligent Surfaces (RISs) are an attractive technology for Millimeter Wave (mmWave) commu-nications due to their ability to passively reflect incident signals. However, current implementations of RIS rely on performing computationally-intensive algorithms offline to generate phase masks, which are stored as a codebook on the embedded microcontroller on the RIS. The codebook size is restricted by the embedded microcontroller’s storage capacity, which limits the ability of the RIS to adapt to evolving channel conditions and deployment scenarios. In this demo, we showcase an Machine Learning (ML)-based solution for dynamically generating new phase masks during runtime. Our approach leverages a ML model deployed on the microcontroller for approximating the output of a phase mask generation algorithm, responding to new inputs while remaining smaller than a codebook. 
+
+I. I NTRODUCTION 
+
+Millimeter Wave (mmWave) communication systems are prone to increased path loss and susceptible to obstructions in the environment, which can reduce the Received Signal Strength (RSS) and potentially lead to link degradation or fail-ure [1]. To address these challenges, Reconfigurable Intelligent Surfaces (RISs) can be deployed in the environment to improve the coverage and reliability of communication by redirecting, reflecting, or reshaping incident signals when the direct link is weak or blocked [2]. RISs are passive metasurfaces that operate as electronically steerable reflectors, reducing energy consumption and electromagnetic footprint compared to active relays or repeaters. The reflection pattern of a RIS is determined by the phase shifts of its radiating elements. These phase shifts are config-ured through phase masks , which are applied to all elements by low-power embedded microcontrollers [3]. However, obtaining an optimal phase mask requires computationally intensive gen-eration algorithms and an extensive amount of high-accuracy channel geometry data, especially as the size of the RIS increases [4]. As a result, prototype and commercial RIS models, such as [3] and [5], respectively, often rely on lookup tables (known as codebooks) that store predefined phase masks generated offline for representative reflection configurations. These phase masks can then be iteratively applied during beam training, or retrieved directly based on user-defined steering angles or locations [6]. The key limitation of this approach is that pregenerating a codebook to cover all foreseeable channel conditions (e.g., the presence of specific obstacles), deployment scenarios (i.e., far-field or near-field), and use cases (e.g., communications, 10 MHz REF Power & GPIO Power & GPIO 10 MHz REF UART   
+
+> Host PC
+> Arduino GIGA (RIS Microcontroller) TensorFlow Lite Embedded ML Model
+> GPIO IQ Samples Ctl Msgs
+> NI USRP X310
+> Reconfigurable Intelligent Surface 5.3 GHz IF 5.3 GHz IF GPIO 10 MHz REF
+> InterDigital MHU (mmWave TX) InterDigital M2U (mmWave Ctl)
+> 28 GHz
+> InterDigital MHU (mmWave RX)
+
+Fig. 1: Demo setup with an RIS and two mmWave radios. A movable RX reports RSS to the Host PC, which performs adaptive beam management on the RIS, and our embedded ML model dynamically generates phase masks to steer reflected signals toward the RX. 
+
+ranging) may be intractable and far exceed the storage capacity of the embedded microcontrollers, hindering the deployment of RISs in practical settings [7]. For instance, an Arduino Mega microcontroller has 256 KB of flash storage, and it could (ideally) store nearly 2000 phase masks, as each phase mask for a 1024-element 1-bit RIS occupies at least 128 B. While this may appear large, 2000 masks provide only up to 13 discrete positions per dimension when uniformly distributed across three spatial dimensions, before considering different channel conditions, obstacles, or use cases. To address this challenge, we propose to replace the codebook with a ML model, implemented as a lightweight Neural Network (NN) embedded on the RIS microcontroller, for approximating the output of the phase-mask generation algorithm and enabling a flexible generation of phase masks during runtime. In this demo, we showcase the first experimental solu-tion for dynamically generating phase masks in support of adaptive RIS-aided mmWave communication systems. Our solution comprises a ML model trained on an extensive set of pregenerated near-field phase masks for a 1-bit RIS, embedded into the microcontroller using TensorFlow Lite, a framework for compressing ML models and running them in inexpensive microcontrollers [8]. This demonstration will show how dynamic phase-mask generation enables an adaptive arXiv:2608.28890v1 [eess.SY] 28 Aug 2026 RIS-aided communication system that is not constrained by fixed codebooks and can adapt to different deployment sce-narios. By generating new phase masks at runtime, the system performs adaptive beam management on the RIS, tracking radio locations and steering the reflected signal toward new RX positions to mitigate link degradation due to mobility. II. D EMO DESIGN AND FUNCTIONALITY 
+
+Fig. 1 shows our demo setup, where TX and RX mmWave radios communicate over a non-line-of-sight link aided by a RIS. Our demo leverages a RIS developed by Arizona State University [3], mmWave equipment provided by InterDigital, and resources from the CCI xG Testbed [9], which include: 2x Mast Head Unit (MHU) mmWave front-ends, 1x M2U mmWave controller, 1x USRP X310 Software-Defined Radio (SDR), and 1x Host PC. The MHUs represent the TX and RX radios, controlled by the accompanying MHU to USRP (M2U) unit, which receives control signals from an SDR, while the RIS is controlled by the Host PC. Each MHU contains an 8 × 8 phased array antenna configured to boresight, and up/down-converts signals with bandwidth up to 200 MHz from/to Intermediate Frequency (IF) 5.3 GHz to/from the 28 GHz band, with a transmit power of 37 dBm. This IF allows the MHUs to interface with a commercial FR1 SDR through a coaxial cable. We implemented the mmWave control and adaptive beam management on top of STAMINA, an out-of-tree GNU Radio module developed in our previous works [10]–[12], which we extended with new blocks for interfacing with the RIS via UART. The RIS contains 1024 1-bit elements arranged in a 32 × 32 
+
+grid, allowing each radiating element to apply a phase shift of 0◦ or 180 ◦. We control the phase of each radiating ele-ment using an Arduino GIGA microcontroller running cus-tom firmware. The microcontroller loads a phase mask into memory, converts it into a bitstream format, and shifts the corresponding bits into shift registers on the RIS to configure all elements at the same time. To generate the phase masks, we have embedded an ML model trained using PyTorch and converted to TensorFlow Lite for deployment on the Arduino. The system performs beam tracking by updating the RIS phase masks based on RSS feedback from the RX, steering the reflected signal toward the RX as its position changes. Each position change event is communicated to the RIS through a serial connection via UART and triggers the phase-mask generation performed by our proposed method. III. ML-BASED GENERATION OF PHASE MASKS 
+
+The traditional approach of pregenerating phase masks and storing them in a codebook limits the operation of an RIS to known channel conditions and deployment scenarios [7]. When the RIS encounters conditions that require a mask not included in the current codebook, the new mask must be generated externally using a generation algorithm, added to the microcontroller firmware, and deployed by taking the RIS offline and re-flashing its microcontroller. These steps RIS TX MHU RX MHU Host PC USRP M2U 
+
+> Transmitted Signal
+> Reflected Signal
+> Fig. 2: Experimental setup we used to develop and evaluate our ML-based solution for dynamically generating phase masks during runtime to steer the reflected signals of a RIS.
+
+add significant overhead when the RIS needs to respond to new operating conditions. To address these challenges, we embedded an ML model on the RIS microcontroller to generate new phase masks at runtime. This approach allows the RIS to adapt to a broader range of operating conditions than would be possible with a fixed codebook, without taking the RIS offline or updating its firmware. Our NN architecture consists of a four-layer, feedforward, fully connected Multilayer Perceptron (MLP). The input layer contains 128 neurons that encode the coordinates of the TX and RX radios as binary activation values. The two hidden layers contain 256 neurons each, and use ReLU activation. The output layer contains one neuron per element of the RIS. The input to the network consists of four 32-bit floating-point values representing the (x, y ) coordinates of the TX and RX radios in millimeters, relative to the RIS. We convert these values to binary and use their 128-bit concatenation as the input vector. As we are utilizing a 1-bit RIS in our demo, we binarize the output layer by mapping positive activations to 1 and negative activations to 0. The same approach can be adapted to RISs with higher phase resolution by quantizing the output into 2b phase states for a b-bit RIS, or by directly using the output for continuously tunable RISs. We then use the resulting binary output as an approximate phase mask to control the RIS and steer the direction of its reflected signals. We leveraged an analytical algorithm developed at Arizona State University [3] to generate a dataset of phase masks cor-responding to different positions of the radios. The algorithm takes as input the (x, y, z ) coordinates of the RX and TX, and calculates the required phase shift that each element needs to impose on the incident signal from the TX, to allow the overall beam to be steered towards the RX position. The phase shifts are quantized to 0◦ and 180 ◦ and translated to binary values of 0 and 1, respectively, for use by the 1-bit RIS. The final output is a grid of 32 × 32 = 1024 bits, which are distributed to the radiating elements through a circuit of shift registers discussed in [3]. We generated multiple phase masks corresponding to different positions of the TX and RX radios, and combined them into a labeled dataset based of their locations relative to the RIS (in millimeters). We used this dataset for training our ML-based solution for dynamically generating phase masks, -50 0 50 50 0-50 X (cm)                                   
+
+> X: 50, Y: -50
+> -50 050 50 0-50
+> X: 50, Y: 0
+> -50 050 50 0-50
+> X: 50, Y: 50
+> -50 050 50 0-50 X (cm)
+> X: 0, Y: -50
+> -50 050 50 0-50
+> X: 0, Y: 0
+> -50 050 50 0-50
+> X: 0, Y: 50
+> -50 050 Y (cm) 50 0-50 X (cm)
+> X: -50, Y: -50
+> -50 050 Y (cm) 50 0-50
+> X: -50, Y: 0
+> -50 050 Y (cm) 50 0-50
+> X: -50, Y: 50 RSS Heatmaps of Original Masks
+> -50 050 50 0-50 X (cm)
+> X: 50, Y: -50
+> -50 050 50 0-50
+> X: 50, Y: 0
+> -50 050 50 0-50
+> X: 50, Y: 50
+> -50 050 50 0-50 X (cm)
+> X: 0, Y: -50
+> -50 050 50 0-50
+> X: 0, Y: 0
+> -50 050 50 0-50
+> X: 0, Y: 50
+> -50 050 Y (cm) 50 0-50 X (cm)
+> X: -50, Y: -50
+> -50 050 Y (cm) 50 0-50
+> X: -50, Y: 0
+> -50 050 Y (cm) 50 0-50
+> X: -50, Y: 50 RSS Heatmaps of Generated Masks
+> 95.0
+> 92.5
+> 90.0
+> 87.5
+> 85.0
+> 82.5
+> 80.0
+> 77.5
+> 75.0
+> RSS (dB)
+
+Fig. 3: Heatmaps showing the average RSS collected at each RX location measured over 10 s, comparing the original phase masks (left) and our ML-generated phase masks (right). The heatmaps are arranged according to each phase mask’s target steering location in the (x, y ) evaluation grid. 
+
+and to serve as the ground-truth phase masks in our evaluation. IV. N UMERICAL VALIDATION 
+
+To validate our solution for dynamically generating phase masks, we trained our ML model on a dataset representing a non-line-of-sight scenario where the communication between TX and RX is aided by the RIS. To do so, we created a dataset containing 1681 near-field phase masks, corresponding to a 
+
+41 ×41 grid of different RX positions on the (x, y ) dimensions (spaced 5 cm apart), located at a fixed z = 2 m , where z
+
+denotes the distance from the RIS plane. The TX was fixed at 1 m from the RIS along z and 1 m to its right along x. Then, we evaluated our solution on a coarser experimental setup, where the RX was moved to different locations on a 3 × 3
+
+evaluation grid on the (x, y ) plane centered on boresight, with 50 cm spacing, as shown in Fig. 2. For this initial validation, our NN architecture supports two spatial degrees of freedom, corresponding to movement along the x and y dimensions at a fixed distance z. In future work, we plan to extend our architecture to also support a variable z, enabling dynamic phase-mask generation across different distances. At each RX location, we compared the RSS obtained from the nine ground-truth phase masks and their nine ML-generated counterparts, each targeting one RX location in the 
+
+(x, y ) evaluation grid, as shown in Fig. 3. As expected, our ML-based solution generates phase masks that closely mimic the behavior of the ground-truth masks, steering reflected signals toward desired locations, as well as reproducing unex-pected effects from the training dataset, such as the secondary reflections shown in the top right location (x, y ) = (50 , 50) .In addition, the reflected signals displayed similar performance at the target steering locations, with the average RSS obtained using the generated phase masks being only 0.26 dB lower on average than the ground-truth phase masks. These results demonstrate that our ML-generated masks perform very sim-ilarly to the ground-truth masks and validate our ML-based solution for dynamically generated phase masks. During the demonstration, attendees will be able to move the RX to different locations and observe, through a dash-board, an adaptive RIS-aided communication link enabled by our approach for dynamically generating phase masks. The movable RX will report RSS measurements to a Host PC, which performs adaptive beam management on the RIS in GNU Radio and sends updated RX coordinates to the micro-controller. The embedded ML model will then generate phase masks to steer the reflected signal toward the updated RX position. The dashboard will display the RSS, the generated mask, and its array factor, illustrating how the system can mitigate performance degradation due to mobility. ACKNOWLEDGEMENTS 
+
+The research leading to this paper received support from the Commonwealth Cyber Initiative. For more information about CCI, visit: www.cyberinitiative.org. This material is also based upon work supported by the National Science Foundation under Grants Nos. 2318798 and 2326599. The authors also thank InterDigital for providing them with their mmWave equipment. REFERENCES [1] T. S. Rappaport et al. , “Broadband Millimeter-wave Propagation Mea-surements and Models Using Adaptive-beam Antennas for Outdoor Urban Cellular Communications,” IEEE Transactions on Antennas and Propagation (TAP) , vol. 61, no. 4, pp. 1850–1859, 2012. [2] M. Nemati et al. , “RIS-assisted Coverage Enhancement in Millimeter-wave Cellular Networks,” IEEE Access , vol. 8, pp. 188 171–188 185, 2020. [3] A. S. Shekhawat et al. , “A millimeter-wave single-bit reconfigurable intelligent surface with high-resolution beam-steering and suppressed quantization lobe,” IEEE Open Journal of Antennas and Propagation (OJAP) , vol. 6, pp. 311–325, 2025. [4] H. Zhou et al. , “A Survey on Model-based, Heuristic, and Machine Learning Optimization Approaches in RIS-aided Wireless Metworks,” 
+
+IEEE Communications Surveys & Tutorials (COMST) , vol. 26, no. 2, pp. 781–823, 2023. [5] TMY Technology Inc. (TMYTEK), XRifle Dynamic RIS 28G , TMY Technology Inc. (TMYTEK), n.d., 28 GHz RIS model, 26–30 GHz frequency range. Accessed: 2026-06-26. [Online]. Available: https://tmytek.com/products/components/xrifle-dynamic-ris [6] T. Osman et al. , “Demo: Real-Time User Mobility Handling in RIS-Aided mmWave O-RAN Systems,” in IEEE Military Communications Conference (MILCOM) , Los Angeles, CA, USA, Oct. 2025, 6–10 Oct. 2025. [7] A. Abdallah et al. , “Multi-agent Deep Reinforcement Learning for Beam Codebook Design in RIS-aided Systems,” IEEE Transactions on Wireless Communications (TMC) , vol. 23, no. 7, pp. 7983–7999, 2024. [8] P. Warden and D. Situnayake, TinyML: Machine Learning with Tensor-Flow Lite on Arduino and Ultra-low-power Microcontrollers . O’Reilly Media, 2019. [9] A. Da Silva et al. , “CCI xG Testbed: An O-RAN based Platform for Future Wireless Network Experimentation,” IEEE Communications Magazine (ComMag) , vol. 63, no. 2, pp. 62–68, 2025. [10] J. F. Santos et al. , “Stamina: Implementation and evaluation of software-defined millimeter wave initial access,” in IEEE International Confer-ence on Communications (ICC) , 2023, pp. 346–352. [11] A. Baron-Hyppolite et al. , “Adaptive Beam management for Secure mmWave Communications Using Software-defined Radios,” in IEEE Military Communications Conference (MILCOM) . IEEE, 2023, pp. 243–244. [12] ——, “Eavesdropper Avoidance through Adaptive Beam Management in SDR-Based MmWave Communications,” in International Symposium on Wireless Communication Systems (ISWCS) . IEEE, 2024, pp. 1–6.

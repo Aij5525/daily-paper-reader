@@ -1,0 +1,342 @@
+Title: Neural Network-Based Delay-Doppler-Assisted Channel Estimation for OFDM
+
+URL Source: https://arxiv.org/pdf/2608.29056v1
+
+Published Time: Tue, 01 Sep 2026 00:28:43 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Neural Network-Based Delay–Doppler-Assisted Channel Estimation for OFDM 
+
+Mingcheng Nie ∗, Hao Chang ∗, Shuangyang Li †, Haiyao Yu ∗, Jiafu Hao ∗, Yonghui Li ∗,
+
+> ∗
+
+The University of Sydney, Sydney, Australia 
+
+> †
+
+Technische Universität Berlin, Berlin, Germany (Invited Paper) 
+
+Abstract—Conventional orthogonal frequency division mul-tiplexing (OFDM) channel estimation relies on single-tap estimation and time-frequency (TF) interpolation, which be-comes unreliable in high-mobility channels because Doppler-induced inter-carrier interference (ICI) invalidates the under-lying element-wise TF model. This paper proposes a neural-network-based delay-Doppler (DD)-assisted channel estimation framework for OFDM over doubly selective channels. We first derive an ICI-aware TF domain input-output relation and formulate channel estimation as a DD recovery problem. Unlike conventional sparse recovery approaches, the proposed framework does not require the equivalent DD domain channel vector to be strictly sparse, thereby accommodating the leakage induced by fractional delay and Doppler shifts. Since the data symbols are unknown during channel estimation, the sensing matrix is constructed using only the known pilot symbols. As a result, data-induced interference is not explicitly modeled, leading to a structured mismatch in the pilot observations. To tackle this challenge, the adopted network iteratively ex-changes observation- and channel-domain features through the sensing matrix to learn the mapping from these contaminated observations to the equivalent DD domain channel, which is subsequently used to reconstruct the TF-domain channel. Simulation results show that the proposed method achieves lower normalized mean-square error and bit-error rate than conventional OFDM estimators. 
+
+I. Introduction Orthogonal frequency division multiplexing (OFDM) has been widely adopted in modern wireless communi-cation systems due to its robustness against frequency-selective fading and low-complexity implementation [1]. With cyclic prefix (CP) insertion and removal, afrequency-selective channel can be decomposed into ap-proximately frequency-flat parallel subchannels, allowing simple single-tap channel estimation (STE) and equaliza-tion. However, this advantage relies on the preservation of perfect subcarrier orthogonality, which becomes overly idealistic in high-mobility scenarios, particularly at high carrier frequency [2], [3]. In such environments, Doppler-induced non-uniform frequency shifts destroy subcarrier orthogonality and cause severe inter-carrier interference (ICI). Meanwhile, the reduced channel coherence time leads to rapid channel variations across OFDM symbols, thereby requiring more frequent channel estimation [4]. As practical systems must constrain pilot overhead to maintain spectral efficiency, conventional time-frequency (TF) domain channel estimation methods may experience significant performance degradation in highly dynamic channels. Recently, delay-Doppler (DD) domain communications and related waveforms [5], such as orthogonal time-frequency space (OTFS) [6]–[9], have attracted significant attention for enabling reliable communication over high-mobility channels. By representing a rapidly time-varying TF domain channel in the DD domain, the channel can often be described in a more compact, quasi-static, and sparse form. This property provides a fresh perspective on the design of channel estimation. For instance, the embedded-pilot scheme in [10] places a high-power pilot symbol in the DD domain with sufficient guard space. Ow-ing to the convolutional DD domain input-output relation and the quasi-static nature of the DD domain channel, the channel parameters can be estimated by comparing the received and transmitted DD domain pilot symbols. Thus, the resulting symbol detection performance is much better than in OFDM systems, especially in high-mobility environments [11]–[13]. Nevertheless, such DD domain pilot designs are not directly compatible with practical OFDM frame struc-tures. In particular, an embedded DD domain pilot may spread over the entire TF domain, causing considerable interference to OFDM data symbols. This motivates an important question: can the benefits of DD domain chan-nel representation be exploited while retaining conven-tional TF domain OFDM pilots? Answering this question would enable improved channel estimation in OFDM systems without requiring dense TF pilot patterns or resorting to DD waveforms. Nevertheless, only limited studies have explored this direction. In [14], a cross-domain channel estimation (CDCE) method was proposed for OTFS transmission with TF domain pilots, where initial TF domain channel estimates are obtained by STE and then refined in the DD domain through cross-correlation operation. However, the adopted TF domain model neglects ICI, which can cause model mismatch and severe estimation error floors in practical high-Doppler scenarios. In contrast, our previous work [15] developed a novel CDCE for OFDM system that accounts for ICI and significantly improves estimation accuracy. In particular, the OFDM pilot sequence and its received signal are transformed into the DD domain, where DD components arXiv:2608.29056v1 [cs.IT] 29 Aug 2026 are coarsely estimated through two-dimensional twisted convolution. The TF domain channel is then reconstructed by solving a least-squares problem using either sparse recovery or pseudo-inverse operations, depending on the dimension of the resulting dictionary matrix. In this paper, we propose a neural network (NN)-based DD-assisted channel estimation method for OFDM systems under high-Doppler channels. We first derive the OFDM input-output relation in the presence of fractional delay and Doppler, and then formulate channel estimation as a DD recovery problem. To address this problem, we develop an NN-based estimator that exploits non-linear representation capability to estimate the channel under the pilot-data interference and ICI at the receiver. Compared with conventional compressed sensing methods, such as the least absolute shrinkage and selection operator (LASSO) [16], the proposed NN-based estimator can learn a nonlinear mapping from contaminated observations to channel parameters. Numerical results show that the proposed method significantly improves the normalized mean square error (NMSE) performance compared with conventional OFDM channel estimation schemes. Notation: The superscripts (·)H, (·)∗ and (·)⊤ denote the Hermitian transpose, conjugate and transpose operation, respectively; Tr {·} and vec ( ·) denote the trace and the vectorization operation of a matrix; FN denotes the normalized discrete Fourier transform (DFT) matrix of size N ×N ; IM represents the M ×M identity matrix; “ ⊗”denotes the Kronecker product operator. E[·] denotes the expectation operation; X = diag ( x) denotes a diagonal matrix X whose diagonal entries are given by vector 
+
+x. blkdiag {A1, A2, · · · AN } stands for the block diagonal matrix with A1, A2, · · · AN being its diaognal. II. OFDM Transmissions over Doubly-Selective Channel Without loss of generality, let us consider an OFDM-based multi-carrier transmission system. Specifically, let 
+
+M be the number of subcarriers with subcarrier spacing 
+
+∆f , and let N be the number of OFDM symbols with each of duration T . The system operates under the critical sampling condition such that ∆f · T = 1 . The transmitted symbols are represented in the TF domain by the matrix XTF ∈ CM ×N . The corresponding time domain representation S ∈ CM ×N is then obtained by applying an inverse discrete Fourier transform (IDFT) along the frequency dimension as 
+
+S = FH 
+
+> M
+
+XTF . (1) By appending the CP of length LCP to each OFDM symbol, we have 
+
+˜S = ACP S = ACP FH 
+
+> M
+
+XTF , (2) which can be written in vector form as 
+
+˜s = ( IN ⊗ ACP )s = ( IN ⊗ ACP FH 
+
+> M
+
+)xTF . (3) where s ∈ CM N ×1 and ˜s ∈ C ˜M N ×1 denote the time domain transmit signal before and after inserting CP, and 
+
+˜M = M + LCP . Moreover, ACP ≜ [GCP , IM ]⊤ ∈ R ˜M ×M
+
+is the OFDM CP addition matrix, where GCP of size 
+
+M × LCP includes the last LCP columns of the identity matrix IM . Subsequently, the continuous time domain transmit signal can be obtained by applying a pulse shaping p(t), yielding 
+
+˜s(t) =  
+
+> ˜M N −1
+
+∑
+
+> ˜n=0
+
+s[˜ n]p(t − ˜nT s), (4) where s[˜ n] denotes the ˜n-th element of ˜s and Ts is the time domain sampling period satisfying Ts = TM . Here, we focus on a time-varying channel, whose sparse representation in the DD domain is given by 
+
+h(τ, ν ) = 
+
+> P
+
+∑
+
+> p=1
+
+hpδ(τ − τp)δ(ν − νp), (5) where hp, τp = lp 1  
+
+> M∆f
+
+, and νp = kp 1 
+
+> N T
+
+denote the channel coefficient, delay, and Doppler shifts of the p-th path, respectively. Note that lp and kp are not necessarily integers. After experiencing the time-varying channel, the con-tinuous time domain receive signal ˜r(t) can be expressed by 
+
+˜r(t) = 
+
+> P
+
+∑
+
+> p=1
+
+hp ˜s(t − τp)ej2 πν p(t−τp) + w(t), (6) where w(t) is the complex additive white Gaussian noise (AWGN) process with zero mean and one-sided power spectral density (PSD) N0. By adopting the matched-filtering to the received signal, we obtain its discrete-time representation ˜r ∈ C ˜M N ×1, whose ˜m-th element can be expressed as 
+
+˜r[ ˜ m] = 
+
+∫ ∞−∞ 
+
+˜r(t)p∗(t − ˜mT s)d t + w[ ˜ m],
+
+= 
+
+> ˜M N −1
+
+∑
+
+> ˜m=0
+
+s[˜ n]g[ ˜ m, ˜n] + w[ ˜ m]. (7) Here, we define the effective time domain channel as 
+
+g[ ˜ m, ˜n] ≜
+
+> P
+
+∑
+
+> p=1
+
+hpej2 π ˜nν pTs A∗((˜ n − ˜m)Ts + τp, ν p), (8) where A∗((˜ n − ˜m)Ts + τp, ν p) denotes the ambiguity function of pulse p(t) with respect to delay τp and Doppler shift νp, whose definition is given by 
+
+A(τp, ν p) ≜
+
+∫ ∞−∞ 
+
+p(t)p∗(t − τp)e−j2πν p(t−τp)dt. (9) By stacking all received symbols into a vector and remov-ing the CP, we obtain the following compact representa-tion of the received signal: 
+
+r = ( IN ⊗ RCP )˜ r = ( IN ⊗ RCP )
+
+> P
+
+∑
+
+> p=1
+
+˜Gp˜s + w= ( IN ⊗ RCP ) ˜GT(IN ⊗ ACP )s + w
+
+= GTs + w, (10) where ˜Gp represents the p-th resolvable path component of the time domain channel matrix ˜GT before CP removal and the ( ˜ m, ˜n)-th element of ˜GT is given in (8). In addition, RCP ≜ [0M ×LCP , IM ] is the CP removal matrix, and GT denotes the equivalent time domain channel matrix after CP removal. Note that in (10) and what follows, we use w to denote the noise vector since it follows the same distribution. Furthermore, the TF domain receive signal is obtained by applying a discrete Fourier transform (DFT) to r,yielding 
+
+yTF = ( IN ⊗ FM )GT(IN ⊗ FH 
+
+> M
+
+)xTF + w, (11) 
+
+= HTF xTF + w, (12) where HTF ∈ CM N ×M N represents the TF domain chan-nel matrix. Note that the channel matrix HTF exhibits a block diagonal structure, when the CP length is larger than the channel delay spread, i.e., 
+
+HTF = blkdiag {H[1] , H[2] , · · · , H[N ]} , (13) where the diagonal elements of H[i] ∈ CM ×M , 1 ≤ i ≤ N, 
+
+represent the channel for the i-th OFDM symbol, while the off-diagonal elements account for the ICI. III. DD-Assisted Channel Estimation In this section, we develop a DD-assisted channel esti-mation framework based on the TF domain input-output relation (IOR) derived in the previous section. Unlike conventional OFDM channel estimation, which typically estimates only the diagonal effective channel coefficients at pilot positions by STE, the proposed framework further exploits the underlying DD parameters to enhance the accuracy of TF domain channel estimation. To this end, we first rewrite the IOR in (12) by discretizing the delay and Doppler into a finite grid. Specifically, we define a DD grid Ξ, whose resolutions are determined by the delay and Doppler grid spacings. Let Q denote the total number of grid points, given by the product of the Doppler and delay bins. Each grid point is denoted by ξi = ( τi, ν i) ∈ Ξ, i = 0 , . . . , Q − 1,where τi and νi are the corresponding delay and Doppler values, respectively. Then, we define the corresponding TF domain channel component ˇHξi as 
+
+ˇHξi = ( IN ⊗ FM RCP ) ˇGT,ξ i (IN ⊗ ACP FH 
+
+> M
+
+), (14) where ˇGT,ξ i denotes the time domain channel component associated with the DD grid point ξi, whose ( ˜ m, ˜n) element is given by 
+
+gξi [ ˜ m, ˜n] = ej2π ˜nν iTs A∗((˜ n − ˜m)Ts + τi, ν i). (15) By vectorizing the matrices ˇHξi for all grid points ξi ∈ Γ
+
+and concatenating the resulting vectors, we construct a general dictionary matrix as 
+
+D = [vec ( ˇHξ0
+
+) , . . . , vec ( ˇHξQ−1
+
+)] , (16) of dimension (M N )2 × Q. We further define h ∈ CQ×1
+
+as the vector collecting the channel gains associated with the discrete DD components on ξi ∈ Ξ. Therefore, the vectorized TF domain channel matrix can be expressed as 
+
+vec ( HTF ) = Dh . (17) Substituting this representation into the TF domain IOR in (12), we obtain 
+
+yTF = (x⊤ 
+
+> TF
+
+⊗ IM N 
+
+) Dh + w = Ah + w, (18) where A = (x⊤ 
+
+> TF
+
+⊗ IM N 
+
+) D denotes the effective sensing matrix determined by the transmitted TF domain signal and the dictionary matrix. It is worth noting that h is commonly estimated using sparse recovery techniques, which typically require con-structing a sufficiently high-resolution dictionary matrix 
+
+D, such that the DD channel can be well approximated by a sparse vector h. Representative sparse recovery solvers include LASSO, orthogonal approximate message passing (OAMP), and sparse Bayesian learning (SBL). However, these model-based approaches may suffer from high com-putational complexity and performance degradation when the true delay and Doppler values are off the predefined grid. To address these limitations, we next introduce a NN-based estimation approach that learns to recover the equivalent DD domain channel from the TF domain observations. It should be emphasized that, although the physical DD domain channel is typically sparse, we do not impose sparsity on h in the proposed framework. Instead, 
+
+h is interpreted as an equivalent DD domain channel vector defined on a grid with limited DD resolution. As a result, off-grid delay and Doppler components may lead to energy leakage across neighboring DD grid points, making 
+
+h generally non-sparse. We now present the NN-based channel estimation scheme for estimating the equivalent DD domain vector h,denoted by ˆh. To facilitate NN processing, we first convert the complex-valued variables in (18) into their equivalent real-valued representations as 
+
+¯y = [ℜ{ yTF }⊤, ℑ{ yTF }⊤]⊤ ∈ R2M N , (19) 
+
+¯h = [ℜ{ h}⊤, ℑ{ h}⊤]⊤ ∈ R2Q, (20) 
+
+¯w = [ℜ{ w}⊤, ℑ{ w}⊤]⊤ ∈ R2M N , (21) The complex-valued sensing matrix and dictionary matrix are rewritten in real-valued form as 
+
+¯A =
+
+[ℜ{ A} −ℑ{ A}ℑ{ A} ℜ{ A}
+
+]
+
+∈ R2M N ×2Q, (22) and 
+
+¯D =
+
+[ℜ{ D} −ℑ{ D}ℑ{ D} ℜ{ D}
+
+]
+
+∈ R2( M N )2×2Q, (23) respectively. Accordingly, the input-output relation in (18) and the vectorized TF domain channel can be rewritten, respectively, as 
+
+¯y = ¯A¯h + ¯ w, ¯g = ¯D¯h, (24) where ¯g = [ℜ{ vec( HTF )}⊤, ℑ{ vec( HTF )}⊤]⊤. In the proposed design, the NN takes the pair ( ¯A, ¯y) as input and outputs an estimate of the equivalent DD domain channel vector ˆh, which is then used to reconstruct the TF domain channel as ˆg = ¯Dˆh.Following [17], the proposed NN-based channel estima-tor consists of three main components: feature represen-tation, feature processing, and feature exchange modules. We denote the observation feature and estimation feature at iteration l by F(l)y ∈ R2M N ×d and F(l)h ∈ R2Q×d, respec-tively, where d is the feature dimension and l = 0 , . . . , L 
+
+denotes the feature update index. The observation feature is initialized by repeating the received signal over the feature dimension, i.e., F(0) y = ¯ y1⊤ 
+
+> d
+
+, where 1 d ∈ Rd is an all-one vector. The feature processing modules are implemented by shared multi-layer perceptrons (MLPs). Specifically, 
+
+Φ(l)(·) denotes the feature processor for updating the observation feature Fy, while Ψ(l)(·) denotes the feature processor for updating the channel-estimation feature Fh.For l < L , both MLPs map each d-dimensional feature vector to another d-dimensional feature vector. At the final iteration, Ψ(L)(·) maps each d-dimensional channel feature to a scalar, thereby producing the estimated real-valued DD domain channel vector ˆh ∈ R2Q.The feature exchange module maps information between the two feature representations through the sensing matrix 
+
+¯A. In particular, the observation feature Fy is projected to the estimation feature Fh by ¯A⊤, i.e., F(l)h = ¯A⊤F(l)y ,while the estimation feature is projected back to the observation feature by ¯A, i.e., F(l)y = ¯AF (l)h .Starting from F(0) y , the l-th iteration proceeds as follows. First, the observation feature is updated by 
+
+Φ(l)(·) and then projected to the estimation domain as 
+
+F(l)h = ¯A⊤Φ(l)
+
+(
+
+F(l−1) y
+
+)
+
+. For l > 1, a weighted skip connection is added to reuse the previous estimation feature as F(l)h = F(l)h + αF(l−1) h , where α is a skip-connection weight. The estimation feature is then updated as F(l)h = Ψ (l)
+
+(
+
+F(l)h
+
+)
+
+. Next, F(l)h is projected back to the observation domain, and the repeated observation feature is subtracted to form a residual-type observation feature for the next iteration as F(l)y = ¯AF (l)h − ¯y1 ⊤ 
+
+> d
+
+. After T
+
+iterations, the final channel feature is converted into the estimated DD domain channel vector by ˆh = Ψ (L)
+
+(
+
+F(L)h
+
+)
+
+.
+
+The corresponding TF domain channel vector is then Algorithm 1 NN-based Channel Estimation  
+
+> 1:
+
+Input: ¯A, ¯D, and ¯y 
+
+> 2:
+
+Initialize F(0) y = ¯ y1 ⊤ 
+
+> d
+> 3:
+
+for l = 1 , . . . , L do  
+
+> 4:
+
+F(l)y = Φ (l)(F(l−1) y ) 
+
+> 5:
+
+F(l)h = ¯A⊤F(l)y 
+
+> 6:
+
+if l > 1 then  
+
+> 7:
+
+F(l)h = F(l)h + αF(l−1) h 
+
+> 8:
+
+end if  
+
+> 9:
+
+F(l)h = Ψ (l)(F(l)h ) 
+
+> 10:
+
+F(l)y = ¯AF (l)h 
+
+> 11:
+
+F(l)y = F(l)y − ¯y1 ⊤ 
+
+> d
+> 12:
+
+end for  
+
+> 13:
+
+Output: ˆh = F(L)h , ˆg = ¯Dˆh
+
+Fig. 1: Pilot arrangement in the TF domain in XTF .reconstructed as ˆg = ¯Dˆh. The overall procedure is summarized in Algorithm 1. The NN parameters are trained in a supervised manner by minimizing the TF domain channel reconstruction error. Specifically, the loss function is defined as the mean-square error (MSE) between the true and reconstructed TF domain channel vectors: 
+
+L = MSE( ¯Dˆh − ¯g). (25) The parameters of the feature processors Φ(l)(·) and Ψ(l)(·)
+
+are then optimized via backpropagation. IV. Numerical Results A. System Settings The system is configured with M = N = 8 . The number of channel paths is set to P = 3 . For each path, the delay and Doppler indices are independently and uniformly sampled from [0 , l max ] and [−kmax , k max ], respectively, where lmax = 3 and kmax = 2 denote the maximum delay and Doppler indices, respectively. Note that the delay and Doppler indices are not restricted to integer values. We adopt a lattice pilot structure, where pilots are placed along both time and frequency dimensions, making it suitable for channel estimation in doubly selective environments. The TF domain pilots are placed in XTF 
+
+and set to all ones, as shown in Fig. 1. The data symbols are independently drawn from quadrature phase-shift keying (QPSK) modulation with unit power. The SNR is defined with respect to the received signal power. For each channel realization, the noiseless received TF domain signal is given by y0 = HTF xTF , and the average received signal power is computed as Py = 1 
+
+> M N
+
+|| y0|| 22. Accordingly, the SNR is defined as SNR = Py 
+
+> N0
+
+. The normalized MSE (NMSE) is defined as NMSE = || ˆHTF −HTF || 22
+
+> || HTF || 22
+
+.To evaluate the performance of the proposed channel estimation method, several conventional OFDM channel estimation schemes are considered as benchmarks. Specif-ically, STE is first applied at the pilot locations to obtain the channel state information (CSI). The CSI at non-pilot locations is then recovered by linear interpolation along both time and frequency dimensions, using the nearest available pilot-based estimates. The STE based on least square (LS) and linear minimum MSE (LMMSE) estimators are adopted, referred to as “ST-LS” and “ST-LMMSE”, respectively. These estimators are expressed as 
+
+vec( HTF )ST −LS = yTF ⊘ xTF , (26) 
+
+vec( HTF )ST −LMMSE = 11 + 1SNR 
+
+⊙ vec( HTF )ST −LS , (27) where ⊘ and ⊙ denote the element-wise division and Hadamard product, respectively. B. Training Settings Both feature processors Φ(t)(·) and Ψ(t)(·) are imple-mented as MLPs comprising an input layer, a hidden layer of dimension dh, and an output layer. At each iteration, the MLPs map input feature matrices in R2M N ×d to output feature matrices of the same dimension. The only exception is Ψ(T )(·) in the final iteration, whose output layer produces a scalar coefficient. In the simulations, we set d = 12 , dh = 64 , L = 10 , and α = 0 .5 for skip connection. The training data are generated according to the OFDM input-output model in (18). Specifically, we generate 50000 training samples for each SNR value in {10 , 15 , 20 , 25 } dB. During training, an SNR value is randomly selected from this set, and each mini-batch is formed by randomly sampling examples generated at the selected SNR. The network is trained using the Adam optimizer with a learning rate of 10 −4 and a weight decay of 10 −4. Unless otherwise specified, the mini-batch size and number of training epochs are set to 256 and 200 ,respectively. C. Simulation results As shown in Fig. 2, conventional OFDM channel es-timation schemes suffer from severe NMSE degradation in high-mobility environments. This is mainly because strong Doppler shifts introduce significant ICI, whereas STE assumes that the TF domain input-output relation-ship can be approximated by an element-wise product. As a result, STE neglects the off-diagonal interference components in the TF domain channel matrix during the estimation stage. Among the STE-based methods, ST-LMMSE outperforms ST-LS because it further exploits the second-order statistics of the channel. In contrast, DD-assisted schemes achieve better NMSE performance by estimating the underlying DD channel parameters and reconstructing the corresponding TF domain channel. Specifically, the model in (18) can be formulated as a sparse recovery problem, where LASSO is employed to estimate the equivalent DD domain channel vector. The estimated DD domain channel is then used to construct the full TF domain channel matrix, thereby partially accounting for the ICI effect. However, the performance of LASSO may still be limited by the interference between pilot and data symbols at the receiver, as well as by possible model mismatch in the sparse representation. The proposed NN-based DD-assisted channel estimation method achieves the most robust performance among all considered schemes. This indicates that the NN can better exploit the structured DD domain information while mitigating the adverse effects of ICI and pilot-data interference. Moreover, the bit-error-rate (BER) performance is pre-sented in Fig. 3. It can be observed that all schemes exhibit a trend consistent with their NMSE performance. Specif-ically, the conventional ST-LS and ST-LMMSE schemes achieve the worst BER performance, since they fail to properly account for the ICI effect in high-mobility scenar-ios. The LASSO-based DD-assisted scheme improves the BER by exploiting the sparse structure of the DD domain channel. In comparison, the proposed NN-based DD-assisted scheme achieves the best BER performance among all practical channel estimation schemes, demonstrating its superior robustness against ICI and pilot-data inter-ference. Nevertheless, a noticeable performance gap still remains between the proposed scheme and the perfect-CSI benchmark. This indicates that the channel estimation accuracy is still the dominant factor limiting the detection performance, and further improvement is possible by enhancing the DD domain parameter estimation. V. Conclusion In this paper, we proposed a NN-based DD-assisted channel estimation framework for OFDM systems in high-mobility environments. By deriving an ICI-aware input-output relation, channel estimation was formulated as the recovery of an equivalent DD domain channel representa-tion, from which the TF domain channel matrix was re-constructed. Unlike conventional sparse recovery methods, the proposed framework does not require the equivalent DD domain channel vector to be strictly sparse and can therefore accommodate the leakage caused by fractional delay and Doppler shifts. Moreover, because the sensing matrix is constructed using only known pilot symbols, the resulting pilot-only model does not fully capture data-induced interference. To address this structured model mismatch, the adopted network iteratively exchanges observation- and channel-domain features through the sensing matrix to learn the recovery of the DD domain Fig. 2: NMSE comparison for different estimation schemes. 
+
+Fig. 3: BER comparison for different estimation schemes. channel from contaminated pilot observations. Simulation results demonstrated that the proposed method achieves lower NMSE and BER than conventional single-tap LS and LMMSE estimators, as well as the LASSO-based DD-assisted estimator. References 
+
+[1] 3rd Generation Partnership Project (3GPP), “3GPP TS 38.211: NR; Physical channels and modulation,” Online, 2024, available: https://www.etsi.org/deliver/etsi_ts/138200_ 138299/138211/16.02.00_60/ts_138211v160200p.pdf. [2] Z. Wei, W. Yuan, S. Li, J. Yuan, G. Bharatula, R. Hadani, and L. Hanzo, “Orthogonal time-frequency space modulation: A promising next-generation waveform,” IEEE Trans. Wireless Commun., vol. 28, no. 4, pp. 136–144, Aug. 2021. [3] M. Nie, S. Li, and D. Mishra, “Improving channel estimation performance for uplink OTFS transmissions: Pilot design based on a posteriori Cramér-Rao bound,” in Proc. IEEE Int. Conf. Commun. Workshops (ICC Workshops), 2023, pp. 301–306. [4] M. Nie, S. Li, D. Mishra, J. Yuan, and D. W. K. Ng, “Uplink multi-user OTFS: Transmitter design based on statistical chan-nel information,” IEEE Trans. on Commun., vol. 73, no. 7, pp. 4678–4696, Dec. 2024. [5] C. H. A. Wong, D. Mishra, M. Nie, A. Shafie, and J. Yuan, “Fairness-aware ODDM design for secrecy rate maximization among untrusted users,” IEEE Wireless Commun. Lett., vol. 15, pp. 2184–2188, Feb. 2026. [6] R. Hadani, S. Rakib, M. Tsatsanis, A. Monk, A. J. Goldsmith, A. F. Molisch, and R. Calderbank, “Orthogonal time frequency space modulation,” in Proc. IEEE WCNC, Mar. 2017, pp. 1–6. [7] M. Nie, R. Chong, S. Li, A. Farhang, F. Göttsch, D. W. K. Ng, M. Matthaiou, and Y. Li, “Toward standardizing OTFS: A candidate waveform for next-generation wireless networks,” IEEE Commun. Stand. Mag., pp. 1–12, Feb. 2026. [8] X. Zhang, C. Liu, W. Yuan, J. A. Zhang, and D. W. K. Ng, “Sparse Prior-Guided Deep Learning for OTFS Channel Estimation,” IEEE Trans. Veh. Technol., vol. 73, no. 12, pp. 19 913–19 918, Aug. 2024. [9] X. Zhang, Z. Ni, W. Yuan, J. A. Zhang, and T. Q. Quek, “Deep Learning-based OTFS Channel Estimation and Symbol Detection with Plug-and-Play Framework,” IEEE Trans. on Commun., Nov. 2025. [10] P. Raviteja, K. T. Phan, and Y. Hong, “Embedded pilot-aided channel estimation for OTFS in delay-Doppler channels,” IEEE Trans. Veh. Technol., vol. 68, no. 5, pp. 4906–4917, May 2019. [11] H. Chang, A. Kosasih, W. Hardjawana, X. Qu, and B. Vucetic, “Untrained neural network based bayesian detector for otfs modulation systems,” in IEEE INFOCOM WKSHPS, 2023, pp. 1–6. [12] H. Chang, B. Vucetic, and W. Hardjawana, “Graph-based untrained neural network detector for otfs systems,” in IEEE Veh Technol Conf, 2024, pp. 1–6. [13] H. Chang, G. Pang, B. Vucetic, and W. Hardjawana, “Neural otfs receiver without training requirements,” IEEE Wireless Commun. Lett., vol. 14, no. 11, pp. 3824–3828, 2025. [14] J. Hu, Z. Bai, H. Xu, H. Liu, Y. Wang, and K. Kwak, “Cross-domain channel estimation based serial interference cancellation in NOMA-OTFS system,” IEEE Commun. Lett., vol. 28, no. 7, pp. 1668–1672, Jul. 2024. [15] M. Nie, R. Chong, S. Li, W. Yuan, D. W. K. Ng, M. Matthaiou, G. Caire, and Y. Li, “A novel cross-domain channel estimation scheme for OFDM,” in IEEE GLOBECOM Proceedings, 2025. [16] L. Gaudio, G. Colavolpe, and G. Caire, “OTFS vs. OFDM in the presence of sparsity: A fair comparison,” IEEE Trans. Wireless Commun., vol. 21, no. 6, pp. 4410–4423, Dec. 2021. [17] H. Ye and L. Liang, “On purely data-driven massive mimo detectors,” IEEE Transactions on Signal Processing, vol. 73, pp. 3079–3093, 2025.

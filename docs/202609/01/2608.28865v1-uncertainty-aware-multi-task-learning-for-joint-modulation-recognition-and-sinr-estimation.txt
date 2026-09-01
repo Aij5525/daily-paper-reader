@@ -1,0 +1,276 @@
+Title: Uncertainty-Aware Multi-Task Learning for Joint Modulation Recognition and SINR Estimation
+
+URL Source: https://arxiv.org/pdf/2608.28865v1
+
+Published Time: Tue, 01 Sep 2026 00:14:59 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+> 1
+
+# Uncertainty-Aware Multi-Task Learning for Joint Modulation Recognition and SINR Estimation 
+
+Kosar Nourolahi, Vahid Ghasemi 
+
+Abstract —Joint modulation recognition and signal-to-interference-plus-noise ratio (SINR) estimation can reduce duplicated processing in intelligent receivers, but the two tasks have different uncertainty characteristics. This letter proposes an uncertainty-aware multi-task model that transforms each short normalized in-phase/quadrature window into 36 deterministic, label-free statistics, learns a shared representation, and uses task-specific adapters for modulation classification and heteroscedastic SINR regression. A joint uncertainty score combines classification entropy and predicted regression variance to support selective inference. Simulations cover QPSK, 8PSK, 16QAM, and 64QAM under matched additive white Gaussian noise/Rayleigh channels and an unseen frequency-selective Rician channel. Over five independent seeds, the proposed model improves matched and unseen-channel accuracy over conventional multi-task learning by 14.86 and 8.61 percentage points, respectively, while reducing SINR mean absolute error by 1.60 and 1.61 dB. Confidence-based rejection further lowers modulation error under channel mismatch. 
+
+Index Terms —Automatic modulation classification, multi-task learning, SINR estimation, uncertainty estimation, selective in-ference. 
+
+I. I NTRODUCTION 
+
+Automatic modulation classification (AMC) and signal-quality estimation are central inference functions in intelligent radio receivers. Deep AMC models can learn discrimina-tive representations from in-phase/quadrature (I/Q) observa-tions and improve robustness to channel impairments [1]–[3], while real-time implementations demonstrate the feasibility of learning-assisted AMC [4]. Signal-to-noise ratio estimation has likewise been addressed using learned covariance repre-sentations [5]. Nevertheless, AMC and SINR estimation are usually trained as separate tasks even though both operate on the same received waveform. Joint modulation and signal-quality determination has pre-viously relied mainly on engineered descriptors [6], [7]. Multi-task learning has also been applied to related radio-signal tasks, including pulse detection and modulation classification [8]. In our earlier work, modulation fingerprints combined distributional, spectral, and constellation-geometry features for AMC [9]. We subsequently used an RBF-SVM to recognize modulation and derived SINR information from support-vector samples for link adaptation [10]. These approaches established the value of interpretable signal statistics, but they did not 
+
+K. Nourolahi is with the Department of Artificial Intelligence, Ker-manshah University of Technology, Kermanshah Province, Iran. (e-mail: k.norolahi@smail.kut.ac.ir). V. Ghasemi is with the Department of Artificial Intelligence, Ker-manshah University of Technology, Kermanshah Province, Iran. (e-mail: v.ghasemi@kut.ac.ir). 
+
+jointly learn task-adaptive representations or quantify predic-tion reliability. Conventional shared-encoder learning can suffer from neg-ative transfer because modulation recognition is discrete whereas SINR estimation is continuous, and their difficulty changes differently with noise, interference, and channel mis-match. Uncertainty-aware AMC has been studied for unreli-able classifications [11], and calibrated prediction has been considered for wireless learning systems [12]. However, the cited studies do not jointly couple AMC with continuous SINR regression or use both output uncertainties for selective joint inference. This letter makes three contributions. First, it develops a compact multi-task architecture that combines a reproducible 36-dimensional signal representation with a shared encoder and residual task adapters. Second, it couples modulation cross-entropy with robust heteroscedastic SINR regression and combines classification entropy with predicted SINR deviation for selective inference. Third, it performs a validation-only, five-seed comparison under both matched channels and a deliberately unseen frequency-selective Rician channel, in-cluding confidence intervals, calibration, classwise confusion, and coverage-risk behavior. II. P ROBLEM FORMULATION 
+
+Let m ∈ { 1, . . . , M } denote the modulation class and sm[ℓ]
+
+the transmitted baseband sequence. The received samples are modeled as 
+
+r[ℓ] = ej(2 πνℓ +φ) 
+
+> P−1
+
+∑
+
+> p=0
+
+hpsm[ℓ − p − τ ] + i[ℓ] + w[ℓ], (1) where hp is the pth channel tap, ν, φ, and τ denote carrier-frequency, phase, and timing offsets, respectively, i[ℓ] is cochannel interference, and w[ℓ] is receiver noise. The ref-erence SINR is 
+
+γ = 10 log 10 
+
+E{| ∑ 
+
+> p
+
+hpsm[ℓ − p − τ ]|2}
+
+E{| i[ℓ] + w[ℓ]|2} . (2) For a window r = [ r[0] , . . . , r [L − 1]] T, power normalization gives ˜r = r/(L−1‖r‖22 + ǫ)1/2. The supervised set is D =
+
+{(˜rn, y n, γ n)}Nn=1 , and the desired mapping is 
+
+FΘ(˜rn) = (̂ pn,̂ γn,̂ σ2
+
+> n
+
+), (3) where ̂ pn is the modulation probability vector and (̂γn,̂ σ2
+
+> n
+
+) are the predicted SINR mean and data-dependent variance. Train-ing samples are generated from Ωtr , whereas the mismatch set uses channel and impairment parameters in Ωte 6 ⊆ Ωtr .arXiv:2608.28865v1 [cs.NI] 28 Aug 2026 2           
+
+> Normalized I/Q window 36 signal statistics Shared encoder Class adapter ̂
+> p
+> SINR adapter ̂
+> γ, ̂σ
+> Fig. 1. Proposed statistics-based uncertainty-aware multi-task inference chain. TABLE I DETERMINISTIC INPUT REPRESENTATION .
+> Feature group Dimension I/Q/amplitude moments (orders 1-4) 12 Complex higher-order moments 5Phase-increment harmonics (orders 1-4) 8Lagged correlations ( 1,2,4,8)8Spectral entropy/flatness/concentration 3Total 36
+
+For a confidence threshold η, let Iη = {n : un ≤ η} contain the retained predictions. The retained coverage and task risks are 
+
+C(η) = |I η |
+
+N ,Rc(η) = 1
+
+|I η |
+
+∑
+
+> n∈I η
+
+1{̂ yn 6 = yn},Rr(η) = 1
+
+|I η |
+
+∑
+
+> n∈I η
+
+|̂ γn − γn|. (4) Thus, selective inference is evaluated by the classification-error and SINR-MAE risks at comparable retained coverage. III. P ROPOSED UNCERTAINTY -A WARE MULTI -T ASK 
+
+MODEL 
+
+Statistical representation: From each normalized I/Q win-dow, a vector f ∈ R36 is computed without labels. The exact feature allocation is summarized in Table I. Every feature is standardized using only the training-set mean and variance, preventing information leakage from validation or test observations. 
+
+Shared and task-adapted representations: As illustrated in Fig. 1, a layer-normalized 36 → 64 → 48 encoder produces 
+
+z ∈ R48 . To retain shared information while allowing task specialization, residual adapters generate 
+
+zc = z + ρA c(z)
+
+‖z + ρA c(z)‖2
+
+, zr = z + ρA r (z), (5) with ρ = 0 .35 . The classifier gives ̂ p = softmax( Wczc + bc).The regression head outputs a standardized SINR mean ̂ μ and log-variance ̂ v ∈ [−5, 4] , which are transformed back to ̂ γ and ̂
+
+σ2 using the mean and variance of the training labels. 
+
+Training objective: The modulation loss is cross-entropy, 
+
+Lcls = −N −1 ∑ 
+
+> n
+
+log ̂ pn,y n . To retain heteroscedastic uncer-tainty without allowing a few large errors to dominate, the SINR term combines Gaussian negative log-likelihood and smooth-ℓ1 regression: 
+
+Lreg = αLnll + (1 − α)Lhub ,
+
+Lnll = 12N
+
+∑
+
+> n
+
+[
+
+e−̂ vn (tn −̂ μn)2 +̂ vn
+
+]
+
+,
+
+L = Lcls + λLreg , (6) where tn is the standardized SINR target, α = 0 .6, and λ =0.4.
+
+Selective inference: The normalized classification entropy 
+
+uc = − ∑
+
+> m
+
+̂ pm log( ̂pm + ǫ)/ log M is combined with regres-sion uncertainty as 
+
+u = 0 .55 uc + 0 .45 clip( ̂σ/ 10 , 0, 1) . (7) Predictions are ranked by u; rejecting the largest values yields the coverage-risk tradeoff in (4) without retraining. 
+
+A. Complexity and Interpretation 
+
+The statistical front end requires linear-time moment, phase, and correlation calculations plus one L-point fast Fourier transform, giving O(L log L) complexity and a fixed 36-dimensional output. Excluding normalization and nonlinear activations, the dense network requires 16,384 multiply-accumulate operations per observation. Its 16,798 trainable parameters are 42.7% fewer than the 29,302 parameters of the conventional complex-CNN multi-task baseline. The shared encoder captures common signal-quality and modulation in-formation, while the residual adapters limit destructive task interference without duplicating the full encoder. IV. S IMULATION RESULTS 
+
+QPSK, 8PSK, 16QAM, and 64QAM are simulated using L = 128 samples at nominal SINRs 
+
+{− 10 , −5, 0, 5, 10 , 15 , 20 } dB, with each label uniformly perturbed by ±1.25 dB. Training, validation, and matched testing use AWGN and flat Rayleigh fading. The unseen set uses a three-tap frequency-selective Rician channel with factor K ∈ [2 , 7] and wider carrier-frequency, timing, I/Q-imbalance, direct-current-offset, and interference ranges. The four sets contain 5600, 1680, 4480, and 3360 observations, respectively, with no shared symbol, channel, noise, or interference realization. AdamW uses learning rate 1.5 × 10 −3, weight decay 10 −4,batch size 256, gradient-norm clipping at 5, and at most 20 epochs. Early stopping follows five epochs without improve-ment. The retained checkpoint maximizes Aval −0.02 MAE val 
+
+using validation data only. Neural results are means over seeds 
+
+{101 , 202 , 303 , 404 , 505 }. Baselines are RBF-SVM/SVR on the same statistics, separate complex CNNs, and a conven-tional shared-encoder complex CNN. Table II shows that the proposed model improves matched accuracy over conventional MTL by 14.86 percentage points and reduces MAE by 1.602 dB. Under unseen Rician fad-ing, the gains remain 8.61 percentage points and 1.614 dB. The paired 95% confidence intervals are [13 .86 , 15 .86] and 
+
+[8 .16 , 9.07] percentage points for matched and unseen accu-racy, and [1 .205 , 1.999] and [1 .018 , 2.210] dB for MAE; all exclude zero. The corresponding macro-F1 gains are 0.211 and 0.149, while the RMSE reductions are 2.152 and 2.280 dB. Relative to RBF-SVM/SVR, the proposed model yields smaller point gains: 4.08/5.16 percentage points in accuracy and 0.463/0.450 dB in MAE for matched/unseen testing. Fig. 2 shows that all classifiers approach the four-class random level below 0 dB. From 10 dB onward, the proposed 3
+
+TABLE II OVERALL PERFORMANCE . N EURAL RESULTS ARE MEAN ± STANDARD DEVIATION OVER FIVE INDEPENDENT SEEDS .                                          
+
+> Test Method Accuracy Macro-F1 MAE (dB) RMSE (dB) Matched RBF-SVM/SVR 0.460 0.461 3.765 4.782 Separate CNNs 0.335 ±0.019 0.295 ±0.015 4.752 ±0.098 6.024 ±0.170
+> Conventional MTL 0.352 ±0.009 0.297 ±0.022 4.904 ±0.303 6.310 ±0.439
+> Proposed 0.500 ±0.004 0.508 ±0.004 3.302 ±0.062 4.158 ±0.045
+> Unseen Rician RBF-SVM/SVR 0.355 0.357 5.153 6.564 Separate CNNs 0.306 ±0.011 0.247 ±0.028 5.968 ±0.181 7.793 ±0.288
+> Conventional MTL 0.321 ±0.005 0.253 ±0.016 6.317 ±0.354 8.218 ±0.440
+> Proposed 0.407 ±0.005 0.402 ±0.003 4.703 ±0.223 5.938 ±0.274
+> −10 010 20
+
+SINR (dB)    
+
+> 0.2 0.4 0.6 0.8 1.0
+> Classification accuracy
+> −10 010 20
+
+SINR (dB)    
+
+> 2468
+> SINR RMSE (dB)
+> RBF -SVM Separate CNNs Conventional MTL Refined proposed
+
+Fig. 2. Matched-channel performance versus SINR: (a) modulation-classification accuracy and (b) SINR-estimation RMSE. Neural curves are means over five independent seeds.   
+
+> 0 60 81 0
+
+Retained overa e  
+
+> 0 45 0 50 0 55 0 60 0 65
+> Classifi  ation error
+> Conventional MTL Refined proposed
+> 0 60 81 0
+
+Retained  overa e
+
+> 5 05 56 0
+> SINR MAE (dB)
+
+Fig. 3. Selective inference under unseen Rician fading: (a) modulation-classification error and (b) SINR-estimation MAE versus retained coverage. 
+
+model reaches accuracies of 0.768, 0.810, and 0.803 at 10, 15, and 20 dB, exceeding the RBF-SVM values of 0.681, 0.742, and 0.741. It also gives the lowest aggregate RMSE, although RBF-SVR is better at the isolated 5-dB point; hence, no claim of uniform dominance at every SINR is made. Fig. 3 evaluates the uncertainty score under mismatch. At full coverage, the proposed and conventional MTL classifi-cation errors are 0.593 and 0.679. Retaining only the 50% most confident observations reduces them to 0.458 and 0.654, respectively. The proposed SINR MAE remains lower at every coverage, including 4.809 versus 5.242 dB at 50%. Its minimum is approximately 4.668 dB near 80% coverage, showing that uncertainty-based rejection is substantially more effective for AMC than for SINR regression. Fig. 4 clarifies the class-dependent behavior. Under matched testing, QPSK, 8PSK, and 64QAM each obtain a diagonal probability of 0.54, whereas 16QAM reaches 0.38 and is most often confused with 64QAM (0.43). Under the unseen 
+
+> 
+
+PS 
+
+8PS 
+
+16 
+
+AM 64 
+
+AM 
+
+Predi ted od lation 
+
+PS 
+
+8PS 
+
+16 AM 64 AM                          
+
+> Tr  e od  lation  054 008 014 0400 054 01 06010 00 0804
+> 008 010 0 8054
+
+Mat   ed  annels 
+
+> 
+
+PS 
+
+8PS 
+
+16 
+
+AM 64 
+
+AM 
+
+Predi  ted  od lation 
+
+PS 
+
+8PS 
+
+16 AM 64 AM                        
+
+> 04 01 011 0401 041 011 06011 01 0 105
+> 01 015 015 058
+> 
+
+nseen Ri ian   annel 
+
+Fig. 4. Row-normalized confusion matrices of the proposed method under (a) matched channels and (b) the unseen frequency-selective Rician channel. TABLE III VALIDATION -BASED ARCHITECTURE SELECTION . E NTRIES ARE ACCURACY /MAE ( DB).       
+
+> Model Matched Unseen Rician Raw-I/Q hybrid 0.494/3.486 0.403/4.934 Final proposed 0.500/3.302 0.407/4.703
+
+Rician channel, the diagonal probabilities become 0.43, 0.41, 0.21, and 0.58, respectively. The dominant mismatch error is the assignment of 16QAM to 64QAM (0.57), while 64QAM remains the most robust class. This behavior indicates that the principal unresolved ambiguity is between the two amplitude-phase constellations rather than between PSK and QAM families. 
+
+A. Architecture Selection, Calibration, and Limitations 
+
+A validation-only comparison also examined a raw-I/Q and statistics hybrid. As shown in Table III, the final statistics-based model is slightly more accurate and consistently reduces SINR MAE. Validation also selected zero weight for the tested prototype-alignment term; therefore, neither the hybrid branch nor an unsupported prototype regularizer is retained in the final method. The proposed classifier has expected calibration errors of 4.52% and 7.59% for matched and unseen testing, respectively. Its nominal 90% SINR interval covers 90.8% of matched observations but only 76.4% under Rician mismatch. Thus, the joint uncertainty score remains useful for ranking observations, while absolute interval calibration degrades under distribu-tion shift. The strongest gains occur in the moderate- and high-SINR regions, where the deterministic statistics expose constellation geometry and higher-order structure with fewer samples than the raw-I/Q baselines. At very low SINR, all 4
+
+classifiers remain close to random guessing, indicating that the method does not create separability when the observation contains insufficient information. The conclusions are lim-ited to simulated impairments, four modulation formats, and 
+
+L = 128 ; measured I/Q data and broader open-set conditions remain necessary for external validation. V. C ONCLUSION 
+
+A statistics-based uncertainty-aware multi-task model was developed for joint AMC and SINR estimation. Shared learn-ing with residual task adapters and robust heteroscedastic regression improved both tasks under matched and unseen channels, while entropy-variance ranking enabled selective inference. The results also expose two limitations: 16QAM-to-64QAM confusion remains substantial under mismatch, and prediction-interval calibration degrades outside the training distribution. Future work should address these limitations using measured I/Q data and distribution-aware recalibration. REFERENCES [1] T. Huynh-The, Q.-V. Pham, T.-V. Nguyen, T. T. Nguyen, R. Ruby, M. Zeng, and D.-S. Kim, “Automatic modulation classification: A deep architecture survey,” IEEE Access , vol. 9, pp. 142 950–142 971, 2021. [Online]. Available: https://doi.org/10.1109/ACCESS.2021.3120419 [2] S.-H. Kim, J.-W. Kim, W.-P. Nwadiugwu, and D.-S. Kim, “Deep learning-based robust automatic modulation classification for cognitive radio networks,” IEEE Access , vol. 9, pp. 92 386–92 393, 2021. [Online]. Available: https://doi.org/10.1109/ACCESS.2021.3091421 [3] J. Norolahi, M. Mehrnia, and P. Azmi, “Blind modulation classification via combined machine learning and signal feature extraction,” in 2021 International Seminar on Machine Learning, Optimization, and Data Science (ISMODE) , 2022, pp. 266–271. [4] Z. Kaleem, M. Ali, I. Ahmad, W. Khalid, A. Alkhayyat, and A. Jamalipour, “Artificial intelligence-driven real-time automatic modulation classification scheme for next-generation cellular networks,” 
+
+IEEE Access , vol. 9, pp. 155 584–155 597, 2021. [Online]. Available: https://doi.org/10.1109/ACCESS.2021.3128508 [5] S. Chen, S. Zheng, Z. Yang, T. Chen, Z. Zhao, and X. Yang, “Deep learning-based SNR estimation with covariance input,” in 2023 IEEE 23rd International Conference on Communication Technology (ICCT) . IEEE, 2023, pp. 181–187. [Online]. Available: https://doi.org/10.1109/ICCT59356.2023.10419442 [6] T. A. Almohamad, M. F. M. Salleh, M. N. Mahmud, and A. H. Y. Sa’d, “Simultaneous determination of modulation types and signal-to-noise ratios using feature-based approach,” 
+
+IEEE Access , vol. 6, pp. 9262–9271, 2018. [Online]. Available: https://doi.org/10.1109/ACCESS.2018.2809448 [7] T. A. Almohamad, M. F. M. Salleh, M. N. Mahmud, I. R. Karas, N. S. M. Shah, and S. A. Al-Gailani, “Dual-determination of modulation types and signal-to-noise ratios using 2D-ASIQH features for next generation of wireless communication systems,” 
+
+IEEE Access , vol. 9, pp. 25 843–25 857, 2021. [Online]. Available: https://doi.org/10.1109/ACCESS.2021.3057242 [8] F. C. Akyon, M. A. Nuhoglu, Y. K. Alp, and O. Arikan, “Multi-task learning based joint pulse detection and modulation classification,” in 2019 27th Signal Processing and Communications Applications Conference (SIU) . IEEE, 2019, pp. 1–4. [Online]. Available: https://doi.org/10.1109/SIU.2019.8806285 [9] J. Norolahi, P. Azmi, and F. Ahmadi, “Automatic modulation classification using modulation fingerprint extraction,” Journal of Systems Engineering and Electronics , vol. 32, no. 4, pp. 799–810, Aug. 2021. [Online]. Available: https://doi.org/10.23919/JSEE.2021.000069 [10] J. Norolahi and P. Azmi, “A machine learning based algorithm for joint improvement of power control, link adaptation, and capacity in beyond 5G communication systems,” Telecommunication Systems ,vol. 83, no. 2, pp. 323–337, Aug. 2023. [Online]. Available: https://doi.org/10.1007/s11235-023-01017-1 [11] V.-C. Luu, J. Park, and J.-P. Hong, “Uncertainty-aware incremental automatic modulation classification with bayesian neural network,” 
+
+IEEE Internet of Things Journal , vol. 11, no. 13, pp. 24 300–24 309, Jul. 2024. [Online]. Available: https://doi.org/10.1109/JIOT.2024.3390038 [12] K. M. Cohen, S. Park, O. Simeone, and S. S. (Shitz), “Calibrating AI models for wireless communications via conformal prediction,” 
+
+IEEE Transactions on Machine Learning in Communications and Networking , vol. 1, pp. 296–312, 2023. [Online]. Available: https://doi.org/10.1109/TMLCN.2023.3319282

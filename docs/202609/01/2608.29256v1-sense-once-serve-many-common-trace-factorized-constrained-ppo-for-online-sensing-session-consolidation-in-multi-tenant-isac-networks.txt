@@ -1,0 +1,1231 @@
+Title: Sense Once, Serve Many: Common-Trace Factorized Constrained PPO for Online Sensing-Session Consolidation in Multi-Tenant ISAC Networks
+
+URL Source: https://arxiv.org/pdf/2608.29256v1
+
+Published Time: Tue, 01 Sep 2026 00:43:52 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Sense Once, Serve Many: Common-Trace Factorized Constrained PPO for Online Sensing-Session Consolidation in Multi-Tenant ISAC Networks 
+
+Dang-Dung Vu 
+
+Abstract —Integrated sensing and communication (ISAC) net-works can serve compatible requests through shared sensing ses-sions, but online consolidation couples admission, reuse, resource-profile selection, sensing service-level agreements (SLAs), com-munication quality of service (QoS), and future commitments. We formulate sensing-session consolidation as a constrained Markov decision process and propose Common-Trace Factorized Constrained Proximal Policy Optimization (CT-PPO). During training, stochastic policy replicas share the same exogenous workload trace; leave-one-out discounted Monte Carlo return contrasts provide reward credit to applicable action factors, while constraint credit remains factor-specific. Across five training seeds and matched workloads, CT-PPO exceeds matched Joint-Credit PPO (JC-PPO) by 0.934 in macro return (95% confidence interval [0.702 , 1.164 ]), reduces sensing-resource cost by 6.277 ,and increases accepted requests per created session by 0.0806 .A four-way ablation shows that replacing JC-PPO’s joint-ratio surrogate with a factor-wise surrogate alone yields no detectable macro-return gain, whereas adding common-trace reward credit produces the dominant improvement. Without retraining, CT-PPO retains a positive return advantage at low, nominal, and high tested arrival loads. Deployment uses public observations and hard feasibility masks; CT-PPO’s extra parameters are confined to training-side prefix critics, its deployed encoder– actor footprint matches JC-PPO, and actor-only batch-one CPU latency is effectively unchanged. 
+
+Index Terms —Integrated sensing and communication (ISAC), sensing-session consolidation, resource management, constrained reinforcement learning, credit assignment. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communication (ISAC) is moving beyond joint radar–communication design toward networked systems in which sensing is requested, orchestrated, and delivered as a service [1], [2]. Heterogeneous applications may demand detection, localization, or tracking with different spatial, temporal, and accuracy requirements while sharing fi-nite radio resources with communication traffic. Sensing-as-a-service and cross-layer architectures provide the corresponding request, control, resource-management, and service-delivery abstractions [3], [4], while architectural work explicitly models sensing-service consumers and sensing-result exposure [5]. These service abstractions leave an online consolidation deci-sion: as requests arrive, which should reuse an active sensing session, which should create a new one, and when should service be deferred or rejected? 
+
+> (Corresponding author: Dang-Dung Vu.) The author is with the Faculty of Information Technology, VNU University of Engineering and Technology (VNU-UET), Hanoi 100000, Vietnam (e-mail: dungvd21105@gmail.com).
+
+Online consolidation is stateful because a merge must preserve the service already committed to existing members. Compatibility depends jointly on target identity, spatial cover-age, task capability, sensing quality, freshness, authorization, timing, and deterministic resource reservations. The orches-trator is therefore an intelligent network-control entity that must choose among M ERGE , C REATE , D EFER , and R EJECT ,together with the applicable sensing-resource profile. Each decision changes not only current sensing occupancy but also future session commitments; every scheduled sensing update consumes bandwidth and power that would otherwise remain available to communication users. We formulate this coupled service–resource problem as a constrained Markov decision process (CMDP), separating hard physical/contractual feasibility from long-term sensing service-level agreement (SLA) residuals and communication quality-of-service (QoS) residuals, and from the completed-service-versus-sensing-cost objective. The learned controller operates only over these ser-vice/session decisions and discrete sensing profiles: commu-nication scheduling is fixed, while waveform, beamforming, precoding, and other continuous physical-layer variables are not policy decisions. The control policy is itself structured: it selects an action type and, conditionally, a destination session and resource profile. Factorizing the action distribution does not remove the training difficulty created by stochastic arrivals and phys-ical processes, whose variation is superimposed on the re-turn of the policy’s composite decisions. We address this with Common-Trace Factorized Constrained Proximal Policy Optimization (CT-PPO) . CT-PPO combines a permutation-invariant Set encoder with a masked factorized actor. During training, stochastic policy replicas are exposed to the same exogenous workload trace—the same request arrivals and physical-process realizations—and leave-one-out discounted Monte Carlo return contrasts aligned by physical slot provide a common reward advantage to the applicable action factors. Constraint advantages remain specific to the applicable action factor within the primal–dual PPO update. Common-trace replication and auxiliary prefix critics are used only during training; validation, external evaluation, and deployment use a single policy trajectory with the current public observation and hard feasibility masks, without future workload information or oracle outcomes. We evaluate CT-PPO against four deterministic online heuristics, Random Valid, and matched Joint-Credit PPO (JC-PPO), holding the environment, public observation, hard arXiv:2608.29256v1 [cs.NI] 29 Aug 2026 2
+
+masks, Set representation, action distribution, reward and constraints, optimizer family, training budget, validation rule, and external workloads fixed. Across five seeds and matched external traces, CT-PPO attains the highest mean macro return; relative to JC-PPO it gains 0.934 (95% CI [0.702 , 1.164 ]), reduces sensing-resource cost by 6.277 , and raises accepted requests per created session by 0.0806 , while exceeding SLA-Aware Greedy by 1.847 . A controlled four-way ablation attributes the return gain primarily to common-trace reward credit: the factor-wise surrogate alone yields no detectable macro-return improvement, whereas adding common-trace re-ward credit after controlling for that surrogate change shifts behavior toward greater session reuse and produces the main return gain. The subsequent prefix-critic machinery for factor-specific constraint credit yields no detectable incremental return effect in the evaluated configuration. Without retraining, frozen validation-selected CT-PPO and JC-PPO checkpoints retain a positive CT–JC macro-return difference at low, nomi-nal, and high tested arrival loads for all five training seeds. The additional CT-PPO parameters are confined to training-side prefix critics; the deployed encoder–actor parameter count is identical to JC-PPO, and measured actor-only batch-one CPU inference latency is effectively unchanged. The main contributions are:  
+
+> •
+
+We formulate online multi-tenant sensing-session consol-idation as a service-level CMDP with explicit M ERGE ,CREATE , DEFER , and REJECT decisions, conditional session/profile selection, heterogeneous sensing SLAs, communication QoS, and future resource commitments.  
+
+> •
+
+We develop CT-PPO, a constrained factorized policy-learning method that uses stochastic replicas sharing the same exogenous workload trace and leave-one-out Monte Carlo reward contrasts to control for exogenous workload variation in reward credit, while retaining factor-specific constraint credit without changing the information avail-able to the policy at deployment.  
+
+> •
+
+We isolate the policy-update components through a con-trolled four-way ablation. Replacing the joint-ratio sur-rogate with a factor-wise surrogate alone does not yield a detectable macro-return improvement; after controlling for this change, common-trace reward credit is the dom-inant empirical driver of the observed return gain, while the additional prefix-critic machinery for factor-specific constraint credit has no detectable incremental return effect in the evaluated configuration.  
+
+> •
+
+We provide controlled five-seed external evaluation against matched JC-PPO and practical online heuris-tics, linking the return gain to selective session reuse and its stronger effect under clustered arrivals. Frozen-checkpoint load-shift evaluation further shows a positive CT–JC return advantage at all three tested arrival loads, while deployment measurements show that CT-PPO’s additional parameters are confined to training-side prefix critics and leave the deployed encoder–actor footprint unchanged. The remainder of the paper reviews related work in Sec-tion II, formulates the system in Section III, presents CT-PPO in Section IV, describes the evaluation in Section V, and reports results, discussion, and conclusions in Sections VI– VIII. II. R ELATED WORK 
+
+A. Network-Level ISAC Services and Orchestration 
+
+ISAC has evolved from joint radar–communication design toward dual-functional and network-level systems that provide sensing alongside communication services [1], [6]. Sensing-as-a-service work makes this transition explicit by mapping heterogeneous detection, localization, and tracking require-ments to task-dependent sensing QoS and joint sensing– communication resource allocation [2], [3]. Standardization and architectural studies further elevate sensing to a managed network service: 3GPP Release 19 studies ISAC use cases and service requirements, while ETSI GR ISC 003 specifies system- and RAN-level architectural functions for sensing control and result exposure [5], [7]. Recent network-level and cross-layer ISAC visions likewise emphasize coordinated sensing, communication, information sharing, and resource orchestration across nodes and protocol layers [4], [8]. Resource management spans joint sensing-service alloca-tion [2], opportunistic spatiotemporal radio-resource reuse [9], and progressively unified resource allocation under changing system states [10]. Deep reinforcement learning has also been used for ISAC resource allocation and trajectory planning [11]. Outside ISAC, sensor-cloud work aggregates application sens-ing requests into a consolidated sensing schedule shared by multiple applications [12]. ISAC architectural work likewise notes request aggregation into one procedure or session [13]. These works address resource optimization or request ag-gregation, but not our online stateful decision of whether each arrival reuses an active sensing session, creates one, defers, or is rejected while preserving heterogeneous member commitments and future reservations. 
+
+B. Constrained and Set-Structured Policy Learning 
+
+The sensing-SLA and communication-QoS requirements in our formulation connect directly to constrained reinforcement learning. Constrained policy optimization (CPO) optimizes expected return subject to expected-cost constraints [14]; prox-imal policy optimization (PPO) provides the clipped policy-optimization backbone [15]; and primal–dual methods such as proportional–integral–derivative (PID) Lagrangian control adapt constraint multipliers during learning [16]. In the con-solidation CMDP, these long-term residual constraints coex-ist with deterministic action-validity conditions. Hard masks therefore enforce physical, contractual, temporal, quality, and reservation feasibility, while post-admission sensing SLA and communication QoS remain explicit CMDP residuals opti-mized by the constrained policy update. The observation also contains variable-cardinality sets of waiting requests and active sensing sessions. A permutation-invariant Set encoder following the Deep Sets principle pro-vides a natural representation for these collections [17]. CT-PPO and the matched JC-PPO reference deliberately share the 3
+
+same Set representation, public features, masks, and condi-tional action distribution. This controlled architecture makes the learned comparison focus on how credit is constructed for the structured policy rather than confounding credit assign-ment with a different state representation or action interface. 
+
+C. Structured Credit Assignment and Matched Rollouts 
+
+Credit assignment becomes more difficult when a policy contains conditional action components and observed return also reflects stochastic events outside the policy’s control. Action-dependent factorized baselines reduce policy-gradient variance by conditioning baselines on subsets of a multidimen-sional action [18]. In cooperative multi-agent learning, COMA assigns credit through counterfactual action baselines [19]. Counterfactual credit assignment has also been studied ex-plicitly as a means of separating the effect of an action from external random events and subsequent behavior [20]. A complementary variance-reduction principle is to couple stochastic rollouts: the vine estimator in TRPO uses common random numbers when comparing rollouts from a shared state so that differences in estimated action values are less dominated by simulation noise [21]. CT-PPO applies matched randomness at a different granular-ity suited to online sensing-session consolidation. Stochastic policy replicas share the same complete primitive workload trace, fixing exogenous arrivals and physical processes, while their actions generate different endogenous request and session trajectories. Reward returns are compared at the same physical slot using a leave-one-out peer baseline, and the resulting common matched-trace reward advantage is supplied to the applicable factors of the conditional actor. Constraint credit remains specific to the applicable action factor. Unlike action-marginal baselines, CT-PPO does not enumerate alternative action components; unlike future-conditioned counterfactual credit, it does not condition credit on learned future-event information; and unlike same-state branching rollouts, replicas need not remain in the same endogenous state. The result-ing credit construction directly targets exogenous workload variation while preserving the online observation and action interface used at deployment. III. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System and Shared-Session Semantics 
+
+We consider a centralized single-cell ISAC system with sensing tenants L = {1, . . . , 𝐿 }, communication users K =
+
+{1, . . . , 𝐾 }, discrete sensing-resource profiles P, and ac-tive sensing sessions J𝑡 . One monostatic ISAC base station (BS) shares total bandwidth 𝐵 tot and power 𝑃 tot over slots 
+
+𝑡 = 0, . . . , 𝑇 − 1. After terminal cleanup and the current-slot physical-process and request updates, at most one focal request is exposed for control; it is selected lexicographically by eligibility, arrival, and identifier, independently of value, compatibility, or policy score. The focal action precedes sensing service, residual communication service, and comple-tion/constraint accounting. Figure 1 summarizes the decision and shared-resource coupling. A request is 𝑥 𝑟 = (𝑙 𝑟 , 𝑎 𝑟 , 𝑑 𝑟 , 𝐴 𝑟 , 𝑔 𝑟 , 𝜅 𝑟 , 𝜃 𝑟 , Δ𝑟 , 𝑣 𝑟 , 𝜒 𝑟 ), de-noting tenant, arrival/latest-start slots, disk-shaped area of interest (AOI), exact target, task 𝜅 𝑟 ∈ {DET , LOC , TRK }
+
+(detection/localization/tracking), quality threshold, maximum valid-output age, completion value, and sharing permission. If admitted at 𝑠 𝑟 , its 𝐻 𝜅 𝑟 -slot service ends at 𝑓 𝑟 = 𝑠 𝑟 +𝐻 𝜅 𝑟 −1 < 𝑇 .Requests evolve from W AITING to A CTIVE , E XPIRED , or R E-
+
+> JECTED
+
+; active requests terminate as C OMPLETED or F AILED .Session 𝑗 fixes AOI 𝐴 𝑗 and target 𝑔 𝑗 and stores its mem-ber set S𝑗,𝑡 , profile 𝑝 𝑗,𝑡 , update calendar, lifetime, output-capability set O𝑗 determined by the creator task, and a shared tracking covariance when applicable. The output contracts are 
+
+O( DET ) = {DET }, O( LOC ) = {DET , LOC }, and O( TRK ) =
+
+{DET , LOC , TRK }. A profile 𝑝 = (𝐵 s 
+
+> 𝑝
+
+, 𝑃 s 
+
+> 𝑝
+
+, 𝜈 𝑝 ) specifies sensing bandwidth, power, and update period. Every feasible CREATE or M ERGE causes a real current-slot sensing update; subsequent updates recur every 𝜈 𝑝 slots within the session lifetime. One scheduled session update is one physical sensing operation and produces one shared result, which every member evaluates against its own task, threshold, freshness bound, and service interval; no member-specific physical sensing realization is generated inside a shared session. 
+
+B. Shared Resources and Service Quality 
+
+Let J upd  
+
+> 𝑡
+
+be the sessions updating at slot 𝑡 . Sensing occu-pancy and residual communication resources obey 
+
+𝐵 s 
+
+> 𝑡
+
+=∑︁  
+
+> 𝑗 ∈ J upd
+> 𝑡
+
+𝐵 s  
+
+> 𝑝 𝑗,𝑡
+
+, 𝑃 s 
+
+> 𝑡
+
+=∑︁  
+
+> 𝑗 ∈ J upd
+> 𝑡
+
+𝑃 s  
+
+> 𝑝 𝑗,𝑡
+
+,𝐵 c 
+
+> 𝑡
+
+= 𝐵 tot − 𝐵 s 
+
+> 𝑡
+
+, 𝑃 c 
+
+> 𝑡
+
+= 𝑃 tot − 𝑃 s 
+
+> 𝑡
+
+, (1) with 𝐵 s 
+
+> 𝑡
+
+≤ 𝐵 tot and 𝑃 s 
+
+> 𝑡
+
+≤ 𝑃 tot . For the 𝐾 + 
+
+> 𝑡
+
+positive-demand users, the fixed scheduler sets 𝐵 c 
+
+> 𝑘,𝑡
+
+= 𝐵 c 
+
+> 𝑡
+
+/𝐾 + 
+
+> 𝑡
+
+and 𝑃 c 
+
+> 𝑘,𝑡
+
+=
+
+𝑃 c 
+
+> 𝑡
+
+/𝐾 + 
+
+> 𝑡
+
+, with zero allocation when 𝐷 𝑘,𝑡 = 0; 𝐾 + 
+
+> 𝑡
+
+is the positive-demand user count and communication scheduling is not an RL action. With demand 𝐷 𝑘,𝑡 , gain 𝑔 c 
+
+> 𝑘,𝑡
+
+, noise power spectral density 𝑁 0, noise factor 𝐹 c, and implementation gap Γc, the served rate is 
+
+𝑅 c 
+
+> 𝑘,𝑡
+
+= min 
+
+(
+
+𝐷 𝑘,𝑡 , 𝐵 c 
+
+> 𝑘,𝑡
+
+log 2 1 + 𝑃 c 
+
+> 𝑘,𝑡
+
+𝑔 c
+
+> 𝑘,𝑡
+
+𝑁 0 𝐹 c 𝐵 c 
+
+> 𝑘,𝑡
+
+Γc
+
+!) 
+
+. (2) For sensing, 𝐺 s, 𝜆 c, 𝐿 s, and 𝐹 s denote front-end gain, carrier wavelength, system loss, and noise factor, while 𝜎 𝑔 𝑗 ,𝑡 ,
+
+𝑑 s 
+
+> 𝑗,𝑡
+
+, Ξs   
+
+> 𝑔 𝑗 ,𝑡
+
+, and |ℎs   
+
+> 𝑔 𝑗 ,𝑡
+
+|2 denote target RCS, BS–target distance, shadowing gain, and fading power gain. The echo gain 𝑔 s 
+
+> 𝑗,𝑡
+
+,sensing SNR 𝛾 s 
+
+> 𝑗, 𝑝,𝑡
+
+, and detection probability 𝑃 D, 𝑗 are 
+
+𝑔 s 
+
+> 𝑗,𝑡
+
+= 𝐺 s𝜆 2c 𝜎 𝑔 𝑗 ,𝑡 
+
+(4𝜋 )3 (𝑑 s 
+
+> 𝑗,𝑡
+
+)4 𝐿 s
+
+Ξs   
+
+> 𝑔 𝑗 ,𝑡
+
+|ℎs   
+
+> 𝑔 𝑗 ,𝑡
+
+|2, 𝛾 s 
+
+> 𝑗, 𝑝,𝑡
+
+= 𝑃 s 
+
+> 𝑝
+
+𝑔 s
+
+> 𝑗,𝑡
+
+𝑁 0 𝐹 s 𝐵 s
+
+> 𝑝
+
+,𝑃 D, 𝑗 ( 𝑝, 𝑡 ) = 1 − 𝐹 𝜒 ′22 (2𝛾 s  
+
+> 𝑗, 𝑝,𝑡 )
+
+(− 2 ln 𝑃 FA ). (3) Here 𝑃 FA is false-alarm probability and 𝐹 𝜒 ′22 (𝜁 ) the noncentral-
+
+𝜒 2 CDF with two degrees of freedom and noncentrality 
+
+𝜁 . Localization uses RMS bandwidth 𝛽 𝑝 = 𝐵 s 
+
+> 𝑝
+
+/√12 and variances 𝜎 2 
+
+> 𝑑
+
+= 𝑐 20/( 32 𝜋 2 𝛽 2 
+
+> 𝑝
+
+𝛾 s 
+
+> 𝑗, 𝑝,𝑡
+
+) and 𝜎 2 
+
+> 𝜙
+
+= (2𝛾 s 
+
+> 𝑗, 𝑝,𝑡
+
+𝜅 𝜙 )−1,where 𝑐 0 is propagation speed, 𝐷 eff effective aperture, and 
+
+𝜅 𝜙 = 112 (2𝜋𝐷 eff /𝜆 c)2 is the bearing Fisher coefficient. Let 4existing session member member served by shared result session AOI ( Aj )focal request AOI ( Ar )physical target (exact) communication user communication users (served by residual resources) sensing and communication share the same BS resources scheduled session update (one physical sensing operation) shared result Waiting sensing requests (logical, multi-tenant) focal (≤ 1 / slot) Session j, profile pAj gj Ar 
+
+(monostatic) ISAC BS DEFER REJECT 
+
+r1 r2 rt Central orchestrator MERGE( j, p )CREATE(p) (feasible) (new session) 
+
+ra rb rc 
+
+Fig. 1. Multi-tenant ISAC system and online sensing-session consolidation. At most one focal request is processed per slot. A feasible request may merge into an active sensing session or create a new one; one scheduled session update produces a shared sensing result that is evaluated against each member’s own service requirements. Sensing bandwidth and power reduce the residual resources available to communication users. 
+
+Hpol  
+
+> 𝑗,𝑡
+
+, F, Q, and Htrk denote the polar-position Jacobian, tracking transition, process covariance, and position selector; 
+
+Jpos  
+
+> 𝑗, 𝑝,𝑡
+
+, P− 
+
+> 𝑗,𝑡
+
+, and P+ 
+
+> 𝑗,𝑡
+
+are the position information matrix and predicted/posterior covariances. The resulting position error bound (PEB) and session-level posterior Cram´ er–Rao bound (PCRB) are 
+
+Jpos  
+
+> 𝑗, 𝑝,𝑡
+
+= (Hpol  
+
+> 𝑗,𝑡
+
+)⊤ diag (𝜎 2 
+
+> 𝑑
+
+, 𝜎 2 
+
+> 𝜙
+
+)−1Hpol  
+
+> 𝑗,𝑡
+
+,
+
+PEB 𝑗 ( 𝑝, 𝑡 ) =√︃ tr [( Jpos  
+
+> 𝑗, 𝑝,𝑡
+
+)−1], P− 
+
+> 𝑗,𝑡
+
+= FP + 
+
+> 𝑗,𝑡 −1
+
+F⊤ + Q,
+
+P+ 
+
+> 𝑗,𝑡
+
+=
+
+h
+
+(P− 
+
+> 𝑗,𝑡
+
+)−1 + ( Htrk )⊤Jpos  
+
+> 𝑗, 𝑝,𝑡
+
+Htrk i −1
+
+,
+
+PCRB 𝑗 (𝑡 ) =√︂ tr 
+
+
+
+Htrk P+ 
+
+> 𝑗,𝑡
+
+(Htrk )⊤
+
+
+
+. (4) When no valid measurement update exists, the tracking poste-rior retains the current prior covariance. Detection requires 
+
+𝑃 D, 𝑗 ≥ 𝜃 𝑟 ; localization and tracking additionally require the detection gate and, respectively, PEB 𝑗 ( 𝑝, 𝑡 ) ≤ 𝜃 𝑟 or 
+
+PCRB 𝑗 (𝑡 ) ≤ 𝜃 𝑟 . Target-indexed primitive channel terms are shared by simultaneous sessions on the same physical target before profile allocation. 
+
+C. Compatibility, Actions, and Service Accounting 
+
+A feasible merge must preserve every member: exact target identity, focal-AOI coverage 𝜔 𝑟 𝑗 = | 𝐴 𝑟 ∩ 𝐴 𝑗 |/| 𝐴 𝑟 | ≥ 𝜔 min ,where 𝜔 min is the minimum coverage ratio, the target inside both AOIs, task-output capability 𝜅 𝑟 ∈ O 𝑗 , all member sharing permissions and cross-tenant authorization, valid start/lifetime, and freshness 𝜈 𝑝 − 1 ≤ Δ𝑟 ′ for all 𝑟 ′ ∈ S𝑗,𝑡 ∪ { 𝑟 }. The candidate shared output must satisfy every member’s current quality requirement and deterministic reservations. If U𝑗 is session 𝑗 ’s update calendar, each reserved slot 𝜏 satisfies ∑︁  
+
+> 𝑗 :𝜏 ∈ U 𝑗
+
+𝐵 s  
+
+> 𝑝 𝑗,𝑡
+
+≤ 𝐵 tot ,∑︁  
+
+> 𝑗 :𝜏 ∈ U 𝑗
+
+𝑃 s  
+
+> 𝑝 𝑗,𝑡
+
+≤ 𝑃 tot . (5) Unknown future arrivals are not reserved. Let 𝐹 𝑟 𝑗 𝑝,𝑡 de-note the full merge conjunction; 𝐹 create  
+
+> 𝑟 𝑝,𝑡
+
+analogously checks start/lifetime, target/AOI and current-quality conditions, fresh-ness, and reservation feasibility. The feasible action set is 
+
+A𝑡 = {MERGE ( 𝑗, 𝑝 ) : 𝐹 𝑟 𝑗 𝑝,𝑡 = 1}∪ { CREATE ( 𝑝 ) : 𝐹 create  
+
+> 𝑟 𝑝,𝑡
+
+= 1}∪ { DEFER : 𝑡 + 𝜏 defer ≤ 𝑑 𝑟 } ∪ { REJECT }.
+
+(6) MERGE /C REATE admit the focal request into an existing or new session under 𝑝 ; D EFER advances its next eligibility by 5
+
+the fixed cooldown 𝜏 defer , and R EJECT terminates it. Hard masks encode only action feasibility, never learned value, reward, cost, or heuristic preference. Admission starts with no fictitious valid result before the mandatory current-slot update. Let 𝐴 age  
+
+> 𝑟 ,𝑡
+
+and 𝑁 valid  
+
+> 𝑟 ,𝑡
+
+denote output age and accumulated valid outputs; a valid result resets age to zero, otherwise age increments. With 𝑈 SLA  
+
+> 𝑟 ,𝑡
+
+the absorbing post-admission violation flag, I[·] the indicator, 𝐵 first 
+
+> 𝑟 ,𝑡
+
+the first-violation indicator, and 𝑍 succ  
+
+> 𝑟
+
+terminal success: 
+
+𝐵 first  
+
+> 𝑟 ,𝑡
+
+= I
+
+h
+
+𝑈 SLA  
+
+> 𝑟 ,𝑡
+
+= 0 ∧
+
+
+
+𝐴 age  
+
+> 𝑟 ,𝑡 +1
+
+> Δ𝑟 
+
+∨ ( 𝑡 = 𝑓 𝑟 ∧ 𝑁 valid  
+
+> 𝑟 ,𝑡 +1
+
+= 0)
+
+i 
+
+,𝑍 succ  
+
+> 𝑟
+
+= I
+
+h
+
+𝑁 valid   
+
+> 𝑟 , 𝑓 𝑟 +1
+
+≥ 1 ∧ 𝑈 SLA   
+
+> 𝑟 , 𝑓 𝑟 +1
+
+= 0
+
+i
+
+. (7) A first violation is absorbing but the request remains attached through 𝑓 𝑟 ; 𝑍 succ  
+
+> 𝑟
+
+determines C OMPLETED versus F AILED ,while rejected/expired requests receive no completion value. 
+
+D. Reward, Constraints, and CMDP 
+
+Let 𝑉 comp  
+
+> 𝑡
+
+= Í𝑟 : 𝑓 𝑟 =𝑡 𝑣 𝑟 𝑍 succ  
+
+> 𝑟
+
+. With bandwidth/power cost weights 𝑤 𝐵 , 𝑤 𝑃 and sensing-cost weight 𝜆 res , the normalized sensing cost and slot reward are 
+
+𝐶 sense  
+
+> 𝑡
+
+= 𝑤 𝐵 
+
+𝐵 s
+
+> 𝑡
+
+𝐵 tot + 𝑤 𝑃 
+
+𝑃 s
+
+> 𝑡
+
+𝑃 tot , 𝑤 𝐵 + 𝑤 𝑃 = 1,𝑅 𝑡 = 𝑉 comp  
+
+> 𝑡
+
+− 𝜆 res 𝐶 sense  
+
+> 𝑡
+
+. (8) There is no merge, acceptance, deferral, fairness, or com-patibility bonus; consolidation changes return only through completed service and sensing expenditure. For tenant 𝑙 with violation-rate budget 𝛿 𝑙 and user 𝑘 with minimum rate 𝑅 min  
+
+> 𝑘
+
+and shortfall budget 𝜖 𝑘 , let 𝐼 acc  
+
+> 𝑟 ,𝑡
+
+indicate current-slot admission; the additive residuals are 
+
+𝑐 SLA  
+
+> 𝑙,𝑡
+
+=∑︁  
+
+> 𝑟 :𝑙 𝑟 =𝑙
+
+𝐵 first  
+
+> 𝑟 ,𝑡
+
+− 𝛿 𝑙 ∑︁  
+
+> 𝑟 :𝑙 𝑟 =𝑙
+
+𝐼 acc  
+
+> 𝑟 ,𝑡
+
+,
+
+e𝑅 min  
+
+> 𝑘,𝑡
+
+= min {𝐷 𝑘,𝑡 , 𝑅 min  
+
+> 𝑘
+
+},𝑆 c 
+
+> 𝑘,𝑡
+
+=
+
+
+
+[ e𝑅 min  
+
+> 𝑘,𝑡
+
+− 𝑅 c 
+
+> 𝑘,𝑡
+
+]+
+
+e𝑅 min 
+
+> 𝑘,𝑡
+
+, 𝐷 𝑘,𝑡 > 0,
+
+0, 𝐷 𝑘,𝑡 = 0,𝑐 comm  
+
+> 𝑘,𝑡
+
+= I[𝐷 𝑘,𝑡 > 0]  𝑆 c 
+
+> 𝑘,𝑡
+
+− 𝜖 𝑘 
+
+, (9) where [𝑥 ]+ = max {𝑥, 0}, e𝑅 min  
+
+> 𝑘,𝑡
+
+is the demand-capped target, and 𝑆 c 
+
+> 𝑘,𝑡
+
+the normalized communication shortfall; both 𝑆 c
+
+> 𝑘,𝑡
+
+and 𝑐 comm  
+
+> 𝑘,𝑡
+
+are zero when 𝐷 𝑘,𝑡 = 0. With tenant-𝑙 episode counts 𝑁 violated  
+
+> 𝑙
+
+and 𝑁 accepted  
+
+> 𝑙
+
+, Í𝑡 𝑐 SLA  
+
+> 𝑙,𝑡
+
+= 𝑁 violated  
+
+> 𝑙
+
+− 𝛿 𝑙 𝑁 accepted  
+
+> 𝑙
+
+.Latest-start deadlines are hard pre-admission conditions; com-munication shortfall is controlled by the long-term residual, not a hard mask. Let 𝑠 𝑡 denote the Markov state, containing current physical processes, request/lifecycle state, active sessions, deterministic commitments, and cumulative service/constraint accounting. The policy observes a normalized public transformation 𝑜 𝑡 =
+
+𝜓 (𝑠 𝑡 ) containing current request, session, and resource fea-tures, current compatibility/quality margins, accounting, and hard masks; future arrivals and other future exogenous realiza-tions are excluded, and identifiers serve only as relational keys. CT-PPO and JC-PPO share this observation and the action semantics above. The finite-horizon control objective is 
+
+max  
+
+> 𝜋
+
+𝐽 𝑅 (𝜋 ) = E𝜋 
+
+"𝑇 −1∑︁ 
+
+> 𝑡 =0
+
+𝑅 𝑡 
+
+#
+
+, (10a) 
+
+s.t. E𝜋 
+
+"𝑇 −1∑︁ 
+
+> 𝑡 =0
+
+𝑐 SLA 
+
+> 𝑙,𝑡
+
+#
+
+≤ 0, ∀𝑙 ∈ L , (10b) 
+
+E𝜋 
+
+"𝑇 −1∑︁ 
+
+> 𝑡 =0
+
+𝑐 comm 
+
+> 𝑘,𝑡
+
+#
+
+≤ 0, ∀𝑘 ∈ K , (10c) subject to the hard feasibility masks. This keeps action validity, long-term service constraints, and the completed-value-versus-sensing-cost objective explicitly distinct. IV. C OMMON -T RACE FACTORIZED CONSTRAINED PPO 
+
+A. Shared Policy Structure and Matched Reference 
+
+CT-PPO and JC-PPO use the same public observation, hard feasibility masks, Set representation, and conditional action distribution. Separate multilayer perceptrons (MLPs) embed request, session, and global features as e𝑟 , e 𝑗 , and e𝑔 . With waiting-request set R𝑡 and focal request 𝑟 ★, masked-mean summaries yield 
+
+¯e𝑅 = mean 𝑟 ∈ R 𝑡 e𝑟 , ¯e𝑆 = mean 𝑗 ∈ J 𝑡 e 𝑗 ,
+
+d𝑡 = 𝜙 𝐷 ([ e𝑟 ★ , ¯e𝑅 , ¯e𝑆 , e𝑔 ]) ,
+
+c 𝑗,𝑡 = 𝜙 𝑀 ([ e𝑟 ★ , e 𝑗 , ¯e𝑅 , ¯e𝑆 , e𝑔 ]) ,
+
+(11) where 𝜙 𝐷 and 𝜙 𝑀 are learned MLP maps and the empty-session summary is zero. d𝑡 supplies shared decision/critic context and c 𝑗,𝑡 conditions the MERGE session/profile branches; Fig. 2 summarizes the architecture. hard feasibility masks public observation structured action 
+
+Factorized Actor PROFILE PROFILE SESSION MERGE CREATE DEFER REJECT TYPE    
+
+> shared context + Set encoder
+> Common-Trace (training only) policy update θ
+> Factorized constrained PPO (global + type/ session prefix values)
+
+Fig. 2. CT-PPO architecture and training-time credit flow. The Set encoder and hard masks feed the factorized actor; leave-one-out common-trace reward credit 𝐴 CT and factor-specific constraint credit 𝐴 𝐶 𝑓 drive the constrained PPO update. Replication is used only during training. Schematic labels suppress indices: ( 𝑀, 𝐺 𝑅 𝑚 , ¯𝐺 𝑅  
+
+> −𝑚
+
+, 𝐴 𝐶 𝑓 ) correspond to ( 𝑀 𝑔 , 𝐺 𝑅 𝑔,𝑚 , 𝐵 𝑅, −𝑚 𝑔 , 𝐴 𝐶 𝑞  
+
+> 𝑛, 𝑓
+
+) be-low. 
+
+The masked actor follows the environment hierarchy, 
+
+𝜋 𝜃 (𝑎 𝑡 |𝑜 𝑡 ) = 𝜋 𝑇 , 𝜃 (𝜏 𝑡 |𝑜 𝑡 )𝜋 𝑆, 𝜃 ( 𝑗 𝑡 |𝑜 𝑡 , 𝜏 𝑡 )𝐼 𝑆,𝑡 
+
+× 𝜋 𝑃, 𝜃 ( 𝑝 𝑡 |𝑜 𝑡 , 𝜏 𝑡 , 𝑗 𝑡 )𝐼 𝑃,𝑡 , (12) 6
+
+where 𝜃 denotes policy parameters, 𝜏 𝑡 ∈{MERGE , CREATE , DEFER , REJECT } the action type, and 
+
+𝐼 𝑆,𝑡 , 𝐼 𝑃,𝑡 session/profile applicability. Type always applies; session applies only to MERGE with multiple feasible destinations, and profile only to MERGE /C REATE with multiple feasible profiles; 𝑗 𝑡 is omitted under CREATE .Singleton branches are deterministic, have zero conditional log probability, and receive no actor credit. All factors are normalized after hard masking. For feasible MERGE pair set F 𝑀 𝑡 = {( 𝑗, 𝑝 ) : 𝐹 𝑟 𝑗 𝑝,𝑡 = 1} and ses-sion/profile logits 𝑢 𝑆 , 𝑢 𝑀 𝑃 , the effective type logit includes 
+
+Δ𝑀 𝑡 = log 
+
+
+
+1
+
+|F 𝑀 𝑡 |∑︁ ( 𝑗, 𝑝 ) ∈ F 𝑀 𝑡 
+
+exp {𝑢 𝑆 ( 𝑗 ) + 𝑢 𝑀 𝑃 ( 𝑗, 𝑝 )} 
+
+
+
+, (13) which removes a feasible-pair multiplicity bonus. For de-cision 𝑛 , 𝑓 ∈ {𝑇, 𝑆, 𝑃 } denotes type/session/profile, with selected component 𝑎 𝑛, 𝑓 and applicability 𝐼 𝑛, 𝑓 . Let ℓ𝑛, 𝑓 (𝜃 ) =
+
+log 𝜋 𝑓 , 𝜃 (𝑎 𝑛, 𝑓 |𝑜 𝑛 ) and ℓjoint  
+
+> 𝑛
+
+(𝜃 ) = Í 𝑓 𝐼 𝑛, 𝑓 ℓ𝑛, 𝑓 (𝜃 ). The global critic predicts 𝑉 𝑅 (𝑜 𝑛 ) and 𝑄 = 𝐿 + 𝐾 values 𝑉 𝐶 𝑞 (𝑜 𝑛 ).JC-PPO is the matched learned reference. A focal transition may span ℎ𝑛 physical slots, so the shared rollout backbone uses span-aware GAE [22] with discount 𝛾 , parameter 𝜆 ,bootstrap 𝛾 ℎ𝑛 , and recursion (𝛾𝜆 )ℎ𝑛 for reward and con-straints. JC-PPO uses these global advantages with a clipped joint-ratio primal–dual actor. CT-PPO retains the same global critics and rollout/dual infrastructure but changes the actor-side credit and surrogate construction described below. Otherwise the methods share environment, observations, hard masks, Set encoder, action distribution, reward, constraints, optimizer family, training budget, validation protocol, and evaluation workloads. 
+
+B. Common-Trace Reward Credit 
+
+CT-PPO conditions reward credit on a shared exogenous workload realization. We call the policy-independent sequence of request arrivals and physical-process realizations a primitive workload trace . A training group 𝑔 contains 𝑀 𝑔 ≥ 2 replicas sharing the same trace 𝜉 𝑔 ; replicas draw their own policy ac-tions, so endogenous request/session trajectories can diverge. In the final runs, each 5000 -slot rollout contains 25 episodes, grouped as one triplet and eleven pairs. For replica 𝑚 , define the discounted slot-return suffix, leave-one-out peer baseline, and decision credit as 
+
+𝐺 𝑅 𝑔,𝑚 (𝑠 ) = 
+
+> 𝑇 −1
+
+∑︁ 
+
+> 𝑢 =𝑠
+
+𝛾 𝑢 −𝑠 𝑅 𝑔,𝑚,𝑢 ,𝐵 𝑅, −𝑚 𝑔 (𝑠 ) = 1
+
+𝑀 𝑔 − 1∑︁ 𝑚 ′≠𝑚 
+
+𝐺 𝑅 𝑔,𝑚 ′ (𝑠 ),𝐴 CT  
+
+> 𝑔,𝑚,𝑛
+
+= 𝐺 𝑅 𝑔,𝑚 (𝑠 𝑔,𝑚,𝑛 ) − 𝐵 𝑅, −𝑚 𝑔 (𝑠 𝑔,𝑚,𝑛 ), (14) where 𝑅 𝑔,𝑚,𝑢 is the slot reward in (8) for replica 𝑚 in group 
+
+𝑔 , and 𝑠 𝑔,𝑚,𝑛 the decision’s physical start slot. Peers need not decide there: alignment is by physical slot in the shared trace, not by endogenous state/action sequence, and replica 𝑚 
+
+is excluded from its baseline. After rollout normalization, b𝐴 CT 
+
+> 𝑛
+
+is supplied only to applicable action factors. 
+
+C. Factor-Specific Constraint Credit 
+
+Constraint credit uses detached hierarchical prefix values. Here, a prefix is the set of higher-level choices already fixed before a lower factor is selected. The prefix is the action type for session selection, and the action type plus the selected session (under M ERGE ) for profile selection. For 
+
+𝑥 ∈ { 𝑅, 𝐶 1, . . . , 𝐶 𝑄 },
+
+𝑉 𝑇 𝑥 (𝑜 𝑛 , 𝜏 ) = sg [𝑉 𝑥 (𝑜 𝑛 )] + Δ𝑇 𝑥 (sg [d𝑛 ], 𝜏 ),𝑉 𝑆 𝑥 (𝑜 𝑛 , 𝑗 ) = sg [𝑉 𝑇 𝑥 (𝑜 𝑛 , MERGE )] + Δ𝑆 𝑥 (sg [c 𝑗,𝑛 ]) , (15) where sg [·] stops gradients and Δ𝑇 𝑥 , Δ𝑆 𝑥 are residual type/session-prefix heads with zero-initialized outputs; prefix losses update only these heads. Let 𝐺 𝐶 𝑞  
+
+> 𝑛
+
+be the rollout-frozen GAE return and 𝐴 𝐶 𝑞  
+
+> 𝑛
+
+the global rollout advantage for constraint 𝑞 . Type retains this global constraint advantage, whereas lower factors subtract the corresponding old-policy prefix value: 
+
+𝐴 𝐶 𝑞  
+
+> 𝑛,𝑇
+
+= 𝐴 𝐶 𝑞  
+
+> 𝑛
+
+,𝐴 𝐶 𝑞  
+
+> 𝑛,𝑆
+
+= 𝐼 𝑛,𝑆 
+
+h
+
+𝐺 𝐶 𝑞  
+
+> 𝑛
+
+− 𝑉 𝑇 , old  
+
+> 𝐶 𝑞
+
+(𝑜 𝑛 , MERGE )
+
+i
+
+,𝐴 𝐶 𝑞  
+
+> 𝑛,𝑃
+
+= 𝐼 𝑛,𝑃 
+
+(𝐺 𝐶 𝑞  
+
+> 𝑛
+
+− 𝑉 𝑆, old  
+
+> 𝐶 𝑞
+
+(𝑜 𝑛 , 𝑗 𝑛 ), 𝜏 𝑛 = MERGE ,𝐺 𝐶 𝑞  
+
+> 𝑛
+
+− 𝑉 𝑇 , old  
+
+> 𝐶 𝑞
+
+(𝑜 𝑛 , CREATE ), 𝜏 𝑛 = CREATE .
+
+(16) Inapplicable lower-factor advantages are zero. These rollout-frozen advantages use the same rollout centering and scaling statistics as the corresponding global advantages. Reward prefix heads are trained on reward returns, but CT-PPO’s actor reward term uses only the normalized common-trace advantage. 
+
+D. Factorized Constrained PPO Update 
+
+For each applicable factor, let 𝜃 old denote the rollout-policy parameters and 𝜖 the PPO clip ratio; define 𝜌 𝑛, 𝑓 =
+
+exp (ℓ𝑛, 𝑓 (𝜃 ) − ℓ𝑛, 𝑓 (𝜃 old )) and ¯𝜌 𝑛, 𝑓 = clip (𝜌 𝑛, 𝑓 , 1 − 𝜖, 1 + 𝜖 ).The factorized reward and constraint surrogates are 
+
+LCT  
+
+> 𝑅
+
+= 1
+
+𝑁 ∑︁ 𝑛, 𝑓 
+
+𝐼 𝑛, 𝑓 min 
+
+
+
+𝜌 𝑛, 𝑓 b𝐴 CT  
+
+> 𝑛
+
+, ¯𝜌 𝑛, 𝑓 b𝐴 CT 
+
+> 𝑛
+
+
+
+,
+
+L𝐶 𝑞 = 1
+
+𝑁 ∑︁ 𝑛, 𝑓 
+
+𝐼 𝑛, 𝑓 max 
+
+
+
+𝜌 𝑛, 𝑓 b𝐴 𝐶 𝑞  
+
+> 𝑛, 𝑓
+
+, ¯𝜌 𝑛, 𝑓 b𝐴 𝐶 𝑞 
+
+> 𝑛, 𝑓
+
+
+
+, (17) The denominator is the full minibatch size 𝑁 , so sparse lower factors contribute in proportion to applicability; hats denote rollout-normalized advantages. With rollout scales 𝑠 𝑅 , 𝑠 𝐶 𝑞 ,raw dual 𝜆 𝑞 ≥ 0, and entropy coefficient 𝛽 𝐻 , the actor uses 
+
+e𝜆 𝑞 = 𝜆 𝑞 𝑠 𝐶 𝑞 /𝑠 𝑅 and minimizes 
+
+Jactor = −L CT  
+
+> 𝑅
+
++
+
+> 𝑄
+
+∑︁ 
+
+> 𝑞 =1
+
+e𝜆 𝑞 L𝐶 𝑞 − 𝛽 𝐻 H ( 𝜋 𝜃 ). (18) Here H ( 𝜋 𝜃 ) is the entropy of the exact masked hierarchical policy. Factor-specific ratios drive the actor update; the re-constructed joint ratio is retained only for joint diagnostics, including approximate Kullback–Leibler (KL) divergence and clipping statistics, and for KL-based PPO early stopping. 7
+
+Global and prefix critics use clipped value losses against rollout returns. Actor and global-critic gradients update the shared encoder with their respective heads; detached prefix losses update only prefix heads. After each rollout, both methods project raw duals using the mean episode residual: 
+
+𝜆 𝑞 ← Π[0,𝜆 max ] [𝜆 𝑞 + 𝜂 𝜆 𝐸 −1 Í𝐸 𝑒 =1 𝐶 𝑒,𝑞 ], where 𝑒 = 1, . . . , 𝐸 
+
+indexes rollout episodes, 𝐶 𝑒,𝑞 is the episode-total residual, 𝜂 𝜆 
+
+the dual learning rate, 𝜆 max the cap, and Π[0,𝜆 max ] denotes projection onto [0, 𝜆 max ].Common-trace returns and prefix values are training-only quantities. Validation, external evaluation, and deployment use a single trajectory with only the current public observation, hard masks, trained Set encoder, and factorized actor; peer trajectories/returns, prefix critics, future arrivals, regime labels, oracle outcomes, and hindsight information are absent from action selection. V. E XPERIMENTAL METHODOLOGY 
+
+A. Experimental Setting and Online References 
+
+The primary comparison and component ablation are eval-uated in the frozen nominal environment of Section III; the arrival-load stress evaluation changes only the two arrival-rate scalars specified below. The four learned methods share the same public observations, hard masks, action seman-tics, Set encoder, conditional factorized action distribution, PPO/CMDP hyperparameters, validation protocol, and phys-ical interaction budget; their training differences are defined in Section V-C. A workload root is a seed that, together with the arrival regime, deterministically generates one primitive workload trace; training seeds separately index learned-policy runs. Table I reports the nominal workload, model, optimiza-tion, and evaluation settings; learned-run entries are taken from the effective configurations stored with the final artifacts. Independent arrivals use a separate Poisson process for each tenant. Clustered arrivals use common parent events with correlated temporal offsets and inherited target/task attributes, creating more session-reuse opportunities without exposing the regime label to the learned policy. The reference set comprises JC-PPO, four deterministic on-line heuristics, and Random Valid. No Consolidation disables MERGE and selects the feasible C REATE using the lowest-cost sensing profile. Static Compatibility Merge prioritizes MERGE and selects the feasible merge using the lowest-cost sensing profile, falling back to the corresponding lowest-cost CREATE . Greedy Incremental Cost minimizes the increase in current normalized sensing-resource cost over feasible immediate-service actions. SLA-Aware Greedy first maximizes the worst current normalized quality/freshness margin among the affected requests and then minimizes incremental sensing-resource cost. If no immediate-service action exists, the heuris-tics defer when feasible and reject otherwise. Random Valid 
+
+samples uniformly from feasible actions and is used only as a stochastic sanity reference, not as a lower bound. JC-PPO is the matched learned reference described in Section IV. 
+
+B. Training, Model Selection, and External Evaluation 
+
+Five policies are trained for each learned method using train-ing seeds {0, 1, 2, 3, 4}, each receiving exactly 10 6 physical interaction slots. Every replica trajectory used by a common-trace method contributes to this budget, so common-trace grouping receives no additional physical interaction. All four learned methods use the same two regimes and Table I settings; all twenty learned runs completed the budget. Checkpoint selection is isolated from external evaluation. At slot 0 and every 10 4 slots thereafter, the current deterministic policy is evaluated on roots 51001 –51020 in both regimes. The selection score is policy return minus a separately seeded Random Valid return on the same validation workloads. Only the top-ranked checkpoint is retained; checkpoints are ordered by macro paired-return difference, worst-regime paired-return difference, lower macro positive constraint excess, and earlier physical slot. The best checkpoint for each training seed is therefore fixed without consulting external roots 52001 –52050 ;the final ( latest ) checkpoint is retained only for the secondary stability analysis. After selection, each best checkpoint is evaluated deter-ministically on roots 52001 –52050 in both regimes (100 
+
+episodes/policy). Heuristics run once on the same root–regime traces, while Random Valid uses four independently seeded ac-tion replicates per trace. For each root, macro observations are formed by equally averaging the two regimes; the underlying records remain separated by training seed, root, regime, and stochastic replicate as applicable. 
+
+C. Component Ablation, Arrival-Load Stress, and Deployment Evaluation 
+
+To separate CT-PPO’s policy-update components, we eval-uate two intermediate variants under the same training, val-idation, checkpoint-selection, and external-evaluation proto-col. Factorized-JC retains JC-PPO’s model and global re-ward/constraint GAE but replaces its clipped joint-ratio actor surrogate with the factor-wise surrogate used by CT-PPO; it uses neither common-trace reward credit nor prefix critics. 
+
+CT-Reward retains the Factorized-JC model and factor-wise surrogate, replaces its reward advantage with CT-PPO’s leave-one-out Monte Carlo reward credit from the same primitive workload trace, aligned by physical slot, and retains global JC-style constraint GAE; it likewise has no prefix critics. Hence the adjacent contrasts along JC-PPO → Factorized-JC → CT-Reward → CT-PPO isolate, respectively, the factor-wise actor surrogate, common-trace reward credit after controlling the surrogate, and the prefix-critic machinery for factor-specific constraint credit added by CT-PPO. To test arrival-load robustness without retraining or check-point reselection, the five frozen validation-selected CT-PPO/JC-PPO checkpoint pairs are evaluated at low and high arrival rates in addition to the nominal setting. The low/nominal/high configurations set the independent per-tenant Poisson rate and clustered parent-event rate to 
+
+0.06 /0.08 /0.10 per slot, respectively; the low and high config-urations differ from the nominal environment only in these two scalars. Each setting uses roots 52001 –52050 in both arrival regimes. Root identifiers are intentionally reused across load settings to preserve matched-root coupling; this is therefore a matched-root load-shift stress test rather than an independent fresh-root replication. 8
+
+TABLE I FINAL EXPERIMENTAL CONFIGURATION . L EARNED -RUN VALUES ARE TAKEN FROM THE EFFECTIVE CONFIGURATIONS RECORDED IN THE FINAL ARTIFACTS ; 𝑈 [𝑎, 𝑏 ] DENOTES THE CONTINUOUS UNIFORM DISTRIBUTION ON [𝑎, 𝑏 ].
+
+Category Setting 
+
+System 𝑇 = 200 slots, Δ𝑡 = 0.1 s; 𝐿 = 4 sensing tenants, 𝐾 = 6 communication users, 8 targets; 𝐵 tot = 20 MHz, 𝑃 tot = 40 W; carrier 6 GHz. Geometry/mobility [− 200 , 200 ]2 m2 region; initial target/user ranges 30 –140 /20 –180 m; initial target/user speeds 0–12 /0–8 m/s and acceleration std. 1/0.5 m/s 2; AOI radius 𝑈 [15 , 30 ] m with center-offset std. 4 m, truncated at half the AOI radius. Requests DET/LOC/TRK probabilities 0.35 /0.35 /0.30 ; durations 𝐻 DET /𝐻 LOC /𝐻 TRK = 3/4/8 slots; completion values 
+
+𝑈 [0.8, 1.2]/ 𝑈 [1.5, 2.5]/ 𝑈 [2.5, 4.0]; latest-start slack discrete-uniform on {2, . . . , 8}; update periods DET/LOC on 
+
+{1, 2, 3} with probabilities (.25 , . 45 , . 30 )/( .30 , . 45 , . 25 ) and TRK on {1, 2} with (.65 , . 35 ); sharing permission 0.9;defer cooldown 𝜏 defer = 1 slot. Physical/quality 𝑁 0 = −174 dBm/Hz; communication/sensing noise figures 7/7 dB; communication gap 1.5 dB; sensing front-end gain/system loss 24 /3 dB, effective aperture 0.5 m; 𝑃 FA = 10 −4, detection gate 0.9; DET/PEB/PCRB thresholds 
+
+𝑈 [0.85 , 0.98 ]/𝑈 [1.5, 6]/𝑈 [1.5, 5] m; tracking prior covariance diagonal (25 , 25 , 4, 4).Channel processes Communication path-loss exponent 3, shadowing std./correlation 4 dB/ 0.95 , fading correlation 0.9; sensing RCS median 
+
+1 m2, RCS std./correlation 3 dB/ 0.98 , shadowing std./correlation 3 dB/ 0.95 , fading correlation 0.9.Communication Minimum rate 𝑅 min  
+
+> 𝑘
+
+= 2 Mbit/s; Markov on/off demand with initial-on 0.50 , on →off/off →on probabilities 0.08 /0.20 ,and lognormal on-demand median 5 Mbit/s (log-std. 0.45 ); equal-share scheduling. Sharing/profiles Minimum request-to-session spatial coverage ratio 𝜔 min = 0.80 ; cross-tenant sharing is disallowed only for tenant pairs (1, 4) and (2, 3) (and symmetric counterparts). Profiles: economical (2 MHz , 2 W , 3); balanced (4 MHz , 5 W , 2);precision (8 MHz , 8 W , 2); rapid (4 MHz , 8 W , 1), where the third entry is the update period. Objective/constraints 𝜆 res = 0.2, bandwidth/power cost weights 𝑤 𝐵 = 𝑤 𝑃 = 0.5, 𝛾 = 1; per-tenant sensing-SLA budget 𝛿 𝑙 = 0.05 and per-user communication-shortfall budget 𝜖 𝑘 = 0.05 .Arrival regimes Independent: per-tenant Poisson rate 0.08 /slot. Clustered: parent Poisson rate 0.08 /slot, 1 + Poisson (2) children, discrete-uniform offsets {0, 1, 2, 3}, parent-target/task inheritance 0.9/0.6.Training/model Seeds 0–4 per method; 10 6 physical slots/run; rollout 5000 slots; Adam ( 𝜖 Adam = 10 −5), initial LR 3 × 10 −4 with linear 
+
+10 6-slot schedule; 10 epochs, minibatch 512 ; hidden/profile dimensions 128 /32 , tanh , masked-mean pooling, orthogonal initialization, zero dropout; first-rollout feature normalization then frozen (clip 10 , 𝜖 norm = 10 −8); deterministic CPU, one Torch thread. PPO/CMDP PPO clip 𝜖 = 0.2, value clip 0.2, GAE 𝜆 = 0.95 , entropy coefficient 𝛽 𝐻 = 0.01 , reward/constraint value coefficients 
+
+0.5/0.5, target KL 0.03 , max gradient norm 0.5; dual LR 𝜂 𝜆 = 0.01 , maximum 𝜆 max = 100 .Validation/evaluation Validation roots 51001 –51020 in both regimes every 10 4 slots; Random Valid root 53001 , four replicates/trace; external roots 52001 –52050 in both regimes; bootstrap root 54001 , 10 4 samples. 
+
+Computational and deployment evaluation separates train-able model size from action-selection latency. Trainable pa-rameters are counted directly from the instantiated models and partitioned into the Set encoder, policy head, global critic, and prefix critic. Inference is measured for the current full action-selection implementation (the reference path) and a deployment-equivalent actor-only path consisting of feature normalization, Set encoding, policy-head evaluation, and de-terministic action selection. The same 500 public observations, generated by running SLA-Aware Greedy in the nominal environment and spanning both arrival regimes, are presented to CT-PPO and JC-PPO for all five frozen checkpoint pairs. Before timing, actor-only actions are checked against the ref-erence path on the first 100 observations for each checkpoint pair. Measurements use CPU execution, one Torch thread, batch size one, 100 warm-up observations, and alternating JC-PPO/CT-PPO timing order across successive observations. 
+
+D. Metrics and Statistical Analysis 
+
+Episode return under (8) is the primary endpoint. Its service–resource decomposition uses completed value and sensing-resource cost. Consolidation is measured directly by MERGE /C REATE counts and RPS = 𝑁 accepted /𝑁 create when 
+
+𝑁 create > 0, where RPS means accepted requests per created physical sensing session . Constraint performance is reported by family-specific episode residuals and their positive excess 
+
+𝐸 + =∑︁ 
+
+> 𝑙 ∈ L
+
+"∑︁ 
+
+> 𝑡
+
+𝑐 SLA 
+
+> 𝑙,𝑡
+
+#
+
+> +
+
++∑︁  
+
+> 𝑘 ∈ K
+
+"∑︁ 
+
+> 𝑡
+
+𝑐 comm 
+
+> 𝑘,𝑡
+
+#
+
+> +
+
+. (19) Positive 𝐸 + is reported as achieved constraint excess, not interpreted as strict feasibility. The five training seeds are the independent learned-policy units; the 50 external roots and two regimes are repeated matched workloads within each trained policy. All learned-to-learned paired effects reported below—the primary CT-PPO–JC-PPO comparison, the three adjacent component-ablation contrasts, and the CT-PPO–JC-PPO comparison at each arrival-load setting—use the same 10 4-draw hierarchical paired bootstrap. Each draw resamples five matched training-seed indices with replacement and, within each sampled seed pair, resamples the 50 matched roots; the two regime outcomes for a root remain paired and are equally weighted for macro in-ference. The reported statistic is the mean paired effect across the resampled seed blocks with percentile 95% confidence intervals. Component attribution uses only adjacent contrasts along JC-PPO → Factorized-JC → CT-Reward → CT-PPO, avoiding nonadjacent differences that change multiple training components. CT-PPO–heuristic effects use the same hierarchy for the CT training seed and roots while pairing each CT outcome with the deterministic heuristic on the identical primitive trace. 9
+
+For absolute operating-point intervals in Fig. 3, learned policies are bootstrapped over training seeds then roots, while heuristic intervals resample roots only; comparisons use paired effects rather than error-bar overlap. Random Valid is averaged over four action replicates within each trace. The evaluation protocol fixes bootstrap root 54001 and 10 4 samples. Fig. 4’s min–max seed bands are descriptive, not confidence intervals, and repeated roots are never treated as independent training experiments. VI. R ESULTS 
+
+A. External Performance and Practical References 
+
+Table II reports the macro external operating points. CT-PPO attains the highest mean return, 67 .511 , ahead of JC-PPO (66 .576 ) and SLA-Aware Greedy ( 65 .663 ). Static Compatibil-ity Merge and Greedy Incremental Cost reduce sensing cost to about 16 .3, but completed value falls to about 66 .7 and pos-itive constraint excess exceeds 4.6, showing that low sensing expenditure alone does not define an effective consolidation policy. Against SLA-Aware Greedy, the strongest determinis-tic reference by return, CT-PPO gains 1.847 (95% CI 
+
+[1.604 , 2.094 ]). The macro effect combines +1.327 com-pleted value [0.995 , 1.657 ] with −2.602 sensing-resource cost [− 3.829 , −1.198 ] and −0.348 positive constraint ex-cess [− 0.491 , −0.205 ]; RPS also increases by 0.0332 
+
+[0.0231 , 0.0428 ]. CT-PPO therefore improves both compo-nents of the slot reward in (8) relative to this practical reference while using shared sessions more effectively. 
+
+B. Integrated CT-PPO–JC-PPO Effect and Consolidation Be-havior 
+
+The matched CT–JC comparison in Table III evaluates the complete CT-PPO training design against JC-PPO while holding the environment, public observation, hard masks, Set representation, action distribution, reward and constraints, optimizer family, training budget, validation rule, and external traces fixed. Because the endpoints differ in both surrogate construction and actor credit, this remains an integrated-method comparison; Section VI-C resolves the individual in-terventions. CT-PPO improves macro return by 0.934 (95% CI 
+
+[0.702 , 1.164 ]), with a positive CT–JC macro-return difference for all five matched training-seed indices. The reward de-composition locates this gain primarily in resource efficiency: completed value changes by −0.321 [− 0.660 , 0.023 ], whereas sensing cost falls by 6.277 [− 7.625 , −4.804 ]. With 𝜆 res = 0.2,the mean effects satisfy −0.321 − 0.2(− 6.277 ) = +0.934 .Direct consolidation metrics move consistently with this de-composition: RPS rises by 0.0806 , M ERGE increases by 2.344 
+
+actions/episode, and C REATE decreases by 2.272 .The regime split reveals where the consolidation mechanism is most effective. Under independent arrivals, CT-PPO im-proves return by 0.827 while reducing sensing cost by 7.047 ;completed value decreases by 0.583 , and positive constraint excess increases by 0.227 . Under clustered arrivals, return improves by 1.042 , sensing cost falls by 5.507 , the completed-value interval spans zero, and positive excess decreases by 
+
+0.665 . The corresponding RPS effect grows from +0.0177 
+
+under independent arrivals to +0.1434 under clustered arrivals, showing that CT-PPO makes greater use of the richer reuse opportunities created by clustered demand. Figure 3 complements these paired effects with the absolute consolidation operating points. The heuristic comparison also shows why reuse must be selective: Static Compatibility Merge attains slightly higher macro RPS than CT-PPO ( 1.125 versus 
+
+1.114 ), but with substantially lower completed value ( 66 .702 
+
+versus 74 .005 ) and larger positive constraint excess ( 4.627 
+
+versus 2.164 ). 
+
+C. Component Attribution 
+
+The four-way ablation resolves the confounding present in the integrated CT–JC comparison by introducing one training change at each adjacent step. The external macro returns of the validation-selected checkpoints are 66 .576 for JC-PPO, 66 .478 
+
+for Factorized-JC, 67 .490 for CT-Reward, and 67 .511 for full CT-PPO. Table IV reports the corresponding adjacent paired effects. Replacing JC-PPO’s joint-ratio surrogate with the factor-wise surrogate alone does not yield a detectable macro-return improvement: Factorized-JC minus JC-PPO is −0.099 
+
+[− 0.472 , 0.287 ], with intervals spanning zero in both in-dependent ( −0.182 [− 0.535 , 0.183 ]) and clustered ( −0.015 
+
+[− 0.523 , 0.496 ]) arrivals. This intervention nevertheless changes the service–resource balance: completed value de-creases by 0.692 , while sensing-resource cost decreases by 
+
+2.968 . Thus factorization alone does not explain the CT-PPO return gain. After controlling for that surrogate change, common-trace reward credit produces the main return gain. CT-Reward improves macro return over Factorized-JC by 1.013 
+
+[0.666 , 1.338 ]; the seedwise macro differences are positive for all five training seeds, and the regime-specific effects are 
+
++0.994 [0.618 , 1.344 ] under independent arrivals and +1.031 
+
+[0.605 , 1.490 ] under clustered arrivals. The isolated interven-tion also shifts behavior toward consolidation: RPS increases by 0.0625 [0.0414 , 0.0818 ], M ERGE by 1.864 [1.250 , 2.448 ],and C REATE decreases by 1.658 [− 2.244 , −0.968 ]. Its mean sensing-cost effect is negative, but the corresponding interval 
+
+[− 6.233 , 0.265 ] spans zero. These results identify common-trace reward credit, after controlling for the factorized surro-gate, as the dominant empirical driver of the observed return improvement in this configuration. Finally, adding CT-PPO’s prefix-critic machinery for factor-specific constraint credit to CT-Reward changes macro return by only +0.021 [− 0.143 , 0.209 ]. The intervals for completed value, sensing cost, positive constraint excess, RPS, and MERGE /C REATE counts also span zero. The ablation therefore provides no detectable incremental return contribution from this additional machinery in the evaluated configuration; this is a non-detection, not an equivalence claim. 
+
+D. Arrival-Load Robustness 
+
+Table V evaluates the same frozen validation-selected CT-PPO and JC-PPO checkpoints at the three tested arrival-rate 10 
+
+TABLE II PRIMARY EXTERNAL MACRO RESULTS . L EARNED ENTRIES AVERAGE FIVE VALIDATION -SELECTED TRAINING SEEDS ; DETERMINISTIC HEURISTICS AVERAGE MATCHED EXTERNAL ROOTS , AND RANDOM VALID IS AVERAGED WITHIN TRACE . 𝐸 + IS POSITIVE CONSTRAINT EXCESS ; RPS IS ACCEPTED REQUESTS PER CREATED SESSION .
+
+Policy Return Completed value Sense cost E+ RPS 
+
+CT-PPO 67.511 74.005 32.474 2.164 1.114 JC-PPO 66.576 74.326 38.751 2.382 1.034 SLA-Aware Greedy 65.663 72.678 35.076 2.512 1.081 Static Compatibility Merge 63.438 66.702 16.321 4.627 1.125 Greedy Incremental Cost 63.417 66.673 16.278 4.641 1.105 No Consolidation 62.998 66.366 16.843 4.722 1.000 Random Valid 42.901 46.519 18.089 2.122 1.048 TABLE III CT-PPO MINUS JC-PPO EFFECTS FROM VALIDATION -SELECTED CHECKPOINTS . E NTRIES ARE Δ [95% HIERARCHICAL PAIRED -BOOTSTRAP CI]. 
+
+Metric Macro Independent Clustered 
+
+Return +0.934 [0.702 , 1.164 ] +0.827 [0.573 , 1.072 ] +1.042 [0.752 , 1.329 ]
+
+Completed value −0.321 [− 0.660 , 0.023 ] −0.583 [− 1.037 , −0.148 ] −0.059 [− 0.351 , 0.246 ]
+
+Sensing-resource cost −6.277 [− 7.625 , −4.804 ] −7.047 [− 8.984 , −4.889 ] −5.507 [− 6.578 , −4.399 ]
+
+Positive constraint excess −0.219 [− 0.573 , 0.058 ] +0.227 [0.088 , 0.409 ] −0.665 [− 1.371 , −0.128 ]
+
+RPS +0.0806 [0.0656 , 0.0954 ] +0.0177 [0.0134 , 0.0221 ] +0.1434 [0.1164 , 0.1701 ]
+
+MERGE /episode +2.344 [1.926 , 2.754 ] +0.892 [0.684 , 1.104 ] +3.796 [3.120 , 4.472 ]
+
+CREATE /episode −2.272 [− 2.674 , −1.860 ] −0.868 [− 1.072 , −0.672 ] −3.676 [− 4.356 , −2.988 ]Independent Clustered 123456
+
+(a) MERGE  
+
+> Independent Clustered 30 35 40 45 50
+
+(b) CREATE  
+
+> Independent Clustered 1.00 1.05 1.10 1.15 1.20
+
+(c) RPS  
+
+> Independent Clustered 25 30 35 40 45
+
+(d) Sensing cost   
+
+> CT-PPO JC-PPO SLA-Aware Greedy
+
+Fig. 3. Direct consolidation and sensing-resource behavior across arrival regimes. Points denote mean M ERGE /C REATE actions per episode, accepted requests per created session (RPS), and episode sensing-resource cost. Whiskers show percentile 95% intervals from a hierarchical bootstrap over five training seeds and 50 external roots for learned policies, and a root-level bootstrap over 50 roots for SLA-Aware Greedy. 
+
+settings. The CT–JC macro-return effect is positive at every load, increasing from +0.690 at rate 0.06 to +0.934 at 0.08 and 
+
++1.443 at 0.10 ; all 15 load-by-training-seed macro contrasts are positive. The return advantage also persists within each arrival regime at all three loads. At rate 0.06 , the independent and clustered effects are +0.596 [0.361 , 0.805 ] and +0.785 [0.472 , 1.066 ];at the nominal rate they are +0.827 [0.573 , 1.072 ] and +1.042 
+
+[0.752 , 1.329 ]; and at rate 0.10 they increase to +1.166 
+
+[0.868 , 1.456 ] and +1.719 [1.323 , 2.141 ]. Across the three tested loads, the macro gain increases with load, with a larger increase under clustered traffic where reuse opportunities are richer; this trend is limited to the tested load grid and does not establish a universal monotonic law. The decomposition also shows why the result should not be read as uniform dominance. At low load, CT-PPO reduces sensing-resource cost by 4.828 and increases RPS by 0.0711 ,but completed value decreases by 0.275 and positive constraint excess increases by 0.075 , with both intervals excluding zero. The positive return effect at this load is therefore driven primarily by improved sensing-resource efficiency, with amodest service/constraint trade-off. At high load, completed value has no detectable change ( −0.061 [− 0.579 , 0.428 ]), while sensing cost decreases by 7.521 and positive constraint excess by 0.748 ; the consolidation shift remains consistent through more M ERGE and fewer C REATE actions. The frozen CT-PPO checkpoints thus retain their return advantage without retraining, while its source varies with load. 11 
+
+TABLE IV ADJACENT COMPONENT -ABLATION EFFECTS . E ACH ENTRY IS THE SECOND METHOD MINUS THE FIRST METHOD , Δ [95% HIERARCHICAL PAIRED -BOOTSTRAP CI]. O NLY ADJACENT CONTRASTS ARE USED FOR ATTRIBUTION .
+
+Metric Factorized-JC − JC-PPO CT-Reward − Factorized-JC CT-PPO − CT-Reward 
+
+Return −0.099 [− 0.472 , 0.287 ] +1.013 [0.666 , 1.338 ] +0.021 [− 0.143 , 0.209 ]
+
+Completed value −0.692 [− 1.272 , −0.239 ] +0.343 [− 0.028 , 0.842 ] +0.028 [− 0.206 , 0.316 ]
+
+Sensing-resource cost −2.968 [− 7.034 , −0.064 ] −3.349 [− 6.233 , 0.265 ] +0.039 [− 0.585 , 0.693 ]
+
+Positive constraint excess −0.016 [− 0.439 , 0.338 ] −0.186 [− 0.421 , 0.025 ] −0.016 [− 0.124 , 0.079 ]
+
+RPS +0.0063 [− 0.0089 , 0.0250 ] +0.0625 [0.0414 , 0.0818 ] +0.0117 [− 0.0031 , 0.0290 ]
+
+MERGE /episode +0.154 [− 0.344 , 0.752 ] +1.864 [1.250 , 2.448 ] +0.326 [− 0.100 , 0.828 ]
+
+CREATE /episode −0.276 [− 0.838 , 0.222 ] −1.658 [− 2.244 , −0.968 ] −0.338 [− 0.852 , 0.096 ]
+
+TABLE V FROZEN -CHECKPOINT ARRIVAL -LOAD ROBUSTNESS . T HE LOAD IS THE COMMON SCALAR APPLIED TO THE INDEPENDENT PER -TENANT ARRIVAL RATE AND CLUSTERED PARENT -EVENT RATE . O PERATING -POINT ROWS REPORT MEAN RETURN ; EFFECT ROWS ARE CT-PPO MINUS JC-PPO, Δ [95% 
+
+> HIERARCHICAL PAIRED
+
+-BOOTSTRAP CI]. 
+
+Metric Low ( 0.06 ) Nominal ( 0.08 ) High ( 0.10 )
+
+CT-PPO return 52 .631 67 .511 83 .978 
+
+JC-PPO return 51 .941 66 .576 82 .535 
+
+Return +0.690 [0.475 , 0.910 ] +0.934 [0.702 , 1.164 ] +1.443 [1.137 , 1.748 ]
+
+Completed value −0.275 [− 0.486 , −0.092 ] −0.321 [− 0.660 , 0.023 ] −0.061 [− 0.579 , 0.428 ]
+
+Sensing-resource cost −4.828 [− 5.944 , −3.613 ] −6.277 [− 7.625 , −4.804 ] −7.521 [− 9.324 , −5.685 ]
+
+Positive constraint excess +0.075 [0.006 , 0.160 ] −0.219 [− 0.573 , 0.058 ] −0.748 [− 1.134 , −0.390 ]
+
+RPS +0.0711 [0.0541 , 0.0861 ] +0.0806 [0.0656 , 0.0954 ] +0.0746 [0.0633 , 0.0853 ]
+
+MERGE /episode +1.646 [1.284 , 1.970 ] +2.344 [1.926 , 2.754 ] +2.798 [2.364 , 3.190 ]
+
+CREATE /episode −1.630 [− 1.948 , −1.278 ] −2.272 [− 2.674 , −1.860 ] −2.608 [− 2.980 , −2.196 ]
+
+E. Constraint and Training Diagnostics 
+
+Constraint behavior is family-specific. CT-PPO has macro 
+
+𝐸 + = 2.164 , entirely from sensing-SLA excess in the selected external episodes, whereas JC-PPO has 1.991 sensing-SLA excess and 0.392 communication-QoS excess. The lower mean total excess for CT-PPO therefore reflects zero observed communication-QoS excess together with a modestly higher sensing-SLA component, rather than uniform improvement across constraint families. Figure 4 shows the unsmoothed macro validation trajectory over the fixed 10 6-slot training horizon. CT-PPO’s selected checkpoints occur at 790 k– 1000 k slots; its mean latest-minus-best external return is +0.037 (latest 67 .548 , selected 67 .511 ). JC-PPO is selected much earlier, at 20 k– 220 k slots, and all five runs end below their selected checkpoints, with mean latest-minus-best −1.000 (latest 65 .577 , selected 66 .576 ). These dy-namics support validation-only checkpoint selection; CT-PPO also retains its selected external performance at the endpoint on average, without implying asymptotic convergence. 
+
+F. Deployment Footprint and Inference Cost 
+
+Table VI separates training-time model capacity from the deployed action-selection path. JC-PPO, Factorized-JC, and CT-Reward each contain 306 ,450 trainable parameters; full CT-PPO contains 346 ,569 , an increase of 40 ,119 (13 .09% ), exactly accounted for by its additional prefix-critic parameters. All four variants have the same 288 ,519 -parameter deployed encoder–actor footprint. The reference path evaluates the actor and global critic and, for full CT-PPO, the prefix critic; its mean CT/JC 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Physical training slots (×10 6)
+
+> 62 64 66 68 70
+> Macro validation return
+> CT-PPO JC-PPO
+
+Fig. 4. Validation dynamics over physical training slots. Curves are un-smoothed five-seed mean macro validation returns; shading spans the seedwise minimum–maximum range. 
+
+latency ratio is 1.073 . Removing training-side critics gives the deployment-equivalent actor-only path—feature normal-ization, Set encoding, policy-head evaluation, and determinis-tic action selection—for which mean latency is 2.778 ms for CT-PPO versus 2.777 ms for JC-PPO, with a five-checkpoint-pair mean ratio of 1.0003 . Before timing, actor-only deci-sions matched the reference-path decisions on the first 100 
+
+observations for both methods in every frozen checkpoint pair. Across the five pairs, actor-only CT/JC mean-latency ratios range from 0.9969 to 1.0060 , whereas the reference-path 12                             
+
+> TABLE VI MODEL FOOTPRINT AND BATCH -ONE CPU INFERENCE . L ATENCIES ARE FIVE -CHECKPOINT -PAIR MEANS OVER THE SAME 500
+> ENVIRONMENT -GENERATED OBSERVATIONS ;ACTOR -ONLY ACTIONS WERE CHECKED AGAINST THE REFERENCE PATH BEFORE TIMING .
+> Trainable and deployed parameters Method Trainable Prefix critic Encoder–actor
+> JC-PPO 306,450 0288,519 Factorized-JC 306,450 0288,519 CT-Reward 306,450 0288,519 CT-PPO 346,569 40,119 288,519
+> Mean inference latency (ms) Path JC-PPO CT-PPO CT/JC
+> Reference path 2.883 3.093 1.073 Actor-only 2.777 2.778 1.000
+
+ratios range from 1.0691 to 1.0776 . Thus CT-PPO’s additional trainable capacity is confined to training-side critic machinery: it increases measured latency on the full reference path but does not enlarge the deployed encoder–actor, and measured actor-only batch-one CPU latency is effectively unchanged. This evidence does not imply lower computational complexity or faster inference than JC-PPO. VII. D ISCUSSION AND LIMITATIONS 
+
+A. Mechanism and Component Attribution 
+
+The combined evidence separates the behavioral mechanism from the training intervention that produces it. At the policy level, CT-PPO shifts accepted demand toward reuse of existing physical sensing sessions and away from new session creation. Because the slot reward in (8) contains no explicit merge, reuse, or acceptance bonus, this behavior is beneficial only when sensing-resource savings compensate for any service loss. The heuristic operating points reinforce the same distinc-tion: aggressive reuse or sensing-cost minimization can reduce resource expenditure while sacrificing completed value or constraint quality. The relevant control mechanism is therefore 
+
+selective consolidation , not consolidation for its own sake. The four-way ablation sharpens the training-side attribution. Replacing JC-PPO’s joint-ratio surrogate with the factor-wise surrogate alone changes the service–resource operating point but yields no detectable macro-return improvement. After that surrogate is held fixed, adding common-trace reward credit produces positive macro-return differences for all five matched training seeds and positive aggregate return effects in both ar-rival regimes, while increasing RPS and M ERGE and reducing CREATE . This connects the return gain to the common-trace reward-credit intervention and to the consolidation behavior observed in the integrated comparison. Conversely, adding the prefix-critic machinery for factor-specific constraint credit on top of CT-Reward yields no detectable incremental change in the reported return or service, resource, and consolidation metrics. This is a non-detection rather than an equivalence result; the present evidence therefore supports common-trace reward credit as the dominant empirical driver of the observed gain after controlling for the factorized surrogate, but does not establish an incremental performance benefit for the prefix machinery. The experiments also do not directly measure policy-gradient variance, so no quantified variance-reduction claim is made. 
+
+B. Workload Dependence and Constraint Trade-offs 
+
+The frozen-checkpoint load stress shows that the CT–JC return ordering is not confined to the nominal arrival intensity: the macro-return difference remains positive at all three tested loads, for every load–training-seed pair, and separately under both independent and clustered arrivals. The decomposition is not uniform, however. At low load, the gain is primarily a sensing-resource-efficiency effect and is accompanied by lower completed value and higher positive constraint excess; at high load, completed value shows no detectable CT–JC difference while sensing cost and positive constraint excess both decrease. Robustness here therefore means persistence of the return advantage under the tested intensity shifts, not Pareto dominance of every service and constraint metric. The larger effect at the higher tested load, especially under clustered arrivals, is an empirical trend on this three-point grid rather than a monotonicity or generalization law. Constraint behavior must likewise be read by family. Hard masks enforce deterministic action validity, whereas sensing-SLA and communication-QoS residuals remain long-term CMDP quantities. In the nominal selected external episodes, CT-PPO has no observed communication-QoS positive excess but modestly higher sensing-SLA excess than JC-PPO, so its lower aggregate 𝐸 + reflects a shift across constraint families rather than uniform constraint improvement. Nonzero residuals also preclude interpreting the results as evidence of strict finite-sample feasibility or as a formal safety guarantee. 
+
+C. Training and Deployment Implications 
+
+Common-trace credit changes the training procedure rather than the online information set. It requires a simulator or re-playable trace generator that can expose stochastic policy repli-cas to the same exogenous workload realization while their endogenous trajectories diverge. Deployment, by contrast, uses one current public observation, hard masks, the trained Set en-coder, and the factorized actor; peer trajectories/returns, prefix values, future arrivals, regime labels, and oracle outcomes are absent. The computational evidence gives the same separation: CT-PPO adds training-side prefix-critic parameters, but the deployed encoder–actor footprint is unchanged. The reference implementation incurs additional latency because it evaluates critics that are unnecessary for action selection, whereas the actor-only path reproduces the reference-path decisions in the equivalence check and has essentially unchanged batch-one CPU latency relative to JC-PPO. These timings are platform-specific and do not imply lower computational complexity or universally identical latency. 
+
+D. Scope and Limitations 
+
+The evidence remains limited to the implemented cen-tralized single-cell monostatic ISAC setting with orthogo-nal sensing/communication resource partitions, equal-share 13 
+
+communication scheduling, four discrete sensing profiles, simulator-generated sensing quality, fixed tenant/user/target and task-generation settings, and five training seeds. The load study varies only the arrival-intensity scalars at three values within the same independent/clustered generator fam-ilies and intentionally reuses matched root identifiers; it is therefore a paired load-shift stress test, not an indepen-dent fresh-root replication across loads. Robustness to dif-ferent tenant/target or task mixes, mobility/channel statistics, sensing-model mismatch, sharing policies, resource budgets, and qualitatively different arrival processes remains untested. Multi-cell/distributed orchestration, adaptive communication scheduling, continuous sensing-resource control, joint wave-form/beamforming/precoding optimization, and RF/hardware-in-the-loop or field validation are also outside the present evidence. VIII. C ONCLUSION 
+
+We formulated online multi-tenant sensing-session consoli-dation as a service-level CMDP and developed CT-PPO, which trains a factorized constrained actor using same-workload stochastic replicas and leave-one-out Monte Carlo return con-trasts aligned by physical slot, while retaining factor-specific constraint credit. Replication and prefix critics are training-only; deployment uses the current public observation, hard feasibility masks, Set encoder, and factorized actor. Across five training seeds and matched external work-loads, CT-PPO improves macro return over JC-PPO by 0.934 
+
+(95% CI [0.702 , 1.164 ]) and over SLA-Aware Greedy by 
+
+1.847 . Relative to JC-PPO, it reduces sensing-resource cost by 6.277 and increases accepted requests per created session by 0.0806 , linking the gain to selective session reuse. The four-way ablation shows no detectable macro-return improvement from the factor-wise surrogate alone; after controlling for that change, common-trace reward credit improves return by 
+
+1.013 [0.666 , 1.338 ] and increases reuse, while the subsequent prefix-critic machinery for factor-specific constraint credit has no detectable incremental return effect. Frozen CT-PPO checkpoints retain a positive return advantage at all three tested arrival loads. CT-PPO’s additional parameters are training-side prefix critics; the deployed encoder–actor footprint is unchanged, and measured actor-only batch-one CPU latency remains effectively unchanged. Overall, the evidence links the selective-consolidation gain primarily to common-trace reward credit without increasing the deployed encoder–actor footprint. REFERENCES [1] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Trans. Commun. , vol. 68, no. 6, pp. 3834–3862, Jun. 2020. [2] F. Dong, F. Liu, Y. Cui, W. Wang, K. Han, and Z. Wang, “Sensing as a service in 6G perceptive networks: A unified framework for ISAC resource allocation,” IEEE Trans. Wireless Commun. , vol. 22, no. 5, pp. 3522–3536, May 2023. [3] F. Dong, F. Liu, Y. Cui, S. Lu, and Y. Li, “Sensing as a service in 6G perceptive mobile networks: Architecture, advances, and the road ahead,” IEEE Netw. , vol. 38, no. 2, pp. 87–96, Mar. 2024. [4] H. Wymeersch et al. , “Cross-layer integrated sensing and communi-cation: A joint industrial and academic perspective,” IEEE Open J. Commun. Soc. , vol. 6, pp. 6966–7015, Aug. 2025. [5] European Telecommunications Standards Institute (ETSI), “Integrated Sensing And Communications (ISAC); System and RAN Architectures,” ETSI GR ISC 003 V1.1.1, Feb. 2026. [6] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, Jun. 2022. [7] 3rd Generation Partnership Project (3GPP), “Study on integrated sensing and communication,” 3GPP TR 22.837 V19.4.0 (Release 19), Jun. 2024. [8] K. Han, K. Meng, X.-Y. Wang, and C. Masouros, “Network-level ISAC design: State-of-the-art, challenges, and opportunities,” IEEE Journal of Selected Topics in Electromagnetics, Antennas and Propagation , vol. 1, no. 1, pp. 65–83, 2025. [9] B. Li and X. Wang, “Opportunistic reuse of spatial-temporal resources in multi-user ISAC systems for value of service maximization,” IEEE Trans. Wireless Commun. , vol. 24, no. 11, pp. 9407–9421, Nov. 2025. [10] B. Li, X. Wang, N. Zhao, and D. Niyato, “From rigid isolation to elastic integration: Progressively unified resource allocation in ISAC for value of service maximization,” IEEE Trans. Commun. , vol. 74, pp. 139–153, 2026. [11] Y. Qin, Z. Zhang, X. Li, W. Huangfu, and H. Zhang, “Deep rein-forcement learning based resource allocation and trajectory planning in integrated sensing and communications UAV network,” IEEE Trans. Wireless Commun. , vol. 22, no. 11, pp. 8158–8169, Nov. 2023. [12] N.-T. Dinh and Y. Kim, “An efficient interactive model for on-demand sensing-as-a-services of sensor-cloud,” Sensors , vol. 16, no. 7, p. 992, 2016. [13] P. Dass, S. Ujjwal, J. Novotny, Y. Zolotavkin, Z. Laaroussi, and S. K¨ opsell, “Addressing privacy concerns in joint communication and sensing for 6G networks: Challenges and prospects,” in Privacy Tech-nologies and Policy , ser. Lecture Notes in Computer Science, vol. 14831. Springer, 2024, pp. 87–111. [14] J. Achiam, D. Held, A. Tamar, and P. Abbeel, “Constrained policy optimization,” in Proceedings of the 34th International Conference on Machine Learning , ser. Proceedings of Machine Learning Research, vol. 70, 2017, pp. 22–31. [15] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Prox-imal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 ,2017. [16] A. Stooke, J. Achiam, and P. Abbeel, “Responsive safety in reinforce-ment learning by PID Lagrangian methods,” in Proceedings of the 37th International Conference on Machine Learning , ser. Proceedings of Machine Learning Research, vol. 119, 2020, pp. 9133–9143. [17] M. Zaheer, S. Kottur, S. Ravanbakhsh, B. Poczos, R. Salakhutdinov, and A. J. Smola, “Deep sets,” in Advances in Neural Information Processing Systems , vol. 30, 2017, pp. 3391–3401. [18] C. Wu et al. , “Variance reduction for policy gradient with action-dependent factorized baselines,” in International Conference on Learn-ing Representations , 2018. [19] J. N. Foerster, G. Farquhar, T. Afouras, N. Nardelli, and S. Whiteson, “Counterfactual multi-agent policy gradients,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 32, no. 1, 2018, pp. 2974–2982. [20] T. Mesnard et al. , “Counterfactual credit assignment in model-free rein-forcement learning,” in Proceedings of the 38th International Conference on Machine Learning , ser. Proceedings of Machine Learning Research, vol. 139, 2021, pp. 7654–7664. [21] J. Schulman, S. Levine, P. Abbeel, M. Jordan, and P. Moritz, “Trust region policy optimization,” in Proceedings of the 32nd International Conference on Machine Learning , ser. Proceedings of Machine Learning Research, vol. 37, 2015, pp. 1889–1897. [22] J. Schulman, P. Moritz, S. Levine, M. Jordan, and P. Abbeel, “High-dimensional continuous control using generalized advantage estimation,” in International Conference on Learning Representations , 2016.

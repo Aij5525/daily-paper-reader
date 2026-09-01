@@ -1,0 +1,677 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-01T22:14:49.081270+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 13,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 13,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2608.29256v1",
+      "source": "arxiv",
+      "title": "Sense Once, Serve Many: Common-Trace Factorized Constrained PPO for Online Sensing-Session Consolidation in Multi-Tenant ISAC Networks",
+      "abstract": "Integrated sensing and communication (ISAC) networks can serve compatible requests through shared sensing sessions, but consolidation couples admission, reuse, profile selection, sensing service-level agreements (SLAs), communication quality of service (QoS), and future commitments. We formulate this problem as a constrained Markov decision process and propose Common-Trace Factorized Constrained Proximal Policy Optimization (CT-PPO). During training, stochastic policy replicas share the same primitive workload trace; leave-one-out discounted Monte Carlo return contrasts provide reward credit to applicable actor factors, while constraint credit remains factor/prefix-specific. Across five training seeds and matched workloads, CT-PPO achieves the highest mean macro return, exceeding matched Joint-Credit PPO (JC-PPO) by 0.934 (95% confidence interval [0.702, 1.164]) and SLA-Aware Greedy by 1.847; versus JC-PPO, it reduces sensing-resource cost by 6.277 and raises accepted requests per created session by 0.0806. A four-way ablation shows that the factorized surrogate alone yields no detectable macro-return gain, whereas adding common-trace reward credit produces the dominant improvement. Without retraining, CT-PPO retains a return advantage at low, nominal, and high arrival loads, with the strongest gain under clustered arrivals. Deployment uses public observations and hard masks; CT-PPO's extra parameters are training-side, its actor footprint matches JC-PPO, and actor-only CPU latency is effectively unchanged.",
+      "authors": [
+        "Dang-Dung Vu"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG"
+      ],
+      "published": "2026-08-29T13:20:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.29256v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Integrated sensing and communication (ISAC) networks, RL-based sensing session consolidation",
+      "llm_evidence_cn": "面向多租户ISAC网络的在线感知会话整合与强化学习优化",
+      "llm_evidence": "面向多租户ISAC网络的在线感知会话整合与强化学习优化",
+      "canonical_evidence": "面向多租户ISAC网络的在线感知会话整合与强化学习优化",
+      "llm_tldr_en": "Proposes CT-PPO, a common-trace factorized constrained PPO algorithm for online sensing-session consolidation in multi-tenant ISAC networks, jointly optimizing admission, reuse, profile selection, and QoS under constraints.",
+      "llm_tldr_cn": "集成感知与通信（ISAC）网络可通过共享感知会话来服务兼容请求，但会话整合会耦合接入、复用、服务等级协议与未来承诺。本文将该问题建模为约束马尔可夫决策过程，提出基于公共迹分解的约束PPO算法（CT-PPO），以因子化方式分配奖励和约束信用。在训练中，随机策略副本共享相同的原始工作负载迹，通过留一法等距蒙特卡洛回报对比实现奖励信用分配。该方案为多租户ISAC网络提供了可扩展的在线感知会话整合优化框架。",
+      "llm_tldr": "集成感知与通信（ISAC）网络可通过共享感知会话来服务兼容请求，但会话整合会耦合接入、复用、服务等级协议与未来承诺。本文将该问题建模为约束马尔可夫决策过程，提出基于公共迹分解的约束PPO算法（CT-PPO），以因子化方式分配奖励和约束信用。在训练中，随机策略副本共享相同的原始工作负载迹，通过留一法等距蒙特卡洛回报对比实现奖励信用分配。该方案为多租户ISAC网络提供了可扩展的在线感知会话整合优化框架。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.29620v1",
+      "source": "arxiv",
+      "title": "Robust Decentralized Multi-Satellite Massive MIMO Transmission via Knowledge Distillation",
+      "abstract": "This paper investigates robust decentralized transmission for cooperative multi-satellite massive multiple-input multiple-output (MIMO) systems under imperfect statistical channel state information (sCSI). In the considered scenario, each satellite has complete access to its local information but receives partial information from other satellites due to limited inter-satellite links (ISLs), with only imperfect sCSI available. To address these challenges, we propose a knowledge distillation (KD) framework that transfers cooperative precoding knowledge from a centralized teacher neural network (NN) to lightweight decentralized student NNs. Specifically, a global-clean teacher, aggregating information from all satellites and accessing accurate sCSI during offline training, transfers its cooperative precoding knowledge to partial-noisy students, relying on complete local information, limited information exchanged by other satellites, and error-corrupted sCSI for local precoding. The teacher NN combines patch-wise self-attention with dual-axis attention to learn inter-user interference and inter-satellite coordination, whereas each student NN adopts a compact per-satellite architecture for efficient onboard inference. The teacher learns a high-quality weighted minimum mean square error precoding policy from global-clean inputs, which is then distilled into the students operating on partial-noisy inputs. To mitigate the resulting teacher-student performance gap, we develop a hybrid KD mechanism with explicit angle- and phase-error calibration. Simulation results demonstrate that the proposed framework significantly enhances the decentralized sum-rate performance and remains robust under diverse configurations.",
+      "authors": [
+        "Wenjing Cao",
+        "Zheng Lin",
+        "Yafei Wang",
+        "Wenjin Wang",
+        "Ye Wang",
+        "Rui Ding",
+        "Symeon Chatzinotas",
+        "Björn Ottersten"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-30T07:27:36+00:00",
+      "link": "https://arxiv.org/pdf/2608.29620v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "ML-based decentralized precoding for multi-satellite massive MIMO via knowledge distillation",
+      "llm_evidence_cn": "用知识蒸馏为多星大规模MIMO设计去中心化预编码，属于无线系统ML设计",
+      "llm_evidence": "用知识蒸馏为多星大规模MIMO设计去中心化预编码，属于无线系统ML设计",
+      "canonical_evidence": "用知识蒸馏为多星大规模MIMO设计去中心化预编码，属于无线系统ML设计",
+      "llm_tldr_en": "Uses knowledge distillation to transfer centralized precoding knowledge to lightweight decentralized student NNs for robust multi-satellite massive MIMO under imperfect statistical CSI.",
+      "llm_tldr_cn": "多星协作大规模MIMO系统受限于星间链路信息不完整和统计CSI不完美，集中式预编码难以直接部署。该文提出基于知识蒸馏的框架，将集中式教师神经网络的协作预编码知识迁移至轻量去中心化学生网络。所提方法在非理想CSI下实现鲁棒的分布式多星传输，为机器学习辅助无线传输设计提供了有效范例。",
+      "llm_tldr": "多星协作大规模MIMO系统受限于星间链路信息不完整和统计CSI不完美，集中式预编码难以直接部署。该文提出基于知识蒸馏的框架，将集中式教师神经网络的协作预编码知识迁移至轻量去中心化学生网络。所提方法在非理想CSI下实现鲁棒的分布式多星传输，为机器学习辅助无线传输设计提供了有效范例。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.29725v1",
+      "source": "arxiv",
+      "title": "A New Paradigm of 6G Networks: Proactive Channel Cognition and Reconfiguration",
+      "abstract": "The sixth-generation (6G) wireless networks are expected to enable the deep integration of communication, sensing, computing, control, and intelligence in highly dynamic environments. This evolution drives a fundamental transition from conventional passive channel adaptation to proactive channel cognition and reconfiguration, wherein wireless channels are no longer regarded as uncontrollable propagation media but as network resources that can be learned, predicted, and actively reconfigured. This paper presents a comprehensive overview of this emerging paradigm. We first review channel cognition through the channel knowledge map (CKM) as a systematic framework for learning and exploiting channel characteristics across space, time, and frequency domain. The definitions, construction methods, and applications in wireless networks of CKMs are comprehensively reviewed. Building upon channel cognition, we then review channel reconfiguration technologies from two complementary perspectives: transceiver-side reconfiguration enabled by movable antennas (MAs) and environment-side reconfiguration enabled by intelligent reflecting surfaces (IRSs). For both MA- and IRS-enabled wireless systems, we review their architectures, performance advantages, and key design challenges. Finally, we discuss several promising research directions to inspire further innovations in this burgeoning field.",
+      "authors": [
+        "Wenyan Ma",
+        "Zixiang Ren",
+        "Weitong Zhai",
+        "Ge Yan",
+        "Lipeng Zhu",
+        "Zhenyu Xiao",
+        "Rui Zhang"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-30T11:17:27+00:00",
+      "link": "https://arxiv.org/pdf/2608.29725v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Proactive channel cognition and reconfiguration, channel knowledge map for learning channel characteristics",
+      "llm_evidence_cn": "面向6G的主动信道认知与重构，利用信道知识图谱学习和预测信道特性",
+      "llm_evidence": "面向6G的主动信道认知与重构，利用信道知识图谱学习和预测信道特性",
+      "canonical_evidence": "面向6G的主动信道认知与重构，利用信道知识图谱学习和预测信道特性",
+      "llm_tldr_en": "Presents a 6G paradigm for proactive channel cognition and reconfiguration, reviewing channel knowledge map (CKM) as a framework to learn, predict, and reconfigure wireless channels.",
+      "llm_tldr_cn": "面向6G无线网络，本文提出从被动信道适应转向主动信道认知与重构的新范式，将无线信道视为可学习、可预测、可主动重构的网络资源。文章系统综述了信道知识图谱（CKM）作为跨空间、时间和频率学习并利用信道特征的系统框架，并展望了通信、感知、计算、控制与智能深度融合下的演进方向。这一范式为动态环境中的无线网络设计提供了基础性视角。",
+      "llm_tldr": "面向6G无线网络，本文提出从被动信道适应转向主动信道认知与重构的新范式，将无线信道视为可学习、可预测、可主动重构的网络资源。文章系统综述了信道知识图谱（CKM）作为跨空间、时间和频率学习并利用信道特征的系统框架，并展望了通信、感知、计算、控制与智能深度融合下的演进方向。这一范式为动态环境中的无线网络设计提供了基础性视角。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.30524v1",
+      "source": "arxiv",
+      "title": "Beamforming Design Via GNN in mmWave Cell-Free Massive MIMO Using Sub-6 GHz CSI",
+      "abstract": "Beamforming methods in millimeter-wave (mmWave) cell-free massive multiple-input multiple-output (CFmMIMO) systems require accurate channel state information (CSI), whose acquisition entails significant training overhead. This paper shows that fully digital cell-free mmWave beamforming can be effectively learned from sub-6 GHz CSI using a graph neural network (GNN). Specifically, we represent a CFmMIMO system as a wireless graph, and the GNN is trained to approximate beamformers that maximize the downlink sum-rate based on the available sub-6 GHz CSI. A message-passing mechanism is proposed to capture inter-user interference and inter-base-station cooperation across different network topologies. Simulation results demonstrate that the proposed sub-6 GHz-assisted GNN-based beamformer achieves competitive and often superior sum-rate performance compared to classical baselines that rely on full mmWave CSI.",
+      "authors": [
+        "Sina Tavakolian",
+        "Abolfazl Zakeri",
+        "Ahmed Alkhateeb",
+        "Markku Juntti",
+        "Nhan Thanh Nguyen"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-08-31T09:55:46+00:00",
+      "link": "https://arxiv.org/pdf/2608.30524v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "GNN learns mmWave cell-free beamforming from sub-6GHz CSI",
+      "llm_evidence_cn": "利用子6GHz信道状态信息通过图神经网络学习毫米波无小区波束成形",
+      "llm_evidence": "利用子6GHz信道状态信息通过图神经网络学习毫米波无小区波束成形",
+      "canonical_evidence": "利用子6GHz信道状态信息通过图神经网络学习毫米波无小区波束成形",
+      "llm_tldr_en": "Learns mmWave cell-free massive MIMO beamforming from sub-6 GHz CSI using a graph neural network; the system is a wireless graph, and message passing captures interference and cooperation. Simulations show competitive sum-rate at lower training overhead.",
+      "llm_tldr_cn": "毫米波无小区大规模多输入多输出系统的波束成形依赖精确信道状态信息，获取开销较大。作者将系统建模为无线图，基于子6GHz信道状态信息，用图神经网络学习全数字波束成形，以最大化下行链路和速率；消息传递机制能捕获用户间干扰和基站间协作。仿真显示所提方法在不同网络拓扑下均能有效逼近最优波束成形，并显著降低信道训练开销。",
+      "llm_tldr": "毫米波无小区大规模多输入多输出系统的波束成形依赖精确信道状态信息，获取开销较大。作者将系统建模为无线图，基于子6GHz信道状态信息，用图神经网络学习全数字波束成形，以最大化下行链路和速率；消息传递机制能捕获用户间干扰和基站间协作。仿真显示所提方法在不同网络拓扑下均能有效逼近最优波束成形，并显著降低信道训练开销。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.30540v1",
+      "source": "arxiv",
+      "title": "Foundation Models for Wireless Localization: Pretraining, Adaptation, and Utilization",
+      "abstract": "Accurate wireless localization is a key enabler for 6G networks, yet remains challenging under diverse and rapidly changing propagation conditions. Model-based methods degrade when multipath channels are non-resolvable and model mismatches occur, while supervised deep learning demands large labeled datasets and generalizes poorly to new deployments. Inspired by foundation models (FMs) in language and vision, this article presents a unified framework for FM-based wireless localization that learns transferable channel representations from large-scale unlabeled channel state information and adapts to new environments with minimal or even no supervision. We review the fundamentals of FMs, compare the FM paradigm with existing localization approaches, and introduce a three-stage framework spanning large-scale pretraining, localization-oriented fine-tuning, and context-augmented inference, together with the location-aware applications it enables. Ray-tracing-based case studies show improved positioning accuracy and cross-environment generalization. Finally, we present an outlook on key research directions toward AI-native networks for wireless localization.",
+      "authors": [
+        "Guangjin Pan",
+        "Jiajia Guo",
+        "Zheng Xing",
+        "Hui Chen",
+        "Chao-Kai Wen",
+        "Shi Jin",
+        "Henk Wymeersch"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T10:10:57+00:00",
+      "link": "https://arxiv.org/pdf/2608.30540v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Foundation model pretraining on unlabeled wireless CSI for localization tasks",
+      "llm_evidence_cn": "基于大规模无标注信道状态信息预训练基础模型用于无线定位",
+      "llm_evidence": "基于大规模无标注信道状态信息预训练基础模型用于无线定位",
+      "canonical_evidence": "基于大规模无标注信道状态信息预训练基础模型用于无线定位",
+      "llm_tldr_en": "Presents a foundation-model framework for wireless localization that pretrains transferable channel representations from large-scale unlabeled CSI and adapts with minimal supervision, reviewing fundamentals, comparing with existing approaches, and discussing pretraining, adaptation, and utilization for 6G.",
+      "llm_tldr_cn": "无线定位在复杂传播条件下面临模型失配和数据标注不足。本文借鉴语言与视觉基础模型范式，提出基于基础模型的无线定位统一框架：在大规模无标注信道状态信息上预训练可迁移的信道表示，并通过少量甚至无监督方式适应新环境。文章综述基础模型原理、比较既有定位方法，并讨论预训练、适应与利用策略，为6G定位提供新范式。",
+      "llm_tldr": "无线定位在复杂传播条件下面临模型失配和数据标注不足。本文借鉴语言与视觉基础模型范式，提出基于基础模型的无线定位统一框架：在大规模无标注信道状态信息上预训练可迁移的信道表示，并通过少量甚至无监督方式适应新环境。文章综述基础模型原理、比较既有定位方法，并讨论预训练、适应与利用策略，为6G定位提供新范式。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.30836v1",
+      "source": "arxiv",
+      "title": "Channel Gains to Captions: Task-Unified Multi-Level RF Sensing with Vision-Language Models",
+      "abstract": "This letter investigates a task-unified multi-level radio-frequency (RF) sensing framework driven by vision-language models (VLMs). Existing RF sensing methods rely on task-specific designs and provide only partial environmental information, limiting their ability to handle emerging 6G applications. To address this, we propose a generative formulation for RF sensing, where millimeter-wave (mmWave)/terahertz (THz) channel gains are mapped to captions describing multi-level environmental semantics. The framework solves this problem through a complementary design for RF-environment semantic bridging, where a VLM is fine-tuned to leverage its multimodal representations and prompt-conditioned semantic generation capabilities. Hence, different sensing tasks are specified through textual prompts, enabling the framework to handle diverse tasks in a unified manner. For fine-tuning, we introduce prompt-routed low-rank adaptation (LoRA) experts to achieve level-aware adaptation. Simulation results show that, compared with baselines, our framework achieves superior performance with a broader semantic scope, and enables task-unified sensing beyond predefined tasks. Under an unseen sensing requirement, it achieves an average F1-score improvement of 0.17 over the most competitive variant.",
+      "authors": [
+        "Tianyu Hu",
+        "Zhiren Gong",
+        "Haowei Cui",
+        "Shuai Wang",
+        "Samson Lasaulce",
+        "Lingxiang Li",
+        "Wassim Hamidouche",
+        "Zhi Chen",
+        "Merouane Debbah"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T14:07:27+00:00",
+      "link": "https://arxiv.org/pdf/2608.30836v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "vision-language foundation model maps channel gains to semantic captions for RF sensing",
+      "llm_evidence_cn": "视觉-语言基础模型将信道增益映射为语义描述，用于射频感知，契合基础模型+无线感知",
+      "llm_evidence": "视觉-语言基础模型将信道增益映射为语义描述，用于射频感知，契合基础模型+无线感知",
+      "canonical_evidence": "视觉-语言基础模型将信道增益映射为语义描述，用于射频感知，契合基础模型+无线感知",
+      "llm_tldr_en": "This letter fine-tunes a vision-language model to map mmWave/THz channel gains into captions describing multi-level environmental semantics, enabling task-unified RF sensing for 6G.",
+      "llm_tldr_cn": "针对现有射频（RF）感知方法依赖特定任务设计且只能提供部分环境信息、难以支持新兴6G应用的问题，本文提出一种任务统一的多级RF感知框架。该框架将毫米波/太赫兹信道增益生成式地映射为描述多级环境语义的文本描述，并通过微调视觉-语言模型（VLM）实现射频与环境的语义桥接。实验表明所提方法能利用多模态表示和提示条件生成能力提升感知语义丰富度。该工作展示了基础模型在无线感知与通信一体化中的巨大潜力。",
+      "llm_tldr": "针对现有射频（RF）感知方法依赖特定任务设计且只能提供部分环境信息、难以支持新兴6G应用的问题，本文提出一种任务统一的多级RF感知框架。该框架将毫米波/太赫兹信道增益生成式地映射为描述多级环境语义的文本描述，并通过微调视觉-语言模型（VLM）实现射频与环境的语义桥接。实验表明所提方法能利用多模态表示和提示条件生成能力提升感知语义丰富度。该工作展示了基础模型在无线感知与通信一体化中的巨大潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "How is integrated sensing and communication implemented with foundation models?",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2608.28878v1",
+      "source": "arxiv",
+      "title": "Hybrid Offline-Online Multi-Agent Decision Transformers for Wireless Resource Management",
+      "abstract": "This paper develops a hybrid offline-online multi-agent reinforcement learning framework based on decision transformers. The policy is first pretrained offline via supervised sequence modeling of trajectories generated by existing policies, providing a safe and sample-efficient initialization. It is then fine-tuned online using a hybrid objective that incorporates critic-guided gradients, enabling performance improvements beyond the offline policy. To facilitate stable offline-to-online transfer and effective multi-agent coordination, the framework incorporates return-weighted sampling, a critic conditioned on neighbors' actions, and neighborhood-correlated exploration. The approach is fully distributed: both training and execution rely only on local observations and limited information exchange among neighboring agents. Evaluations with dynamic traffic arrivals in two settings: (i) joint scheduling and power allocation and (ii) coordinated beamforming, show that the proposed method achieves quality-of-service (QoS) performance comparable to centralized methods. Moreover, when pretrained on lower-quality datasets, online fine-tuning is also observed to surpass the initial offline policy. These results demonstrate a promising learning-based alternative for wireless resource management.",
+      "authors": [
+        "Yiming Zhang",
+        "Kun Yang",
+        "Cong Shen",
+        "Dongning Guo"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.AI"
+      ],
+      "published": "2026-08-28T21:31:32+00:00",
+      "link": "https://arxiv.org/pdf/2608.28878v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Hybrid offline-online multi-agent decision transformers pretrain transformer policies for wireless resource management",
+      "llm_evidence_cn": "混合离线-在线多智能体决策Transformer为无线资源管理预训练策略",
+      "llm_evidence": "混合离线-在线多智能体决策Transformer为无线资源管理预训练策略",
+      "canonical_evidence": "混合离线-在线多智能体决策Transformer为无线资源管理预训练策略",
+      "llm_tldr_en": "Proposes a hybrid offline-online MARL framework based on decision transformers, pretraining via supervised sequence modeling then fine-tuning online for wireless resource management.",
+      "llm_tldr_cn": "无线资源管理通常需要大量在线交互，样本效率低。该文将决策Transformer用于多智能体无线资源管理，先通过离线轨迹序列建模预训练策略，再结合评论家梯度在线微调。引入回报加权采样和邻居条件评论家等机制，实现稳定的离线到在线迁移和分布式多智能体协调。实验表明该方法能超越离线策略并获得安全高效的初始化。",
+      "llm_tldr": "无线资源管理通常需要大量在线交互，样本效率低。该文将决策Transformer用于多智能体无线资源管理，先通过离线轨迹序列建模预训练策略，再结合评论家梯度在线微调。引入回报加权采样和邻居条件评论家等机制，实现稳定的离线到在线迁移和分布式多智能体协调。实验表明该方法能超越离线策略并获得安全高效的初始化。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.28865v1",
+      "source": "arxiv",
+      "title": "Uncertainty-Aware Multi-Task Learning for Joint Modulation Recognition and SINR Estimation",
+      "abstract": "Joint modulation recognition and signal-to-interference-plus-noise ratio (SINR) estimation can reduce duplicated processing in intelligent receivers, but the two tasks have different uncertainty characteristics. This letter proposes an uncertainty-aware multi-task model that transforms each short normalized in-phase/quadrature window into 36 deterministic, label-free statistics, learns a shared representation, and uses task-specific adapters for modulation classification and heteroscedastic SINR regression. A joint uncertainty score combines classification entropy and predicted regression variance to support selective inference. Simulations cover QPSK, 8PSK, 16QAM, and 64QAM under matched additive white Gaussian noise/Rayleigh channels and an unseen frequency-selective Rician channel. Over five independent seeds, the proposed model improves matched and unseen-channel accuracy over conventional multi-task learning by 14.86 and 8.61 percentage points, respectively, while reducing SINR mean absolute error by 1.60 and 1.61 dB. Confidence-based rejection further lowers modulation error under channel mismatch.",
+      "authors": [
+        "Kosar Nourolahi",
+        "Vahid Ghasemi"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG"
+      ],
+      "published": "2026-08-28T21:06:06+00:00",
+      "link": "https://arxiv.org/pdf/2608.28865v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multi-task deep learning for modulation recognition and SINR estimation in wireless receivers",
+      "llm_evidence_cn": "多任务深度学习用于无线接收机调制识别与SINR估计",
+      "llm_evidence": "多任务深度学习用于无线接收机调制识别与SINR估计",
+      "canonical_evidence": "多任务深度学习用于无线接收机调制识别与SINR估计",
+      "llm_tldr_en": "This letter proposes an uncertainty-aware multi-task network that maps IQ windows to 36 label-free statistics and uses task-specific adapters for joint modulation classification and SINR regression, with a joint uncertainty score for selective inference.",
+      "llm_tldr_cn": "智能接收机中调制识别与SINR估计可共享计算，但两类任务的不确定性特性不同。本文提出不确定性感知多任务模型，将短时IQ窗转换为36维确定无标注统计量，学习共享表示并通过任务自适应头完成调制分类与异方差SINR回归，同时用联合不确定性得分支持选择性推理。在QPSK、8PSK、16QAM、64QAM及AWGN/瑞利信道下验证了其有效性，为多任务物理层感知提供了新框架。",
+      "llm_tldr": "智能接收机中调制识别与SINR估计可共享计算，但两类任务的不确定性特性不同。本文提出不确定性感知多任务模型，将短时IQ窗转换为36维确定无标注统计量，学习共享表示并通过任务自适应头完成调制分类与异方差SINR回归，同时用联合不确定性得分支持选择性推理。在QPSK、8PSK、16QAM、64QAM及AWGN/瑞利信道下验证了其有效性，为多任务物理层感知提供了新框架。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.23018v1",
+      "source": "arxiv",
+      "title": "SplitLite: Low-Rank Residual Compression for Split Learning",
+      "abstract": "Federated fine-tuning of on-device large language models (LLMs) faces a significant computing burden. To overcome this limitation, split learning (SL) has emerged as a promising solution, which offloads the primary training workload to a powerful server. However, SL requires exchanging high-dimensional activations and gradients between clients and the server, resulting in prohibitive communication costs. To overcome this challenge, we propose SplitLite, a communication-efficient split federated LoRA fine-tuning method that exploits the low effective rank structure of consecutive-epoch activation and gradient residuals. Our key finding is that, when LoRA uses rank $r$ updates in parameter space, the activation and gradient residuals of the same data sample between adjacent epochs also exhibit effective rank-$2r$ and rank-$4r$ structures, respectively. By revealing this property, SplitLite transmits only quantized truncated singular value decomposition (SVD) residual factors, thereby significantly reducing both activation uplink and gradient downlink traffic. Extensive experiments on the GLUE benchmark across a series of advanced on-device LLMs demonstrate that our method reduces activation uplink communication costs by up to 93.5\\% and total communication costs by up to 83.7\\%, without performance degradation.",
+      "authors": [
+        "Tao Li",
+        "Yulin Tang",
+        "Qi Guo",
+        "Xianhao Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-08-24T09:20:04+00:00",
+      "link": "https://arxiv.org/pdf/2608.23018v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Communication-efficient split learning for on-device LLMs; useful for wireless edge LLM fine-tuning",
+      "llm_evidence_cn": "面向端侧大模型的分割学习通信压缩，可用于无线边缘大模型微调",
+      "llm_evidence": "面向端侧大模型的分割学习通信压缩，可用于无线边缘大模型微调",
+      "canonical_evidence": "面向端侧大模型的分割学习通信压缩，可用于无线边缘大模型微调",
+      "llm_tldr_en": "Proposes low-rank residual compression for split federated LoRA fine-tuning, cutting communication costs by exploiting low effective rank of activation/gradient residuals.",
+      "llm_tldr_cn": "端侧大模型联邦微调计算负担大，分割学习将主要训练放至服务器但需交换高维激活与梯度。该文提出SplitLite，利用连续epoch间激活和梯度残差的低秩结构进行低秩压缩，显著降低客户端-服务器通信开销。这为无线边缘场景下的通信高效大模型微调提供了可迁移的通用压缩方法。",
+      "llm_tldr": "端侧大模型联邦微调计算负担大，分割学习将主要训练放至服务器但需交换高维激活与梯度。该文提出SplitLite，利用连续epoch间激活和梯度残差的低秩结构进行低秩压缩，显著降低客户端-服务器通信开销。这为无线边缘场景下的通信高效大模型微调提供了可迁移的通用压缩方法。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "use of large language models in wireless communication",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.28890v1",
+      "source": "arxiv",
+      "title": "Adaptive RIS-aided Communications through ML-based Generation of Phase Masks",
+      "abstract": "Reconfigurable Intelligent Surfaces (RISs) are an attractive technology for Millimeter Wave (mmWave) communications due to their ability to passively reflect incident signals. However, current implementations of RIS rely on performing computationally-intensive algorithms offline to generate phase masks, which are stored as a codebook on the embedded microcontroller on the RIS. The codebook size is restricted by the embedded microcontroller's storage capacity, which limits the ability of the RIS to adapt to evolving channel conditions and deployment scenarios. In this demo, we showcase an Machine Learning (ML)-based solution for dynamically generating new phase masks during runtime. Our approach leverages a ML model deployed on the microcontroller for approximating the output of a phase mask generation algorithm, responding to new inputs while remaining smaller than a codebook.",
+      "authors": [
+        "Corwin Carpenter",
+        "Thomas Daltzis",
+        "George C. Trichopoulos",
+        "Jacek Kibilda",
+        "Joao F. Santos"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY",
+        "cs.NI"
+      ],
+      "published": "2026-08-28T21:48:38+00:00",
+      "link": "https://arxiv.org/pdf/2608.28890v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "ML-based generation of phase masks for adaptive RIS in mmWave communications",
+      "llm_evidence_cn": "基于机器学习的RIS相移掩码生成，用于毫米波通信自适应",
+      "llm_evidence": "基于机器学习的RIS相移掩码生成，用于毫米波通信自适应",
+      "canonical_evidence": "基于机器学习的RIS相移掩码生成，用于毫米波通信自适应",
+      "llm_tldr_en": "Presents an ML-based approach to dynamically generate RIS phase masks at runtime, avoiding offline codebook storage and enabling adaptation to evolving channels.",
+      "llm_tldr_cn": "现有RIS依赖离线计算并存储相移码本，受限于微控制器存储容量，难以适应动态信道。该演示提出在微控制器上部署机器学习模型，在运行时动态生成新相移掩码，从而提高RIS对信道变化和部署场景的适应能力。这项工作展示了机器学习在无线通信系统实时配置中的潜力。",
+      "llm_tldr": "现有RIS依赖离线计算并存储相移码本，受限于微控制器存储容量，难以适应动态信道。该演示提出在微控制器上部署机器学习模型，在运行时动态生成新相移掩码，从而提高RIS对信道变化和部署场景的适应能力。这项工作展示了机器学习在无线通信系统实时配置中的潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.29182v1",
+      "source": "arxiv",
+      "title": "Movable Antenna Arrays with Imperfect Channel State Information in Rich Scattering Environments",
+      "abstract": "The growing demand for high spectral efficiency in 6G and beyond has driven research into adaptive antenna architectures capable of exploiting the spatial structure of multipath propagation channels. Conventional base station arrays are deployed with fixed element positions and cannot adapt to the instantaneous spatial structure of the propagation channel. In contrast, movable antenna (MA) systems enable dynamic reconfiguration of antenna positions, allowing the array geometry to track the channel characteristics of the current user set. While prior MA studies have demonstrated significant gains under perfect or statistical channel state information (CSI) assumptions, the interplay between imperfect instantaneous CSI, antenna placement optimization, and precoder design has received limited attention. This paper addresses this gap by proposing a practical end-to-end framework encompassing uplink pilot transmission, MMSE channel estimation under a clustered multipath model, and downlink ZF precoding designed from estimated CSI. Antenna positions are optimized via particle swarm optimization under two objectives: sum-rate maximization and max-min fairness. Simulation results show that MA gains are most pronounced under sparse, near-LoS propagation and diminish as channel richness increases. Furthermore, we reveal a fundamental coupling between array geometry and precoder design: a fairness-oriented antenna geometry encodes spatial fairness information that is only recoverable when evaluated with a compatible power allocation strategy. A mismatched precoder can completely mask the geometric advantage, leading to misleading conclusions about the robustness of antenna placement to the choice of optimization objective. These findings provide practically relevant guidance for the design and evaluation of movable antenna systems under realistic operating conditions.",
+      "authors": [
+        "Yizhen Zhao",
+        "Amna Irshad",
+        "Emil Bjornson"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-29T10:16:24+00:00",
+      "link": "https://arxiv.org/pdf/2608.29182v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Analyzes movable antenna arrays with imperfect CSI under rich scattering channel models",
+      "llm_evidence_cn": "分析丰富散射信道下可移动天线阵列与非理想信道状态信息",
+      "llm_evidence": "分析丰富散射信道下可移动天线阵列与非理想信道状态信息",
+      "canonical_evidence": "分析丰富散射信道下可移动天线阵列与非理想信道状态信息",
+      "llm_tldr_en": "This paper investigates movable antenna (MA) arrays in rich scattering environments under imperfect channel state information, analyzing the interplay between antenna position optimization and CSI accuracy for spectral efficiency in 6G systems.",
+      "llm_tldr_cn": "面向6G及未来系统对高频谱效率的需求，可移动天线阵列能动态调整阵元位置以匹配信道空间结构，但此前研究多假设理想或统计CSI。本文研究丰富散射环境中非理想瞬态CSI与天线位置优化的相互作用，并考虑信道模型特性对阵列设计的影响，为实际MA系统设计提供更贴近现实的性能分析与优化准则。",
+      "llm_tldr": "面向6G及未来系统对高频谱效率的需求，可移动天线阵列能动态调整阵元位置以匹配信道空间结构，但此前研究多假设理想或统计CSI。本文研究丰富散射环境中非理想瞬态CSI与天线位置优化的相互作用，并考虑信道模型特性对阵列设计的影响，为实际MA系统设计提供更贴近现实的性能分析与优化准则。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.31034v1",
+      "source": "arxiv",
+      "title": "XAI2CSI: Interpreting CSI with eXplainable AI for Human Activity Recognition",
+      "abstract": "Wi-Fi Channel State Information (CSI) has emerged as a key enabler for device-free Human Activity Recognition (HAR), enabling low-cost, unobtrusive sensing using existing communication infrastructure. However, Deep Learning (DL) models trained on CSI data often struggle to generalize across users, environments, and device setups due to the context sensitivity of wireless propagation. Despite this challenge, limited attention has been devoted to understanding model decisions and generalization failures. This paper introduces XAI2CSI, a framework that leverages eXplainable Artificial Intelligence (XAI) to analyze DL-based CSI sensing systems. XAI2CSI employs SAGE, a model-agnostic explainability method, to quantify temporal, spectral, and spatial CSI contributions to HAR decisions under nominal and cross-context evaluations on IEEE 802.11ax data. Our analysis reveals that the considered DL model exhibits limited robustness to unseen conditions due to an over-reliance on context-specific CSI patterns, causing models to misinterpret the underlying signal dynamics when deployment conditions change. The proposed methodology and findings provide a reference framework to explore alternative solutions and guide the development of robust, transparent Wi-Fi sensing systems.",
+      "authors": [
+        "Idio Guarino",
+        "Alfredo Nascita",
+        "Domenico Ciuonzo",
+        "Damiano Carra",
+        "Antonio Pescapé"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T16:14:29+00:00",
+      "link": "https://arxiv.org/pdf/2608.31034v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "CSI-based human activity recognition analyzed with explainable AI",
+      "llm_evidence_cn": "基于CSI的人体活动识别，用可解释AI分析",
+      "llm_evidence": "基于CSI的人体活动识别，用可解释AI分析",
+      "canonical_evidence": "基于CSI的人体活动识别，用可解释AI分析",
+      "llm_tldr_en": "This paper introduces XAI2CSI, an explainable AI framework that uses SAGE to interpret deep learning models for WiFi CSI-based human activity recognition, quantifying temporal, spectral, and spatial importance to improve model generalization and trust in wireless sensing.",
+      "llm_tldr_cn": "WiFi CSI用于无设备人体活动识别时，深度学习模型常因无线传播的环境敏感性而难以跨用户、跨环境泛化，且缺乏对决策过程的解释。为此提出XAI2CSI框架，采用模型无关的SAGE方法量化CSI在时间、频谱和空间维度的重要性。实验表明该框架能够揭示模型决策依据和泛化失败原因，为无线感知模型的可靠性分析与改进提供新工具。",
+      "llm_tldr": "WiFi CSI用于无设备人体活动识别时，深度学习模型常因无线传播的环境敏感性而难以跨用户、跨环境泛化，且缺乏对决策过程的解释。为此提出XAI2CSI框架，采用模型无关的SAGE方法量化CSI在时间、频谱和空间维度的重要性。实验表明该框架能够揭示模型决策依据和泛化失败原因，为无线感知模型的可靠性分析与改进提供新工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2608.29052v1",
+      "source": "arxiv",
+      "title": "DeepHSIC: Deep Learning-based Signal Detector for Hybrid Downlink IM-NOMA",
+      "abstract": "DeepHSIC is introduced as a neural receiver for hybrid downlink IM-NOMA transmission. The considered scheme combines power-domain NOMA with a composite OFDM/OFDM-IM waveform, so that user information is mapped jointly onto constellation symbols, subcarrier-index patterns, and different power levels. Although maximum-likelihood detection can achieve strong reliability for this model, its search space grows rapidly with the number of users and subcarriers. Conventional SIC reduces part of this burden, but its sequential cancellation may still accumulate errors and does not fully exploit the structure of IM-NOMA signals. To address this limitation, the proposed detector embeds dedicated deep neural network modules into the receiver and replaces the most computationally demanding SIC operations with learned inference blocks. The receiver is trained for Rayleigh fading channels and uses preprocessed channel-output features to recover user symbols. Simulation results show that DeepHSIC reaches BER performance close to model-based detectors under both perfect and imperfect CSI while requiring substantially lower detection time. These results indicate that learned SIC-style detection is a practical candidate for scalable hybrid downlink IM-NOMA receivers.",
+      "authors": [
+        "Dung Nguyen Tran",
+        "Toan D. Gian",
+        "Tien-Hoa Nguyen",
+        "Mai Xuan Trang",
+        "Tien-Cuong Nguyen",
+        "Thien Van Luong"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-29T04:56:50+00:00",
+      "link": "https://arxiv.org/pdf/2608.29052v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep learning-based signal detector for hybrid downlink IM-NOMA wireless transmission",
+      "llm_evidence_cn": "面向混合下行IM-NOMA无线传输的深度学习信号检测器",
+      "llm_evidence": "面向混合下行IM-NOMA无线传输的深度学习信号检测器",
+      "canonical_evidence": "面向混合下行IM-NOMA无线传输的深度学习信号检测器",
+      "llm_tldr_en": "Proposes DeepHSIC, a neural receiver that embeds deep neural network modules to detect hybrid downlink IM-NOMA signals, aiming to overcome ML detection complexity and SIC error accumulation.",
+      "llm_tldr_cn": "混合下行IM-NOMA将用户信息映射到星座符号、子载波索引和功率域，极大扩展了最优检测的搜索空间，而传统SIC存在误差传播。为此提出DeepHSIC，在接收机中嵌入专用深度神经网络模块替代复杂检测过程。实验表明该神经接收机在可靠性与复杂度之间取得更优平衡。该工作展示了深度学习用于物理层接收机设计的价值。",
+      "llm_tldr": "混合下行IM-NOMA将用户信息映射到星座符号、子载波索引和功率域，极大扩展了最优检测的搜索空间，而传统SIC存在误差传播。为此提出DeepHSIC，在接收机中嵌入专用深度神经网络模块替代复杂检测过程。实验表明该神经接收机在可靠性与复杂度之间取得更优平衡。该工作展示了深度学习用于物理层接收机设计的价值。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.30663v1",
+      "source": "arxiv",
+      "title": "Event-Inference Reliability for Physical AI over Wireless Networks",
+      "abstract": "Wireless-enabled physical artificial intelligence (physical AI) systems call for a shift from reliable data delivery to reliable inference of physical events. The relevant question is not only whether packets arrive, but whether the set of cues available at the decision node, i.e., the evidence, is sufficiently timely and informative to support reliable inference about the event. Accordingly, this paper develops a framework in which event-inference reliability (EIR) is determined jointly by cue informativeness, cue availability, and temporal admissibility. The latter is determined by the downstream task requirement and represented through the usefulness horizon. We define event-inference error ratio (EIER) as the normalised residual event uncertainty after incorporating admitted cues, and EIR as the corresponding normalised uncertainty reduction, both conditioned on decision-node context. We further distinguish the evidence-limited Bayes benchmark from operational performance of a particular inference engine and derive an entropy-based lower bound on the minimum achievable event error from the same decision-node information. The framework then enables an event-aware wireless design interface for cue prioritisation, cue-reliability allocation, and event-inference coverage characterisation. A multiclass indoor activity-inference study combining empirical cue likelihoods with wireless delivery instantiates the framework and demonstrates how it characterises EIR under finite usefulness horizons.",
+      "authors": [
+        "Anup Mishra",
+        "Petar Popovski"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T12:03:48+00:00",
+      "link": "https://arxiv.org/pdf/2608.30663v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Event-inference reliability framework for wireless-enabled physical AI, shifting focus from data delivery to reliable inference",
+      "llm_evidence_cn": "面向无线物理AI的事件推断可靠性框架，将可靠性从数据投递转向推断任务",
+      "llm_evidence": "面向无线物理AI的事件推断可靠性框架，将可靠性从数据投递转向推断任务",
+      "canonical_evidence": "面向无线物理AI的事件推断可靠性框架，将可靠性从数据投递转向推断任务",
+      "llm_tldr_en": "Introduces event-inference reliability (EIR) for wireless physical AI, jointly determined by cue informativeness, availability, and temporal admissibility, and defines EIER to measure residual event uncertainty.",
+      "llm_tldr_cn": "无线物理AI系统需要从可靠数据投递转向可靠事件推断，但现有指标仅关注数据包是否到达。该文提出事件推断可靠性（EIR）框架，联合考虑线索信息量、可用性与时间可容许性，以反映下游任务对证据的需求，并定义归一化残差不确定性指标EIER。该框架为设计面向任务的无线传输策略提供了新的度量基础。",
+      "llm_tldr": "无线物理AI系统需要从可靠数据投递转向可靠事件推断，但现有指标仅关注数据包是否到达。该文提出事件推断可靠性（EIR）框架，联合考虑线索信息量、可用性与时间可容许性，以反映下游任务对证据的需求，并定义归一化残差不确定性指标EIER。该框架为设计面向任务的无线传输策略提供了新的度量基础。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.29056v1",
+      "source": "arxiv",
+      "title": "Neural Network-Based Delay-Doppler-Assisted Channel Estimation for OFDM",
+      "abstract": "Conventional orthogonal frequency division multiplexing (OFDM) channel estimation relies on single-tap estimation and time-frequency (TF) interpolation, which becomes unreliable in high-mobility channels because Doppler-induced inter-carrier interference (ICI) invalidates the underlying element-wise TF model. This paper proposes a neural-network-based delay-Doppler (DD)-assisted channel estimation framework for OFDM over doubly selective channels. We first derive an ICI-aware TF domain input-output relation and formulate channel estimation as a DD recovery problem. Unlike conventional sparse recovery approaches, the proposed framework does not require the equivalent DD domain channel vector to be strictly sparse, thereby accommodating the leakage induced by fractional delay and Doppler shifts. Since the data symbols are unknown during channel estimation, the sensing matrix is constructed using only the known pilot symbols. As a result, data-induced interference is not explicitly modeled, leading to a structured mismatch in the pilot observations. To tackle this challenge, the adopted network iteratively exchanges observation- and channel-domain features through the sensing matrix to learn the mapping from these contaminated observations to the equivalent DD domain channel, which is subsequently used to reconstruct the TF-domain channel. Simulation results show that the proposed method achieves lower normalized mean-square error and bit-error rate than conventional OFDM estimators.",
+      "authors": [
+        "Mingcheng Nie",
+        "Hao Chang",
+        "Shuangyang Li",
+        "Haiyao Yu",
+        "Jiafu Hao",
+        "Yonghui Li"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-08-29T05:17:21+00:00",
+      "link": "https://arxiv.org/pdf/2608.29056v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural network-based delay-Doppler channel estimation for OFDM over doubly-selective channels",
+      "llm_evidence_cn": "基于神经网络的时延-多普勒辅助OFDM信道估计，应对双选择性信道",
+      "llm_evidence": "基于神经网络的时延-多普勒辅助OFDM信道估计，应对双选择性信道",
+      "canonical_evidence": "基于神经网络的时延-多普勒辅助OFDM信道估计，应对双选择性信道",
+      "llm_tldr_en": "Proposes a neural-network delay-Doppler assisted channel estimation framework for OFDM over doubly selective channels, formulating estimation as a DD recovery problem without strict sparsity.",
+      "llm_tldr_cn": "高移动性场景中，OFDM信道估计因多普勒引起的子载波间干扰而不可靠。本文提出基于神经网络的时延-多普勒（DD）辅助信道估计框架，推导了含ICI的时频输入输出关系，将信道估计建模为DD域恢复问题。区别于传统稀疏恢复方法，该框架不要求等效DD域信道向量严格稀疏，能适应泄露和能量扩散，从而提升双选择性信道下的估计精度。该工作展示了神经网络在无线信道建模与估计中的实用价值。",
+      "llm_tldr": "高移动性场景中，OFDM信道估计因多普勒引起的子载波间干扰而不可靠。本文提出基于神经网络的时延-多普勒（DD）辅助信道估计框架，推导了含ICI的时频输入输出关系，将信道估计建模为DD域恢复问题。区别于传统稀疏恢复方法，该框架不要求等效DD域信道向量严格稀疏，能适应泄露和能量扩散，从而提升双选择性信道下的估计精度。该工作展示了神经网络在无线信道建模与估计中的实用价值。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2608.30984v1",
+      "source": "arxiv",
+      "title": "Semantic-Aware Sub-Band Allocation for Terahertz Communications",
+      "abstract": "This paper studies semantic-aware sub-band al- location for terahertz (THz) communication systems, where frequency-selective molecular absorption creates highly non- uniform sub-band qualities. Unlike conventional formulations, semantic fidelity depends nonlinearly on the signal-to-noise ratio (SNR) and is also sentence-specific, leading to a non-separable assignment problem that is generally not solvable using simple ordering-based policies. To address this, we use a sentence-BERT (SBERT)-based surrogate model that predicts semantic fidelity from the sentence embedding and sub-band SNR. We propose an importance-aware scheduler that assigns sentences to sub- bands based on their semantic contribution using an oracle utility function that captures importance-weighted semantic similarity across sentence-sub-band pairs. A neural scheduler is then trained through imitation learning to approximate the oracle policy at more than 200x lower runtime than full DeepSC- based oracle evaluation. Integrated with a deep-learning-enabled semantic communication (DeepSC) system, the proposed method consistently outperforms all benchmark schemes and approaches oracle-level performance under realistic THz channel conditions.",
+      "authors": [
+        "Fatima Ismail",
+        "Hadi Sarieddeen",
+        "Jihad Fahs"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T15:42:48+00:00",
+      "link": "https://arxiv.org/pdf/2608.30984v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Sentence-BERT surrogate for semantic fidelity in THz sub-band allocation",
+      "llm_evidence_cn": "利用句向量BERT代理模型预测太赫兹通信中的语义保真度",
+      "llm_evidence": "利用句向量BERT代理模型预测太赫兹通信中的语义保真度",
+      "canonical_evidence": "利用句向量BERT代理模型预测太赫兹通信中的语义保真度",
+      "llm_tldr_en": "Develops a sentence-BERT surrogate to predict semantic fidelity for THz sub-band allocation and an importance-aware scheduler that assigns sentences by semantic contribution, tackling non-separable assignment problems that simple ordering policies cannot solve.",
+      "llm_tldr_cn": "太赫兹通信中分子吸收导致子带质量高度不均匀，语义保真度与SNR呈非线性关系且与句子相关。本文采用基于句向量BERT的代理模型预测语义保真度，并设计重要性感知调度器，依据语义贡献将句子分配给不同子带。相比传统排序策略，该方法能更好地处理不可分离的分配问题，提升语义传输效率。",
+      "llm_tldr": "太赫兹通信中分子吸收导致子带质量高度不均匀，语义保真度与SNR呈非线性关系且与句子相关。本文采用基于句向量BERT的代理模型预测语义保真度，并设计重要性感知调度器，依据语义贡献将句子分配给不同子带。相比传统排序策略，该方法能更好地处理不可分离的分配问题，提升语义传输效率。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "use of large language models in wireless communication",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2608.29504v1",
+      "source": "arxiv",
+      "title": "RadioSight: Predictive mmWave XR Network Optimization from Dynamic Neural Radio Fields",
+      "abstract": "Next-generation extended reality (XR) networks rely on mmWave communication for multi-gigabit throughput, yet highly directional links are vulnerable to user mobility and blockages, causing frequent outages under reactive beam management. Emerging neural radio fields can predict radio propagation, but prior work remains limited to offline channel reconstruction. We introduce RadioSight, a real-time multi-modal radio field system for predictive mmWave optimization and proactive Multi-User MIMO beamforming. RadioSight combines backward beam-tracing with real-time semantic object synchronization to anticipate RF geometry changes without full model retraining. Implemented as an edge-executable pipeline for commercial 28 GHz arrays, RadioSight determines each scheduling window's beams during the preceding window without exhaustive beam sweeps. Experiments show that RadioSight reduces beam-search error by up to ~50%, improves median throughput by 2x, and enhances link stability.",
+      "authors": [
+        "Lihao Zhang",
+        "Paul Kudyba",
+        "Zhenlin An",
+        "Haijian Sun"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-08-30T01:41:57+00:00",
+      "link": "https://arxiv.org/pdf/2608.29504v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural radio fields for predictive mmWave network optimization and beamforming",
+      "llm_evidence_cn": "神经无线电场用于毫米波网络预测优化与波束成形",
+      "llm_evidence": "神经无线电场用于毫米波网络预测优化与波束成形",
+      "canonical_evidence": "神经无线电场用于毫米波网络预测优化与波束成形",
+      "llm_tldr_en": "RadioSight is a real-time neural radio field system that predicts mmWave propagation for proactive Multi-User MIMO beamforming, combining backward beam-tracing with semantic object synchronization to avoid reactive outages and reduce retraining in XR networks.",
+      "llm_tldr_cn": "毫米波XR网络中的定向链路易受移动和遮挡影响，传统反应式波束管理常导致频繁中断，而现有神经无线电场仅支持离线信道重建。RadioSight将反向波束追踪与实时语义对象同步结合，构建边缘可执行的实时多模态无线电场系统，可在无需完整重训练的情况下预测射频几何变化并实现预适应多用户MIMO波束成形。在商用28GHz阵列上的实现展示了其用于实际网络优化的潜力。",
+      "llm_tldr": "毫米波XR网络中的定向链路易受移动和遮挡影响，传统反应式波束管理常导致频繁中断，而现有神经无线电场仅支持离线信道重建。RadioSight将反向波束追踪与实时语义对象同步结合，构建边缘可执行的实时多模态无线电场系统，可在无需完整重训练的情况下预测射频几何变化并实现预适应多用户MIMO波束成形。在商用28GHz阵列上的实现展示了其用于实际网络优化的潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}

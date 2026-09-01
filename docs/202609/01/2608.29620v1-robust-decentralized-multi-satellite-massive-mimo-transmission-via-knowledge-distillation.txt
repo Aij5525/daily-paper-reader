@@ -1,0 +1,2728 @@
+Title: Robust Decentralized Multi-Satellite Massive MIMO Transmission via Knowledge Distillation
+
+URL Source: https://arxiv.org/pdf/2608.29620v1
+
+Published Time: Tue, 01 Sep 2026 01:11:34 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Robust Decentralized Multi-Satellite Massive MIMO Transmission via Knowledge Distillation 
+
+Wenjing Cao, Graduate Student Member , IEEE , Zheng Lin, Member , IEEE ,Yafei Wang, Graduate Student Member , IEEE , Wenjin Wang, Member , IEEE , Ye Wang, Member , IEEE ,Rui Ding, Symeon Chatzinotas, Fellow , IEEE , Bj¨ orn Ottersten, Fellow , IEEE 
+
+Abstract —This paper investigates robust decentralized trans-mission for cooperative multi-satellite massive multiple-input multiple-output (MIMO) systems under imperfect statistical channel state information (sCSI). In the considered scenario, each satellite has complete access to its local information but receives partial information from other satellites due to limited inter-satellite links (ISLs), with only imperfect sCSI available. To address these challenges, we propose a knowledge distillation (KD) framework that transfers cooperative precoding knowledge from a centralized teacher neural network (NN) to lightweight decentralized student NNs. Specifically, a global-clean teacher, aggregating information from all satellites and accessing accurate sCSI during offline training, transfers its cooperative precoding knowledge to partial-noisy students, relying on complete local information, limited information exchanged by other satellites, and error-corrupted sCSI for local precoding. The teacher NN combines patch-wise self-attention with dual-axis attention to learn inter-user interference and inter-satellite coordination, whereas each student NN adopts a compact per-satellite archi-tecture for efficient onboard inference. The teacher learns a high-quality weighted minimum mean square error precoding policy from global-clean inputs, which is then distilled into the students operating on partial-noisy inputs. To mitigate the resulting teacher-student performance gap, we develop a hybrid KD mechanism with explicit angle- and phase-error calibration. Simulation results demonstrate that the proposed framework significantly enhances the decentralized sum-rate performance and remains robust under diverse configurations. 
+
+Index Terms —Satellite communication, knowledge distillation, decentralized multi-satellite, massive MIMO. 
+
+I. I NTRODUCTION 
+
+# SATELLITE networks are expected to play a pivotal role in future wireless systems by extending ubiquitous con-nectivity beyond the reach of terrestrial infrastructures [1]–[3]. In particular, dense low-earth-orbit (LEO) constellations have garnered significant attention owing to their low propagation delay, wide-area coverage, and deployment flexibility [4], [5]. Nevertheless, single-satellite transmission faces fundamental bottlenecks, including severe path loss, limited service ca-pacity, and intense inter-user interference, especially under 
+
+Manuscript received xxx; revised xxx. Wenjing Cao, Yafei Wang, and Wenjin Wang are with the National Mobile Communications Research Laboratory, Southeast University, Nanjing 210096, China, and also with Purple Mountain Laboratories, Nanjing 211100, China (e-mail: caowj@seu.edu.cn; wangyf@seu.edu.cn; wangwj@seu.edu.cn). Zheng Lin, Symeon Chatzinotas, and Bj¨ orn Ottersten are with the Interdisci-plinary Centre for Security, Reliability and Trust (SnT), University of Luxem-bourg, Luxembourg (e-mail: zhenglin@ieee.org; symeon.chatzinotas@uni.lu; bjorn.ottersten@uni.lu). Ye Wang is with Peng Cheng Laboratory, Shenzhen 518055, China (e-mail: wangy02@pcl.ac.cn). Rui Ding is with China Satellite Network Group Company Ltd., Beijing 100029, China (e-mail: greatdn@qq.com) 
+
+full frequency reuse and massive user access [6]. Coop-erative multi-satellite massive multiple-input multiple-output (MIMO) transmission provides a promising means of over-coming these limitations by jointly exploiting the large-scale antenna resources distributed across multiple satellites that share a common coverage area [3], [7]. Specifically, the large-scale antenna array onboard each satellite provides substantial beamforming gains to mitigate severe propagation loss, while coordinated multi-satellite transmission aggregates distributed antenna resources to provide additional spatial degrees of freedom for multi-user and multi-stream transmission. These spatial degrees of freedom also enable more flexible precoding for inter-user interference suppression under aggressive fre-quency reuse, thereby improving service capacity and spectral efficiency. Efficient precoding is therefore essential to fully exploit these spatial-domain benefits in cooperative multi-satellite massive MIMO systems [8], [9]. In cooperative multi-satellite massive MIMO systems, precoding enables multiple satellites to jointly transmit over shared time-frequency resources while mitigating inter-user and inter-satellite interference. Conventional centralized schemes assume that a network controller collects global channel state information (CSI) to jointly optimize pre-coders of all satellites, typically solving the weighted sum-rate (WSR) maximization problem via iterative algorithms [8]. Recent learning-based approaches utilize neural networks (NNs) trained on global statistical CSI (sCSI) for rapid coop-erative precoding inference [10], [11]. Despite the spectral-efficiency advantages of centralized multi-satellite coopera-tion, they rely on globally available CSI, substantial computa-tional power, and frequent inter-satellite signaling. These re-quirements are unsustainable in large-scale LEO constellations characterized by limited onboard resources and bandwidth-constrained, topology-varying inter-satellite links (ISLs) [12]– [14]. Consequently, decentralized multi-satellite transmission has emerged as a promising alternative, wherein each satellite infers its local precoder using only local sCSI and restricted ISL-exchanged data [9]. Nevertheless, there are two critical challenges for deploying decentralized multi-satellite trans-mission. First, while most existing designs predicate their performance on accurate sCSI, practical LEO links suffer from severe sCSI impairments—such as angle-estimation errors, attitude jitter, array calibration errors and uncertainty, and feedback delays—making them highly sensitive to angle-of-arrival (AoA) and angle-of-departure (AoD) inaccuracies [15]– [18]. Second, decentralized learning-based schemes operate arXiv:2608.29620v1 [eess.SP] 30 Aug 2026 2
+
+with noisy partial sCSI under a lightweight NN, resulting in a significant performance bottleneck compared with centralized schemes that rely on clean global sCSI. Knowledge distillation (KD) has been widely studied as an effective technique for enhancing deployment efficiency, achieving broad success across computer vision, natural lan-guage processing, and foundation models [19]–[22]. While classical KD transfers softened output distributions from a high-capacity teacher to a compact student [19], subsequent advancements have shifted the distillation target to interme-diate representations [20]. Beyond conventional model com-pression, clean-to-noisy KD offers a compelling paradigm for robust wireless transmission [23]. Specifically, [23] demon-strates that a teacher trained on pristine samples can provide hidden-feature supervision to a student processing corrupted inputs, guiding the student to learn denoised, generalizable representations. In the physical layer, KD has proven effective across various representative tasks. For CSI feedback, high-capacity autoencoders transfer reconstruction capabilities to lightweight student NNs [24]. Similarly, in beam prediction, KD facilitates compact mapping models that approach teacher-level accuracy and spectral efficiency at a fraction of the computational cost [25]. Furthermore, KD can compress and exchange low-dimensional representations among coopera-tive agents, significantly curbing inter-agent communication overhead while retaining task-aware domain knowledge [26]. Collectively, these findings validate that KD can effectively transfer coordination-aware and noise-robust policies from an offline centralized teacher (operating on clean global sCSI) to decentralized students (constrained by noisy partial sCSI). This mechanism elegantly bridges the gap between idealized centralized design and practical decentralized implementation. From a KD perspective, although centralized cooperative schemes incur substantial signaling and computational over-heads that preclude practical deployment, they can serve as highly effective teachers during offline training. By leveraging clean global sCSI, they extract near-optimal precoding policies and provide high-quality supervision targets, thereby circum-venting the need for computationally intensive alternating iterations during inference [8], [10], [11]. Conversely, de-centralized schemes offer a lightweight and efficient onboard inference framework. However, their reliance on noisy, partial sCSI and limited ISL data corrupted by angle errors funda-mentally restricts their capacity to acquire global cooperative knowledge [9], [18]. This inherent asymmetry aligns well with the KD paradigm, wherein a high-capacity teacher with access to pristine global information transfers task-relevant represen-tations to lightweight, decentralized students operating under imperfect observations [23]. Motivated by these observations, this paper addresses the following fundamental research ques-tion: How to design efficient and robust decentralized multi-satellite cooperative transmission under partial and imperfect sCSI? To resolve this challenge, our principal contributions are summarized as follows:  
+
+> •
+
+We propose a KD learning framework for cooperative multi-satellite transmission, where a large centralized teacher NN is developed to guide decentralized student NNs. The teacher NN mainly consists of a patch-wise self-attention encoder and a dual-axis attention module: the former refines feature representations within each satellite-user pair, while the latter captures user-domain interference relationships and satellite-domain cooper-ative dependencies through user-axis and satellite-axis attention, respectively. By leveraging clean and global CSI inputs, the centralized teacher NN learns a high-performance precoding policy that approaches the per-formance of WSR maximization, thereby serving as re-liable and efficient supervision targets for decentralized student NNs with low inference complexity, avoiding the need to obtain targets through computationally intensive alternating iterations.  
+
+> •
+
+We develop lightweight decentralized student NNs that operate with practical partial and angle-error-corrupted observations at individual satellites. Specifically, each student replaces the deep patch-wise encoder with a compact single-layer counterpart, and infers only its local precoder, which facilitates effective knowledge transfer during distillation while reducing computational com-plexity for onboard inference. Unlike the centralized teacher, each student relies only on locally available sCSI and a small amount of ISL-exchanged information, both of which are corrupted by angle errors.  
+
+> •
+
+We design an angle- and phase-correction-based hybrid KD mechanism to bridge the gap between the centralized teacher and decentralized students. The proposed mech-anism guides each student NN to predict angle residuals and phase residuals during training. The corrected angle information is then converted into Kronecker-structured steering vectors and combined with phase correction to obtain more accurate array responses for robust de-centralized closed-form precoding. In addition, hybrid distillation transfers physically interpretable knowledge, including corrected steering vectors and precoders, from the teacher to the students. Simulation results demon-strate that the proposed mechanism improves the sum-rate performance of decentralized student NNs under partial and noisy inputs, while maintaining robustness and generalization across different angle-error distributions and satellite-user scales. This paper is structured as follows: Section II introduces the multi-satellite system model and problem formulation. Section III presents the large centralized teacher NN and lightweight decentralized student NNs design. Section IV presents the KD design. Section V provides the simulation results. Section VI concludes this article. 
+
+Notation : x, x, X represent scalar, column vector, matrix. 
+
+(·)T , (·)∗, (·)H , and (·)−1 respectively denote the transpose, conjugate, transpose-conjugate, and inverse operations. ∥·∥ 2
+
+denotes l2-norm. ⊗ and ⊙ are the Kronecker product and Hadamard product operations. The operator Tr {·} repre-sents the matrix trace. E {·} denotes the expectation. The expression CN (μ, σ 2) denotes circularly symmetric complex Gaussian distribution with expectation μ and variance σ2.
+
+RM ×N and CM ×N represent the set of M × N dimension real- and complex-valued matrices. k ∈ K means element 3 
+
+> Fig. 1. System architecture of cooperative multi-satellite transmission.
+
+k belongs to set K. Re( ·) and Im( ·) denote the real and imaginary parts of a complex scalar, vector, or matrix. We use X[m1,...,m N ] to denote the indexing of elements in tensor 
+
+X ∈ RM1×···× MN .[A1, . . . , AK ]S denotes the tensor formed by stacking A1, . . . , AK along the S-th dimension. [·]0 denotes the concatenation of tensors along a new dimension, i.e., 
+
+A[n, :,··· ] = Bn, ∀n when A = [B1, . . . , BN ]0. We define the product of tensor X ∈ RM1×···× MN ×DX and matrix 
+
+Y ∈ RDX ×DY as (X × Y)[m1,...,m N ,:] = X[m1,...,m N ,:] Y.II. M ULTI -S ATELLITE TRANSMISSION MODEL AND 
+
+WMMSE C LOSED -F ORM STRUCTURE 
+
+We consider a downlink (DL) multi-satellite cooperative transmission system, as shown in Fig. 1, comprising S LEO satellites, performing transmission to K mobile user termi-nals (UTs) within the same time-frequency resources. For clarity, we define the satellite set as S = {1, . . . , S } and the UT set as K = {1, . . . , K }. Each satellite is equipped with a large-scale uniform planar array (UPA) consisting of M = Mx × My antenna elements, where Mx and My
+
+represent the number of antennas along the x-axis and y-axis, respectively. Similarly, each UT is equipped with a UPA composed of N = Nx′ × Ny′ antenna elements. In cooperative multi-satellite multi-stream (MSMS) transmission, non-coherent transmission enables multiple satellites to send independent data streams to the same UT equipped with an antenna array, while all beams simultaneously reuse the full system bandwidth and time-frequency resources [4], [10]. Unlike coherent cooperation, which requires stringent synchro-nization [27], [28], the considered non-coherent scheme offers greater implementation flexibility while improving spectral efficiency through spatial multiplexing [1]. 
+
+A. Channel and Signal Models 
+
+To support broadband communication in the multi-satellite system, the entire system bandwidth is employed for the orthogonal frequency division multiplexing (OFDM) transmis-sion. Let the number of subcarriers be denoted by Nsc , the cyclic prefix (CP) length by Ncp , and the system sampling period by Tsam . The CP duration is given by Tcp = Ncp Tsam .The OFDM symbol duration without CP is Tsc = Nsc Tsam ,while the total symbol duration including CP is Tsym =
+
+Tsc +Tcp . The time-domain transmit signal of the s-th satellite during the m-th OFDM symbol is given by xs,m (t) ∈ CM ×1:
+
+xs,m (t) = 
+
+PNsc −1 
+
+> r=0
+
+xs,m,r ej2πr ∆f t , −Tcp ≤ t−mT sym < T sc , (1) herein, xs,m,r denotes the frequency-domain transmit signal vector over the r-th subcarrier in the m-th OFDM symbol and 
+
+∆f = 1 /T sc . The DL time-domain received signal vector of the k-th UT from the s-th satellite in the m-th OFDM symbol at the t-th time instant can be written as: 
+
+ys,k,m (t) = R ∞−∞ ˜Hs,k (t, τ )xs,m (t − τ )d τ + zs,k,m (t), (2) where we denote τ as the delay variable, zs,k,m (t) =P
+
+> s′∈S\{ s}
+
+R ∞−∞ ˜Hs′,k (t, τ )xs′,m (t − τ )d τ + ˜nk(t), and 
+
+˜nk(t) ∈ CN ×1 denotes the additive white Gaussian noise vec-tor with distribution CN (0, σ 2
+
+> k
+
+IN ). Herein, the time-varying spatial domain MIMO channel ˜Hs,k (t, τ ) ∈ CN ×M from the 
+
+s-th satellite to the k-th UT can be expressed as [29]: 
+
+˜Hs,k (t, τ ) = 
+
+PLs,k −1 
+
+> ℓ=0
+
+as,k,ℓ ej2πν s,k,ℓ tδ(τ −τs,k,ℓ )ds,k,ℓ gHs,k,ℓ , (3) where Ls,k is the multipath number of the channel from the 
+
+s-th satellite to the k-th UT, as,k,ℓ , νs,k,ℓ , τs,k,ℓ , ds,k,ℓ and 
+
+gs,k,ℓ are the complex channel gain, Doppler shift, propaga-tion delay, receive array response vector and transmit array response vector associated with the ℓ-th path. Specifically, the AoD at the satellite side is denoted by (θsat 
+
+> s,k,ℓ
+
+, ϕ sat 
+
+> s,k,ℓ
+
+), the AoA at the UT side is denoted by (θut 
+
+> s,k,ℓ
+
+, ϕ ut 
+
+> s,k,ℓ
+
+). In LEO satellite channels, owing to the large satellite-to-ground distance and the fact that scattering occurs within a few kilometers around UTs, the AoD pairs corresponding to different multipath components of the same link are nearly identical. Therefore, we have (θsat 
+
+> s,k,ℓ
+
+, ϕ sat 
+
+> s,k,ℓ
+
+) = ( θsat 
+
+> s,k
+
+, ϕ sat 
+
+> s,k
+
+), ∀ℓ. The transmit array response vectors at the satellite side are [15], [18]: 
+
+gs,k,ℓ = gs,k = aMx
+
+ sin θsat  
+
+> s,k
+
+cos ϕsat 
+
+> s,k
+
+⊗aMy
+
+ cos θsat 
+
+> s,k
+
+ . (4) The receive array response vectors are given by: 
+
+ds,k,ℓ = aNx′
+
+ sin θut  
+
+> s,k,ℓ
+
+cos ϕut 
+
+> s,k,ℓ
+
+ ⊗ aNy′
+
+ cos θut 
+
+> s,k,ℓ
+
+ . (5) We define anv (x) = 1√nv [1 , e− j2πλ dv x, . . . , e− j2πλ dv (nv −1) x]T .
+
+dv = λ 
+
+> 2
+
+represents the distance between adjacent antenna elements along the v-axis and v ∈ { x, y, x′, y′}. To separate the signals from multiple satellites at the multi-antenna UT, spatial linear receive processing is applied as: 
+
+rs,k,m (t) = bHs,k ys,k,m (t)= bHs,k 
+
+R ∞−∞ ˜Hs,k (t, τ )xs,m (t − τ )d τ + zs,k,m (t)
+
+
+
+, (6) 
+
+bs,k ∈ CN ×1 denotes the receive vector at the k-th UT for extracting the signal from the s-th satellite. To compensate for the large and predictable Doppler shift and propagation delay in LEO satellite links, a two-stage compensation procedure is considered. First, each satellite performs bulk Doppler and delay pre-compensation toward the beam center based on its ephemeris and beam-pointing information. The k-th UT then estimates the remaining Doppler shift and propagation delay of each satellite primarily from the received DL pi-lots, with ephemeris and global navigation satellite system (GNSS) information providing auxiliary position-based post-compensation [8], [30]. Let νsat  
+
+> s,k
+
+and τ sat  
+
+> s,k
+
+denote the satellite-side bulk pre-compensation terms, while νcps  
+
+> s,k
+
+and τ cps  
+
+> s,k
+
+model the remaining Doppler and delay errors after beam-center-based compensation at the k-th UT [27], respectively. After 4
+
+compensation, the compensated signal at the k-th UT is: 
+
+rcps 
+
+> s,k,m
+
+(t) = rs,k,m (t + τ cps  
+
+> s,k
+
+)e −j2πν cps    
+
+> s,k (t+τcps
+> s,k )
+
+=bHs,k 
+
+ PLs,k −1 
+
+> ℓ=0
+
+as,k,ℓ ej2πν ut   
+
+> s,k,ℓ (t+τcps
+> s,k )
+
+ds,k,ℓ gHs,k xs,m 
+
+ t − τ ut 
+
+> s,k,ℓ
+
+ 
+
++ zcps 
+
+> s,k,m
+
+(t), (7) 
+
+νs,k,ℓ and τs,k,ℓ denote the original Doppler shift and propa-gation delay of the (s, k, ℓ )-th path in the channel model. The residual Doppler shift and delay after the satellite-side pre-compensation and UT-side post-compensation are defined as 
+
+νut  
+
+> s,k,ℓ
+
+≜ νs,k,ℓ − νsat  
+
+> s,k
+
+− νcps  
+
+> s,k
+
+, τ ut  
+
+> s,k,ℓ
+
+≜ τs,k,ℓ − τ sat  
+
+> s,k
+
+− τ cps  
+
+> s,k
+
+,
+
+respectively. Since the compensation is performed with re-spect to the intended satellite s, the desired satellite-UT link is approximately synchronized in time and frequency after compensation, whereas signals from other satellites remain asynchronous. zcps 
+
+> s,k,m
+
+(t) denotes the aggregate inter-satellite interference-plus-noise term. Assume that the residual delay spread after compensation is within the CP duration, i.e., 
+
+max ℓ τ ut  
+
+> s,k,ℓ
+
+≤ Tcp . Then, over the useful OFDM symbol interval, xs,m (t − τ ut 
+
+> s,k,ℓ
+
+) = PNsc −1 
+
+> q=0
+
+xs,m,q ej2πq ∆f (t−τ ut 
+
+> s,k,ℓ )
+
+.The effective MIMO channel frequency response is: 
+
+Hs,k (t, f ) = ds,k (t, f )gHs,k ∈ CN ×M , (8) where ds,k (t, f ) = PLs,k −1 
+
+> ℓ=0
+
+¯as,k,ℓ ej2π(νut  
+
+> s,k,ℓ t−f τ ut
+> s,k,ℓ
+
+)ds,k,ℓ 
+
+and ¯as,k,ℓ ≜ as,k,ℓ ej2πν ut   
+
+> s,k,ℓ τcps
+> s,k
+
+. Therefore, the compen-sated time-domain signal can be rewritten as: rcps 
+
+> s,k,m
+
+(t) = 
+
+bHs,k 
+
+PNsc −1 
+
+> q=0
+
+Hs,k (t, q ∆f )xs,m,q ej2πq ∆f t +zcps 
+
+> s,k,m
+
+(t). After re-moving the CP, the received signal over the r-th subcarrier is obtained by OFDM demodulation as: 
+
+rs,k,m,r = 1
+
+> Tsc
+
+R mT sym +Tsc  
+
+> mT sym
+
+rcps 
+
+> s,k,m
+
+(t)e −j2πr ∆f t dt (9) 
+
+= 1
+
+> Tsc
+
+PNsc −1
+
+> q=0
+
+R bHs,k Hs,k (t, q ∆f )xs,m,q ej2π(q−r)∆ f t dt+zs,k,m,r ,zs,k,m,r = 1
+
+> Tsc
+
+R mT sym +Tsc  
+
+> mT sym
+
+zcps 
+
+> s,k,m
+
+(t)e −j2πr ∆f t dt. Since the de-sired satellite-UT link is compensated at the UT and the OFDM parameters are properly designed, the residual Doppler variation within one OFDM symbol is negligible. Hence, 
+
+Hs,k (t, q ∆f ) = Hs,k (mT sym , q ∆f ) within the m-th OFDM symbol. Using the orthogonality among OFDM subcarriers, 
+
+rs,k,m,r = bHs,k Hs,k,m,r xs,m,r + zs,k,m,r , (10) 
+
+Hs,k,m,r = Hs,k (mT sym , r ∆f ) = ds,k,m,r gHs,k , (11) where we have ds,k,m,r = ds,k (mT sym , r ∆f ) =
+
+PLs,k −1 
+
+> ℓ=0
+
+¯as,k,ℓ ej2π(νut  
+
+> s,k,ℓ mT sym −r∆f τ ut
+> s,k,ℓ
+
+)ds,k,ℓ . For simplic-ity, we omit the OFDM symbol index m and subcarrier index 
+
+r in the following: Hs,k ≜ ds,k gHs,k . The transmit signal of the s-th satellite is: 
+
+xs = P 
+
+> k∈K
+
+ps,k xs,k ∈ CM ×1, (12) where ps,k ∈ CM ×1 denotes the precoding vector for the k-th UT served by the s-th satellite, and xs,k is the corresponding data symbol. Therefore, the received signal from the s-th satellite at the k-th UT can be written as: 
+
+rs,k = bHs,k Hs,k 
+
+P 
+
+> k′∈K
+
+ps,k ′ xs,k ′ + zs,k . (13) 
+
+zs,k denotes the aggregate inter-satellite interference-plus-noise term at the k-th UT, whose variance is E{zs,k z∗
+
+> s,k
+
+} =
+
+bHs,k Rs,k bs,k . The covariance matrix is: 
+
+Rs,k =
+
+P
+
+> s′∈S\{ s}
+
+P
+
+> k′∈K
+
+gHs′,k ps′,k ′ pHs′,k ′ gs′,k Rut 
+
+> s′,k
+
++σ2
+
+> k
+
+IN . (14) Herein, Rut  
+
+> s′,k
+
+denotes the UT-side channel correlation matrix from the interfering satellite s′ to the k-th UT. 
+
+B. Statistical Characteristics and Angle Error Model 
+
+We adopt sCSI rather than instantaneous CSI (iCSI) because the high mobility and non-negligible propagation and feedback delays in LEO systems make timely tracking of fast fading challenging. In contrast, sCSI is governed mainly by slowly varying geometric LoS information and large-scale channel parameters, which can be obtained or predicted from satel-lite ephemeris, attitude, and UT-reported GNSS information. Owing to the LoS-dominant channel, sCSI-based precoding can retain substantial beamforming gains without tracking instantaneous fading. By exploiting this stable spatial structure, it can also reduce signal leakage toward unintended users and thereby mitigate interference. The channel between the s-th satellite and the k-th UT can be further modeled as a Rician fading channel [8], [11], [29]: 
+
+Hs,k =
+
+q κs,k βs,k   
+
+> κs,k +1
+
+ds,k, 0gHs,k +
+
+q βs,k   
+
+> κs,k +1
+
+˜ds,k gHs,k , (15) the LoS component satisfies ∥ds,k, 0∥2 = ∥gs,k ∥2 = 1 , while the non-LoS (NLoS) component follows a complex Gaussian distribution ˜ds,k ∼ CN (0, Σs,k ) with Tr( Σs,k ) = 1 . The re-ceiver steering vector ds,k =
+
+q κs,k βs,k   
+
+> κs,k +1
+
+ds,k, 0 +
+
+q βs,k   
+
+> κs,k +1
+
+˜ds,k ,and βs,k = Ed{Tr( Hs,k HHs,k )} = Ed{∥ ds,k ∥2} denotes the average channel power, which captures the distance-dependent path loss and other large-scale propagation losses, including atmospheric and rain attenuation. The channel correlation matrices at the UT side and at the satellite side are: 
+
+Rut 
+
+> s,k
+
+=Ed
+
+n
+
+Hs,k HHs,k 
+
+o
+
+=κs,k βs,k  
+
+> κs,k +1
+
+ds,k, 0dHs,k, 0+ βs,k 
+
+> κs,k +1
+
+Σs,k , (16) 
+
+Rsat  
+
+> s,k
+
+= Ed
+
+n
+
+HHs,k Hs,k 
+
+o
+
+= βs,k gs,k gHs,k . (17) Based on the satellite channel characteristics described above, we summarize the sCSI available at the satellite side: 
+
+{ϕsat 
+
+> s,k
+
+, θ sat 
+
+> s,k
+
+, ϕ ut 
+
+> s,k, 0
+
+, θ ut 
+
+> s,k, 0
+
+, Σs,k , β s,k , κ s,k }∀s, ∀k. The angle pa-rameters {ϕsat 
+
+> s,k
+
+, θ sat 
+
+> s,k
+
+, ϕ ut 
+
+> s,k, 0
+
+, θ ut 
+
+> s,k, 0
+
+}∀s,k are primarily obtained from the satellite ephemeris, satellite attitude, and the UT position provided by GNSS, and are used to construct the LoS steering vectors. The average channel power βs,k , Rician factor 
+
+κs,k , and the normalized NLoS covariance matrix Σs,k can be estimated from the repeated downlink-pilot observations. The clean and global sCSI commonly assumed in central-ized schemes relies on idealized perfect information acquisi-tion or a large number of inter-satellite information exchanges, which are difficult to realize in practical decentralized trans-mission. Consequently, each satellite typically has access only to partial and noisy observations. Since angle information directly determines the precoding structure, we use angle perturbation as a physically meaningful characterization of noisy sCSI, which may arise from angle-estimation errors, satellite attitude jitter, array calibration errors and uncertainty, 5
+
+and feedback delay [16]–[18]. For each link (s, k ), the true angle vector and its corresponding error vector are defined as: 
+
+Ψs,k ≜ ϕsat 
+
+> s,k
+
+, θ sat 
+
+> s,k
+
+, ϕ ut 
+
+> s,k, 0
+
+, θ ut 
+
+> s,k, 0
+
+T , (18) 
+
+∆Ψs,k ≜ ∆ϕsat 
+
+> s,k
+
+, ∆θsat 
+
+> s,k
+
+, ∆ϕut 
+
+> s,k, 0
+
+, ∆θut 
+
+> s,k, 0
+
+T , (19) where the four angle error components are assumed to be independent and identically distributed as: 
+
+∆ϕsat 
+
+> s,k
+
+, ∆θsat 
+
+> s,k
+
+, ∆ϕut 
+
+> s,k, 0
+
+, ∆θut  
+
+> s,k, 0
+
+∼ U[−ε, ε ]. Here, ε > 0
+
+represents the angle error bound, i.e., the maximum absolute deviation of each angle component, with a larger ε indicating less accurate sCSI. Then, the perturbed angle vector is: 
+
+¯Ψs,k ≜ Ψs,k + ∆ Ψs,k =  ¯ϕsat 
+
+> s,k
+
+, ¯θsat 
+
+> s,k
+
+, ¯ϕut 
+
+> s,k, 0
+
+, ¯θut 
+
+> s,k, 0
+
+T . (20) Accordingly, the steering vectors used in student-side statisti-cal modeling are recomputed as: 
+
+¯gs,k = aMx
+
+
+
+sin ¯θsat  
+
+> s,k
+
+cos ¯ϕsat 
+
+> s,k
+
+
+
+⊗ aMy
+
+
+
+cos ¯θsat 
+
+> s,k
+
+
+
+, (21) 
+
+¯ds,k, 0 = aNx′
+
+
+
+sin ¯θut  
+
+> s,k, 0
+
+cos ¯ϕut 
+
+> s,k, 0
+
+
+
+⊗aNy′
+
+
+
+cos ¯θut 
+
+> s,k, 0
+
+
+
+. (22) Then, all sCSI-dependent covariance terms are updated as: 
+
+¯Rut  
+
+> s,k
+
+= κs,k βs,k   
+
+> κs,k +1
+
+¯ds,k, 0 ¯dHs,k, 0 + βs,k   
+
+> κs,k +1
+
+Σs,k , (23) 
+
+¯Rsat  
+
+> s,k
+
+= βs,k ¯gs,k ¯gHs,k . (24) 
+
+C. Closed-Form Structure for Multi-Satellite Transmission 
+
+The DL ergodic rate from the satellite s to the UT k is: 
+
+Rs,k = EH
+
+n
+
+log 2
+
+
+
+1 + α−1
+
+> s,k
+
+bHs,k Hs,k ps,k pHs,k HHs,k bs,k 
+
+o 
+
+= Ed
+
+n
+
+log 2
+
+
+
+1 + α−1
+
+> s,k
+
+|pHs,k gs,k |2|bHs,k ds,k |2o 
+
+, (25) herein, we have αs,k ≜ P
+
+> k′∈K\{ k}
+
+|pHs,k ′ gs,k |2|bHs,k ds,k |2+
+
+bHs,k Rs,k bs,k . Assuming the sCSI available at satellites, the WSR maximization problem for multi-satellite transmission can be formulated as [8]: 
+
+max   
+
+> {bs,k ,ps,k }∀s,k
+
+P
+
+> s∈S
+
+P 
+
+> k∈K
+
+as,k Rs,k ,
+
+s.t. P 
+
+> k∈K
+
+∥ps,k ∥22 ≤ P sat  
+
+> s
+
+, ∀s ∈ S ,
+
+(26) 
+
+as,k denotes the user rate weight, and P sat  
+
+> s
+
+is the satellite transmit power budget. To facilitate the optimization, we opti-mize the WSR maximization problem by solving the weighted minimum mean square error (WMMSE) problem [31]: 
+
+min     
+
+> {us,k ,w s,k ,ps,k ,bs,k }∀s,k
+
+P
+
+> s∈S
+
+P 
+
+> k∈K
+
+(ws,k es,k − log ws,k ) ,
+
+s.t. P 
+
+> k∈K
+
+∥ps,k ∥22 ≤ P sat  
+
+> s
+
+, ∀s ∈ S , (27) where ws,k represents the error weight, and the MSE es,k is: 
+
+es,k = EH,x,z 
+
+|us,k rs,k − xs,k |2
+
+= |us,k |2 (ηs,k + ζs,k ) − u∗
+
+> s,k
+
+ξ∗ 
+
+> s,k
+
+− us,k ξs,k + 1 , (28) where the desired signal level ξs,k = EH{bHs,k Hs,k ps,k } =q κs,k βs,k   
+
+> κs,k +1
+
+bHs,k ds,k, 0gHs,k ps,k , and the desired signal power 
+
+ζs,k = EH{| bHs,k Hs,k ps,k |2} = |pHs,k gs,k |2bHs,k Rut 
+
+> s,k
+
+bs,k .Moreover, the aggregate interference-plus-noise signal power 
+
+ηs,k = EH,z {P 
+
+> k′∈K\{ k}
+
+|bHs,k Hs,k ps,k ′ |2 + zs,k z∗
+
+> s,k
+
+} =
+
+P 
+
+> k′∈K\{ k}
+
+|pHs,k ′ gs,k |2bHs,k Rut 
+
+> s,k
+
+bs,k + bHs,k Rs,k bs,k . The derivation follows the standard WMMSE equivalence and the Karush–Kuhn–Tucker (KKT)-based block-coordinate updates [9], and the closed-form expressions can be summarized as: 
+
+b⋆s,k =
+
+q κs,k βs,k   
+
+> κs,k +1
+
+ws,k us,k 
+
+
+
+ws,k |us,k |2 P
+
+> s′∈S
+
+P
+
+> k′∈K
+
+|pHs′,k ′ gs′,k |2Rut  
+
+> s′,k
+
++ws,k |us,k |2σ2
+
+> k
+
+IN
+
+−1
+
+ds,k, 0gHs,k ps,k , (29) 
+
+p⋆s,k =
+
+q κs,k βs,k   
+
+> κs,k +1
+
+ws,k u∗
+
+> s,k
+
+ P
+
+> s′∈S
+
+P 
+
+> k′∈K
+
+ws′,k ′ |us′,k ′ |2
+
+bHs′,k ′ Rut  
+
+> s,k ′
+
+bs′,k ′ gs,k ′ gHs,k ′ + λsIM
+
+−1
+
+gs,k dHs,k, 0bs,k , (30) where {λs}∀s denote the Lagrange multipliers associated with the satellite transmit-power budget constraints. The above updates reveal an explicit mapping from compact low-dimensional variables to the high-dimensional beamform-ing and precoding vectors. Specifically, once the weights, Lagrange multipliers, and sCSI are available, bs,k and ps,k can be recovered through the structured matrix-inversion forms in (29) and (30). Therefore, instead of directly learning the high-dimensional precoders, such a WMMSE-induced structure is exploited for developing a neural recovery framework to pre-dict the compact variables and reconstruct the corresponding precoding solution. III. M ULTI -S ATELLITE COOPERATION : F ROM TEACHER 
+
+NN TO STUDENT NN S
+
+Centralized multi-satellite precoding faces two practical challenges: acquiring global and clean sCSI from all satellites is difficult, while distributing the jointly optimized precoders through ISLs incurs substantial signaling overhead and delay. In contrast, decentralized precoding avoids centralized infor-mation collection and precoder dissemination but suffers from degraded performance because each satellite has access only to partial and noisy observations. To bridge this gap, we pro-pose the centralized-training and decentralized-execution KD framework. During offline ground-based training, a centralized teacher NN learns from emulated global and clean sCSI and transfers its cooperative precoding knowledge to lightweight student NNs trained with partial and noisy inputs. The trained student NNs are then uploaded to their corresponding satellites for online onboard inference. During operation, only the student NNs are executed, with each satellite independently inferring its local precoder from locally available sCSI and limited ISL-exchanged information. 
+
+A. Knowledge Discovery for Multi-Satellite Transmission 
+
+To reduce the learning burden of precoder recovery by NNs, we reformulate the closed-form precoding solution as follows: 
+
+ps,k =ws,k u∗
+
+> s,k
+
+ X 
+
+> k′∈K
+
+gs,k ′ gHs,k ′ ϱs,k ′+λsIM
+
+−1
+
+gs,k ¯dHs,k bs,k . (31) Here, we introduce the low-dimensional variable 
+
+ϱs,k ′ ≜ P 
+
+> s′∈S
+
+ws′,k ′ |us′,k ′ |2bHs′,k ′ Rut  
+
+> s,k ′
+
+bs′,k ′ , ∀s, k ′, and denote ¯ds,k ≜ E{ds,k } =
+
+q κs,k βs,k   
+
+> κs,k +1
+
+ds,k, 0. It follows from (31) that the high-dimensional precoding vectors are governed 6 
+
+> Fig. 2. Teacher NN framework.
+
+by a set of compact variables, including {ws,k , u s,k }∀s,k ,
+
+{λs}∀s, {ϱs,k ′ }∀s,k ′ , and {bs,k }∀s,k . Therefore, instead of directly learning the mapping from channel observations to high-dimensional precoding vectors, we learn the mapping to these compact variables and recover the precoders according to (31). This knowledge-guided reformulation significantly reduces the representation complexity of the NN and provides a more structured and interpretable learning target for multi-satellite transmission. The accurate prediction of these compact variables depends not only on the NN itself but also on the informativeness and reliability of the input features. An ideal centralized learner can exploit clean global sCSI to learn the coupled variables in (31). In practical decentralized systems, however, each satellite is equipped with lightweight NNs due to onboard computation, storage, and real-time inference constraints, and can directly access only partial and noisy sCSI. To address this information asymmetry, we propose a teacher-student learning framework. The centralized teacher NN is trained with global and clean observations to discover the compact transmission knowledge embedded in the WMMSE-inspired structure. Each decentral-ized student NN is designed for lightweight onboard infer-ence and operates with partial and noisy sCSI, together with limited information exchanged through ISLs. Through KD, the informative representations and transmission knowledge learned by the teacher are transferred to the students, thereby bridging the gap between centralized knowledge discovery and decentralized precoder recovery. The detailed designs of the centralized teacher NN and decentralized student NNs are presented in the following subsections. 
+
+B. Large Centralized Teacher NN for MSMS 
+
+According to (16) and (31), we define the input set, which serves as the foundation for the subsequent learning process. In the centralized satellite network architecture, the central satellite combines the local features with the transmitted features from all cooperative satellites, forming the following centralized NN input set Htea ≜ {H s}∀s∈S :
+
+Htea ≜
+
+nΨs,k ,β s,k ,κ s,k ,Σs,k ,σ 2  
+
+> k∀k∈K
+
+∪ P sat 
+
+> s
+
+o
+
+> ∀s∈S
+
+. (32) The central teacher satellite feature set Htea comprises the angle information of the satellite and UTs, the average channel power βs,k , the Rician factor κs,k , the spatial covariance matrix Σs,k of the NLoS component, and the receiver noise power σ2
+
+> k
+
+. Based on Htea , we construct the centralized teacher NN input tensor T ∈ RS×K×Dloc :
+
+T[s,k, :] = ϕsat 
+
+> s,k
+
+, θ sat 
+
+> s,k
+
+, ϕ ut 
+
+> s,k, 0
+
+, θ ut 
+
+> s,k, 0
+
+, β s,k , κ s,k , σ 2
+
+> s,k
+
+, P sat  
+
+> s,k
+
+,
+
+vec(Re( Rut 
+
+> s,k
+
+)) , vec(Im( Rut 
+
+> s,k
+
+)) ,
+
+vec(Re( Rsat 
+
+> s,k
+
+)) , vec(Im( Rsat 
+
+> s,k
+
+)) , (33) where σ2 
+
+> s,k
+
+≜ σ2 
+
+> k
+
+and P sat  
+
+> s,k
+
+≜ P sat  
+
+> s
+
+.
+
+1) Large Transformer Encoder (LTE) : For each satellite 
+
+s ∈ S and user k ∈ K , the feature vector ts,k ≜ T[s,k, :] ∈
+
+RDloc is partitioned into patch tokens of length E. With zero-padding of the last patch if necessary, the number of tokens is 
+
+T =  Dloc 
+
+> E
+
+, and the raw patch tensor is Ftea = Token( T) ∈
+
+RS×K×T ×E . The multi-layer Transformer NLTE serves as the backbone that maps raw satellite-user features into compact patch-conditioned embeddings through stacked self-attention: 
+
+Xtea = N tea LTE (Ftea ) ∈ RS×K×Dh . (34) Each patch token is linearly projected to hidden dimension Dh,summed with a learnable positional embedding that depends on the patch index τ , and applies the layer normalization (LN): 
+
+x(0)  
+
+> s,k,τ
+
+= LN  Linear( fs,k,τ ; Wemb , bemb ) + pτ
+
+ ∈ RDh , (35) where fs,k,τ ≜ Ftea [s,k,τ, :] ∈ RE , τ ∈ {1, . . . , T }, and 
+
+Wemb ∈ RE×Dh , bemb , pτ ∈ RDh shared across all (s, k ).We define a multi-dimensional linear layer that applies an affine mapping along the last dimension: Linear( X; W, b) ≜
+
+X × W + 1M1,...,M N ,1 ⊙ bT , where X ∈ RM1×···× MN ×DI ,
+
+W ∈ RDI×DO , and b ∈ RDO . For each fixed (s, k ), the patch embeddings are stacked into a length-T sequence 
+
+X(0)  
+
+> s,k
+
+=
+
+h
+
+x(0) 
+
+> s,k, 1
+
+, . . . , x(0) 
+
+> s,k,T
+
+iT
+
+∈ RT ×Dh . (36) The resulting sequence is then fed into an L-layer Transformer encoder, where self-attention is restricted to the patch dimen-sion τ for each satellite-user pair: 
+
+X(ℓ) 
+
+> s,k
+
+= TF ℓ
+
+
+
+X(ℓ−1) 
+
+> s,k
+
+
+
+∈ RT ×Dh , ∀ℓ = 1 , . . . , L, (37) where each layer TF ℓ(·) consists of multi-head attention (MHA) followed by a feed-forward network (FFN). 
+
+(i) MHA. Let Q = X(ℓ−1)  
+
+> s,k
+
+WQ, K = X(ℓ−1)  
+
+> s,k
+
+WK , V =
+
+X(ℓ−1)  
+
+> s,k
+
+WV , with WQ, WK , WV ∈ RDh×Dh . Split into H
+
+heads with dk = Dh/H . For head h, softmax is taken over the key dimension indexed by patch τ :
+
+Oh = softmax  QhKTh /√dk
+
+ Vh. (38) Concatenate heads along the feature dimension, O =[O1, . . . , OH ]2 ∈ RT ×Dh , apply an output linear map, dropout, residual from X(ℓ−1)  
+
+> s,k
+
+, and LN: 
+
+eX(ℓ) 
+
+> s,k
+
+= LN 
+
+
+
+X(ℓ−1)  
+
+> s,k
+
++Dropout  O(WO )T 
+
+∈ RT ×Dh . (39) 
+
+(ii) FFN. A two-layer FFN is applied to every patch row of 
+
+eX(ℓ) 
+
+> s,k
+
+with hidden width Dffn = ρD h, ReLU activation [32], 7
+
+Algorithm 1 Centralized Teacher NN for MSMS  
+
+> 1:
+
+Input: {Ψs,k ,β s,k ,κ s,k ,Σs,k }∀s,k ,{σ2
+
+> k
+
+}∀k,{P sat  
+
+> s
+
+}∀s. 
+
+> 2:
+
+Construct the centralized teacher NN input tensor T. 
+
+> 3:
+
+Training:  
+
+> 4:
+
+Initialize N (0) tea = {N tea LTE , N tea DAA , N tea TEN , N tea PD }(0) , n = 0 . 
+
+> 5:
+
+for n < N ep do  
+
+> 6:
+
+forward:  
+
+> 7:
+
+Tokenize the input: Ftea = Token( T). 
+
+> 8:
+
+Apply the LTE network: Xtea = N tea LTE 
+
+ Ftea . 
+
+> 9:
+
+Apply the DAA network: Htea = N tea DAA 
+
+ Xtea . 
+
+> 10:
+
+Apply the TEN network: Etea = N tea TEN 
+
+ Htea . 
+
+> 11:
+
+Execute the PD module: Ctea = N tea PD (Etea ). 
+
+> 12:
+
+{btea  
+
+> s,k
+
+, ptea  
+
+> s,k
+
+}∀s,k = N tea PR (Ctea , {ds,k, 0, gs,k }∀s,k ). 
+
+> 13:
+
+backward:  
+
+> 14:
+
+Update N (n)tea via gradient descent on Lwsr obj . 
+
+> 15:
+
+Update n = n + 1 . 
+
+> 16:
+
+end for  
+
+> 17:
+
+Store the learned variables of Ntea . 
+
+> 18:
+
+Inference: Use Ntea to obtain {ptea  
+
+> s,k
+
+, btea  
+
+> s,k
+
+}∀s, ∀k.dropout, a residual connection from eX(ℓ)
+
+> s,k
+
+, and a final LN: 
+
+X(ℓ) 
+
+> s,k
+
+= LN eX(ℓ) 
+
+> s,k
+
++ Dropout Linear 
+
+
+
+ReLU 
+
+
+
+Linear   eX(ℓ)
+
+> s,k
+
+; Wffn 1 , bffn 1
+
+
+
+; Wffn 2 , bffn 2
+
+!! 
+
+,
+
+(40) where X(ℓ) 
+
+> s,k
+
+∈ RT ×Dh , Wffn 1 ∈ RDh×Dffn , Wffn 2 ∈ RDffn ×Dh ,and bffn 1 ∈ RDffn , bffn 2 ∈ RDh are the corresponding biases. Patch-wise mean pooling yields one vector per (s, k ):
+
+Xtea [s,k, :] = 1
+
+> T
+
+PTτ =1 x(L) 
+
+> s,k,τ
+
+∈ RDh , (41) where x(L) 
+
+> s,k,τ
+
+≜ X(L) 
+
+> s,k [τ, :]
+
+, forming Xtea ∈ RS×K×Dh as input to subsequent modules. 
+
+2) Dual-Axis Attention (DAA) : The DAA network stacks 
+
+Laxis identical stages. Each stage executes two separable self-attention operations on the satellite–UT lattice: first, along the UT index k within each satellite s, so that UTs served by the same satellite attend over one another, then along the satellite index s while holding k fixed, aggregating embeddings of the same UT across satellites. The UT-axis sweep encodes intra-satellite multi-UT coupling; the satellite-axis sweep fuses inter-satellite information perceived by individual UTs: 
+
+Htea = N tea DAA (Xtea ) ∈ RS×K×Dh , (42) 
+
+N tea DAA (·) denote Laxis compositions of two-axis updates. 
+
+(i) User-axis. For each satellite s ∈ S , form a token matrix whose k-th row is the embedding of user k on satellite s,
+
+A(ℓ) 
+
+> s
+
+=
+
+h
+
+H(ℓ−1) [s, 1,:] , . . . , H(ℓ−1) [s,K, :] 
+
+iT
+
+∈ RK×Dh , (43) where H(0) = Xtea ∈ RS×K×Dh . Update A(ℓ) 
+
+> s
+
+with LN, MHA along the row index k, dropout, and a residual connection, 
+
+A(ℓ) 
+
+> s
+
+← A(ℓ) 
+
+> s
+
++ Dropout 
+
+
+
+MHA (ℓ)user 
+
+ LN( A(ℓ) 
+
+> s
+
+)
+
+. (44) Let ´H(ℓ)
+
+∈ RS×K×Dh pack these slices, ´H(ℓ)[s,k, :] = A(ℓ) 
+
+> s[k, :]
+
+.
+
+(ii) Satellite-axis. For each user k ∈ K , form a token matrix whose s-th row is that user’s embedding on satellite s after user-axis mixing, 
+
+B(ℓ) 
+
+> k
+
+=
+
+
+
+´H(ℓ)[1 ,k, :] , . . . , ´H(ℓ)[S,k, :] 
+
+T
+
+∈ RS×Dh , (45) and update with the same pattern along the row index s,
+
+B(ℓ) 
+
+> k
+
+← B(ℓ) 
+
+> k
+
++ Dropout 
+
+
+
+MHA (ℓ)sat 
+
+ LN( B(ℓ) 
+
+> k
+
+)
+
+. (46) Define the stage output H(ℓ) ∈ RS×K×Dh by H(ℓ)[s,k, :] =
+
+B(ℓ) 
+
+> k[s, :]
+
+. After Laxis stages, Htea ≜ H(Laxis ) outputs to subsequent modules. 
+
+3) Tensor-Equivariant Neural (TEN) Network : We em-ploy a low-complexity TEN network to transform the input tensor into a latent representation while preserving permu-tation equivariance with respect to both the satellite and UT dimensions. Specifically, TEN captures both original and multidimensional global features by aggregating mean features across different subsets of the equivariant dimensions and combining them with the original features via learnable linear transformations [33]: 
+
+Etea = N tea TEN (Htea ) ∈ RS×K×G. (47) The TEN network N tea TEN consists of an input linear layer followed by Lten stacked blocks, each comprising a multi-dimensional equivariant (MDE) module, a ReLU, an LN, and an output linear layer: 
+
+E(0) = Linear  Htea ; Wten 1 , bten 1
+
+ ∈ RS×K×Dten , (48a) 
+
+E(ℓ) = LN 
+
+
+
+ReLU   MDE ℓ(E(ℓ−1) )
+
+, ℓ = 1 , . . . , L ten , (48b) 
+
+Etea = Linear 
+
+
+
+E(Lten ); Wten 2 , bten 2
+
+
+
+∈ RS×K×G, (48c) where Dten denotes the hidden dimension in TEN network and 
+
+G = 6 + 2 N , Wten 1 ∈ RDh×Dten , Wten 2 ∈ RDten ×G, bten 1 ∈
+
+RDten , bten 2 ∈ RG. In each layer, MDE ℓ(·) is implemented as a linear combination of mean-and-repeat patterns defined on subsets of the two equivariant dimensions {S, K } [33]. 
+
+4) Parameter Decoder (PD) and Precoder Recovery (PR) :
+
+The PD module aims to decode the precoder-related parame-ters from the teacher-side representation: 
+
+Ctea = N tea PD 
+
+ Etea . (49) Specifically, we employ a lightweight MLP consisting of one LN layer, two linear transformations, and a GELU activation. The decoded parameter tensor Ctea is obtained as: 
+
+˜C = Linear(LN( Etea ); Wpd 1 , bpd 1 ), (50a) 
+
+Ctea = Linear(GELU( ˜C); Wpd 2 , bpd 2 ), (50b) with Wpd 1 , Wpd 2 ∈ RG×G and bpd 1 , bpd 2 ∈ RG. Then, the PD module recovers the receive and precoding vectors: 
+
+{btea  
+
+> s,k
+
+, ptea  
+
+> s,k
+
+}∀s, ∀k = N tea PR 
+
+ Ctea , {ds,k, 0, gs,k }∀s, ∀k
+
+, (51) 8 
+
+> Fig. 3. Student NN framework.
+
+writing Ctea [s,k, :] = cs,k = [ c1, . . . , c G]T ,
+
+
+
+utea  
+
+> s,k
+
+= c1 + jc 2,wtea  
+
+> s,k
+
+= softplus( c3) + ϵ, 
+
+˜λtea  
+
+> s,k
+
+= c4, λ tea  
+
+> s
+
+= softplus 
+
+ 1
+
+> K
+
+PKk=1 ˜λs,k 
+
+
+
+,ϱtea  
+
+> s,k
+
+= c5 + jc 6,
+
+btea  
+
+> s,k
+
+= norm 
+
+
+
+cs,k [7:6+ N ] + jcs,k [7+ N :6+2 N ]
+
+
+
+.
+
+(52) Herein, norm( ·) is ℓ2 normalization on CN , and ϵ >
+
+0 is small. Given {utea  
+
+> s,k
+
+, w tea  
+
+> s,k
+
+, λ tea  
+
+> s
+
+, ϱ tea  
+
+> s,k
+
+, btea  
+
+> s,k
+
+}∀s, ∀k and 
+
+{ds,k, 0, gs,k }∀s, ∀k, we can recover the closed-form precoders 
+
+{ptea  
+
+> s,k
+
+}∀s, ∀k as in (31). Note that N tea PR is a fixed computation module and is not updated during training. Moreover, the teacher NN Ntea = {N tea LTE , N tea DAA , N tea TEN , N tea PD } is frozen during following distillation. The entire teacher NN training and inference process is summarized in Algorithm 1 .
+
+C. Lightweight Decentralized Student NNs for MSMS 
+
+The decentralized student is a weight-shared NN instanti-ated for each satellite s ∈ S . It maps local features, together with low-rate information exchanged among peer satellites, to per-satellite precoders without centralized aggregation [9]. Assuming that only satellite state information (SSI), including the satellite position, attitude, and transmit power, is period-ically exchanged among decentralized student satellites, the exchanged information, together with the UT positions, is used to obtain the corresponding angles { ¯Ψs′,k }∀s∈S\{ s},∀k∈K for the other satellites. The student feature set is then constructed from the local- and other-satellite features: 
+
+Hstu  
+
+> s
+
+≜  ¯Ψs,k , β s,k , κ s,k , Σs,k , σ 2
+
+> k
+
+, P sat   
+
+> s∀k∈K
+
+(53) 
+
+∪ { ¯Ψs′,k , σ 2
+
+> k
+
+, P sat  
+
+> s′
+
+}∀s′∈S\{ s},∀k∈K , (54) Based on Hstu  
+
+> s
+
+, we construct the local-satellite input second-order tensors Sloc  
+
+> s
+
+∈ RK×Dloc and the other-satellite input third-order tensors Soth  
+
+> s
+
+∈ R(S−1) ×K×Doth as follows: 
+
+Sloc   
+
+> s[k, :]
+
+=  ¯ϕsat 
+
+> s,k
+
+, ¯θsat 
+
+> s,k
+
+, ¯ϕut 
+
+> s,k, 0
+
+, ¯θut 
+
+> s,k, 0
+
+, β s,k , κ s,k , σ 2
+
+> s,k
+
+, P sat  
+
+> s,k
+
+,
+
+vec(Re( ¯Rut 
+
+> s,k
+
+)) , vec(Im( ¯Rut 
+
+> s,k
+
+)) ,
+
+vec(Re( ¯Rsat 
+
+> s,k
+
+)) , vec(Im( ¯Rsat 
+
+> s,k
+
+)) , (55) 
+
+Soth   
+
+> s[s′,k, :]
+
+=  ¯ϕsat 
+
+> s′,k
+
+, ¯θsat 
+
+> s′,k
+
+, ¯ϕut 
+
+> s′,k, 0
+
+, ¯θut 
+
+> s′,k, 0
+
+, σ 2
+
+> s′,k
+
+, P sat 
+
+> s′,k
+
+,
+
+vec(Re( ¯ds′,k, 0 ¯dHs′,k, 0)) , vec(Im( ¯ds′,k, 0 ¯dHs′,k, 0)) ,
+
+vec(Re(¯ gs′,k ¯gHs′,k )) , vec(Im(¯ gs′,k ¯gHs′,k )) , s ′ ∈ S \{ s}, (56) Fixing a target satellite s, we collect the local-satellite feature tensor Sloc  
+
+> s
+
+∈ RK×Dloc and other-satellite feature tensor Soth  
+
+> s
+
+∈ R(S−1) ×K×Doth for s′ ∈ S \ { s}. Due to the limited observation of the decentralized student satellite, 
+
+Doth = Dloc − 2, we align the feature dimension by zero-padding so that all features are put into RS×K×Dloc . We then form a virtual stack along an auxiliary satellite index, 
+
+Ss ≜
+
+h
+
+Sloc  
+
+> s
+
+,
+
+h
+
+Soth  
+
+> s
+
+, 0(S−1) ×K×2
+
+i
+
+> 3
+
+i
+
+> 1
+
+∈ RS×K×Dloc . (57) Compared with the teacher-NN input, the student-NN input excludes the average channel power βs′,k and the Rician factor κs′,k of the other satellites, and all angle information is corrupted by estimation errors, satellite attitude jitter, ar-ray calibration errors and uncertainty, and feedback delays [16]–[18]. Moreover, we use the outer products of the LoS steering vectors and their Hermitian transposes, i.e., ¯gs′,k ¯gHs′,k 
+
+and ¯ds′,k, 0 ¯dHs′,k, 0, as substitutes for the missing correlation matrices. The teacher in Section III-B assumes a global-capable node that acquires the full tensor T ∈ RS×K×Dloc and runs a deep LTE backbone ( L Transformer layers). Each de-centralized student satellite, however, must perform on-board precoding under latency and signaling constraints. Relative to the teacher, the LTE is reduced to a single-layer Transformer encoder (STE) for patch tokens, rather than L Transformer layers. The whole student NN for the s-th satellite is: 
+
+Fstu  
+
+> s
+
+= Token  Ss
+
+ ∈ RS×K×T ×E , (58a) 
+
+Xstu  
+
+> s
+
+= N stu STE 
+
+ Fstu 
+
+> s
+
+ ∈ RS×K×Dh , (58b) 
+
+Hstu  
+
+> s
+
+= N stu DAA 
+
+ Xstu 
+
+> s
+
+ ∈ RS×K×Dh , (58c) 
+
+¯Hstu  
+
+> s
+
+= 1
+
+S
+
+> S
+
+X
+
+> s′=1
+
+Hstu  
+
+> s[s′,:,:]
+
+∈ RK×Dh , (58d) 
+
+Estu  
+
+> s
+
+= N stu TEN 
+
+  ¯Hstu 
+
+> s
+
+ ∈ RK×G, (58e) 
+
+Cstu  
+
+> s
+
+= N stu PD 
+
+ Estu 
+
+> s
+
+, (58f) 
+
+{bstu  
+
+> s,k
+
+, pstu  
+
+> s,k
+
+}∀k = N stu PR 
+
+ Cstu  
+
+> s
+
+, {¯ds,k, 0, ¯gs,k }∀k
+
+. (58g) Herein, the student NNs we deployed are weight-shared across different satellites. The student NN training and inference process is summarized in Algorithm 2 .IV. K NOWLEDGE DISTILLATION FRAMEWORK DESIGN 
+
+A. Differences between Teacher and Student 
+
+As illustrated in Fig. 4, the teacher serves as a privileged knowledge source with access to more complete and reliable observations and a broader precoding decision scope than each student. Specifically, the teacher takes the global-clean observation T in (33) as input, which contains global features across all satellites and UTs together with accurate angle observations. In contrast, the s-th student only has access to the partial and angle-noisy observation Ss in (57). Their respective observation domains are characterized as: 
+
+T ∼ D gc tea , Ss ∼ D pn stu , Dgc tea ̸ = Dpn stu , (59) 9
+
+Algorithm 2 Decentralized Student NNs for MSMS  
+
+> 1:
+
+Input: { ¯Ψs,k , β s,k , κ s,k , Σs,k , σ 2
+
+> k
+
+, P sat  
+
+> s
+
+}∀k∈K 
+
+∪{ ¯Ψs′,k , σ 2
+
+> k
+
+, P sat  
+
+> s′
+
+}∀s′∈S\{ s},∀k∈K ∀s. 
+
+> 2:
+
+Construct {Sloc  
+
+> s
+
+, Soth  
+
+> s
+
+}∀s and stack into {Ss}∀s. 
+
+> 3:
+
+Training:  
+
+> 4:
+
+N (0) stu = {N stu STE , N stu DAA , N stu TEN , N stu PD }(0) and n = 0 . 
+
+> 5:
+
+for n < N ep do  
+
+> 6:
+
+forward:  
+
+> 7:
+
+for each satellite s ∈ S do  
+
+> 8:
+
+Tokenize the input: Fstu  
+
+> s
+
+= Token  Ss
+
+. 
+
+> 9:
+
+Apply the STE network: Xstu  
+
+> s
+
+= N stu STE 
+
+ Fstu 
+
+> s
+
+. 
+
+> 10:
+
+Apply the DAA network: Hstu  
+
+> s
+
+= N stu DAA 
+
+ Xstu 
+
+> s
+
+. 
+
+> 11:
+
+Calculate: ¯Hstu  
+
+> s
+
+= 1
+
+> S
+
+PSs′=1 Hstu 
+
+> s[s′,:,:]
+
+. 
+
+> 12:
+
+Apply the TEN network: Estu  
+
+> s
+
+= N stu TEN 
+
+  ¯Hstu 
+
+> s
+
+. 
+
+> 13:
+
+Execute the PD module: Cstu  
+
+> s
+
+= N stu PD 
+
+ Estu 
+
+> s
+
+. 
+
+> 14:
+
+{bstu  
+
+> s,k
+
+, pstu  
+
+> s,k
+
+}∀k = N stu PR 
+
+ Cstu  
+
+> s
+
+, {¯ds,k, 0, ¯gs,k }∀k
+
+. 
+
+> 15:
+
+end for  
+
+> 16:
+
+backward:  
+
+> 17:
+
+Update N (n)stu via gradient descent on Lwsr obj . 
+
+> 18:
+
+Update n = n + 1 . 
+
+> 19:
+
+end for  
+
+> 20:
+
+Store the learned variables of Nstu . 
+
+> 21:
+
+Inference: For ∀s, use the partial noisy input Ss and the trained Nstu to obtain {pstu  
+
+> s,k
+
+, bstu  
+
+> s,k
+
+}∀k in parallel. where Dgc tea denotes the global-clean teacher-view domain, whereas Dpn stu denotes the partial-noisy student-view domain. The teacher-student asymmetry arises from three aspects. First, in terms of observation scope , the teacher observes system-wide information across all satellites and UTs, whereas each student only observes satellite-specific partial informa-tion. Second, in terms of observation quality , the teacher receives accurate angle observations, whereas the student operates with angle-noisy observations. Third, in terms of 
+
+precoding decision scope , the centralized teacher learns a system-level mapping from global multi-satellite observations to jointly coordinated precoders for all satellites, whereas each decentralized student learns a node-level mapping from its partial observation to the precoder of the corresponding satellite. These mappings can be expressed as: 
+
+ftea : T 7 −→ ptea   
+
+> s,k ∀s,k
+
+, (60) 
+
+fstu : Ss 7 −→ pstu   
+
+> s,k ∀k
+
+, ∀s ∈ S , (61) where {ptea  
+
+> s,k
+
+}∀s,k denotes the jointly generated multi-satellite precoders by the teacher, while {pstu  
+
+> s,k
+
+}∀k denotes the local precoder generated independently by the s-th student satellite. Accordingly, the proposed framework performs knowledge transfer not only from the global-clean observation domain to the partial-noisy observation domain, but also from a central-ized system-level precoding policy to decentralized satellite-level precoding policies. This design enables each student to inherit the teacher’s knowledge of global interference man-agement and multi-satellite coordination while retaining the low signaling overhead and decentralized inference capability required in practical systems.  
+
+> Fig. 4. Hybrid knowledge distillation design.
+
+B. Angle and Phase Correction 
+
+To mitigate performance degradation caused by angle noise, we introduce two modules, termed angle and phase residual prediction (APRP) and Kronecker steering-vector correction (KSVC), following the TEN network, as shown in Fig. 4. 
+
+1) APRP: Let ¯Ψs,k denote the noisy angle observation associated with the satellite and UT, given by: 
+
+¯Ψs,k =  ¯ϕsat 
+
+> s,k
+
+, ¯θsat 
+
+> s,k
+
+, ¯ϕut 
+
+> s,k, 0
+
+, ¯θut 
+
+> s,k, 0
+
+T . (62) An angle-error prediction head outputs a four-dimensional residual vector rs,k = [ r1
+
+> s,k
+
+, r 2
+
+> s,k
+
+, r 3
+
+> s,k
+
+, r 4
+
+> s,k
+
+]T , from which the bounded angle corrections are obtained as follows: 
+
+∆ ˆϕsat  
+
+> s,k
+
+= αϕ tanh  r1
+
+> s,k
+
+, ∆ˆθsat  
+
+> s,k
+
+= αθ tanh  r2
+
+> s,k
+
+,
+
+∆ ˆϕut  
+
+> s,k, 0
+
+= αϕ tanh  r3
+
+> s,k
+
+, ∆ˆθut  
+
+> s,k, 0
+
+= αθ tanh  r4
+
+> s,k
+
+, (63) where αθ and αϕ denote the maximum correction magni-tudes for the elevation and azimuth angles, respectively. The satellite-side and UT-side phase-residual vectors are: 
+
+∆ψgs,k = ψg tanh 
+
+
+
+rgs,k 
+
+
+
+∈ RM ×1, (64) 
+
+∆ψds,k = ψd tanh  rds,k 
+
+ ∈ RN ×1, (65) 
+
+ψg and ψd are the maximum correction magnitudes for the satellite-side and UT-side steering-vector phases, respectively. 
+
+2) KSVC: Accordingly, the predicted angle residual gives the corrected angle vector: ˆΨs,k ≜ ¯Ψs,k − ∆ ˆΨs,k =
+
+ ˆϕsat 
+
+> s,k
+
+, ˆθsat 
+
+> s,k
+
+, ˆϕut 
+
+> s,k, 0
+
+, ˆθut 
+
+> s,k, 0
+
+T = ¯ϕsat 
+
+> s,k
+
+−∆ ˆϕsat 
+
+> s,k
+
+, ¯θsat 
+
+> s,k
+
+−∆ˆθsat 
+
+> s,k
+
+, ¯ϕut 
+
+> s,k, 0
+
+−
+
+∆ ˆϕut 
+
+> s,k, 0
+
+, ¯θut 
+
+> s,k, 0
+
+−∆ˆθut 
+
+> s,k, 0
+
+T . Based on the corrected angles, the satellite-side and UT-side steering vectors are reconstructed by the Kronecker product: 
+
+ˆgs,k = aMx
+
+
+
+sin ˆθsat  
+
+> s,k
+
+cos ˆϕsat 
+
+> s,k
+
+
+
+⊗ aMy
+
+
+
+cos ˆθsat 
+
+> s,k
+
+
+
+, (66) 
+
+ˆds,k, 0 = aNx′
+
+
+
+sin ˆθut  
+
+> s,k, 0
+
+cos ˆϕut 
+
+> s,k, 0
+
+
+
+⊗aNy′
+
+
+
+cos ˆθut 
+
+> s,k, 0
+
+
+
+. (67) Then, we apply a per-antenna phase correction with normal-ization to the reconstructed steering vectors as follows: 
+
+˜gs,k = ˆgs,k ⊙exp (j∆ψgs,k )
+
+∥ˆgs,k ⊙exp (j∆ψgs,k )∥2
+
+, ˜ds,k, 0 = ˆds,k, 0⊙exp (j∆ψds,k )
+
+∥ˆds,k, 0⊙exp (j∆ψds,k )∥2
+
+.
+
+(68) 10 
+
+Algorithm 3 Decentralized Student NN with KD  
+
+> 1:
+
+Input: T, {Ss}∀s, Ntea , and {αP , α d, α g }. 
+
+> 2:
+
+Freeze the teacher NN Ntea for supervision.  
+
+> 3:
+
+Training: N (0) stu -kd ={N stu -kd STE , N stu -kd DAA , N stu -kd TEN , N stu -kd PD }∪{ N stu -kd APRP  
+
+> (0)
+
+and n = 0 . 
+
+> 4:
+
+for n < N ep do  
+
+> 5:
+
+forward:  
+
+> 6:
+
+for each satellite s ∈ S do  
+
+> 7:
+
+Fstu  
+
+> s
+
+= Token( Ss). 
+
+> 8:
+
+Xstu -kd  
+
+> s
+
+= N stu -kd STE (Fstu  
+
+> s
+
+). 
+
+> 9:
+
+Hstu -kd  
+
+> s
+
+= N stu -kd DAA (Xstu -kd  
+
+> s
+
+). 
+
+> 10:
+
+¯Hstu -kd  
+
+> s
+
+= 1
+
+> S
+
+PSs′=1 Hstu -kd 
+
+> s[s′,:,:]
+
+. 
+
+> 11:
+
+Estu -kd  
+
+> s
+
+= N stu -kd TEN ( ¯Hstu -kd  
+
+> s
+
+). 
+
+> 12:
+
+{∆ ˆΨs,k ,∆ψgs,k ,∆ψds,k }∀k=N stu -kd APRP ( ¯Hstu −kd  
+
+> s
+
+). 
+
+> 13:
+
+{˜ds,k, 0,˜gs,k }∀k =NKSVC 
+
+ {∆ˆΨs,k ,∆ψgs,k ,∆ψds,k }∀k
+
+. 
+
+> 14:
+
+Cstu -kd  
+
+> s
+
+= N stu -kd PD (Estu -kd  
+
+> s
+
+). 
+
+> 15:
+
+{bstu -kd  
+
+> s,k
+
+, pstu -kd  
+
+> s,k
+
+}∀k=N stu PR 
+
+ Cstu -kd  
+
+> s
+
+, {˜ds,k, 0, ˜gs,k }∀k
+
+. 
+
+> 16:
+
+end for  
+
+> 17:
+
+Compute the overall loss Lstu -kd according to (74), with 
+
+T fed into Ntea and {Ss}∀s fed into N (n)stu -kd . 
+
+> 18:
+
+backward: Update N (n)stu -kd via Lstu -kd . 
+
+> 19:
+
+Set n = n + 1 . 
+
+> 20:
+
+end for  
+
+> 21:
+
+Store the learned variables of Nstu -kd . 
+
+> 22:
+
+Inference: For ∀s, use the partial noisy input Ss and the trained Nstu -kd to obtain {pstu -kd  
+
+> s,k
+
+, bstu -kd  
+
+> s,k
+
+}∀k in parallel. 
+
+C. Training Objective and Distillation Loss Design 
+
+The student NN is trained using a hybrid objective that combines a task-driven WSR loss with hybrid KD losses. The WSR loss directly optimizes the final task performance, whereas the distillation losses transfer structured knowledge from the teacher at both the precoder and steering-vector levels, as in Fig. 4. During student training, the teacher NN remains fixed and serves only to provide supervision targets. 
+
+1) WSR Optimization : At each training iteration, the stu-dent NNs output the precoders {pstu  
+
+> s,k
+
+}∀s,k , based on which the achievable rate is evaluated using the instantaneous CSI. The task loss is defined as the negative sample-averaged WSR: 
+
+Lwsr obj = − 1
+
+> Nsam
+
+PNsam 
+
+> n=1
+
+PSs=1 
+
+PKk=1 as,k R(n)
+
+> s,k
+
+
+
+{pstu  
+
+> s,k
+
+}(n)
+
+> ∀s,k
+
+
+
+, (69) where Nsam is the number of training samples. Minimizing 
+
+Lwsr obj is equivalent to maximizing the system WSR. 
+
+2) Precoder Distillation : Let Ptea  
+
+> s
+
+= [ptea  
+
+> s, 1
+
+, . . . , ptea  
+
+> s,K
+
+]
+
+and Pstu  
+
+> s
+
+= [ pstu  
+
+> s, 1
+
+, . . . , pstu  
+
+> s,K
+
+] denote the teacher and student precoder matrices of satellite s, respectively. For complex-valued vectors or matrices, we adopt the cosine similarity [10]: 
+
+ℓcos ( ˆX, X) = 1 − |vec( ˆX)H vec( X)|   
+
+> ∥vec( ˆX)∥∥ vec( X)∥+ϵ
+
+, (70) 
+
+ϵ > 0 is for numerical stability. The precoder-level KD loss is: 
+
+LP
+
+> kd
+
+= 1
+
+> Nsam S
+
+PNsam 
+
+> n=1
+
+PSs=1 ℓcos 
+
+ (Pstu  
+
+> s
+
+)(n), (Ptea  
+
+> s
+
+)(n) . (71) 
+
+3) Steering Vector Distillation : Based on the corrected angles and phase, the student reconstructs the steering vec-tors ˜ds,k, 0 and ˜gs,k . The corresponding teacher-side steering vectors are denoted by ds,k, 0 and gs,k . The steering-vector KD losses are formulated as follows: 
+
+Ld 
+
+> kd
+
+= 1
+
+> Nsam SK
+
+PNsam 
+
+> n=1
+
+PSs=1 
+
+PKk=1 ℓcos 
+
+˜d(n)
+
+> s,k, 0
+
+, d(n)
+
+> s,k, 0
+
+
+
+, (72) 
+
+Lg 
+
+> kd
+
+= 1
+
+> Nsam SK
+
+PNsam 
+
+> n=1
+
+PSs=1 
+
+PKk=1 ℓcos 
+
+
+
+˜g(n) 
+
+> s,k
+
+, g(n)
+
+> s,k
+
+
+
+. (73) These two losses align the geometry-consistent steering vec-tors reconstructed by the student with those generated from the teacher’s clean angle information. Finally, the overall student loss is written as: 
+
+Lstu -kd = Lwsr obj +αP LP 
+
+> kd
+
++αdLd 
+
+> kd
+
++αg Lg
+
+> kd
+
+, (74) where αP , αd, and αg control the relative importance of different KD losses. The entire student NN using KD is summarized in Algorithm 3 .The dataset comprises 10,000 samples, with 7,000 used for training, 2,000 for validation, and an additional 1,000 for testing. Each sample randomly selects the center of the coop-erative transmission region within the global coverage of the constellation, generates UTs, and determines the cooperating satellites. It further includes data corresponding to five transmit power levels, namely P sat  
+
+> s
+
+∈ {− 10 , −5, 0, 5, 10 } dBW, which are randomly selected during training to enable the NN to operate under various link budgets resulting from various transceiver configurations [8], [11], [34]. V. N UMERICAL RESULTS 
+
+We employ the QuaDRiGa channel simulator to gener-ate the propagation scenarios and radio channel parameters. Specifically, the channel parameters are obtained using the QuaDRiGa NTN Urban LOS scenario [35]. This simulator, with appropriate parameter calibration, is consistent with the channel model considered in this work as well as the Third Generation Partnership Project specifications. Monte Carlo simulations are conducted by randomly selecting a point within the constellation coverage as the center, defining a circular region with the specified radius, and choosing the S
+
+nearest satellites to that center for multi-satellite cooperative transmission. In addition, all satellites are assumed to have identical power constraints, i.e., P sat  
+
+> s
+
+= P sat , ∀s. The remain-ing simulation parameters are summarized in Table I .
+
+A. Performance Comparison 
+
+This subsection evaluates the effectiveness of the proposed hybrid KD framework. The following schemes are compared.  
+
+> •
+
+Sep-WMMSE (clean) : The separate WMMSE optimiza-tion independently performed at each satellite, without joint optimization of inter-satellite interference [31], [37].  
+
+> •
+
+Cen-WMMSE (clean/noisy) : A centralized iterative WMMSE optimization algorithm with global CSI and cooperative multi-satellite transmission [8], [9].  
+
+> •
+
+Cen-Teacher (clean/noisy) : The centralized teacher NN, whose architecture is described in Section III-B, is trained with global clean sCSI observations. During evaluation, its performance is tested under both clean and noisy global sCSI inputs, denoted by Cen-Teacher (clean) and Cen-Teacher (noisy), respectively. 11                               
+
+> TABLE I MULTI -S ATELLITE SYSTEM PARAMETERS [8], [10], [34], [36]
+> Parameter Value
+> Constellation Type Walker-Delta Satellite Orbit Altitude 600 km
+> Orbital Planes 28 Satellites Per Plane 60 Inclination 53 ◦
+> Multi-Satellite Coverage Radius 800 km
+> Number of Cooperating Satellites 2,3,4 Number of UTs 12,18,24,30,36 Distribution of UTs Uniform Velocity of UTs 5 km /h
+> Carrier Frequency 2 GHz
+> Subcarrier Spacing 30 kHz
+> System Bandwidth (DL) 20 MHz
+> Transmit Antenna Number M64
+> Receive Antenna Number N4
+> Per-Antenna Gain GT,GR6 dBi ,0 dBi
+> Noise Figure F7 dB
+> Noise Temperature T290 K
+> •
+
+Dec-Student (noisy) : The decentralized student NN is trained with partial and noisy inputs, without employing KD, as described in Section III-C.  
+
+> •
+
+Dec-Student-PKD (noisy) : Based on Dec-Student, we incorporate precoder-level KD from the teacher.  
+
+> •
+
+Dec-Student-HKD (noisy) : The proposed decentral-ized student NN trained with the WSR objective and hybrid KD (HKD), consisting of precoder-level and steering-vector-level distillation, with angle correction and steering-vector phase correction, as in Section IV. Fig. 5 compares the multi-satellite sum rate versus the satel-lite transmit power under S = 3 and K = 24 . It is observed that Cen-Teacher (clean) closely approaches Cen-WMMSE (clean) over the entire transmit-power range, verifying that the large teacher NN can effectively learn the centralized global precoding policy from clean observations. For decentralized inference, Dec-Student exhibits an evident performance loss due to its limited observation scope and noisy angle inputs, but it still outperforms Sep-WMMSE (clean), which confirms the necessity of satellite cooperation transmission. The proposed Dec-Student-HKD consistently outperforms Dec-Student and Dec-Student-PKD with an increasingly noticeable gain at larger P sat . This demonstrates the effectiveness of the pro-posed hybrid KD, where the joint supervision on steering vectors and precoders provides effective guidance. It is also observed that Cen-WMMSE (noisy) and Cen-Teacher (noisy) suffer from severe performance degradation compared with their clean counterparts. This indicates that directly applying centralized schemes to noisy partial sCSI is highly sensitive to observation errors. By contrast, Dec-Student-HKD is explicitly trained for noisy partial sCSI and achieves a much higher sum rate, confirming the necessity and robustness of the proposed KD framework. Table II validates the effectiveness of the proposed hybrid KD scheme in precoders. Compared with Dec-Student, Dec-Student-HKD consistently achieves higher precoder cosine similarity across all transmit power levels. -10 -5 0 5 10 020 40 60 80 100 120 140 160 180                                     
+
+> Fig. 5. Multi-satellite sum rate vs Psat .TABLE II COSINE SIMILARITY COMPARISON OF THE PRECODERS .
+> Schemes Transmit power (dBW)
+> −10 −50510
+> Dec-Student (noisy) 0.8021 0.7938 0.7761 0.7519 0.7239 Dec-Student-HKD (noisy) 0.8588 0.8471 0.8295 0.8087 0.7837 Cosine-similarity gain +0 .0567 +0 .0533 +0 .0534 +0 .0568 +0 .0599
+> Gain percentage +7.07 % + 6.71 % + 6.88 % + 7.55 %+8.27 %130.296447 13.242377 0.044 0.00824 0.00859
+> 0.01 0.1 110 100 Cen-WMMSE Sep-WMMSE Cen-Teacher Dec-Student Dec-Student-HKD
+> Fig. 6. Running time comparison.
+
+Specifically, the proposed distillation scheme brings a stable cosine-similarity gain of about 7%, indicating that hybrid KD effectively guides the student NN to recover precoders with better directional alignment. This improvement demonstrates that the transferred steering-vector-level and precoder-level knowledge enhances the effectiveness and robustness of de-centralized precoding under partial noisy sCSI. As summarized in Table III , the optimization-based schemes require iterative WMMSE updates, leading to the it-eration number Iout max Iin max . In contrast, learning-based schemes perform only one neural forward pass followed by closed-form precoder recovery, thereby avoiding iterative optimization and greatly reducing online inference complexity. Moreover, the decentralized student NNs are lighter than the centralized teacher NN by replacing the L-layer Transformer with a single-layer structure. Although Dec-Student-HKD introduces an additional low-order term K(M +N ) for steering-vector re-computation, the dominant cost remains approximately KM 3.Therefore, all student schemes have nearly identical inference complexity. Fig. 6 compares the running time of different schemes on a laptop platform with an Intel(R) Core(TM) Ultra 12 
+
+TABLE III COMPUTATIONAL AND INFERENCE COMPLEXITY ORDER COMPARISON .
+
+Scheme Complexity order Mode 
+
+Sep-WMMSE O
+
+
+
+Iout max Iin max KM 3
+
+Parallel Cen-WMMSE O
+
+
+
+Iout max Iin max SKM 3
+
+Centralized Cen-Teacher O
+
+
+
+SKLT 2Dh + Laxis SK (S + K)Dh
+
++ Lten SKD 2ten + SKM 3 Centralized Dec-Student O
+
+
+
+SKT 2Dh + Laxis SK (S + K)Dh
+
++ Lten SKD 2ten + KM 3 Parallel Dec-Student-HKD O
+
+
+
+SKT 2Dh + Laxis SK (S + K)Dh
+
++ Lten SKD 2ten + KM 3 + K(M + N )
+
+ Parallel Dec-Student-HKD                 
+
+> 24.38 24.29 24.81 24.79 25.03 25.01 24.13 24.52 24.92 25.31
+> 80.16 79.83 82.09 82.01 83.02 82.98 79.13 80.83 82.53 84.23
+> 159.21 158.36 168.32 168.32 173.73 173.82 154.96 163.20 171.45 179.69 Dec-Student
+> 23.12 23.20 24.53 24.51 24.85 24.83 22.74 23.67 24.59 25.51
+> 75.50 75.84 80.71 80.72 82.34 82.31 74.00 77.64 81.29 84.93
+> 141.98 143.74 161.46 161.70 170.14 170.25 135.76 150.84 165.92 181.00 Cen-Teacher
+> 22.98 23.05 24.54 24.51 24.95 24.92 22.55 23.59 24.64 25.69
+> 73.85 74.13 80.51 80.46 82.52 82.53 71.94 76.57 81.20 85.83
+> 131.07 133.67 160.82 160.90 173.78 173.68 121.67 144.45 167.23 190.02
+
+Fig. 7. Different angle error distribution generalization. 
+
+9 185H CPU @ 2.30 GHz. Due to iterative optimization, Cen-WMMSE and Sep-WMMSE incur much higher latency than the learning-based schemes, which only require non-iterative inference after training. Specifically, Cen-Teacher achieves a running time of 0.044 s, while the lightweight decentralized students further reduce it to below 0.01 s. This indicates that Dec-Student-HKD supports efficient real-time inference while preserving the benefits of structured knowledge transfer. The measured time is implementation- and hardware-dependent and should be viewed as indicative. 
+
+B. Robustness to Angle Error Distributions 
+
+Fig. 7 evaluates the robustness of the proposed hybrid KD framework under different angle-error distributions. Dec-Student-HKD consistently outperforms Dec-Student across all tested settings. More importantly, under large angle per-turbations, Dec-Student-HKD substantially outperforms Cen-Teacher (noisy). This result indicates that directly feeding noisy observations into the centralized teacher makes it highly 30.58 32.67 33.55 35.38 0.00 23.67 47.34 71.01       
+
+> 45.30 47.63 48.87 49.56 0.00 23.67 47.34 71.01
+> 53.16 55.98 56.37 62.92 0.00 23.67 47.34 71.01 Dec-Student (noisy) Dec-Student-HKD (noisy) Cen-Teacher (clean) Cen-WMMSE (clean)
+
+Fig. 8. Multi-satellite sum rate vs satellite number with K = 24 and P sat =
+
+−10 dBW , where NN schemes are all trained at S = 3 .12 18 24 30 36 18 20 22 24 26 28 30 
+
+Fig. 9. Multi-satellite sum rate vs UT number with S = 3 and P sat =
+
+−10 dBW , where NN schemes are all trained at K = 24 .
+
+sensitive to angle errors, whereas the proposed distillation framework explicitly equips the decentralized student with angle- and phase-correction capabilities. As the angle error decreases, the performance of Dec-Student-HKD becomes comparable to, and occasionally slightly better than, that of Cen-Teacher (noisy). Moreover, the proposed method remains stable under both uniform and Gaussian angle errors. Although the two error models have different distributional shapes, Dec-Student-HKD exhibits similar performance trends when their means and variances are matched, while consistently outper-forming Dec-Student. These results suggest that the proposed distillation framework does not overfit to a specific angle-error distribution. Instead, it enables the student to acquire distribution-robust angle-correction knowledge for practical decentralized multi-satellite transmission. 
+
+C. Scalability to Network Scenario Size 
+
+Fig. 8 and Fig. 9 evaluate the scalability of the proposed method with respect to the number of satellites and UTs, respectively. All learning-based schemes are trained under a fixed configuration with S = 3 and K = 24 , and are directly tested under different network sizes without retraining. In Fig. 8, the sum rate increases with the number of cooperative satellites. Among the decentralized schemes, Dec-Student-HKD remains consistently closer to Cen-Teacher and Cen-WMMSE than Dec-Student, demonstrating the robustness and transferability of hybrid KD across different satellite scales. In Fig. 9, all schemes achieve higher sum rates as the number of UTs increases. The proposed Dec-Student-HKD maintains a stable advantage over the Dec-Student across the whole range of K, indicating its scalability to different user loads. 13 
+
+VI. C ONCLUSION 
+
+This paper has investigated robust decentralized transmis-sion for cooperative multi-satellite massive MIMO systems with partial and imperfect sCSI. A teacher-student KD frame-work for multi-satellite cooperative transmission is proposed, where a centralized teacher learns high-performance precoders from clean global sCSI, and lightweight decentralized students perform onboard inference using only noisy partial sCSI and limited ISL-exchanged information. To reduce the teacher-student performance gap, we design an angle- and phase-correction-based hybrid KD mechanism, which calibrates an-gle errors and the resulting phase errors, reconstructs steering vectors, and performs hybrid distillation. Simulation results demonstrated that the proposed scheme significantly improves the sum-rate performance of decentralized student NNs with negligible additional inference overhead. REFERENCES [1] W. Wang, Y. Zhu, Y. Wang, R. Ding, and S. Chatzinotas, “Toward mobile satellite internet: The fundamental limitation of wireless transmission and enabling technologies,” Engineering , vol. 54, pp. 42–51, 2025. [2] G. Pan, X. Zhang, P. Chen, S. Wang, R. Zhang, Z. Hua, D. Niy-ato, P. Xiao, M. D. Renzo, and G. K. Karagiannidis, “Multi-satellite collaborations: Conception, merits, mechanisms, and prospects,” IEEE Commun. Surv. Tutor. , vol. 28, pp. 5561–5595, 2026. [3] Z. M. Bakhsh, Y. Omid, G. Chen, F. Kayhan, Y. Ma, and R. Tafazolli, “Multi-satellite MIMO systems for direct satellite-to-device communi-cations: A survey,” IEEE Commun. Surv. Tutor. , vol. 27, no. 3, pp. 1536– 1564, 2025. [4] B. Shang, X. Huang, H. Wang, X. Li, M. Tao, H. Zhang, and P. Fan, “Multi-satellite cooperative communications for 6G: Fundamentals, sys-tem design, and applications,” IEEE Commun. Surv. Tutor. , vol. 28, pp. 4690–4730, 2026. [5] W. Cao, Y. Wang, T. Ji, T. Cao, W. Wang, S. Chatzinotas, and B. Otter-sten, “Interference in spectrum-sharing integrated terrestrial and satellite networks: Modeling, approximation, and robust transmit beamforming,” 
+
+IEEE Trans. Wireless Commun. , vol. 25, pp. 19 660–19 676, 2026. [6] Y. Wang, X. Xu, Y. Zhu, W. Wang, R. Ding, S. Chatzinotas, and B. Ottersten, “Multi-LEO satellite cooperative transmission: A spatial-temporal-frequency perspective,” IEEE Wireless Commun. , Feb. 2026. [7] Y. Wang, Y. Zhang, Y. Zhu, V. N. Ha, R. Ding, W. Wang, S. Chatzinotas, and B. Ottersten, “Semantic communication for multi-satellite massive MIMO transmission: A mixture of cooperative modes framework,” 
+
+arXiv , May. 2026. [8] Z. Xiang, X. Gao, K.-X. Li, and X.-G. Xia, “Massive MIMO downlink transmission for multiple LEO satellite communication,” IEEE Trans. Commun. , vol. 72, no. 6, pp. 3352–3364, Jun. 2024. [9] W. Cao, Y. Wang, J. Zhang, X. Xu, W. Wang, S. Chatzinotas, and B. Ot-tersten, “Deep learning-based multi-satellite massive MIMO transmis-sion: Centralized or decentralized?” arXiv preprint arXiv:2603.20862 ,2026. [10] Y. Wang, V. Nguyen Ha, K. Ntontin, H. Yan, W. Wang, S. Chatzinotas, and B. Ottersten, “Statistical CSI-based distributed precoding design for OFDM-cooperative multi-satellite systems,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 3219–3236, 2026. [11] Y. Wang, Y. Zhu, V. N. Ha, W. Wang, R. Ding, S. Chatzinotas, and B. Ottersten, “Multi-satellite multi-stream beamspace massive MIMO transmission,” arXiv preprint arXiv:2512.21998 , 2025. [12] T. K. Rodrigues and N. Kato, “Hybrid centralized and distributed learning for MEC-equipped satellite 6G networks,” IEEE J. Sel. Areas Commun. , vol. 41, no. 4, pp. 1201–1211, 2023. [13] H.-W. Chu, T.-H. Moon, W.-J. Lee, and J.-H. Kim, “A network path method for connecting cross-seam using ground relay in LEO satellite network,” in Proc. IEEE Consum. Commun. Netw. Conf. (CCNC) , 2025, pp. 1–4. [14] B. Soret, I. Leyva-Mayorga, and P. Popovski, “Inter-plane satellite matching in dense LEO constellations,” arXiv preprint arXiv:1905.08410 , 2019. [15] L. You, K.-X. Li, J. Wang, X. Gao, X.-G. Xia, and B. Ottersten, “Massive MIMO transmission for LEO satellite communications,” IEEE J. Sel. Areas Commun. , vol. 38, no. 8, pp. 1851–1865, Aug. 2020. [16] D. Cilden-Guler, M. Raitoharju, R. Piche, and C. Hajiyev, “Nanosatellite attitude estimation using kalman-type filters with non-gaussian noise,” 
+
+Aerosp. Sci. Technol. , vol. 92, pp. 66–76, 2019. [17] L. Pan, X. Zhang, X. Li, X. Li, C. Lu, J. Liu, and Q. Wang, “Satellite availability and point positioning accuracy evaluation on a global scale for integration of GPS, GLONASS, BeiDou and galileo,” Adv. Space Res. , vol. 63, no. 9, pp. 2696–2710, 2019. [18] Y. Liu, Y. Wang, J. Wang, L. You, W. Wang, and X. Gao, “Robust downlink precoding for LEO satellite systems with per-antenna power constraints,” IEEE Trans. Veh. Technol. , vol. 71, no. 10, pp. 10 694– 10 711, Oct. 2022. [19] G. Hinton, O. Vinyals, and J. Dean, “Distilling the knowledge in a neural network,” arXiv preprint arXiv:1503.02531 , 2015. [20] J. Gou, B. Yu, S. J. Maybank, and D. Tao, “Knowledge distillation: A survey,” Int. J. Comput. Vision. , vol. 129, no. 6, pp. 1789–1819, 2021. [21] C. Hu, X. Li, D. Liu, H. Wu, X. Chen, J. Wang, and X. Liu, “Teacher-student architecture for knowledge distillation: A survey,” arXiv preprint arXiv:2308.04268 , 2023. [22] A. M. Mansourian, R. Ahmadi, M. Ghafouri, A. M. Babaei, E. B. Golezani, Z. Y. Ghamchi, V. Ramezanian, A. Taherian, K. Dinashi, A. Miri, and S. Kasaei, “A comprehensive survey on knowledge dis-tillation,” arXiv preprint arXiv:2503.12067 , 2025. [23] G. Hong, Z. Mao, X. Lin, and S. H. Chan, “Student-teacher learning from clean inputs to noisy inputs,” in Proc. IEEE Comput. Soc. Conf. Comput. Vision Pattern Recognit. (CVPR) , 2021, pp. 12 070–12 079. [24] Y. Cui, J. Guo, Z. Cao, H. Tang, C.-K. Wen, S. Jin, X. Wang, and X. Hou, “Lightweight neural network with knowledge distillation for CSI feedback,” IEEE Trans. Commun. , vol. 72, no. 8, pp. 4917–4929, 2024. [25] S. Tavakolian, N. T. Nguyen, A. Alkhateeb, and M. Juntti, “Knowledge distillation for mmWave beam prediction using sub-6 GHz channels,” 
+
+arXiv preprint arXiv:2602.04703 , 2026. [26] Z. Liu, J. Zhang, Y. Zhu, E. Shi, B. Xu, D. Niyato, S. Jin, and B. Ai, “MaLAM4Com: Multi-agent cooperative large AI models for wireless communications,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 2889–2903, 2026. [27] Y. Zhu, Y. Wang, C. Amatetti, A. Vanelli-Coralli, W. Wang, R. Ding, S. Chatzinotas, and B. Ottersten, “Toward multi-satellite cooperative transmission: A joint framework for CSI acquisition, feedback, and phase synchronization,” arXiv preprint arXiv:2603.28195 , 2026. [28] L. M. Marrero, J. C. Merlano-Duncan, J. Querol, S. Kumar, J. Krivochiza, S. K. Sharma, S. Chatzinotas, A. Camps, and B. Ottersten, “Architectures and synchronization techniques for distributed satellite systems: A survey,” IEEE Access , vol. 10, pp. 45 375–45 409, 2022. [29] K.-X. Li, L. You, J. Wang, X. Gao, C. G. Tsinos, S. Chatzinotas, and B. Ottersten, “Downlink transmit design for massive MIMO LEO satellite communications,” IEEE Trans. Commun. , vol. 70, no. 2, pp. 1014–1028, 2022. [30] W. Wang, Y. Tong, L. Li, A.-A. Lu, L. You, and X. Gao, “Near optimal timing and frequency offset estimation for 5G integrated LEO satellite communication system,” IEEE Access , vol. 7, pp. 113 298–113 310, 2019. [31] Q. Shi, M. Razaviyayn, Z.-Q. Luo, and C. He, “An iteratively weighted MMSE approach to distributed sum-utility maximization for a MIMO interfering broadcast channel,” IEEE Trans. Signal Process. , vol. 59, no. 9, pp. 4331–4340, Sep. 2011. [32] V. Nair and G. E. Hinton, “Rectified linear units improve restricted boltz-mann machines,” in Proc., Int. Conf. Mach. Learn. (ICML) , Madison, WI, USA, 2010, pp. 807–814. [33] Y. Wang, H. Hou, X. Yi, W. Wang, and S. Jin, “Toward unified AI models for MU-MIMO communications: A tensor equivariance framework,” IEEE Trans. Wireless Commun. , vol. 24, pp. 10 517–10 533, 2024. [34] 3GPP, “Solutions for NR to support non-terrestrial networks (NTN),” 3rd Generation Partnership Project, Tech. Rep. TR 38.821, Mar. 2023. [35] F. Burkhardt, S. Jaeckel, E. Eberlein, and R. Prieto-Cerdeira, “QuaDRiGa: A MIMO channel model for land mobile satellite,” in 8th European Conf. Antennas Propag. (EuCAP 2014) , 2014, pp. 1274–1278. [36] Federal Communications Commission, “Federal communications com-mission; amendment to pending application for the SpaceX Gen2 NGSO satellite system,” FCC, Washington, DC, USA, Tech. Rep. File No. SAT-AMD-20210818-00105, Aug. 2021, tech. Rep. [37] S. S. Christensen, R. Agarwal, E. De Carvalho, and J. M. Cioffi, “Weighted sum-rate maximization using weighted MMSE for MIMO-BC beamforming design,” IEEE Trans. Wireless Commun. , vol. 7, no. 12, pp. 4792–4799, Dec. 2008.
