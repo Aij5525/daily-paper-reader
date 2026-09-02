@@ -1,0 +1,496 @@
+Title: Freshness-Aware Constrained Sensing-Aided Beam Prediction with Knowledge Distillation
+
+URL Source: https://arxiv.org/pdf/2609.01225v1
+
+Published Time: Wed, 02 Sep 2026 01:48:21 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Freshness-Aware Constrained Sensing-Aided Beam Prediction with Knowledge Distillation 
+
+Abolfazl Zakeri, Member, IEEE, Nhan Thanh Nguyen, Senior Member, IEEE, Ahmed Alkhateeb, Senior Member, IEEE, and Markku Juntti, Fellow, IEEE 
+
+Abstract—Beam prediction leveraging environmental data reduces over-the-air beam training overhead. Existing frame-works, however, assume continuous access to fresh sensory data, an assumption that breaks down under sensing budget constraints or sensor failures. To make this more practical, this paper proposes a sensing-aided beam prediction framework that operates under an average sensing rate constraint. We incorporate the age of information (AoI) directly into the beam prediction pipeline as a synthetic input modality: the age of the most recently captured data is encoded and fused with visual features through a gating mechanism. This provides the predictor with explicit context information about input sensory data reliability. We formalize and examine three fixed sampling policies, accumulated, uniform, and randomized, under the average sensing budget. We further develop aknowledge distillation (KD) framework that operates as a robustness regularizer rather than a pure model compression method. In particular, the high-capacity teacher is trained unconstrained on fully sampled data, and its representational knowledge is transferred to a compact student deployed under the sensing budget. We conduct numerical experiments on the DeepSense 6G data set. The results show that AoI fusion nearly doubles top-1 accuracy at strict sensing budgets, and age-aware models achieve near-optimal top-3 accuracy with only 20% of the data. Furthermore, we find that the teacher’s training regime is a more consequential design choice than the distillation loss function. Index Terms—Beam prediction, age of information, knowl-edge distillation, multimodal sensing, sensing-constrained in-ference. 
+
+I. Introduction Millimeter-wave (mmWave) communications offers multi-gigabit data rates and has potential for accurate localization at the cost of severe path loss and high sensi-tivity to blockage. Harnessing these frequencies requires large antenna arrays and highly directional beams, which in turn demand accurate and low-latency beam manage-ment [3], [4]. Traditional over-the-air beam management relies on exhaustive codebook sweeping, which consumes a significant fraction of the available radio resources as pilot and training overhead. It can also become 
+
+A. Zakeri, N. T. Nguyen, and M. Juntti are with the Centre for Wireless Communications (CWC), University of Oulu, Oulu 90014, Finland, Emails: {abolfazl.zakeri; nhan.nguyen; markku.juntti}@oulu.fi. A. Alkhateeb is with the School of Electrical, Computer, and Energy Engineering, Arizona State University, Email: alkhateeb@asu.edu. This work was supported by the Research Council of Finland through 6G Flagship Program (no. 369116) and projects DIREC-TION (no. 354901) and DYNAMICS (no. 367702). The paper’s preliminary results were presented at ICASSP 2026 [1] and IEEE ICC 2026 [2]. 
+
+impractical in high-mobility scenarios [5], [6]. Reducing this overhead while maintaining reliable beam alignment is a central challenge in the design of mmWave systems. A compelling class of solutions substantially reduces over-the-air beam management overhead by leveraging environmental context extracted from sensors mounted at the base station (BS) or user equipment (UE), broadly re-ferred to as “multimodal sensing-aided communications”. Cameras, global navigation satellite systems, e.g., global positioning system (GPS) receivers, light detection and ranging (LiDAR) scanners, and radar units can each pro-vide a partial view of the propagation environment, and machine-learning (ML) models trained on such sensing-aided data have demonstrated accurate beam prediction without exhaustive channel measurements [3]–[5]. Among the various sensing modalities, vision-based approaches using red-green-blue (RGB) images have proven par-ticularly effective, with convolutional neural network (CNN) encoders extracting discriminative features for beam classification and tracking [6], [7]. Despite the progress, a critical but often overlooked aspect of these sensing-aided beam prediction approaches is the availability of fresh sensory data at inference in practice. Most existing works implicitly assume that fresh, maximally relevant sensory data is perfectly available on demand at every scheduling slot. In practice, how-ever, continuous sensing is limited by power budgets, computational processing capacity, and communications overhead for transmitting or storing sensory data, as well as the possibility of sensor failures or intermittent connectivity. A vehicular user traversing a coverage area may encounter periods during which the camera feed is temporarily unavailable, or the network’s sensing budget is exhausted [8]. Under such conditions, the beam prediction must rely on data sampled at some earlier times, that is, stale observations, whose relevance to the current beam degrades with the elapsed time. This data freshness dimension is absent from the vast majority of existing sensing-aided beam prediction frameworks, rendering their performance assessments overly optimistic for realistic deployments. To address the gap, we build on the age of infor-mation (AoI) concept [9], [10], which defines the time elapsed since the most recent observation was acquired, as a principled metric to quantify and manage data staleness. We formulate a constrained multimodal sensing-aided beam prediction problem in which a (normalized) arXiv:2609.01225v1 [eess.SP] 1 Sep 2026 2
+
+sensing budget αmax ∈ (0 , 1] limits the fraction of time slots in which fresh data may be obtained. Rather than treating AoI solely as a scheduling objective, we incorporate it directly into the deep neural-network-based beam prediction pipeline as a synthetic modality: the age of each available image sample is computed at inference time, encoded, and fused with the image features through a gating mechanism [11] before being passed to the beam predictor. This transforms the AoI from a passive constraint descriptor into an active, discriminative feature that informs the predictor about the reliability of its vi-sual inputs. A gated recurrent unit (GRU) is further used to aggregate temporal histories of sampled observations, capturing the sequential structure of the sensing data sequence. Together, these design choices enable the model to reason explicitly about both what it has seen and how stale that sensory data is. We propose to employ knowledge distillation (KD) [12] to enable a high-performance compact model under the sensing constraint, with a fundamentally different moti-vation than its conventional use for model compression. Specifically, we exploit the fact that the teacher model is not limited by the inference-time sensing budget during training. Hence, it can be trained under unconstrained access to fully sampled, temporally dense observations, allowing it to develop rich inter-class beam representa-tions that are simply not accessible to a model trained on sparse, stale data inputs. These abstract beam-class relationships are then transferred to the compact student model via soft-label supervision. This enables the student to generalize under the same sensing budget at inference far better than training under the constraint alone would allow. In this setting, KD’s role shifts from compression to that of an implicit regularizer against the distribution shift induced by the sensing constraint. Our main contributions are summarized as follows:  
+
+> •
+
+Constrained multimodal sensing formulation: We pose the sensing-aided beam prediction problem under an average sensing rate constraint. This for-mulation captures the realistic trade-off between sensing cost, i.e., data acquisition and processing overhead, and beam prediction quality, and can naturally be extended to per-modality sensing costs to enable modality selection in multimodal sensing-aided communications.  
+
+> •
+
+Age-aware multimodal fusion: We propose incorpo-rating the AoI of the most recently captured image sample as a synthetic modality, fused with CNN image features through a gating mechanism [11]. We demonstrate that this low-cost, zero-overhead signal provides discriminative context about input re-liability, yielding significant accuracy improvements particularly under strict sensing budgets.  
+
+> •
+
+Knowledge distillation: We extend the KD frame-work [12] to the constrained sensing setting, where KD here serves not as a model compression method but as a bridge between unconstrained teacher training and budget-constrained student inference. We systematically study the impact of distillation loss choice and the teacher training regime (un-constrained versus budget-constrained) on student accuracy. We observe that the teacher’s training regime is a more consequential design choice than the specific distillation loss function.  
+
+> •
+
+Fixed sampling policy comparison: We formulate three budget-satisfying sampling policies, accumu-lated, uniform, and randomized, and characterize their frame-selection behavior as a function of 
+
+αmax [13].  
+
+> •
+
+Comprehensive empirical evaluation: Experiments on the real-world DeepSense 6G dataset [14] show that AoI fusion alone can nearly double top-1 beam prediction accuracy at αmax = 0 .1 relative to an image-only baseline, and that age-aware KD achieves the best overall accuracy-complexity trade-off. Paper organization. The remainder of the paper is orga-nized as follows. Related work is reviewed in Section II. The system model and problem formulation are presented in Section III. Section IV describes the proposed age-aware ML framework. The knowledge distillation frame-work and training procedures are respectively detailed in Sections V and VI. The experimental setup and simula-tion results are presented in Section VII. Section VIII concludes the paper. II. Related Work A. Sensing-Aided Beam Prediction and Beam Manage-ment The use of non-radio frequency (non-RF) sensing data to assist beam prediction has attracted substantial re-search attention over the past several years. Early works established the feasibility of position-aided beam selec-tion [5], demonstrating that even coarse GPS coordinates can reduce the beam codebook search space and decrease training overhead. Vision-aided approaches subsequently showed that RGB cameras, being both low-cost and information-rich, are particularly effective: CNNs trained directly on image data achieve high top-k accuracy on real-world mmWave datasets [6], [7]. Multimodal fusion, combining vision with GPS, LiDAR, or radar, has been shown to further improve robustness, especially in sce-narios where a single modality may be degraded [6], [15], [16]. Prototype demonstrations of camera-assisted beam tracking [17] and vision-assisted digital twins [18] have validated the practicality of vision-aided management in laboratory and simulation settings, while Vuckovic et al. [19] revisited the evaluation metrics used for multimodal beam prediction to provide a more consistent performance baseline. Architectural advances have further pushed the frontier of multimodal sensing-aided beam management. Mol-lah et al. [20] propose a transformer-based multimodal fusion framework that employs multi-head cross-modal attention to learn inter-modal dependencies for vehicular mmWave beamforming across vehicle-to-infrastructure 3
+
+(V2I) and vehicle-to-vehicle (V2V) scenarios, achieving over 96% top-15 beam accuracy. Xie et al. [21] address the modality alignment problem through contrastive learning, improving feature consistency between hetero-geneous sensing streams and yielding higher beam track-ing accuracy. Zheng et al. [22] adopt a self-supervised joint-embedding predictive architecture that pretrains a shared backbone on temporal sequences of multimodal measurements, then fine-tunes lightweight heads for beam prediction, localization, and received signal strength indi-cator (RSSI) estimation simultaneously. For orthogonal frequency-division multiplexing systems under non-line-of-sight conditions, Li and Yu [23] integrate camera im-ages, LiDAR point clouds, and RF pilots through a graph neural network to optimize beamforming vectors. Active sensing approaches, where the BS adaptively selects probing beams based on accumulated observations and environmental maps [24], offer a complementary direction to passive multimodal fusion: the sensing policy itself is optimized jointly with the communication objective. Comprehensive surveys have cataloged the rapid growth of this field [3], [8]. A critical assumption shared by almost all of the above works is that sensing data is always available and fresh at inference time. Sensing constraints, budget limitations, and the temporal variability of data freshness are not modeled. Our work explicitly addresses this gap by formulating the problem under an average sensing rate constraint and incorporating AoI as a dynamic, learnable feature into the beam prediction pipeline. B. Knowledge Distillation for Beam Prediction Model complexity is a practical barrier to deploy-ing sensing-aided beam predictors at the network edge. KD [12] offers a principled approach to constructing com-pact, deployable models: a lightweight student network is trained to match the soft output distributions of a larger, more capable teacher, transferring generalizable knowl-edge while dramatically reducing parameter count and inference cost. In the wireless communications domain, Ma et al. [25] propose a CNN+GRU teacher trained on joint camera and radar data from the DeepSense 6G dataset and compress it into a student model that reduces parameter count by over 27 times while retaining 96% top-5 beam prediction accuracy. Park et al. [26] develop a cross-modal relational knowledge distillation algorithm that transfers knowledge from a multimodal (LiDAR+radar+RGB+GPS) teacher to a radar-only stu-dent, enabling high accuracy with only 10% of the teacher’s parameters, via a realistic simulation framework built on the CARLA autonomous-driving simulator. We have addressed the case where the original training data is unavailable at distillation time, proposing a data-free KD approach for LiDAR-aided beam tracking [27]. Prior KD work for beam prediction did not consider the interaction between sensing constraints, data freshness, and distillation quality. In particular, the question of how the teacher’s training regime, whether under uncon-strained or budget-constrained sensing, affects the quality of the soft targets provided to a student deployed under sparse sensing conditions has not been studied. Our paper fills this gap and reveals that the teacher’s training regime is a more consequential design choice than the specific distillation loss function. C. Age of Information and Constrained Multimodal Sens-ing The AoI metric was introduced by Kaul et al. [9] and subsequently analyzed in depth in the context of status update systems [10], [13]. Optimal sampling and scheduling policies for minimizing AoI have been extensively studied under diverse network models, in-cluding multi-source systems [13] and energy-harvesting networks [10]. More recently, Zhang et al. [28] studied the joint scheduling problem for multimodal remote inference, showing that AoI-aware policies can meaningfully reduce the inference error rate of multi-sensor classifiers, a result that motivates AoI-awareness at the learning level, not only the scheduling level. Despite this body of work, the integration of AoI into the training of data-driven beam prediction models, rather than solely as a scheduling objective, has not been fully explored. AoI has not previously been used as a synthetic input feature for neural-network-based beam predictors. The existing scheduling literature optimizes AoI as a system-level objective, whereas we treat it as a per-sample learning signal that informs the beam predictor about the reliability of its visual context. This distinction is fundamental: our model does not minimize AoI, it learns to cope with high AoI, due to, e.g., packet losses or sensor failure, by explicitly conditioning its predictions on input data freshness. D. Distinction from Prior Work The most closely related works to this paper are [6] and our earlier conference papers [1] and [2]. In [6], Charan et al. developed a multimodal (vision+GPS) machine-learning framework for mmWave beam prediction in real vehicular scenarios, assuming fully available fresh data and no sensing constraints. In [1], we addressed the sensing scheduling problem using deep reinforcement learning, where AoI entered only as a state and reward component. In [2], we further incorporated AoI into pre-dictor training through dataset augmentation, replicating each sample across all age values up to a predefined limit and concatenating the scalar age with the input features, while retaining the architecture of [6]. The present work differs from [1] and [2] in three re-spects. First, AoI is integrated architecturally rather than through the training data: a learned age encoder projects the age of each retrieved sample into an embedding that modulates the visual features via a dimension-wise gating mechanism. This removes the predefined age limit, which in [2] must be retuned for each sensing budget, 4
+
+together with the proportional growth of the training set that the augmentation entails. The concatenation variant evaluated in Section VII corresponds to the fusion mechanism of [2], and is shown to be outperformed by gating fusion, particularly at low budgets. Second, the predictor operates on a finite history of non-consecutive observations, determined by the sampling policy and aggregated by a GRU, whereas [1] and [2] use only the most recent sample and prior sensing-aided works assume a history window of consecutive samples. Third, neither conference paper addresses model complexity; here, a compact predictor with a 180-fold parameter reduction is trained within an age-aware KD framework that has no counterpart in [1], [2]. In addition, whereas [1] and [2] optimize the sensing schedule for a fixed predictor, this work fixes the schedule to budget-satisfying policies and instead optimizes the predictor. The role of KD in this work also differs from its conventional use. Rather than serving compression alone, KD bridges unconstrained teacher training and budget-constrained student inference, thereby acting as a regular-izer against the induced distribution shift. This is distinct from data-free distillation [27], where the training data itself is unavailable. We systematically study the effect of the distillation loss and the teacher training regime, and identify the latter as the dominant design factor. III. System Model and Problem Formulation We consider a downlink mmWave communications system consisting of a BS and a single-antenna mo-bile UE. The BS is equipped with N antennas and an RGB camera. The BS adopts a predefined analog beamforming codebook of M beams, F = {f1, . . . , fM },for signal transmission, where fm ∈ CN ×1 with ∥fm∥22 = 1 ,
+
+m = 1 , 2, . . . , M .Denote by h(t) ∈ CN ×1 the channel between the BS and the UE at time slot t. Let x(t) ∈ C be the transmit data symbol from the BS to the UE at slot t, with 
+
+E{| x(t)|2} = P , where P is the transmit power. Suppose the beamforming vector f (t) ∈ F is chosen at time t; the received signal at the UE is then 
+
+y(t) = hH(t)f (t)s(t) + n(t), (1) where n(t) ∈ C is additive white Gaussian noise dis-tributed as CN (0 , σ 2), with σ2 denoting the noise variance at the UE. In conventional beam scanning, the best beam m at time t can be chosen to maximize the received signal-to-noise ratio (SNR) |hH(t)fm(t)|2
+
+σ2 . This typically requires channel state information or exhaustive search-based beam training, both of which are costly in mmWave systems. We therefore consider a data-driven sensing-aided beam prediction approach to reduce the CSI ac-quisition/beam training overhead. In this paper, by sensing we specifically refer to the acquisition of RGB image data, together with its associ-ated preprocessing pipeline. This visual data acquisition, however, cannot generally be realized at every time slot in practice. For instance, in a distributed integrated sensing and communication deployment, multiple sensing nodes must relay their locally captured observations to a central processing unit over a shared, capacity-limited backhaul link; even if each node could capture continu-ously, only a fraction of these sensory observations can be transmitted and processed within a given beam decision interval. Analogous constraints arise even in a single-sensor deployment, from limited on-device sensing power, computational processing capacity, and communication overhead for transmitting or storing sensory samples. To account for this limitation, we associate each slot 1
+
+with a binary sensing decision α(t) ∈ { 0, 1}: α(t) = 1 
+
+indicates that sensing is performed at slot t and a fresh sample is acquired for beam prediction, while α(t) = 0 
+
+indicates that no sensing is performed, so the predictor must reuse a previously acquired, and hence stale, sample. This restriction on how often α(t) = 1 can occur is formal-ized as the average sensing-rate constraint later in (5b). When more than one sensing modality is available [6], 
+
+α(t) is treated as a joint decision covering all modalities. To quantify data staleness, we employ AoI [9], [10], defined as the number of slots elapsed since the most recent sensing event. Given the sensing decisions, the AoI 
+
+δ(t) evolves as 
+
+δ(t + 1) = 
+
+{
+
+0, if α(t) = 1 ,δ(t) + 1 , if α(t) = 0 . (2) Thus, δ(t) resets to zero whenever a fresh sample is acquired and increases by one otherwise. When α(t) = 0 ,the beam predictor at slot t uses the sample acquired 
+
+δ(t) slots earlier. As illustrated in [2, Fig. 1], the cross-entropy beam prediction loss behaves in general as a non-monotonic function of δ(t), which motivates modeling data freshness explicitly within the deep learning pipeline. A. Problem Formulation Let gθ (·, ·) denote the beam predictor, parameterized by θ and detailed in Section IV, which maps the most recently retrieved observation X(t − δ(t)) and its age δ(t)
+
+to a (codebook-based) beam index selection, m(t), i.e., 
+
+m(t) = gθ
+
+(X(t − δ(t)) , δ (t)) ∈ { 1, . . . , M }. (3) The per-slot loss is then defined as 
+
+f (t) := ℓ(m(t), y (t)), (4) where y(t) is the ground-truth optimal beam label at slot t, determined offline during dataset construction, and ℓ(·, ·) is a loss function penalizing deviation of the predicted beam from y(t), e.g., cross-entropy. This loss 
+
+> 1A time slot here denotes the scheduling opportunity for sensing and beam decision-making, distinct from the 3GPP NR physical-layer slot [29], whose duration is numerology-fixed (0.125–1 ms). NR beam management instead operates via RRC-configured SSB/CSI-RS periodicities (5–160 ms) [30], [31]. Our accumulated and uniform sampling policies, introduced later, mirror this periodic scheduling. 5
+
+serves as a proxy for communication performance: it is small when the predicted beam yields a received SNR close to that of the optimal beam, and large when the beam is misaligned and the resulting SNR, and hence the achievable rate, degrades. Since m(t) depends on δ(t)
+
+both directly and through the retrieved sample X(t−δ(t)) ,
+
+f (t) is a function of δ(t).Over a finite horizon of T time slots, the beam prediction task is formulated as a constrained optimiza-tion problem over the joint sequence of beam selections 
+
+{m(t)}Tt=1 and sensing decisions {α(t)}Tt=1 :
+
+minimize 
+
+> {m(t),α (t)}t=1 ,2,...
+> T
+
+∑
+
+> t=1
+
+E{f (t)} (5a) subject to 1
+
+T
+
+> T
+
+∑
+
+> t=1
+
+E{α(t)} ≤ αmax , (5b) where αmax ∈ (0 , 1] bounds the fraction of slots in which sensing may be performed. This budget represents the aggregate and normalized cost of sensing, which in practice may arise from power, bandwidth, or processing limitations. The expectation is taken with respect to the possibly randomized sensing decisions. Problem (5) couples two subproblems. The first is the sensing decision problem: choosing when to sense, i.e., the sequence {α(t)}, subject to the budget (5b), referred to as “sampling policy”. The second is the beam prediction problem: choosing which beam to use given the available data at slot t, i.e., m(t). The two are coupled because the sensing decisions determine which samples the predictor observes, so future observations depend on past sensing actions. This coupling makes the joint problem a difficult sequential decision-making problem. Rather than solving the joint problem above, we fix the sampling policy to one of three budget-satisfying families (accumulated, uniform, and randomized sam-pling, detailed in Section IV-A), each of which satisfies constraint (5b). As noted in Footnote 1, accumulated and uniform sampling reflect the periodic, centrally-scheduled cadences characteristic of standardized beam manage-ment, while randomized sampling reflects the irregular sensing availability induced by scheduling contention or resource-sharing constraints. This breaks the coupling and lets us focus on designing a beam predictor that is robust to the resulting sparse and stale observations. This decoupling thus provides a principled and practically relevant baseline, and we show that the choice of sampling policy has a measurable but secondary impact compared to the design of the predictor itself. IV. Age-Aware Beam Prediction Framework Given the sensing constraint (5b), fresh sensory data is not available at every time slot. The beam predictor must therefore operate on a finite history of previously acquired samples. In general, each sample may comprise heterogeneous sensing modalities such as RGB images, LiDAR point clouds, or radar measurements. In this work,          
+
+> Fig. 1: Proposed beam predictor architecture and data pipelines for beam prediction, where the buffered samples are ordered from most recent to oldest with non-decreasing age, and Wis the number of previously taken samples, i.e., the GRU sequence length.
+
+we instantiate the framework with RGB images. Let T (t)
+
+denote the set of the W most recent slots up to t at which sensing occurred, 
+
+T (t) = { t1 > t 2 > · · · > t W : tw ≤ t, α (tw) = 1 }, (6) and let the corresponding observation history be 
+
+X (t) = { ( X(tw), t − tw
+
+)} Ww=1 , (7) as exemplified in Fig. 1. Note that the slots in T (t) are in general non-consecutive, in contrast to prior works, where the history comprises W consecutive observations. Rather than treating data staleness as a degradation to be tolerated, we propose to make it explicit to the beam predictor: the age of each retrieved sample is encoded and fused with its visual features as a synthetic modality, providing the predictor with direct context about the reliability of its inputs. The remainder of this section describes the complete framework, beginning with the sampling algorithms (Section IV-A), the preprocessing and age encoding pipeline, and the multimodal fusion mechanism (Section IV-B), and the neural network archi-tecture (Section IV-C). A. Sensing Data Sampling Algorithms As discussed in Section III, we restrict attention to fixed, signal-agnostic sampling policies that satisfy the average sensing budget constraint (5b) by construction. Here, signal-agnostic means that the sensing decision α(t)
+
+does not depend on the content of the sensed data or on the modality [13]. This decoupling keeps the analysis tractable and provides interpretable benchmarks against which the benefit of the proposed age-aware learning can be isolated. We consider three such policies. (1) Accumulated Sampling: We employ a determin-istic fractional-accumulator, Bresenham-style sampling scheme to ensure the sensing budget αmax ∈ (0 , 1] is met exactly over any finite horizon T . At each slot t, the accumulator state is updated and the sensing decision is taken as 
+
+s(t) = s(t − 1) + αmax , (8) 6
+
+α(t) = 1{s(t) ≥ 1}, (9) where 1{·} is the indicator function, and the accumulator is reset via s(t) ← s(t) − 1 whenever α(t) = 1 . With 
+
+s(0) = 0 , this construction generates the binary sequence 
+
+α(t) = ⌊tα max ⌋ − ⌊ (t − 1) αmax ⌋, (10) which satisfies ∑Tt=1 α(t) = ⌊T α max ⌋, thereby guarantee-ing that the time-average sensing rate satisfies (5b) over any horizon T .(2) Uniform Sampling: Under the average budget αmax ,sensing is performed once every N := ⌈1/α max ⌉ slots, i.e., 
+
+α(t) = 1{t mod N = 0 }, (11) which yields a time-average sensing rate of 1/N ≤ αmax 
+
+and hence satisfies the budget. A key structural property of this policy is that N = 2 for all αmax ∈ (0 .5, 1) , so the selected frame set is identical to that obtained at 
+
+αmax = 0 .5: the fixed uniform grid cannot be refined beyond one sample every two slots. Any budget allocated beyond this threshold is therefore redundant, yielding no additional observations and no performance gain. This saturation is also reflected in the numerical results of Section VII. (3) Random Sampling: We use a Bernoulli sampling scheme with mean αmax , i.e., at every slot the sensing decision is drawn independently as 
+
+α(t) ∼ Bernoulli( αmax ). (12) The budget constraint is thus satisfied in expectation, with the time-average sampling rate converging to αmax 
+
+as T grows large by the law of large numbers. For short horizons, however, individual realizations may deviate from the budget. B. Data Preprocessing, Age Encoding, and Fusion Raw RGB images are preprocessed prior to feature extraction to ensure compatibility with pretrained convo-lutional backbone architectures. Each image is resized and converted to a tensor with pixel intensities scaled to [0 , 1] ,followed by per-channel normalization using ImageNet statistics. This aligns the input distribution with that encountered during backbone pretraining and stabilizes optimization. The AoI value δ(t) associated with each retrieved sample is incorporated as a synthetic input signal along-side the visual data. Unlike standard sensing modalities, 
+
+δ(t) carries no environmental information of its own; rather, it acts as a contextual filter that informs the predictor about the reliability of the input image. A key practical advantage is that this signal is available at zero sensing cost, since the AoI is computed locally from the sampling decisions {α(t)} via (2), without any additional measurement overhead. However, as a scalar, δ(t) cannot be directly combined with high-dimensional image feature vectors without introducing a distributional mismatch. To address this, δ(t) is passed through a lightweight age encoder, 
+
+ea = σ(waδ(t) + ba
+
+) ∈ RD , (13) where wa, ba ∈ RD are trainable parameters and σ(·)
+
+denotes the element-wise sigmoid function. This projects the scalar age into a D-dimensional embedding matching the dimension of the image feature representation. The image embedding ei ∈ RD , extracted by the backbone feature extractor, and ea are independently normalized prior to fusion to mitigate scale disparity. Age Fusion: Different multimodal fusion strategies exist, ranging from concatenation, element-wise addition, and element-wise multiplication to attention-based mech-anisms [32]. We adopt early fusion, combining the two embeddings before the temporal aggregation stage. The choice of mechanism is dictated by the asymmetric role of the two embeddings. A symmetric strategy such as addition or concatenation would treat the age as an equal contributor to the fused representation, regardless of its actual relevance, which varies substantially across sensing budgets. Element-wise multiplication better re-flects the modulating role of age, but applies a fixed interaction that cannot adapt to how informative the age signal is at a given budget. We therefore adopt a gating mechanism [11], in which ea modulates the image features through a learned, dimension-wise weighting. 2
+
+Specifically, the two embeddings are concatenated as 
+
+z = [ei; ea] ∈ R2D and passed through a learnable linear transformation followed by a sigmoid activation to produce a gating vector: 
+
+g = σ(Wz + b), (14) where W ∈ RD×2D and b ∈ RD are trainable parameters. The fused representation is then obtained as a dimension-wise convex combination of the two embeddings: 
+
+efused = g ⊙ ei + ( 1 − g) ⊙ ea, (15) where ⊙ denotes element-wise multiplication. Since g
+
+in (14) is itself a function of both embeddings, the weighting adapts to the input rather than being fixed a priori. This enables the model to learn how much to rely on visual content versus age context for each feature dimension independently, providing robustness against modality imbalance across varying sensing bud-gets. A numerical comparison of gating fusion against additive, concatenation, and multiplicative alternatives is presented in Section VII. C. Beam Predictor Model Architecture This subsection describes the neural network architec-ture of the proposed beam predictor gθ (·, ·) defined in (3), 
+
+> 2Although instantiated here with RGB image features, the gating formulation is agnostic to the specific modality and extends readily to other high-dimensional feature representations, such as those arising from LiDAR or radar inputs. 7
+
+detailing its constituent blocks and the two feature ex-tractor designs that trade off prediction accuracy against model complexity. As illustrated in Fig. 1, the model comprises five func-tional blocks: a visual feature extractor, an age encoder, a gating fusion layer, a GRU temporal aggregator, and a beam classifier. For each sample in the history buffer, the visual feature extractor maps the RGB image into a feature embedding ei, while the age encoder maps the associated AoI value into an embedding ea, as described in the preceding section. The two embeddings are combined by the gating fusion layer into a fused representation 
+
+efused . The fused embeddings across the sampled history are then aggregated by the GRU, whose final hidden state is mapped by the beam classifier to a probability distribution over the M codebook beams. Visual feature extractor: The visual feature extractor is the most computationally intensive block of the model, as it maps each high-dimensional RGB image into a discrim-inative embedding. The remaining blocks, by contrast, operate on low-dimensional vectors. Deep residual CNNs, and ResNet in particular, are among the most widely adopted architectures for visual feature encoding, owing to their strong representational capacity and the stable optimization afforded by residual connections [33]. We therefore adopt a pretrained ResNet18 backbone, with the final classification layer removed, as the primary feature extractor. It yields a D = 512 dimensional embedding ei from each input image. Although pretrained weights are used as initialization, all backbone parameters are updated during training according to the task loss, allowing the model to adapt its representations to the beam prediction objective. This design contains approx-imately 11 million trainable parameters, dominated by the ResNet18 backbone. While accurate, the ResNet18-based model is too heavy for deployment on resource-constrained platforms, particularly since the feature extractor accounts for nearly the entire model complexity. To address this, we design a low-complexity visual feature extractor based on a custom compact CNN, schematically illustrated in Fig. 2. The encoder consists of a strided 3 × 3
+
+convolutional stem followed by five depthwise-separable convolution blocks with progressive channel expansion (16 → 32 → 64 → 128 → 256 ) and spatial downsampling via strided convolutions, yielding a 256 -dimensional em-bedding. Identity residual connections are applied where input and output channel dimensions match. Prior to global average pooling, a squeeze-and-excitation (SE) channel attention module [34] with reduction ratio r = 16 
+
+recalibrates channel-wise feature responses. The resulting encoder contains approximately 60 K trainable parame-ters, a compression ratio of roughly 180 × relative to ResNet18. Since the remaining blocks of the pipeline are inherently lightweight, replacing the feature extractor alone substantially reduces the overall model complexity. Reducing model capacity in this manner, however, risks degrading prediction accuracy, particularly under the  
+
+> Fig. 2: Our low-complexity custom CNN-based visual feature extractor model (i.e., the student model) with only around 60 Ktrainable parameters. This model replaces the heavy visual feature-extraction ResNet block in Fig. 1.
+
+sparse and stale inputs induced by the sensing budget. To retain high accuracy in the compact model, we employ a knowledge distillation (KD) framework in which the high-capacity ResNet18-based model guides the training of the low-complexity model. The two designs thus serve as the “teacher” and the “student”, respectively; the framework is detailed in Section V. GRU temporal aggregator and classifier: The fused embeddings {efused } of the samples in the history buffer are fed sequentially into the GRU, ordered from oldest to most recent, which aggregates the age-tagged observation sequence and captures temporal dependencies across sparsely sampled frames. The final hidden state of the GRU is passed to a fully connected classifier layer that maps it to the logits {zm(t)}Mm=1 over the codebook beams, from which the predicted distribution follows via (16). As illustrated in Fig. 1, for a window size W = 3 
+
+at time t, the model processes the three most recently acquired samples at times t, t−2, and t−5, with respective ages 0, 2, and 5.A special case arises when W = 1 , i.e., no history buffer is maintained. In this regime, the GRU aggregation is unnecessary, and the fused embedding efused is passed directly to the classifier. This reduces model complexity in two aspects: the sequential processing of an observation history is eliminated, and the GRU parameters are removed entirely. The empirical implications of varying 
+
+W are examined in Section VII. V. Knowledge Distillation Framework A. Motivation In the standard KD paradigm [12], a compact model, called the student, is trained to mimic the output dis-tribution of a larger, more capable teacher, transferring generalizable knowledge while substantially reducing pa-rameter count and inference cost. In most existing appli-cations, both teacher and student operate under identical training and inference conditions, and the primary benefit is model compression. Our setting differs from this paradigm due to con-straint (5b). Specifically, the teacher is allowed to be trained on fully sampled, temporally dense data, while the student must train and operate under the sensing budget. 8
+
+Without distillation, the student’s training distribution is dominated by high-AoI samples, especially at low budgets 
+
+αmax , which prevents it from developing the inter-class structure needed to generalize across budgets. Conversely, training a model on fully sampled data and subsequently deploying it under a constrained sensing budget intro-duces a substantial mismatch between the training and inference distributions, leading to significant performance degradation irrespective of model architecture or capacity. To address both challenges, we propose to employ KD as follows: the high-capacity teacher is first trained on fully sampled data, i.e., regardless of constraint (5b), to obtain a strong representation of the inter-class structure, which is then transferred to the budget-constrained student through soft-target supervision. Distillation therefore acts here as a regularization mechanism against the distribu-tion shift between training and inference imposed by the sensing constraint. To evaluate this approach, we consider two regimes for training the teacher: (1) full sampling (FS) and (2) limited sampling (LS). In the FS regime, the teacher is trained with α(t) = 1 for all times t in the training set, i.e., each best beam label at t is paired with its associated sample 
+
+X(t). In the LS regime, the teacher is trained under the sensing budget αmax , so that each best beam label at t is paired with the most recent available sample X (t − δ(t)) ,as determined by the sampling policies of Section IV-A. Note that in both regimes the number of slots requiring a beam decision equals the total number of sample points at inference. In both regimes, the student is trained and evaluated exclusively under the budget constraint. Remark 1. The training regime that is optimal for a standalone predictor differs from the one that is optimal for a teacher used in distillation. When a model serves as the beam predictor itself, LS training is preferable, since training under sampling aligns the training distribution with the budget-constrained inference distribution. An FS-trained model, by contrast, overfits to dense observa-tions and generalizes poorly to sparse inputs at inference (see results in Section VII-A). When the same model instead serves as a teacher, FS training yields a stronger student (see results in Section VII-B), because the student already matches the inference distribution through its own budget-constrained inputs, so the teacher contributes most by supplying the rich inter-class structure learned from dense data, which the student cannot obtain on its own. This contrast confirms that, in the constrained sensing setting, KD operates as a bridge between the dense training conditions of the teacher and the sparse inference conditions of the student, rather than as a conventional compression mechanism. Having established the role of distillation, we now define the loss functions used for training. Training any model variant requires a task loss measured against the ground-truth beam labels, defined in the next subsection. Training the student additionally requires a distillation loss measured against the teacher’s outputs, defined in Section V-C. For the student, the two are combined into a single KD loss. B. Task Loss As the beam prediction task is a multiclass classi-fication problem, we adopt the cross-entropy loss as the base training objective. Let zm(t) denote the m-th logit of the model output at slot t. Let pm(t) denote the corresponding predicted probability that beam m is optimal, obtained via the softmax function as 
+
+pm(t) = softmax( zm(t)) := ezm(t)
+
+∑Mj=1 ezj (t) , m = 1 , . . . , M. 
+
+(16) The cross-entropy loss at slot t is then 
+
+L(t) := − log (py(t)(t)), (17) where y(t) is the ground-truth optimal beam index at t.Training is performed on minibatches of B consecutive slots. For a minibatch B with |B| = B, the empirical task loss minimized at each training step is the sample average value given by 
+
+Ltask (B) := 1
+
+B
+
+∑
+
+> t∈B
+
+L(t) = − 1
+
+B
+
+∑
+
+> t∈B
+
+log (py(t)(t)). (18) This loss is used to train all model variants, i.e., the teacher under both the FS and LS regimes and the student without KD. C. Distillation Loss To train the student, the task loss in (18) is combined with a distillation loss that aligns the student’s output distribution with that of the pretrained teacher. Let 
+
+Ldis denote the distillation loss. The total KD training objective over a minibatch B is 
+
+Lkd := γLdis + (1 − γ)Ltask (B), (19) where γ ∈ [0 , 1] is a tunable hyperparameter controlling the relative weight of the two terms. For the distillation loss, we first consider the Kullback-Leibler (KL) divergence between the temperature-softened output distributions of the teacher and student. Let zT
+
+> m
+
+(t) and zS
+
+> m
+
+(t) denote the teacher and student logits for beam m at slot t, respectively. The corresponding softened probabilities are pm(t) = softmax (zT
+
+> m
+
+(t)/τ ) and 
+
+qm(t) = softmax (zS
+
+> m
+
+(t)/τ ), and the KL distillation loss is given by 
+
+Ldis KL = τ 2
+
+B
+
+∑
+
+> t∈B
+> M
+
+∑
+
+> m=1
+
+pm(t) log 
+
+( pm(t)
+
+qm(t)
+
+)
+
+, (20) where τ > 1 is the temperature parameter that softens the distributions to expose relative class similarities, and the 
+
+τ 2 scaling compensates for the reduced gradient magni-tude introduced by the softening [12]. Substituting (20) into (19) yields the total student training objective for this variant, which requires tuning two hyperparameters, 
+
+τ and γ.9
+
+As an alternative distillation loss, inspired by [27], [35], we consider the mean squared error (MSE) between the teacher’s and student’s raw logits: 
+
+Ldis MSE = 1
+
+BM 
+
+∑
+
+> t∈B
+> M
+
+∑
+
+> m=1
+
+(zS
+
+> m
+
+(t) − zT
+
+> m
+
+(t))2 , (21) which is substituted for Ldis in (19). Unlike the KL variant, this formulation operates directly on the raw logits and therefore does not require the temperature parameter τ , reducing the hyperparameter search to 
+
+γ alone. Logit matching is further motivated by its equivalence to KL distillation in the limit of large τ [35], capturing inter-class structure through the magnitude of the teacher’s outputs rather than through explicitly softened distributions. The practical implications of this choice are examined in Section VII. VI. Training Algorithms While Section V defined the optimization objectives, this section specifies the procedure by which they are optimized: we describe the dataset construction and the application of sampling policies across data splits, then present the training procedures for the standard and KD-based models, summarized in Algorithms 1 and 2, respectively. We adopt a time-series-based approach to dataset construction that preserves the temporal structure of the sensing process. Given a dataset of N multimodal samples ordered chronologically, the first N1 samples are allocated for training, the following N2 for validation, and the remaining N − N1 − N2 for testing. This chronological partitioning is essential for the sampling constraint to be meaningful: it ensures that the history buffer X (t) at any slot t draws exclusively from past observations, as it would in a real deployment, and that the test set captures genuinely unseen future conditions. The chosen values of 
+
+N , N1, and N2 are given in Section VII. The sampling policies introduced in Section IV-A are applied across all three splits. For every slot t at which 
+
+α(t) = 0, the most recently acquired image sample 
+
+X(t − δ(t)) is retrieved and paired with its corresponding AoI value δ(t) to form the input tuple (X(t − δ(t)) , δ (t)) .This applies uniformly to the training, validation, and test sets, ensuring that the model is always evaluated under conditions consistent with those it encounters at inference. Importantly, even the teacher trained under the FS regime is validated and tested under the sensing budget, so that performance comparisons across all model variants remain on equal footing. A. Training Without Distillation Algorithm 1 summarizes the training procedure of the age-aware beam predictor model without KD. The procedure is parameterized by the training mode M ∈ {FS , LS } defined in Section V, which controls whether the sensing budget is enforced during training. In both Algorithm 1: Age-Aware Model Training Without Distillation Initialize : Training set Dtrain , validation set Dval ,sampling policy π, sensing budget αmax ,training mode M ∈ { FS , LS }, improvement threshold ϵ, max epochs E, patience K                                                                                                  
+
+> 1/* Step (1): Construct age-tagged training sequences */
+> 2for each slot tin Dtrain do
+> 3if M=FS then
+> 4Set α(t)←1;// Unconstrained: always fresh data, δ(t) = 0
+> 5else
+> 6Draw α(t)from policy πwith budget αmax ;// Budget-constrained: sparse observations
+> 7Compute AoI δ(t)via (2)
+> 8Retrieve image sample X(t−δ(t))
+> 9Form input tuple (X(t−δ(t)) , δ (t))
+> 10 /* Step (2): Training loop with early stopping */
+> 11 Initialize θ;;
+> 12 set ℓ⋆← ∞ ,;
+> 13 patience counter c←0
+> 14 for each epoch e= 1 , . . . , E do
+> 15 for each mini-batch Bfrom Dtrain do
+> 16 Compute task loss Ltask (B)via (18)
+> 17 Update θvia Adam (backpropagation)
+> 18 Evaluate ℓval on Dval under policy πwith budget
+> αmax ; // Inference always under sampling budget
+> 19 if ℓval < ℓ ⋆−ϵthen
+> 20 ℓ⋆←ℓval ;
+> 21 θ⋆←θ;
+> 22 c←0
+> 23 else
+> 24 c←c+ 1 ;
+> 25 if c≥Kthen break; Output : Trained model parameters θ⋆
+
+regimes, the task loss (18) is minimized, while valida-tion is always performed under the sampling budget, regardless of the training mode. Early stopping is applied based on validation loss with patience K, and the model checkpoint achieving the lowest validation loss is retained. B. Training With Distillation Algorithm 2 details the training procedure for the stu-dent model under the KD framework. A key distinction from Algorithm 1 is that the student is always trained under the sensing budget, regardless of the teacher’s training regime MT. At each training step, the teacher, whose parameters are frozen, and the student process the same age-tagged input tuple; the teacher produces soft logits that serve as distillation targets, while the student is updated by minimizing the combined KD loss (19). The distillation loss Ldis is computed either as the KL divergence (20) between temperature-softened output distributions, or as the MSE between raw logits (21), in which case the temperature τ is not used. As with Algorithm 1, validation and early stopping are always performed under the sensing budget, ensuring that model selection reflects inference-time conditions. 10 
+
+Algorithm 2: Constrained Knowledge Distillation Training (Student) Initialize : Training set Dtrain , validation set Dval ,pretrained teacher f T(·; θT) from Alg. 1 with mode MT ∈ { FS , LS }, sampling policy 
+
+π, budget αmax , KD weight γ, temperature 
+
+τ (KL only), distillation loss type 
+
+∈ { KL , MSE }, improvement threshold ϵ, max epochs E, patience K 
+
+> 1
+
+for each slot t in Dtrain do  
+
+> 2
+
+Draw α(t) from policy π with budget αmax ;// Student always trains under sensing budget  
+
+> 3
+
+Compute AoI δ(t) via (2)  
+
+> 4
+
+Retrieve image sample X(t − δ(t))  
+
+> 5
+
+Form input tuple (X(t − δ(t)) , δ (t))  
+
+> 6
+
+/* Step (2): KD training loop with early stopping */  
+
+> 7
+
+Initialize θS;;  
+
+> 8
+
+set ℓ⋆ ← ∞ ,;  
+
+> 9
+
+patience counter c ← 0 
+
+> 10
+
+for each epoch e = 1 , . . . , E do  
+
+> 11
+
+for each mini-batch B from Dtrain do  
+
+> 12
+
+Get teacher logits (frozen): 
+
+zT(t) ← f T(X(t−δ(t)) , δ (t); θT) 
+
+> 13
+
+Get student logits: 
+
+zS(t) ← f S(X(t−δ(t)) , δ (t); θS) 
+
+> 14
+
+Compute Ldis between zT and zS via (20) (KL) or (21) (MSE)  
+
+> 15
+
+Compute total KD loss Lkd via (19)  
+
+> 16
+
+Update θS via Adam (backpropagation)  
+
+> 17
+
+Evaluate ℓval on Dval under policy π with budget 
+
+αmax ; // Inference always under sampling budget  
+
+> 18
+
+if ℓval < ℓ ⋆ − ϵ then  
+
+> 19
+
+ℓ⋆ ← ℓval ; 
+
+> 20
+
+θS,⋆ ← θS; 
+
+> 21
+
+c ← 0 
+
+> 22
+
+else  
+
+> 23
+
+c ← c + 1 ; 
+
+> 24
+
+if c ≥ K then break; Output : Trained student parameters θS,⋆ 
+
+VII. Numerical Results and Discussions This section presents simulation results to examine the impact of age-augmented modality fusion, sampling algo-rithms, and knowledge distillation on the beam prediction accuracy. We use the DeepSense 6G dataset, Scenario 9, and consider a codebook of 32 candidate beams. To account for stochastic variability, all results are averaged over 20 independent Monte Carlo runs, with common random numbers (CRN) [36] used across budgets to ensure a fair comparison. Unless stated otherwise, we set W = 1 (single time-step input), learning rate η = 10 −3, weight decay λ =10 −4, batch size B = 64 , maximum number of training epochs 100 , a cosine annealing scheduler with a linear warm-up of 5 epochs (start factor 0.1, minimum learning rate 10 −6), early-stopping patience K = 10 epochs with validation loss improvement stopping threshold ϵ = 10 −3,and the accumulated sampling policy. The overall neural network architecture and training hyperparameters are summarized in Table I and Table II, respectively. Dataset Construction: Following the chronological par-
+
+TABLE I: Neural Network Architecture Component Value Image feature extractor ResNet18 (ImageNet pretrained) Feature vector dimension 512 Classifier head FC (512 → 32) 
+
+Input image size 224 × 224 
+
+Input normalization Per-channel ImageNet statistics †† Mean: (0 .485 , 0.456 , 0.406) , Std: (0 .229 , 0.224 , 0.225) .TABLE II: Training Hyperparameters Parameter Value Optimizer Adam Learning rate 10 −3
+
+Weight decay 10 −4
+
+Batch size 64 Maximum epochs 100 LR schedule Linear warm-up 
+
+→ cosine annealing Warm-up epochs 5 (start factor 0.1)Minimum learning rate 10 −6
+
+Loss function Cross-entropy Early-stopping patience 10 epochs Early-stopping threshold 10 −3
+
+Monte Carlo iterations 20 
+
+titioning described in Section VI, we allocate the first 50 %of samples for training, the following 15 % for validation, and the remaining 35 % for testing. For Scenario 9, with 
+
+N = 5964 samples in total, this yields N1 = 3000 training, 
+
+N2 = 1000 validation, and 1964 test samples. A. Results Without Distillation Here, we first solely evaluate the impact of age fusion, sampling algorithms, and the history window size W .In particular, we consider the following benchmark and baselines. Full sensing (upper bound) refers to the model trained and evaluated with α(t) = 1 for all t, i.e., without the sensing constraint (5b), and provides a budget-independent performance ceiling. For the proposed age-fused predictor, we additionally compare three fusion mechanisms: additive, concatenation-based, and multi-plicative. As baselines, we consider two without-age models that rely on the RGB image data alone: Without age, trained and evaluated under the sensing budget, and Without age (FS training), trained with α(t) = 1 but evaluated under the sensing budget, which quantifies the penalty of the training–inference distribution mismatch discussed in Section V. Note that the FS regime applies only to models without age fusion: under α(t) = 1 the AoI is identically zero, so the age input carries no information and the fusion mechanism cannot meaningfully be trained. All age-fused models are therefore trained under the sensing budget. Impact of Age Fusion: Fig. 3 shows the Top-1 and Top-3 accuracies for different fusion techniques across sampling budgets. Age fusion yields a substantial accuracy gain: at the most restricted budget ( αmax = 0 .1), the multiply and gating fusion methods achieve a Top-1 accuracy of 11          
+
+> (a) Top-1 accuracies
+> (b) Top-3 accuracies
+> Fig. 3: Top-1 and Top-3 accuracies for Scenario 9across different fusion techniques.
+
+approximately 47 %, nearly doubling the 22 % of the with-out age baseline. Multiplicative and gating mechanisms further outperform additive and concatenation-based fu-sion, indicating a non-linear interaction between the age signal and the image features. This further suggests the interpretation of age as a contextual filter on the visual features rather than an independent data modality. While all models converge as αmax → 1, the age-aware models retain their advantage in the low-budget regime, reaching near-upper-bound Top-3 accuracy (approximately 95 %) at αmax = 0.2, a level the baseline does not attain until αmax = 0 .5.Impact of Sampling Algorithms: Fig. 4 compares the three sampling policies of Section IV-A, where line style denotes the policy and marker denotes the model variant. CRN is used to synchronize the frame subsets across model variants at each budget, isolating the effect of the policy itself. Accumulated sampling consistently outperforms uniform and random sampling, with the largest gap at low αmax , as its near-deterministic spacing yields a lower AoI variance than the alternatives at the same average sensing rate. The three policies converge as αmax → 1, confirming that the gap originates entirely from frame placement under data scarcity. A structural limitation of uniform sampling is that for any αmax > 0.5,
+
+> (a) Top-1 accuracies
+> (b) Top-3 accuracies
+> Fig. 4: Top-1 and Top-3 accuracies of Scenario 9 for different sampling techniques.
+
+the fixed uniform grid selects the same frame set as at αmax = 0 .5, so any additional budget beyond this threshold yields no accuracy gain. The FS-trained model, in contrast, degrades sharply at low αmax , reaching ap-proximately 12 % Top-1 accuracy at αmax = 0 .1: training exclusively on temporally dense observations leaves it unable to accommodate sparse, stale inputs at inference, consistent with the distribution mismatch discussed in Section V. The age-fused method retains its advantage over all image-only configurations across the full budget range and under every sampling policy, with an absolute gain of approximately 15 –20 percentage points at low αmax .At low budgets, where stale observations carry limited discriminative visual content, the age signal provides a reliable, budget-independent cue that partially compen-sates for the reduced input quality. As αmax increases and fresher observations become available, this contribu-tion diminishes, since the visual features alone become increasingly sufficient for accurate beam classification. Impact of History Window Size W : Fig. 5 examines the effect of the history window size W . For the age-fused models, W = 1 , i.e., no GRU aggregation, outperforms both W = 2 and W = 3 across the budget range, with the gap most pronounced at low αmax and closing only as 12   
+
+> (a) Top-1 accuracies
+> (b) Top-3 accuracies
+> Fig. 5: Top-1 and Top3 accuracies of Scenario 9 for the impact of the window size W.
+
+αmax → 1. Under sparse sampling, the frames retained in the history window are separated by large and variable age gaps, so aggregating over them introduces more noise than exploitable temporal structure. This is reinforced by the ordering of W = 2 and W = 3 at low budgets, where the longer window performs worse, indicating that the additional retained frames are too stale to contribute useful context. The two converge for αmax ≳ 0.4, beyond which the marginal value of an additional history step is negligible. For the without-age models, in contrast, the ordering reverses at mid-to-high budgets, where W =2 and W = 3 overtake W = 1 : absent the age input, temporal aggregation partially substitutes for the missing freshness information once observations are dense enough to form a coherent sequence. The age-fused variant retains its advantage over all image-only baselines. B. Impact of Knowledge Distillation Here, we examine the impact of distilling knowledge from a high-capacity image feature encoder into the lightweight student model described in Section IV-C. Unless otherwise stated, the teacher employs the ResNet-18 backbone and the student employs the compact custom CNN encoder, as described in Table I. We consider three distilled configurations, all evaluated under the sensing budget: FS-Img-KD and LS-Img-KD denote students without age fusion, distilled from teach-ers trained under the FS and LS regimes, respectively, while Age-KD denotes the age-fused student distilled from the FS-trained teacher. Each is compared against the corresponding undistilled student trained directly under the budget, with and without age fusion. Effect of Distillation Loss and Teacher Training: Fig. 6 compares the MSE and KL-divergence distillation losses (with γ ∈ { 0.1, 0.9}) for the two teacher training regimes. A cross-over is observed for the KL loss: γ = 0 .1, i.e., a higher task-loss weight, outperforms γ = 0 .9 at low budgets, while the ordering reverses at high budgets. Under severe data scarcity, i.e., small values of αmax ,anchoring the student more strongly to the ground-truth labels is therefore beneficial, whereas at higher budgets the richer soft-label signal from the teacher becomes more informative and a larger distillation weight is preferable. The MSE loss performs on par with the best KL variant across the entire budget range while removing the tem-perature τ from the hyperparameter search, making it a practical default choice for this setting. Fig. 6 further shows that the dominant factor is the teacher’s own training regime. A teacher trained under full sampling (FS, blue curves) consistently yields astronger student than one trained under limited sampling (LS, green curves), across all budgets and both Top-1 and Top-3 metrics, with the gap widening at low αmax as seen in the inset. This ordering is the reverse of the standalone comparison in Sec. VII-A, where the LS-trained teacher achieves higher accuracy under constrained inference. The reversal confirms the mechanism described in Section V: what transfers to the student is the inter-class structure the teacher acquires from fully observed data, not its accuracy under the budget. Overall Impact of KD and Age Fusion: Fig. 7 compares distilled and non-distilled student models, with and with-out age fusion. KD consistently improves accuracy over all no-KD baselines across the full budget range, confirming that the teacher’s knowledge transfers effectively to the compact student even under sampling constraints. Among the distilled configurations, Age-KD achieves the highest Top-1 accuracy throughout, with FS-Img-KD trailing marginally and both substantially outperforming LS-Img-KD, consistent with the finding above that the teacher’s training regime is the primary differentiator. The W/ age student (no KD) baseline exhibits adistinct failure mode. At low budgets (αmax ≤ 0.3)it is competitive with Age-KD, but its accuracy stalls at mid-range budgets and plateaus near 0.47 Top-1 at αmax = 1, falling below all distilled models. This indicates an optimization conflict: without the teacher’s soft-label guidance, the fusion mechanism fails to reweight the age and image contributions as more visual data becomes available, so the age signal interferes rather than complements. KD resolves this by regularizing the student’s output distribution, enabling it to exploit both 13 
+
+> (a) Top-1 accuracies
+> (b) Top-3 accuracies
+
+Fig. 6: Top-1 and Top-3 accuracies of Scenario 9 for different KD losses. 
+
+inputs across all budgets. Finally, the W/o age, FS train. stud. (no KD) variant performs poorly at low αmax (≈ 0.12 Top-1 at αmax =0.1), well below all other configurations. As discussed previously, training exclusively on fully sampled data causes the model to overfit to dense observations and lose robustness to sparse inference inputs. The distilled variants avoid this collapse: the teacher’s soft targets encode abstract beam-class relationships that transfer more gracefully to low-budget conditions, confirming the role of KD in this setting as an implicit regularizer against the training–inference distribution shift rather than as a compression mechanism. VIII. Conclusions This paper studied sensing-aided beam prediction un-der an explicit average sensing rate constraint, which limits how often a data sample can be acquired in association with a beam decision slot. The age of the input sample is encoded and fused with the visual features through a gating mechanism. Training at a high sensing rate yields better beam prediction accuracy, but such a W/ age, stud. w/ KD W/o age (FS teach.), stud. w/ KD W/o age (LS teach.), stud. w/ KD W/o age, LS train. stud. (no KD) W/o age, FS train. stud. (no KD) W/ age student (no KD) 
+
+> (a) Top-1 accuracies
+> (b) Top-3 accuracies
+
+Fig. 7: Top-1 and Top-3 accuracies of Scenario 9 for the impact of KD. 
+
+model fails when inference is performed under the sensing constraint. We proposed KD to address this: a teacher is trained on fully sampled data, without accounting for the sensing constraint, and its acquired knowledge is then distilled into a student deployed under that constraint. This yields not only a low-cost model for beam prediction, but a more accurate one under sparse data availability. Future work may consider modality-specific cost budgets in place of the shared α(t); joint optimization of the sensing and prediction policies; and extension of age-aware KD to distribution shifts beyond data sparsity at inference, e.g., sensor noise or unseen deployment scenarios. References         
+
+> [1] A. Zakeri, N. T. Nguyen, A. Alkhateeb, and M. Juntti, “Deep reinforcement learning for dynamic sensing and communi-cations,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Processing, pp. 20636–20640, Barcelona, Spain, May 2026. [2] A. Zakeri, N. T. Nguyen, A. Alkhateeb, and M. Juntti, “AoI-aware machine learning for constrained multimodal sensing and communications,” Proc. IEEE Int. Conf. Commun., Accepted, May 2026. 14
+
+[3] M. Qurratulain Khan, A. Gaber, P. Schulz, and G. Fettweis, “Machine learning for millimeter wave and terahertz beam management: A survey and open challenges,” IEEE Access, vol. 11, pp. 11880–11902, 2023. [4] S. Kim, J. Moon, J. Kim, Y. Ahn, D. Kim, S. Kim, K. Shim, and B. Shim, “Role of sensing and computer vision in 6G wireless communications,” IEEE Wireless Commun., vol. 31, no. 5, pp. 264–271, Oct. 2024. [5] A. Ali, N. Gonzalez-Prelcic, R. W. Heath, and A. Ghosh, “Leveraging sensing at the infrastructure for mmWave com-munication,” IEEE Commun. Mag., vol. 58, no. 7, pp. 84–89, Jul. 2020. [6] G. Charan, T. Osman, A. Hredzak, N. Thawdar, and A. Alkha-teeb, “Vision-position multi-modal beam prediction using real millimeter wave datasets,” in Proc. IEEE Wireless Commun. and Networking Conf., pp. 2727–2731, Austin, TX, USA, Apr. 2022. [7] G. Charan, M. Alrabeiah, and A. Alkhateeb, “Vision-aided 6G wireless communications: Blockage prediction and proactive handoff,” IEEE Trans. Veh. Technol., vol. 70, no. 10, pp. 10193– 10208, Oct. 2021. [8] K. Tan and C. Zhu, “Multimodal sensing for intelligent V2X: A review of recent advances toward deployment,” IEEE Internet Things J., vol. 12, no. 22, pp. 46294–46315, Nov. 2025. [9] S. Kaul, R. Yates, and M. Gruteser, “Real-time status: How often should one update?,” in Proc. IEEE Int. Conf. on Computer Commun., pp. 2731–2735, Orlando, FL, USA, Mar. 2012. [10] Y. Sun, I. Kadota, R. Talak, and E. Modiano, “Age of in-formation: A new metric for information freshness,” Synthesis Lectures on Communication Networks, vol. 12, no. 2, pp. 1–224, Dec. 2019. [11] B. Wen and T.-P. Tan, “PGF-Net: A progressive gated-fusion framework for efficient multimodal sentiment analysis,” arXiv preprint arXiv:2508.15852, 2025. [12] G. Hinton, O. Vinyals, and J. Dean, “Distilling the knowledge in a neural network,” arXiv preprint arXiv:1503.02531, 2015. [13] A. M. Bedewy, Y. Sun, S. Kompella, and N. B. Shroff, “Optimal sampling and scheduling for timely status updates in multi-source networks,” IEEE Trans. Inf. Theory, vol. 67, no. 6, pp. 4019–4034, Jun. 2021. [14] A. Alkhateeb, G. Charan, T. Osman, A. Hredzak, J. Morais, U. Demirhan, and N. Srinivas, “Deepsense 6G: A large-scale real-world multi-modal sensing and communication dataset,” IEEE Commun. Mag., vol. 61, no. 9, pp. 122–128, Sep. 2023. [15] K. Patel and R. W. Heath, “Harnessing multimodal sensing for multi-user beamforming in mmWave systems,” IEEE Trans. Wireless Commun., vol. 23, no. 12, pp. 18725–18739, Dec. 2024. [16] S. Kim, J. Moon, J. Wu, B. Shim, and M. Z. Win, “Vision-aided positioning and beam focusing for 6G terahertz com-munications,” IEEE J. Sel. Areas Commun., vol. 42, no. 9, pp. 2503–2519, Sep. 2024. [17] K. Li, B. Zhou, J. Guo, X. Yang, Q. Xue, F. Gao, and S. Ma, “Vision-aided multi-user beam tracking for mmWave massive MIMO system: Prototyping and experimental results,” in Proc. IEEE Veh. Technol. Conf., pp. 1–6, Singapore, Jun. 2024. [18] M. Arnold, B. Major, F. V. Massoli, J. B. Soriaga, and A. Be-hboodi, “Vision-assisted digital twin creation for mmWave beam management,” in Proc. IEEE Int. Conf. Commun., pp. 1– 6, Denver, CO, USA, Jun. 2024. [19] K. Vuckovic, S. M. Hosseini, and N. Rahnavard, “Revisiting performance metrics for multimodal mmWave beam prediction using deep learning,” in Proc. IEEE Military Commun. Conf., pp. 881–887, Washington, DC, USA, Oct, 2024. [20] M. B. Mollah, H. Wang, M. A. Karim, and H. Fang, “Multi-modal sensing and fusion in Mmwave beamforming for con-nected vehicles: A transformer based framework,” IEEE Trans. Veh. Technol., pp. 1–13, Early Access, 2026. [21] X. Xie, F. Liao, and H. Wang, “A beam tracking approach for mmWave communication with multi-modal data fusion,” Under Review, 2025. [22] C. Zheng, J. He, G. Cai, N. Li, M. Bennis, H. Wymeersch, and M. Debbah, “JEPA-MSAC: A joint-embedding predictive architecture for multimodal sensing-assisted communications,” Under Review, 2025. [23] Y. Li and W. Yu, “Multimodal sensing-aided beamforming optimization for OFDM systems,” in Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP), 2025. [24] X. Cai, G. Pan, H. Chen, H. Wymeersch, and H. V. Cheng, “Map-aided ISAC beam design via active sensing,” Under Review, 2025. [25] M. Ma, N. T. Nguyen, N. Shlezinger, Y. C. Eldar, A. L. Swindle-hurst, and M. Juntti, “Knowledge distillation for sensing-assisted long-term beam tracking in mmWave communica-tions,” arXiv preprint arXiv:2509.11419, Sep. 2025. [26] Y. M. Park, Y. K. Tun, W. Saad, and C. S. Hong, “Resource-efficient beam prediction in mmWave communications with multimodal realistic simulation framework,” arXiv preprint arXiv:2504.05187, Apr. 2025. [27] A. Zakeri, N. T. Nguyen, A. Alkhateeb, and M. Juntti, “Data-free knowledge distillation for LiDAR-aided beam tracking in MmWave systems,” arXiv preprint arXiv:2509.19092, Sep. 2025. [28] K. Zhang, Y. Sun, and B. Ji, “Multimodal remote inference,” in Proc. Int. Conf. Mobile, Ad Hoc, and Smart Sys. (MASS), pp. 198–204, Chicago, IL, USA, Oct. 2025. [29] “NR; physical channels and modulation,” Tech. Rep. TS 38.211, 3GPP, 2024. Release 18. [30] “NR; physical layer procedures for control,” Tech. Rep. TS 38.213, 3GPP, 2024. Release 18. [31] Q. Xue, C. Ji, S. Ma, J. Guo, Y. Xu, Q. Chen, and W. Zhang, “A survey of beam management for mmWave and THz commu-nications towards 6G,” IEEE Commun. Surveys Tuts., vol. 26, no. 3, pp. 1520–1559, 2024. [32] S. Li and H. Tang, “Multimodal alignment and fusion: Asurvey,” arXiv preprint arXiv:2411.17040, Oct. 2025. [33] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for image recognition,” in Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR), (Las Vegas, NV, USA), pp. 770–778, June 2016. [34] J. Hu, L. Shen, and G. Sun, “Squeeze-and-excitation networks,” in Proc. IEEE Conf. Comput. Vis. Pattern Recognit., (Salt Lake City, UT, USA), pp. 7132–7141, June 2018. [35] T. Kim, J. Oh, N. Kim, S. Cho, and S. Yun, “Understand-ing knowledge distillation,” OpenReview (ICLR Submission), 2019. [36] J. P. C. Kleijnen, A. Ridder, and R. Rubinstein, “Variance re-duction techniques in Monte Carlo methods,” SSRN Electronic Journal, 2010.

@@ -1,0 +1,198 @@
+Title: Physiological Information Reliability: Cross-Layer Adaptive Resource Allocation for Cardiovascular Sensing
+
+URL Source: https://arxiv.org/pdf/2609.00435v1
+
+Published Time: Wed, 02 Sep 2026 00:23:03 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+> ML4H 2026 - Findings Track Machine Learning for Health (ML4H) 2026
+
+# Physiological Information Reliability: Cross-Layer Adaptive Resource Allocation for Cardiovascular Sensing 
+
+Navaneeth Krishnan K and Janakiraman K and Harinisri V ∗
+
+## Abstract 
+
+Cardiovascular sensing systems must preserve clinically useful information despite signal degradation, wireless packet loss, energy con-straints, and edge-computation latency, yet sig-nal quality, delivery reliability, energy, and la-tency are conventionally optimized as separate, layer-local objectives. We formalize Physiologi-cal Information Reliability (PIR), a joint state representation Xt = [ Sm, S w , S e, S c] that cou-ples a multimodal ECG/PPG physiological in-formation value (PIV) with wireless-channel, energy, and compute-placement state, and in-stantiate its controller as a LinUCB contextual bandit that adapts network-coding redundancy and edge/local compute placement online. In a controlled, multiseed ( n=5) evaluation of 1,200 sequential monitoring windows per seed under a Gilbert–Elliott burst-erasure channel, PIR-LinUCB reaches the lowest steady-state energy draw (0 .089 ± 0.004 J/window) and the high-est mean reward (0 .205 ± 0.065) among five compared policies, while every policy meets a 150 ms latency deadline; a hand-tuned heuristic baseline is statistically indistinguishable from it on reward. We report the accuracy–energy– latency trade-off honestly, including where the bandit’s advantage is condition-dependent rather than universal, and discuss the limits of a synthetic-data, simulated-channel evaluation. Code and configurations are provided for repro-ducibility. 
+
+Keywords: physiological monitoring, contex-tual bandits, network coding, edge computing, wireless health sensing 
+
+Data and Code Availability This study uses no real patient data. All physiological signals are  
+
+> ∗N. Krishnan K. is with the Department of Electronics and Communication Engineering, Saveetha School of Engineer-ing ( e-mail: knavaneeth385@gmail.com) and J. K is with the Government Kilpauk Medical College and Hospital ( e-mail: kjanaki2408@gmail.com) and Harinisri V. is with the Department of Physics and Nanotechnology, SRM In-stitute of Science and Technology, Chennai, India (e-mail: harinisriv2003@gmail.com).
+
+produced by a documented, parameterized synthetic ECG/PPG generator (Section 4) that reproduces the graded and complete-modality degradation protocol used in prior multimodal fusion work (Kamalakannan and Kamalakannan, 2026); no public corpus offers in-dependently controllable, graded degradation of both modalities simultaneously. Code, configuration files, and the full multiseed experiment logs/figures un-derlying every number reported here are included as anonymized supplementary material for review, and will be released at a de-anonymized public repository upon acceptance. 
+
+Institutional Review Board (IRB) This work involves no human subjects and no real patient data; all evaluation is performed on synthetic waveforms generated in software. No IRB review was required. 
+
+## 1. Introduction 
+
+Wearable cardiovascular sensing pipelines chain to-gether sensing, wireless transmission, edge or on-device inference, and clinical decision support. Re-liability in such pipelines is conventionally treated as an end-to-end packet -delivery question: did the bits arrive? But not every window of ECG/PPG data carries equal clinical value: a packet spanning a clean, diagnostically usable beat and a packet span-ning motion-artifact noise are not equally worth pro-tecting, yet systems that allocate redundancy, com-pute, or energy by fixed or purely channel-aware rules treat them identically. Existing work instead optimizes signal quality (Orphanidou et al., 2015; Kamalakannan and Ka-malakannan, 2026), transmission reliability (Ho et al., 2006; Kamalakannan and Velmurugan, 2026), or task/semantic relevance of transmitted content (G¨ und¨ uz et al., 2023) largely in isolation from one another and from the energy and compute budget that a body-worn device actually has. We argue that 
+
+communication reliability is not the same objective as physiological information reliability , and that a  
+
+> ©.arXiv:2609.00435v1 [eess.SP] 31 Aug 2026
+
+Physiological Information Reliability 
+
+cross-layer controller should allocate scarce wireless, energy, and compute resources in proportion to the physiological information at stake, not only to chan-nel conditions. We formalize this as PIR : a joint state Xt =[Sm(t), S w(t), S e(t), S c(t)] spanning medical (signal-quality/fusion), wireless, energy, and compute sub-states (Figure 1), and instantiate its control policy as a contextual bandit that learns, online, which coding redundancy and compute placement to use per mon-itoring window. PIR bridges two previously separate systems – a multimodal ECG/PPG fusion and signal-quality front end (Kamalakannan and Kamalakan-nan, 2026) and an adaptive random-linear-network-coding transport layer (Kamalakannan and Velmuru-gan, 2026) – into one closed-loop, learned controller rather than a hand-tuned heuristic. 
+
+Contributions. (1) A formal PIR state represen-tation connecting a physiological information value (PIV) with wireless, energy, and compute conditions (Section 3). (2) A LinUCB contextual-bandit con-troller that selects network-coding redundancy and edge/local compute placement to maximize a PIV-weighted decode utility net of energy, latency, and power penalties. (3) A controlled, multiseed em-pirical comparison against four non-learned baselines that reports where the learned controller helps, where it does not, and what a synthetic-data proxy evalua-tion can and cannot show (Sections 5–7). 
+
+## 2. Related Work 
+
+Physiological signal quality. Signal-quality in-dices (SQI) assess whether a reliable heart rate can be recovered from a given ECG/PPG segment (Orphanidou et al., 2015); Kamalakannan and Ka-malakannan (2026) extend this to multimodal fusion under six graded and complete-modality degradation regimes, the protocol our PIV estimator follows. 
+
+Task-aware information preservation. A grow-ing communications literature argues that systems should preserve decision-relevant meaning , not raw bits (G¨ und¨ uz et al., 2023). PIR instantiates this principle for one concrete closed-loop physiological-sensing pipeline rather than proposing a general semantic-communication scheme. 
+
+Wireless medical sensing. Random linear net-work coding (RLNC) gives algebraic resilience to packet erasures (Ho et al., 2006); Kamalakannan       
+
+> ECG PPG CardioFusion SQI →PIV
+> Xt= [ Sm, S w, S e, S c]
+> medical / wireless / energy / compute
+> PIR Controller (LinUCB) Action at=( Rt, m t)APC-RLNC encode + GE channel Edge / local inference reward
+
+Figure 1: PIR-Framework architecture. ECG/PPG signal quality and cross-modal agreement give the physiological information value (PIV), which joins wireless, energy, and compute state into Xt. A LinUCB con-troller selects coding redundancy R and compute placement m; APC-RLNC-style coding and the Gilbert–Elliott channel de-termine delivery, which is scored and fed back as reward. and Velmurugan (2026) combine RLNC with adap-tive peer clustering over Gilbert–Elliott burst-erasure channels (Gilbert, 1960; Elliott, 1963). Our channel and RLNC decode-probability model reuse this for-mulation. 
+
+Adaptive, ML-based resource allocation. 
+
+Contextual bandits give low-regret online decision policies with linear-model efficiency (Li et al., 2010; Agrawal and Goyal, 2013) and have been applied to sequential mobile-health decisions (Tewari and Mur-phy, 2017). We apply the same machinery to sens-ing/coding/placement decisions rather than behav-ioral interventions. Existing approaches typically optimize one or two of {signal quality, delivery, energy, latency } in iso-lation; PIR instead treats preservation of physiologi-cally valuable information as an explicit, joint control objective over sensing quality, wireless state, energy, and compute placement. 
+
+## 3. The PIR Framework 
+
+Joint state. Xt = [ Sm(t), S w(t), S e(t), S c(t)]. Sm
+
+carries per-modality SQI, modality-presence flags, and a scalar physiological information value PIV t ∈
+
+[0 , 1]: PIV t = clip  wq SQI comb ,t − wa δt, 0, 1, (1) where SQI comb is a presence-weighted average of per-modality SQI (a missing modality is excluded, 
+
+2Physiological Information Reliability 
+
+not scored as 0) and δt is the normalized cross-modal heart-rate disagreement, gated to 0 unless both modalities are present (wq =0 .75, wa=0 .25), following the availability/quality distinction of Ka-malakannan and Kamalakannan (2026). Sw(t) =[SNR t, p er  
+
+> t
+
+] evolves via a two-state Gilbert–Elliott chain (Gilbert, 1960; Elliott, 1963) with per-step transition probabilities pgb , p bg ; SNR is drawn state-conditionally and mapped to a BPSK/AWGN bit-error rate BER = Q(√2 · SNR lin ) and then to a packet-erasure probability per = 1 − (1 − BER) L
+
+over an L-bit payload, so SNR and erasure risk can-not silently disagree. Se(t) = [ Bt, E pkt ,t ] is resid-ual battery and an additive per-packet energy cost 
+
+E = etx ntx + erx nrx + ecomp nops ; Sc(t) is on-device vs. edge-offload compute latency plus RLNC trans-mission latency. 
+
+Action and reward. The controller chooses at =(Rt, m t) – RLNC redundancy (generation size K=32 fixed) and local/edge placement – from a 6-arm set 
+
+R ∈ { 2, 8, 20 } × m ∈ { local , edge }. Delivery uses the closed-form RLNC decode probability (Ho et al., 2006), Pdec (K, R, p ) = PK+Rk=K
+
+ K+Rk
+
+(1 −p)kpK+R−k.We define a PIR utility proxy UPIR = PIV t · Pdec –how much physiologically valuable information is ex-pected to be successfully decoded – and not as an independently validated measure of clinical informa-tion agreement. The reward is 
+
+rt = UPIR −λE Et−λL sp( Lt−Lmax )−λP sp( Pt−Pmax ),
+
+(2) with softplus sp( ·) penalties that are near-zero inside the 150 ms deadline Lmax and 100 mW power cap 
+
+Pmax and grow smoothly once violated. 
+
+Controller. PIR-LinUCB (Li et al., 2010) main-tains, per arm a, ridge posterior ˆθa = A−1 
+
+> a
+
+ba and selects 
+
+at = arg max  
+
+> a
+
+x⊤ 
+
+> t
+
+ˆθa + α
+
+q
+
+x⊤ 
+
+> t
+
+A−1 
+
+> a
+
+xt, (3) over the causal context xt (built from the previ-ously observed channel telemetry, not the about-to-be-realized draw), updated via a rank-1 Sherman– Morrison rule after each observed reward. 
+
+## 4. Experimental Setup 
+
+Data. A physiologically-grounded synthetic ECG/PPG generator (125 Hz, 8 s windows) pro-duces n=5 independent seeds × 1,200 sequential windows/seed (200 windows × 6 degradation regimes: both-clean, ECG-degraded, PPG-degraded, both-degraded, ECG-missing, PPG-missing), following Kamalakannan and Kamalakannan (2026)’s protocol. Graded degradation adds severity-scaled Gaussian noise, sinusoidal baseline wander, a band-limited muscle-artifact component, and randomly-timed mo-tion bursts; missing-modality windows are replaced by a structureless noise floor. 
+
+Wireless. A two-state Gilbert–Elliott channel (pgb =0 .03, pbg =0 .08; SNR ∼ N (18 , 1.52) dB good, 
+
+N (7 , 12) dB bad; 64-byte coded payload) drives packet erasure identically for every policy (common random numbers, for variance reduction). 
+
+Energy / compute. A BLE-class radio (etx =2 mJ, erx =1 mJ/packet) and a 64 MHz on-body MCU vs. 1.4 GHz edge target (+12 ms RTT) parameterize Se, S c; deadline 150 ms, power cap 100 mW. 
+
+Baselines. Fixed-Rate (K=32 , R =8, local, static); 
+
+Always-Local / Always-Edge (R=20, placement pinned); Heuristic-Rule (battery-threshold place-ment; smallest R whose closed-form decode probabil-ity clears 0.99 at the current erasure estimate – same physical features as the bandit, hand-written thresh-olds instead of a learned policy); PIR-LinUCB 
+
+(α=0 .3, ridge λ=1 .0, λE =4 .0, λ L=0 .05 , λ P =0 .02). 
+
+Protocol and metrics. Each policy runs as one continuous sequential monitoring session per seed over the identical channel/physiological stream. We report steady-state metrics (second half of each ses-sion) as mean ± 95% CI (Student-t, 5 seeds) to separate converged decision quality from the ban-dit’s own exploration cost. Primary metrics: HR-MAE (bpm), energy/window (J), deadline-success rate. Secondary: packet delivery ratio (PDR), a threshold-based bradycardia/tachycardia surrogate event-detection F1, and mean reward. 
+
+## 5. Results 
+
+All five policies achieve 100% deadline-success and stay well under the power cap (Table 1), so the dif-ferences below are a genuine energy/accuracy trade, not a constraint being quietly violated. PIR-LinUCB attains the lowest steady-state power (11.2 mW, vs. 12.0 mW Fixed/Heuristic and 15.0 mW Always-Local/Edge) and the highest mean reward, narrowly ahead of Heuristic-Rule (+0.5%) and clearly ahead 
+
+> 3Physiological Information Reliability
+
+Table 1: Steady-state results, mean ± 95% CI over 5 seeds. Best per column in bold .                                                
+
+> Policy HR-MAE (bpm) ↓Energy (J) ↓Reward ↑
+> Fixed-Rate 6.96 ±1.11 0.096 ±0.000 0.172 ±0.054 Always-Local 5.95 ±0.58 0.120 ±0.000 0.113 ±0.031 Always-Edge 5.95 ±0.58 0.120 ±0.000 0.115 ±0.031 Heuristic-Rule 6.08 ±0.57 0.096 ±0.006 0.204 ±0.054 PIR-LinUCB 6.82 ±1.62 0.089 ±0.004 0.205 ±0.065
+
+Figure 2: Accuracy–power Pareto frontier (steady-state, pooled across seeds). PIR-LinUCB and Heuristic-Rule sit on the frontier at low power; Always-Local/Edge sit on it at the high-accuracy/high-power end; Fixed-Rate is dominated on both axes. of the non-adaptive fixed policies (+19% vs. Fixed-Rate, +81% vs. Always-Local/Edge). It does not 
+
+have the best raw HR-MAE: spending redundancy unconditionally ( R=20) buys better raw accuracy at 34% more energy – the intended behavior of a reward that trades some accuracy for energy, not a deficiency. Figures 2–3 show PIR-LinUCB and Heuristic-Rule both lying on the accuracy–power and energy–latency Pareto frontiers, with Fixed-Rate dominated on both axes. The reward gap between PIR-LinUCB and Heuristic-Rule (0.205 vs. 0.204) is far smaller than either policy’s own 95% CI half-width; with 5 seeds this comparison would not survive a multiplicity-corrected significance test, and we report it as an effect size rather than a significance claim. 
+
+Figure 3: Energy–latency trade-off (marker size ∝
+
+PDR; stars = Pareto-optimal). PIR-LinUCB and Heuristic-Rule dominate on energy and latency simultaneously; Always-Local approaches the 150 ms dead-line. 
+
+## 6. Findings 
+
+F1 – PIV is a usable cross-layer signal. PIV enters the controller’s context directly, and per-regime results (Appendix B) show reward tracking PIV across all six regimes for every policy, consis-tent with PIV carrying decision-relevant information about downstream task difficulty. 
+
+F2 – Adaptive allocation lowers energy with-out violating latency. PIR-LinUCB’s steady-state energy and power are the lowest of all five policies while still meeting the 150 ms deadline on 100% of windows. 
+
+F3 – The advantage is condition-dependent, not universal. PIR-LinUCB’s reward edge over Heuristic-Rule is within noise, and its raw accuracy trails the redundancy-maximizing baselines. Here, learning recovers heuristic-competitive decisions with less hand-tuning, not a dominant improvement over a well-designed rule. 
+
+F4 – Static evaluation understates the case for prediction. The controller reacts only to the 
+
+last-observed channel state (Section 3); a bursty Gilbert–Elliott channel has short-horizon structure a reactive bandit cannot exploit, motivating model-predictive or forecasting extensions. 
+
+> 4Physiological Information Reliability
+
+## 7. Limitations 
+
+Evaluation uses a controlled synthetic ECG/PPG generator, not recorded patient data; the front-end SQI/degradation protocol follows Kamalakannan and Kamalakannan (2026), whose signal-processing com-ponents are separately validated against real ICU and fetal-ECG recordings, but our own bandit-facing pipeline is not. The wireless, energy, and compute constants are documented and physically motivated but not fit to a specific real radio or MCU. UPIR is a PIR utility proxy (PIV × decode probability), not an independently validated measure of clinical infor-mation agreement, and the reported event-F1 uses a simple bradycardia/tachycardia threshold rather than a clinically adjudicated arrhythmia label. With 5 seeds, several pairwise differences (notably PIR-LinUCB vs. Heuristic-Rule) do not clear a strict sig-nificance bar; we report effect sizes with honest CIs. We did not evaluate an oracle (perfect future-channel-knowledge) upper bound in this submission; adding one, along with a state-ablation study (dropping PIV, wireless, energy, or compute context in turn) and real-channel/hardware validation, is the immediate next step. These results are an initial computational demonstration of physiological-information-aware re-source allocation, not a clinical efficacy claim. 
+
+## References 
+
+Shipra Agrawal and Navin Goyal. Thompson sam-pling for contextual bandits with linear payoffs. In 
+
+Proceedings of the 30th International Conference on Machine Learning (ICML) , volume 28 of Pro-ceedings of Machine Learning Research , pages 127– 135, 2013. E. O. Elliott. Estimates of error rates for codes on burst-noise channels. Bell System Technical Jour-nal , 42(5):1977–1997, 1963. E. N. Gilbert. Capacity of a burst-noise channel. Bell System Technical Journal , 39(5):1253–1265, 1960. Deniz G¨ und¨ uz, Zhijin Qin, Inaki Estella Aguerri, Harpreet S. Dhillon, Zhaohui Yang, Aylin Yener, Kai Kit Wong, and Chan-Byoung Chae. Beyond transmitting bits: Context, semantics, and task-oriented communications. IEEE Journal on Se-lected Areas in Communications , 41(1):5–41, 2023. Tracey Ho, Muriel M´ edard, Ralf Koetter, David R. Karger, Michelle Effros, Jun Shi, and Ben Leong. A random linear network coding approach to mul-ticast. IEEE Transactions on Information Theory ,52(10):4413–4430, 2006. Navaneetha Krishnan Kamalakannan and Janaki-raman Kamalakannan. CardioFusion-AI: Ro-bust ECG–PPG fusion for multimodal physiolog-ical monitoring under signal degradation. arXiv preprint arXiv:2608.26000 , 2026. Navaneetha Krishnan Kamalakannan and Harinisri Velmurugan. Adaptive peer clustering with hierar-chical random linear network coding for resilient decentralized wireless networks. arXiv preprint arXiv:2608.26040 , 2026. Lihong Li, Wei Chu, John Langford, and Robert E. Schapire. A contextual-bandit approach to person-alized news article recommendation. In Proceed-ings of the 19th International Conference on World Wide Web (WWW) , pages 661–670. ACM, 2010. Christina Orphanidou, Timothy Bonnici, Peter Charlton, David Clifton, David Vallance, and Li-onel Tarassenko. Signal-quality indices for the elec-trocardiogram and photoplethysmogram: Deriva-tion and applications to wireless monitoring. IEEE Journal of Biomedical and Health Informatics , 19 (3):832–838, 2015. Ambuj Tewari and Susan A. Murphy. From ads to in-terventions: Contextual bandits in mobile health. In James M. Rehg, Susan A. Murphy, and San-tosh Kumar, editors, Mobile Health: Sensors, An-alytic Methods, and Applications , pages 495–517. Springer, 2017. 
+
+## Appendix A. Extended Configuration 
+
+LinUCB: α=0 .3, ridge λ=1, context dimension 10 (per-modality SQI/presence, PIV, normalized SNR, EWMA erasure estimate, link state, battery fraction, bias). Reward weights: λE =4 .0 J −1, λL=0 .05 ms −1,
+
+λP =0 .02 mW −1, softplus β=0 .5. Compute model: 8 GF(256) cycles/op, 2 ×10 6 (6 .4× that for edge) infer-ence cycles, 250 kbps PHY rate. All parameters and their physical justification are documented in the re-leased configuration file. 
+
+## Appendix B. Per-Regime Breakdown 
+
+Steady-state reward is highest in both-clean and missing-modality regimes (PIR-LinUCB: 0.268, 
+
+> 5Physiological Information Reliability
+
+0.265, 0.258 for both-clean/ECG-missing/PPG-missing) and lowest under both-degraded (0.089), tracking mean PIV (0.739 both-clean vs. 0.543 both-degraded) across every policy, not only the bandit – consistent with F1. HR-MAE follows the same ordering (3.5–3.8 bpm clean/missing vs. 14.4 bpm both-degraded), since graded noise, not modality absence, is the harder regime for heart-rate estimation in this synthetic protocol.

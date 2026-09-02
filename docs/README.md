@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-01</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-02</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 17 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 11 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>11</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>5</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-01 22:20:23 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-02 22:39:14 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,9 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读17篇论文，重点聚焦ISAC网络感知与多星MIMO传输的优化方法。</p>
-<p>最值得关注：通过公用迹分解约束PPO实现多租户感知合并，以及用知识蒸馏提升去中心化多星大规模MIMO性能，两篇均获9分。</p>
-<p>下一步可扩展关注混合离线-在线决策Transformer及RIS相位掩码生成等高效无线资源管理思路。</p>
+<p>今日精读6篇、速读5篇，聚焦光通信与OTFS/ISAC等无线感知前沿；最值得关注的是可解释匹配滤波揭示经典接收理论偏差，以及SpecMind多智能体频谱智能方案；建议优先精读这两篇高分论文，后续再涉猎OTFS深度学习检测与贝叶斯信道估计。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -76,7 +74,7 @@
     <strong class="dpr-home-dashboard-count">6 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Sense Once, Serve Many: Common-Trace Factorized Constrained PPO for Online Sensing-Session Consolidation in Multi-Tenant ISAC Networks">Sense Once, Serve Many: Common-Trace Factorized Constrained PPO for Online Sensing-Session Consolidation in Multi-Tenant ISAC Networks</span></li><li><span class="dpr-home-dashboard-paper-title" title="Robust Decentralized Multi-Satellite Massive MIMO Transmission via Knowledge Distillation">Robust Decentralized Multi-Satellite Massive MIMO Transmission via Knowledge Distillation</span></li><li><span class="dpr-home-dashboard-paper-title" title="A New Paradigm of 6G Networks: Proactive Channel Cognition and Reconfiguration">A New Paradigm of 6G Networks: Proactive Channel Cognition and Reconfiguration</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Explainable deformable matched filtering reveals measurable departures from classical receiver theory in optical wireless communications">Explainable deformable matched filtering reveals measurable departures from classical receiver theory in optical wireless communications</span></li><li><span class="dpr-home-dashboard-paper-title" title="SpecMind: Enabling Spectrum Intelligence via Multi-Agent Hybrid Retrieval-Augmented Generation">SpecMind: Enabling Spectrum Intelligence via Multi-Agent Hybrid Retrieval-Augmented Generation</span></li><li><span class="dpr-home-dashboard-paper-title" title="CRAFT: Fine-Tuning Pre-hoc Explainability in AI-native 6G RAN">CRAFT: Fine-Tuning Pre-hoc Explainability in AI-native 6G RAN</span></li></ul>
   </div>
   <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
 </section>
@@ -86,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">11 篇</strong>
+    <strong class="dpr-home-dashboard-count">5 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Hybrid Offline-Online Multi-Agent Decision Transformers for Wireless Resource Management">Hybrid Offline-Online Multi-Agent Decision Transformers for Wireless Resource Management</span></li><li><span class="dpr-home-dashboard-paper-title" title="Adaptive RIS-aided Communications through ML-based Generation of Phase Masks">Adaptive RIS-aided Communications through ML-based Generation of Phase Masks</span></li><li><span class="dpr-home-dashboard-paper-title" title="DeepHSIC: Deep Learning-based Signal Detector for Hybrid Downlink IM-NOMA">DeepHSIC: Deep Learning-based Signal Detector for Hybrid Downlink IM-NOMA</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A Deep Iterative Refinement Receiver for OTFS Symbol Detection in Doubly-Dispersive Channels">A Deep Iterative Refinement Receiver for OTFS Symbol Detection in Doubly-Dispersive Channels</span></li><li><span class="dpr-home-dashboard-paper-title" title="Delay-Doppler Sensing Performance Analysis for MIMO-OFDM ISAC Systems">Delay-Doppler Sensing Performance Analysis for MIMO-OFDM ISAC Systems</span></li><li><span class="dpr-home-dashboard-paper-title" title="OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling">OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>11</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>5</strong></span></div>
 </section>
 </div>
 

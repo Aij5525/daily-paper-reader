@@ -1,0 +1,732 @@
+Title: WiSDoM: Wireless Sparse Decision Transformer with Mixture-of-Experts for Multi-Task Mobile Network Optimization
+
+URL Source: https://arxiv.org/pdf/2609.00284v1
+
+Published Time: Wed, 02 Sep 2026 00:14:25 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# WiSDoM: Wireless Sparse Decision Transformer with Mixture-of-Experts for Multi-Task Mobile Network Optimization 
+
+Fatih Temiz, Shavbo Salehi, and Melike Erol-Kantarci, Fellow, IEEE School of Electrical Engineering and Computer Science, University of Ottawa, Ottawa, Canada 
+
+Emails: {ftemi033, ssale038, melike.erolkantarci }@uottawa.ca 
+
+Abstract —Emerging 6G wireless networks are expected to operate across increasingly diverse deployment scenarios, where variations in network topology, user mobility, traffic demand, and radio conditions challenge the scalability of conventional radio resource management (RRM) methods. While recent of-fline reinforcement learning (RL) methods have demonstrated strong decision-making capabilities, learning a single policy that performs consistently across heterogeneous wireless environments remains difficult due to conflicting optimization objectives and limited model specialization. These challenges become partic-ularly pronounced in coordinated multipoint (CoMP) trans-mission, where selecting the optimal serving-cell combination requires sequential decision-making under continuously evolving network conditions. This paper presents the Wireless Sparse Decision Transformer with Mixture of Experts (WiSDoM), a sparse multi-task offline RL framework for adaptive multi-cell selection. Instead of relying on a single shared policy network, WiSDoM combines Decision Transformers (DTs) with a Mixture-of-Experts (MoE) architecture that dynamically activates specialized experts according to the characteristics of each task. This MoE mecha-nism improves model capacity without proportionally increasing inference cost, mitigates negative transfer across heterogeneous tasks, and enables expert specialization across different tasks. WiSDoM is trained jointly on diverse network configurations spanning multiple base station and user equipment densities, mobility levels, and scheduler policies. Experimental results show that the proposed framework consistently outperforms heuristic methods, single-task models, and conventional multi-task DTs, improving quality of experience (QoE) by up to 55% while activating only approximately one-third of the parameters of its dense counterpart during inference. Furthermore, WiSDoM exhibits strong task generalization and efficiently adapts to previously unseen wireless scenarios through few-shot prompting without requiring retraining or fine-tuning. 
+
+Index Terms —Decision Transformer, Mixture of Experts, Multi-Task Learning, Wireless Networks 
+
+I. INTRODUCTION 
+
+# ARTIFICIAL INTELLIGENCE (AI)-native wireless net-works are expected to support an unprecedented diversity of devices, services, and performance requirements in the era of hyperconnectivity and pervasive intelligence. Beyond higher data rates, networks evolving toward sixth-generation (6G) systems are anticipated to accommodate massive connectiv-ity, heterogeneous mobility patterns, immersive services and increasingly autonomous network operation. Meeting these requirements calls for an AI-enabled radio access network paradigm capable of continuously adapting its radio resource management (RRM) strategies to rapidly changing channel conditions and service-level objectives [1]. Hence, AI-native RRM has emerged as a key component of future wireless systems, offering a data-driven alternative to conventional optimization methods and rigid rule-based control mechanisms [2]. Furthermore, AI-driven control is a fundamental enabler of emerging wireless architectures such as the open radio access network (O-RAN), supporting intelligent and adaptive network management for disaggregated networks through the RAN intelligent controllers (RICs) [3]. Among advanced RRM techniques, coordinated multipoint (CoMP) transmission is particularly relevant to dense and het-erogeneous deployments [4]. CoMP was initially standardized by the 3rd Generation Partnership Project (3GPP) in Release 11 primarily to improve the performance of cell-edge user equipments (UEs). However, its potential extends well beyond its initial interference-management objective. By coordinat-ing multiple base stations (BSs), CoMP can increase spatial diversity, mitigate inter-cell interference, improve coverage, enhance communication reliability through macro-diversity, and improve mobility robustness by reducing handover in-terruptions across cooperating BSs. These capabilities enable CoMP to support stringent quality of experience (QoE) re-quirements, making it particularly attractive for ultra-reliable low-latency communications (URLLC), connected vehicles, and industrial automation [5], [6]. Notably, the performance of CoMP strongly depends on determining which BSs should jointly serve each UE. This multi-cell selection problem be-comes increasingly difficult as the network grows because the number of possible serving-cell combinations increases com-binatorially with the number of UEs and candidate BSs [7]. Moreover, the optimal association depends on time-varying channel gains, mobility, available radio resources and the scheduling policy employed at each BS. Exact optimization approaches, such as mixed-integer nonlinear programming (MINLP), can provide optimal or near-optimal solutions but are often difficult to solve directly because of their high computational complexity, motivating the use of decomposi-tion or approximation techniques [8]. Heuristic approaches, including CoMP clustering schemes and signal-to-noise ratio (SNR)-based UE association methods, reduce computational complexity but typically rely on manually designed rules, pre-defined clustering strategies, or fixed thresholds, limiting their ability to adapt to heterogeneous and time-varying network conditions [4], [9]. arXiv:2609.00284v1 [cs.NI] 31 Aug 2026 2
+
+Recent advances in reinforcement learning (RL), enabled by deep neural networks in the form of deep reinforcement learning (DRL), have significantly improved the ability to solve complex wireless resource management problems. DRL algorithms, including proximal policy optimization (PPO), [10], have been extensively investigated for tasks such as network slicing [11], beam management [12], and particularly for cell-selection in CoMP [7]. Centralized DRL approaches can exploit a global network view to coordinate multi-cell decisions, whereas multi-agent formulations, i.e., multi-agent RL (MARL), can distribute decision-making across BSs or UEs [13]. While these approaches outperform conventional heuristics in selected deployment settings, they scale poorly in practice. Also, conventional DRL approaches (e.g., online DRL) require repeated interaction with the environment, which can be costly to implement. More importantly, conventional DRL policies are generally tied to a predefined state and action space. A change in the number of UEs, the number of BSs, or the underlying network configurations (e.g., scheduler, mobility) may alter the decision problem substantially and require costly retraining [14]. Offline RL offers a promising alternative by learning de-cision policies from previously collected trajectories without requiring continuous online interaction [15]. In particular, the decision transformer (DT) reformulates RL as a sequence-modeling problem, enabling a policy to predict actions con-ditioned on historical states, actions and desired returns (i.e., return-to-go (RTG)) [16]. Moreover, prompt decision trans-former (PromptDT) further extends DTs and shows strong performance in multi-task learning and few-shot adaptation by conditioning the policy on short task-specific trajectory demonstrations [15]. This capability is especially attractive for wireless networks, where operating conditions often change frequently after initial deployment. Despite these advantages, conventional PromptDT employs a densely shared generative pretrained transformer (GPT) style decoder-only transformer architecture in which the same parameter set is optimized across all tasks. As the diversity of network configurations increases, task-specific gradients can conflict, resulting in negative transfer and degraded multi-task performance. Simply increasing the size of the shared model often provides additional capacity, as in the large language models (LLMs). However, it does not explicitly separate conflicting task-specific knowledge and increases the number of parameters activated during every inference operation [17]. Thus, dense multi-task DTs may exhibit limited task and parameter scalability in highly heterogeneous wireless environments. To address these limitations, this paper proposes the Wire-less Sparse Decision Transformer with Mixture of Experts 
+
+(WiSDoM) framework for multi-task CoMP multi-cell selec-tion. A lightweight routing mechanism dynamically directs each input trajectory token to a subset of specialized ex-perts, enabling conditional computation that increases model capacity while activating only a fraction of the parameters during inference. The framework is jointly trained on offline trajectories collected from 36 CoMP tasks spanning diverse network configurations, including different numbers of BSs and UEs, UE mobility conditions, and BS scheduling poli-cies (e.g., resource-fair (ReF), proportional-fair (PF)). Conse-quently, WiSDoM learns a single unified policy across hetero-geneous wireless environments instead of requiring indepen-dently trained models for each configuration, while trajectory prompts further enable adaptation to previously unseen tasks without retraining or fine-tuning. The main contributions of this work are summarized as follows  
+
+> •
+
+Multi-Task RL Framework: We develop a complete multi-task learning framework comprising 36 network config-urations with simultaneous variations in UE density, BS deployment, mobility conditions, and scheduling policies.  
+
+> •
+
+Computation-Efficient MoE-DT Architecture: We pro-pose a sparsely activated MoE-DT-based architecture for multi-discrete action spaces, trained using masked cross-entropy loss, auxiliary loss and action masking. The routing mechanism promotes expert specialization across heterogeneous tasks, increases the model capacity, and improves parameter efficiency.  
+
+> •
+
+Few-Shot Generalization: The WiSDoM framework en-ables adaptation to previously unseen tasks and network conditions through task-specific trajectory prompts, with-out requiring additional retraining or fine-tuning.  
+
+> •
+
+Comprehensive Performance Evaluation: Extensive ex-periments show that WiSDoM improves QoE by up to 55% over heuristic, single-task, and conventional multi-task baselines while using as few as one-third of the active parameters during inference. II. R ELATED WORK 
+
+A. Generalizable and Multi-Task RL for Wireless Networks 
+
+Early learning-based approaches to address CoMP cell selection relied on online DRL and MARL trained for a fixed network configuration or just extending to UE arrivals [7], [13]. DeepCoMP [7] demonstrated that DRL agents can learn effective multi-cell association policies to maximize user QoE, but its policy must be retrained whenever the number of UEs or BSs changes. Similarly, [13] adopts a transformer-based MARL framework (TransfQMix) for CoMP cell selection, improving inter-agent coordination and scalability to varying UE populations. Nevertheless, it still relies on online MARL training and does not learn a unified offline policy across heterogeneous tasks. Beyond transformer-based RL architec-tures, recent studies have also begun leveraging generative AI (GenAI) to improve wireless network optimization. The LLM-Curriculum approach [18] improves the training of PPO-based CoMP association by using an LLM (e.g., GPT-4) to construct a curriculum over increasingly complex UE configurations. Although curriculum learning can improve training efficiency, the resulting policy remains based on online environment interaction. Several studies have instead formulated wireless resource management as offline sequence modeling using DTs rather than DRL. In [19], the authors explore explainability for DT-based CoMP cell selection using both intrinsic and post-hoc explainable AI (XAI) methods. While the study provides 3
+
+valuable insights into the DT’s decision-making process, it considers only a single network configuration and does not address multi-task learning or generalization across heteroge-neous environments. On the other hand, [20] uses DT-based control for joint intelligent reflecting surface (IRS) phase-shift and unmanned aerial vehicle (UAV) trajectory optimiza-tion, demonstrating multi-objective control within a wireless resource-management problem under predefined system con-figurations. Also, the authors in [21] combine PromptDT with federated learning to maximize the QoE of customized mobile edge computing (MEC)-based virtual-reality services across heterogeneous user environments. More closely related to task generalization, the methods in [14] and [22] use PromptDT to adapt across varying numbers of BSs and UEs, respectively. The former targets BS energy management, whereas the latter enhances PromptDT with an attention mechanism to overcome limitations due to zero-padding and jointly optimizes UAV trajectory planning and user scheduling in UAV-assisted Internet-of-Things (IoT) networks. Authors in [23] proposed federated split decision transformer (FSDT), which distributes DT training between the cloud and MEC servers and uses MEC-specific modules to support environment customization while reducing compu-tational burden on MECs. Similarly, authors in [24] proposed a PromptDT-based framework that jointly generalizes across variations in UE count, BS count, and scheduling policy in CoMP; however, it retains a densely shared transformer backbone on a limited number of tasks and therefore does not explicitly address parameter-efficient scaling or expert specialization across tasks. Table I summarizes the main differences between these studies and WiSDoM. It analyzes all related works from online versus offline RL paradigms, proposed algorithms, wireless network domain, objective of the approach and whether MoE is used or not. 
+
+B. MoE for Scalable Sequence Modeling 
+
+Scaling dense transformers uniformly, i.e., activating all pa-rameters for every input, becomes computationally prohibitive as model capacity grows. However, expanding capacity re-mains attractive because larger sequence models have been shown to implicitly perform many tasks without task-specific supervision, first demonstrated at scale by GPT-2 [33]. MoE architectures provide a scalable form of conditional computa-tion for transformer-based models. Rather than activating the same parameters for every input token, a learned router selects a small subset of specialized expert networks. This design increases total model capacity while keeping the number of active parameters per input comparatively small [34]. Expert specialization can also reduce interference (i.e., gradient con-flict) among heterogeneous data distributions by sequential training of each expert. This architecture has been adopted by several high-capacity frontier language models. DeepSeek-V3 contains 671 billion parameters while activating only 37 billion per token through DeepSeekMoE [35]. NVIDIA’s Nemotron 3 Super and Ultra further combine sparse MoE routing with hybrid mamba-attention backbones, activating 12 billion of 120 billion and 55 billion of 550 billion parameters, respectively. These models demonstrate that conditional expert activation can substantially increase representational capacity while maintaining computationally efficient inference [36]. However, these models employ MoE primarily for lan-guage modeling, where experts process token representations to predict subsequent tokens. It is important to note that experts in these LLMs are not generally assigned explicit high-level functions such as translation, summarization, or coding. Instead, routing is learned at the token level, and expert specialization emerges from the training data and optimization process. MoE has also been investigated for scalable multi-task control with RL. Authors in [17] augment a PromptDT backbone with grouped experts and a multi-stage training procedure to improve performance as the number of control tasks increases. Additionally, [37] introduces token- and task-wise MoE for in-context RL, which incorporates sparse MoE routing to improve multi-task decision making across het-erogeneous control tasks. Their evaluation, however, focuses on standard RL benchmarks and does not consider wireless-RRM characteristics such as time-varying channels, mobility, heterogeneous schedulers, constrained multi-discrete actions, or network-level QoE objectives. 
+
+C. MoE for Wireless Networks 
+
+As wireless networks become increasingly heterogeneous and AI-native, single dense models face growing challenges in scaling across diverse optimization tasks. The MoE archi-tecture addresses these limitations through conditional com-putation, which enables larger model capacity without propor-tionally increasing inference cost, making MoE particularly attractive for resource-constrained wireless systems. Authors in [38] provide a comprehensive review of MoE architectures for wireless communications, examining how expert special-ization addresses core network challenges.  
+
+> •
+
+Increased model capacity through experts tailored to distinct tasks (e.g., adaptive modulation classification (AMC), interference cancellation, channel estimation).  
+
+> •
+
+Computational efficiency via sparse expert activation suited to resource-constrained edge/IoT deployments.  
+
+> •
+
+Dynamic feature learning for time-varying conditions such as spectrum allocation and beamforming. Authors in [38] further discuss MoE’s integration with GenAI and RL across channel prediction, resource allocation, and net-work security, along with multi-task and multimodal special-ization (e.g., SNR-regime-specific experts for AMC, modality-specific experts for radar/LiDAR/visual data). In [31], a feder-ated MoE combines shared and client-specific experts through dynamic gating to address data heterogeneity in AMC, while [32] optimizes expert quantization (i.e., expert-wise mixed-bit quantization) and request assignment for efficient MoE deployment at resource-constrained edge servers. Similarly, [30] distributes GenAI tasks among specialized edge experts, demonstrating the potential of MoE-based task decomposition and expert specialization for reducing computational and serv-ing costs. 4
+
+TABLE I: Literature review of generalizable, multi-task RL, DT-based and MoE-based frameworks for wireless networks.                                                                                                                         
+
+> Reference Method Summary Online RL Off. RL Multi-Task Task Variation MoE
+> [7] DRL for adaptive CoMP cell selection ✓––––[13] Transformer-based MARL approach for cooperative CoMP ✓––––[18] GPT-4-assisted PPO for multi-task CoMP ✓––UE Count –[19] XAI-assisted DT for CoMP –✓–––[20] DT for joint IRS-UAV optimization –✓✓IRS+UAV –[25] Hierarchical DT for AI-enabled RAN intent management –✓–––[21] Federated PromptDT for personalized MEC-VR optimization –✓✓User Env. –[14] PromptDT for generalizable BS energy optimization –✓✓BS Count –[22] Attention enhanced PromptDT for UAV-IoT control –✓–UE Count –[26] MoE-enhanced DRL for adaptive RAN slicing ✓–✓SLA weights ✓
+> [27] MoE-based meta-RL for adaptive MAC protocols ✓–✓MAC protocols ✓
+> [28] LLM-gated MoE for network utility optimization ✓–✓QoS intent ✓
+> [29] Distributed MoE inference for wireless LLMs –––Expert placement ✓
+> [30] MoE-based distributed GenAI for mobile edge Metaverse ––✓GenAI tasks ✓
+> [31] Personalized federated MoE for heterogeneous AMC ––✓Data heterogeneity ✓
+> [32] Hybrid expert quantization for edge MoE deployment ✓––Request distribution ✓
+> [23] Federated split DT for MEC-VR –✓✓Network characteristics –[24] PromptDT for generalizable CoMP –✓✓BS, UE, Scheduler –
+> WiSDoM (ours) Sparse MoE-enhanced PromptDT for generalizable CoMP –✓✓BS, UE, Mobility, Scheduler ✓
+
+In [26], the authors pre-train and freeze multiple expert policies under diverse slice service level agreement (SLA) weight preferences (e.g., VoLTE, URLLC, etc.), then train a step-level DRL-based gating network to fuse expert actions for fast adaptation to unseen SLA configurations in RAN slicing. While it demonstrates that MoE gating generalizes well to unseen SLA weight vectors, its experts are trained independently offline and fused only at the gating level during online interaction rather than being jointly optimized within a single sequence model. MoE is also incorporated into a context-based meta-RL framework for media-access control (MAC) in heterogeneous networks [27]. The expert mod-ules improve latent-context representation and support rapid adaptation to previously unseen MAC-protocol environments. Unlike [26], the experts and gating mechanism are jointly trained through meta-RL; nevertheless, MoE is used primarily for context representation within a step-wise policy rather than for autoregressive modeling of extended decision trajectories. Authors in [28] replace a conventional learned gate with an LLM. Given a textual description of a user’s QoS require-ments, the LLM selects and weights independently pre-trained DRL experts, such as outage probability minimization and data rate maximization policies, to optimize network-provider util-ity. Compared to our approach, this work uses MoE externally as an orchestration mechanism over multiple independent RL models, while WiSDoM uses MoE internally within a single model. This approach also incurs LLM inference overhead and relies on natural-language task specifications. Taken together, [26]–[28] demonstrate that MoE is an effective mechanism for adapting to task heterogeneity in wireless RL. However, these approaches do not combine sparse expert routing with long-horizon offline trajectory modeling over a large and structurally diverse set of wireless control tasks. 
+
+Uniqueness of WiSDoM framework: To the best of our knowledge, WiSDoM is the first framework that combines sparse MoE routing with PromptDT-based offline RL for the wireless communications domain (i.e., particularly CoMP). It jointly learns across a large number of diverse network configurations and supports prompt-based adaptation to unseen tasks, and shows strong few-shot prediction performance. III. SYSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+In this paper, we consider a downlink (DL) CoMP trans-mission scenario with joint transmission and coordinated scheduling. The wireless network consists of M UEs and N
+
+BSs, where both M and N can be adjusted as illustrated in Fig. 1. The system is assumed to operate over discrete time steps t = 1 , 2, . . . , T within a bounded two-dimensional area where possible configurations are listed in Table II. All BSs are assumed to transmit synchronously. UE mobility follows the random waypoint model, where each UE moves with a constant velocity and periodically selects random destina-tions within the environment. Wireless channel propagation is modeled using the Okumura-Hata path loss model [39]. Orthogonal resource allocation is assumed within each BS, such that different UEs are assigned different resource blocks (RBs), thereby eliminating intra-cell interference. Further-more, neighboring BSs are assumed to operate on orthogonal or slightly shifted frequency resources, and therefore inter-cell interference is neglected [7]. At each time step, the SNR between UE uj and BS bi is denoted by ρij (t). A UE can establish or maintain a DL connection with a BS only if the measured SNR exceeds a predefined threshold ρmin . The path loss between BS bi and UE uj at distance dij (t) (km) is modeled using the Okumura-Hata urban propagation model: 5
+
+PL ij (t) = 69 .55 − a(huj ) + 26 .16 log 10 fc − 13 .82 log 10 hbi
+
++ (44 .9 − 6.55 log 10 hbi ) log 10 dij (t)
+
+(1) 
+
+a(huj ) = 0 .8 + (1 .1 log 10 fc − 0.7) huj − 1.56 log 10 fc (2) where fc is the carrier frequency (MHz), hbi and huj denote the BS and UE antenna heights (m), and a(huj ) is the mobile antenna height correction factor for urban environments. The received SNR ρij (t) is then computed from PL ij (t) together with the transmit power and noise floor. Multiple BSs are allowed to simultaneously serve a single UE, enabling CoMP transmission. BS resources, i.e., physical resource blocks (PRBs), are allocated among their connected UEs using either a ReF or PF scheduling. Under ReF schedul-ing, each BS allocates its available PRBs equally among its connected UEs. Under PF scheduling, PRBs are distributed by balancing UEs’ instantaneous data rates with their historical throughput to achieve long-term fairness [7]. The achievable Shannon DL data rate between BS bi and UE uj at time t
+
+is denoted by Dij (t), and depends on the channel conditions and scheduling policy. The total DL data rate achieved by UE 
+
+uj is then: 
+
+Dj (t) = X 
+
+> bi∈C j(t)
+
+Dij (t), (3) where Cj (t) denotes the set of BSs serving UE uj at time t.To quantify the QoE of the UEs, we employ a bounded logarithmic utility function that maps the achieved DL data rate to a finite utility range. Let Dj (t) denote the aggregated DL data rate received by UE uj at time t. The instantaneous utility of UE uj is defined as : 
+
+Uj (t) = min 
+
+
+
+Umax , max 
+
+
+
+Umin , w 1
+
+log( w2 + Dj (t)) log( w3)
+
+ 
+
+,
+
+(4) where w1, w2, and w3 are configurable scaling coefficients, and Umin and Umax denote the lower and upper bounds of the utility function, respectively [7]. The clipping operation ensures that the utility remains within a bounded interval, and the rationale of this QoE formulation is to capture the dimin-ishing returns of user-perceived satisfaction with increasing data rates. The objective of the UE association problem is to determine the UE-BS connectivity decisions over time to maximize the long-term average QoE across all active UEs, subject to connectivity and SNR constraints, and it can be expressed as follows: 
+
+max   
+
+> {xij (t)}
+
+lim  
+
+> T→∞
+
+1
+
+T
+
+> T
+
+X
+
+> t=1
+
+1
+
+M (t)
+
+X
+
+> j∈U (t)
+
+Uj (t), (5) 
+
+xij (t) ∈ { 0, 1}, ∀j ∈ U (t), ∀i ∈ B , ∀t (5a) 
+
+xij (t) = 0 if ρij (t) ≤ ρmin , ∀j ∈ U (t), ∀i ∈ B , ∀t (5b) 
+
+X
+
+> i∈B
+
+xij (t) ≤ N, ∀j ∈ U (t), ∀t (5c) where Eq. (5) maximizes the long-term average QoE of all active UEs. Eq. 5a defines the binary UE-BS association variables, and Eq. 5b enforces that a UE–BS connection can only be established when the SNR constraint is satisfied. Also, Eq. 5c ensures that the total number of simultaneous connections for each UE does not exceed the number of BSs. 
+
+B. Problem Formulation 
+
+Due to the stochastic evolution of user mobility and channel conditions, we model the multi-cell selection problem as a Markov Decision Process (MDP), where future system states depend only on the current state and action. The RL agent’s MDP is defined as follows: 
+
+a) State Space: At time step t, the system state captures the DL connectivity, channel quality, and service utility of all active UEs. For a system with M (t) active UEs and N BSs, the state is defined as: 
+
+st =
+
+h
+
+xj (t), ρj (t), ˆUj (t)
+
+i
+
+> j∈U (t)
+
+, (6) 
+
+xj (t) ∈ { 0, 1}N denotes the binary connection vector where the n-th element equals to 1 if UE uj is connected to BS bn,and 0 when it is not connected. ρj (t) ∈ RN represents the normalized SNRs between UE uj and all BSs, and ˆUj (t) ∈
+
+[−1, 1] is the scaled utility of UE uj .
+
+b) Action Space: To limit protocol overhead and signal-ing complexity, each UE is allowed to modify at most one connection per time step. Accordingly, the action for UE uj
+
+at time t is defined as: 
+
+aj (t) ∈ { 0, 1, . . . , N }, (7) where aj (t) = i ∈ { 1, . . . , N } indicates that UE uj toggles its connection status with BS bi, i.e., a connection is established if none exists or released otherwise, provided that the SNR constraint is satisfied. Alternatively, aj (t) = 0 denotes a non-operation, where all existing connections of UE uj remain unchanged. Then the joint action at time t is given by aj =
+
+{aj (t)}j∈U (t).
+
+c) Reward Function: The reward function at the time step t is defined as the average utility of all active UEs, reflecting the overall system’s QoE: 
+
+rt = 1
+
+M (t)
+
+X
+
+> j∈U (t)
+
+ˆUj (t), (8) where the reward formulation in Eq. 8 encourages policies that maximize the long-term average QoE across users. IV. WISDOM FOR MULTI -T ASK LEARNING IN COMP 
+
+1) Multi-Task RL: RL is conventionally formulated as an MDP (S, A, P, R, γ, d 0), with state space S, action space A,transition dynamics P(s′|s, a ), reward function R, discount factor γ, and initial state distribution d0. In multi-task RL (MTRL), a family of tasks Ti ∼ p(T ) is considered, where each task induces a distinct MDP (STi , ATi , PTi , RTi , γ, d Ti 
+
+> 0
+
+)
+
+with potentially different state/action dimensionality, dynam-ics, and reward structure. Rather than solving a single MDP, 6
+
+the objective is to learn a shared policy that generalizes across the task distribution: 
+
+π⋆ = arg max  
+
+> π
+
+ETi∼p(T ) Eat∼π
+
+h ∞X
+
+> t=0
+
+γtrTi
+
+> t
+
+i
+
+. (9) In the offline setting, a static multi-task dataset D = S 
+
+> i
+
+Di
+
+is provided, partitioned into per-task subsets Di collected by a behavior policy, and training tasks T train are used to learn a policy that is then evaluated on both seen and unseen tasks T eval , without further environment interaction. In wire-less CoMP multi-cell selection, task heterogeneity naturally arises from varying numbers of BSs and UEs, UE mobilities, scheduler policies (e.g., ReF/PF), and network topologies, each inducing a distinct state/action space and reward landscape that a shared policy must generalize across. 
+
+2) DT and PromptDT: Offline RL seeks to learn a policy entirely from a fixed dataset D = {(s, a, s ′, r )} without online interaction, which is well suited to wireless settings where exploratory interaction with live infrastructure is costly [20]. DT reframes offline RL as a sequence modeling problem, replacing explicit value-function estimation or policy opti-mization with autoregressive prediction over trajectories of RTG, state, and action tokens: 
+
+τ =
+
+ ˆR0, s 0, a 0, ˆR1, s 1, a 1, . . . , ˆRT , s T , a T
+
+
+
+, (10) where ˆRt = PTt′=t rt′ is the undiscounted RTG. Tokens are embedded into a shared latent space, augmented with positional embeddings, and processed by masked causal self-attention blocks following a GPT-style decoder, so that action prediction is cast as conditional next-token generation given a desired target return [16]. While DT generalizes poorly across tasks with a sin-gle shared parameterization, PromptDT extends the archi-tecture with short task-identifying trajectory prompts τ ⋆i =(ˆ r⋆, s ⋆, a ⋆) of length K⋆, sampled from near-optimal demon-strations Pi, and prepended to a K-step history segment (K⋆ < K ) to form the input τ input  
+
+> i
+
+= ( τ ⋆i , τ i). The prompt encodes just enough information to identify the task, and the model learns to infer task identity implicitly, enabling few-shot generalization to unseen tasks without additional retraining, analogous to in-context learning (ICL) in LLMs [15], [40]. ICL with LLMs has shown strong promise in several wireless network problems such as network intrusion detection [41]. Despite these benefits, a single shared backbone still suffers from gradient conflicts as the number and heterogeneity of tasks grows, since all tasks compete for the same parameters [17]. This motivates augmenting the PromptDT backbone with an MoE architecture, where dedicated expert modules absorb task-specific specialization while the backbone retains shared cross-task knowledge, alleviating gradient interference across heterogeneous CoMP configurations. This forms the basis of the proposed WiSDoM framework, introduced next. 
+
+A. WiSDoM Framework 
+
+The WiSDoM framework is illustrated in Fig. 1 including four main steps. Also, Algs. 1 and 2 break down the framework in detail. The first part of the Fig. 1 is the offline setting 
+
+Algorithm 1 Backbone and Expert Training (Stages 2–3)                                                                                                                                             
+
+> Require: Training tasks Ttrain , task groups {G 1, . . . , GC}, PromptDT back-bone fθ, offline datasets {D i}, demonstrations {P i}, training iterations
+> N1, N 2, per-task batch size M, number of transformer blocks L
+> 1: Stage 2: Multi-Task Backbone Training
+> 2: for n= 1 to N1do
+> 3: for each task Ti∈ T train do
+> 4: for m= 1 to Mdo
+> 5: Sample trajectory τi,m ∼Diand prompt τ⋆i,m =
+> GetPrompt (Ti,Pi)
+> 6: Construct input τinput
+> i,m = ( τ⋆i,m , τ i,m )
+> 7: end for
+> 8: Form task minibatch BMi={τinput
+> i,m }Mm=1
+> 9: end for
+> 10: Form multi-task batch B=S
+> TiBMi
+> 11: Predict actions apred =fθ(τinput ),∀τinput ∈ B
+> 12: Compute masked cross-entropy loss LCE
+> 13: Update backbone: θ←θ−α1∇θLCE
+> 14: end for
+> 15: Stage 3: Group-Specific Expert Training
+> 16: Freeze the shared backbone parameters θ
+> 17: for each task group Gc,c= 1 , . . . , C do
+> 18: Initialize one expert e(ℓ)
+> ϕcin each transformer block ℓ= 1 , . . . , L
+> 19: for n= 1 to N2do
+> 20: Sample a batch Bcfrom tasks in Gc
+> 21: for each block ℓ= 1 , . . . , L do
+> 22: Combine with FFN in parallel: x(ℓ)
+> t←x(ℓ)
+> t+h(ℓ)
+> t, FFN +
+> e(ℓ)
+> ϕc(x(ℓ)
+> t)
+> 23: end for
+> 24: Predict actions apred =fθ,ϕ c(Bc)
+> 25: Compute masked cross-entropy loss L(c)CE
+> 26: Update only expert parameters: ϕc←ϕc−α2∇ϕcL(c)CE
+> 27: end for
+> 28: end for
+> 29: return backbone θ, experts Φ = {ϕ1, . . . , ϕ C}
+
+where the global data buffer consists of RL trajectories formed over diverse tasks. Later, in backbone training, the PromptDT model is trained across all tasks utilizing historical trajectories with prompts. Third, the trained backbone is used to analyze inter-task gradient conflicts, from which agreement vectors are computed to group similar tasks. An expert is then assigned to each task group by inserting task-specific feedforward networks (FFN) into the transformer blocks, and each expert is fine-tuned using only the data from its corresponding task group. Finally, the backbone and experts are frozen, and only the router (i.e., gating network) is optimized to enable dynamic token-level expert selection. During inference, each transformer block performs self-attention followed by sparse expert routing, where the router selects the top-ranked expert(s) for each token. The resulting representations are then passed through the prediction heads to generate the final outputs. 
+
+1) Trajectory Collection: DT-based models are trained on offline trajectories consisting of state, action, and RTG se-quences. These trajectories can be collected using any be-haviour policy, including RL agents, heuristic algorithms, or human demonstrations [15]. In this work, the offline dataset is generated using expert policies trained with the PPO algorithm in diverse CoMP environments. Since different tasks may involve varying numbers of BSs and UEs, the corresponding state and action spaces have different dimensionalities. To enable joint multi-task training, all state and action represen-7
+
+Fig. 1: Overview of WiSDoM Framework tations are zero-padded to the maximum dimensions observed across the training tasks. With a moderate number of UEs and BSs, the state space dimension can exceed 100, which makes it more challenging. Invalid action dimensions introduced by padding are masked during both training and inference, ensuring they do not affect action prediction. Following the standard offline RL setting, the collected trajectories include both successful and suboptimal interactions combined to pro-vide diverse behavioral patterns for learning. For each one of the 36 tasks detailed in Table II, 2000 episodes were collected. It is also important to note that, although DTs typically require larger offline datasets than value-based offline RL methods, they are robust to low-quality data and perform well in sparse-reward environments [14], [42]. For practical network deploy-ments, network digital twins can facilitate offline trajectory generation under diverse operating conditions, enabling DT-based policy learning without requiring direct exploration in the operational network [43]. 
+
+2) Backbone and Expert Training: Following Stage 1(trajectory collection), Alg. 1 details the first two training stages. In Stage 2 (lines 2-14), the shared backbone fθ
+
+is trained jointly across all training tasks T train : for each task, trajectories are sampled from the offline dataset Di and paired with a task-identifying prompt (line 5) to form per-task minibatches BMi (lines 4-8), which are aggregated into a multi-task batch B (line 10). The backbone predicts actions autoregressively and is updated via masked cross-entropy loss 
+
+LCE (lines 11-13), learning shared representations across all tasks. In Stage 3 (lines 15-29), the backbone is frozen and one expert e(ℓ) 
+
+> ϕc
+
+is instantiated per transformer block for each task group Gc (line 18). Each group’s expert parameters 
+
+ϕc = {ϕ(1)  
+
+> c
+
+, . . . , ϕ (L) 
+
+> c
+
+} therefore consist of L block-specific modules that are trained jointly, yielding C ×L expert modules in total across all groups. Each expert is trained independently on its own group’s batch Bc, combined with the frozen FFN output in parallel (line 22), and only the expert parameters ϕc
+
+are updated (lines 24–26), allowing every expert to specialize on its task subset without interference from other groups. 
+
+3) Task Grouping: Considered CoMP tasks vary in the number of BSs, UEs, UE velocity, and scheduler policy (ReF/PF), e.g., 5BS UE8 V3 ReF, spanning a heterogeneous range of network scales and mobility conditions. Training a single shared backbone jointly across all such tasks induces gradient conflicts, as updates favorable to one configuration can be detrimental to others. To mitigate this, tasks are grouped by optimization be-havior rather than raw configuration labels following the approach in [44]. For each task Ti, the backbone gradient 
+
+gi = 1
+
+> B
+
+PBb=1 ∇θ L(b) 
+
+> i
+
+is computed and compared to the mean gradient ¯g = 1
+
+> N
+
+PNi=1 gi via the agreement vector 
+
+ai = gi ⊙ ¯g. Pairwise task affinity Sij = a⊤   
+
+> iaj
+> ∥ai∥∥ aj∥
+
+is then clustered with K-means to partition {T 1, . . . , T36 } into six groups {G 1, . . . , G6} as shown in Table V, so each expert in Stage 3 specializes on tasks with aligned gradients rather than just similar configurations. Inspired by [17], which shows that increasing the number of experts can improve task scalability by reducing the learning burden on each parameter subset, we employ six experts in the proposed WiSDoM framework. Although larger expert counts may further improve specialization, they also increase routing complexity and training cost. This choice provides a practi-8
+
+Algorithm 2 Router Training (Stage 4) and Evaluation 
+
+Require: Trained backbone fθ , trained experts Φ = {ϕ1, . . . , ϕ C }, evalua-tion tasks T eval , training iterations N3, routing sparsity Kr, target returns 
+
+G⋆, episode length T , prompt length K⋆, auxiliary-loss coefficient λaux 
+
+1: Router Training 
+
+2: Freeze backbone θ and experts Φ; initialize router r(ℓ) 
+
+> ψ
+
+at each block ℓ
+
+3: for n = 1 to N3 do 
+
+4: Sample a multi-task batch B
+
+5: for each block ℓ = 1 , . . . , L do 
+
+6: Given normalized token x(ℓ) 
+
+> t
+
+, compute z(ℓ) 
+
+> t
+
+= r(ℓ) 
+
+> ψ
+
+(x(ℓ) 
+
+> t
+
+) and 
+
+p(ℓ) 
+
+> t
+
+= Softmax( z(ℓ) 
+
+> t
+
+)
+
+7: Select E(ℓ) 
+
+> t
+
+= TopK( p(ℓ) 
+
+> t
+
+, K r) and construct normalized sparse weights ˆw(ℓ)
+
+> t
+
+8: Apply STE: w(ℓ) 
+
+> t
+
+= p(ℓ) 
+
+> t
+
++ sg 
+
+
+
+ˆw(ℓ) 
+
+> t
+
+− p(ℓ)
+
+> t
+
+
+
+9: Compute MoE output: h(ℓ) 
+
+> t, MoE
+
+= P
+
+> e∈E (ℓ)
+> t
+
+w(ℓ) 
+
+> t,e
+
+e(ℓ) 
+
+> ϕe
+
+(x(ℓ) 
+
+> t
+
+)
+
+10: Combine with the parallel FFN path: x(ℓ) 
+
+> t
+
+← x(ℓ) 
+
+> t
+
++ h(ℓ) 
+
+> t, FFN
+
++
+
+h(ℓ)
+
+> t, MoE
+
+11: end for 
+
+12: Predict actions apred = fθ, Φ,ψ (B)
+
+13: Compute Lrouter = Lrouter CE + λaux Laux 
+
+14: Update only the router: ψ ← ψ − α3∇ψ Lrouter 
+
+15: end for 
+
+16: Evaluation 
+
+17: for each task Tj ∈ T eval do 
+
+18: Initialize trajectory history τ , target return g = G⋆j , and prompt τ ⋆j =GetBestPrompt( Tj , Pj ) of length K⋆
+
+19: for t = 1 to T do 
+
+20: at = fθ, Φ,ψ 
+
+
+
+(τ ⋆j , τ )
+
+
+
+[−1] 
+
+21: Execute at, observe st+1 and rt; update g ← g − rt
+
+22: Append [st+1 , a t, g ] to τ
+
+23: end for 
+
+24: end for 
+
+cal trade-off between expert specialization and computational overhead while maintaining sufficient training data within each task group. 
+
+4) Router Training and Inference: Alg. 2 presents router training and evaluation. With the backbone θ and all experts 
+
+Φ frozen, a router r(ℓ) 
+
+> ψ
+
+is introduced at each block and trained on multi-task batches. For each token, the router computes expert probabilities, selects the top-Kr experts, and combines their weighted outputs with the frozen FFN path (lines 6–10). As Top-K selection is non-differentiable, a straight-through estimator (STE) is used (line 8): the forward pass uses sparse Top-Kr weights, while gradients are propagated through the dense softmax probabilities [45]. To mitigate expert collapse, router training also employs the auxiliary load-balancing loss used in [34] with masked cross-entropy loss (line 13). This loss encourages a more balanced distribution of tokens across the available experts. Consequently, it prevents the router from consistently favoring a small subset of experts. For block ℓ, it is defined as: 
+
+L(ℓ)aux = C
+
+> C
+
+X
+
+> e=1
+
+f (ℓ) 
+
+> e
+
+p(ℓ) 
+
+> e
+
+, (11) where f (ℓ) 
+
+> e
+
+is the fraction of tokens assigned to expert e and 
+
+p(ℓ) 
+
+> e
+
+is its average routing probability. The auxiliary losses are averaged across all transformer blocks to obtain Laux . The router is therefore optimized using: 
+
+Lrouter = Lrouter CE + λaux Laux , (12) while only ψ is updated. This allows the router to learn dynamic token-level expert selection without task identifiers. During evaluation (lines 16–24), sparse Top-Kr routing is retained. For each task Tj ∈ T eval , the model is conditioned on its best-performing prompt and a target return. Actions are then generated in closed loop from the prompt and interaction history, while the RTG and trajectory are updated after each environment interaction. An offline dataset Di is assumed available for each training task, and demonstration trajectories 
+
+Pi are available during both training and evaluation. TABLE II: 36 Multi-Task Configurations 
+
+Layout #UE State Dim. Map Size (m) Vel. (m/s) Sched. 
+
+3BS 3 21 120 × 107 0.5, 1.5, 3.0 PF, ReF 5 35 4BS 4 36 120 × 120 0.5, 1.5, 3.0 PF, ReF 5 45 5BS 6 66 210 × 190 0.5, 1.5, 3.0 PF, ReF 8 88 
+
+TABLE III: Simulation Parameters and Hyperparameters 
+
+Parameter Value CoMP Environment Parameters 
+
+fc (GHz), BW (MHz) 2.5, 9 UE Velocity [0.5,1.5,3] m/s Scheduler (s) PF, ReF 
+
+PT x (dBm), N0 (dBm/Hz) 30, -90 
+
+ρmin (dB) -77 Cell tower and UE height (m) 50 & 1.5 Cell-to-cell distance (m) 100 
+
+(Umin , U max ) (−10 , 10) (w1, w 2, w 3) (10 , 0, 10) 
+
+Episode length 100 
+
+Backbone, Expert and Router Parameters 
+
+n heads, n blocks 4, 6 
+
+K, K⋆ 20, 5 per-task batch size 8reward scale 50 optimizer AdamW learning rate,weight decay 10 −4 ,10 −4
+
+activation function ReLU & GELU Number of Experts 6N1, N2, N3 400k, 400k, 150k 
+
+λaux 0.01 hidden dim(s) 256,448,1024 MoE Type Token-level Top-K (1-2) 
+
+V. S IMULATION SETTINGS AND NUMERICAL RESULTS 
+
+In this section, we first summarize multi-task scenarios, simulation settings, and model hyperparameters and then present the comprehensive numerical results. In our study, we construct a set of multi-task learning scenarios based on the open-source system-level lightweight simulation platform, namely mobile-env [46]. We consider a total of 36 tasks, as shown in Table II, varying the number of BSs, UEs, UE velocities, and scheduler policies. Also, CoMP environment simulation parameters and model hyperparameters are detailed in Table III. All models were trained on a single NVIDIA RTX 5090 GPU (32 GB VRAM, 105 TFLOPS FP32). 9
+
+A. Baselines 
+
+We compare WiSDoM against four baseline categories, all evaluated on the identical 36-task suite and held-out unseen tasks (e.g., an extra 8 tasks) using the same closed-loop rollout (50 episodes/task).  
+
+> •
+
+Heuristic: Following [7], [9], a UE uj associates with every BS bi whose SINR falls within a threshold fraction 
+
+ϵ of the best available SINR at that UE, i.e. SINR i,j (t) ≥
+
+ϵ · SINR max  
+
+> j
+
+(t). We sweep ϵ ∈ { 0, 0.5, 1}: at ϵ = 1 only the strongest cell is retained, recovering the single-cell association, while ϵ = 0 connects to all cells if thresholds are satisfied. The heuristic has complexity O(U B log B)
+
+due to per-UE BS sorting. While computationally effi-cient, its performance is sensitive to ϵ, whose optimal value varies across network configurations and requires manual tuning.  
+
+> •
+
+PPO (single-task DRL): PPO models [10] are trained in-dependently per task (36 separate policies); upper bound on task-specific specialization, no cross-task generaliza-tion. Default PPO hyperparameters in [7] are used.  
+
+> •
+
+PromptDT (multi-task DT): PromptDT trained jointly across all 36 tasks, evaluated at 5M/15M/75M parameter scales to isolate the effect of backbone capacity alone [24]. Larger models were obtained by increasing only the transformer hidden dimension while keeping the architecture (e.g., number of blocks and attention heads) unchanged, as outlined in Table III. Training logic follows backbone training in Alg. 1.  
+
+> •
+
+WiSDoM (proposed): MoE-augmented DT with Top-1/Top-2 token-level routing over per task-group experts. In the remainder, Top-1 router based architecture called as WiSDoM-75M-A27M and Top-2 router based archi-tecture called as WiSDoM-75M-A37M, showing a total of 75M parameters and active numbers of parameters 27M and 37M, respectively. PromptDT-15M is used as the backbone of the architecture. 0 2 4 6 8 10 12 
+
+> Inference Complexity (GFLOPs / inference)
+> 5.50 5.75 6.00 6.25 6.50 6.75 7.00 7.25 7.50
+> Average Episode Return
+> PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M Pareto frontier PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M
+> 64.8% GFLOPs
+
+Fig. 2: Average Episode Return vs. Inference Complexity 
+
+B. Results: 
+
+We compare the methods along five axes: (i) RL perfor-mance, (ii) network performance (QoE, rate outage probability, and active UEs), (iii) task-wise comparison (consistency across 36 tasks under a shared model), (iv) unseen-task performance (generalization to held-out configurations), and (v) complexity (parameter count, active parameters per forward pass, and inference latency). 
+
+1) RL Performance: We first compare the proposed WiS-DoM models against PromptDT multi-tasking baselines on RL performance versus inference complexity across all evaluation tasks as shown in Fig. 2. Increasing the PromptDT model size from 5M to 75M parameters consistently improves the average episode return from 5.72 to 7.04, indicating improved multi-task learning capacity with model scaling. The proposed sparse MoE architecture further improves performance while activat-ing only a subset of experts during inference. In particular, WiSDoM-75M-A27M with Top-1 routing achieves the high-est average episode return of 7.25, outperforming the dense PromptDT-75M (7.04), while WiSDoM-75M-A37M with Top-2 routing achieves 7.11 despite both using significantly fewer active parameters (e.g., up to 3x) during inference. PromptDT 5M PromptDT 15M PromptDT 75M WiSDoM 75M-A27M WiSDoM 75M-A37M PPO SINR-H = 0   
+
+> SINR-H = 0.5
+> SINR-H = 1
+> 0.4 0.5 0.6 0.7 0.8 0.9
+> Average QoE
+> 0.57 0.67 0.70 0.73 0.71 0.63 0.58 0.67 0.47
+> PromptDT WiSDoM PPO SINR-Aware Heuristic
+
+Fig. 3: Average QoE Across 36 Tasks Compared with PPO, WiSDoM improves users’ QoE from 0.63 to 0.73 (15.87%) and outperforms all heuristic schedulers up to 55%. The SINR-H with ϵ = 0 .5 achieves better QoE (0.67) compared to others, and the remaining configurations perform considerably worse. These results demonstrate that sparse expert routing preserves the representational capacity of a dense transformer while substantially improving inference efficiency. Furthermore, WiSDoM learns a single unified pol-icy that operates across all 36 network configurations, whereas PPO requires 36 independently trained policies. This signifi-cantly simplifies AI deployment in next-generation RANs, es-pecially when hierarchical RICs operate under diverse network conditions [47]. Instead of maintaining, selecting, and updating dozens of task-specific models, operators can deploy and manage a single policy, reducing model lifecycle management, software updates, and operational complexity while facilitating continual adaptation to evolving network scenarios. 
+
+2) Network Performance: To better understand the QoE performance of the evaluated policies, Figs. 4a, 4b, and 4c provide complementary insights into their network-level behavior across six configurations, ranging from 3BS-3UE to 5BS-8UE. Each configuration reports the average over six tasks corresponding to two scheduling policies and three UE mobility settings. As shown in Fig. 4a, the average number of connected UEs is nearly identical across the learning-based approaches. Similarly, Fig. 4b shows relatively small differ-ences in the number of established links among PromptDT, 10 3BS-3UE 3BS-5UE 4BS-4UE 4BS-5UE 5BS-6UE 5BS-8UE PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M PPO SINR-H ( = 0)                                                
+
+> SINR-H ( = 0.5)
+> SINR-H ( = 1)
+> 2.99 4.95 3.89 4.90 5.64 7.42 3.00 4.98 3.94 4.92 5.70 7.48 3.00 4.99 3.95 4.94 5.69 7.47 3.00 4.99 3.95 4.96 5.72 7.55 3.00 4.99 3.95 4.95 5.72 7.50 3.00 4.98 3.95 4.94 5.71 7.50 3.00 5.00 3.99 4.99 5.79 7.72 3.00 5.00 3.99 4.99 5.79 7.72 2.95 4.92 3.95 4.95 5.71 7.61
+> 34567
+
+(a) Average number of connected UEs. 3BS-3UE 3BS-5UE 4BS-4UE 4BS-5UE 5BS-6UE 5BS-8UE PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M PPO SINR-H ( = 0)                                                 
+
+> SINR-H ( = 0.5)
+> SINR-H ( = 1)
+> 4.01 6.41 5.20 6.43 7.12 9.41 4.14 6.70 5.32 6.59 7.42 9.62 4.19 6.83 5.38 6.63 7.38 9.60 4.15 6.85 5.43 6.77 7.54 9.81 4.22 6.94 5.44 6.72 7.48 9.69 4.16 7.01 5.40 6.68 7.54 9.85 4.91 8.22 6.08 7.59 8.77 11.74 3.66 6.14 5.00 6.20 6.78 9.09 2.96 4.94 4.04 5.05 5.73 7.64
+> 345678910 11
+
+(b) Average number of established links. 3BS-3UE 3BS-5UE 4BS-4UE 4BS-5UE 5BS-6UE 5BS-8UE PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M PPO SINR-H ( = 0)                                                 
+
+> SINR-H ( = 0.5)
+> SINR-H ( = 1)
+> 2.36 0.47 0.48 0.03 0.49 -0.39 2.39 0.57 0.58 0.07 0.67 -0.25 2.42 0.60 0.59 0.08 0.71 -0.18 2.44 0.60 0.62 0.10 0.73 -0.14 2.42 0.58 0.61 0.09 0.73 -0.16 2.37 0.47 0.55 0.02 0.63 -0.26 2.19 0.33 0.50 -0.03 0.66 -0.16 2.22 0.53 0.52 0.05 0.71 -0.04 1.89 0.41 0.27 -0.12 0.52 -0.15
+> 0.0 0.5 1.0 1.5 2.0
+
+(c) Average QoE. 
+
+Fig. 4: Performance comparison across network configurations in terms of the average number of connected UEs, established links, and QoE. D < 0.05 D < 0.10 D < 0.15 D < 0.20 Datarate outage threshold (Mbps) 23456789Outage probability (%)    
+
+> WiSDoM-75M-A27M WiSDoM-75M-A37M PPO PromptDT-15M PromptDT-5M PromptDT-75M SINR-H ( = 0)
+> SINR-H ( = 0.5)
+> SINR-H ( = 1)
+
+Fig. 5: Rate Outage Probability (%) WiSDoM, and PPO. These observations are important for interpreting the QoE results: the performance differences are not simply explained by serving more UEs or establishing substantially more CoMP links. Instead, the results suggest that how the available BS associations and radio resources are utilized plays a more important role in the resulting QoE. This is particularly evident when comparing the learning-based ap-proaches with the SINR-aware heuristics. The SINR-H policy with ϵ = 0 generally establishes considerably more links than the learned policies since it associates each UE with all BSs whose SINR exceeds the threshold ρij without considering BS load balancing or long-term resource allocation, leading to excessive CoMP links that do not translate into improved QoE. For example, in the 3BS-5UE configurations, it establishes 8.22 links on average, compared with 6.85 for WiSDoM-75M-A27M, while their corresponding QoE values are 0.33 and 
+
+0.60 , respectively. In contrast, SINR-H with ϵ = 1 generally yields the lowest QoE, as it associates each UE only with its strongest BS and therefore does not exploit the potential gains of CoMP coordination. It demonstrates the limitations of purely threshold-based association. Fig. 4c further shows that WiSDoM-75M-A27M achieves the highest or joint-highest average QoE in five of the six network configurations. DT-based models show overall better performance compared to single-task RL and heuristic baselines. For instance, in the 3BS-5UE configuration, WiSDoM achieves a QoE of 0.60, corresponding to a 27.7% improvement over PPO (0.47). As the number of BSs and UEs increases, the dimensionality of the joint state and action spaces also grows substantially, making policy learning increasingly challenging for task-specific PPO agents. These observations indicate that while conventional DRL methods perform competitively in relatively simple environments, their performance deteriorates in larger environments, and this can be explained as the state space becomes increasingly complex (e.g., 88 in the largest case as shown in Table II). Beyond cumulative reward and average QoE, we evaluate service reliability using the rate outage probability, defined as Pout = Pr( Dj < τ ), where Dj denotes the aggregated UE DL data rate and τ ∈ 0.05 , 0.10 , 0.15 , 0.20 Mbps. As shown in Fig. 5, outage probability increases with τ for all methods, while WiSDoM consistently remains among the best-performing approaches. Across the four thresholds, WiSDoM-75M-A27M reduces outage probability by 8.6–14 .3% relative to PromptDT-75M and by 23 .4–36 .0% relative to PPO. WiS-DoM also remains competitive with the SINR-H baselines. Although SINR-H with ϵ = 0 achieves a marginally lower outage at τ = 0 .05 Mbps ( 2.05% versus 2.09% ), WiSDoM achieves lower outage at τ = 0 .10 and τ = 0 .15 Mbps and nearly identical performance at τ = 0 .20 Mbps. Also, it is important to note that this reliability performance comes with the cost of overloaded BSs and degraded QoE for SINR-H approaches, as illustrated in Figs. 4b and 4c. 
+
+3) Task-Wise Performance: To further examine the relia-bility gains at a finer granularity, Fig. 6 compares the task-wise rate outage probabilities of WiSDoM-75M-A27M and PPO across all 36 evaluation tasks. WiSDoM achieves alower outage probability than PPO in 32 out of 36 tasks (88.89%), including all 18 tasks with PF scheduling. The advantage is particularly pronounced under high mobility with 11 3BS_UE3_V0p5_PF 3BS_UE3_V0p5_RF 3BS_UE3_V1p5_PF 3BS_UE3_V1p5_RF 3BS_UE3_V3_PF 3BS_UE3_V3_RF 3BS_UE5_V0p5_PF 3BS_UE5_V0p5_RF 3BS_UE5_V1p5_PF 3BS_UE5_V1p5_RF 3BS_UE5_V3_PF 3BS_UE5_V3_RF 4BS_UE4_V0p5_PF 4BS_UE4_V0p5_RF 4BS_UE4_V1p5_PF 4BS_UE4_V1p5_RF 4BS_UE4_V3_PF 4BS_UE4_V3_RF 4BS_UE5_V0p5_PF 4BS_UE5_V0p5_RF 4BS_UE5_V1p5_PF 4BS_UE5_V1p5_RF 4BS_UE5_V3_PF 4BS_UE5_V3_RF 5BS_UE6_V0p5_PF 5BS_UE6_V0p5_RF 5BS_UE6_V1p5_PF 5BS_UE6_V1p5_RF 5BS_UE6_V3_PF 5BS_UE6_V3_RF 5BS_UE8_V0p5_PF 5BS_UE8_V0p5_RF 5BS_UE8_V1p5_PF 5BS_UE8_V1p5_RF 5BS_UE8_V3_PF 5BS_UE8_V3_RF 0246810 12 14 Rate outage probability (%)  WiSDoM-75M-A27M PPO 
+
+Fig. 6: Task-wise rate outage probability of WiSDoM and PPO across 36 tasks. 3BS_UE2_V1p0_PF 3BS_UE2_V1p5_RF 3BS_UE4_V1p0_PF 3BS_UE4_V3_PF 4BS_UE3_V2p0_PF 4BS_UE3_V2p0_RF 5BS_UE5_V2p5_PF 5BS_UE7_V1p5_PF 010 20 30 40 Average Episode Return  PPO (task-specific policy) PromptDT-5M PromptDT-15M PromptDT-75M WiSDoM-75M-A27M WiSDoM-75M-A37M SINR-H ( = 0)   
+
+> SINR-H ( = 0.5)
+> SINR-H ( = 1)
+
+Fig. 7: Unseen Task Performance Results PF scheduling. At 3 m/s, WiSDoM reduces the outage prob-ability from 6.22% to 0.16% in the 3BS-5UE configuration. Similarly, for the larger 5BS-6UE and 5BS-8UE configura-tions, the outage probability decreases from 11.29% to 5.31% and from 13.23% to 5.96%, corresponding to reductions of approximately 52.9% and 55.0%, respectively. In contrast, the performance gap under ReF scheduling is generally smaller than under PF scheduling, although WiSDoM still provides clear improvements in several tasks. These results indicate that WiSDoM provides more reliable data-rate performance, particularly under dynamic and increasingly complex network conditions. 
+
+4) Unseen Task Performance: Sequence-based decision modelling enables adaptation to unseen tasks through in-context conditioning. We evaluate the DT-based models on eight unseen network configurations against task-specific PPO policies and SINR-aware heuristics, as shown in Fig. 7. The DT-based models use demonstration trajectories of length K⋆
+
+as prompts without target-task parameter updates or fine-tuning, whereas a separate PPO policy is trained for each un-seen task. WiSDoM demonstrates strong transfer using a single shared pretrained policy, outperforming task-specific PPO on five of the eight unseen tasks. For example, on the 3BS-4UE configuration with v = 3 .0 m/s and PF scheduling, WiSDoM-75M-A27M achieves an average return of 13.8 compared with 8.8 for PPO. On the challenging 5BS-7UE configuration, WiSDoM achieves the highest return of 3.4, compared with 0.2 for PPO and 1.3 for PromptDT-75M. Even on configurations where PPO performs best, WiSDoM remains competitive. These results demonstrate that WiSDoM can reuse knowledge acquired across previously observed environments to adapt to new network configurations through few-shot conditioning, reducing the need to train and maintain a dedicated policy for each task. 0 20 40 60 80 100           
+
+> Number of Parameters (M)
+> WiSDoM-75M-A27M WiSDoM-75M-A37M PromptDT-5M PromptDT-15M PromptDT-75M Active: 26.9M |Stored: 75.2M Active: 36.6M |Stored: 75.2M Active: 4.9M |Stored: 4.9M Active: 14.8M |Stored: 14.8M Active: 76.3M |Stored: 76.3M Backbone Active experts Inactive experts Router
+
+Fig. 8: Active and Stored Model Parameters 
+
+C. Complexity Analysis and Ablation Study 1) Complexity Analysis: While WiSDoM stores the same total number of parameters as the dense PromptDT-75M, only the backbone, router, and selected experts (e.g., Top-1 or Top-2) are activated during inference. Hence, WiSDoM-75M-A27M activates only 26.9M parameters, and WiSDoM-75M-A37M activates 36.6M compared with 76.3 for the dense PromptDT-75M. This reduction directly translates into lower computational complexity. As summarized in Table IV, PromptDT-75M requires 11.47 GFLOPs per inference step as measured em-pirically (i.e., profiling). In contrast, WiSDoM-75M-A27M reduces the computational cost to 4.044 GFLOPs (35% of the dense model), and WiSDoM-75M-A37M requires 5.490 12 
+
+GFLOPs (48% of the dense model). Thus, WiSDoM sub-stantially reduces the arithmetic computation required for inference while maintaining and, in many cases, improving task performance, demonstrating an attractive performance-efficiency tradeoff for practical deployments such as resource-constrained near real-time RIC. As demonstrated, sparse ac-tivation can further improve the energy efficiency of larger models by reducing the amount of computation performed during inference, thereby enhancing test-time scalability and lowering resource consumption [38]. Furthermore, despite their large parameter counts, all DT-based models achieve per-decision inference latencies of 8-20 ms on a consumer-grade GPU with 16 GB of VRAM. Further optimizations can lower this inference time on various hardware variants in real networks [32], [48]. TABLE IV: Computational complexity comparison 
+
+Model FP16 -Memory GFLOPs/Inf. GFLOPs/Token 
+
+WiSDoM-75M-A27M 150.3 MB 4.044 0.054 WiSDoM-75M-A37M 150.3 MB 5.490 0.073 PromptDT-5M 9.8 MB 0.745 0.010 PromptDT-15M 29.6 MB 2.233 0.030 PromptDT-75M 152.6 MB 11.474 0.153 
+
+D. Ablation Study on Expert Specialization and Routing 
+
+Similar to the expert specialization and router strategy analysis in [49], we investigate whether experts specialize in particular task groups or learn shared knowledge across tasks, and interestingly, we observe both behaviors. Fig. 9 shows the mean expert selection distribution for each task group defined in Table V, computed across all six transformer blocks and each row sums up to 1. Experts 0 and 5 exhibit clear task-dependent specialization, with higher utilization for the task groups on which they were trained, i.e., Groups 0 and 5, respectively. Furthermore, Expert 0 is primarily associated with smaller network configurations, whereas Expert 5 is more frequently selected for challenging high-mobility and larger-network tasks. In contrast, Experts 1, 3, and 4 behave as generalists, maintaining relatively consistent utilization across task groups. Such behavior is expected and further supports the coexistence of shared and specialized knowledge, consistent with recent frontier MoE architectures that employ shared experts alongside dynamically routed experts [35]. In addition, although Expert 2 is less frequently selected, no expert col-lapse is observed, owing to the auxiliary load-balancing loss. We further observe distinct expert-selection patterns across transformer blocks (i.e., layers). VI. CONCLUSION This paper proposed WiSDoM, a MoE-DT-based multi-task learning framework for multi-cell selection in CoMP that addresses key limitations of conventional DRL, including limited scalability, and the need to train separate policies for different network configurations. By integrating prompt-based task conditioning with sparse expert routing, WiSDoM enables a single model to specialize across heterogeneous wireless environments while maintaining efficient conditional TABLE V: Task groups                                          
+
+> Group Tasks
+> 04BS-UE4-V0.5-ReF, 4BS-UE4-V0.5-PF, 3BS-UE3-V0.5-PF, 3BS-UE5-V0.5-PF, 4BS-UE5-V0.5-ReF, 3BS-UE3-V0.5-ReF, 4BS-UE5-V0.5-PF, 3BS-UE5-V0.5-ReF, 3BS-UE3-V1.5-PF, 4BS-UE4-V1.5-ReF 14BS-UE4-V3-ReF, 4BS-UE5-V3-ReF, 3BS-UE5-V3-ReF, 3BS-UE3-V3-ReF, 5BS-UE6-V3-ReF 23BS-UE5-V1.5-PF, 4BS-UE5-V1.5-PF, 5BS-UE6-V1.5-PF, 4BS-UE4-V1.5-PF 33BS-UE5-V1.5-ReF, 3BS-UE3-V1.5-ReF, 4BS-UE5-V1.5-ReF, 5BS-UE6-V1.5-ReF, 5BS-UE8-V1.5-PF 45BS-UE6-V0.5-ReF, 5BS-UE6-V0.5-PF, 5BS-UE8-V0.5-ReF, 5BS-UE8-V0.5-PF 53BS-UE5-V3-PF, 4BS-UE5-V3-PF, 3BS-UE3-V3-PF, 4BS-UE4-V3-PF, 5BS-UE6-V3-PF, 5BS-UE8-V3-PF, 5BS-UE8-V3-ReF, 5BS-UE8-V1.5-ReF 012345
+> Expert
+> Task Group 0 Task Group 1 Task Group 2 Task Group 3 Task Group 4 Task Group 5
+> Task Groups
+> 0.21 0.26 0.04 0.18 0.19 0.12 0.14 0.24 0.06 0.19 0.14 0.24 0.12 0.24 0.06 0.20 0.13 0.26 0.13 0.24 0.06 0.20 0.13 0.24 0.07 0.25 0.05 0.24 0.14 0.25 0.10 0.24 0.06 0.20 0.11 0.29
+> 0.00 0.05 0.10 0.15 0.20 0.25 Mean Expert Selection Frequency
+
+Fig. 9: Mean expert selection frequency for each task group computation through sparse expert activation. Extensive exper-iments over 36 CoMP tasks show that WiSDoM consistently outperforms heuristic, single-task, and conventional multi-task baselines in QoE and rate outage probability, achieving up to 55% higher QoE, with its advantage most pronounced on harder task configurations where load-blind and fixed-threshold-based heuristics degrade. In addition, its sparse MoE architecture activates as few as one-third of the parameters of an equivalent-sized dense Transformer during inference without compromising performance. The proposed framework also exhibits strong scalability with increasing model capacity, effectively mitigates task interference through expert special-ization, and generalizes well to previously unseen network configurations, enabling robust few-shot adaptation without retraining or fine-tuning. Future work will investigate MoE ar-chitecture in more detail, including auxiliary-loss-free balanc-ing strategies, as well as robustness beyond the trained model’s dimensional bounds and applications to O-RAN architectures. ACKNOWLEDGMENT This work has been supported by the NSERC Canada Research Chairs Program. REFERENCES [1] F. Jiang, C. Pan, K. Wang, P. Michiardi, O. A. Dobre, and M. Debbah, “From large ai models to agentic ai: A tutorial on future intelligent communications,” IEEE JSAC , pp. 1–1, 2026. [2] N. Khan, S. Coleri, A. Abdallah, A. Celik, and A. M. Eltawil, “Explainable and robust artificial intelligence for trustworthy resource management in 6g networks,” IEEE Commun. Mag. , vol. 62, no. 4, pp. 50–56, 2024. [3] M. Polese, M. Dohler, F. Dressler, M. Erol-Kantarci, R. Jana, R. Knopp, and T. Melodia, “Empowering the 6g cellular architecture with open ran,” IEEE JSAC , vol. 42, no. 2, pp. 245–262, 2024. 13 
+
+[4] S. Bassoy, H. Farooq, M. A. Imran, and A. Imran, “Coordinated multi-point clustering schemes: A survey,” IEEE COMST , vol. 19, no. 2, pp. 743–764, 2017. [5] M. S. J. Solaija, H. Salman, A. B. Kihero, M. I. Sa˘ glam, and H. Arslan, “Generalized coordinated multipoint framework for 5g and beyond,” 
+
+IEEE Access , vol. 9, pp. 72 499–72 515, 2021. [6] M. Elhattab, M. A. Arfaoui, C. Assi, and A. Ghrayeb, “Ris-assisted joint transmission in a two-cell downlink noma cellular system,” IEEE JSAC ,vol. 40, no. 4, pp. 1270–1286, 2022. [7] S. Schneider, H. Karl, R. Khalili, and A. Hecker, “Multi-agent deep reinforcement learning for coordinated multipoint in mobile networks,” 
+
+IEEE TNSM , 2023. [8] M. Elhattab, M. A. Arfaoui, and C. Assi, “Joint clustering and power allocation in coordinated multipoint assisted c-noma cellular networks,” 
+
+IEEE TCOM , vol. 70, no. 5, pp. 3483–3498, 2022. [9] A. Beylerian and T. Ohtsuki, “Multi-point fairness in resource allocation for c-ran downlink comp transmission,” EURASIP Journal on Wireless Communications and Networking , vol. 2016, 01 2016. [10] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Prox-imal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 ,2017. [11] S. Salehi, H. Zhou, M. Elsayed, M. Bavand, R. Gaigalas, Y. Ozcan, and M. Erol-Kantarci, “Smart jamming attack and mitigation on deep transfer reinforcement learning enabled resource allocation for network slicing,” IEEE TMLCN , vol. 2, pp. 1492–1508, 2024. [12] M. Ghassemi, H. Zhang, A. Afana, A. B. Sediq, and M. Erol-Kantarci, “Multi-modal transformer and reinforcement learning-based beam man-agement,” IEEE Networking Letters , vol. 6, no. 4, pp. 222–226, 2024. [13] W. Huang and C.-K. Tham, “Transformer-based reinforcement learning for base station selection,” in 2025 IEEE GLOBECOM , 2025, pp. 2342– 2347. [14] J. Li, Y. Zhu, P. Xia, T. Ma, J. Zhang, L. Shi, Z. Zeng, and S. Jin, “Prompt decision transformer based policy generalization for base station energy saving,” in 2024 IEEE WCSP , 2024, pp. 1204–1209. [15] M. Xu, Y. Shen, S. Zhang, Y. Lu, D. Zhao, B. J. Tenenbaum, and C. Gan, “Prompting decision transformer for few-shot policy generalization,” in 
+
+ICML , 2022. [16] L. Chen et al. , “Decision transformer: Reinforcement learning via sequence modeling,” in NeurIPS , 2021. [17] Y. Kong, G. Ma, Q. Zhao, H. Wang, L. Shen, X. Wang, and D. Tao, “Mastering massive multi-task reinforcement learning via mixture-of-expert decision transformer,” in ICML , 2025. [Online]. Available: https://openreview.net/forum?id=qUcUyqP1UA [18] O. Erak, O. Alhussein, S. Naser, N. Alabbasi, D. Mi, and S. Muhaidat, “Large language model-driven curriculum design for mobile networks,” in 2024 IEEE/CIC ICCC , 2024, pp. 179–184. [19] H. Ali, “Explainability of transformer-based reinforcement learning,” Master’s thesis, KTH Royal Institute of Technology, Stockholm, Sweden, 2024, tRITA-EECS-EX; 2024:824. [Online]. Available: https://kth.diva-portal.org/smash/record.jsf?pid=diva2:1940023 [20] J. Zhang, J. Li, Z. Wang, L. Shi, S. Jin, W. Chen, and H. V. Poor, “Decision transformers for wireless communications: A new paradigm of resource management,” IEEE Wirel. Commun. , vol. 32, no. 2, pp. 180–186, 2025. [21] T. Zhou et al. , “Federated prompt-based decision transformer for re-source allocation of customized vr streaming in mobile edge computing,” 
+
+IEEE TWC , pp. 1–1, 2025. [22] C. Lu, Y. Ni, Z. Wang, X. Shi, J. Li, and S. Jin, “Attention-enhanced prompt decision transformers for aav-assisted communications with aoi,” 
+
+IEEE Wireless Communications Letters , vol. 14, no. 8, pp. 2576–2580, 2025. [23] F. Temiz, S. Salehi, and M. Erol-Kantarci, “Edge learning via federated split decision transformers for metaverse resource allocation,” in IEEE ICC . IEEE, 2026. [24] ——, “Generalizable multi-task learning for wireless networks using prompt decision transformers,” in Proceedings of the 2026 IEEE Med-itCom . Cagliari, Italy: IEEE, Jul. 2026. [25] M. A. Habib, P. E. Iturria-Rivera, Y. Ozcan, M. Elsayed, M. Bavand, R. Gaigalas, and M. Erol-Kantarci, “Harnessing the power of llms, informers and decision transformers for intent-driven ran management in 6g,” IEEE TNSE , pp. 1–20, 2025. [26] X. Mu, M. Liu, Y. Xu, and D. Li, “Comex: Continual mixture of experts for fast policy adaptation in ran slicing,” Applied Sciences , vol. 16, no. 4, 2026. [Online]. Available: https://www.mdpi.com/2076-3417/16/4/1823 [27] Z. Liu, X. Wang, C. Feng, X. Sun, W. Zhan, and X. Chen, “Meta-reinforcement learning with mixture of experts for generalizable multi access in heterogeneous wireless networks,” IEEE TCOM , vol. 74, pp. 870–885, 2026. [28] H. Du, G. Liu, Y. Lin, D. Niyato, J. Kang, Z. Xiong, and D. I. Kim, “Mixture of experts for intelligent networks: A large language model-enabled approach,” in 2024 IWCMC , 2024, pp. 531–536. [29] N. Xue, Y. Sun, Z. Chen, M. Tao, X. Xu, L. Qian, S. Cui, and P. Zhang, “Wdmoe: Wireless distributed large language models with mixture of experts,” in 2024 IEEE GLOBECOM , 2024, pp. 2707–2712. [30] G. Liu, H. Du, D. Niyato, J. Kang, Z. Xiong, A. Jamalipour, S. Mao, and D. I. Kim, “Fusion of mixture of experts and generative artificial intelligence in mobile edge metaverse,” IEEE Network , pp. 1–9, 2025. [31] J. Ma, J. Li, S. Zhao, H. D. Li, J. Y. Dai, J. Wang, and Q. Cheng, “Per-sonalized federated learning with mixture-of-experts for automatic mod-ulation classification under data heterogeneity,” IEEE TCCN , vol. 12, pp. 6478–6491, 2026. [32] T. Liu, Q. Xie, Z. Han, W. Wang, S. Pan, X. Zhang, C. Su, and K. Wu, “Efficient edge deployment of mixture-of-experts models with hybrid expert quantization,” IEEE TCCN , vol. 12, pp. 10 164–10 178, 2026. [33] A. Radford, J. Wu, R. Child, D. Luan, D. Amodei, and I. Sutskever, “Language models are unsupervised multitask learners,” https://openai.com/research/language-unsupervised, 2019, openAI Blog. [34] W. Fedus, B. Zoph, and N. Shazeer, “Switch transformers: scaling to trillion parameter models with simple and efficient sparsity,” J. Mach. Learn. Res. , vol. 23, no. 1, Jan. 2022. [35] DeepSeek-AI, A. Liu, B. Feng et al. , “Deepseek-v3 technical report,” 2025. [Online]. Available: https://arxiv.org/abs/2412.19437 [36] NVIDIA, “Nemotron 3 super: Open, efficient mixture-of-experts hybrid mamba-transformer model for agentic reasoning,” NVIDIA, Technical Report, Apr. 2026, also available as arXiv:2604.12374. [Online]. Available: https://arxiv.org/pdf/2604.12374 [37] W. Wu, F. Liu, H. Li, Z. Hu, D. Dong, C. Chen, and Z. Wang, “Mixture-of-experts meets in-context reinforcement learning,” in NeurIPS , 2025. [Online]. Available: https://openreview.net/forum?id=VMqxRPqdPw [38] Y. Xu, J. Wang, R. Zhang, C. Zhao, D. Niyato, J. Kang, Z. Xiong, B. Qian, H. Zhou, S. Mao, A. Jamalipour, X. Shen, and D. I. Kim, “Mixture of experts for decentralized generative ai and reinforcement learning in wireless networks: A comprehensive survey,” IEEE COMST ,vol. 28, pp. 4051–4085, 2026. [39] A. Medeisis and A. Kajackas, “On the use of the universal okumura-hata propagation prediction model in rural areas,” in VTC2000-Spring. 2000 IEEE 51st VTC , vol. 3, 2000, pp. 1815–1818 vol.3. [40] T. Brown, B. Mann, N. Ryder et al. , “Language models are few-shot learners,” in NeurIPS , vol. 33, 2020, pp. 1877–1901. [41] H. Zhang, A. Bin Sediq, A. Afana, and M. Erol-Kantarci, “Large language models in wireless application design: In-context learning-enhanced automatic network intrusion detection,” in 2024 IEEE GLOBE-COM , 2024, pp. 2479–2484. [42] P. Bhargava, R. Chitnis, A. Geramifard, S. Sodhani, and A. Zhang, “When should we prefer decision transformers for offline reinforcement learning?” in ICLR , 2024. [Online]. Available: https://openreview.net/forum?id=vpV7fOFQy4 [43] C. Han, R. Chen, S. Yao, C. Xu, and X. Mei, “Frequency-aware decision transformer for offline policy learning in adaptive twin control,” IEEE OJVT , vol. 7, pp. 1656–1666, 2026. [44] S. Hu, Z. Fan, L. Shen, Y. Zhang, Y. Wang, and D. Tao, “Harmodt: Harmony multi-task decision transformer for offline reinforcement learning,” in ICML , ser. PMLR, vol. 235. PMLR, Jul. 2024, pp. 19 182–19 197. [Online]. Available: https://proceedings.mlr.press/v235/hu24d.html [45] Y. Bengio, N. L´ eonard, and A. Courville, “Estimating or propagating gradients through stochastic neurons for conditional computation,” arXiv preprint arXiv:1308.3432 , 2013. [46] S. Schneider, S. Werner, R. Khalili, A. Hecker, and H. Karl, “mobile-env: An open platform for reinforcement learning in wireless mobile networks,” in NOMS 2022-2022 IEEE/IFIP , 2022, pp. 1–3. [47] M. Tsampazi, S. D’Oro, M. Polese, L. Bonati, G. Poitau, M. Healy, M. Alavirad, and T. Melodia, “Pandora: Automated design and compre-hensive evaluation of deep reinforcement learning agents for open ran,” 
+
+IEEE TMC , vol. 24, no. 4, pp. 3223–3240, 2025. [48] S. Yang, X. Fan, M. Pan, H. Xi, Z. Wang, S. Sun, K. Keutzer, S. Han, M. Zaharia, C. Xu, and I. Stoica, “Freetoken: Efficient edge-native moe serving with bandwidth-adaptive execution,” 2026. [Online]. Available: https://arxiv.org/abs/2608.16157 [49] A. Q. Jiang, A. Sablayrolles, A. Roux, A. Mensch, B. Savary, C. Bam-ford, D. S. Chaplot, D. de las Casas, E. Bou Hanna, F. Bressand et al. ,“Mixtral of experts,” arXiv preprint arXiv:2401.04088 , 2024.

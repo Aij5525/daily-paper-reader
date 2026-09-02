@@ -1,0 +1,1350 @@
+Title: Cross-View Vision-Aided Proactive BS Selection and Beam Prediction for mmWave V2I Communications
+
+URL Source: https://arxiv.org/pdf/2609.00617v1
+
+Published Time: Wed, 02 Sep 2026 00:36:33 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Cross-View Vision-Aided Proactive BS Selection and Beam Prediction for mmWave V2I Communications 
+
+Zijiao Hu, Haiyao Yu, Gaoyang Pang, Guangchen Wang, Litianyi Zhang, Wanchun Liu, Senior Member, IEEE , George C. Alexandropoulos, Senior Member, IEEE ,Branka Vucetic, Life Fellow, IEEE , and Yonghui Li, Fellow, IEEE 
+
+Abstract —This paper investigates environmental-sensing-aided proactive base station (BS) selection and beam prediction for millimeter-wave (mmWave) vehicle-to-infrastructure (V2I) wire-less systems. We exploit onboard panoramic street-view im-ages and a preloaded satellite map to predict communication-relevant environmental information around the vehicle, including nearby building footprints and heights. The predicted height map provides a compact environmental prior and is combined with historical mobility information to jointly predict the next-slot line-of-sight (LoS) state, transmission rate, and transmit and receive beam selections. On our dataset covering differ-ent real-world regions across New South Wales, Australia, the proposed framework achieves 91.4% LoS classification accuracy, 0.638 bps/Hz mean absolute error of data rate prediction, and more than 40% higher transmission rate than the conventional reactive baseline in geographically unseen regions, outperforming all evaluated deployable learning-based baselines. The dataset and code will be released at https://github.com/Huzijiao/Cross-view V2I. 
+
+Index Terms —Vision-aided mmWave communications, Multi-modal learning, V2I, Environment sensing. 
+
+I. I NTRODUCTION 
+
+# WITH the development of 6G and deployment of ultra-dense networks (UDNs), vehicle-to-infrastructure (V2I) communications are expected to support ultra-reliable, high-data-rate, and low-latency vehicular services. Millimeter-wave (mmWave) transmission is a key technology for the 6G V2I communications [1] because of its high carrier frequency and large available bandwidth, which can substantially im-prove link capacity in vehicular networks. However, the high-frequency propagation also makes mmWave links vulnerable to severe path loss, attenuation, and weak diffraction [2], [3]. As a result, designing the beamforming matrices and handover strategies to achieve reliable mmWave V2I communications becomes complex and challenging, especially in high-mobility urban scenarios. Conventional V2I beamforming and handover methods are mainly classified into two groups [4]. The first group is beam sweeping over a predefined transceiver codebook [5], [6], which sweeps the beam to select the beam pair or serving base  
+
+> Z. Hu, H. Yu, G. Pang, G. Wang, L. Zhang, W. Liu, B. Vucetic, and Y. Li are with the School of Electrical and Computer Engineering, University of Sydney, Sydney, NSW 2006, Australia (e-mails: {zijiao.hu, haiyao.yu, gaoyang.pang, guangchen.wang, litianyi.zhang, wanchun.liu, branka.vucetic, yonghui.li }@sydney.edu.au). G. Wang is also with the School of Engineering, Australian National Univer-sity, Canberra, ACT 2600, Australia (e-mail: guangchen.wang@anu.edu.au). G. C. Alexandropoulos is with the Department of Informatics and Telecom-munications, National and Kapodistrian University of Athens, Athens 16122, Greece (e-mail: alexandg@di.uoa.gr).
+
+station (BS) that maximizes the received power or transmission data rate. The second group relies on uplink pilots or reference signals from the user equipment (UE) to estimate the channel, infer the UE location or angle information [7], [8], and then design the beamforming matrix and handover strategy accordingly. Although these approaches are effective in quasi-static links, they become expensive in vehicular scenarios. Specifically, the exhaustive or hierarchical beam sweeping overhead grows with the codebook size and the number of candidate BSs [6], [9], [10]. The pilot-based channel esti-mation also requires frequent measurement, feedback, and reconfiguration, while the estimated channel degrades rapidly when the vehicle moves at high speed [11] or when the link state changes suddenly [12]. Therefore, reactive beam design incurs substantial beam searching or training overhead and initiates handover only after the link quality has already degraded, leading to reduced connection stability, delayed handover, and less effective data transmission time. Recently, integrated sensing and communication (ISAC) has attracted increasing attention for V2I beam management and link prediction [13]. The main intuition is that sensing side information, such as global positioning system (GPS) loca-tion measurements [14], [15], radar [16], light detection and ranging (LiDAR) point clouds [17], and RGB/depth images from cameras mounted at either the BS or the vehicular user (VUE) [12], [18], can capture propagation-relevant environ-mental features, such as line-of-sight (LoS) paths, blockage, scatterers, and user–BS geometry. These features can guide the design of proactive mmWave beam management strategies that reduce beam-searching overhead and handover latency. For example, a LiDAR-aided learning framework has been pro-posed in [17] to exploit point-cloud data with GPS to predict both current and future beam indices in real-world mmWave V2I scenarios. Extending sensing-aided beam management to vehicle-to-vehicle (V2V) scenarios, a radar-aided V2V beam tracking framework has been proposed in [16] to use the range-Doppler map to reconstruct surrounding moving vehicles, which is utilized to predict the future beams between moving vehicles. However, LiDAR- or radar-based sensing typically incurs substantial hardware, calibration, and deployment costs. Although such sensors can provide accurate geometric infor-mation, their cost and infrastructure requirements limit their practicality for large-scale V2I deployment [19]. Vision-aided V2I communications have become feasible because cameras are low cost, easy to deploy, and capable of capturing rich environmental information without occu-pying additional wireless spectrum [12], [20], [21]. Exist-ing vision-aided methods can be broadly divided into BS-arXiv:2609.00617v1 [eess.SP] 1 Sep 2026 2
+
+side and vehicle-side sensing [22], [23]. In BS-side sensing, cameras mounted at BSs, roadside units (RSUs), or third-party infrastructures observe the road scene and assist beam alignment, blockage prediction, or link scheduling. Recently, object detection results and position embeddings from BS-mounted RGB camera images have been used for future link-rate prediction and link switching [22]. Moreover, the authors in [23] construct binary encoding maps (BEM) from BS-side RGB camera images and BS/vehicle location information by extracting bounding boxes of multiple users and scatterers, and use the resulting BEM sequences to predict user-specific channel gains, beam indices, and proactive BS selection. Nev-ertheless, BS-side camera deployment is difficult to scale in dense urban networks because each BS requires camera instal-lation, calibration, maintenance, and field-of-view planning. BS-side visual monitoring also introduces privacy concerns because road users and surrounding objects are continuously captured from infrastructure cameras [18]. In contrast, vehicle-side vision can exploit sensing devices that already exist on the VUE, especially in autonomous-driving or advanced driver-assistance systems, where cameras are used for navigation, localization, and obstacle avoidance [18]. Existing vehicle-side vision-aided works use images captured by the VUE to detect surrounding vehicles, estimate dynamic channel conditions, and predict beam alignment and handover strategies [24], [25]. However, most of the forediscussed studies focus on the blockage between nearby vehicles or between a roadside RSU and the target vehicle [16]–[18], [24], [25]. In practical V2I deployments, when the antenna is mounted on the roof of the VUE and communicates with elevated BSs such as RSUs, rooftop BSs, or unmanned aerial vehicle (UAV)-mounted BSs, the dominant blockage is often induced by surrounding buildings rather than only by neighboring vehicles [26], [27]. Existing works either do not explicitly consider the impact of building geometry or assume that building footprints and their heights are known from accurate maps [28]. This assumption is restrictive because building heights are unavailable or in-complete in many cities, and urban maps may be incomplete or outdated as the environment evolves. Therefore, how to use vehicle-accessible visual observations to predict surrounding building shapes and heights for V2I beam and handover decisions remains insufficiently investigated. In this paper, motivated by this gap, we propose a vision-aided proactive V2I prediction framework, which utilizes the onboard camera-captured street-view images and preloaded satellite map to capture the surrounding environmental infor-mation around the VUE, and then predicts the next-slot beam selection and handover decisions. The main contributions of this paper are summarized as follows:  
+
+> •
+
+To the best of our knowledge, this work is among the first to incorporate height-map estimation from cross-view visual observations into a communication-aware V2I decision-making pipeline. Specifically, we propose a visual building height-map estimation (VBHE) model that utilizes both satellite and street-view images for building-footprint segmentation and height estimation. The estimated height map captures link propagation-relevant geometric information around the VUE, which 𝑡𝑡 − 1 
+
+> Rooftop BS
+> UAV BS
+> Satellite
+> RSU BS
+> VUE
+> Satellite image
+> Street-view image
+> 𝑡𝑡
+> Satellite-view:
+> Street-view:
+> LoS links:
+> NLoS links:
+> VUE trajectory:
+> Blocked links:
+> Fig. 1. Illustration of the considered urban mmWave V2I scenario.
+
+is then used to guide the subsequent multi-task link prediction.  
+
+> •
+
+We propose a multi-modal multi-task spatial-temporal model (MMST) that extracts candidate-specific geometric features for each VUE–BS link from the predicted height map. These features are fused with the historical mobility information to jointly predict multiple link tasks, includ-ing the LoS probability, transmission rate, and transmit and receive beam indices. These predictions are then used to guide proactive BS selection and beam prediction for the next time slot along the VUE trajectory.  
+
+> •
+
+We construct a dataset covering 18 real-world urban regions across New South Wales, Australia, including the panoramic street-view images, bird’s-eye-view (BEV)-domain satellite images, and the ground truth building-footprint and height maps. We then use the ray-tracing platform Sionna to generate the corresponding V2I chan-nel labels along different trajectories of these regions. The resulting dataset contains 17 K visual samples for VBHE and 290 K communication-channel samples for MMST. Simulation results on this dataset show that both VBHE and MMST outperform the baselines in height-map es-timation and multi-task link prediction, respectively, in geographically unseen test regions. 
+
+Notations : Uppercase (e.g., X) and lowercase (e.g., x)letters denote constants and scalar variables, respectively, while R is the set of real numbers. Sets are represented by calligraphic letters (e.g., A), with cardinality |A| and element sequence explicitly denoted as {xℓ}ℓ=a,...,b . Bold uppercase (e.g., A) and lowercase (e.g., a) letters designate matrices or tensors, and column vectors, respectively. The superscript  
+
+> ⊤
+
+and H indicate transposition and Hermitian transpose, re-spectively. We use a ∼ CN (μ, Σ) to indicate that vector a
+
+is complex Gaussian distributed with mean μ and covariance matrix Σ. Given matrices A and B, [A, B], [A⊤, B⊤]⊤,
+
+A ⊗ B, and A ⊙ B denote horizontal, vertical concatenations, the Kronecker product, and element-wise product, respectively. 
+
+⌊x⌋ denotes the floor function, and A[i, j ] denotes the (i, j )-th entry of the matrix A.II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+We consider a downlink mmWave V2I communication system deployed in an urban road environment, as illustrated 3
+
+in Fig. 1. In this environment, a VUE is equipped with GPS, a camera, and an onboard mmWave transceiver, and is served by one BS from a nearby candidate set B ≜ {1, . . . , B },which is spatially distributed across the environment, such as roadside, rooftop, or UAV. The positions of candidate BSs are known to the VUE. At each time slot t, the VUE can access satellite images via the on-board navigation system, obtain street-view images via its camera, and observe its locations via GPS record. The VUE interprets the channel knowledge behind these observations and then selects the BS to maximize the transmission rate in the downlink communication at time slot t + 1 . The corresponding decision is sent by the VUE to the target BS during the stable data-transmission stage of slot 
+
+t, before the association is applied in slot t + 1 . The VUE and the target BS then establish the association according to the selected BS index, and perform the subsequent downlink communication using the selected beam-search result. 
+
+A. System Model 1) mmWave V2I Channel Model: Both the BS and the VUE are equipped with uniform planar arrays (UPAs), containing 
+
+N = NxNy transmit antennas and M = MxMy receive antennas, respectively, with a single radio frequency chain. We note that the UPAs are modeled on x-y planes parallel to the ground, with their element indices column-first from the top-left to the bottom-right. The channel between each candidate BS and the VUE is modeled as an orthogonal frequency-division multiplexing (OFDM) mmWave link with carrier fre-quency fc and K subcarriers. Following a standard geometric wideband mmWave channel model [3], the frequency-domain channel on the k-th subcarrier, k ∈ { 1, . . . , K }, denoted by 
+
+Hk ∈ CM ×N , is given by: 
+
+Hk =
+
+> Ξ−1
+
+X
+
+> ξ=0
+> Lp
+
+X
+
+> ℓ=1
+
+αℓe−ȷ 2πk K ξ d(ξT s − τℓ)r(ϕA 
+
+> ℓ
+
+, θ A 
+
+> ℓ
+
+)bH(ϕD 
+
+> ℓ
+
+, θ D 
+
+> ℓ
+
+).
+
+(1) where Ξ represents the length of the discrete-time channel impulse response; Lp is the number of propagation paths; the exponential term e−ȷ 2πk K ξ represents the standard discrete Fourier transform (DFT) operation for OFDM demodulation, and ȷ = √−1 is the imaginary unit; αℓ and τℓ are the complex gain and delay of the ℓ-th path, respectively; Ts is the sampling interval; d(·) is a raised-cosine pulse to elimi-nate inter-symbol interference under high-speed transmission; 
+
+r(ϕAl , θ Al ) ∈ CM ×1 and b(ϕDl , θ Dl ) ∈ CN ×1 are the steering vectors of UPA at VUE and BS, respectively. Specifically, for the ℓ-th path, ϕA 
+
+> ℓ
+
+and θA 
+
+> ℓ
+
+are the azimuth and elevation angles of arrival (AOA), respectively. ϕD 
+
+> ℓ
+
+and θD 
+
+> ℓ
+
+are the azimuth and elevation angles of departure (AOD), respectively. For a typical U -antenna UPA ( U = Ux × Uy ), the steering vector is given as follows: 
+
+a(ϕ, θ ) ≜ ay (ϕ, θ ) ⊗ ax(ϕ, θ ), ∀a ∈ { r,b}, (2) where 
+
+ax(ϕ, θ ) ≜
+
+h
+
+1, e ȷπ sin θ cos ϕ, . . . , e ȷπ(Ux−1) sin θ cos ϕi⊤
+
+, (3) 
+
+ay (ϕ, θ ) ≜
+
+h
+
+1, e ȷπ sin θ sin ϕ, . . . , e ȷπ(Uy −1) sin θ sin ϕi⊤
+
+. (4) VUE GPS position      
+
+> LoS
+> classification
+> Multi-modal spatial-temporal model Rx beam indices
+> Tx beam indices
+> Data rate
+> Data transmission
+> Time
+> (b) Proposed vision-aided BS/beam selection framework
+> BS 3D position
+> Predicted height-map
+> Visual building height-map estimation BS handover
+> Beam selection
+> Handover
+> Beam searching
+> 𝜏𝜏 𝑚𝑚
+> Link state prediction Visual inference
+> 𝜏𝜏 𝑠𝑠
+> 𝜏𝜏 𝑚𝑚
+> Data transmission
+> Data transmission Data transmission Handover
+> Conventional
+> approach
+> Proposed approach
+> BS handover & beam selection
+> Inputs Predictions & decisions Learning models
+> …
+> …
+> 𝑡𝑡 𝑡𝑡 + 1
+
+Fig. 2. Framework overview. Top: Conventional and proposed BS association procedures; Bottom: Architecture of the proposed framework. 
+
+2) Transmission Rate under mmWave Channel: Let Wtx ≜
+
+{wtx  
+
+> i
+
+}Ctx  
+
+> i=1
+
+and Wrx ≜ {wrx  
+
+> j
+
+}Crx  
+
+> j=1
+
+denote the transmit and receive analog beam codebooks of the BS and VUE, respec-tively, with the sizes of Ctx and Crx , where i and j are the corresponding beam indices. The transmit symbol on the 
+
+k-th subcarrier is denoted by sk, with corresponding power 
+
+Pk = E{| sk|2}. The received signal at the VUE on the k-th subcarrier is given by: 
+
+yk =  wrx 
+
+> j
+
+H Hkwtx  
+
+> i
+
+sk +  wrx 
+
+> j
+
+H nk, (5) where wtx  
+
+> i
+
+∈ CN ×1 and wrx  
+
+> j
+
+∈ CM ×1 are the unit-norm transmit and receive beamforming vectors, respectively. 
+
+nk ∼ CN (0, σ 2IM ) is the additive white Gaussian noise (AWGN), where IM is the identity matrix. The transmission rate averaged over K subcarriers is defined as 
+
+R(i, j ) = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+log 2
+
+
+
+1 + Pk
+
+σ2
+
+ wrx 
+
+> j
+
+H Hkwtx 
+
+> i
+> 2
+
+
+
+, (6) where equal power allocation is applied, i.e., Pk = Ptot /K .
+
+B. Problem Formulation and Practical Challenges 1) Effective Data-Transmission Rate Maximization: Typi-cally, each time slot is composed of three time durations for beam searching, handover, and data transmission, respectively, as shown in Fig. 2. At the beginning of the t-th time slot, the VUE first performs the beam searching to obtain the optimal beam index of each BS, which takes τ m. Then, given a BS selection strategy, the VUE decides whether to process the handover based on the result of link quality. The handover duration is denoted by τ h. The remaining time is used to transfer the data between the VUE and the selected BS via the searched beam index. Hence, the data transmission duration at the t-th time slot is given by: 
+
+τ d 
+
+> t
+
+= τ s − τ m −  1 − o⊤
+
+> t−1
+
+ot
+
+| {z }
+
+> δt
+
+τ h, (7) where τ s is the duration of each time slot, and ot =[o1,t , . . . , o B,t ]⊤ ∈ { 0, 1}B denotes the one-hot association vector at slot t, i.e., ob,t = 1 indicates that the VUE is 4
+
+associated with candidate BS b during the t-th time slot and 
+
+ob,t = 0 otherwise. We note that the VUE is served by only one BS in each time slot, indicating 1⊤ot = 1 . Therefore, 
+
+δt = 1 − o⊤
+
+> t−1
+
+ot is the handover indicator, i.e., δt = 1
+
+represents the selected BS changes from slot t − 1 to slot 
+
+t, and δt = 0 otherwise. For candidate BS b at slot t, let Rb,t (i, j ) denote the transmission rate in (6) evaluated using the channel between BS b and the VUE when the transmit and receive beam indices are i and j, respectively. Given the previous association ot−1,the VUE needs to choose the current association and beam-index pair to maximize the effective data transmission in the 
+
+t-th time slot, which can be formulated as 
+
+(o⋆t , i ⋆t , j ⋆t ) = arg max 
+
+> ot,i t,j t
+
+τ d
+
+> t
+
+τ s
+
+> B
+
+X
+
+> b=1
+
+ob,t Rb,t (it, j t) (8a) 
+
+s.t. ot ∈ { 0, 1}B , 1⊤ot = 1 , (8b) 
+
+1 ≤ it ≤ Ctx , 1 ≤ jt ≤ Crx . (8c) Here, τ d 
+
+> t
+
+/τ s converts the transmission rate into the effective data-transmission rate after accounting for beam-search and the handover cost induced by switching from ot−1 to ot. Given the beam index pair (i⋆t , j ⋆t ), the analog beams for the selected BS at slot t are wtx  
+
+> i⋆t
+
+and wrx  
+
+> j⋆t
+
+from the predefined codebooks. 
+
+2) Challenges for Solving the Rate Maximization Problem: 
+
+Solving (8a)-(8c) by conventional methods is difficult because the association variable ot and the beam indices it and jt
+
+are coupled. Beam-search overhead: For each candidate BS, evaluating Rb,t (i, j ) either requires estimating Hk in (1) or sweeping many beam pairs over both codebooks [29], [30]. The resulting τ m reduces τ d 
+
+> t
+
+in (7), particularly for large B,
+
+Ctx , or Crx . Mobility-induced degradation: VUE movement relative to blockage rapidly changes the LoS condition, domi-nant paths, and optimal beams. Channel estimation, therefore, requires substantial pilot overhead, and the resulting estimates or searched beam indices can easily be outdated in these rapidly varying channels [3], [29]. Handover cost: Changing 
+
+ot−1 to ot activates δt and incurs τ h, reducing τ d 
+
+> t
+
+. Thus, selecting the BS with the largest data rate may be suboptimal when its gain cannot offset the handover loss and may also cause frequent switching when multiple BSs have similar rates [22]. Therefore, beam-search cost, handover cost, and transmission rate must be jointly optimized. III. P ROPOSED VISION -A IDED PROACTIVE BS S ELECTION AND BEAM PREDICTION 
+
+A. Learning-based Approach Formulation 
+
+To address the challenges for solving (8a)-(8c), we for-mulate a proactive learning-based approach, which uses the sensing and mobility information available up to slot t to predict the next-slot link state for each candidate BS before the slot starts. The input includes the VUE trajectory, known candidate-BS locations, and visual environment observations. The output for each BS b includes the predicted LoS indicator 
+
+ˆpLoS  
+
+> b,t +1
+
+∈ { 0, 1}, the predicted optimal data rate ˆR⋆b,t +1 , and the predicted transmit and receive beam rankings Rtx  
+
+> t+1
+
+≜
+
+{i}Ktx beam  
+
+> t+1
+
+, Rrx  
+
+> t+1
+
+≜ {j}Krx beam  
+
+> t+1
+
+over Wtx and Wrx . These learned predictions are used to approximate the same effective-rate objective in (8a). Specifically, we first use the predicted optimal data rate ˆR⋆b,t +1 to determine the BS selection at time 
+
+t + 1 , which can be expressed as 
+
+ˆo⋆t+1 = arg max 
+
+> ˆot+1
+
+τ d
+
+> t+1
+
+τ s
+
+> B
+
+X
+
+> b=1
+
+ˆob,t +1 ˆpLoS  
+
+> b,t +1
+
+ˆR⋆b,t +1 (9a) 
+
+s.t. ˆot+1 ∈ { 0, 1}B , 1⊤ˆot+1 = 1 . (9b) Given ˆo⋆t+1 , we perform the beam search with respect to Rtx 
+
+> t+1
+
+and Rrx  
+
+> t+1
+
+to maximize the effective data transmission in the time slot t + 1 , which is expressed as follows: 
+
+ i⋆t+1 , j ⋆t+1 
+
+= arg max 
+
+> it+1 ,j t+1
+
+τ d
+
+> t+1
+
+τ s
+
+> B
+
+X
+
+> b=1
+
+ˆo⋆b,t +1 Rb,t +1 (it+1 , j t+1 ) (10a) 
+
+s.t. it+1 ∈ R tx 
+
+> t+1
+
+, jt+1 ∈ R rx 
+
+> t+1
+
+. (10b) Following staged BS/VUE refined beam search proce-dures [31], the beam search duration is τ m = ( Ktx beam +
+
+Krx beam )τu, where τu denotes the unit beam-probing time. The formulated learning-based approach targets the same transmission rate objective as (8a)-(8c), while replacing un-available next-slot channel-dependent quantities with predic-tions and reducing the online search space from exhaustive BS-beam exploration to rate-aware BS selection and ordered beam testing. Using environmental and mobility information available before data transmission in slot t + 1 , the proposed framework proactively determines the BS selection and the beam-search shortlist to maximize the transmission rate in (8). 
+
+B. Learning-based Framework 
+
+To address the learning problem of (9a)-(10b), we propose a vision-aided, proactive V2I prediction framework that extracts surrounding environmental information from camera-captured street-view images and a preloaded satellite map from the navi-gation database for next-slot BS selection and beam prediction. The framework contains two main components: the VBHE and the MMST. As illustrated in Fig. 2, the VBHE first takes a street-view panoramic image and a satellite image as inputs and outputs a building height-map representation that summarizes building footprints and heights around the VUE. The MMST then combines this height map with the historical VUE and candidate-BS coordinates, extracts candidate-specific geomet-ric features along each VUE-BS path, and predicts the next-slot LoS indicator ˆpLoS 
+
+> b,t +1
+
+, optimal-beam rate ˆR⋆b,t +1 , and the Top-Ktx beam /K rx beam beam indices, ranked by their predicted beam probabilities, of BS and VUE for each candidate BS b,respectively. The architecture and training objective of VBHE and MMST are detailed in Sections IV and V, respectively. IV. V ISUAL BUILDING HEIGHT -M AP ESTIMATION MODEL 
+
+The VBHE estimates the building footprints and height map around the VUE. The height map encodes building geometry that is informative for blockage, LoS/NLoS conditions, and possible reflected paths. This geometric information is used by the subsequent MMST for BS selection and beam-index 5𝐅𝐅sat bev      
+
+> DPT
+> MSCAN Encoder
+> DPT
+> MSCAN
+> Encoder
+> Mask Head
+> Height Head
+> 𝐈𝐈 svi ∈ ℝ 𝐻𝐻 ×𝑊𝑊 ×𝐶𝐶
+> 𝐈𝐈 sat ∈ ℝ 𝐿𝐿 ×𝐿𝐿 ×𝐶𝐶
+> 360 °0°
+> 180 °
+> BEV Feature Adapter
+> Street-view Branch
+> Satellite Branch
+> N
+> E
+> S
+> W
+> 𝐷𝐷 = 79.36 𝑚𝑚
+> SNEW
+> Fsvi 𝑏𝑏𝑏𝑏𝑏𝑏 ∈ 𝑅𝑅 Db ×𝑆𝑆 ×𝑆𝑆
+> SVI Feature Adapter
+> Fsvi pan ∈ 𝑅𝑅 Db ×H/16 ×W/16
+> 𝐅𝐅fuse
+> �𝐇𝐇 geo
+> 𝐑𝐑 ∈ ℝ 𝐿𝐿 ×𝐿𝐿
+> 𝑭𝑭𝑟𝑟𝑟𝑟𝑟𝑟𝑟𝑟
+> Rooftop Cue Encoder
+> Up Sample
+> Roof Height Prior
+
+Cross-View Feature Encoding         
+
+> FNN1
+> DeepVIT
+> DNN Block
+> +
+> Ground Cue Encoder
+> (𝑢𝑢 _{ 𝑚𝑚 ,𝑛𝑛 }, 𝑣𝑣 _{ 𝑚𝑚 ,𝑛𝑛 })
+> {( 𝑢𝑢 _{ 𝑚𝑚 ,𝑛𝑛 }, 𝑣𝑣 _{ 𝑚𝑚 ,𝑛𝑛 }) } 𝑚𝑚 ,𝑛𝑛=1 𝐿𝐿
+> (𝑣𝑣𝑚𝑚 ,𝑛𝑛 ,𝑢𝑢𝑚𝑚 ,𝑛𝑛 )
+> (𝑣𝑣𝑚𝑚 ,𝑛𝑛 ,𝑢𝑢𝑚𝑚 ,𝑛𝑛 roof )
+> Cross-View Feature Encoding
+
+Image Preparation and Segmentation Block 
+
+> Ground projection
+> Rooftop Projection
+> �𝐇𝐇 𝐅𝐅r bev
+> 𝐅𝐅 svi pan
+
+SVI-to-BEV  Feature Extractor   
+
+> Frozen
+> Trainable
+> �ℎ𝑚𝑚 ,𝑛𝑛 geo
+> N
+> 𝐏𝐏 bld svi
+> Pbld svi
+> 𝐏𝐏 bld sat
+> 𝐅𝐅g bev 𝐑𝐑g
+> 𝐑𝐑𝑔𝑔
+> 𝐅𝐅r bev 𝐑𝐑r
+
+Fig. 3. Overall architecture of the proposed cross-view VBHE model. 
+
+prediction. As shown in Fig. 3, VBHE consists of four components: 1) an image preparation and segmentation block; 2) a cross-view feature encoding block; 3) SVI-to-BEV feature extractor; and 4) a cross-view fusion and output block. 
+
+A. Image Preparation and Segmentation Block 1) Image Preparation: At each time slot, the VUE provides the satellite image, denoted by Isat  
+
+> t
+
+∈ RL×L×C , and the street-view panorama image, denoted by Isvi  
+
+> t
+
+∈RH×W ×C , as inputs to the VBHE. Specifically, the satellite image Isat  
+
+> t
+
+is a North-aligned RGB patch centered at the VUE position pUE  
+
+> t
+
+, cover-ing a D×D m2 area. The street-view panorama image Isvi  
+
+> t
+
+is obtained using an onboard 360 ◦ camera mounted hc m above the ground. This image is presented in the equirectangular format, where the horizontal axis uniformly covers the full 
+
+360 ◦ azimuth range and the vertical axis uniformly covers the 
+
+180 ◦ elevation range. The left boundary of Isvi  
+
+> t
+
+corresponds to true North to align the street-view panorama with Isat  
+
+> t
+
+. For ease of notation, we omit the subscript t in the subsequent analysis. 
+
+2) Image Segmentation: Since the VBHE aims to estimate building footprints and heights, masking non-building regions, such as roads, sky, vegetation, and vehicles, reduces back-ground interference and helps the subsequent feature extractor focus on building-related visual cues. Hence, a DPT-hybrid building segmentation module [32] is deployed to identify building regions from both Isat and Isvi .1 Specifically, we build the building probability map Pν 
+
+> bld
+
+by 
+
+Pν 
+
+> bld
+
+= softmax cbld 
+
+ f DPT (Iν ; θD) , ν ∈ { sat , svi }, (11) where Psat bld ∈ [0 , 1] L×L, Psvi bld ∈ [0 , 1] H×W , and f DPT (·; θD)
+
+denotes the DPT-Hybrid model with parameters θD. The softmax operation is applied over the semantic-class dimension of the DPT output, and cbld denotes the building-class index. Then, the building-masked image is ˜Iν = Pν 
+
+> bld
+
+⊙Iν to suppress non-building regions for the subsequent feature encoding. 
+
+B. Cross-View Feature Encoding Block 
+
+The cross-view feature encoding block adopts a two-branch architecture [33]. As shown in Fig. 3, two parallel MSCAN encoders extract multi-scale pyramid features from ˜Iν [34]. The extracted pyramid features are then fed into subsequent view-specific feature adapters to map them into a compact branch-level representation. 
+
+> 1
+
+DPT modules [32] are trained offline on the semantic segmentation dataset. The parameters are frozen during training and deployment, so the block introduces no additional learnable parameters into the proposed VBHE. 
+
+1) MSCAN Encoder: MSCAN encoders use the multi-scale convolutional attention design to extract multi-scale pyramid features. These features capture local details, such as building boundaries and global contextual cues, which are important for cross-view feature representation. The multi-scale pyramid features {cνl }4 
+
+> l=1
+
+with the corresponding downsampling ratios 
+
+{1/4, 1/8, 1/16 , 1/32 } are extracted by 
+
+{cνl }4 
+
+> l=1
+
+= f E ˜Iν ; θE,ν , ν ∈ { sat , svi }, (12) where f E(·; θE,ν ) denotes the MSCAN encoder for view ν,with trainable parameters θE,ν .
+
+2) Cross-view Adapter: The two view-specific adapters follow a similar lightweight multi-scale fusion structure. For each adapter, an MLP is first applied to project the feature into the channel dimension Db. The projected features are then resized to a branch-specific reference resolution and fused through convolutional layers. Finally, the BEV adapter outputs Fbev sat ∈ RDb×L×L, which is directly treated as the representation in the BEV domain, whereas the SVI adapter outputs Fpan svi ∈ RDb×H′×W ′
+
+in the panorama domain. The two adapters are 
+
+Fbev sat = f A {csat  
+
+> l
+
+}4
+
+> l=1
+
+; θA,sat , (13) 
+
+Fpan svi = f A {csvi  
+
+> l
+
+}4
+
+> l=2
+
+; θA,svi , (14) For the satellite branch, all pyramid levels are used because the satellite features are already in the top-down BEV domain and provide complementary layout cues at different scales. In contrast, the street-view features need to be projected into the BEV domain, and thus should preserve sufficient spatial detail while maintaining a receptive field large enough to provide reliable geometric and semantic cues. The finest level 
+
+l = 1 mainly captures highly local panorama textures, which are sensitive to perspective distortion and provide limited reliable information for BEV projection, while also increasing the panorama-to-BEV sampling cost. Therefore, using levels 
+
+l = 2, 3, 4 for the street-view adapter provides a better balance between spatial resolution, contextual representation, and computational efficiency for subsequent feature extractors. 
+
+C. SVI-to-BEV Feature Extractor 
+
+Since both the satellite representation and the height map are defined in the BEV domain, the street-view representa-tion Fpan svi in (14), which remains in the panorama domain, must be projected into the satellite BEV coordinate system before cross-view fusion. We therefore explore the mapping 6𝑣𝑣        
+
+> 𝑢𝑢𝑚𝑚 ,𝑛𝑛
+> 𝑣𝑣 𝑚𝑚 ,𝑛𝑛 roo f
+> 𝑊𝑊′
+> 𝑣𝑣𝑚𝑚 ,𝑛𝑛
+> 𝜃𝜃 𝑚𝑚 ,𝑛𝑛 𝛼𝛼𝑚𝑚 ,𝑛𝑛
+> horizon
+> N
+> 𝜙𝜙𝑚𝑚 ,𝑛𝑛
+> nadir
+> zenith
+> �ℎ𝑚𝑚 ,𝑛𝑛
+> 𝑔𝑔𝑔𝑔𝑔𝑔
+> Rooftop Projection Ground Projection
+> 𝐅𝐅 svi pan
+> 𝐻𝐻′
+> 𝑑𝑑𝑚𝑚 ,𝑛𝑛
+> Car location
+> ℎ𝑐𝑐
+> 𝑛𝑛
+> 𝜃𝜃𝑚𝑚 ,𝑛𝑛
+> 𝐿𝐿
+> N
+> 𝐿𝐿
+> 𝑚𝑚
+> �𝐅𝐅 gbev
+> 360 °
+> camera
+> 𝑑𝑑𝑚𝑚 ,𝑛𝑛
+> 𝜙𝜙𝑚𝑚 ,𝑛𝑛
+> ℎ𝑐𝑐
+> nadir
+> horizon
+> zenith
+> (𝑚𝑚 ,𝑛𝑛 )
+> 𝑛𝑛
+> N𝑚𝑚
+> 360 °
+> camera
+> 𝑑𝑑𝑚𝑚 ,𝑛𝑛
+> 𝛼𝛼𝑚𝑚 ,𝑛𝑛
+> 𝜙𝜙𝑚𝑚 ,𝑛𝑛
+> ℎ𝑐𝑐
+> �ℎ𝑚𝑚 ,𝑛𝑛 𝑔𝑔𝑔𝑔𝑔𝑔
+> nadir
+> horizon
+> zenith (𝑚𝑚 ,𝑛𝑛 )
+> 𝜙𝜙𝑚𝑚 ,𝑛𝑛
+> (𝑚𝑚 ,𝑛𝑛 )
+> (𝑚𝑚 ,𝑛𝑛 )
+> �𝐅𝐅 rbev
+
+①②③④⑤⑥ 
+
+①
+
+⑥ ⑤
+
+④
+
+③②
+
+> 𝑑𝑑𝑚𝑚 ,𝑛𝑛
+
+Fig. 4. Illustration of the ground and rooftop projection. For ground projection: 1⃝ the vertical viewing angle ϕm,n and horizontal distance dm,n of BEV cell (m, n ) relative to the camera; 2 ⃝ the azimuth angle θm,n and distance dm,n of (m, n ) on BEV domain; and 3 ⃝ the sampled location from the panorama to the ˜Fbev g with corresponding Rg. For rooftop projection: 4⃝ the rooftop elevation angle αm,n of BEV cell (m, n ) relative to the camera; 5⃝ the azimuth angle θm,n and distance dm,n of (m, n ) on BEV domain; and 6⃝ sampled location from the panorama to the ˜Fbev r with corresponding reliability Rr.
+
+between the panorama and BEV coordinate systems to align the panorama-domain features Fpan svi with BEV features Fbev sat .Without this mapping, features at the same tensor index in representation Fpan svi and Fbev sat would correspond to different physical locations, leading to spatially inconsistent fusion. As illustrated in Fig. 3, the ground and rooftop projections first find the relationship between each cell in the BEV-domain 
+
+Fbev sat with the corresponding ground coordinate and rooftop coordinate on the panorama-domain street-view feature map 
+
+Fpan svi , respectively. The mappings are then fed to ground cue encoder and rooftop cue encoder, which resample the Fpan svi to generate the BEV-aligned street-view ground feature ˜Fbev g ∈
+
+RDb×L×L and rooftop feature ˜Fbev r ∈ RDb×L×L, respectively. 
+
+1) Ground and Rooftop Projection: As shown in Fig. 4, the ground and rooftop projections are based on the geometric relationship between the camera and the pixel on the ground plane or on the rooftop, respectively. Ground Projection: For each spatial BEV cell (m, n ) on the ground plane, where m, n ∈ {1, . . . , L }, its location corresponds to the row and column coordinates on panorama-domain image (vm,n , u m,n ), where vm,n ∈ [0 , H ′] and um,n ∈
+
+[0 , W ′] are defined by the standard equirectangular projection (ERP) properties [35], i.e., v = 0 corresponds to the zenith, 
+
+v = H′/2 corresponds to the horizon, and v = H′ corresponds to the nadir. Therefore, the coordinates are computed as 
+
+um,n = θm,n 
+
+2π W ′, vm,n = H′ − ϕm,n 
+
+π H′, (15) where θm,n denotes the azimuth angle from the VUE position to the BEV cell (m, n ), measured with respect to the north direction; ϕm,n is the vertical viewing angle from the camera center to the building base point on the ground plane. As shown in 2 in Fig. 4, the angle θm,n ∈ [0 , 2π) is computed as follows. 
+
+θm,n = mod atan2 
+
+
+
+(n − L
+
+2 ) DL| {z }
+
+> ∆yn
+
+, −(m − L
+
+2 ) DL| {z }
+
+> −∆xm
+
+
+
+, 2π. (16) where ∆xm and ∆yn are the metric ground-plane offsets from cell (m, n ) to the BEV-grid center, which corresponds to the current VUE/camera location. The factor D/L is the metric scale factor, with units of m/pixel, that converts grid offsets to distances in meters. The vertical viewing angle ϕm,n , as shown in 1 in Fig. 4, is computed as 
+
+ϕm,n = arctan( dm,n /h c) , (17) where hc is the camera height, and dm,n is the horizontal ground distance from the camera location to the BEV cell in meters, computed by dm,n = p∆xm2 + ∆ yn2.Rooftop Projection: For each spatial BEV cell (m, n ) on the rooftop, its location corresponds to the panorama feature coordinates (vroof  
+
+> m,n
+
+, u m,n ). The horizontal image coordinate 
+
+um,n is the same as in (15), while the vertical coordinate 
+
+vroof  
+
+> m,n
+
+∈ [0 , H ′] is determined by finding the topmost row in 
+
+Psvi bld , whose building probability exceeds 0.5 at fixed column index ⌊um,n ⌋ WW ′ . Specifically, 
+
+vroof  
+
+> m,n
+
+=
+
+(
+
+min Fm,n , Fm,n ̸ = ∅,H′/2, Fm,n = ∅, (18) where 
+
+Fm,n ≜ v ∈ { 0, . . . , H′
+
+2 }| Psvi bld [v HH′ , ⌊um,n ⌋ WW ′ ] > 0.5 . (19) 
+
+This definition explicitly searches over the vertical coordinate 
+
+v while keeping the horizontal panorama column ⌊um,n ⌋ WW ′
+
+fixed by the BEV cell direction. We can then compute the rooftop height prior geometrically. As shown in 4 in Fig. 4, the prior building rooftop height at BEV cell (m, n ), denoted by ˆhgeo 
+
+> m,n
+
+, is estimated as: 
+
+ˆhgeo  
+
+> m,n
+
+= hc + dm,n tan( αm,n ), (20) where αm,n is the elevation angle from the camera to the rooftop along the azimuth direction θm,n , which is computed by mapping the rooftop row to its angle in the equirectangular projection, given by αm,n = π  H′/2 − vroof 
+
+> m,n
+
+ /H ′ .
+
+2) Ground Cue Encoder: After obtaining all the sampling coordinates (vm,n , u m,n ) for each BEV cell (m, n ) on the ground plane, the BEV-aligned street-view ground feature 
+
+˜Fbev g is obtained by sampling Fpan svi at these continuous co-ordinates, i.e., ∀m, n ∈ { 1, . . . L },
+
+˜Fbev g [: , m, n ] = Fpan svi [: , ⌊vm,n ⌋, ⌊um,n ⌋]. (21) The resampled ground feature ˜Fbev g is then fed into an adapter 
+
+f G(·; θG) to extract ground-plane-aligned street-view cues and refine the projected representation: Fbev g = f G
+
+ ˜Fbev g ; θG
+
+
+
+.7
+
+The resulting BEV-aligned ground-plane feature Fbev g ∈
+
+RDb×L×L is then concatenated with the satellite BEV feature 
+
+Fbev sat for subsequent cross-view fusion. In addition, we construct a ground reliability matrix Rg ∈
+
+[0 , 1] L×L from the ground regions identified in the building probability map Psat bld . As shown in 3 in Fig. 4, Rg assigns higher reliability to ground cells and lower reliability to build-ing cells, since the ground-plane projection is valid only for ground regions. The reliability is highest at building–ground boundaries, encouraging the subsequent neural network to focus on building footprint information. 
+
+3) Rooftop Cue Encoder: Similar to the ground cue en-coder, the BEV-aligned street-view rooftop feature ˜Fbev r
+
+is obtained by sampling Fpan svi at the rooftop coordinates 
+
+(vroof  
+
+> m,n
+
+, u m,n ), i.e., ∀m, n ∈ { 1, . . . L },
+
+˜Fbev r [: , m, n ] = Fpan svi 
+
+:, vroof 
+
+> m,n
+
+ , ⌊um,n ⌋ . (22) The sampled rooftop feature ˜Fbev r is then fed into a learnable rooftop adapter f R(·; θR) to extract compact rooftop-aware features: 
+
+Fbev r = f R ˜Fbev r ; θR
+
+∈ RDr ×L×L. (23) We also construct a rooftop-correspondence reliability ma-trix, denoted by Rr ∈ [0 , 1] L×L, from the building probability 
+
+Psat bld . As shown in 6 in Fig. 4, Rr assigns higher reliability to the nearby building cells and lower reliability to ground cells, since the rooftop projection is valid only for building regions. The reliability is highest at building–ground boundaries of the BEV domain, encouraging the subsequent neural network to focus on building-top information. In order to further improve the rooftop feature, we also incorporate a geometric rooftop height prior matrix ˆHgeo given by ˆHgeo [m, n ] = ˆhgeo 
+
+> m,n
+
+. The rooftop-aware feature Fbev r , the geometric height prior ˆHgeo ,and the reliability matrix Rr are the height-related cues for the subsequent cross-view fusion. 
+
+D. Cross-view Fusion and Output Block 
+
+The final cross-view fusion feature is obtained by concate-nating the satellite and street-view BEV features and then adding the rooftop-aware feature through 
+
+Ffuse = [ Fbev sat ; ( Fbev g ⊙ Rg)]+ f UP ([( Fbev r ⊙ Rr); ˆHgeo ]; θup ),
+
+(24) where [·; ·] denotes channel-wise concatenation, Ffuse ∈
+
+R2Db×L×L contains both satellite-view and street-view infor-mation and building height prior in the same BEV coordinates. 
+
+f UP (·; θup ) is the convolutional layer that maps the concate-nated rooftop-aware feature from (Dr + 1) × L × L to the same channel dimension 2Db × L × L.As shown in Fig. 3, the fused feature Ffuse is fed into two task-specific heads for footprint segmentation and height regression, respectively, and is expressed as 
+
+ˆM = I  softmax( f M(Ffuse ; θM)) 
+
+| {z }
+
+> ˜PM
+
+> 0.5, (25) 
+
+ˆH = softplus  f B Ffuse ; θB . (26) Here, ˜PM denotes the predicted building footprint probability map and is used for footprint supervision. ˆM is the pre-dicted binary footprint mask, where ˆM[m, n ] = 0 indicates ground/background and ˆM[m, n ] = 1 indicates building at BEV cell (m, n ). ˆH is the height map that contains the non-negative physical height values of each cell (m, n ).
+
+E. Training Objective of VBHE 
+
+To train the proposed VBHE, we use the ground-truth building height and footprint mask as the labels. The loss function is defined as the weighted sum of mask segmentation loss Lm, height regression loss Lh:
+
+L θVBHE  = λmLm + λhLh, (27) where θVBHE ≜ {θB, θM, θG, θR, θup , θA,svi , θA,sat , θE,sat ,
+
+θE,svi }, and λm, λ h are the relative weights. The mask seg-mentation loss Lm supervises footprint prediction by combin-ing cross-entropy, Dice [36], and GIoU [37] losses between the predicted footprint probability map ˜PM and the ground-truth mask M. These complementary terms improve pixel-wise classification, foreground-background balance, and regional shape agreement. The height regression loss Lh focuses on precise height estimation, and is computed as the smooth-ℓ1
+
+loss [38] between the predicted ˆH and the ground-truth height map H.V. P ROPOSED MULTI -M ODAL MULTI -TASK 
+
+SPATIAL -T EMPORAL MODEL 
+
+The MMST model estimates the next-slot link state for each candidate BS by leveraging the geometry information from the VUE trajectory and the VBHE-reconstructed build-ing height map. At the t-th time slot, the input of MMST includes the predicted building height map ˆHt, VUE location 
+
+pUE = ( L/ 2, L/ 2) on the map, and the b-th BS location 
+
+pBS  
+
+> b,t
+
+= ( mBS  
+
+> b,t
+
+, n BS  
+
+> b,t
+
+); ∀b ∈ B on the map. The prediction of MMST includes the next-slot LoS indicator pLoS 
+
+> b,t +1
+
+, the predicted optimal data rate ˆR⋆b,t +1 , and the predicted beam rankings Rtx 
+
+> t+1
+
+, Rrx  
+
+> t+1
+
+of the b-th candidate BS, defined in Section III. As shown in Fig. 5, MMST consists of three blocks: (1) a spatial feature encoder, (2) a temporal feature encoder, and (3) a prediction block and training objective, which are elaborated as follows. 
+
+A. Spatial Encoder 
+
+The spatial encoder extracts two complementary types of features: (i) the height-map context feature that contains the surrounding building geometry information; (ii) the LoS fea-ture that characterizes the propagation condition along each UE–BS path. 
+
+1) Height-Map Context Feature Extraction: The predicted height map contains rich link-related environmental informa-tion, indicating building-induced blockage, LoS and NLoS propagation conditions, and surrounding structures that may support reflected paths. To extract these propagation-relevant 8
+
+features from ˆHt, we employ a lightweight convolutional encoder at time slot t
+
+ct = f CNN  ˆHt; θCNN 
+
+∈ Rdm , (28) where ct is the height-map context embedding with dimension 
+
+dm. The encoder f CNN comprises four cascaded convolutional blocks. Each block consists of a 3 × 3 convolutional layer, followed by batch normalization, a ReLU activation, and 2 ×2
+
+max pooling. Finally, a compact geometric feature is obtained by applying global average pooling and a linear projection. 
+
+2) LoS Feature Extraction: The LoS features capture the propagation condition along each VUE-BS path, which is a critical factor for LoS classification. As shown in Fig. 5, we sample Q points along the line segment between the VUE and the BS, where the q-th sampled point at t-th time slot is indexed by (mq,b,t , n q,b,t ) in height map ˆHt, with 
+
+mq,b,t , n q,b,t ∈ { 1, . . . , L }. The height of the q-th sampled point towards BS is 
+
+hq,b = hc + q − 1
+
+Q − 1
+
+ hBS  
+
+> b
+
+− hc
+
+ , q ∈ { 1, . . . , Q }. (29) At each sampled point (mq,b,t , n q,b,t ), we define a local square neighborhood centered at (mq,b,t , n q,b,t ) with side length R
+
+pixels as Tq,b,t ={(m, n ) | | m−mq,b,t | ≤ (R−1) /2, |n−nq,b,t | ≤ 
+
+(R−1) /2}.For each (m, n ) ∈ T q,b,t , the LoS height margin is defined as the height difference between the sampled point and the 
+
+(m, n )-th pixel in the height map, given by ∆hq,b,t (m, n ) ≜
+
+hq,b − ˆHt[m, n ]. After computing the height margins for all pixels, we have H ≜ {∆hq,b,t (m, n )}(m,n )∈T q,b,t .Then, the LoS feature vector for the q-th sampled point towards the b-th BS at time slot t is given by 
+
+eq,b,t ≜mean( H), min( H), 1{H <0} 0 /|H| , std( H)⊤,
+
+(30) which includes the average height margin, minimum height margin, blockage ratio, and height-margin variation, respec-tively. The LoS features eq,b,t are calculated for all Q sam-pled points and are concatenated to form the final LoS feature vector for the b-th BS at t-th time slot: eLoS  
+
+> b,t
+
+=[e⊤
+
+> 1,b,t
+
+, . . . , e⊤
+
+> Q,b,t
+
+, ]⊤ ∈ R4Q. Then eLoS  
+
+> b,t
+
+is transformed to 
+
+mb,t ∈ Rdh by an MLP encoder, with corresponding param-eters θsp , and is expressed as mb,t = f sp (eLoS  
+
+> b,t
+
+; θsp ).
+
+B. Temporal Encoder 
+
+The temporal encoder includes a relative-position feature extractor and a two-layer LSTM. The relative-position feature extractor first computes the relative 3D displacement of the VUE and the BS at each time slot. Since the candidate links evolve continuously with VUE mobility and exhibit strong temporal correlations, the LSTM layer captures the temporal evolution of the VUE-BS relative position from the historical sequence. At the t-th time slot, the relative-position feature ex-Decoder 
+
+> Decoder
+> Decoder
+> Decoder
+> LoS Classification
+> Tx Beam Index
+> Rx Beam Index
+> Data Rate
+
+… Temporal Encoder  
+
+> LSTM Cell LSTM Cell
+
+…LSTM Cell      
+
+> 𝐩𝐩 UE ,𝐩𝐩𝑏𝑏 ,𝑡𝑡−1
+> BS 𝐩𝐩 UE ,𝐩𝐩𝑏𝑏 ,𝑡𝑡
+> BS
+> BS Position, 𝐩𝐩 𝑏𝑏 ,𝑡𝑡
+> BS
+> Encoder
+> LoS Feature Extraction
+> Height-Map Context Encoder
+> 𝐞𝐞𝑏𝑏 ,𝑡𝑡 LoS
+> Height Map, �𝐇𝐇𝑡𝑡
+
+Spatial Encoder       
+
+> UE Position, 𝐩𝐩 UE
+> 𝐜𝐜𝑡𝑡
+> 𝐦𝐦𝑏𝑏 ,𝑡𝑡
+> 𝐠𝐠𝑏𝑏 ,𝑡𝑡
+> 𝐡𝐡𝑏𝑏 ,𝑡𝑡
+> Encoder Encoder Encoder
+> 𝐠𝐠𝑏𝑏 ,𝑡𝑡−1 𝐠𝐠𝑏𝑏 ,𝑡𝑡−𝑇𝑇+1
+> LSTM Cell LSTM Cell LSTM Cell
+
+…
+
+1
+
+𝑑𝑑𝑏𝑏 ,𝑡𝑡 
+
+𝐩𝐩𝑏𝑏 ,𝑡𝑡 BS 
+
+𝒯𝒯 1,𝑏𝑏 ,𝑡𝑡 
+
+𝒯𝒯 𝑞𝑞 ,𝑏𝑏 ,𝑡𝑡 
+
+𝒯𝒯 𝑄𝑄 ,𝑏𝑏 ,𝑡𝑡 
+
+𝑅𝑅 
+
+2
+
+𝑞𝑞 
+
+𝑄𝑄 
+
+𝒯𝒯 2,𝑏𝑏 ,𝑡𝑡 
+
+BEV 
+
+𝛥𝛥ℎ𝑞𝑞 ,𝑏𝑏 ,𝑡𝑡 𝑚𝑚 , 𝑛𝑛  ℎ𝑏𝑏 BS 
+
+ℎc
+
+(𝑚𝑚𝑞𝑞 ,𝑏𝑏 ,𝑡𝑡 , 𝑛𝑛𝑞𝑞 ,𝑏𝑏 ,𝑡𝑡 )
+
+𝐩𝐩 UE 
+
+LoS Feature Extraction  
+
+> 𝜸𝜸𝑏𝑏 ,𝑡𝑡 𝜸𝜸𝑏𝑏 ,𝑡𝑡−1 𝜸𝜸𝑏𝑏 ,𝑡𝑡−𝑇𝑇+1
+> 𝐩𝐩 UE ,𝐩𝐩𝑏𝑏 ,𝑡𝑡−𝑇𝑇+1
+> BS
+
+Fig. 5. Architecture of the proposed MMST model. 
+
+tractor outputs the relative position feature vector by distance, azimuth, and elevation: γb,t = [ rb,t , θ b,t , φ b,t ]⊤ ∈ R3, where 
+
+rb,t =
+
+q
+
+∆x2 
+
+> b,t
+
++ ∆ y2 
+
+> b,t
+
++ ∆ z2
+
+> b,t
+
+, (31) 
+
+θb,t = atan2  ∆yb,t , −∆xb,t 
+
+ ∈ (−π, π ], (32) 
+
+φb,t = arcsin 
+
+
+
+∆zb,t /r b,t 
+
+
+
+∈ [0 , π/ 2] . (33) The terms ∆xb,t = ( mBS  
+
+> b,t
+
+− L 
+
+> 2
+
+) DL , ∆yb,t = ( nBS  
+
+> b,t
+
+− L 
+
+> 2
+
+) DL , and 
+
+∆zb,t = hBS  
+
+> b
+
+− hc denote the relative displacements between the UE and b-th BS. The MLP encoder with parameters θgeo 
+
+maps this low-dimensional feature γb,t to a latent space as 
+
+gb,t ∈ Rdh , which is expressed as gb,t = f geo (γb,t ; θgeo ). For a historical window of length T , the geometry embeddings 
+
+Gb,t = [ gb,t −T +1 , . . . , gb,t ] ∈ RT ×dh serve as the input of the LSTM to capture the dynamic evolution of the relative position features. The output of the LSTM is its hidden state at the last time step, given by hb,t = f L Gb,t ; θL ∈ Rds ,with dimension of ds.
+
+C. Prediction Heads and Training Objective 
+
+The input to the prediction head is the concatenated repre-sentation of the temporal embedding, the LoS feature embed-ding, and the height-map context embedding, given by 
+
+zb,t = hb,t ; mb,t ; ct
+
+. (34) Next, four task-specific MLP heads produce the next-slot LoS 
+
+˜pLoS 
+
+> b,t +1
+
+, BS and VUE beam probability ˆπtx  
+
+> b,t +1
+
+and ˆπrx 
+
+> b,t +1
+
+, and the optimal-beam transmission rate ˆR⋆b,t +1 , respectively, with 9
+
+corresponding parameters θLoS , θtx , θrx , and θRate , which are given by 
+
+ˆpLoS  
+
+> b,t +1
+
+= I(sigmoid( f LoS (zb,t ; θLoS )) 
+
+| {z }
+
+> ˜pLoS
+> b,t +1
+
+> 0.5) ∈ { 0, 1}, (35) 
+
+ˆπκb,t +1 = softmax( f κ(zb,t ; θκ)) ∈ [0 , 1] Cκ , (36) 
+
+ˆR⋆b,t +1 = softplus  f R zb,t ; θRate  ∈ R+, (37) where κ ∈ { tx , rx } and ˜pLoS  
+
+> b,t +1
+
+is LoS probability. The BS and VUE beam rankings are obtained by sorting the beam probabilities in descending order and keeping the first Kbeam 
+
+indices: 
+
+ˆRκb,t +1 = argsort ↓
+
+  ˆπκb,t +1 
+
+ [1 : Kκ
+
+> beam
+
+], ∀κ ∈ { tx , rx }. (38) Given the ground-truth labels pLoS 
+
+> b,t +1
+
+, R⋆b,t +1 , πtx  
+
+> b,t +1
+
+and 
+
+πrx  
+
+> b,t +1
+
+at the b-th candidate BS at time slot t + 1 ,MMST is trained with a multi-task objective based on homoscedastic uncertainty weighting [39]. Let ℓLoS =BCE(˜ pLoS 
+
+> b,t +1
+
+, p LoS 
+
+> b,t +1
+
+), ℓR = Smooth ℓ1 ( ˆR⋆b,t +1 , R ⋆b,t +1 ), ℓκ =CE( ˆ πκb,t +1 , πκb,t +1 ), ∀κ ∈ { tx , rx }, denote the binary cross-entropy, smooth-ℓ1 [38], and cross-entropy loss. Then, the loss function for MMST is given by 
+
+L(θMMST ) = X
+
+> χ∈{ LoS ,tx ,rx ,R}
+
+ wχℓχ
+
+2λ2
+
+> χ
+
++ 12 log λ2
+
+> χ
+
+
+
+(39) where θMMST ≜ {θCNN , θsp , θgeo , θL, θLoS , θtx , θrx , θRate },
+
+wLoS = 1 , wtx = wrx = wR = pLoS 
+
+> b,t +1
+
+, and λχ is the learnable uncertainty parameter for the corresponding task. λχ is initialized to 1 and dynamically adjusted during training. The LoS label pLoS  
+
+> b,t +1
+
+gates the beam ranking and data rate because the optimal beam and transmission-rate labels are only meaningful for valid LoS links. VI. P ERFORMANCE EVALUATION 
+
+A. Dataset 
+
+The dataset has two parts: the visual dataset for training the VBHE, and the communication channel dataset for training the MMST. The visual data set has a total of 17K sam-ples in 18 different real-world regions of 4 cities covering around 88 .0 km 2 in New South Wales, Australia, named the Hills Shire, Blacktown, Parramatta, and Cumberland, consisting of street-view panoramic images, satellite images, and their building footprint and height maps. The street-view panoramic images and satellite images are collected from Google Maps [40]. These regions include the city center, the commercial region, the residential region, and the industrial region. The building footprint and height maps are obtained from OpenStreetMap [41]. The communication channel data set with 290K samples is generated by Sionna [42], which utilizes ray-tracing techniques to simulate the LoS indicators, optimal-beam data rates, and beam indices based on the pre-defined VUE trajectories and candidate-BS coordinates in the same wireless propagation environment in these 18 regions. Due to space limitations, more details of the data set generation process are available in our GitHub project repository.                                               
+
+> TABLE I SIMULATION PARAMETERS
+> Parameter Value
+> Number of BS antennas, N=NxNy12 ×8
+> Number of VUE antennas, M=MxMy4×4
+> Beam codebook sizes of BS/VUE, Ctx ;Crx 96 ;16
+> Beam-candidate size of BS/VUE, Ktx beam ;Krx beam 10 ;5
+> BS transmission power, Ptot 30 dBm Carrier frequency, fc28 GHz Subcarrier spacing 120 kHz Number of subcarriers, K1584 Bandwidth, 200 MHz Noise power density −174 dBm/Hz Slot duration, τs33 .33 ms Beam-sweep unit time τu0.03568 ms Handover interruption, τh20 ms BS density (100%) 0.0019 m −2
+> Maximum paths per receiver, Lp32 Velocity of VUE 43.2 km/h Average GPS error 0.4363 m
+
+B. Experiment Settings 
+
+The system parameters for the configuration of the BS and VUE, and the channel conditions are summarized in Table I. 
+
+1) Hyper-Parameters of VBHE: L = 256 , H = 416 , W =832 , C = 3 , D = 79 .36 , Dr = 16 , Db = 32 , hc = 1 .5 m, 
+
+H′ = 52 , and W ′ = 104 . For training, the weights of the mask and height losses are set to λm = 1 and λh = 3 .5. We use 
+
+Adam as the optimizer with an initial learning rate of 6×10 −5
+
+and a weight decay of 1 × 10 −2. A step learning-rate schedule is adopted, where the learning rate is decayed by a factor of 
+
+0.7 every 10 epochs. The model is trained for 50 epochs with a batch size of 16. 
+
+2) Hyper-Parameters of MMST: T = 5 , L = 256 , ds =256 , dh = 128 , dm = 128 , Q = 64 , and R = 3 . The model is trained for 80 epochs with a batch size of 512. During training, we use Adam as the optimizer with an initial learning rate of 
+
+5 × 10 −4.
+
+3) Performance Metrics: For VBHE, we use the mean intersection over union (mIoU) as the evaluation metric for building-mask segmentation performance [45]. For height-map estimation, we use mean absolute error (MAE) between the predicted and the ground-truth heights within the set of all building-cell indices in M. For MMST, we evaluate the performance of binary LoS prediction by using the accuracy, precision, recall, and F1 score [46]. For data-rate prediction, we use the MAE between the ˆR⋆b,t +1 and R⋆b,t +1 as the evaluation metric. For beam prediction, the model outputs a set of Kκ
+
+> beam
+
+, ∀κ ∈ { tx , rx } candidate beams for each sample. A prediction is considered correct if the ground-truth beam index is included in this candidate set and incorrect otherwise. The top-Kκ 
+
+> beam
+
+prediction accuracy is then defined as the proportion of correctly predicted samples among all evaluated samples. 
+
+C. Baselines 
+
+The proposed framework comprises two stages: VBHE and MMST, which are evaluated separately against different task-specific baselines. 10                                                                      
+
+> TABLE II COMPARISON OF VBHE WITH CROSS -VIEW TRANSFORMATION BASELINES UNDER DIFFERENT EVALUATION PROTOCOLS .
+> Method North-West Sydney (Hills Shire, Blacktown) Central-West Sydney (Parramatta, Cumberland) In-region Cross-region In-region Cross-region mIoU ↑MAE ↓mIoU ↑MAE ↓mIoU ↑MAE ↓mIoU ↑MAE ↓
+> GP [43] 77.18 1.53 54.68 5.57 79.22 2.17 67.62 2.23 ST [44] 82.88 1.74 72.93 2.43 81.78 1.84 65.72 2.19
+> VBHE 84.49 1.33 75.93 2.18 83.88 1.64 68.63 1.90
+> VBHE w/o DPT 82.89 1.44 73.62 2.31 79.76 2.70 63.32 2.98 VBHE w/o Roof Projection 80.85 1.53 74.86 2.41 80.41 2.04 67.14 2.16 VBHE w/o Ground Projection 81.24 1.52 74.53 2.23 77.50 2.93 66.80 3.09
+
+1) Baselines for VBHE: GP [43]: The geometry projection (GP) method uses deterministic camera geometry and ground-plane homography to project ground-view image features into an overhead-view representation. The projected features there-fore encode ground-plane visual cues in the BEV coordinate system, while scene structures above the ground plane are handled only through the geometric projection assumption. 
+
+ST [44]: The spherical transform (ST) method maps spher-ical coordinates in the ground-camera system to normalized equirectangular panoramic coordinates using inverse trigono-metric functions. 
+
+2) Baselines for MMST: GBPN [23]: In its design, a CNN module extracts spatial features from each encoding map, a GRU module captures temporal evolution across consecutive frames, and task-specific prediction heads estimate the beam-forming gain and the optimal beam. HMCN [47]: The method extracts dynamic features from semantic maps using 2D CNNs, extracts static environmental features from point-cloud-derived pseudo image sequences using 3D CNNs, and encodes user-location information through fully connected layers. The dynamic, static, and user-location features are then fused and fed into a temporal predictor to estimate future beam indices. 
+
+TORP [22]: The method uses the Transformer encoder by constructing a sequence of visual environmental and geometric tokens to infer the link data rate. The predicted results are then used for proactive BS selection. 5G NR Reactive Base-lines : We follow the NR Event A3 condition [48], where a neighboring BS becomes sufficiently better than the serving BS, triggering the handover decision. The beam-sweeping overhead is τm = ( Ctx + Crx ) τu. Reactive HBS: Reactive HBS has the same NR Event A3 condition handover strategy, while the exhaustive sweeping is replaced with hierarchical beam search [5] where the number of searched beams is set to 2 ⌈log 2 (Ctx Crx )⌉.
+
+D. Evaluation of VBHE 
+
+We first evaluate the building segmentation and height-prediction performance of the proposed VBHE module and compare it with the baselines across the 18 regions. We report results for two target areas: North-West Sydney, comprising Hills Shire and Blacktown, and Central-West Sydney, com-prising Parramatta and Cumberland. For each target area, we consider both in-region and cross-region evaluation. In the in-region setting, samples within the target area are randomly partitioned into training, validation, and test sets at a ratio of 0.8:0.1:0.1. In the cross-region setting, each model is tested in  
+
+> Fig. 6. Visualization of the height map of different methods.
+
+the opposite region. In other words, the test area is completely unseen by the model during training phases. This setting, therefore, measures the generalization of VBHE in the unseen regions. Fig. 6 illustrates the estimated height map of VBHE and the GP and ST baselines in urban and suburban areas. The results demonstrate that VBHE produces more accurate build-ing segmentation and height prediction than the baselines, which are crucial for accurate environmental reconstruction. In contrast, GP tends to produce distorted building shapes due to its reliance on ground projection, while ST tends to over-smooth building boundaries in this complex scene. Table II illustrates the mIoU and MAE results for the two target areas under both in-region and cross-region settings. The results show that VBHE consistently outperforms the cross-view transformation baselines, achieving higher mIoU and lower MAE in both in-region and cross-region evaluations. For the cross-region evaluation, although the performance of all methods decreases, VBHE still outperforms the baselines, demonstrating its ability to generalize to unseen areas. The re-sults highlight the effectiveness of the proposed VBHE module in capturing building segmentation and height prediction from street-view and satellite images, which is crucial for accurate environmental reconstruction and subsequent communication prediction tasks. Moreover, the ablation results show that removing the DPT, Ground Projection, or Rooftop Projection consistently reduces the mIoU and increases the height MAE, validating the effectiveness of each component of VBHE towards overall performance. We note that, to emulate a realistic deployment scenario, all subsequent evaluations are conducted under the cross-region setting, with North-West Sydney serving as a geographically unseen test region. 11                                                                                      
+
+> TABLE III MULTI -TASK PREDICTION PERFORMANCE ON THE COMMON EVALUATION SET .
+> Method LoS Classification ↑Rate ↓Top-1 Beam Prediction ↑
+> Acc. (%) Prec. (%) Rec. (%) F1 (%) MAE (bps/Hz) BS Acc.(%) VUE Acc.(%) Joint Acc.(%)
+> GTHM-MMST 98.0 98.0 99.2 98.6 0.589 98.4 99.6 98.4
+> VBHE-MMST 91.4 92.9 94.7 93.8 0.638 90.8 97.2 89.0
+> VBHE-GBPN [23] 81.8 87.0 86.5 86.7 0.786 89.2 96.2 88.2 VBHE-HMCN [47] 72.6 82.7 76.1 79.2 0.869 85.7 95.0 83.1 VBHE-TORP [22] 67.9 84.0 65.9 73.9 0.757 88.8 95.0 85.9 VBHE-MMST w/o Height-map Context Feature 80.2 84.9 86.5 85.7 0.745 89.3 95.8 86.6 VBHE-MMST w/o LoS Feature 66.6 73.8 79.8 76.7 1.049 74.6 86.6 68.1 VBHE-MMST w/o Relative-Position Feature 77.6 83.9 83.4 83.6 1.381 68.6 65.0 44.2 VBHE-MMST w/o Height Map 61.0 69.3 77.9 73.3 1.227 72.5 83.3 64.9
+
+0 20 40 60 80 100 
+
+BS density (%) 
+
+3456789 
+
+> Average data rate (bps/Hz)
+> Upper bound GTHM-MMST VBHE-MMST ST-MMST GP-MMST HBS Reactive 5G NR Reactive
+> Fig. 7. Comparison of VBHE with baselines under different BS densities.
+
+0 20 40 60 80 100 
+
+BS density (%) 
+
+123456789 
+
+> Average data rate (bps/Hz)
+> Upper bound VBHE-MMST VBHE-GBPN VBHE-HMCN VBHE-TORP HBS Reactive 5G NR Reactive
+> Fig. 8. Comparison of MMST with baselines under different BS densities.
+
+E. Evaluation of MMST 
+
+We further evaluate the performance of the proposed MMST model in three aspects: LoS classification, predicted data rate, and beam index selection of BS and VUE for the next time slot. Similar to the VBHE, the training, validation, and testing datasets are constructed from trajectories in geographically disjoint regions with partitioning of 0.8:0.1:0.1, ensuring that both VBHE and MMST are evaluated in the same geograph-ically unseen area. Table III reports the prediction performance of the pro-posed MMST model and the baselines. All methods are evaluated with the same VBHE-estimated height map as the environmental input. GTHM-MMST uses the ground-truth height map thus it provides an upper bound for assessing the impact of height-map estimation errors on MMST. VBHE-MMST achieves the best performance across all three pre-diction tasks. For LoS classification, VBHE-MMST achieves an accuracy of 91 .4% , whereas GBPN, HMCN, and TORP achieve 81 .8% , 72 .6% , and 67 .9% , respectively. For the MAE of the rate prediction, VBHE-MMST obtains the lowest MAE of 0.638 bps /Hz , compared with 0.786 bps /Hz for GBPN, 
+
+0.869 bps /Hz for HMCN, and 0.757 bps /Hz for TORP. VBHE-MMST also achieves the highest Top-1 ( Kκ 
+
+> beam
+
+= 1 )beam prediction accuracy compared with GBPN, HMCN, and TORP. For example, the MMST achieves 90 .8% BS beam prediction accuracy, while other baselines achieve 89 .2% ,
+
+85 .7% , and 88 .8% , respectively. These results demonstrate that the proposed MMST model effectively leverages the visual height-map representation to improve link-level prediction. The ablation results in Table III show that removing any MMST component degrades the overall performance, validat-ing the complementary contributions of the height-map context feature, LoS features, relative-position features, and height-map input to LoS, rate, and beam prediction. 
+
+F. Evaluation of the Entire Framework 1) Performance under Varying BS Densities: We evaluate the proposed framework under varying BS densities, ranging from sparse to dense deployments. Fig. 7 first evaluates the impact of the height-map estimation module by applying the same MMST predictor to the height maps produced by GTHM, VBHE, ST, and GP, respectively. We note that the upper bound is computed in Sionna using the ground-truth building environment with ground-truth link prediction and therefore serves as an ideal reference. Across the entire density range, VBHE-MMST achieves a throughput close to that of GTHM-MMST and consistently outperforms other methods. For example, at a BS density of 100%(0 .0019 m −2) and velocity of 32 .4 km /h, VBHE-MMST achieves an average data rate of around 8.2 bps /Hz , while ST-MMST and GP-MMST achieve 7.57 bps /Hz and 7.36 bps /Hz , respectively. These results demonstrate the effectiveness of VBHE in accurately estimating the building geometry and blockage information required for downstream communication decisions under varying BS densities. In contrast, reactive 5G NR 12 10.8 21.6 32.4 43.2 54 64.8 75.6 86.4 97.2 108        
+
+> Velocity (km/h)
+> 3456789
+> Average data rate (bps/Hz)
+> Upper bound GTHM-MMST VBHE-MMST ST-MMST VBHE-GBPN VBHE-HMCN GP-MMST VBHE-TORP HBS Reactive 5G NR Reactive
+> Fig. 9. Average data rate versus VUE velocity. 32 64 96 128 160 192
+
+Number of BS antennas  
+
+> 345678910
+> Average data rate (bps/Hz)
+> Upper bound (GT) GTHM-MMST VBHE-MMST GP-MMST HBS Reactive 5G NR Reactive
+> Fig. 10. Average data rate versus the BS antenna number.
+
+exhibits limited throughput improvement as the BS density increases. Fig. 8 compares different link-prediction models using the same VBHE-estimated environmental representation. Similarly, VBHE-MMST consistently achieves the highest throughput among all practical learning-based methods over the full range of BS densities, including VBHE-HMCN, VBHE-GBPN, and VBHE-TORP. 
+
+2) Performance under Different VUE Velocities: We eval-uate the proposed framework under different VUE velocities, ranging from 10 .8 to 108 km /h. The evaluation is conducted under the same BS density of 80% . As shown in Fig. 9, the average transmission data rate decreases as the VUE velocity increases. This degradation is mainly attributed to two factors. First, a higher velocity causes rapid channel changes, making the predicted link information more likely to become outdated and reducing the data rate in the same time slot. Second, a faster-moving VUE crosses BS coverage and blockage bound-aries more frequently, leading to more frequent BS association and handover. This overhead reduces the time available for data transmission. Despite these challenges, VBHE-MMST consistently achieves the highest data rate among all practical schemes across the evaluated velocity range, demonstrating its robustness to mobility-induced channel variation and link dynamics. 
+
+3) Performance under Different BS Antenna Numbers: We evaluate the proposed framework with different BS antenna array sizes, ranging from N = 32 to 192 antennas. Fig. 10 compares VBHE-MMST with the baselines and the upper bound. The results show that the average transmission data rate increases as the number of BS antennas increases. This is because a larger antenna array provides higher beamforming gains under the same transmission power, which improves the data rate during the data transmission period. Among all practical methods, VBHE-MMST consistently achieves the highest data rate across the evaluated antenna numbers. This demonstrates the scalability and effectiveness of the proposed framework in different BS antenna configurations. We note that the data rate of 5G NR decreases as the number of BS antennas increases. Although a larger antenna array provides a higher beamforming gain, it also enlarges the transmit beam codebook size Ctx . Consequently, the exhaustive beam-search procedure of 5G NR must evaluate more candidate beams, resulting in greater beam-training overhead and a shorter duration for data transmission. In this case, the increased search overhead outweighs the additional beamforming gain, leading to a reduction in the average data rate. 
+
+4) Computation Overhead: Online inference complexity of VBHE and MMST is measured by the number of on-device parameters and the floating-point operations (FLOPs) required to process one sample. VBHE requires 9.95 M trainable pa-rameters and 88.098 GFLOPs per sample, whereas MMST re-quires 5.94 M deployed model parameters and 0.152 GFLOPs per sample. We also evaluate the inference latency of each sample on a desktop with the NVIDIA GeForce RTX 4090 GPU. Specifically, the inference latency is averaged over 
+
+10 ,000 samples. The inference latency of VBHE and MMST is 9.10 ms and 0.71 ms, respectively, which is significantly lower than the duration of each time slot, demonstrating its suitability for V2I link prediction in practical deployment scenarios. VII. C ONCLUSION 
+
+This paper proposed an environmental-sensing-aided frame-work for proactive BS selection and beam prediction in mmWave V2I communication systems. Specifically, VBHE first estimates the building height map from onboard panoramic street-view images and the preloaded satellite map. Then, MMST combines the estimated environmental features with historical mobility information to predict next-slot link states, rates, and beam rankings. Extensive experiments in geographically unseen urban regions show that the proposed framework outperforms the evaluated deployable baselines, demonstrating that the height maps can provide useful geo-metric information for proactive V2I communications. REFERENCES [1] M. Noor-A-Rahim et al. , “6G for vehicle-to-everything (V2X) commu-nications: Enabling technologies, challenges, and opportunities,” Proc. IEEE , vol. 110, no. 6, pp. 712–734, 2022. [2] T. Bai and R. W. Heath, “Coverage and rate analysis for millimeter-wave cellular networks,” IEEE Trans. Wireless Commun. , vol. 14, no. 2, pp. 1100–1114, 2015. 13 
+
+[3] T. S. Rappaport, Y. Xing, G. R. MacCartney, A. F. Molisch, E. Mellios, and J. Zhang, “Overview of millimeter wave communications for fifth-generation (5G) wireless networks—with a focus on propagation models,” IEEE Trans. Antennas Propag. , vol. 65, no. 12, pp. 6213–6230, 2017. [4] M. Giordani, M. Polese, A. Roy, D. Castor, and M. Zorzi, “A tutorial on beam management for 3GPP NR at mmWave frequencies,” IEEE Commun. Surv. Tutorials , vol. 21, no. 1, pp. 173–196, 2019. [5] Z. Xiao, T. He, P. Xia, and X.-G. Xia, “Hierarchical codebook design for beamforming training in millimeter-wave communication,” IEEE Trans. Wireless Commun. , vol. 15, no. 5, pp. 3380–3392, 2016. [6] I. Aykin and M. Krunz, “Efficient beam sweeping algorithms and initial access protocols for millimeter-wave networks,” IEEE Trans. Wireless Commun. , vol. 19, no. 4, pp. 2504–2514, 2020. [7] V. Va, J. Choi, T. Shimizu, G. Bansal, and R. W. Heath, “Inverse multipath fingerprinting for millimeter wave V2I beam alignment,” IEEE Trans. Veh. Technol. , vol. 67, no. 5, pp. 4042–4058, 2018. [8] M. A. Islam, G. C. Alexandropoulos, and B. Smida, “Direction-assisted beam management in full duplex millimeter wave massive mimo sys-tems,” in Proc. 2021 IEEE Global Commun. Conf. (GLOBECOM) , 2021, pp. 1–6. [9] C. N. Barati et al. , “Initial access in millimeter wave cellular systems,” 
+
+IEEE Trans. Wireless Commun. , vol. 15, no. 12, pp. 7926–7940, 2016. [10] Y. Li, J. G. Andrews, F. Baccelli, T. D. Novlan, and J. C. Zhang, “Design and analysis of initial access in millimeter wave cellular networks,” IEEE Trans. Wireless Commun. , vol. 16, no. 10, pp. 6409–6425, 2017. [11] V. Va, J. Choi, and R. W. Heath, “The impact of beamwidth on temporal channel variation in vehicular channels and its implications,” IEEE Trans. Veh. Technol. , vol. 66, no. 6, pp. 5014–5029, 2017. [12] G. Charan, M. Alrabeiah, and A. Alkhateeb, “Vision-aided 6G wireless communications: Blockage prediction and proactive handoff,” IEEE Trans. Veh. Technol. , vol. 70, no. 10, pp. 10 193–10 208, 2021. [13] F. Liu et al. , “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [14] G. C. Alexandropoulos, “Position aided beam alignment for millimeter wave backhaul systems with large phased arrays,” in Proc. 2017 IEEE 7th Int. Workshop Comput. Adv. Multi-Sensor Adapt. Process. (CAM-SAP) , 2017, pp. 1–5. [15] H. Yu et al. , “Distributed split learning for map-based signal strength prediction empowered by deep vision transformer,” IEEE Trans. Veh. Technol. , vol. 73, no. 2, pp. 2358–2373, 2024. [16] H. Luo, U. Demirhan, and A. Alkhateeb, “Millimeter wave V2V beam tracking using radar: Algorithms and real-world demonstration,” in Proc. 31st Eur. Signal Process Conf. (EUSIPCO) , 2023, pp. 740–744. [17] S. Jiang, G. Charan, and A. Alkhateeb, “LiDAR aided future beam prediction in real-world millimeter wave V2I communications,” IEEE Wirel. Commun. Lett. , vol. 12, no. 2, pp. 212–216, 2023. [18] W. Xu, F. Gao, X. Tao, J. Zhang, and A. Alkhateeb, “Computer vision aided mmWave beam alignment in V2X communications,” IEEE Trans. Wireless Commun. , vol. 22, no. 4, pp. 2699–2714, 2023. [19] K. Zheng, H. Yang, Z. Ying, P. Wang, and L. Hanzo, “Vision-assisted millimeter-wave beam management for next-generation wireless sys-tems: Concepts, solutions, and open challenges,” IEEE Veh. Technol. Mag. , vol. 18, no. 3, pp. 58–68, 2023. [20] Y. Feng, F. Gao, X. Tao, S. Ma, and H. V. Poor, “Vision-aided ultra-reliable low-latency communications for smart factory,” IEEE Trans. Commun. , vol. 72, no. 6, pp. 3439–3453, 2024. [21] Y. Yang, F. Gao, X. Tao, G. Liu, and C. Pan, “Environment semantics aided wireless communications: A case study of mmWave beam pre-diction and blockage prediction,” IEEE J. Sel. Areas Commun. , vol. 41, no. 7, pp. 2025–2040, 2023. [22] Y. Ahn, J. Kim, S. Kim, B. Shim, and S. Kim, “Sensing and computer vision-aided mobility management for 6G millimeter and terahertz communication systems,” IEEE Trans. Commun. , vol. 72, no. 10, pp. 6044–6058, 2024. [23] K. Li, B. Zhou, J. Guo, F. Gao, G. Yang, and S. Ma, “Out-of-band modality synergy-based multi-user beam prediction and proactive BS selection with zero pilot overhead,” IEEE Trans. Commun. , vol. 74, pp. 3858–3874, 2026. [24] T. Osman, G. Charan, and A. Alkhateeb, “Vehicle cameras guide mm wave beams: Approach and real-world V2V demonstration,” in Proc. 57th Asilomar Conf. Signals, Syst., Comput. , 2023, pp. 225–232. [25] M. Fabiani, D. Silva, A. Abdallah, A. Celik, and A. M. Eltawil, “Multi-modal sensing and communication for V2V beam tracking via camera and GPS fusion,” in Proc. 58th Asilomar Conf. Signals, Syst., Comput. ,2024, pp. 1–6. [26] V. Begishev, D. Moltchanov, A. Gaidamaka, and K. Samouylov, “Closed-form UAV LoS blockage probability in mixed ground- and rooftop-mounted urban mmWave NR deployments,” Sensors , vol. 22, no. 3, p. 977, 2022. [27] Y. Wang, K. Venugopal, A. F. Molisch, and R. W. Heath, “MmWave vehicle-to-infrastructure communication: Analysis of urban microcellu-lar networks,” IEEE Trans. Veh. Technol. , vol. 67, no. 8, pp. 7086–7100, 2018. [28] R. Levie, C. Yapar, G. Kutyniok, and G. Caire, “RadioUNet: Fast radio map estimation with convolutional neural networks,” IEEE Trans. Wireless Commun. , vol. 20, no. 6, pp. 4001–4015, 2021. [29] J. Tan et al. , “Beam alignment in mmWave V2X communications: A survey,” IEEE Commun. Surv. Tutorials , vol. 26, no. 3, pp. 1676–1709, 2024. [30] S. Madhekwana, M. A. Usman, A. Ayyub, and C. Politis, “Beam alignment for mmWave and THz: Systematic review,” Telecommun. Syst. , vol. 88, no. 3, Art. no. 87, 2025. [31] 3GPP, “Study on new radio access technology: Physical layer aspects,” 3rd Generation Partnership Project, Technical Report TR 38.802, 2017, release 14. [32] R. Ranftl, A. Bochkovskiy, and V. Koltun, “Vision transformers for dense prediction,” in Proc. IEEE/CVF Int. Conf. Comput. Vision (ICCV) , 2021, pp. 12 159–12 168. [33] J. Ye et al. , “SG-BEV: Satellite-guided BEV fusion for cross-view semantic segmentation,” in Proc. IEEE/CVF Conf. Comput. Vision Pattern Recognit. (CVPR) , 2024, pp. 27 748–27 757. [34] M.-H. Guo, C.-Z. Lu, Q. Hou, Z. Liu, M.-M. Cheng, and S.-M. Hu, “SegNeXt: Rethinking convolutional attention design for semantic seg-mentation,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 35, 2022, pp. 1140–1156. [35] B. Coors, A. P. Condurache, and A. Geiger, “SphereNet: Learning Spher-ical Representations for Detection and Classification in Omnidirectional Images,” in Proc. Eur. Conf. Comput. Vision (ECCV) , vol. 11213, 2018, pp. 525–541. [36] F. Milletari, N. Navab, and S.-A. Ahmadi, “V-Net: Fully convolutional neural networks for volumetric medical image segmentation,” in Proc. 4th Int. Conf. 3D Vision (3DV) , 2016, pp. 565–571. [37] H. Rezatofighi, N. Tsoi, J. Gwak, A. Sadeghian, I. Reid, and S. Savarese, “Generalized intersection over union: A metric and a loss for bounding box regression,” in Proc. IEEE/CVF Conf. Comput. Vision Pattern Recognit. (CVPR) , 2019, pp. 658–666. [38] R. Girshick, “Fast R-CNN,” in Proc. IEEE Int. Conf. Comput. Vision (ICCV) , 2015, pp. 1440–1448. [39] A. Kendall, Y. Gal, and R. Cipolla, “Multi-task learning using uncer-tainty to weigh losses for scene geometry and semantics,” in Proc. IEEE/CVF Conf. Comput. Vision Pattern Recognit. (CVPR) , 2018, pp. 7482–7491. [40] Google Maps Platform. (2024) Street View Static API Documentation. Accessed: Mar. 19, 2026. [Online]. Available: https://developers.google. com/maps/documentation/streetview [41] OpenStreetMap contributors. (2026) OpenStreetMap. OpenStreetMap Foundation. Accessed: Jun. 15, 2026. [Online]. Available: https: //www.openstreetmap.org [42] J. Hoydis, F. A¨ ıt Aoudia, S. Cammerer, M. Nimier-David, N. Binder, G. Marcus, and A. Keller, “Sionna RT: Differentiable ray tracing for radio propagation modeling,” in Proc. IEEE Global Commun. Conf. Workshop , 2023, pp. 317–321. [43] Y. Shi, F. Wu, A. Perincherry, A. Vora, and H. Li, “Boosting 3-DoF ground-to-satellite camera localization accuracy via geometry-guided cross-view transformer,” in Proc. IEEE/CVF Int. Conf. Comput. Vision (ICCV) , 2023, pp. 21 459–21 469. [44] X. Wang, R. Xu, Z. Cui, Z. Wan, and Y. Zhang, “Fine-grained cross-view geo-localization using a correlation-aware homography estimator,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , vol. 36, 2023, pp. 5301–5319. [45] M. Everingham, S. M. A. Eslami, L. Van Gool, C. K. I. Williams, J. Winn, and A. Zisserman, “The pascal visual object classes challenge: A retrospective,” Int. J. Comput. Vision , vol. 111, no. 1, pp. 98–136, 2015. [46] D. M. W. Powers, “Evaluation: From precision, recall and F-Measure to ROC, informedness, markedness and correlation,” J. Mach. Learn. Technol. , vol. 2, no. 1, pp. 37–63, 2011. [47] Y. Feng, C. Zhao, F. Gao, Y. Zhang, and S. Ma, “Environment sensing-aided beam prediction with transfer learning for smart factory,” IEEE Trans. Wireless Commun. , vol. 24, no. 1, pp. 676–690, 2025. [48] 3GPP, “NR; Radio Resource Control (RRC); Protocol specification,” 3GPP, TS 38.331, 2025.

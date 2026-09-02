@@ -1,0 +1,506 @@
+Title: OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling
+
+URL Source: https://arxiv.org/pdf/2609.01074v1
+
+Published Time: Wed, 02 Sep 2026 01:11:33 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling 
+
+Louis Anseaume, Benedikt B¨ ock, Franz Weißer, Wolfgang Utschick 
+
+TUM School of Computation, Information and Technology, Technical University of Munich, Germany 
+
+{louis.anseaume,benedikt.boeck,franz.weisser,utschick }@tum.de 
+
+Abstract —One of the key challenges of future wireless com-munication systems is ensuring reliability in high-speed mobile scenarios, where accurate recovery of channel state informa-tion (CSI) is essential. Many recent studies have concluded that orthogonal time-frequency space (OTFS) modulation is a promising technology for addressing this challenge. Additionally, machine learning (ML)-based methods have the potential to improve channel estimation performance by leveraging ambient information more effectively than classical estimation techniques. This paper particularly addresses channel estimation for OTFS by employing a compressive sensing (CS)-based sparse Bayesian generative model (SBGM), namely the recently introduced com-pressive sensing Gaussian mixture model (CSGMM). We show that our proposed approach yields significant improvement in normalized mean squared error (NMSE) over the next-best-performing baseline. We additionally provide insights into the theoretical potential of the model to optimally approximate complex channel distributions with arbitrary precision within the Doppler-delay (DD) domain. To summarize, this work establishes the OTFS-CSGMM framework as a promising solution for high-mobility wireless channel estimation. 
+
+Index Terms —OTFS, Doppler-delay domain, compressive sens-ing, sparse Bayesian generative modelling, channel estimation 
+
+I. I NTRODUCTION 
+
+Current state-of-the-art wireless communication systems, such as fifth generation (5G) systems, are based on or-thogonal frequency-division multiplexing (OFDM) due to its high spectral efficiency, low computational complexity, and robustness to frequency-selective fading [1]. However, next-generation systems, such as sixth generation (6G) systems, aim to expand the network to support high-mobility scenarios, such as vehicle-to-vehicle or high-speed train communication, with speeds reaching between 300 and 500 km/h in typical applica-tions [2]. In these contexts, research has shown that OFDM no longer remains a reliable technology due to high inter-carrier interference (ICI), leading to poor signal reconstruction [3]. Many recent works have thus declared that orthogonal time-frequency space (OTFS) is a promising candidate technology for these scenarios involving large Doppler effects [4]. It op-erates in the Doppler-delay (DD) domain, a two-dimensional (2D) space spanning Doppler shifts and delays, instead of passing the information symbols over the usual time-frequency (TF) domain as in OFDM. Accurate channel state information (CSI) is crucial for OTFS to achieve correct, reliable, and fast 
+
+This work is funded by the Bavarian Ministry of Economic Affairs, Regional Development, and Energy within the project 6G Future Lab Bavaria. 
+
+communication, and therefore requires highly accurate channel estimation methods. One important aspect that can be utilized to obtain CSI in OTFS modulation is the channel’s inherent sparsity in typical outdoor high-mobility scenarios, due to the presence of a small number of reflectors [5]. However, classical estimation methods for sparse channel representations may reach their limits in these complex environments. Therefore, machine learning (ML)-based methods are promising candidates for improving channel estimation in these scenarios, as they can better leverage contextual information inherent to the wire-less communication system. In particular, [6] introduces the compressive sensing (CS)-based sparse Bayesian generative model (SBGM), which can be used to learn the channel distribution within a base station cell in typical high-speed mobile communication setups. The goal of this work is to address the problem of OTFS channel estimation by leveraging the sparsity of typical out-doors wireless communication environments, as well as the inherent adaptability of ML techniques to capture the complex-ity of these scenarios. To this end, we reformulate the results from [7] in order to match the description of CS. Afterwards, we utilize the compressive sensing Gaussian mixture model (CSGMM) from [6], a representative of SBGMs, and apply the adapted algorithm to the problem of OTFS channel estimation. Through simulations, we show that our proposed approach outperforms state-of-the-art baseline methods. We additionally provide a theoretical study of the functionalities of SBGMs, showing that, under certain assumptions on the channels, the studied models can optimally learn the characteristics of the underlying channel distributions, or arbitrarily fine approxima-tions thereof. This will allow the estimation methods to yield optimal channel reconstructions. II. OTFS S YSTEM MODEL 
+
+We consider time-frequency-dependent wireless channels, consisting of P multipath components. The channel impulse response, within the TF domain, is then expressed as 
+
+H(t, f ) =  
+
+> P−1
+
+X
+
+> p=0
+
+hpej2πν pte−j2πτ pf , (1) where {hp}P −1 
+
+> p=0
+
+are the channel gains, {νp}P −1 
+
+> p=0
+
+the Doppler shifts and {τp}P −1 
+
+> p=0
+
+the delays of the paths. Furthermore, we denote with T the symbol duration within the TF domain 
+
+> © 20XX IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. arXiv:2609.01074v1 [eess.SP] 1 Sep 2026
+
+and ∆f the subcarrier frequency spacing. We assume that the channel parameters follow [7] 
+
+τmax < T, νmax < ∆f, T = 1 /∆f, (2) where τmax and νmax represent the (absolute) maximal values that the parameters τp and νp can take for p ∈ { 0, ..., P − 1},respectively. A set of complex data symbols {xk′,l ′ } for k′ ∈{0, ..., N − 1} and l′ ∈ { 0, ..., M − 1}, with N, M ∈ N, is placed in a 2D DD grid 
+
+Gdata =
+
+ k′
+
+N T , l′
+
+M ∆f
+
+ N −1,M −1
+
+> k′,l ′=0
+
+, (3) which we call the modulation grid. The relation between the DD domain and the TF domain is then given by the inverse symplectic finite Fourier transform (ISFFT), which applied to 
+
+{xk′,l ′ } yields a block of data symbols {X[n′, m ′]} in the TF domain. By applying a discrete Heisenberg transform on the TF symbols, we obtain a transmission signal in the time domain, which is transmitted over the time-frequency-selective channel defined in (1). At the receiver, we apply a Wigner transform on the received signal to obtain the output signal 
+
+y(t, f ) in the TF domain. After sampling the output signal to obtain a block of symbols {Y [n, m ]} in the TF domain, we apply the symplectic finite Fourier transform (SFFT), yielding output symbols {yk,l } in the DD domain. Following the described modulation scheme, the vectorized input-output relationship for OTFS is then [7] 
+
+y = 
+
+> P−1
+
+X
+
+> p=0
+
+hpΨp
+
+!
+
+x + n = Hx + n, (4) where H is the channel matrix, the entries of Ψp are the inter-symbol interference (ISI) coefficients Ψpk,k ′ [l, l ′] of the p-th path, and n ∼ NC(0, σ 2IM N ) is additive white Gaussian noise (AWGN). By considering rectangular shaping pulses for both transmission and reception, for any path 
+
+p ∈ { 0, ..., P − 1}, a simplified expression of Ψpk,k ′ [l, l ′] is given by (5), shown at the bottom of this page. The details of the derivation can be found in [8]. The channel has a block-wise effect on the OTFS modula-tion scheme instead of inducing symbol-per-symbol transfor-mations [7]. The transmitted symbols experience a shift in the DD grid, corresponding to the channel parameters, with some additional energy spread induced by their fractional parts. This leads us to consider the pilot scheme from [7], which we summarize in the following. Here, a block of N × M symbols contains a central, high-energy pilot symbol, called a peak pilot symbol, surrounded by a zero-energy guard interval of pilot symbols. The remaining space in the block can be reserved for low-energy data symbols. This ensures that the peak pilot symbol is isolated from the data symbols, both spatially within the DD domain and in power. Therefore, it can serve as an indicator of shifts in the DD grid as interference with other symbols is negligible. As such, we can set the input vector of such a pilot scheme as 
+
+xpl ,OTFS = [0 , ..., 0, x pilot , 0, ..., 0] T ∈ CN M (6) since data symbols have negligible power levels. III. OTFS C HANNEL ESTIMATION 
+
+We consider a class of models that incorporates both the sparsity-inducing property of the sparse Bayesian learning (SBL) framework [9] as well as the exploitation of a latent space through a trainable generative model (GM). In this work, we consider a specific class of GMs called conditional Gaussian latent models (CGLM), where the distributions con-ditioned on the latent variable are Gaussians. In that case, the combined models are called SBGMs [6]. In particular, this paper focuses on the application of the Gaussian mixture model (GMM), which approximates an arbitrary probability density function (PDF) p(x) by 
+
+p(GMM) (x) = 
+
+> K
+
+X
+
+> k=1
+
+p(k)p(x | k) = 
+
+> K
+
+X
+
+> k=1
+
+ρkN (x; μk, Ck) (7) with p(k) = ρk ≥ 0 for all k ∈ { 1, ..., K } and PKk=1 ρk = 1 .GMMs are typically thought to be good approximations of complex probabilistic distributions and can be employed for a variety of wireless communication tasks [10]. Incorporating them into the SBGM framework yields the CSGMM [6]. To estimate the channel parameters ξ = {hp, ν p, τ p}P −1
+
+> p=0
+
+utilizing the framework of the CSGMM, we reformulate the OTFS input-output relationship. To this end, we introduce the vectors ϕp as 
+
+ϕp = Ψpx. (8) With the matrix Φ = [ ϕ0, ..., ϕP −1] ∈ CM N ×P and the vector 
+
+h = [ h0, ..., h P −1]T ∈ CP , the input-output relationship in (4) becomes 
+
+y = Φh + n. (9) Let us further define a DD grid of cardinality G ≥ M N ,which we call the sparse grid, as 
+
+G = {(˜ νi, ˜τi)}Gi=1 . (10) 
+
+Ψpk,k ′ [l, l ′] ≈ ej2πν pτp
+
+N M 
+
+1 − ej2π(k′−k+νpN T )
+
+1 − ej2π (k′−k+νpN T )
+
+> N
+
+1 − ej2π(l′−l+τpM ∆f )
+
+1 − ej2π (l′−l+τpM ∆f )
+
+> M
+
+e−j2πν p l′ 
+
+> M∆f
+
+×
+
+
+
+1 if l′ ∈
+
+n
+
+0, ..., M − 1 −
+
+l M τ p
+
+> T
+
+mo 
+
+e−j2π  
+
+> k′
+> N+νpT
+> 
+
+if l′ ∈
+
+n
+
+M −
+
+l M τ p
+
+> T
+
+m
+
+, ..., M − 1
+
+o
+
+.
+
+(5) Under the assumption that the channel coefficients lie on the sparse grid, the input-output relationship in (9) can be reformulated as 
+
+y = Φdict hsp + n, (11) with the sparse vector hsp ∈ CG, which has only P non-zero entries, and the sparse dictionary Φdict , which is given as 
+
+Φdict =
+
+h ˜ϕ0, ..., ˜ϕG−1
+
+i
+
+∈ CM N ×G, (12) with its columns as ˜ϕi = Ψ (˜ νi, ˜τi) x, cf. (8). In the general case, we still use (11) under the assumption that for any param-eters ξ = {hp, ν p, τ p}P −1 
+
+> p=0
+
+the approximation Φh ≈ Φdict hsp 
+
+holds. Equation (11) now resembles the typical formulation of a CS ill-posed linear inverse problem [6]. This allows us to express the OTFS-CSGMM as follows, 
+
+
+
+y | hsp ∼ p(y | hsp ) = N (y; Φdict hsp , σ 2I)
+
+hsp | k ∼ p(hsp | k) = N (hsp ; 0, diag (γk)) 
+
+∀k ∈ { 1, ..., K } , p δ (k) = ρk ≥ 0.
+
+(13) We use an expectation-maximization (EM) algorithm to train the OTFS-CSGMM. In the so-called E-step, we estimate the statistical characteristics of the posteriors of the sparse and latent variables {hsp | (y, k ); k | y}, which allows the closed-form computation of p(t)(hsp , k | y) at the t-th iteration. In the so-called M-step, we update the parameters of the CSGMM 
+
+{ρk, (t+1) , γk, (t+1) }Kk=1 by maximizing the evidence lower bound (ELBO) with respect to these parameters. After the training of the model, we estimate the sparse channel representations hsp from observed noisy samples 
+
+y. The mean squared error (MSE)-optimal conditional mean estimator (CME) can be decomposed as 
+
+hsp ,CME = E [hsp | y] = E [E [hsp | y, k ] | y]
+
+≈
+
+> K
+
+X
+
+> k=1
+
+ˆp(k | y) ˆ μhsp | y,k (14) where ˆp(k | y) and ˆμhsp | y,k are the estimates of the respective quantities. This sparse estimate is then cast into its matrix representation 
+
+ˆH =
+
+> G
+
+X
+
+> i=1
+
+hi, sp Ψ (˜ νi, ˜τi) (15) where hi, sp are the entries of hsp ,CME .IV. T HEORETICAL ANALYSIS 
+
+Under the assumption of a zero mean and wide-sense-stationary-uncorrelated-scattering (WSSUS) channel model, the statistical characteristics are preserved under conditioning on side information [11]. However, for OTFS, the Toeplitz structure constraint arising from the WSSUS assumption no longer holds. Nevertheless, we show that it is possible to design a procedure in which, under suitable conditions, the CSGMM can optimally learn arbitrarily fine approximations of the channel distribution, which allows accurate recovery of the distribution of random OTFS channels. Let us consider the decomposition of the channel path coefficients as hp = √ape−jβ p for p ∈ { 0, ..., P − 1}, as well as the resulting channel model 
+
+r = Φh = 
+
+> P−1
+
+X
+
+> p=0
+
+√ape−jβ p ϕp. (16) 
+
+A. Discrete Model Distribution 
+
+If the channel parameters lie on the sparse grid G, the following theorem shows that the statistical characterization of the OTFS model is preserved under conditioning on side information. 
+
+Theorem 1. Let G be a DD grid such that for all p ∈{0, ..., P − 1}, we have (νp, τ p) ∈ G , and let Φdict be the associated sparse dictionary (cf. (12) ). Let z be any side information about r. Assume that  
+
+> •
+
+∀p̸ = p′, β p ⊥ βp′ 
+
+> •
+
+∀p, β p ⊥ ap, ν p, τ p 
+
+> •
+
+∀p, β p ∼ U ([ −π, π ])  
+
+> •
+
+∀p, β p ⊥ z
+
+Then r has the following moments, 
+
+E [r] = 0 (17) 
+
+E rr H = Φdict ∆Φ Hdict (18) 
+
+E [r | z] = 0 (19) 
+
+E rr H | z = Φdict ∆z ΦHdict (20) 
+
+where ∆ and ∆z are diagonal matrices. Proof. See Appendix. According to Theorem 1, if certain assumptions on the side information z and the path phases β = {βp}P −1
+
+> p=0
+
+hold, the zero-mean property and dictionary-based structure of the model are preserved. Thus, the model can, in principle, optimally learn this distribution since the ground truth model distribution lies within the search space of the CSGMM [11]. 
+
+B. Continuous Model Distribution 
+
+In general, the parameters of ground truth channels are continuously distributed over a bounded range of possible values. By constructing a sequence of discrete models, the following theorem establishes convergence to the continuous ground truth model. 
+
+Theorem 2. Let  r(n)
+
+ 
+
+> n∈N
+
+be a sequence of discrete models defined on a sequence of increasingly dense, evenly spaced DD grids G(n). We write Φdict ,(n) as the sparse dictionary associated to DD grid G(n). Assume boundedness of the DD parameters. Let z be some side information on r. Further-more, assume  
+
+> •
+
+∀p̸ = p′, β p ⊥ βp′ 
+
+> •
+
+∀p, β p ⊥ ap, ν p, τ p 
+
+> •
+
+∀p, β p ∼ U ([ −π, π ])  
+
+> •
+
+∀p, β p ⊥ z
+
+Then 
+
+∀n ∈ N, E r(n)
+
+ = E r(n) | z = 0 (21) 
+
+E [r] = E [r | z] = 0 (22) 
+
+Φdict ,(n)∆(n)ΦHdict ,(n) = E
+
+h
+
+r(n)rH(n)
+
+i
+
+−−−→ 
+
+> n→+∞
+
+E rr H (23) 0 5 10 15 20 25 10 −2
+
+10 −1
+
+10 0
+
+SNR [ dB ]NMSE OMP ( α=0.1) OMP ( α=1.0) OMP ( α=10.0) SBL M-SBL CSGMM CSGMM (20 dB training SNR) Fig. 1: NMSE performance of CSGMM, OMP, SBL, and M-SBL applied to OTFS channel estimation for different SNR values. For trained methods, at each tested SNR level, we separately train a new model at that SNR. 
+
+Φdict ,(n)∆(n),z ΦHdict ,(n) = E
+
+h
+
+r(n)rH(n) | z
+
+i
+
+−−−→ 
+
+> n→+∞
+
+E rr H | z
+
+(24) 
+
+where ∆(n) is a diagonal matrix dependent on the DD grid G(n), and ∆(n),z is a diagonal matrix that additionally depends on the side information z.Proof. (21) and (22) stem from similar computations to the results in (17) and (19). (23) and (24) are the result of the dominated convergence theorem. Theorem 2 shows that the statistical characteristics of dis-cretely parameterized models converge to those of the ground truth continuous channel. Since such discrete models lie within the learnable space of the CSGMM, this result demonstrates that the CSGMM can, in principle, capture arbitrarily accu-rate representations of realistic OTFS channels. Therefore, it provides theoretical motivation for implementing the CSGMM with high-resolution DD grids, ensuring that the moments of the learned approximations approach those of the ground truth, continuously parameterized OTFS models. V. N UMERICAL RESULTS 
+
+To evaluate our proposed channel estimation framework, we consider the “Dynamic Doppler (DD1)” scenario from DeepMIMOv3 [12] with the base station (BS) labeled “BS1”. Furthermore, we use single-element antennas and generate the P = 10 most significant paths for BS-to-user downlink channels across the 2000 available scenes. We randomly shuffle and partition the dataset into a training and a testing set with sizes Ntrain = 12805 and Ntest = 3202 , respectively. The implementation of the OTFS modulation scheme is done at a subcarrier frequency spacing of ∆f = 30 kHz and a symbol duration T = 1∆f = 33 .3 μs. For the CSGMM, we consider K = 10 components. The OTFS modulation DD grid 
+
+Gdata is set to be an 8×8 grid, while the OTFS sparse DD grid 
+
+G spans 32 ×32 elements, unless specified otherwise, such that we have |G data | = 64 and |G| = 1024 . Except where otherwise provided, we set the signal-to-noise ratio (SNR) at 20 dB .64 256 1024 4096 
+
+10 −2
+
+10 −1
+
+|G|  
+
+> NMSE OMP ( α=0.1) OMP ( α=1.0) OMP ( α=10.0) SBL M-SBL CSGMM
+> Fig. 2: NMSE performance of CSGMM, OMP, SBL, and M-SBL applied to OTFS channel estimation for different sparse grid sizes |G| .
+
+The normalized mean squared error (NMSE) as our distor-tion metric is given in its empirical form by 
+
+NMSE = 1
+
+Ntest 
+
+> Ntest
+
+X
+
+> n=1
+
+ˆH − H 2F
+
+∥H∥2F
+
+. (25) For comparative baselines, we consider orthogonal matching pursuit (OMP) [13], SBL [9] and its variant multiple sparse Bayesian learning (M-SBL) [14]. In our implementation of OMP, the tolerance level of the residue norm is defined as 
+
+ϵOMP = α|G| , where α denotes a scaling factor and |G| the grid size. From [14], we see that we can equate M-SBL to a single-component CSGMM model, cf. (13). In the first experiment, we train and test models separately for each SNR value in a specified range, retraining each learning-based model independently at every assessed SNR level. We additionally evaluate the generalization capability of our approach by testing a CSGMM trained at a single, fixed SNR. The corresponding performance results are presented in Fig. 1. The CSGMM consistently outperforms all baseline models across the entire SNR range, showing a significant improvement over the next-best-performing method, namely M-SBL. At high SNR levels, all implemented methods ex-hibit a flattening in performance, suggesting saturation. These observations indicate that the proposed CSGMM more ac-curately captures the probabilistic structure of OTFS chan-nels compared to existing dictionary-based approaches. The reduced improvement in distortion at high SNR values further highlights the limitations introduced by fractional Doppler effects when using discretized DD grid approximations. While its accuracy remains ultimately constrained by the resolution of the discrete grid representation of the channel distribution in the DD domain, leading to a residual generalization bias, the CSGMM demonstrates strong generalization performance, making it a promising candidate for OTFS channel estimation. To elaborate more on the impact of the discretized grid, in the second experiment, the SNR is fixed and the performance of the considered methods is evaluated as a function of the sparse grid cardinality, |G| . The corresponding results are shown in Fig. 2. For large grids, the CSGMM consistently outperforms all baselines, achieving significant improvement for a 64 × 64 grid relative to the best competing method, SBL. The direct estimation baselines also show improved performance as the grid size increases, but keep their relatively inferior performance. Furthermore, while the CSGMM bene-fits monotonically from larger |G| , the M-SBL model attains its peak performance at |G| = 1024 and degrades thereafter, suggesting over-regularization. By comparison, the CSGMM possesses sufficient model complexity to effectively exploit increased sparse grid dimensionality, thereby consistently ben-efiting from larger grids. Overall, the results highlight the CSGMM’s superior ability to capture realistic OTFS channel distributions over sparse DD grids. VI. C ONCLUSION 
+
+This paper proposes a novel way to address the problem of OTFS channel estimation through a statistically expressive ML-based SBGM. The used CSGMM accurately captures the complexities of channel distributions in high-mobility wireless communication scenarios. We have demonstrated significant performance improvements over state-of-the-art baseline meth-ods in terms of estimation accuracy. Additionally, we have provided theoretical insights into the potential of our approach to learn arbitrarily accurate approximations of OTFS channel distributions. The application of the CSGMM, as well as the related model, the compressive sensing variational auto-encoder (CSVAE), to the problem of OTFS channel estimation offers an exciting opportunity for future research. VII. A PPENDIX 
+
+Proof of Theorem 1. Let r be a random vector defined ac-cording to (16), where its parameters follow all assumptions. Let G = |G| be the cardinality of G. Since the parameters lie in G, we can write r = Ψdict hsp , where we can decompose the entries of hsp as hsp ,i = √ηie−j ˜βi for i ∈ { 1, ..., G }.Without loss of generalization, we can assume that all el-ements of ˜β =
+
+n ˜βi
+
+oGi=1 
+
+have the same properties as the elements from β = {βp}P −1 
+
+> p=0
+
+. It is then easily shown that 
+
+∀i ∈ { 1, ..., G } , ˜βi ⊥ ηi. As such, we can perform a change of variables on the moments of r applied in (26) and (27), shown at the bottom of this page, which yields (17) and (18) respectively. By additionally assuming ∀p, β p ⊥ z, without loss of generalization, we can assume that ∀i, ˜βi ⊥ z, and through a similar reasoning, we obtain (19) and (20). REFERENCES [1] G. Stuber, J. Barry, S. McLaughlin, Y. Li, M. Ingram, and T. Pratt, “Broadband MIMO-OFDM wireless communications,” Proceedings of the IEEE , vol. 92, no. 2, pp. 271–294, 2004. [2] W. Yuan, S. Li, Z. Wei, Y. Cui, J. Jiang, H. Zhang, and P. Fan, “New delay Doppler communication paradigm in 6G era: A survey of orthogonal time frequency space (OTFS),” China Communications ,vol. 20, no. 6, pp. 1–25, 2023. [3] T. Wang, J. Proakis, E. Masry, and J. Zeidler, “Performance degradation of OFDM systems due to Doppler spreading,” IEEE Transactions on Wireless Communications , vol. 5, no. 6, pp. 1422–1432, 2006. [4] R. Hadani, S. Rakib, M. Tsatsanis, A. Monk, A. J. Goldsmith, A. F. Molisch, and R. Calderbank, “Orthogonal time frequency space modu-lation,” in 2017 IEEE Wireless Communications and Networking Con-ference (WCNC) , 2017, pp. 1–6. [5] C.-X. Wang, A. Ghazal, B. Ai, Y. Liu, and P. Fan, “Channel mea-surements and models for high-speed train communication systems: A survey,” IEEE Communications Surveys & Tutorials , vol. 18, no. 2, pp. 974–987, 2016. [6] B. B¨ ock, S. Syed, and W. Utschick, “Sparse Bayesian generative modeling for compressive sensing,” in Advances in Neural Information Processing Systems , A. Globerson, L. Mackey, D. Belgrave, A. Fan, U. Paquet, J. Tomczak, and C. Zhang, Eds., vol. 37. Curran Associates, Inc., 2024, pp. 4629–4659. [7] L. Gaudio, G. Colavolpe, and G. Caire, “OTFS vs. OFDM in the presence of sparsity: A fair comparison,” IEEE Transactions on Wireless Communications , vol. 21, no. 6, pp. 4410–4423, 2022. [8] L. Gaudio, M. Kobayashi, G. Caire, and G. Colavolpe, “On the effective-ness of OTFS for joint radar parameter estimation and communication,” 
+
+IEEE Transactions on Wireless Communications , vol. 19, no. 9, pp. 5951–5965, 2020. [9] D. Wipf and B. Rao, “Sparse Bayesian learning for basis selection,” 
+
+IEEE Transactions on Signal Processing , vol. 52, no. 8, pp. 2153–2164, 2004. [10] M. Koller, B. Fesl, N. Turan, and W. Utschick, “An asymptotically MSE-optimal estimator based on Gaussian mixture models,” IEEE Transactions on Signal Processing , vol. 70, pp. 4109–4123, 2022. [11] B. B¨ ock, M. Baur, N. Turan, D. Semmler, and W. Utschick, “A statistical characterization of wireless channels conditioned on side information,” 
+
+IEEE Wireless Communications Letters , vol. 13, no. 12, pp. 3508–3512, 2024. [12] A. Alkhateeb, “DeepMIMO: A generic deep learning dataset for mil-limeter wave and massive MIMO applications,” in Proc. of Inf. Theory and Appl. Workshop (ITA) , San Diego, CA, Feb 2019, pp. 1–8. [13] Y. Pachigolla, L. Zaniboni, and M. Mahvari, “Channel estimation in uplink multi-user scenario using OTFS modulation,” in 2025 14th International ITG Conference on Systems, Communications and Coding (SCC) , 2025, pp. 1–6. [14] D. P. Wipf and B. D. Rao, “An empirical Bayesian strategy for solving the simultaneous sparse approximation problem,” IEEE Transactions on Signal Processing , vol. 55, no. 7, pp. 3704–3716, 2007. 
+
+E [r] = Eη, ˜β [r] = 
+
+> G
+
+X
+
+> i=1
+
+Eη [√ηi] E ˜β
+
+h
+
+e−j ˜βi
+
+i| {z }  
+
+> =0 since ˜βi∼U ([ −π,π ])
+
+ϕ
+
+
+
+˜ν(i), ˜τ (i)
+
+= 0 (26) 
+
+E rr H = Eη, ˜β
+
+rr H =
+
+> G
+
+X
+
+> i=1
+> G
+
+X
+
+> i′=1
+
+Eη [√ηi
+
+√ηi′ ] E ˜β
+
+h
+
+e−j ˜βi ej ˜βi′
+
+i| {z }   
+
+> =δi,i ′since ˜βi⊥˜βi′
+
+ϕ
+
+
+
+˜ν(i), ˜τ (i)
+
+ϕH 
+
+˜ν(i′), ˜τ (i′)
+
+=
+
+> G
+
+X
+
+> i=1
+
+Eη [ηi] ϕ
+
+
+
+˜ν(i), ˜τ (i)
+
+ϕH 
+
+˜ν(i), ˜τ (i)
+
+= Ψdict diag ( E [η]) ΨHdict 
+
+(27)

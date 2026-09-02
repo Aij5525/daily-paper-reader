@@ -1,0 +1,962 @@
+Title: KDGen-BF: A Generative Site-Specific Multi-User Beamforming Approach
+
+URL Source: https://arxiv.org/pdf/2608.29838v1
+
+Published Time: Tue, 01 Sep 2026 01:28:13 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# KDGen-BF: A Generative Site-Specific Multi-User Beamforming Approach 
+
+Ruihang Jiang, Zhaolin Wang, Member, IEEE , and Yuanwei Liu, Fellow, IEEE 
+
+Abstract —This paper proposes knowledge-distilled generative beamforming (KDGen-BF) framework for site-specific multi-user beamforming. KDGen-BF generates a multi-user beamforming weights from low-dimensional reference signal received power (RSRP) observations without acquiring instantaneous channel state information (CSI). To address the ambiguity caused by limited RSRP observations and interference coupling, KDGen-BF formulates multi-user beamforming as a conditional gen-eration problem and directly outputs beamforming weights beyond a finite codebook. A diffusion transformer is trained through knowledge-distillation and exponential-moving-average (KD-EMA) guidance, and multi-candidate strategy is used for online deployment. Numerical results on multiple DeepMIMO scenarios demonstrate that: 1) under limited probing budgets, KDGen-BF outperforms all baselines; 2) with larger probing bud-gets, KDGen-BF achieves performance comparable to exhaustive search over the discrete Fourier transform (DFT) codebook and outperforms all other baselines; and 3) under noisy RSRP observations, KDGen-BF remains robust and outperforms all compared baselines. 
+
+Index Terms —conditional diffusion transformer, site-specific beamforming, multi-user communications 
+
+I. I NTRODUCTION 
+
+# IN multi-antenna wireless communications, beamforming is a cornerstone because it effectively utilizes spatial degrees of freedom [1]. The base station (BS) can steer the transmitted signal toward a specific user equipment (UE), leading to higher desired signal power. This directional transmission can compensate for the severe propagation and penetration losses in high frequency wireless systems. Beamforming is even more critical in multi-user downlink transmission, where users share the same time-frequency resource. The transmitted beams must be jointly designed to enhance desired signals while controlling inter-user interference. Such joint beam design traditionally relies on accurate instantaneous channel state information (CSI) at the BS, since the channels of all users determine both desired sig-nal enhancement and interference suppression [2]. Given CSI, conventional beamforming optimization methods, includ-ing weighted minimum mean square error (WMMSE)-based beamforming [3], zero-forcing-type precoding [4], and max– min signal-to-interference-plus-noise ratio (SINR) beamform-ing optimization [5], can compute the beamforming weights in multi-user scenarios. However, acquiring accurate CSI in large array systems requires frequent pilot transmission and instantaneous channel estimation, which incurs substantial                   
+
+> The authors are with the Department of Electrical and Computer Engineering, The University of Hong Kong, Hong Kong (e-mail: rui-hang.jiang@connect.hku.hk, zhaolin.wang@hku.hk, yuanwei@hku.hk).
+
+training overhead, baseband processing cost, and decision latency [6]. This overhead becomes more pronounced in multi-user systems, where the BS must acquire CSI for multiple users. Therefore, such CSI acquisition becomes a major bot-tleneck when beamforming decisions must be made online within each coherence block. To avoid the requirement of instantaneous CSI, practi-cal systems commonly adopt grid-of-beams (GoB) [7], acodebook-based beamforming strategy that can be applied to both single-user and multi-user systems. In this paradigm, the BS transmits predefined probing beams and UEs report corresponding measurements, such as reference signal received power (RSRP). Nevertheless, GoB methods restrict the final beamforming solution to a finite set of predefined beams, leading to quantization loss [8]. Meanwhile, in the multi-user case, a more complicated tradeoff arises. A simple strategy is per-user greedy selection, where each UE selects its own probing beam with the strongest RSRP [7]. Although this approach exhibits low complexity, it ignores inter-user interference. An interference considered alternative is joint exhaustive search over all possible beam combinations in the codebook. However, the search space grows combinatorially with the number of users, resulting in high decision latency. Hierarchical search [9], [10] reduces the sweeping overhead by using coarse-to-fine probing and keeping a small candidate beam set for each user. Nevertheless, it is still restricted to a discrete predefined beam grid. 
+
+A. Prior Works 
+
+Conventional codebook-based beamforming reduces CSI acquisition through probing feedback, but it remains limited by predefined beam grids and, in multi-user systems, by the combinatorial search over joint beam combinations. Site-specific beamforming (SSBF) [11] offers a different way to reduce online CSI acquisition and beam search overhead. The key idea of SSBF is to utilize the structure of a fixed propagation environment as side information. One represen-tative direction of SSBF focuses on site-specific codebook learning, where probing beams are optimized from environ-mental data. In [12], a neural network based framework was proposed to learn environment aware beam codebooks for millimeter-wave (mmWave) MIMO systems. In [13], an online compressive beam codebook learning method was developed for mmWave vehicular communication by exploiting site-specific channel observations. In [14], site-specific probing beams were learned to reduce the beam alignment overhead, and the measured probing responses were used to predict arXiv:2608.29838v1 [eess.SP] 30 Aug 2026 2
+
+the optimal narrow beam. Unlike traditional discrete Fourier transform (DFT) codebooks, learned codebooks can better match the dominant propagation patterns of a given site and increase the informativeness of beam measurements. However, the final beamforming decision is still made over a finite set of candidate beams. Another line of SSBF research moves beyond finite code-book selection and predicts continuous domain beamform-ing variables from incomplete observations. Discriminative neural networks can be used to map probing measurements to beamforming weights directly. In [15], a grid-free site-specific beam alignment framework was proposed, where learned probing beams and multilayer perceptron (MLP)-based beam synthesizers were jointly trained to directly synthesize transmit and receive beams from a continuous beam space. In [16], site-specific beam learning was extended to full-duplex massive MIMO systems, where joint probing codebook design and beam synthesis were considered for transmit and receive beamforming. These grid-free predictors enlarge the solution space. However, most of them are discriminative models that produce a single deterministic output and suffer from ambiguity. More specifically, similar RSRP responses may correspond to multiple plausible channels, and regression will lead to degraded beamforming performance. Generative site-specific beamforming (GenSSBF) [17] has recently been introduced to address the ambiguity in beam prediction from low-dimensional observations. Instead of pro-ducing a single deterministic beam from a low-dimensional RSRP observation, GenSSBF formulates beam prediction as conditional generation and outputs multiple plausible beam candidates. This is suitable when the same probing observation may correspond to multiple high-quality beamforming solu-tions. For example, in [18], a U-Net-based Beam-Brainstorm framework was developed to generate multiple beamforming weights from RSRP. 
+
+B. Motivation and Contributions 
+
+However, existing GenSSBF studies mainly focus on single user beamforming and cannot be directly extended to the multi-user setting. In multi-user beamforming, a beam selected for one user can interfere with other users, so the beams cannot be generated independently. Moreover, there may be more than one optimal set of joint beamforming weights for the same multi-user channel, so forcing the model to learn only one output can be restrictive. These challenges motivate us to develop a joint conditional generation framework for online multi-user beamforming without CSI. Therefore, we propose KDGen-BF, a conditional diffu-sion transformer framework that generates joint multi-user beamforming weights from RSRP observations. The pro-posed framework integrates a conditional diffusion trans-former (DiT) [19] beam generator, knowledge-distillation and exponential-moving-average (KD-EMA) training [20], and de-noising diffusion implicit model (DDIM)-based [21] multi-candidate inference. The main contributions are summarized as follows:  
+
+> •
+
+We propose KDGen-BF, a site-specific conditional gener-ative framework for online multi-user beamforming with-out CSI. Given multi-user RSRP observations, KDGen-BF directly generates joint beamforming weights rather than selecting beams from a finite codebook.  
+
+> •
+
+We design a second-order-cone (SOC)-guided [22] KD-EMA training strategy to solve the ambiguity of low-dimensional RSRP observations and the multi-solution nature of joint beamforming. The SOC beamforming weights computed with full CSI are used only as offline teacher supervision, while KD-EMA training transfers this supervision to the DiT beam generator and improves robustness through masked learning.  
+
+> •
+
+We develop a deployable DDIM-based multi-candidate inference strategy with feedback based candidate selec-tion. The proposed inference strategy generates multiple candidate beamformers online without instantaneous CSI acquisition at the BS, and selects the final beamforming matrix using lightweight UE feedback.  
+
+> •
+
+We conduct experiments on multiple DeepMIMO sce-narios to evaluate the proposed framework. The results demonstrate that KDGen-BF achieves max–min fairness gains over codebook-based, learned-codebook, determin-istic, and single-user-direction baselines, especially under limited probing budgets and noisy RSRP observations. 
+
+C. Organization and Notations 
+
+The remainder of this paper is organized as follows. Sec-tion II presents the system model and problem formulation. Section III introduces the proposed KDGen-BF framework. Section IV describes the baseline methods and complexity comparison. Section V presents the numerical results, and Section VI concludes the paper. 
+
+Notations: Scalars, vectors, and matrices are denoted by italic, bold lowercase, and bold uppercase letters, respectively. For a matrix A, AT , AH , and Tr( A) denote its transpose, Hermitian transpose, and trace, respectively. The notations 
+
+Ai, : and A:,j denote the i-th row and the j-th column of A,respectively. The Euclidean and Frobenius norms are denoted by ∥ · ∥ 2 and ∥ · ∥ F , respectively. The expectation operator and computational complexity order are denoted by E[·] and O(·),respectively. Other symbols are defined when they first appear. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Model 
+
+As illustrated in Fig. 1, we consider a single cell multi-user downlink MISO system, where a BS equipped with an Mt-element uniform linear array (ULA) serves K single-antenna UEs indexed by K = {1, . . . , K }. A narrowband quasi-static block-fading model is considered, under which the channel remains constant within each coherence block. In this work, we assume the whole beamforming procedure is performed within a single coherence block, such that the channel is treated as fixed during the online process. The downlink channel from the BS to user k is given by 
+
+hk ∈ CMt×1 and modeled as 
+
+hk =
+
+> Lk
+
+X
+
+> ℓ=1
+
+αk,ℓ a ϕDk,ℓ 
+
+ , (1) 3
+
+> Fig. 1: Three-stage site-specific multi-user downlink beamforming framework. The BS first collects channel probing RSRP feedback, then generates a joint beamforming weights from the multi-user prompt without requiring instantaneous CSI at the BS, and finally deploys the generated beams for simultaneous downlink transmission.
+
+where Lk denotes the number of propagation paths associated with user k, αk,ℓ ∈ C is the complex gain of the ℓ-th path, and ϕDk,ℓ is its azimuth angle of departure (AoD) at the BS. For a ULA with inter-element spacing d, the array steering vector under the narrowband far field assumption is given by 
+
+a(ϕ) = 1
+
+√Mt
+
+h
+
+1, e j2π dλ sin( ϕ), . . . , e j2π (Mt−1) dλ sin( ϕ)iT
+
+,
+
+(2) where λ denotes the carrier wavelength. Let sk denote the transmit symbol intended for user k,satisfying E[|sk|2] = 1 and E[sks∗ 
+
+> i
+
+] = 0 for i̸ = k, and 
+
+wk ∈ CMt×1 denotes the corresponding beamforming vector. The transmitted signal at the BS is given by 
+
+x =
+
+> K
+
+X
+
+> k=1
+
+wksk. (3) Based on the above model, the received signal at user k can be expressed as 
+
+yk = hHk x + nk = hHk wksk + X
+
+> i̸=k
+
+hHk wisi + nk, (4) where nk ∼ CN (0 , σ 2) denotes the additive white Gaus-sian noise (AWGN) at user k. Accordingly, the signal-to-interference-plus-noise ratio (SINR) of user k is given by 
+
+γk(W) = |hHk wk|2
+
+P 
+
+> i̸=k
+
+|hHk wi|2 + σ2 . (5) Based on the SINR in (5), the achievable rate of user k is given by 
+
+Rk(W) = log 2(1 + γk(W)) . (6) where W = [ w1, . . . , wK ] ∈ CMt×K is the overall multi-user beamforming matrix. Since γk(W) contains inter-user interference terms, the achievable rate of each user depends on the entire beamforming matrix W rather than only on its own beamforming vector. 
+
+B. Problem Formulation 
+
+In this paper, we consider the following max–min beam-forming design problem: 
+
+max  
+
+> W
+
+min  
+
+> k∈K
+
+Rk(W)
+
+s.t. 
+
+> K
+
+X
+
+> k=1
+
+∥wk∥22 ≤ Ptot ,
+
+W ∈ S ,
+
+(7) where Ptot denotes the BS transmit power budget, and S de-notes the feasible beamforming set determined by the adopted transceiver architecture. The optimization problem in (7) is challenging due to the coupled interference structure across users and the resulting non-convexity of the objective. In particular, each user rate depends on the entire beamforming matrix through the inter-user interference terms, which prevents the problem from being decomposed into independent per-user subproblems. If CSI were available at the BS, (7) could in principle be ad-dressed directly using conventional beamforming optimization methods [5]. The main challenge considered in this work is that such CSI is unavailable during online deployment, and the beamforming decision must instead be made from limited channel probing observations. This motivates a site-specific learning-based reformulation that predicts beamform-4
+
+ing matrices directly from low-dimensional channel probing observations. 
+
+C. Site-Specific Learning Reformulation 
+
+We next instantiate this reformulation by first specifying the channel probing observations and the site-specific structure used for learning. In practical beamforming problem, the probing observations are obtained through beam probing: the BS transmits a set of predefined probing beams, and each UE reports the corresponding RSRP values. These measurements provide only a low-dimensional response, rather than the full complex channel vector, but they indicate how each UE responds to the probed directions. The site-specific assumption provides the missing structure needed to use these coarse observations for beamforming. For a fixed deployment, the BS location, dominant scatterers, blockage patterns, and long-term user distribution remain relatively stable. As a result, RSRP patterns observed in the same site are statistically related to effective beamforming decisions. Site-specific learning exploits this relation to infer joint beamforming weights from RSRP observations, thereby avoiding online CSI acquisition and exhaustive beam search. Specifically, let pk = [ pk, 1, . . . , p k,N p ]T ∈ RNp×1 denote the RSRP vector of user k, where Np is the number of DFT beams used for probing, and pk,n represents the measured RSRP corresponding to the n-th probing beam. Let P =
+
+{pk}Kk=1 denote the resulting multi-user RSRP observation set, and define H = {hk}Kk=1 as the multi-user channel set. To characterize the site-specific setting, we conceptually model the probing observation process as 
+
+P = ME (H), (8) where E denotes the site related propagation environment, including the BS deployment, the long-term user spatial dis-tribution within the site, dominant scatterers or blockages, and other environment related propagation characteristics; ME (·)
+
+is the corresponding channel probing operator. Based on P, we further construct a multi-user prompt repre-sentation O, which serves as the input to the subsequent beam prediction framework. In the site-specific setting considered in this work, E is fixed for a given deployment scenario. Therefore, E is neither explicitly estimated nor provided to the network during inference; instead, its effect is implicitly em-bedded in O through the channel probing RSRP observations. Based on the prompt representation O, the joint beamforming matrix is predicted as 
+
+ˆW = fθ (O), ˆW ∈ CMt×K , (9) where fθ (·) is defined as the learnable mapping from the multi-user prompt to the joint beamforming matrix. A decoding and normalization module maps the generated representa-tion to beamforming weights and enforces the total transmit power constraint and the feasibility constraints imposed by the adopted transmitter architecture. To learn the relation from the multi-user prompt O to the joint beamforming weights ˆW, training samples are collected from the considered site as paired prompt and channel samples 
+
+(O, H). Let γk( ˆW; H) denote the SINR of user k evaluated under channel set H. The desired task objective is to learn a model that maximizes the expected worst user rate: 
+
+max  
+
+> θ
+
+E(O,H)∼pdata 
+
+
+
+min  
+
+> k∈K
+
+log 2
+
+
+
+1 + γk( ˆW; H)
+
+
+
+. (10) The objective in (10) evaluates the generated beamforming weights using the channel set H. During online inference, however, the BS only receives the low-dimensional RSRP observation set P and constructs the prompt O from it; the instantaneous channel set H is not available at the BS. Thus, the online task is to generate ˆW from P, or equivalently from 
+
+O, without observing H. This task is difficult because limited RSRP observations may correspond to different channel con-ditions, and the same channel condition may admit multiple optimal sets of joint beamforming weights. To address this challenge, we propose KDGen-BF in the following section. III. P ROPOSED KDG EN -BF FOR SITE -S PECIFIC 
+
+MULTI -U SER BEAMFORMING 
+
+A. Framework Overview 
+
+As shown in Fig. 2, we propose a site-specific conditional generative framework for solving the max–min fair multi-user beamforming problem in (7). Given the RSRP observations reported by all users in a group, the framework predicts a joint beamforming matrix ˆW ∈ CMt×K without requiring instantaneous CSI at the BS during online inference. The framework consists of three components. First , the RSRP observations reported by all users are converted into a multi-user prompt for conditional beam generation. Second ,a conditional diffusion transformer (DiT) denoiser generates multi-user beamforming weights by using timestep informa-tion and multi-user dependencies. Third , SOC-based pseudo-labels and EMA-stabilized teacher-student offline training, while DDIM sampling with multi-candidate generation en-ables online inference. We first describe how the RSRP observations are converted into the multi-user prompt used by the conditional denoiser. 
+
+B. Prompt Construction and Conditioning 1) Prompt construction: We construct the model prompt from low-dimensional channel probing RSRP observations. Let Cp = {f1, . . . , fNp } ⊆ C denote the probed DFT beam subset. For each user k ∈ K , let pk = [ pk, 1, . . . , p k,N p ]T ∈
+
+RNp×1 represent the probing RSRP vector over Cp.From pk, we extract a standardized probing feature and a peak referenced feature. The standardized feature zk ∈
+
+RNp×1 is obtained by normalizing the entries of pk using the mean and standard deviation computed within the same user’s RSRP vector. This normalization emphasizes relative response variations and reduces scale differences across users. The peak referenced feature rk ∈ RNp×1 is obtained by measuring each entry relative to the strongest probed beam. This feature preserves the relative gap between the dominant probing direction and the other probing directions. By concatenating these two feature views, the user prompt is formed as ok = [zTk , rTk ]T ∈ R2Np×1. Stacking all 5
+
+> Fig. 2: Training framework of KDGen-BF. Offline SOC solutions provide full CSI pseudo-labels for diffusion training, while the RSRP prompt and diffusion timestep condition the denoiser. The student is trained with masked prompts and guided by an EMA teacher through denoising, distillation, and fairness-oriented losses.
+
+user prompts gives the multi-user prompt matrix O =[oT 
+
+> 1
+
+, . . . , oTK ]T ∈ RK×2Np . Together, zk and rk provide a scale robust representation that preserves both relative RSRP variations and the contrast to the strongest probed beam. 
+
+2) Prompt conditioning: To condition the model on the group prompt, O is encoded into one context token for each user. Throughout this paper, the term token refers to a vec-tor representation processed by Transformer attention layers. Since the fairness oriented beamforming decision depends on multi-user coupling rather than independent per-user prefer-ences, the conditioning representation should capture not only per-user prompt features but also their cross-user dependency structure. To this end, we employ a prompt encoder that applies self-attention across users and maps the multi-user prompt to 
+
+Cu = Eu(O) ∈ RK×dc , (11) where dc denotes the context token dimension. The resulting matrix Cu contains one context token for each user, while self-attention enables each token to incorporate dependency information from the other users in the same group. The diffusion denoiser is conditioned not only on the multi-user prompt but also on the diffusion timestep. At denoising step t, let et ∈ Rd×1 denote the timestep embedding, and ct ∈
+
+Rdc×1 represents the corresponding time token obtained from 
+
+et through a learnable projection. We then form the cross-attention context as 
+
+C =
+
+" cTt
+
+Cu
+
+#
+
+∈ R(K+1) ×dc . (12) This design keeps the conditioning tokens separate from the main denoising sequence and allows the subsequent diffusion model to inject timestep and prompt information in a struc-tured way. In addition to the token conditioning context prepared for subsequent cross-attention, we further construct a global conditioning signal for layer modulation. Specifically, let the 
+
+k-th user token be denoted by c(u) 
+
+> k
+
+∈ Rdc×1, where the k-th row of Cu is given by (c(u) 
+
+> k
+
+)T . Then, the global conditioning vector is constructed as 
+
+u = et + MLP 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+c(u)
+
+> k
+
+!
+
+∈ Rd×1, (13) where the MLP maps the average of the K user context tokens from Rdc×1 to Rd×1. This global conditioning summarizes the overall multi-user context and provides a shared modulation signal across layers. 
+
+C. Conditional DiT Denoiser 
+
+With the cross-attention context and global conditioning signal defined in Section III-B, we now describe the diffu-sion model that operates on noisy beam representations and reconstructs the target multi-user beamforming solution. 
+
+1) Beamforming target representation: Rather than directly predicting the complex beamforming matrix, we first convert the target beamforming solution into a real-valued DFT do-main representation, denoted by X0. In the diffusion model, 
+
+X0 is treated as the target sample before noise perturbation. Specifically, define X0 ∈ R2K×Mt as the target beam repre-sentation, where the first K rows correspond to the real parts of the user beams and the remaining K rows correspond to the imaginary parts. For user k ∈ K , the associated complex DFT domain beam is reconstructed as 
+
+˜wdft  
+
+> k
+
+= ( X0,k, : + j X0,K +k, :)T ∈ CMt×1. (14) This representation is adopted for two reasons. First , the probing observations are collected from DFT beam measure-ments, so the conditioning prompt and the beam output are naturally aligned in the same DFT domain coordinate system. 
+
+Second , beam patterns are typically more structured in the 6
+
+angular and spectral domain than in the spatial domain, which is beneficial for conditional generation and denoising. The corresponding spatial domain beam is then obtained by inverse discrete Fourier transform as ˜wk = IFFT   ˜wdft 
+
+> k
+
+ ∈
+
+CMt×1. To satisfy the total transmit-power constraint, we further apply global normalization across all users: 
+
+wk =
+
+s Ptot 
+
+PKi=1 ∥ ˜wi∥22
+
+˜wk, k ∈ K . (15) By concatenating the resulting user beams, we obtain the final beamforming matrix ˆW = [ w1, . . . , wK ] ∈ CMt×K .
+
+2) Forward diffusion process: To train the denoiser, the tar-get beam representation X0 is progressively corrupted through the standard forward diffusion process [23]. At diffusion step 
+
+t, the noisy sample Xt is drawn from 
+
+q(Xt | X0) = N  √¯αt X0, (1 − ¯αt)I , (16) The above representation can be equivalently written as 
+
+Xt = √¯αt X0 + √1 − ¯αt ϵ, ϵ ∼ N (0, I), (17) where ϵ denotes the Gaussian noise injected into the target beam representation at diffusion step t. Here, ¯αt = Qts=1 (1 −
+
+βs) denotes the cumulative noise coefficient, where {βs}Ts=1 
+
+is the variance schedule over the diffusion horizon. Under the forward diffusion process defined above, the denoising task is to predict the injected noise from Xt under the conditioning representation defined in Section III-B. 
+
+3) One-dimensional DiT architecture: To perform condi-tional denoising, we adopt a one-dimensional DiT backbone operating on the noisy beam representation. Since Xt ∈
+
+R2K×Mt is represented in the DFT domain, its Mt columns correspond to DFT beam indices. We therefore treat the DFT beam dimension as a one-dimensional sequence with length 
+
+Mt, which is more suitable than a two-dimensional token representation designed for image inputs. Let d denote the hidden width of the DiT backbone. Given Xt ∈ R2K×Mt , the input token sequence is initialized as 
+
+H(0) = Proj in (XTt ) + Ppos + Pstem (XTt ), (18) where Proj in : RMt×2K → RMt×d maps the noisy beam representation into the hidden token space, Ppos ∈ RMt×d
+
+denotes the positional embedding, and Pstem (XTt ) ∈ RMt×d
+
+provides shallow input related features. The cross-attention context C and the global conditioning vector u are defined in (12) and (13), respectively. Let 
+
+ℓ ∈ { 0, . . . , L − 1} represent the block index, where L is the number of stacked DiT blocks. Each DiT block then applies the following residual updates: 
+
+H(ℓ)sa = H(ℓ) + SA  AdaLN( H(ℓ); u), (19a) 
+
+H(ℓ)ca = H(ℓ)sa + CA  AdaLN( H(ℓ)sa ; u), C, (19b) 
+
+H(ℓ+1) = H(ℓ)ca + FFN  AdaLN( H(ℓ)ca ; u). (19c) Here, SA, CA, and FFN are self-attention, cross-attention, and the position feed-forward network, respectively. In particular, self-attention captures structural correlation within the noisy beam sequence, cross-attention injects timestep and prompt context through C, and AdaLN uses the global conditioning vector u to provide shared layer modulation. This combination enables joint denoising of multi-user beam representations while preserving the structured one-dimensional nature of the beam sequence. After the final block, the hidden sequence 
+
+H(L) is projected to the predicted noise tensor ˆϵ ∈ R2K×Mt
+
+through an output head. 
+
+4) Denoising objective and target beam reconstruction: 
+
+The predicted noise tensor ˆϵ produced by the DiT backbone is trained to match the injected Gaussian noise ϵ. Accordingly, the base denoising objective is given by 
+
+Ldiff = EX0,t, ϵ
+
+h
+
+∥ϵ − ˆϵ∥2
+
+> F
+
+i
+
+. (20) This objective trains the model to recover the target beam rep-resentation by predicting the additive noise from the corrupted sample under prompt conditioning. From the predicted noise, the target estimate is reconstructed as 
+
+ˆX0 = Xt − √1 − ¯αt ˆϵ
+
+√¯αt
+
+. (21) Substituting the forward diffusion relation of Xt into the above expression yields the reconstruction error 
+
+ˆX0 − X0 =
+
+r 1 − ¯αt
+
+¯αt
+
+(ϵ − ˆϵ) . (22) Therefore, the reconstruction fidelity of the target beam representation is directly controlled by the noise prediction accuracy, with a step related amplification factor determined by ¯αt. In particular, errors at high noise steps are more strongly amplified in the reconstructed target estimate. The reconstructed ˆX0 is then mapped to the final beamforming matrix ˆW through the DFT domain decoding, inverse Fourier transform, and total-power normalization. 
+
+D. SOC Teacher Construction and KD-EMA Training 1) SOC-based pseudo-label construction: To provide high-quality supervision for the diffusion beamformer, we construct pseudo-labels by solving the max–min beamforming problem using offline CSI. For each user group with channel set H =
+
+{hk}Kk=1 , we first solve the following max–min SINR problem under the total transmit-power constraint: 
+
+max  
+
+> W, τ
+
+τ
+
+s.t. γk(W) ≥ τ, ∀k ∈ K ,
+
+> K
+
+X
+
+> k=1
+
+∥wk∥22 ≤ Ptot ,
+
+(23) where W = [ w1, . . . , wK ] ∈ CMt×K and γk(W) is the user-
+
+k SINR defined in (5). In implementation, the above problem is solved by bisection over the target SINR level τ together with SOC [22] feasibility checks. For a fixed τ , let sk = ℜ{ hHk wk} and impose the phase-fixing constraints ℑ{ hHk wk} = 0 , s k ≥ 0, ∀k ∈ K .
+
+Then, with σ2 denoting the receiver noise variance defined in the system model, the SINR feasibility condition can be 7
+
+written in SOC form as 
+
+
+
+{ℜ (hHk wj )}j̸ =k
+
+{ℑ (hHk wj )}j̸ =k
+
+√σ2
+
+
+
+> 2
+
+≤ 1
+
+√τ sk, ∀k ∈ K . (24) By performing bisection on τ and solving the associated second-order-cone programming (SOCP) feasibility problem, we obtain a high-quality beamforming solution denoted by 
+
+Wsoc = [ w1,soc , . . . , wK, soc ] ∈ CMt×K .
+
+We convert Wsoc into the DFT domain target Xsoc 0 ∈
+
+R2K×Mt by stacking the real and imaginary parts of the DFT coefficients of {wk, soc }Kk=1 . This pseudo-label is then used as the supervision target for teacher-student training. 
+
+2) Why single target training is insufficient: Although the SOC solution provides a high-quality supervision target, it is not the only beamforming output that can achieve comparable performance. A simple example is the phase ambiguity of the max–min SINR objective: replacing wk by wkejϕ k does not change |hHi wk|2 for any i, k , and therefore leaves all users’ SINRs unchanged [24]. This multi-solution structure is further enlarged by limited RSRP observations, since similar prompts may correspond to different channel conditions, each of which may admit multiple effective sets of joint beamform-ing weights. Therefore, forcing the diffusion beamformer to match a single SOC target may collapse the generated outputs toward one selected representation. We use the SOC pseudo-label as a strong supervision target rather than the only correct target, with the EMA teacher providing stable guidance while preserving generative flexibility. 
+
+3) Teacher-online and EMA teacher: Based on the above discussion, we first train a teacher-online denoiser using the SOC pseudo-label as a strong supervision target. The teacher-online denoiser learns a SOC-guided denoising target that provides structured supervision for the student. Let ψ denote the parameters of the teacher-online denoiser. Using the SOC-derived target representation Xsoc 0 , the teacher-online network is trained under the forward diffusion process as 
+
+LT = EXsoc 0 ,t, ϵ
+
+h
+
+∥ϵ − ϵψ (Xt, t, O)∥2
+
+> F
+
+i
+
+, (25) where Xt is generated by corrupting Xsoc 0 according to the forward diffusion process defined in (17). In this way, the teacher-online model learns to denoise toward SOC-guided beam representations under full prompt conditioning. To improve target stability during distillation, we further maintain an exponential moving average (EMA) [25] copy of the teacher-online network. Let ¯ψ denote the EMA teacher parameters. After each teacher-online update, the EMA teacher is updated as following 
+
+¯ψ ← μ ¯ψ + (1 − μ)ψ, (26) where μ ∈ (0 , 1) is the EMA decay factor. Compared with the rapidly changing online teacher, the EMA teacher provides a temporally smoothed supervision signal and serves as a more stable distillation target for the student model. 
+
+4) Student objectives: Let θ denote the student network parameters, and define ˜O as the masked prompt used by the student. The student is trained under three complementary objectives, namely, a diffusion space denoising loss, a teacher-guided distillation loss, and a task related SINR-oriented guidance loss. 
+
+First , the student is required to predict the injected Gaussian noise directly from the corrupted sample, leading to the denoising objective 
+
+Lϵ = EXsoc 0 ,t, ϵ
+
+
+
+ϵ − ϵθ (Xt, t, ˜O) 2
+
+> F
+
+
+
+. (27) This term preserves the basic diffusion denoising capability of the student and ensures consistency with the target recon-struction process. 
+
+Second , to distill the knowledge of the EMA teacher, the student is encouraged to match the teacher’s predicted noise under the same corrupted sample: 
+
+LKD = EXsoc 0 ,t, ϵ
+
+
+
+ϵθ (Xt, t, ˜O) − ϵ ¯ψ (Xt, t, O) 2
+
+> F
+
+
+
+. (28) Here, the EMA teacher receives the full prompt O, whereas the student uses the masked prompt ˜O. This design allows the teacher to provide a stable high-quality denoising target, while improving the robustness of the student to imperfect and incomplete prompt information. 
+
+Third , to inject task-level fairness guidance, we reconstruct the target beam estimate from the student predicted noise as 
+
+ˆX0 = Xt − √1 − ¯αt ϵθ (Xt, t, ˜O)
+
+√¯αt
+
+, (29) and decode it to the beamforming matrix ˆW according to Section III-C. Using the resulting SINRs {γk( ˆW; H)}Kk=1 , the fairness-oriented guidance loss is defined as 
+
+LSINR = −E
+
+h
+
+softmin τs
+
+ {10 log 10 γk( ˆW; H)}Kk=1 
+
+i
+
+, (30a) 
+
+softmin τs ({rk}Kk=1 ) = −τs log 
+
+> K
+
+X
+
+> k=1
+
+e−rk /τ s
+
+!
+
++ τs log K, (30b) where τs > 0 is the soft-min temperature. This term directly encourages the generated beamforming weights to improve the worst user performance. The final student loss combines the above objectives as 
+
+LS = λϵ(e)Lϵ + λKD (e)LKD + λSINR (e)LSINR , (31) where e denotes the training epoch, and λϵ(e), λKD (e), and 
+
+λSINR (e) are epoch dependent weighting coefficients. We next describe how these loss weights are scheduled together with the diffusion steps used for teacher and student training. 
+
+5) Optimization schedule: The optimization schedule con-tains two coupled parts: diffusion step sampling for the teacher and student, and epoch related weighting of the student losses. The first part is motivated by the noise related behavior of diffusion denoising. At larger diffusion steps, the sample is heavily corrupted, and errors are more strongly amplified in the reconstructed target estimate according to (22). Consistent with observations in diffusion models, high noise denoising is more associated with coarse structure, whereas low noise denoising is more related to local refinement around a possible 8
+
+Algorithm 1 Offline KD-EMA Training                                                                           
+
+> Require: Training set D, student denoiser ϵθ, teacher-online denoiser ϵψ,EMA teacher ϵ¯ψ, noise schedule {¯αt}Tt=1
+> Ensure: Trained student denoiser ϵθ
+> 1: Initialize θand ψ, and set ¯ψ←ψ
+> 2: for each training epoch do
+> 3: for each mini-batch (O,H)∼ D do
+> 4: Compute SOC pseudo-labels Wsoc from H
+> 5: Convert Wsoc into the target Xsoc 0
+> 6: Sample timestep tand noise ϵ∼ N (0,I)
+> 7: Construct Xtusing (17) 8: Update ϵψwith full prompt Ousing the teacher denoising loss 9: Update EMA teacher: ¯ψ←μ¯ψ+ (1 −μ)ψ
+> 10: Generate masked prompt eOfor student training 11: Obtain detached EMA guidance from ϵ¯ψ(Xt, t, O)
+> 12: Update ϵθusing the scheduled student loss in (31) 13: end for
+> 14: end for
+> 15: return ϵθ
+
+target solution [26], [27]. This motivates using different denoising roles for the teacher and student instead of training a single DiT branch over the entire reverse process. This separation also follows the broader view that diffusion training and sampling choices can be designed separately across noise regimes [28]. The SOC solution provides a high-quality but selected supervision target. If one branch is trained for both high noise recovery and low noise refinement toward this target, the reverse trajectory can be overly tied to the selected representative solution. In our framework, the teacher-online branch is trained more often at higher noise steps to learn coarse beamforming structures from the SOC supervision. The EMA teacher provides a stable distillation target, while the masked prompt student focuses more on lower noise denoising to learn general refinement patterns for beamforming weights under imperfect observa-tions. This design guides the student with SOC supervision without forcing it to match a single SOC solution. The second part controls the weights of the three student losses in (31). At the beginning of training, the student is mainly trained by Lϵ and LKD , while LSINR is disabled. This avoids unstable SINR gradients before the generated beamforming weights have learned meaningful structures. As training proceeds, the weights of Lϵ and LKD are reduced, and the weight of LSINR is increased. In this way, the student first learns stable denoising behavior from the SOC guided teacher, and then gradually shifts toward improving the worst user SINR. This schedule is also consistent with the observation that guidance in diffusion models can depend on the noise interval and may not be equally useful at all diffusion steps [29]. The complete offline training procedure is summarized in Algorithm 1. 
+
+E. Inference with DDIM and Candidate Selection 1) Student-only deployment: During online deployment, only the trained student denoiser is deployed; the teacher-online network, EMA teacher, and SOC solver are not used in online deployment. Given the channel probing based prompt 
+
+O, the student constructs the conditioning representation in Section III-B and performs conditional reverse denoising from Gaussian noise. Thus, online beam generation depends only on the low-dimensional RSRP observations and the student model, without requiring CSI at the BS or online SOC optimization. 
+
+2) DDIM sampling and candidate generation: To reduce inference latency, we adopt DDIM sampling [21] instead of the original stochastic denoising diffusion probabilistic models (DDPM) reverse process. Compared with DDPM, DDIM can generate high-quality solutions with substantially fewer reverse steps, and is therefore more suitable for online beamforming deployment under latency constraints. Let Tinf = {tM , . . . , t 0} denote the DDIM reverse schedule with t0 = 0 and tM = T . Starting from an initial Gaussian sample X(c) 
+
+> tM
+
+∼ N (0, I), the student denoiser iteratively predicts the noise tensor 
+
+ˆϵ(c) 
+
+> m
+
+= ϵθ
+
+
+
+X(c) 
+
+> tm
+
+, t m, O
+
+
+
+, (32) for candidate index c at reverse step tm. At reverse step tm, the corresponding target estimate is computed analogously to (21), and is denoted by ˆX(c)0,m . The DDIM update is then written as 
+
+X(c) 
+
+> tm−1
+
+= p¯αtm−1
+
+ˆX(c)0,m +
+
+q
+
+1 − ¯αtm−1 − ˜σ2 
+
+> m
+
+ˆϵ(c)
+
+> m
+
++ ˜ σmz(c) 
+
+> m
+
+,
+
+(33) where z(c) 
+
+> m
+
+∼ N (0, I) if ηddim > 0, and z(c) 
+
+> m
+
+= 0 for deterministic DDIM. The stochasticity coefficient is 
+
+˜σ2 
+
+> m
+
+= η2ddim 
+
+1 − ¯αtm−1
+
+1 − ¯αtm
+
+
+
+1 − ¯αtm
+
+¯αtm−1
+
+
+
+. (34) After completing the reverse process, we obtain the fi-nal target estimate ˆX(c)0 = X(c) 
+
+> t0
+
+, which is then decoded into the resulting beamforming matrix. To improve robust-ness against sampling variability and mode bias, we re-peat the above DDIM procedure for Ncand independent ini-tializations, thereby obtaining the candidate set Wcand =n ˆW(1) , . . . , ˆW(Ncand )
+
+o
+
+.
+
+3) Candidate selection: Among the generated candidates, we select the final beamforming solution according to afeedback based utility ranking rule. Specifically, 
+
+ˆW⋆ = arg max 
+
+> ˆW(c)∈W cand
+
+U
+
+ ˆW(c)
+
+, (35) where U (·) denotes the candidate selection utility. To evaluate each candidate in a deployable manner, the BS transmits short pilot signals using the beamforming matrix 
+
+ˆW(c). For notation, define the desired signal power and interference power of user k under candidate ˆW(c) as S(c) 
+
+> k
+
+=
+
+|hHk ˆw(c) 
+
+> k
+
+|2 and I(c) 
+
+> k
+
+= P 
+
+> i̸=k
+
+|hHk ˆw(c) 
+
+> i
+
+|2. During online candi-date evaluation, user k estimates these two quantities from the pilot measurements and feeds back the scalar estimates ˆS(c)
+
+> k
+
+and ˆI(c) 
+
+> k
+
+. Using the scalar estimates fed back by the UEs, the BS assigns each candidate the following utility: 
+
+U
+
+ ˆW(c)
+
+= min 
+
+> k∈K
+
+ˆS(c)
+
+> k
+
+ˆI(c)
+
+> k
+
+. (36) The final beamforming weights are selected as the candidate with the largest utility. This selection uses only scalar UE feedback and does not require instantaneous CSI acquisition at 9
+
+Algorithm 2 Deployable DDIM Inference                                                                               
+
+> Require: O,ϵθ,Tinf ,Ncand ,ηddim
+> Ensure: ˆW⋆
+> 1: for c= 1 to Ncand do
+> 2: Sample X(c)
+> tM∼ N (0,I)
+> 3: for m=M, . . . , 1do
+> 4: Predict ˆϵ(c)
+> m←ϵθ(X(c)
+> tm, t m,O)
+> 5: Update X(c)
+> tm−1by the DDIM step in (33) 6: end for
+> 7: Decode X(c)
+> t0into ˆW(c)
+> 8: end for
+> 9: if Ncand = 1 then
+> 10: return ˆW(1)
+> 11: end if
+> 12: for c= 1 to Ncand do
+> 13: Transmit short pilots using ˆW(c)
+> 14: Each UE estimates ˆS(c)
+> kand ˆI(c)
+> kand feeds them back to the BS 15: Compute U( ˆW(c))←min k∈K ˆS(c)
+> k/ˆI(c)
+> k
+> 16: end for
+> 17: ˆW⋆←arg max ˆW(c)U( ˆW(c))
+> 18: return ˆW⋆
+
+the BS. Since this work focuses on the multi-user setting dom-inated by interference, the candidate utility does not explicitly include the noise term. Instead, the generated candidates are ranked by the measured desired signal to interference balance, which provides a lightweight selection rule without noise power estimation. The complete deployable inference and candidate selection procedure is summarized in Algorithm 2. IV. C OMPARISON WITH BASELINE APPROACHES 
+
+We compare KDGen-BF with conventional codebook-based baselines, a site-specific learned-codebook baseline, and site-specific grid-free learning baselines under a unified online protocol. All deployable methods use low-dimensional RSRP observations and do not assume instantaneous CSI at the BS during online inference. Whenever a method produces multiple candidate beams or beam combinations, the final solution is selected using the same feedback based utility in (36). This shared selection rule accounts for interference during candidate selection and ensures a fair comparison among the methods in multi-user settings. 
+
+A. Codebook-Based Baselines 
+
+We first consider codebook-based baselines whose final beams are selected from finite DFT codebooks. Let Fp =
+
+{f1, . . . , fNp } denote the probed DFT beam subset. For a selected beam index combination m = [ m1, . . . , m K ]T , the beamforming vector of user k is 
+
+wk(m) = 
+
+r Ptot 
+
+K fmk , k ∈ K . (37) 
+
+1) DFT Greedy: DFT Greedy selects each user’s beam independently according to the largest probing RSRP, 
+
+mgreedy  
+
+> k
+
+= arg max  
+
+> n∈{ 1,...,N p}
+
+pk,n . (38) The resulting combination is directly used without joint can-didate selection, and therefore does not explicitly account for inter-user interference. 
+
+2) DFT Exhaustive: DFT Exhaustive performs joint com-bination selection over all probed DFT beams. Specifically, it enumerates Mexh = {1, . . . , N p}K , maps each combination 
+
+m ∈ M exh to W(m), evaluates it using the feedback based utility in (36), and selects the best combination. This baseline accounts for inter-user coupling but requires combinatorial combination enumeration. 
+
+3) Hier-DFT: Hier-DFT reduces the exhaustive combi-nation space through coarse-to-fine DFT probing. The full DFT codebook is partitioned into Nc angular sectors, and one representative beam from each sector is used for coarse probing. According to the coarse RSRP feedback, each user keeps its top-Bc sectors. Fine probing is then performed over Nf DFT beams selected from these kept sectors. After fine probing, user k keeps its top-B fine beams to form 
+
+Mhier  
+
+> k
+
+. The BS then evaluates the reduced combination set 
+
+Mhier = Mhier 1 × · · · × M hier  
+
+> K
+
+, which contains BK candidate combinations, using (36) and selects the best combination. 
+
+B. Learned-Codebook Baseline 1) NN-LSS-Codebook: We further include NN-LSS-Codebook, where NN-LSS denotes neural-network learned site-specific, as a learned site-specific codebook baseline. Unlike DFT-based methods that use fixed angular beams, this baseline trains a site-specific beam codebook offline and per-forms online combination selection over learned codewords. Let G = {g1, . . . , gM } denote the learned codebook, where each codeword gm ∈ CMt×1 is normalized. The codebook is trained from the training split using SOC-derived beamforming targets. During online evaluation, each user reports a score 
+
+qnn  
+
+> k,m
+
+for codeword gm through UE-side beam feedbacks. For each user, the top-B codewords are kept to form the candidate set Mnn  
+
+> k
+
+⊆ { 1, . . . , M }. The BS then evaluates the reduced combination set Mnn = Mnn 1 × · · · × M nn  
+
+> K
+
+using (36) and selects the best combination. 
+
+C. Grid-Free Learning-Based Baselines 
+
+We next consider site-specific grid-free learning baselines, whose outputs are not restricted to a finite beam codebook. 
+
+1) Deterministic Transformer: This baseline uses the same group prompt O as KDGen-BF, but directly predicts the target beam representation without diffusion sampling: 
+
+ˆXtr 0 = ftr (O). (39) The output ˆXtr 0 is decoded into ˆWtr using the same DFT domain decoding, inverse Fourier transform, and total power normalization. It therefore serves as a deterministic grid-free counterpart to the proposed generative beamformer. 
+
+2) Single-user Direction-SOC: This baseline adapts single-user generative site-specific beamforming to the multi-user setting. For each user k, a single-user generator produces 
+
+N su cand candidate transmit beam directions from prompt ok:
+
+Vsu  
+
+> k
+
+= {˜v(1)  
+
+> k
+
+, . . . , ˜v(N su cand ) 
+
+> k
+
+}, ˜v(c) 
+
+> k
+
+∈ CMt×1. The candidate with the largest UE-side received power is selected 
+
+˜v⋆k = arg max 
+
+> ˜v∈V su
+> k
+
+qk(˜ v), (40) 10 
+
+TABLE I: Dataset, training, inference, and baseline parameters.                                                            
+
+> Parameter Value Parameter Value
+> Dataset setup
+> Scenarios I2_28B ,O1B_28 ,Boston5G_28 Carrier frequency 28 GHz BS array 64-element ULA Antenna spacing 0.5λ
+> UE antenna Single antenna Users K∈ { 2,3,4}
+> Groups 102,400 per scenario Split 8:1:1
+> Probed DFT beams Np= 64 default RSRP noise setting SNR = 40 dB
+> Training setup
+> Optimizer AdamW Learning rate 10 −4
+> Batch size 64 Epochs 1000 Diffusion steps 1000 EMA decay 0.995
+> Inference setup
+> DDIM steps Nstep = 50 DDIM stochasticity ηddim = 0
+> Default candidates Ncand = 64 Candidate sweep Ncand ∈ { 1,2,4,8,16 ,24 ,32 ,64 }
+> Baseline setup
+> Candidate number B= 4 Candidate search budget BK
+> Learned codebook size 64 SU candidates M= 64
+
+TABLE II: BS-side serial decision complexity for one K-user group. 
+
+Method Complexity 
+
+DFT Greedy O(KN p)
+
+DFT Exhaustive O(N Kp )
+
+Hier-DFT O(K(Nc + Nf ) + BK )
+
+NN-LSS-Codebook O(KM + BK )
+
+Det. Transformer O(CNN )
+
+SU Dir.-SOC O(KN su cand Nstep CNN + Csoc )
+
+KDGen-BF O(Ncand Nstep CNN )
+
+where qk(˜ v) is the RSRP measured by user k under transmit beam ˜v. Since this single-user selection is MRT-like, the nor-malized beam ˆvk = ˜ v⋆k/∥˜v⋆k∥2 is used as an estimated channel direction. With ˆHsu = [ˆ v1, . . . , ˆvK ], we solve the SOC-based max–min beamforming problem using ˆHsu , yielding 
+
+ˆWsu+soc = SOC( ˆHsu ).
+
+D. Complexity Analysis 
+
+We then compare the BS side serial decision complexity for one K user group. The decision time is measured after the required probing observations or UE reported scores are available and before downlink data transmission. Over the air probing, UE side measurement, and feedback signaling are excluded, while BS side RSRP processing and joint candidate selection are counted. For a fair comparison and to avoid weakening the baselines, the feedback based joint candidate search baselines are allowed to keep B candidate beams for each user and evaluate all BK joint beam combinations. Thus, their over the air candidate evaluation overhead scales with 
+
+BK , whereas the corresponding overhead of KDGen-BF is controlled by the number of generated candidates Ncand .Let CNN denote the architecture dependent cost of one neural network forward pass, and let Csoc denote the cost of one SOC based max–min beamforming solve. We use a single 
+
+CNN notation for compactness. For multi-user neural methods, one forward pass processes one whole K user group, so the dependence on K is included in CNN through the input and output dimensions. For single-user diffusion generators, the denoiser is applied separately to each user, each candidate, and each DDIM reverse step, resulting in the factor KN su cand Nstep .For feedback based joint candidate search baselines, B denotes the kept candidate size for each user, yielding BK joint candidate combinations. For Hier-DFT, Nc and Nf denote the numbers of coarse and fine probing beams, respectively. For NN-LSS-Codebook, M denotes the learned codebook size. The complexity of each method is summarized in Table II, where lower order utility aggregation costs are omitted for compactness. As shown in Table II, only DFT Exhaustive has inherent exponential scaling over the full probed codebook, i.e., N Kp .For Hier-DFT and NN-LSS-Codebook, the BK term is an optional feedback based cost used to strengthen multi-user selection; without it, their main scoring costs scale linearly with K. KDGen-BF requires Ncand Nstep multi-user student denoiser evaluations, with all teacher and SOC pseudo-label operations kept offline. V. N UMERICAL RESULTS 
+
+A. Experimental Setup 
+
+We evaluate the proposed method on three Deep-MIMO [30] ray-tracing scenarios: I2_28B , O1B_28 , and 
+
+Boston5G_28 , representing indoor, outdoor street-level, and dense urban propagation environments, respectively. For each scenario, we construct multi-user groups with K ∈ { 2, 3, 4}
+
+under the downlink MISO setting in Section II-A. The same preprocessing, grouping, probing, and data-splitting protocol is used for all compared methods. All models are implemented in PyTorch and trained on a server with NVIDIA A100-SXM4-80GB GPUs. A separate model is trained for each scenario and each value of K. Unless otherwise specified, the default probing budget is Np = 64 ,the DDIM reverse-step number is Nstep = 50 , and the default candidate number is Ncand = 64 . The RSRP noise setting in Table I is used to corrupt probing observations, while all reported performance metrics are based on downlink SINR and include inter-user interference. For joint candidate search baselines, the kept candidate size is B = 4 unless otherwise specified. For Hier-DFT, the coarse and fine split is budget-matched to Np, with 
+
+(Nc, N f ) = (2 , 2) , (4 , 4) , (4 , 12) , (8 , 24) , (8 , 40) , (8 , 56) for 
+
+Np = 4 , 8, 16 , 32 , 48 , 64 , respectively. The kept coarse-sector number is Bc = 1 for Np = 4 and Bc = 2 otherwise, and the final kept fine-beam number is B = 2 for Np = 4 and 
+
+B = 4 otherwise. The detailed dataset, training, inference, and baseline configurations are summarized in Table I. 11 Group Minimum SINR(dB) Number of Probing Beams Number of Probing Beams Number of Probing Beams KDGen-BF Upper Bound DFT Exhaustive DFT Greedy Hier-DFT NN-LSS-Codebook SU Dir.-SOC Det. Trans. Gen-BF KDGen-BF KDGen-BF KDGen-BF DFT Exh. DFT Exh. DFT Exh. Upper Bound Upper Bound Upper Bound 
+
+Fig. 3: Mean group minimum SINR versus the number of probed DFT beams Np for K = 4 users under three DeepMIMO scenarios. 
+
+B. Evaluation under Different Probing Budgets 
+
+Fig. 3 reports the mean group minimum SINR under differ-ent probing budgets for K = 4 users in the three DeepMIMO scenarios. The full CSI upper bound is computed from offline CSI and is therefore independent of Np.Overall, KDGen-BF achieves the best performance among the non-exhaustive deployable methods in Boston5G_28 
+
+over the entire probing range, and remains highly competitive in I2_28B and O1B_28 . In Boston5G_28 , KDGen-BF improves from 5.15 dB at Np = 4 to 11 .26 dB at Np = 64 ,consistently outperforming DFT Greedy, Hier-DFT, NN-LSS-Codebook, deterministic Transformer, SU Dir.-SOC, and Gen-BF. In O1B_28 , KDGen-BF increases from −4.64 dB to 
+
+7.64 dB as Np grows from 4 to 64 , and becomes the best non-exhaustive method for Np ≥ 8. In I2_28B , KDGen-BF reaches 7.66 dB at Np = 64 , approaching DFT Exhaustive at 
+
+8.66 dB while clearly outperforming the other non-exhaustive baselines. KDGen-BF is particularly effective under limited or mod-erate probing budgets. For example, in Boston5G_28 at 
+
+Np = 16 , KDGen-BF achieves 7.31 dB, compared with 3.37 
+
+dB for DFT Exhaustive, 3.45 dB for NN-LSS-Codebook, and 
+
+0.99 dB for Gen-BF. At Np = 32 , KDGen-BF still surpasses DFT Exhaustive in Boston5G_28 and slightly exceeds it in 
+
+I2_28B . These results indicate that our conditional genera-tion can outperform finite-codebook search when the probed codebook is in limited sized. When Np becomes large, DFT Exhaustive becomes more competitive because the enlarged DFT codebook provides finer angular resolution and a larger joint candidate search space. Nevertheless, at Np = 64 , the gaps between KDGen-BF and DFT Exhaustive are only 1.70 dB, 1.00 dB, and 0.75 dB on 
+
+Boston5G_28 , I2_28B , and O1B_28 , respectively. Thus, KDGen-BF provides a favorable performance and search-complexity tradeoff, especially when the probing budget is limited or exhaustive combination search is undesirable. 
+
+C. From Single-User Fitting to Multi-User Generalization 
+
+To explain why multi-user beamforming is not a straightfor-ward extension of single-user beam prediction, we analyze the train-test similarity of target beamforming solutions. For each test target, we compute its maximum cosine similarity to the Sample Count Train-Test Target Cosine Similarity 1 user / group 2 user / group 3 user / group 4 user / group 
+
+Fig. 4: Train-test target cosine similarity distributions on 
+
+Boston5G_28 under different user-group sizes. For each test target, the similarity is computed with respect to its nearest training target in the target space. 
+
+training targets after converting the beamforming matrix into the real-valued DFT domain representation used for training. Fig. 4 shows the similarity distributions on Boston5G_28 
+
+for different user-group sizes. For K = 1 , most test targets have high similarity to at least one training target, indicating that the single user target space is well covered by the training set. As K increases, the distributions shift toward lower values and become more dispersed, which means that multi-user beamforming targets are less likely to have close training-set counterparts. Thus, multi-user prediction cannot rely only on target space memorization or nearest neighbor interpolation; it must learn joint beamforming structure, including interference coupling and fairness-oriented coordination. This observation is consistent with the performance trend in Table III. Although the Upper Bound also decreases as K
+
+increases due to stronger multi-user interference, the degrada-tion of single user baselines is much more severe. For example, from K = 2 to K = 4 , NN-LSS-Codebook drops from 31 .16 
+
+dB to 4.54 dB, the deterministic Transformer drops from 6.75 
+
+dB to −8.35 dB, and SU Dir.-SOC drops from −4.67 dB to −15 .98 dB. Their gaps to the Upper Bound also enlarge substantially, indicating that learned codebook methods, de-terministic regression, and single user direction fitting do not adequately capture the coupled tradeoff among desired signal enhancement, inter-user interference suppression, and max– 12 
+
+TABLE III: Mean group min-SINR (dB) comparison on Boston5G_28 . Superscripts indicate the gap to Upper Bound.                                                                                               
+
+> Users Upper Bound DFT Greedy DFT Exh. Hier-DFT NN-LSS-Codebook Det. Trans. SU Dir.-SOC
+> K= 2 35.73 10.36 (−25 .37) 29.70 (−6.03) 22.39 (−13 .34) 31.16 (−4.57) 6.75 (−28 .98) -4.67 (−40 .40)
+> K= 3 20.36 -1.66 (−22 .02) 17.44 (−2.92) 11.02 (−9.34) 16.18 (−4.18) -0.26 (−20 .62) -12.26 (−32 .62)
+> K= 4 15.54 -8.25 (−23 .79) 12.96 (−2.58) 4.20 (−11 .34) 4.54 (−11 .00) -8.35 (−23 .89) -15.98 (−31 .52)
+> Users Method Ncand
+> 124816 24 32 64
+> K= 2 Gen-BF 13.78 16.02 17.72 19.19 20.42 21.05 21.52 22.51 (−13 .22)
+> KDGen-BF 13.70 16.11 18.06 19.65 21.05 21.77 22.26 27.36 (−8.37)
+> K= 3 Gen-BF -0.36 2.41 4.38 5.92 7.22 7.88 8.31 11.29 (−9.07)
+> KDGen-BF 1.07 4.15 6.61 8.64 10.20 10.98 11.50 14.64 (−5.72)
+> K= 4 Gen-BF -6.26 -3.39 -1.08 0.71 2.15 2.92 3.43 6.47 (−9.07)
+> KDGen-BF -8.48 -4.44 -1.10 1.60 3.85 4.97 5.72 11.26 (−4.28)
+
+min fairness. For K = 4 , KDGen-BF reduces the gap to the Upper Bound to 4.28 dB, compared with 11 .00 dB for NN-LSS-Codebook, 23 .89 dB for the deterministic Transformer, and 31 .52 dB for SU Dir.-SOC. 
+
+D. Ablation Studies 
+
+Table III reports the ablation results on Boston5G_28 .The lower part of the table compares Gen-BF and KDGen-BF under different candidate numbers, thereby examining the effects of KD-EMA training and feedback based multi-candidate selection. 
+
+1) Effect of KD-EMA training: Comparing Gen-BF and KDGen-BF isolates the effect of the proposed KD-EMA teacher-student strategy. Gen-BF is trained without the SOC-supervised EMA teacher, whereas KDGen-BF uses SOC-guided distillation. At Ncand = 64 , KDGen-BF consistently outperforms Gen-BF for all user numbers. The mean group minimum SINR improves from 22 .51 dB to 27 .36 dB for 
+
+K = 2 , from 11 .29 dB to 14 .64 dB for K = 3 , and from 
+
+6.47 dB to 11 .26 dB for K = 4 . For the most challenging 
+
+K = 4 case, the gap to the full CSI Upper Bound is reduced from 9.07 dB to 4.28 dB. These gains indicate that KD-EMA improves the quality of the generated beamforming distribution, especially when the interference coupled solution space becomes more complex. The EMA teacher provides a stable SOC-guided denoising target, while the student keeps the flexibility of conditional generation instead of collapsing to a single pseudo-label representative. 
+
+2) Effect of candidate number: We next examine the role of the number of generated candidates Ncand . For both Gen-BF and KDGen-BF, a larger Ncand improves the performance by providing more candidate beamforming weights for selection. For KDGen-BF, as Ncand increases from 1 to 64 , the mean group minimum SINR improves from 13 .70 dB to 27 .36 
+
+dB for K = 2, from 1.07 dB to 14 .64 dB for K = 3,and from −8.48 dB to 11 .26 dB for K = 4 . The gain is most pronounced for K = 4 , indicating that single-sample generation is insufficient in the more strongly coupled multi-user setting. These results show that multi-candidate generation improves coverage of the conditional beamforming solution space. The final selection uses only scalar desired and interference mea-surements for each candidate, which avoids instantaneous CSI Upper Bound DFT Exhaustive DFT Greedy Hier-DFT NN-LSS-Codebook SU Dir.-SOC Det. Trans. Gen-BF KDGen-BF RSRP Measurement SNR (dB) Group Minimum SINR(dB) 
+
+Fig. 5: Mean group minimum SINR versus RSRP measurement SNR on Boston5G_28 with K = 4 . Noise is injected into the probing-based RSRP observations to evaluate robustness to prompt corruption. 
+
+acquisition at the BS while introducing only lightweight pilot measurement and feedback overhead. It is worth noting that the candidate budget of KDGen-BF is still modest compared with the feedback based joint candidate search baselines: with the default B = 4, those baselines evaluate BK = 64 
+
+combinations for K = 3 and BK = 256 combinations for 
+
+K = 4 . Thus, even the largest KDGen-BF setting considered here, Ncand = 64 , does not exceed the combination evaluation budget used by strong feedback based baselines in the K = 4 
+
+case. Moreover, candidate generation in KDGen-BF is natu-rally batchable: multiple diffusion trajectories can be sampled in parallel, so the wall-clock latency can be much smaller than the serial scaling with Ncand when sufficient hardware resources are available. Therefore, Ncand controls a practical tradeoff between beamforming weights quality and inference cost, with serial DDIM complexity growing linearly in the number of generated candidates. 
+
+3) Robustness to noisy probing observations: We further evaluate robustness to noisy RSRP measurements. Different from the receiver noise used in downlink SINR evaluation, the noise here is injected into the low-dimensional RSRP observations before beamforming decisions are made. Thus, this experiment measures sensitivity to corrupted prompt in-formation rather than robustness to data transmission noise. The RSRP measurement SNR is swept from 5 dB to 40 dB on Boston5G_28 with K = 4 .Fig. 5 shows that KDGen-BF remains robust even under 13 
+
+severely corrupted probing observations. At an RSRP mea-surement SNR of 5 dB, KDGen-BF achieves 6.28 dB mean group minimum SINR, compared with 0.47 dB for Gen-BF, 
+
+−5.52 dB for DFT Exhaustive, −10 .13 dB for NN-LSS-Codebook, and −13 .63 dB for Hier-DFT. As the measurement SNR increases to 40 dB, KDGen-BF reaches 11 .26 dB. This indicates that the proposed framework is not overly sensitive to RSRP perturbations, even without a dedicated noise robust training module. The robustness gain is mainly attributed to masked prompt student training and the prompt design. During training, the student learns from partially masked prompts under the guidance of the full-prompt EMA teacher, which encourages recovery of useful beamforming structure from degraded or incomplete conditioning information. Meanwhile, the stan-dardized and peak-referenced RSRP features reduce depen-dence on absolute RSRP scale and emphasize relative beam-domain structure. Multi-candidate generative inference further improves tolerance to prompt ambiguity, since feedback based strategy selects a high performance beamformer from several plausible candidates. In contrast, codebook-search and deter-ministic baselines rely more directly on noisy RSRP rankings or deterministic prompt-to-beam mapping, which makes them more sensitive to prompt corruption. VI. C ONCLUSION 
+
+This paper proposed KDGen-BF, a conditional generative framework for online multi-user beamforming from low-dimensional RSRP observations. The key idea is to replace de-terministic beam prediction and finite-codebook selection with joint conditional generation of beamforming weights, so that the model can account for limited observations, interference among users, and the multi-solution nature of fairness-oriented beamforming. Numerical results on multiple DeepMIMO sce-narios show that KDGen-BF achieves strong max–min fairness performance, especially under limited probing budgets and noisy RSRP measurements. These results demonstrate the potential of generative modeling for multi-user beamforming when online observations are low-dimensional or imperfect. Future work will extend the framework to mobility adaptation, wideband beamforming scenarios, and multi-cell interference coordination. REFERENCES [1] J. Mietzner et al. , “Multiple-antenna techniques for wireless communications—a comprehensive literature survey,” IEEE Commun. Surv. Tut. , vol. 11, no. 2, pp. 87–105, Jun. 2009. [2] B. Hassibi and B. M. Hochwald, “How much training is needed in multiple-antenna wireless links?” IEEE Trans. Inf. Theory , vol. 49, no. 4, pp. 951–963, Apr. 2003. [3] Q. Shi et al. , “An iteratively weighted MMSE approach to distributed sum-utility maximization for a MIMO interfering broadcast channel,” 
+
+IEEE Trans. Signal Process. , vol. 59, no. 9, pp. 4331–4340, Apr. 2011. [4] A. Wiesel, Y. C. Eldar, and S. Shamai, “Zero-forcing precoding and generalized inverses,” IEEE Trans. Signal Process. , vol. 56, no. 9, pp. 4409–4418, Sep. 2008. [5] E. Bj¨ ornson, M. Bengtsson, and B. Ottersten, “Optimal multiuser trans-mit beamforming: A difficult problem with a simple solution structure,” 
+
+IEEE Signal Process. Mag. , vol. 31, no. 4, pp. 142–148, Jun. 2014. [6] J.-C. Shen et al. , “High-dimensional CSI acquisition in massive MIMO: Sparsity-inspired approaches,” IEEE Systems Journal , vol. 11, no. 1, pp. 32–40, Nov. 2017. [7] M. Giordani et al. , “A tutorial on beam management for 3GPP NR at mmWave frequencies,” IEEE Commun. Surv. Tut. , vol. 21, no. 1, pp. 173–196, Sep. 2019. [8] D. J. Love et al. , “An overview of limited feedback in wireless communication systems,” IEEE J. Sel. Areas Commun. , vol. 26, no. 8, pp. 1341–1365, Oct. 2008. [9] A. Alkhateeb et al. , “Channel estimation and hybrid precoding for millimeter wave cellular systems,” IEEE J. Sel. Topics Signal Process. ,vol. 8, no. 5, pp. 831–846, Jul. 2014. [10] S. Noh, J. Song, and Y. Sung, “Fast beam search and refinement for millimeter-wave massive MIMO based on two-level phased arrays,” 
+
+IEEE Trans. Wireless Commun. , vol. 19, no. 10, pp. 6737–6751, Jul. 2020. [11] Y. Heng et al. , “Site-specific beam alignment in 6G via deep learning,” 
+
+IEEE Commun. Mag. , vol. 62, no. 8, pp. 162–168, Aug. 2024. [12] Y. Zhang, M. Alrabeiah, and A. Alkhateeb, “Learning beam codebooks with neural networks: Towards environment-aware mmWave MIMO,” in Proc. IEEE Int. Workshop Signal Process. Adv. Wireless Commun. (SPAWC) , Aug. 2020, pp. 1–5. [13] Y. Wang et al. , “Site-specific online compressive beam codebook learning in mmWave vehicular communication,” IEEE Trans. Wireless Commun. , vol. 20, no. 5, pp. 3122–3136, Jan. 2021. [14] Y. Heng, J. Mo, and J. G. Andrews, “Learning site-specific probing beams for fast mmWave beam alignment,” IEEE Trans. Wireless Com-mun. , vol. 21, no. 8, pp. 5785–5800, Jan. 2022. [15] Y. Heng and J. G. Andrews, “Grid-free MIMO beam alignment through site-specific deep learning,” IEEE Trans. Wireless Commun. , vol. 23, no. 2, pp. 908–921, Jun. 2024. [16] S. Li and I. P. Roberts, “Site-specific beam learning for full-duplex massive MIMO wireless systems,” in Proc. IEEE Military Commun. Conf. (MILCOM) , Sep. 2025, pp. 1236–1241. [17] Z. Wang et al. , “Generative site-specific beamforming for next-generation spatial intelligence,” Jan. 2026, arXiv:2601.02301. [18] Z. Zhou, Z. Wang, and Y. Liu, “Beam-brainstorm: A generative site-specific beamforming approach,” Jan. 2026, arXiv:2601.02219. [19] W. Peebles and S. Xie, “Scalable diffusion models with transformers,” in 
+
+Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV) , Dec. 2023, pp. 4195– 4205. [20] A. Tarvainen and H. Valpola, “Mean teachers are better role mod-els: Weight-averaged consistency targets improve semi-supervised deep learning results,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , Mar. 2017, pp. 1195–1204. [21] J. Song, C. Meng, and S. Ermon, “Denoising diffusion implicit models,” in Proc. Int. Conf. Learn. Represent. (ICLR) , Oct. 2021. [22] A. B. Gershman et al. , “Convex optimization-based beamforming,” IEEE Signal Process. Mag. , vol. 27, no. 3, pp. 62–75, May 2010. [23] J. Ho, A. Jain, and P. Abbeel, “Denoising diffusion probabilistic models,” in Adv. Neural Inf. Process. Syst. , vol. 33, Jun. 2020, pp. 6840–6851. [24] E. J. Cand‘es, T. Strohmer, and V. Voroninski, “PhaseLift: Exact and stable signal recovery from magnitude measurements via convex programming,” Commun. Pure Appl. Math. , vol. 66, no. 8, pp. 1241– 1274, Sep. 2013. [25] G. Hinton, O. Vinyals, and J. Dean, “Distilling the knowledge in a neural network,” arXiv preprint arXiv:1503.02531 , Mar. 2015. [26] N. Stracke et al. , “CleanDIFT: Diffusion features without noise,” in 
+
+Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , Dec. 2025. [27] E. Pavlova and X.-X. Wei, “Diffusion models under low-noise regime,” 
+
+arXiv preprint arXiv:2506.07841 , Jun. 2025. [28] T. Karras et al. , “Elucidating the design space of diffusion-based generative models,” in Adv. Neural Inf. Process. Syst. , vol. 35, Jun. 2022, pp. 26 565–26 577. [29] T. Kynk”a”anniemi et al. , “Applying guidance in a limited interval improves sample and distribution quality in diffusion models,” in Adv. Neural Inf. Process. Syst. , Apr. 2024. [30] A. Alkhateeb, “DeepMIMO: A generic deep learning dataset for mil-limeter wave and massive MIMO applications,” in Proc. Inf. Theory Appl. Workshop (ITA) , Feb. 2019.

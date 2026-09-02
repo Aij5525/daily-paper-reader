@@ -1,87 +1,12 @@
 {
-  "generated_at": "2026-09-01T22:14:49.082295+00:00",
-  "updated_date": "20260901",
+  "generated_at": "2026-09-02T22:33:25.329978+00:00",
+  "updated_date": "20260902",
   "carryover_days": 9,
   "tag_states": {
     "wireless-llm": {
-      "updated_date": "20260901",
+      "updated_date": "20260902",
       "carryover_days": 9,
-      "items": [
-        {
-          "id": "2608.30826v1",
-          "source": "arxiv",
-          "title": "Explainable deformable matched filtering reveals measurable departures from classical receiver theory in optical wireless communications",
-          "abstract": "Matched filtering is a central result of communication theory, providing the optimal linear receiver when the received waveform satisfies specific assumptions. Practical communication systems rarely satisfy these assumptions, yet learned receivers that outperform the classical matched filter provide little insight into what those improvements reveal about the limitations of the underlying theory.   Here we introduce an explainable deformable matched-filter framework in which machine learning is constrained to learn a low-dimensional deformation of the classical matched filter rather than replacing it. Because every learned correction is defined relative to the theoretical matched-filter solution, the deformation becomes a measurable representation of receiver mismatch rather than an unconstrained optimisation. The communication waveform remains processed entirely by the matched filter, while a Kolmogorov-Arnold Network predicts only the deformation from physically interpretable receiver-state descriptors.   Using an optical wireless communication testbed spanning ten signalling formats, four impairment classes and 1,600 conditions, we show that learned deformations improve receiver performance, yielding a median relative error-vector-magnitude reduction of 18.1%, while revealing departures from classical matched-filter optimality. Different signalling families occupy distinct deformation regimes, spectral analysis identifies the physical mechanisms underlying receiver mismatch, and latent receiver-state organisation demonstrates that these departures are structured rather than arbitrary.",
-          "authors": [
-            "Paul Anthony Haigh"
-          ],
-          "primary_category": "eess.SP",
-          "categories": [
-            "eess.SP"
-          ],
-          "published": "2026-08-31T14:05:07+00:00",
-          "link": "https://arxiv.org/pdf/2608.30826v1",
-          "tags": [
-            "keyword:wireless-llm",
-            "query:wireless-llm"
-          ],
-          "llm_score": 8.0,
-          "llm_evidence_en": "Explainable machine-learning deformable matched filter for optical wireless receivers",
-          "llm_evidence_cn": "可解释机器学习可变形匹配滤波用于光无线接收机",
-          "llm_evidence": "可解释机器学习可变形匹配滤波用于光无线接收机",
-          "canonical_evidence": "可解释机器学习可变形匹配滤波用于光无线接收机",
-          "llm_tldr_en": "Introduces an explainable deformable matched-filter framework in which machine learning learns a low-dimensional deformation of the classical filter, relating every correction to theory and revealing measurable departures from classical receiver theory in optical wireless communications.",
-          "llm_tldr_cn": "经典匹配滤波在假设不满足时并非最优，而学习型接收机虽性能更优却难提供理论洞见。本文提出可解释的可变形匹配滤波框架，让机器学习在经典匹配滤波的低维形变空间中学习修正，而非整体替换。每个修正都相对于理论匹配滤波定义，从而揭示光无线通信中测量到的偏离经典理论的现象，为可解释物理层接收机设计提供新思路。",
-          "llm_tldr": "经典匹配滤波在假设不满足时并非最优，而学习型接收机虽性能更优却难提供理论洞见。本文提出可解释的可变形匹配滤波框架，让机器学习在经典匹配滤波的低维形变空间中学习修正，而非整体替换。每个修正都相对于理论匹配滤波定义，从而揭示光无线通信中测量到的偏离经典理论的现象，为可解释物理层接收机设计提供新思路。",
-          "llm_tags": [
-            "query:wireless-llm"
-          ],
-          "matched_query_tag": "query:wireless-llm",
-          "matched_query_text": "wireless communication system design with machine learning",
-          "matched_requirement_id": "req-2",
-          "selection_source": "carryover_cache",
-          "paper_id": "2608.30826v1",
-          "carry_days": 1
-        },
-        {
-          "id": "2608.29838v1",
-          "source": "arxiv",
-          "title": "KDGen-BF: A Generative Site-Specific Multi-User Beamforming Approach",
-          "abstract": "This paper proposes knowledge-distilled generative beamforming (KDGen-BF) framework for site-specific multi-user beamforming. KDGen-BF generates a multi-user beamforming weights from low-dimensional reference signal received power (RSRP) observations without acquiring instantaneous channel state information (CSI). To address the ambiguity caused by limited RSRP observations and interference coupling, KDGen-BF formulates multi-user beamforming as a conditional generation problem and directly outputs beamforming weights beyond a finite codebook. A diffusion transformer is trained through knowledge-distillation and exponential-moving-average (KD-EMA) guidance, and multi-candidate strategy is used for online deployment. Numerical results on multiple DeepMIMO scenarios demonstrate that: 1) under limited probing budgets, KDGen-BF outperforms all baselines; 2) with larger probing budgets, KDGen-BF achieves performance comparable to exhaustive search over the discrete Fourier transform (DFT) codebook and outperforms all other baselines; and 3) under noisy RSRP observations, KDGen-BF remains robust and outperforms all compared baselines.",
-          "authors": [
-            "Ruihang Jiang",
-            "Zhaolin Wang",
-            "Yuanwei Liu"
-          ],
-          "primary_category": "eess.SP",
-          "categories": [
-            "eess.SP"
-          ],
-          "published": "2026-08-30T15:10:19+00:00",
-          "link": "https://arxiv.org/pdf/2608.29838v1",
-          "tags": [
-            "keyword:wireless-llm",
-            "query:wireless-llm"
-          ],
-          "llm_score": 8.0,
-          "llm_evidence_en": "Generative beamforming with diffusion transformer for site-specific multi-user systems",
-          "llm_evidence_cn": "使用扩散Transformer进行站点特定多用户波束成形的生成式方法",
-          "llm_evidence": "使用扩散Transformer进行站点特定多用户波束成形的生成式方法",
-          "canonical_evidence": "使用扩散Transformer进行站点特定多用户波束成形的生成式方法",
-          "llm_tldr_en": "Proposes KDGen-BF: a diffusion-transformer framework generating multi-user beamforming weights from RSRP observations without CSI or codebook, using knowledge distillation and EMA guidance with multi-candidate deployment.",
-          "llm_tldr_cn": "传统多用户波束成形依赖瞬时CSI且受限于码本，难以在站点特定场景快速部署。本文提出KDGen-BF，将波束成形构造成条件生成问题，用扩散Transformer从低维RSRP观测直接输出波束权重。通过知识蒸馏与EMA引导训练，并采用多候选在线策略，在DeepMIMO等数据集上验证了无需CSI即可生成波束的性能。该工作为无线系统设计提供了新的生成式AI路径。",
-          "llm_tldr": "传统多用户波束成形依赖瞬时CSI且受限于码本，难以在站点特定场景快速部署。本文提出KDGen-BF，将波束成形构造成条件生成问题，用扩散Transformer从低维RSRP观测直接输出波束权重。通过知识蒸馏与EMA引导训练，并采用多候选在线策略，在DeepMIMO等数据集上验证了无需CSI即可生成波束的性能。该工作为无线系统设计提供了新的生成式AI路径。",
-          "llm_tags": [
-            "query:wireless-llm"
-          ],
-          "matched_query_tag": "query:wireless-llm",
-          "matched_query_text": "wireless communication system design with machine learning",
-          "matched_requirement_id": "req-2",
-          "selection_source": "carryover_cache",
-          "paper_id": "2608.29838v1",
-          "carry_days": 1
-        }
-      ]
+      "items": []
     }
   }
 }
