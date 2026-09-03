@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-02</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-03</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 11 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 7 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>6</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>5</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>3</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>4</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-02 22:39:14 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-03 21:47:31 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读6篇、速读5篇，聚焦光通信与OTFS/ISAC等无线感知前沿；最值得关注的是可解释匹配滤波揭示经典接收理论偏差，以及SpecMind多智能体频谱智能方案；建议优先精读这两篇高分论文，后续再涉猎OTFS深度学习检测与贝叶斯信道估计。</p>
+<p>今日聚焦7篇前沿研究，精读2篇高分论文，速读3篇交叉方向，覆盖ISAC、人体姿态预测、WiFi指纹识别等热点。最值得关注通信感知计算一体化系统与互质阵列ISAC，均获9.0高分，展现虚拟孔径与资源分配新突破。建议优先追踪高分论文后续扩展，再借LLM根因分析与主动推理思路，迁移到自身定位或优化任务。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">6 篇</strong>
+    <strong class="dpr-home-dashboard-count">3 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Explainable deformable matched filtering reveals measurable departures from classical receiver theory in optical wireless communications">Explainable deformable matched filtering reveals measurable departures from classical receiver theory in optical wireless communications</span></li><li><span class="dpr-home-dashboard-paper-title" title="SpecMind: Enabling Spectrum Intelligence via Multi-Agent Hybrid Retrieval-Augmented Generation">SpecMind: Enabling Spectrum Intelligence via Multi-Agent Hybrid Retrieval-Augmented Generation</span></li><li><span class="dpr-home-dashboard-paper-title" title="CRAFT: Fine-Tuning Pre-hoc Explainability in AI-native 6G RAN">CRAFT: Fine-Tuning Pre-hoc Explainability in AI-native 6G RAN</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="CRB-Guided Sensing and Resource Allocation for Human Pose Prediction in Integrated Sensing, Communication, and Computation Systems">CRB-Guided Sensing and Resource Allocation for Human Pose Prediction in Integrated Sensing, Communication, and Computation Systems</span></li><li><span class="dpr-home-dashboard-paper-title" title="ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and uplink downlink communications">ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and uplink downlink communications</span></li><li><span class="dpr-home-dashboard-paper-title" title="Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks">Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>6</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>3</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">5 篇</strong>
+    <strong class="dpr-home-dashboard-count">4 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A Deep Iterative Refinement Receiver for OTFS Symbol Detection in Doubly-Dispersive Channels">A Deep Iterative Refinement Receiver for OTFS Symbol Detection in Doubly-Dispersive Channels</span></li><li><span class="dpr-home-dashboard-paper-title" title="Delay-Doppler Sensing Performance Analysis for MIMO-OFDM ISAC Systems">Delay-Doppler Sensing Performance Analysis for MIMO-OFDM ISAC Systems</span></li><li><span class="dpr-home-dashboard-paper-title" title="OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling">OTFS Channel Estimation Utilizing Sparse Bayesian Generative Modelling</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="C$^2$T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling">C$^2$T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling</span></li><li><span class="dpr-home-dashboard-paper-title" title="Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI">Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI</span></li><li><span class="dpr-home-dashboard-paper-title" title="Large Language Models (LLMs) for Telecom Root Cause Analysis (RCA): A Structured Reasoning Framework for Evidence-Grounded Diagnosis">Large Language Models (LLMs) for Telecom Root Cause Analysis (RCA): A Structured Reasoning Framework for Evidence-Grounded Diagnosis</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>5</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
 </section>
 </div>
 

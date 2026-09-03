@@ -1,0 +1,2090 @@
+Title: ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and uplink downlink communications
+
+URL Source: https://arxiv.org/pdf/2609.01979v1
+
+Published Time: Thu, 03 Sep 2026 00:23:32 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and Uplink–Downlink Communications 
+
+Jing Zhang, Member, IEEE, Yuxiao Liu, Jiayi Sun, Junliang Ye, Member, IEEE, and Derrick Wing Kwan Ng, Fellow, IEEE 
+
+Abstract —Integrated sensing and communication (ISAC) en-ables simultaneous communication and environmental sensing in unmanned aerial vehicle (UAV) networks, but its performance is constrained by the physical antenna aperture and residual self-interference (SI) in full-duplex (FD) sensing. To address these issues, we propose a shared-aperture ISAC architecture in which a sparse co-prime array (CPA) is embedded in a uniform linear array (ULA) grid for FD sensing, while the remaining antenna positions support time-division duplexing (TDD) communication. We characterize the sensing performance through an order-wise Cramer–Rao bound (CRB) analysis, showing that the CPA achieves a stronger asymptotic sensing gain than the partitioned ULA benchmark in both single-target and nondegenerate multi-target scenarios. We further reveal a space–time sampling trade-off under the same physical aperture. Based on the proposed architecture, we formulate a non-convex joint resource allocation problem that maximizes the weighted downlink–uplink sum rate by jointly designing the sensing transmit covariance, downlink precoder, and uplink receive beamformers under sensing ac-curacy, BS transmit-power, communication QoS, and residual SI constraints. An alternating-optimization-based algorithm is developed. Simulations demonstrate consistent performance gains over the considered baselines and confirm the complementary benefits of the CPA virtual aperture and sensing covariance optimization. 
+
+I. INTRODUCTION 
+
+Integrated sensing and communication (ISAC) has emerged as a key enabling paradigm for unlocking the full potential of future sixth-generation (6G) wireless networks, where commu-nication systems are expected to provide not only high-rate data transmission but also native sensing and environmental awareness capabilities [1]. On the one hand, ISAC enables effective spectrum and hardware reuse, allowing radar sensing and multiuser communication to be jointly supported within a unified multi-input multi-output (MIMO) transmit platform [2]. On the other hand, it endows wireless networks with radio perception capabilities, thereby providing environmental information that can facilitate beam management, mobility tracking, and resource allocation in dynamic scenarios [3]. Owing to these advantages, ISAC is considered promising for a broad range of emerging applications, including autonomous driving, intelligent transportation, industrial Internet of Things (IIoT), smart robotics, and low-altitude aerial networks [1], [4], [5]. In general, since sensing and communication signals are engineered for different objectives, ISAC systems usually require careful resource allocation and signal processing across the time, frequency, spatial, and waveform domains. In fact, existing studies have evaluated the performance gains ob-tained by sharing spectrum resources and radio-frequency 
+
+> Part of this work has been presented at the IEEE PIMRC 2026.
+
+(RF) hardware at the physical layer of ISAC systems to achieve goals such as improving spectral efficiency, reducing costs, decreasing hardware size and weight, and enabling mutual assistance and enhancement between communication and sensing. For spectrum-efficient integration, dual-function radar-communication (DFRC) systems have been investigated as a promising solution to the spectrum congestion problem [6]. From the hardware integration perspective, DFRC designs have shown that implementing sensing and communication on the same hardware platform can substantially reduce the duplicated hardware costs compared with separately deployed radar and communication systems [7]. Moreover, ISAC has been recognized as a viable approach to reducing the number of antennas, system size, weight, and power consumption, by reusing RF hardware and physical-layer resources [8]. In addition to such integration gain, ISAC can also enable coordination gains, where sensing information is exploited to assist communication tasks such as predictive beamforming and beam tracking [9]. Although hardware-level integration of ISAC systems can reduce overall power consumption, system size, and informa-tion exchange latency, several open issues remain unsolved, posing obstacles for achieving a seamless and effective reuse of baseband and RF transceiver hardware of ISAC systems. In general, there is a fundamental mismatch between the dynamic range requirements of communication and radar systems. Specifically, for the transmitter, the sensing function requires a high-power amplifier (PA) to transmit constant-envelope single-carrier signals such as frequency modulation continuous wave (FMCW) signals. However, communication requires a larger operating dynamic range to linearly and with low distortion transmit wide band multi-carrier signals such as orthogonal frequency division multiplexing (OFDM) [10]. Another fundamental issue is the waveform design for inte-grated sensing and communication signals. In practice, OFDM waveforms in communication system usually suffer from a non-constant envelope issue [11], resulting in a high peak-to-average power ratio (PAPR). Meanwhile, sensing systems typically employ power amplifiers (PAs) with a small dynamic range, which are nonlinear amplifiers generally operating near saturation to achieve high transmission efficiency. When an integrated OFDM waveform signal passes through such a PA, it inevitably undergoes a certain degree of nonlinear distortion, leading to reduced transmitter power efficiency, distortion of the OFDM signal, and degradation of both radar and communication performance [12], [13]. To address these issues, ISAC systems typically employ time-division duplexing (TDD) schemes, referred to as TDD-arXiv:2609.01979v1 [cs.IT] 2 Sep 2026 ISAC, where the receiver and transmitter operate in a time-division manner. For continuous-wave sensing systems, the receiver and transmitter are required not only to operate almost simultaneously, but also continuously in order to constantly detect echo signals. Meanwhile, communication capacity is also potentially degraded due to dedicated time slots reserved for sensing echoes. Indeed, the temporal separation between communication and sensing prevents simultaneous operation, thereby constraining real-time responses to highly dynamic environmental changes. To enable communication and sensing to fully reuse the transceiver chain, full-duplex (FD) technol-ogy combined with self-interference cancellation allows ISAC devices to transmit and receive simultaneously, effectively eliminating the sensing coverage gaps and improving the communication capacity [14], [15]. To effectively cancel self-interference (SI), the transmitting and receiving antennas of sensing system usually separates and joint transmitter-receiver beamforming is employed to align the null of the transmit antenna pattern with the main lobe of the receive antenna. The antenna switch enables dynamic configuration of transmit and receive functionalities within the same antenna array, is discussed in some works. In [16], a dynamically partitioned monostatic multiple-input multiple-output (MIMO)-ISAC ar-ray was proposed, where each base station (BS) antenna ele-ment can be flexibly configured as either a transmit or receive antenna to minimize direction of arrival (DOA) estimation error while satisfying communication signal to interference plus noise ratio (SINR) and power constraints. Also, in [17], a segmented pinching-antenna-assisted ISAC architecture was proposed, where segment-wise transmit/receive partitioning, antenna deployment, and beamforming are jointly optimized for varying user and target configurations. Although separating communication and sensing functions can simplify hardware architecture and receiver-side signal processing, several fundamental obstacles remain to achieving high data-rate communication in practical ISAC systems. On the one hand, the limited BS transmit power must be judiciously allocated between downlink communication and dedicated sensing waveforms. Allocating more power to sens-ing can strengthen the echo signals and improve estimation accuracy, but it leaves less transmit power for downlink communication and may also increase the residual SI experi-enced during uplink reception. In contrast, allocating excessive BS power to downlink communication reduces the resources available for target illumination, thereby requiring a careful sensing–communication power tradeoff. On the other hand, in multi-target and multiuser scenarios, sensing and commu-nication signals coexist within the same spatial aperture and introduce coupled interference effects. Therefore, an effective ISAC architecture should jointly consider power allocation, interference suppression, and spatial degrees of freedom to simultaneously support high-resolution sensing and reliable high-rate communication. In this paper, we investigate a co-located TDD commu-nication and FD sensing ISAC system for UAV networks, where sensing and communication share a common physical aperture. Specifically, the BS employs an active co-prime array (CPA) sensing structure embedded in a common uniform linear array (ULA) grid. The sensing transmit and receive subarrays exploit the enlarged virtual aperture induced by the CPA geometry, while the remaining antenna positions are reused as TDD communication transceiver antennas for downlink transmission and uplink reception. This shared-aperture architecture enables continuous FD sensing while supporting bidirectional communication without requiring an additional dedicated communication array. We analytically characterize the sensing performance of the proposed architecture by deriving order-wise bounds on the angle-related CRB and comparing its asymptotic behavior with that of a ULA benchmark. We further quantify the associated space–time sampling tradeoff in terms of the required number of sensing snapshots. Building upon the proposed architecture, we formulate a joint resource allocation problem to maximize the weighted downlink–uplink communication sum rate by jointly designing the sensing transmit precoder, downlink communication precoder, and uplink receive beamformers, subject to the sensing accuracy, total BS transmit-power, communication QoS, and residual SI constraints. To tackle the resulting non-convex problem, we develop an AO-based iter-ative algorithm incorporating fractional programming, closed-form uplink receive beamforming, convex downlink precoder optimization, and semidefinite programming for the sensing transmit covariance. The main contributions of this paper are summarized as follows.  
+
+> •
+
+We propose a shared-aperture ISAC antenna architecture, where a sparse co-prime sensing array is embedded into a common ULA grid and the remaining antenna positions within the same physical aperture are reused as TDD communication transceiver antennas. This architecture enables continuous high-resolution FD sensing while sup-porting both downlink transmission and uplink reception in UAV networks.  
+
+> •
+
+We establish an order-wise CRB analysis for the pro-posed CPA-based sensing architecture and conduct an asymptotic comparison with a ULA benchmark in both single-target and nondegenerate multi-target scenarios. The results demonstrate that the CPA geometry provides a stronger asymptotic sensing advantage, thereby offering theoretical support for the CRB improvement enabled by the enlarged virtual aperture.  
+
+> •
+
+We further identify and quantify a space–time sampling tradeoff under a fixed physical aperture. Although the sparse CPA exploits an enlarged virtual aperture with fewer physical sensing elements, its estimation-accuracy loss relative to the same-aperture ULA generally needs to be compensated for increasing the number of snapshots.  
+
+> •
+
+We formulate a joint resource allocation problem for the proposed shared-aperture architecture to maximize the weighted downlink–uplink communication sum rate by jointly optimizing the sensing transmit design, downlink precoder, and uplink receive beamformers under the sensing CRB, total BS transmit-power, downlink/uplink QoS, and residual SI constraints. An AO-based iter-ative algorithm is developed by combining fractional programming, closed-form uplink receive beamforming, :Sensing transmit antenna          
+
+> :Sensing receive antenna
+> Shared sensing Tx/Rx antenna
+> :Communication antenna
+> PA
+> DAC
+> LNA
+> Analog SIC
+> ADC
+> Digital SIC
+> Sensing waveform
+> precoding
+> LNA
+> ADC
+> Digital signal processing
+> ... ... ... sW
+> Sensing processing TDD communication
+> processing
+> Sensing Tx Sensing Rx Comm. Tx/Rx
+> DL  communication signal
+> TDD switch
+> PA
+> DAC Fig. 1. System model of the considered shared-aperture ISAC UAV net-work with TDD uplink–downlink communication and FD sensing, where a
+> (M1, M 2) = (3 ,4) co-prime sensing array is embedded in a 10-element ULA grid and the remaining four antenna positions are reused as communication transceiver antennas.
+
+convex downlink precoder optimization, and semidefinite programming for the sensing transmit covariance. The remainder of this paper is organized as follows. Section II introduces the system model and the proposed shared-aperture ISAC architecture. Section III analyzes the order-wise sensing CRB and formulates the joint resource allocation problem for maximizing the weighted downlink– uplink communication sum rate under the sensing accuracy, total BS transmit-power, communication QoS, and residual SI constraints. Section IV develops the FP-based AO so-lution framework for jointly optimizing the communication beamformers and sensing transmit design. Simulation results and performance comparisons with the baseline schemes are presented in Section V, and Section VI concludes the paper. 
+
+Notation: (·)T, (·)H, and (·)∗ denote the transpose, Her-mitian transpose, and element-wise complex conjugate, re-spectively. tr( ·), diag( ·), vec( ·), and rank( ·) denote the trace, diagonalization, vectorization, and rank operators, respectively. 
+
+⊗ denotes the Kronecker product. E{·} denotes expectation; 
+
+Re {·} and Im {·} denote the real and imaginary parts. C and 
+
+R denote the complex and real fields, respectively. CN (μ, σ 2)
+
+denotes a circularly symmetric complex Gaussian distribution with mean μ and variance σ2. IN denotes the N × N identity matrix. ei denotes the i-th canonical basis vector with a compatible dimension. ∂f ∂x i denotes the partial derivative with respect to xi. A ⪰ 0 means that A is Hermitian positive semidefinite. II. S YSTEM MODEL 
+
+A. Network Model 
+
+As shown in Fig. 1, we consider a co-located TDD com-munication and full-duplex (FD) sensing ISAC network coor-dinated by a single ground base station (BS). The BS serves 
+
+Kc communication unmanned aerial vehicles (UAVs) in both downlink and uplink transmission slots and simultaneously senses Ks UAV targets located in the far field within a symmetric angular sector [−θmax , θ max ]. Here, θmax > 0
+
+denotes the sector half-width, and the sensing-target angles satisfy θm ∈ [−θmax , θ max ]. Each communication UAV is equipped with a single antenna for downlink reception and uplink transmission in the corresponding TDD slots. The BS is equipped with a uniform linear array (ULA) grid comprising M antenna positions with inter-element spacing 
+
+d = λ/ 2. On this physical aperture, a subset of antenna positions is configured as an active (M1, M 2) co-prime array (CPA) for FD sensing, where M1 antenna elements are used for sensing transmission and M2 antenna elements are used for sensing reception. The remaining antenna positions are reused as TDD communication transceiver antennas. In this paper, sensing is performed in an active BS-sensing manner using dedicated BS-transmitted sensing waveforms. The uplink and downlink communication signals are used only for data transmission, and their leakage components are modeled as interference at the sensing receiver. 
+
+B. Co-prime Sensing Array 
+
+To make the CPA deployment explicit, we first describe the physical sensing-antenna positions. Let (M1, M 2) be a pair of co-prime positive integers 1. Following the classical co-prime array construction [18], two sparse ULA subarrays are placed on the same underlying ULA grid with unit spacing d.In the considered active sensing architecture, the M1-element subarray is used for sensing transmission, while the M2-element subarray is used for sensing reception. Specifically, their physical positions are given by Pt = {mM 2d | m =0, . . . , M 1 − 1}, and Pr = {nM 1d | n = 0 , . . . , M 2 − 1},
+
+respectively. The two subarrays are aligned at their zeroth elements, which are shared as a common reference sensing element. Due to the co-primality of M1 and M2, no other physical positions overlap. Accordingly, the number of distinct physical sensing antenna positions is 
+
+Ms = |P t ∪ P r| = M1 + M2 − 1. (1) The remaining antenna positions are reused as TDD com-munication transceiver antennas, whose number is given by 
+
+Mc = M − Ms.
+
+For the active Tx/Rx sensing structure considered in this paper, the sensing transmit and receive subarrays jointly form a virtual sensing array through their cross-sum spatial positions. Specifically, each transmit element at pt ∈ P t and each receive element at pr ∈ P r generate an equivalent virtual sensing         
+
+> 1Two positive integers are co-prime if their only common factor is 1. For example, 4 and 3 have factors {1,2,4}and {1,3}, respectively, and are therefore co-prime. In contrast, 2 has factors {1,2}, so 4 and 2 are not co-prime because they share the factor 2.
+
+position pt + pr. Using the physical positions of the two subarrays, the CPA-induced virtual sensing array is given by 
+
+VCPA = {(mM 2+nM 1)d | m = 0 , . . . , M 1−1, n = 0 , . . . , M 2−1}.
+
+(2) 
+
+Due to the co-primality of M1 and M2, these M1M2 cross-sum positions are distinct. Hence, with only Ms = M1 +M2 −
+
+1 distinct physical sensing antenna positions, the proposed CPA sensing structure synthesizes M1M2 virtual sensing positions. This enlarged virtual aperture improves the angular resolution without requiring a fully populated sensing array. Finally, the sensing Tx/Rx split ratio is defined as ρ = M1 
+
+> Ms+1
+
+.
+
+C. Signal Model 
+
+We consider an ISAC transmission frame consisting of L
+
+discrete-time symbol intervals, indexed by n ∈ { 1, . . . , L }.During each frame, the BS continuously performs FD sensing with the sensing transmit and receive subarrays. Meanwhile, the communication transceiver antennas operate in a TDD manner, transmitting downlink signals in the downlink slot and receiving uplink signals in the uplink slot. The sensing and communication channels are assumed to remain quasi-static within one frame due to the relatively low mobility of the UAVs over the frame duration. For sensing transmission, the BS transmits dedicated sens-ing waveforms through the M1-element sensing transmit sub-array. The sensing transmit vector is given by 
+
+xs(n) = Wsss(n), (3) where xs(n) ∈ CM1×1, Ws ∈ CM1×ds , and ss(n) ∈ Cds×1
+
+denote the sensing transmit vector, sensing precoder, and sens-ing symbol vector, respectively. With E{ss(n)sH 
+
+> s
+
+(n)} = Ids ,the sensing transmit covariance induced by Ws is given by 
+
+Rs(Ws) = E{xs(n)xH 
+
+> s
+
+(n)} = WsWH 
+
+> s
+
+∈ CM1×M1 . (4) Let Xs = [ xs(1) , . . . , xs(L)] ∈ CM1×L denote the sensing waveform matrix over L snapshots. For sufficiently large 
+
+L, the sample covariance of the sensing waveform can be approximated as 
+
+1
+
+L XsXH 
+
+> s
+
+≈ Rs(Ws). (5) For downlink communication, let dDL (n) =[dDL 1 (n), . . . , d DL  
+
+> Kc
+
+(n)] T ∈ CKc×1 denote the downlink data-symbol vector intended for the Kc communication UAVs, where E{dDL (n)( dDL (n)) H } = IKc . The BS applies linear downlink transmit beamforming at the communication transceiver antennas. Let 
+
+WDL  
+
+> c
+
+= [ wDL  
+
+> c, 1
+
+, . . . , wDL  
+
+> c,K c
+
+] ∈ CMc×Kc denote the downlink communication precoding matrix, where wDL  
+
+> c,k
+
+∈ CMc×1 is the transmit beamforming vector for the k-th communication UAV. The downlink communication transmit signal is given by 
+
+xDL  
+
+> c
+
+(n) = WDL  
+
+> c
+
+dDL (n). (6) For uplink communication, let dUL (n) =[dUL 1 (n), . . . , d UL  
+
+> Kc
+
+(n)] T ∈ CKc×1 denote the uplink transmit-symbol vector from the same set of communication UAVs. The uplink transmit-power covariance is given by 
+
+PUL = E{dUL (n)( dUL (n)) H } = diag( pUL 1 , . . . , p UL  
+
+> Kc
+
+),
+
+where pUL  
+
+> k
+
+denotes the given uplink transmit power of the 
+
+k-th communication UAV. To detect the uplink signals, the BS applies linear receive beamforming at the communication transceiver antennas. Let 
+
+WUL  
+
+> c
+
+= [ wUL  
+
+> c, 1
+
+, . . . , wUL  
+
+> c,K c
+
+] ∈ CMc×Kc (7) denote the uplink receive beamforming matrix, where wUL  
+
+> c,k
+
+∈
+
+CMc×1 is the receive beamforming vector for decoding the uplink signal of the k-th communication UAV. The sensing streams, downlink communication symbols, uplink communi-cation symbols, and receiver noises are assumed to be mutually independent over different symbol intervals. For the sensing link, the BS receives target echoes through the M2-element sensing receive subarray. The UAV sensing targets are modeled as point targets. For the Ks targets with angles {θm}Ks 
+
+> m=1
+
+and complex reflection coefficients 
+
+{βm}Ks
+
+> m=1
+
+, the target echo component is determined by the sensing transmit and receive steering vectors at(θ) ∈ CM1×1
+
+and ar (θ) ∈ CM2×1, respectively. Due to the simultaneous operation of the sensing transmit and receive subarrays, the direct leakage from the sensing transmit antennas to the sensing receive antennas introduces SI. In practical FD-ISAC receivers, SIC is usually imple-mented in a cascaded manner, where analog/RF-domain SIC is first performed before the ADC and digital-domain SIC is further applied after sampling by exploiting the known trans-mitted signal [19], [20]. However, due to imperfect SI channel estimation, hardware impairments, nonlinear distortions, and multipath leakage, the SI cannot be completely removed in practice. Following the residual SI modeling adopted in FD systems, the post-SIC residual SI at the sensing receiver is represented by HSI ,s xs(n), where HSI ,s ∈ CM2×M1 denotes the equivalent residual SI channel from the sensing transmit subarray to the sensing receive subarray. The received signal at the sensing receive subarray in symbol interval n is given by 
+
+ys(n) = 
+
+> Ks
+
+X
+
+> m=1
+
+βma∗ 
+
+> r
+
+(θm)aHt (θm)xs(n)+ ℓs(n)+ HSI ,s xs(n)+ zs(n),
+
+(8) 
+
+where ys(n) ∈ CM2×1 denotes the received sensing signal, and zs(n) ∼ CN (0, σ 2 
+
+> s
+
+IM2 ) is the sensing receiver noise. The aggregate leakage term ℓs(n) captures the effective residual interference from uplink and downlink communication signals. For CRB evaluation, we define its covariance as Rℓ,s ≜
+
+E{ℓs(n)ℓHs (n)}.
+
+For the downlink communication link, let hDL  
+
+> c,k
+
+∈ CMc×1
+
+denote the channel from the communication transceiver anten-nas to the k-th communication UAV, and let hDL  
+
+> s,k
+
+∈ CM1×1
+
+denote the interference channel from the sensing transmit subarray to the k-th communication UAV. In the downlink slot, the received signal at the k-th communication UAV is given by 
+
+yDL  
+
+> k
+
+(n) = ( hDL  
+
+> c,k
+
+)H xDL  
+
+> c
+
+(n) + ( hDL  
+
+> s,k
+
+)H xs(n) + zDL  
+
+> k
+
+(n), (9) where zDL  
+
+> k
+
+(n) ∼ CN (0 , σ 2DL ) denotes the downlink receiver noise. For the uplink communication link, let HUL  
+
+> c
+
+=[hUL  
+
+> c, 1
+
+, . . . , hUL  
+
+> c,K c
+
+] ∈ CMc×Kc denote the uplink channel ma-trix from the communication UAVs to the communication transceiver antennas. In the uplink slot, the communication transceiver antennas receive uplink signals from the Kc com-munication UAVs, while the concurrent FD sensing transmis-sion may cause residual SI after SIC. Therefore, the received uplink communication signal is given by 
+
+yUL  
+
+> c
+
+(n) = HUL  
+
+> c
+
+dUL (n) + HSI ,c xs(n) + zUL  
+
+> c
+
+(n), (10) where yUL  
+
+> c
+
+(n) ∈ CMc×1 denotes the received uplink commu-nication signal, and zUL  
+
+> c
+
+(n) ∼ CN (0, σ 2UL IMc ) is the additive noise at the communication receiver. Based on the uplink receive beamforming model, the de-tected signal of the k-th communication UAV is given by 
+
+ˆdUL  
+
+> k
+
+(n) = ( wUL  
+
+> c,k
+
+)H yUL  
+
+> c
+
+(n).
+
+D. System Performance 1) Communication Rate: Based on the downlink received signal in Section II-C, the SINR of the k-th communication UAV in the downlink slot is given by 
+
+γDL  
+
+> k
+
+=
+
+(hDL  
+
+> c,k
+
+)H wDL 
+
+> c,k
+> 2
+
+PKc  
+
+> j̸=k
+
+(hDL  
+
+> c,k
+
+)H wDL 
+
+> c,j
+> 2
+
++ ( hDL  
+
+> s,k
+
+)H RshDL  
+
+> s,k
+
++ σ2DL 
+
+.
+
+(11) Accordingly, the downlink sum rate is expressed as 
+
+RDL = B
+
+> Kc
+
+X
+
+> k=1
+
+log 2(1 + γDL  
+
+> k
+
+). (12) Based on the uplink received signal and the receive beam-forming model in Section II-C, the SINR of the k-th commu-nication UAV in the uplink slot is given by 
+
+γUL  
+
+> k
+
+=
+
+pUL  
+
+> k
+
+(wUL  
+
+> c,k
+
+)H hUL 
+
+> c,k
+> 2
+> Kc
+
+X 
+
+> j̸=k
+
+pUL  
+
+> j
+
+(wUL  
+
+> c,k
+
+)H hUL 
+
+> c,j
+> 2
+
++ ( wUL  
+
+> c,k
+
+)H HSI ,c RsHH
+
+> SI ,c
+
+wUL  
+
+> c,k
+
++ σ2UL ∥wUL  
+
+> c,k
+
+∥2
+
+.
+
+(13) The corresponding uplink sum rate is 
+
+RUL = B
+
+> Kc
+
+X
+
+> k=1
+
+log 2(1 + γUL  
+
+> k
+
+). (14) Thus, the weighted communication sum rate is defined as 
+
+Rsum = αDL RDL + αUL RUL , where αDL ≥ 0 and αUL ≥ 0
+
+are fixed weights for balancing the downlink and uplink rates, respectively. 
+
+2) CRB-Based Sensing Performance: The sensing per-formance is characterized by the angle-related Cram´ er– Rao bound (CRB), which provides a lower bound on the estimation error covariance of the target angles. For CRB evaluation, we collect the sensing received sig-nals over L snapshots as Ys = [ys(1) , . . . , ys(L)] ∈
+
+CM2×L. Let Ls = [ℓs(1) , . . . , ℓs(L)] and Zs =[zs(1) , . . . , zs(L)] . Define At(θ) = [at(θ1), . . . , at(θKs )] ,
+
+Ar (θ) = [ ar (θ1), . . . , ar (θKs )] , and B(β) = diag( β), where 
+
+β = [ β1, . . . , β Ks ]T . Then, the stacked sensing received signal is written as 
+
+Ys = A∗ 
+
+> r
+
+(θ)B(β)AHt (θ)Xs + Ls + HSI ,s Xs + Zs. (15) By vectorizing Ys, we obtain 
+
+ys ≜ vec( Ys) = ( XTs ⊗ IM2 )
+
+> Ks
+
+X
+
+> m=1
+
+βmϕ(θm) + vs, (16) where ϕ(θ) = a∗ 
+
+> t
+
+(θ) ⊗ a∗ 
+
+> r
+
+(θ) ∈ CM1M2×1 denotes the CPA-induced virtual array manifold, and vs = vec( Ls +HSI ,s Xs +
+
+Zs) collects the aggregate communication leakage, the residual SI after SIC, and the sensing receiver noise. At each snapshot, the corresponding non-target component is 
+
+vs(n) = ℓs(n) + HSI ,s xs(n) + zs(n). (17) Under the independence assumptions in the signal model, the covariance matrix of vs(n) is given by 
+
+Rv,s ≜ E{vs(n)vHs (n)} = Rℓ,s + HSI ,s RsHH 
+
+> SI ,s
+
++ σ2 
+
+> s
+
+IM2 .
+
+(18) Let the unknown target parameter vector be defined as 
+
+ξ = [θT , Re {β}T , Im {β}T ]T ∈ R3Ks×1, where θ =[θ1, . . . , θ Ks ]T denotes the target-angle vector and β =[β1, . . . , β Ks ]T denotes the complex reflection-coefficient vec-tor. The mean vector of the received sensing signal is expressed as μ(ξ) = vec  A∗ 
+
+> r
+
+(θ)B(β)AH 
+
+> t
+
+(θ)Xs
+
+ .
+
+Due to the effective interference-plus-noise covariance is generally colored, the FIM of ξ is given by 
+
+[Fξ]i,j = 2 Re 
+
+ ∂μH (ξ)
+
+∂ξ i
+
+ IL ⊗ R−1v,s
+
+ ∂μ(ξ)
+
+∂ξ j
+
+
+
+, (19) where IL ⊗ Rv,s denotes the covariance matrix of the stacked effective interference-plus-noise vector over L snapshots. Since the reflection coefficients are nuisance parameters for the considered angle-estimation task, we define η =[Re {β}T , Im {β}T ]T ∈ R2Ks×1. Accordingly, the full FIM can be partitioned as 
+
+Fξ =
+
+Fθθ Fθη 
+
+Fηθ Fηη 
+
+
+
+. (20) After eliminating the nuisance reflection parameters via the Schur complement, the equivalent FIM for the target angles is given by Jθ = Fθθ − Fθη F−1 
+
+> ηη
+
+Fηθ . Therefore, the angle-related CRB metric is defined as 
+
+CRB θ = tr  J−1
+
+> θ
+
+ . (21) III. S ENSING PERFORMANCE ANALYSIS AND PROBLEM 
+
+FORMULATION 
+
+In this section, we first provide an order-wise CRB analysis to quantify the sensing gain enabled by the co-prime array layout. Subsequently, we formulate a joint resource allocation problem for the considered TDD communication and FD sensing ISAC system, where the weighted downlink–uplink communication sum rate is maximized subject to the sensing accuracy, total BS transmit-power, downlink/uplink QoS, and residual SI constraints. 
+
+A. Order-Wise CRB Analysis 
+
+To obtain analytical insight into the sensing advantage of the proposed CPA-based architecture, we first characterize the normalized correlation-response of the CPA-induced virtual -30 -20 -10 0 10 20 30 -60 -50 -40 -30 -20 -10 0     
+
+> Normalized correlation response (dB)  Proposed CPA Partitioned ULA Fig. 2. Normalized correlation responses of the proposed CPA and the partitioned ULA benchmark with 4 sensing transmit antenna elements and 7 sensing receive antenna elements, i.e., (M1, M 2) = (4 ,7) , for reference direction θ0= 0 ◦.
+
+array manifold. We then investigate the asymptotic behavior (i.e., scaling order) of the angle-related CRB with respect to the allocated antennas by comparing it with that of a con-ventional ULA benchmark. Similar normalized steering-vector correlation metrics have been widely adopted as ambiguity functions or virtual-array beampatterns in MIMO radar array characterization, where they quantify whether two angular directions can be distinguished from the array responses [21], [22]. For a reference direction θ0 and a scanning direction θ, the normalized correlation response of the virtual array manifold is defined as 
+
+χ(θ0, θ ) = ϕH (θ0)ϕ(θ)
+
+∥ϕ(θ0)∥2 ∥ϕ(θ)∥2
+
+. (22) The corresponding response is given by 20 log 10 (χ(θ0, θ )) .
+
+As shown in Fig. 2, for the same numbers of sensing transmit and receive antennas, the proposed CPA exhibits a much narrower mainlobe than the partitioned ULA. This nar-row mainlobe from the CPA is due to the difference between sensing and communications. This behavior is fundamentally due to the transmit-receive virtual aperture created by the CPA geometry. In conventional communication-type beamforming , antenna array is mainly designed to improve the spatial degrees of freedom for one-way signal transmission from the BS to users or from users to the BS. Accordingly, half-wavelength-spaced ULAs are commonly adopted to form directing beams while avoiding spatial aliasing. In contrast, sensing depends on the phase variations accumulated along both the probing path from the transmitter to the target and the echo path from the target to the receiver. Hence, the relevant array response is not determined by the transmit beam directing. Therefore, the virtual array responses decorrelate more rapidly as the scanning direction deviates from the reference direction, which indicates a higher angular resolution capability. Motivated by the narrower correlation mainlobe observed above, we next investigate the order-wise behavior of the angle-related CRB and compare it with that of a ULA benchmark. Specifically, we begin with the single-target case, where the asymptotic scaling can be directly characterized from the derivative structure of the CPA virtual manifold. We then extend the analysis to the multi-target case. This extension is nontrivial, since, unlike the single-target setting, the multi-target CRB depends on the effective angle Fisher information matrix after eliminating the nuisance parameters associated with the target reflection coefficients. Therefore, the multi-target analysis must retain the complete FIM block structure and its Schur-complement correction, under which a nondegenerate target configuration enables a meaningful order-wise comparison between the CPA and the ULA. To facilitate the following asymptotic analysis, we introduce the spatial frequency ω(θ) = π sin θ and reformulate the angle-related CRB with respect to ω, since ω leads to a more compact characterization of the steering vectors and their derivatives. Further, we eliminate the nuisance parameters from the full mean-based FIM. For the single-target case, define the parameter vector as 
+
+ξ =
+
+ω
+
+η
+
+
+
+, η =
+
+ℜ{ β}ℑ{ β}
+
+
+
+, (23) where ω is the spatial frequency of interest and η collects the nuisance parameters associated with the complex reflection coefficient. Then, the corresponding FIM can be partitioned as 
+
+F =
+
+Fωω Fωη 
+
+Fηω Fηη 
+
+
+
+. (24) Since the CRB of the spectral frequency ω is given by the 
+
+(1 , 1) -th block of F−1, applying the block matrix inversion formula yields 
+
+CRB ω =  Fωω − Fωη F−1 
+
+> ηη
+
+Fηω 
+
+−1 . (25) The term Fωω − Fωη F−1 
+
+> ηη
+
+Fηω represents the effective Fisher information associated with the angle parameter after eliminat-ing the nuisance parameters via the Schur complement. There-fore, the order-wise CRB analysis can be equivalently carried out by studying the asymptotic scaling of Fωω −Fωη F−1 
+
+> ηη
+
+Fηω .As for the multi-target case, the same principle applies, except that the scalar quantity in (25) is replaced by the effective angle FIM matrix obtained from the corresponding block Schur complement. 
+
+Theorem 1 (Single-target order-wise CRB comparison) . Con-sider the single-target sensing case. Let the CPA sensing layout be generated by the co-prime pair (M1, M 2) satisfying Ms =
+
+M1 + M2 − 1, M1 = ρ(Ms + 1) , and M2 = (1 − ρ)( Ms + 1) ,where ρ ∈ (0 , 1) is chosen such that M1 and M2 are co-prime positive integers. The transmit power of each sensing transmit antenna is kept fixed as Ms grows. Then, as Ms → ∞ , the CRB of the spatial frequency ω for the proposed CPA-based sensing architecture satisfies 
+
+CRB ω, CPA = O(M −6 
+
+> s
+
+). (26) 
+
+For the partitioned ULA sensing benchmark with the same number of sensing elements, the corresponding CRB satisfies 
+
+CRB ω, ULA = O(M −4 
+
+> s
+
+). (27) 
+
+Proof. Please refer to Appendix A. 12 14 16 18 20 22 24 26 28 30 Ms                  
+
+> 10 -12
+> 10 -11
+> 10 -10
+> 10 -9
+> 10 -8
+> 10 -7
+> 10 -6
+> CRB CPA actual ( = 0.5) ULA actual ( = 0.5) CPA approx. ( = 0.5) ULA approx. ( = 0.5) CPA actual ( = 0.2) ULA actual ( = 0.2) CPA approx. ( = 0.2) ULA approx. ( = 0.2) Fig. 3. CRB versus the number of sensing elements Ms. The dashed lines indicate the asymptotic reference slopes predicted by Theorem 1, namely, CPA ∝M−6
+> sand ULA ∝M−4
+> s.
+
+Theorem 1 illustrates that, under the same number of physical sensing elements and with the transmit power of each sensing transmit antenna kept fixed, the proposed CPA-based sensing architecture enjoys a faster asymptotic CRB decay than the partitioned ULA benchmark. This result reflects the virtual-aperture gain of the CPA geometry in the order-wise array-geometry comparison. On the other hand, to characterize the asymptotic CRB be-havior in the multi-target case, we first introduce the following nondegenerate target placement. 
+
+Definition 1. Consider the multi-target sensing case with target spatial-frequency vector ω = [ ω1, . . . , ω Ks ]T , where 
+
+ωm = π sin θm. The target placement is said to be nonde-generate if there exists a constant δ ∈ (0 , 1) , independent of 
+
+Ms, such that for any m̸ = n, sin 
+
+ M1(ωm−ωn)2
+
+
+
+≥ δ and 
+
+sin 
+
+ M2(ωm−ωn)2
+
+
+
+≥ δ.This condition excludes degenerate target configurations where the pairwise spatial-frequency differences fall close to the aliasing singularities induced by the co-prime spacings. Under Definition 1, the inter-target cross terms are asymptot-ically weaker than the corresponding diagonal terms after the Schur-complement reduction. 
+
+Theorem 2. Under the same CPA sensing configuration as in Theorem 1, consider the multi-target sensing case with fixed Ks ≥ 2. If the target placement satisfies Definition 1, then, with the transmit power of each sensing transmit antenna kept fixed as in Theorem 1, the trace of the multi-target spatial-frequency CRB obtained from the full Fisher information matrix after eliminating the nuisance reflection parameters via the block Schur complement satisfies 
+
+tr(CRB ω, CPA ) = O(M −6 
+
+> s
+
+) (28) 
+
+for sufficiently large Ms.For the partitioned ULA sensing benchmark with the same number of sensing elements, under the corresponding non-degenerate target placement and the same antenna-power setting, the trace of the multi-target spatial-frequency CRB satisfies 
+
+tr(CRB ω, ULA ) = O(M −4 
+
+> s
+
+) (29) 
+
+for sufficiently large Ms.Proof. Please refer to Appendix B. Building on Theorems 1 and 2, we further characterize the snapshot requirement under a fixed physical aperture. Specifically, although the proposed CPA can realize a much larger effective aperture with fewer physical sensing elements, this sparse spatial sampling also leads to an estimation-accuracy loss relative to a same-aperture ULA, which must be compensated by using more temporal snapshots. 
+
+Theorem 3 (Snapshot tradeoff under the same physical sens-ing aperture) . Under the same physical sensing aperture, let 
+
+LCPA and LULA denote the numbers of snapshots required by the proposed CPA sensing architecture and the same-aperture ULA benchmark, respectively. With the transmit power of each sensing transmit antenna kept fixed as in the above order-wise analysis, attaining the same spatial-frequency CRB generally requires the proposed CPA to exploit more snapshots than the ULA benchmark. Proof. From the proofs of Theorems 1 and 2 under the same fixed antenna-power setting, the single-target CRB and the multi-target trace-CRB both scale inversely with the number of snapshots. Hence, for fixed Ks, the proposed CPA and the same-aperture ULA benchmark satisfy CRB ω, CPA =Θ
+
+ 1 
+
+> LCPA M6s
+
+
+
+, CRB ω, ULA = Θ 
+
+ 1 
+
+> LULA M4U
+
+
+
+, where MU de-notes the number of sensing elements of the ULA benchmark. For the proposed CPA, the physical sensing aperture is determined by the outermost deployed sensing element and thus satisfies 
+
+ACPA = Θ( M1M2d) = Θ( M 2s d), (30) since M1 = ρ(Ms + 1) and M2 = (1 − ρ)( Ms + 1) imply 
+
+M1M2 = Θ( M 2s ). For a ULA with MU sensing elements, its physical aperture satisfies 
+
+AULA = ( MU − 1) d = Θ( MUd). (31) Therefore, under the same physical aperture condition 
+
+ACPA ≍ AULA , we have MU = Θ( M 2s ).
+
+Substituting this relation into the ULA CRB scaling gives 
+
+CRB ω, ULA = Θ 
+
+ 1
+
+LULA M 8s
+
+
+
+. (32) To attain the same spatial-frequency CRB, it is therefore necessary that Θ
+
+ 1 
+
+> LCPA M6s
+
+
+
+= Θ 
+
+ 1 
+
+> LULA M8s
+
+
+
+, which yields 
+
+LCPA = Θ( M 2s )LULA . Hence, under the same physical aperture, the proposed CPA generally requires more snapshots than the ULA benchmark to attain the same spatial-frequency CRB. This proves Theorem 3. To validate the order-wise CRB scaling in Theorem 1, Fig. 3 illustrates the CRB changes with the number of sensing antenna elements Ms for different ρ. The results demonstrate that, in the large-Ms regime, the CPA and ULA curves approach the theoretical orders M −6 
+
+> s
+
+and M −4 
+
+> s
+
+, respectively. Meanwhile, when ρ = 0 .5, where the number of transmit antennas is equal to the number of receive antennas, the CRB is less than the same number of sensing antenna elements with ρ = 0 .2. This is because, for a fixed Ms, ρ = 0 .5
+
+yields M1 ≈ M2, which maximizes the product M1M2 and thereby generates a richer CPA-induced virtual array with a larger effective aperture. Consequently, the balanced Tx/Rx configuration offers improved angular resolution and lower CRB. 
+
+B. Problem Formulation 
+
+In this subsection, we formulate a joint resource allocation problem for the considered TDD communication and FD sens-ing ISAC system. The objective is to maximize the weighted communication sum rate by jointly designing the sensing pre-coder, the downlink communication precoder, and the uplink receive beamformers, subject to the sensing accuracy require-ment, BS transmit-power budget, residual SI constraints, and communication QoS constraints. The optimization problem is formulated as 
+
+P1 : max  
+
+> Ws,WDL
+> c,WUL
+> c
+
+αDL RDL + αUL RUL 
+
+s.t. C1 : CRB θ (Ws) ≤ ΓCRB ,
+
+C2 : ∥Ws∥2 
+
+> F
+
++ ∥WDL  
+
+> c
+
+∥2 
+
+> F
+
+≤ P max BS ,
+
+C3 : 
+
+h
+
+HSI ,s Rs(Ws)HH
+
+> SI ,s
+
+i
+
+> m,m
+
+≤ ΓSI ,s ,m = 1 , . . . , M 2,
+
+C4 : 
+
+h
+
+HSI ,c Rs(Ws)HH
+
+> SI ,c
+
+i
+
+> q,q
+
+≤ ΓSI ,c ,q = 1 , . . . , M c,
+
+C5 : γDL  
+
+> k
+
+≥ γth DL , k = 1 , . . . , K c,
+
+C6 : γUL  
+
+> k
+
+≥ γth UL , k = 1 , . . . , K c,
+
+C7 : ∥wUL  
+
+> c,k
+
+∥2 = 1 , k = 1 , . . . , K c.
+
+(33) 
+
+Constraint C1 guarantees the required sensing accuracy by limiting the angle-related CRB. Constraint C2 imposes the total BS transmit-power budget for the dedicated sensing waveform and the downlink communication signals. Con-straints C3 and C4 restrict the residual SI power at the sensing receive subarray and the communication transceiver antennas, respectively. Constraints C5 and C6 ensure the downlink and uplink communication QoS requirements, respectively. Constraint C7 normalizes the uplink receive beamformers. Problem P1 is non-convex due to the coupled commu-nication sum-rate objective, the fractional SINR expressions in both downlink and uplink links, and the CRB constraint. In particular, the sensing precoder Ws affects the downlink rate through the sensing interference term, the uplink rate through the residual SI term, and the sensing accuracy through the induced covariance Rs(Ws). Moreover, the downlink precoder WDL  
+
+> c
+
+is coupled with the downlink SINR constraints and the total BS transmit-power budget. Therefore, a tractable iterative algorithm is required, which will be developed in the following section. IV. P ROBLEM SOLUTION 
+
+To tackle the non-convex problem P1, we first reformulate the downlink and uplink rate terms using fractional program-ming (FP). Based on the resulting equivalent formulation, an alternating optimization (AO) algorithm is developed to successively update the FP auxiliary variables, the communi-cation beamformers, and the sensing transmit covariance until convergence. 
+
+A. FP-Based Rate Reformulation 
+
+Let q ∈ {DL , UL } denote the communication direc-tion, where αq is the corresponding downlink or uplink rate weight. The desired signal amplitudes are defined as 
+
+aDL  
+
+> k
+
+= ( hDL  
+
+> c,k
+
+)H wDL  
+
+> c,k
+
+, aUL  
+
+> k
+
+=
+
+q
+
+pUL  
+
+> k
+
+(wUL  
+
+> c,k
+
+)H hUL  
+
+> c,k
+
+. The corresponding total received powers are 
+
+IDL  
+
+> k
+
+=
+
+> Kc
+
+X
+
+> j=1
+
+(hDL  
+
+> c,k
+
+)H wDL  
+
+> c,j
+> 2
+
++ ( hDL  
+
+> s,k
+
+)H RshDL  
+
+> s,k
+
++ σ2DL , (34) 
+
+IUL  
+
+> k
+
+=
+
+> Kc
+
+X
+
+> j=1
+
+pUL  
+
+> j
+
+(wUL  
+
+> c,k
+
+)H hUL 
+
+> c,j
+> 2
+
++ ( wUL  
+
+> c,k
+
+)H HSI ,c RsHH
+
+> SI ,c
+
+wUL  
+
+> c,k
+
++ σ2UL ∥wUL  
+
+> c,k
+
+∥2. (35) Accordingly, the SINR can be uniformly expressed as 
+
+γqk = |aqk|2
+
+Iqk − | aqk|2 , q ∈ { DL , UL }. (36) Following the FP-based rate transformation in [23], the weighted communication sum rate can be equivalently ex-pressed as 
+
+Rsum = max   
+
+> {νqk≥0, y qk∈C}
+
+eRsum , (37) where 
+
+eRsum = B
+
+ln 2 
+
+X
+
+> q∈{ DL ,UL }
+
+αqKcX
+
+> k=1
+
+"
+
+ln(1 + νqk ) − νqk
+
++ 2 Re 
+
+
+
+(yqk)∗
+
+q
+
+1 + νqk aqk
+
+
+
+− | yqk|2Iqk
+
+#
+
+. (38) For given physical design variables, the optimal auxiliary variables are updated in closed form as 
+
+(νqk )⋆ = γqk , (yqk)⋆ =
+
+p1 + ( νqk )⋆ aqk
+
+Iqk
+
+, q ∈ { DL , UL }. (39) The uplink receive beamformers admit closed-form updates, while the transformed objective is used to construct tractable subproblems for the downlink precoder and the sensing trans-mit covariance. 
+
+B. Communication Beamforming Optimization with Fixed Sensing Transmit Design 
+
+For fixed Ws, the communication beamformers are updated by first determining the uplink receive beamformers in closed form and then optimizing the downlink precoder. For the uplink link, define the interference-plus-noise co-variance matrix of the k-th communication UAV as 
+
+CUL  
+
+> k
+
+=
+
+> Kc
+
+X 
+
+> j̸=k
+
+pUL  
+
+> j
+
+hUL  
+
+> c,j
+
+(hUL  
+
+> c,j
+
+)H +HSI ,c Rs(Ws)HH 
+
+> SI ,c
+
++σ2UL IMc .
+
+(40) The SINR-maximizing receive beamformer is given by 
+
+(wUL  
+
+> c,k
+
+)⋆ = (CUL  
+
+> k
+
+)−1hUL 
+
+> c,k
+
+(CUL  
+
+> k
+
+)−1hUL 
+
+> c,k
+
+, k = 1 , . . . , K c. (41) The above normalization satisfies C7 , while the SINR-maximizing update preserves C6 for a feasible current iterate. For the downlink link, define the fixed sensing-interference-plus-noise power as 
+
+ζDL  
+
+> k
+
+= ( hDL  
+
+> s,k
+
+)H Rs(Ws)hDL  
+
+> s,k
+
++ σ2DL . (42) Without loss of optimality, the phase of wDL  
+
+> c,k
+
+can be chosen such that (hDL  
+
+> c,k
+
+)H wDL  
+
+> c,k
+
+is real and nonnegative [24]. Accordingly, constraint C5 is equivalently recast as the SOC constraint 
+
+fC5 : 
+
+n
+
+(hDL  
+
+> c,k
+
+)H wDL 
+
+> c,j
+
+o 
+
+> j̸=k
+
+,
+
+q
+
+ζDL 
+
+> k
+
+T
+
+> 2
+
+≤ Re (hDL  
+
+> c,k
+
+)H wDL 
+
+> c,k
+
+pγth DL 
+
+,k = 1 , . . . , K c.
+
+(43) 
+
+For fixed FP auxiliary variables, the downlink precoder is updated by solving 
+
+P2 : max 
+
+> WDL
+> c
+
+αDL B
+
+ln 2 
+
+> Kc
+
+X
+
+> k=1
+
+"
+
+2 Re 
+
+
+
+(yDL  
+
+> k
+
+)∗
+
+q
+
+1 + νDL  
+
+> k
+
+(hDL  
+
+> c,k
+
+)H wDL 
+
+> c,k
+
+
+
+− | yDL  
+
+> k
+
+|2IDL 
+
+> k
+
+#
+
+s.t. fC2 : WDL 
+
+> c
+> 2
+> F
+
+≤ P max BS − ∥ Ws∥2 
+
+> F
+
+,
+
+fC5 .
+
+(44) 
+
+For fixed FP auxiliary variables, the objective of P2 is concave in WDL  
+
+> c
+
+, while fC2 and fC5 define a convex feasible set. Hence, 
+
+P2 is a convex quadratically constrained problem and can be efficiently solved using standard convex optimization tools. 
+
+C. Sensing Transmit Design Optimization with Fixed Commu-nication Beamformers 
+
+For fixed communication beamformers {WDL  
+
+> c
+
+, WUL  
+
+> c
+
+},we introduce the lifted sensing covariance Rs =
+
+WsWHs ⪰ 0. Define GDL  
+
+> s,k
+
+= hDL  
+
+> s,k
+
+(hDL  
+
+> s,k
+
+)H , GUL SI ,k =
+
+HH
+
+> SI ,c
+
+wUL  
+
+> c,k
+
+(wUL  
+
+> c,k
+
+)H HSI ,c .
+
+For fixed FP auxiliary variables, define λDL  
+
+> k
+
+= αDL |yDL  
+
+> k
+
+|2
+
+and λUL  
+
+> k
+
+= αUL |yUL  
+
+> k
+
+|2. After omitting the common positive factor B/ ln 2 and the terms independent of Rs, maximizing the transformed weighted sum-rate is equivalent to minimizing the weighted sensing-interference and residual-SI terms. With fixed communication beamformers, the downlink and uplink QoS constraints can be equivalently rewritten as 
+
+C5 : IDL  
+
+> k
+
+≤
+
+
+
+1 + 1
+
+γth DL 
+
+
+
+|aDL  
+
+> k
+
+|2, k = 1 , . . . , K c, (45) 
+
+C6 : IUL  
+
+> k
+
+≤
+
+
+
+1 + 1
+
+γth UL 
+
+
+
+|aUL  
+
+> k
+
+|2, k = 1 , . . . , K c. (46) The total transmit-power constraint becomes 
+
+C2 : tr( Rs) ≤ P max BS − WDL  
+
+> c
+> 2
+> F
+
+. (47) To obtain a tractable CRB constraint, we adopt a fixed worst-case upper bound RSI ,s on the residual-SI covariance and define 
+
+Rv,s = Rℓ,s + RSI ,s + σ2 
+
+> s
+
+IM2 . (48) With Rv,s fixed, the resulting FIM Fξ(Rs) is affine in Rs.
+
+Algorithm 1 AO-Based Joint Communication and Sensing Design 
+
+Require: System parameters, feasible initial points R(0)  
+
+> s
+
+, WDL ,(0)  
+
+> c
+
+,and WUL ,(0)  
+
+> c
+
+, convergence tolerance ϵ.
+
+Ensure: Optimized R⋆s , WDL ,⋆ c , and WUL ,⋆ c . 
+
+> 1:
+
+Set t = 0 and calculate R(0) sum . 
+
+> 2:
+
+repeat  
+
+> 3:
+
+Update {νq, (t+1)  
+
+> k
+
+, y q, (t+1)  
+
+> k
+
+}, ∀k and q ∈ {DL , UL }, us-ing (39).  
+
+> 4:
+
+Update WUL ,(t+1)  
+
+> c
+
+using (41) with R(t) 
+
+> s
+
+. 
+
+> 5:
+
+Solve (44) to obtain WDL ,(t+1)  
+
+> c
+
+. 
+
+> 6:
+
+Solve (51) to obtain R(t+1)  
+
+> s
+
+. 
+
+> 7:
+
+Calculate R(t+1) sum and set t ← t + 1 . 
+
+> 8:
+
+until 
+
+R(t)sum − R(t−1) sum 
+
+R(t−1) sum 
+
+≤ ϵ. 
+
+> 9:
+
+Set R⋆s = R(t) 
+
+> s
+
+, WDL ,⋆ c = WDL ,(t) 
+
+> c
+
+, and WUL ,⋆ c = WUL ,(t) 
+
+> c
+
+.
+
+By introducing an auxiliary matrix Tθ , the CRB constraint is conservatively reformulated as 
+
+C1a : 
+
+Fξ(Rs) Eθ
+
+ETθ Tθ
+
+
+
+⪰ 0, (49) 
+
+C1b : tr( Tθ ) ≤ ΓCRB , (50) where Eθ selects the angle-related parameters from the com-plete parameter vector. Since Ws ∈ CM1×ds , the lifted covariance implicitly satisfies rank( Rs) ≤ ds. By dropping this non-convex rank constraint, the sensing transmit design subproblem is relaxed as 
+
+P3 : min 
+
+> Rs,Tθ
+> Kc
+
+X
+
+> k=1
+
+λDL  
+
+> k
+
+tr 
+
+
+
+GDL  
+
+> s,k
+
+Rs
+
+
+
++
+
+> Kc
+
+X
+
+> k=1
+
+λUL  
+
+> k
+
+tr 
+
+
+
+GUL SI ,k Rs
+
+
+
+s.t. C1a , C1b , C2 , C3 , C4 ,
+
+C5 , C6 , Rs ⪰ 0.
+
+(51) 
+
+Problem P3 is an SDP obtained through semidefinite relax-ation and can be efficiently solved using standard convex optimization tools. Let R⋆s denote the solution of P3. If 
+
+rank( R⋆s ) ≤ ds, an exact sensing precoder can be recovered from its compact eigenvalue decomposition; otherwise, Gaus-sian randomization is employed to obtain a feasible rank-ds
+
+sensing precoder. The overall AO procedure for solving P1 is summarized in Algorithm 1. The per-iteration complexity is dominated by the updates of the communication beamformers and the sensing covari-ance. The uplink beamforming update requires O(KcM 3 
+
+> c
+
+)
+
+operations, while P2 and P3 are solved as an SOCP and an SDP, respectively. Hence, the overall complexity scales as 
+
+O IAO [KcM 3 
+
+> c
+
++ CSOCP + CSDP ], where IAO is the number of AO iterations. Typically, the SDP subproblem P3 dominates the computational cost. V. S IMULATION RESULTS 
+
+In this section, we present a comprehensive simulation study to evaluate the effectiveness of the proposed shared-aperture ISAC design under different system parameters and operating conditions. Unless explicitly stated otherwise, the simulation TABLE I SIMULATION PARAMETER SETTINGS                                                   
+
+> Total number of BS antennas, M10 Co-prime sensing pair, (M1, M 2)(3 ,4)
+> Number of communication UAVs, Kc2Number of sensing targets, Ks3Number of sensing snapshots, L256 Maximum BS transmit power, Pmax BS 40 dBm SINR thresholds, (γth DL , γ th UL )(10 ,10) dB CRB threshold, ΓCRB 5×10 −6rad 2
+> Residual-SI strength, ρSI 0 dB 012345678910 11 12 13 14 15
+> Iterations
+> 11 11.5 12 12.5 13 13.5 14 14.5 15 15.5 16
+> Sum rate (bit/s/Hz)
+> M= 10 M= 17
+> Pmax BS = 1 :5 W
+> Pmax BS = 2 :0 W
+> Pmax BS = 2 :5 W
+> Fig. 4. Convergence performance of Algorithm 1.
+
+parameters are set according to Table I, including the antenna configuration, numbers of communication UAVs and sensing targets, number of sensing snapshots, BS transmit-power bud-get, downlink/uplink SINR thresholds, CRB threshold, and residual-SI level. The downlink and uplink communication channels between the ground BS and the communication UAVs are modeled as i.i.d. Rayleigh fading vectors with unit average power, i.e., 
+
+hDL  
+
+> c,k
+
+, hUL  
+
+> c,k
+
+∼ CN (0, I), where the large-scale path loss is absorbed into the channel normalization factor to isolate the impact of small-scale fading. For each simulated scenario, all numerical results are obtained by averaging over 500 independent channel realizations to ensure statistical reliability and reduce random fluctuations in the performance metrics. To provide a fair and thorough performance comparison, we benchmark the proposed coprime-array-based ISAC beam-forming scheme against several representative baseline array configurations. This comparison allows us to highlight the trade-offs among sensing accuracy, communication through-put, and hardware complexity, thereby demonstrating the ad-vantages of the coprime array in the considered ISAC-UAV scenario.  
+
+> •
+
+Baseline 1, Partitioned ULA subarrays [25]: A ULA with the same total number of antennas M as the proposed scheme is employed. Specifically, the array is divided into three contiguous subarrays assigned to sensing trans-mission, sensing reception, and TDD communication, respectively. The communication subarray operates as a transceiver, supporting downlink transmission and uplink reception in the corresponding TDD slots.  
+
+> •
+
+Baseline 2, Isotropic sensing transmission [26]: This scheme adopts the same CPA sensing layout and communication-antenna positions as the proposed scheme. The sensing transmit covariance is restricted to an isotropic form Riso  
+
+> s
+
+= Ps 
+
+> M1
+
+IM1 , where Ps denotes the sensing transmit power. The design is otherwise subject to the same sensing-accuracy, total BS transmit-power, downlink/uplink QoS, and residual-SI constraints as the proposed scheme. This baseline isolates the gain achieved by CRB-oriented sensing covariance optimization under the same CPA geometry.  
+
+> •
+
+Baseline 3, Minimum-Redundancy Array (MRA) [27]: The sensing Tx and Rx positions are jointly determined through a combinatorial search on the common ULA grid to enlarge the contiguous aperture of the MIMO virtual array while reducing redundant virtual spacings. The same numbers of sensing Tx, sensing Rx, distinct sensing, and communication antennas as those of the pro-posed CPA architecture are maintained, and the remaining grid positions are assigned to the TDD communication transceiver subarray. Fig. 4 illustrates the convergence behavior of Algorithm 1 under different maximum BS transmit power limitations and the number of antenna elements. It is observed that, across all parameter configurations, the system sum rate increases rapidly during the first few iterations. After that, the perfor-mance gain between successive iterations gradually dimin-ishes, and the sum rate eventually goes to stable, which demonstrates that the proposed alternating optimization al-gorithm exhibits numerical convergence properties. As the maximum BS transmit power increases from 1.5 W to 2.5 W ,the converged sum rate improves notably. This is expected, since a larger transmission power provides greater optimiza-tion flexibility for the joint allocation of resources between the sensing waveform and the downlink communication beams. Furthermore, under the same transmit power level, the sum rate achieved with M = 17 is consistently higher than that with M = 10 , indicating that increasing the array size enhances both communication beamforming capability and sensing performance. Overall, the majority of the performance gain is attained within the initial few iterations, confirming that Algorithm 1 is capable of converging rapidly to a stable solution under the considered transmit power and number of antenna elements. Fig. 5 presents the system sum rate as a function of the max-imum BS transmit power under two different CRB thresholds. It is observed that, for all considered schemes, the sum rate increases monotonically with P max BS . This trend is attributed to the fact that a larger power budget expands the feasible resource-allocation space for the sensing waveform and the downlink communication beams, thereby enabling the system to achieve higher communication rates while still satisfying the constraints on communication QoS, residual self-interference (SI), and sensing accuracy. Under the same transmit-power level, the curves corresponding to ΓCRB = 3 × 10 −6 rad 234 36 38 40 42 44       
+
+> Maximum BS transmit power (dBm)
+> 12 13 14 15 16 17 18 19 20 21
+> Sum rate (bit/s/Hz)
+> !CRB = 2 #10 !6!CRB = 3 #10 !6
+> Proposed CPA Baseline 1 Baseline 2 Baseline 3
+
+Fig. 5. Sum-rate performance versus the maximum BS transmit power. 0.1 1 2 3 4 5 6 7 8 9 10     
+
+> CRB threshold (10 !6rad 2)
+> 12 14 16 18 20 22 24 26 28
+> Sum rate (bit/s/Hz)
+> M= 10 M= 17
+> Proposed CPA Baseline 1 Baseline 2 Baseline 3
+
+Fig. 6. Sum-rate performance versus the CRB threshold. 
+
+consistently lie above those for ΓCRB = 2 × 10 −6 rad 2.This indicates that relaxing the sensing accuracy requirement reduces the resources required to satisfy the CRB constraint, thus enabling system allocating more power to data transmis-sion. The proposed co-prime array (CPA) scheme achieves the highest sum rate across the entire power range and consistently outperforms the minimum-redundancy array (MRA) baseline. This confirms that the CPA virtual array structure combined with joint resource allocation can effectively exploit the trans-mit power. In comparison with the partitioned ULA, the larger virtual aperture offered by the CPA lowers the resource cost of satisfying for the same CRB target. Moreover, the pronounced performance advantage of the proposed scheme over the CPA-Isotropic benchmark highlights that merely adopting the CPA architecture is insufficient to fully unlock its potential. The optimization of the sensing covariance matrix guaranteeing the sensing accuracy, communication interference, and residual SI enable to balance the tradeoff between sensing and communi--10 -5 0 5 10 15 20       
+
+> residual-SI strength (dB)
+> 12 13 14 15 16 17 18 19 20
+> Sum rate (bit/s/Hz)
+> !CRB = 2 #10 !6!CRB = 5 #10 !6
+> Proposed CPA Baseline 1 Baseline 2 Baseline 3
+
+Fig. 7. Sum-rate performance versus the residual SI power. 
+
+cation.. Fig. 6 illustrates the system sum rate as a function of the CRB threshold under different number of antenna elements. A smaller ΓCRB corresponds to a more strict requirement on angle-estimation accuracy. In this regime, the system must devote more communication resources to the sensing waveform, thereby limiting the design flexibility available for communication beamforming. As a result, the achievable sum rate decreases, and in some cases, certain schemes may even fail to satisfy all the constraints simultaneously. As 
+
+ΓCRB gradually increases, the sensing accuracy requirement is relaxed, allowing those schemes limited by the CRB constraint to allocate more resources to communication transmission. Consequently, the sum rate improves notably. As shown in Baseline 1, the problem becomes feasible only with larger CRB thresholds than those of the other schemes. Meanwhile, the proposed scheme can accommodate more strict CRB con-straints. It should be also noted that once the CRB constraint no longer constitutes the primary performance bottleneck, the curves tend to saturate. It is worth noting that the proposed CPA scheme with 
+
+M = 17 maintains a nearly constant sum rate across the entire considered range of CRB thresholds. This observation indicates that the larger virtual aperture and richer angular observations provided by the CPA enable the system to meet stringent sensing requirements with little degradation in communication performance. Even with M = 10 , the proposed scheme remains feasible under relatively stringent CRB thresholds and achieves a higher sum rate than the baseline schemes with the same array size. In contrast, the partitioned ULA, particularly in the M = 10 case, requires a considerably looser CRB threshold to become feasible. This simulation results show that its limited effective sensing aperture makes it difficult to simultaneously support high-accuracy sensing and maintain the required communication QoS. Fig. 7 presents the system sum rate as a function of the residual SI level under different CRB thresholds. It is observed 35 40 45 50 55 60 65 70 75       
+
+> Sensing FoV half-width 3max (deg)
+> 10 12 14 16 18 20 22 24 26 28 30
+> Sum rate (bit/s/Hz)
+> M= 10 M= 17
+> Proposed CPA Baseline 1 Baseline 2 Baseline 3 Fig. 8. Sum-rate performance versus the sensing field-of-view half-width.
+
+that, for all considered schemes, the sum rate decreases mono-tonically as the residual SI level increases. This degradation is attributed to the fact that stronger sensing-transmission leakage increases the interference level at both the sensing receive subarray and the communication transceiver antennas. Under the same residual SI level, the looser CRB threshold of ΓCRB = 5 × 10 −6 rad 2 yields a higher sum rate. This is because the system is afforded greater flexibility in allocating sensing resources, thereby mitigating the communication per-formance loss imposed by stringent sensing accuracy require-ments. Meanwhile, the proposed CPA scheme consistently achieves the highest sum rate across the entire considered range of residual SI levels. Moreover, it remains feasible throughout this range and experiences only moderate perfor-mance degradation, demonstrating that the proposed design exhibits favorable robustness under imperfect SI cancellation. Compared with the CPA-Isotropic baseline, the performance advantage of the proposed scheme indicates that the jointly optimized sensing covariance matrix can effectively tailor the spatial distribution of the transmit energy according to the communication interference, sensing accuracy, and residual SI constraints, rather than relying solely on the geometric advan-tages of the CPA architecture. In contrast, the performance of the partitioned ULA deteriorates rapidly as the residual SI level increases, and infeasible points emerge at high residual SI levels. This highlights that its limited effective sensing aperture makes it difficult to simultaneously satisfy the communication QoS, sensing accuracy, and residual SI constraints. Fig. 8 illustrates the system sum rate as a function of the half-width of the sensing field of view, denoted by θmax ,under different array sizes. It is observed that, for most of the considered schemes, the sum rate gradually decreases as θmax increases. This is because a wider sensing field of view extends the target distribution over a larger off-axis angular range, thereby increasing the difficulty of satisfying the angle-estimation accuracy requirement. To satisfy the CRB constraint, the system must devote more transmit resources to the sensing task, leaving fewer resources available for commu-1 2 3 4 5     
+
+> The number of sensing targets Ks
+> 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+> Sum rate (bit/s/Hz)
+> M= 10 M= 17
+> Proposed CPA Baseline 1 Baseline 2 Baseline 3
+> Fig. 9. Sum-rate performance versus the number of sensing targets.
+
+nication transmission. Notably, the proposed CPA scheme with 
+
+M = 17 maintains an approximately constant sum rate across the entire considered range of θmax , indicating that the large virtual aperture of the CPA can support wide-FoV sensing with only a modest communication performance loss. Even with M = 10 , although the sum rate of the proposed scheme decreases somewhat as θmax increases, it remains feasible over the entire tested range and consistently outperforms the baseline schemes with the same array size. Compared with other schemes, the partitioned ULA is the most sensitive to the expansion of the sensing field of view. Its sum rate decreases rapidly, and infeasible points emerge at large values of θmax . This reveals that its limited effective sensing aper-ture makes it difficult to simultaneously maintain wide-FoV sensing accuracy and communication QoS. The performance advantage of the proposed scheme over the CPA-Isotropic baseline further indicates that, beyond the virtual-aperture gain provided by the CPA geometry, the optimization of the sensing covariance matrix—with explicit consideration of the target angles, communication interference, and residual SI—plays a critical role in sustaining wide-FoV sensing performance. Fig. 9 presents the system sum rate as a function of the number of sensing targets Ks under different array sizes. It is observed that, for most of the considered schemes, the sum rate gradually decreases as Ks increases. This is because a larger number of sensing targets increases the dimensionality of the angle parameters to be estimated and intensifies the coupling among different target parameters within the Fisher informa-tion matrix (FIM). Under a fixed CRB threshold, the system is required to simultaneously guarantee the angle-estimation ac-curacy for all targets, thereby devoting more transmit resources to the sensing task and leaving fewer resources available for communication transmission. Notably, the proposed CPA scheme with M = 17 maintains an approximately constant sum rate across the entire considered range of Ks, indicating that the large virtual aperture of the CPA can effectively alleviate the sensing-resource burden imposed by multi-target sensing. Even with M = 10 , although the sum rate of the proposed scheme decreases somewhat as Ks increases, it consistently remains higher than those of the baseline schemes with the same array size. Compared with other schemes, the partitioned ULA exhibits the most significant performance degradation and becomes infeasible at relatively small values of Ks. This reveals that its limited effective sensing aperture makes it difficult to simultaneously satisfy the multi-target CRB requirement, communication QoS, and residual SI con-straints. The performance advantage of the proposed scheme over the CPA-Isotropic baseline further indicates that relying solely on the CPA geometry is insufficient to fully address the demands of multi-target sensing. Instead, it is essential to jointly optimize the sensing covariance matrix by taking into account the target directions, communication interference, and residual SI. VI. C ONCLUSION 
+
+This paper proposed a shared-aperture ISAC architecture for UAV networks, where a sparse co-prime array is employed for full-duplex sensing while the remaining antenna positions within the same physical aperture are reused for communica-tion. Through the CRB analysis, we showed that the enlarged virtual aperture provided by the CPA enables improved sensing performance compared with the partitioned ULA benchmark in both single-target and nondegenerate multi-target scenar-ios. Meanwhile, we revealed a space–time sampling tradeoff, where the sensing gain enabled by sparse spatial sampling generally requires additional temporal snapshots under the same physical aperture. Based on the proposed architecture, we further formulated a joint resource allocation problem to maximize the weighted communication sum rate under the sensing accuracy, transmit-power, communication QoS, and residual SI constraints, and developed an AO-based iterative algorithm for its solution. Simulation results showed that the proposed scheme consistently outperforms the considered baseline schemes and maintains favorable communication per-formance under increasingly demanding sensing and interfer-ence conditions. Moreover, the comparison with the isotropic CPA baseline demonstrated that the virtual-aperture gain alone is insufficient to fully exploit the potential of the CPA ar-chitecture, and that sensing covariance optimization plays an important role in improving the sensing–communication tradeoff. These results demonstrate the benefits of jointly exploiting sparse-array geometry and resource optimization for shared-aperture FD-ISAC systems. REFERENCES [1] H. Tataria, M. Shafi, A. F. Molisch et al. , “6G wireless systems: Vision, requirements, challenges, insights, and opportunities,” Proceedings of the IEEE , vol. 109, no. 7, pp. 1166–1199, 2021. [2] J. Wu, Z. Wang, Y.-F. Liu et al. , “Efficient global algorithms for transmit beamforming design in ISAC systems,” IEEE Trans. Signal Process. ,vol. 72, pp. 4493–4508, 2024. [3] A. Zhang, M. L. Rahman, X. Huang et al. , “Perceptive mobile networks: Cellular networks with radio vision via joint communication and radar sensing,” IEEE Veh. Technol. Mag. , vol. 16, no. 2, pp. 20–30, 2021. [4] Z. Wei, H. Qu, Y. Wang et al. , “Integrated sensing and communication signals toward 5G-A and 6G: A survey,” IEEE Internet Things J. , vol. 10, no. 13, pp. 11 068–11 092, 2023. [5] S. Lu, F. Liu, Y. Li et al. , “Integrated sensing and communications: Recent advances and ten open challenges,” IEEE Internet Things J. ,vol. 11, no. 11, pp. 19 094–19 120, 2024. [6] A. Hassanien, M. G. Amin, E. Aboutanios et al. , “Dual-function radar communication systems: A solution to the spectrum congestion problem,” IEEE Signal Process. Mag. , vol. 36, no. 5, pp. 115–126, 2019. [7] T. Huang, N. Shlezinger, X. Xu et al. , “Majorcom: A dual-function radar communication system using index modulation,” IEEE Trans. Signal Process. , vol. 68, pp. 3423–3438, 2020. [8] F. Liu, Y. Cui, C. Masouros et al. , “Integrated sensing and communi-cations: Toward dual-functional wireless networks for 6G and beyond,” 
+
+IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [9] F. Liu, W. Yuan, C. Masouros et al. , “Radar-assisted predictive beam-forming for vehicular links: Communication served by sensing,” IEEE Trans. Wireless Commun. , vol. 19, no. 11, pp. 7704–7719, 2020. [10] J. A. Zhang, M. L. Rahman, K. Wu et al. , “Enabling joint communica-tion and radar sensing in mobile networks—a survey,” IEEE Commun. Surveys Tuts. , vol. 24, no. 1, pp. 306–345, 2022. [11] Y. Rahmatallah and S. Mohan, “Peak-to-average power ratio reduction in OFDM systems: A survey and taxonomy,” IEEE Commun. Surveys Tuts. , vol. 15, no. 4, pp. 1567–1592, 2013. [12] P. M. McCormick, S. D. Blunt, and J. G. Metcalf, “Simultaneous radar and communications emissions from a common aperture, part i: Theory,” in 2017 IEEE Radar Conference (RadarConf) , 2017, pp. 1685–1690. [13] P. M. McCormick, B. Ravenscroft, S. D. Blunt et al. , “Simultaneous radar and communication emissions from a common aperture, part ii: Experimentation,” in 2017 IEEE Radar Conference (RadarConf) , 2017, pp. 1697–1702. [14] Z. Xiao and Y. Zeng, “Waveform design and performance analysis for full-duplex integrated sensing and communication,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1823–1837, 2022. [15] A. Tang, X. Wang, and J. A. Zhang, “Interference management for full-duplex ISAC in B5G/6G networks: Architectures, challenges, and solutions,” IEEE Commun. Mag. , vol. 62, no. 9, pp. 20–26, 2024. [16] R. Liu, M. Li, Q. Liu et al. , “DOA estimation-oriented joint array partitioning and beamforming designs for ISAC systems,” IEEE Trans. Wireless Commun. , vol. 24, no. 3, pp. 2052–2066, 2025. [17] Q. Gao, R. Zhong, H. Shin et al. , “LLM-enabled antenna partitioning and beamforming optimization for segmented pinching,” 2026. [Online]. Available: https://arxiv.org/abs/2604.10372 [18] P. P. Vaidyanathan and P. Pal, “Sparse sensing with co-prime samplers and arrays,” IEEE Trans. Signal Process. , vol. 59, no. 2, pp. 573–586, 2011. [19] C. Du, H. Zhang, X. Zhang et al. , “A full-duplex-based integrated sensing and communication survey: Principles, key techniques, and receiver design,” IEEE Commun. Surveys Tuts. , vol. 28, pp. 1285–1317, 2026. [20] Z. Zhang, K. Long, A. V. Vasilakos et al. , “Full-duplex wireless communications: Challenges, solutions, and future research directions,” 
+
+Proc. IEEE , vol. 104, no. 7, pp. 1369–1409, 2016. [21] C. Vasanelli, R. Batra, and C. Waldschmidt, “Optimization of a MIMO radar antenna system for automotive applications,” in 2017 11th Eu-ropean Conference on Antennas and Propagation (EUCAP) , 2017, pp. 1113–1117. [22] M. Huan, J. Liang, Y. Ma et al. , “Optimization of high-resolution and ambiguity-free sparse planar array geometry for automotive MIMO radar,” IEEE Trans. Signal Process. , vol. 72, pp. 4332–4348, 2024. [23] Z. Wu, H. Zhang, Y. Ren et al. , “Joint design of phase shift and transceiver beamforming in ris-assisted full-duplex isac system,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 468–479, 2026. [24] Z. He, W. Xu, H. Shen et al. , “Full-duplex communication for ISAC: Joint beamforming and power optimization,” IEEE J. Sel. Areas Com-mun. , vol. 41, no. 9, pp. 2920–2936, 2023. [25] J. Li and P. Stoica, “MIMO radar with colocated antennas,” Signal Process. Mag. , vol. 24, no. 5, pp. 106–114, 2007. [26] G. Wu, Y. Fang, J. Xu et al. , “Energy-efficient MIMO integrated sensing and communications with on–off nontransmission power,” IEEE Internet Things J. , vol. 11, no. 7, pp. 12 177–12 191, 2024. [27] R. Rajam¨ aki and V. Koivunen, “Sparse symmetric linear arrays with low redundancy and a contiguous sum co-array,” IEEE Trans. Signal Process. , vol. 69, pp. 1697–1712, 2021. APPENDIX APROOF OF THEOREM 1For the single-target case, the vectorized sensing mean is given by ˜μ(ω, β ) = ( XT ⊗ I) β ϕ(ω), where β = βR + jβ I.Using the mean-based FIM definition in (19), together with the single-target parameter partition and Schur-complement formulation in (23)–(25), it remains to evaluate the FIM blocks associated with ω, βR, and βI. The corresponding partial derivatives are 
+
+∂ ˜μ
+
+∂ω = ( XT ⊗ I) β ˙ϕ(ω), (A.1) 
+
+∂ ˜μ
+
+∂β R
+
+= ( XT ⊗ I) ϕ(ω), (A.2) 
+
+∂ ˜μ
+
+∂β I
+
+= j(XT ⊗ I) ϕ(ω). (A.3) Substituting ∂ ˜μ/∂ω into (19) and adopting the snapshot approximation X∗XT ≈ LRTs , we obtain 
+
+Fωω = 2Lσ2
+
+> r
+
+|β|2 ˙ϕH (ω)( RTs ⊗ I) ˙ϕ(ω). (A.4) Similarly, 
+
+FβRβR = FβIβI = 2Lσ2
+
+> r
+
+ϕH (ω)( RTs ⊗ I)ϕ(ω), (A.5) 
+
+Fωβ R = 2Lσ2
+
+> r
+
+ℜ
+
+n
+
+β∗ ˙ϕH (ω)( RTs ⊗ I)ϕ(ω)
+
+o
+
+, (A.6) 
+
+Fωβ I = − 2Lσ2
+
+> r
+
+ℑ
+
+n
+
+β∗ ˙ϕH (ω)( RTs ⊗ I)ϕ(ω)
+
+o
+
+, (A.7) and FβRβI = 0 , since ϕH (ω)( RTs ⊗ I)ϕ(ω) is a Hermitian quadratic form and is therefore real-valued. For compactness, let A = RTs ⊗ I, x = ˙ϕ(ω), y = ϕ(ω),
+
+and define t = xH Ax , q = xH Ay , u = yH Ay . Then, with the nuisance parameter vector η = [ βR, β I]T , the nuisance block satisfies 
+
+Fηη = 2Lσ2
+
+> r
+
+u I2, (A.8) and the Schur complement yields 
+
+Fωω − Fωη F−1 
+
+> ηη
+
+Fηω = 2Lσ2
+
+> r
+
+|β|2
+
+
+
+t − |q|2
+
+u
+
+
+
+. (A.9) Moreover, 
+
+t − |q|2
+
+u = xH Ax − |xH Ay |2
+
+yH Ay = min  
+
+> c∈C
+
+(x − cy)H A(x − cy),
+
+(A.10) where the minimizer is c⋆ = yH Ax yH Ay . Under the setting in The-orem 1, the sensing transmit power of each sensing transmit antenna is kept fixed as Ms grows. Moreover, the sensing covariance Rs is considered full-rank and uniformly well-conditioned. Hence, its eigenvalues are uniformly bounded above and below with respect to Ms, and tr( Rs) = Θ( M1),
+
+i.e., the total sensing transmit power grows linearly with the number of sensing transmit antennas. Therefore, for any vector 
+
+v, we have 
+
+λmin (Rs)∥v∥2 ≤ vH Av ≤ λmax (Rs)∥v∥2.
+
+Using the standard identity min c∈C ∥x − cy∥2 = ∥x∥2 −  
+
+> |xHy|2
+> ∥y∥2
+
+, and restoring the original notation x = ˙ϕ(ω), y =
+
+ϕ(ω), we further obtain 
+
+2Lσ2
+
+> r
+
+|β|2λmin (Rs) ˙ϕH (ω) ˙ϕ(ω) −
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω)
+
+!
+
+≤ Fωω − Fωη F−1 
+
+> ηη
+
+Fηω 
+
+≤ 2Lσ2
+
+> r
+
+|β|2λmax (Rs) ˙ϕH (ω) ˙ϕ(ω) −
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω)
+
+!
+
+.
+
+(A.11) For the proposed CPA sensing architecture, the transmit and receive steering vectors with respect to the spatial frequency 
+
+ω are given by 
+
+at(ω) = 1, e jM 2ω , e j2M2ω , . . . , e j(M1−1) M2ω T , (A.12) 
+
+ar (ω) = 1, e jM 1ω , e j2M1ω , . . . , e j(M2−1) M1ω T , (A.13) and the corresponding virtual manifold is 
+
+ϕ(ω) = a∗ 
+
+> t
+
+(ω) ⊗ a∗ 
+
+> r
+
+(ω). (A.14) Let Dt = diag(0 , M 2, 2M2, . . . , (M1 − 1) M2), D r =diag(0 , M 1, 2M1, . . . , (M2 − 1) M1), so that ˙at(ω) =
+
+jD tat(ω) and ˙ar (ω) = jD r ar (ω). Hence, 
+
+˙ϕ(ω) = ˙ a∗ 
+
+> t
+
+(ω) ⊗ a∗ 
+
+> r
+
+(ω) + a∗ 
+
+> t
+
+(ω) ⊗ ˙a∗ 
+
+> r
+
+(ω). (A.15) To evaluate the projected term in (A.11), it suffices to compute the three inner products ϕH (ω)ϕ(ω), ˙ϕH (ω)ϕ(ω),and ˙ϕH (ω) ˙ϕ(ω). Using the mixed-product property of the Kronecker product, we first obtain 
+
+ϕH (ω)ϕ(ω) =  aTt (ω)a∗ 
+
+> t
+
+(ω)  aTr (ω)a∗ 
+
+> r
+
+(ω) = M1M2.
+
+(A.16) Next, by (A.15), 
+
+˙ϕH (ω)ϕ(ω) =   ˙aHt (ω)a∗ 
+
+> t
+
+(ω)  aTr (ω)a∗ 
+
+> r
+
+(ω)
+
++  aTt (ω)a∗ 
+
+> t
+
+(ω)  ˙aHr (ω)a∗ 
+
+> r
+
+(ω). (A.17) Using PM1−1 
+
+> m=0
+
+m = M1(M1−1) 2 , PM2−1 
+
+> n=0
+
+n = M2(M2−1) 2 , we have 
+
+˙ϕH (ω)ϕ(ω) = jM 1M2
+
+2
+
+ 2M1M2 − M1 − M2
+
+, (A.18) and hence 
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω) = M1M2
+
+4
+
+ 2M1M2 − M1 − M2
+
+2. (A.19) Similarly, by expanding (A.15) and using PM1−1 
+
+> m=0
+
+m2 = 
+
+> M1(M1−1)(2 M1−1) 6
+
+, PM2−1 
+
+> n=0
+
+n2 = M2(M2−1)(2 M2−1) 6 , straight-forward algebra yields 
+
+˙ϕH (ω) ˙ϕ(ω) = M1M2
+
+6
+
+h
+
+M 22 (M1 − 1)(2 M1 − 1) +M 21 (M2 − 1)(2 M2 − 1) + 3 M1M2(M1 − 1)( M2 − 1) 
+
+i
+
+.
+
+(A.20) Substituting (A.16), (A.19), and (A.20) into the projected quantity in (A.11), we obtain 
+
+˙ϕH (ω) ˙ϕ(ω) −
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω) = M1M2
+
+12 
+
+ 2M 21 M 22 − M 21 − M 22
+
+.
+
+(A.21) Substituting M1 = ρ(Ms + 1) and M2 = (1 − ρ)( Ms + 1) 
+
+into (A.21), the leading-order term becomes 
+
+˙ϕH (ω) ˙ϕ(ω) −
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω) ∼ 16 ρ3(1 − ρ)3(Ms + 1) 6,
+
+(A.22) which implies 
+
+˙ϕH (ω) ˙ϕ(ω) −
+
+˙ϕH (ω)ϕ(ω) 2
+
+ϕH (ω)ϕ(ω) = Θ( M 6 
+
+> s
+
+). (A.23) Together with (A.9) and (A.11), this yields 
+
+CRB ω, CPA = Θ( M −6 
+
+> s
+
+). (A.24) For the partitioned ULA sensing benchmark, let 
+
+¯at(ω) = 1, e jω , e j2ω , . . . , e j(M1−1) ω T , (A.25) 
+
+¯ar (ω) = 1, e jω , e j2ω , . . . , e j(M2−1) ω T , (A.26) and define 
+
+¯ϕ(ω) = ¯ a∗ 
+
+> t
+
+(ω) ⊗ ¯a∗ 
+
+> r
+
+(ω). (A.27) Using the same asymptotic sequence as in the CPA case, one can similarly obtain the projected quantity associated with the ULA. The intermediate expressions for ¯ϕH (ω) ¯ϕ(ω),
+
+˙¯ϕH (ω) ¯ϕ(ω), and ˙¯ϕH (ω) ˙¯ϕ(ω) follow analogously and are omitted for brevity. As a result, 
+
+˙¯ϕH (ω) ˙¯ϕ(ω) −
+
+˙¯ϕH (ω) ¯ϕ(ω) 2
+
+¯ϕH (ω) ¯ϕ(ω) = M1M2
+
+12 
+
+ M 21 + M 22 − 2.
+
+(A.28) Hence, under M1 = ρ(Ms + 1) and M2 = (1 − ρ)( Ms + 1) ,its leading-order term satisfies 
+
+˙¯ϕH (ω) ˙¯ϕ(ω)−
+
+˙¯ϕH (ω) ¯ϕ(ω) 2
+
+¯ϕH (ω) ¯ϕ(ω) ∼ 112 ρ(1 −ρ) ρ2+(1 −ρ)2(Ms+1) 4,
+
+(A.29) 
+
+which implies 
+
+˙¯ϕH (ω) ˙¯ϕ(ω) −
+
+˙¯ϕH (ω) ¯ϕ(ω) 2
+
+¯ϕH (ω) ¯ϕ(ω) = Θ( M 4 
+
+> s
+
+). (A.30) Together with (A.9) and (A.11), this yields 
+
+CRB ω, ULA = Θ( M −4 
+
+> s
+
+). (A.31) APPENDIX BPROOF OF THEOREM 2For the multi-target case, define the parameter vector as 
+
+ξ = ωT ηT T , η = ℜ{ β}T ℑ{ β}T T , where ω =[ω1, . . . , ω Ks ]T and β = [ β1, . . . , β Ks ]T . Then, the full mean-based FIM can be partitioned as 
+
+F =
+
+Fωω Fωη 
+
+Fηω Fηη 
+
+
+
+. (B.1) By the block matrix inversion formula, the multi-target spatial-frequency CRB matrix is 
+
+CRB ω =  Fωω − Fωη F−1 
+
+> ηη
+
+Fηω 
+
+−1 . (B.2) Hence, it suffices to study the asymptotic scaling of 
+
+eFωω = Fωω − Fωη F−1 
+
+> ηη
+
+Fηω . (B.3) Next, define Φ = [ϕ(ω1), . . . , ϕ(ωKs )] , ˙Φ =[ ˙ϕ(ω1), . . . , ˙ϕ(ωKs )] , and let A = RTs ⊗ I. Under the setting in Theorems 1 and 2, the sensing transmit power of each sensing transmit antenna is kept fixed as Ms grows. Moreover, the sensing covariance Rs is considered full-rank and uniformly well-conditioned. Hence, its eigenvalues are uniformly bounded above and below with respect to Ms, and 
+
+tr( Rs) = Θ( M1). Therefore, inserting A into the relevant quadratic forms changes only multiplicative constants and does not alter their asymptotic orders with respect to Ms. It thus suffices to characterize the corresponding inner products among ϕ(ωm) and ˙ϕ(ωm).For any m̸ = n, Definition 1 implies that 
+
+sin 
+
+ M1(ωm − ωn)2
+
+
+
+≥ δ, sin 
+
+ M2(ωm − ωn)2
+
+
+
+≥ δ. 
+
+(B.4) This condition prevents the target-pair spatial-frequency differ-ence from approaching the aliasing singularities induced by the sparse CPA geometry. Hence, the pairwise spatial-frequency difference ∆ωmn ≜ ωm − ωn stays away from the aliasing singularities induced by the two sparse spacings M1 and M2.As a result, the cross inner products can be reduced to oscil-latory sums with respect to ∆ωmn , including the unweighted form P ejℓ ∆ωmn , the first-order weighted form P ℓe jℓ ∆ωmn ,and the second-order weighted form P ℓ2ejℓ ∆ωmn . Under (B.4), the denominators of the corresponding geometric-series expressions remain bounded away from zero, and hence these sums do not add coherently. Therefore, for m̸ = n, one obtains 
+
+ϕH (ωm)Aϕ(ωn) = O(1) , (B.5) 
+
+˙ϕH (ωm)Aϕ(ωn) = O(M 2s ), (B.6) 
+
+˙ϕH (ωm)A ˙ϕ(ωn) = O(M 4s ), m̸ = n. (B.7) These bounds show that all inter-target cross terms are asymp-totically weaker than their corresponding diagonal counter-parts. We next consider the diagonal entries of eFωω . Appendix A has already established that, for the CPA sensing geometry, 
+
+ϕH (ωm)Aϕ(ωm) = Θ( M 2s ), (B.8) and 
+
+˙ϕH (ωm)A ˙ϕ(ωm) −
+
+˙ϕH (ωm)Aϕ(ωm) 2
+
+ϕH (ωm)Aϕ(ωm) = Θ( M 6s ). (B.9) 
+
+The second quantity is precisely the single-target projected term after eliminating the nuisance reflection coefficient. Since the cross-target contributions entering the m-th diagonal are lower-order by (B.5)–(B.7), each diagonal entry of eFωω inher-its the same leading-order scaling, namely, 
+
+eFωω 
+
+ 
+
+> m,m
+
+= Θ( M 6s ), m = 1 , . . . , K s. (B.10) We now turn to the off-diagonal entries. By construction, the blocks Fωω , Fωη , and Fηη are all formed from the same cross inner products controlled above. Hence, the Schur correction term Fωη F−1 
+
+> ηη
+
+Fηω cannot increase the off-diagonal order beyond that already induced by the cross terms in Fωω .Consequently, after the exact Schur-complement reduction, the off-diagonal entries remain lower-order and satisfy 
+
+eFωω 
+
+ 
+
+> m,n
+
+= O(M 4s ), m̸ = n. (B.11) Therefore, for fixed Ks, the matrix eFωω is dominated by its diagonal principal terms for sufficiently large Ms, while the off-diagonal entries contribute only lower-order perturbations. Hence, the inverse matrix is governed by the inverse order of the diagonal principal terms, and we obtain 
+
+tr( CRB ω,CPA ) = tr 
+
+eF−1
+
+> ωω
+
+
+
+= O(M −6s ). (B.12) This proves the CPA part of Theorem 2. For the partitioned ULA sensing benchmark, the same proof procedure applies. In this case, the corresponding target placement is assumed to stay away from the ULA degeneracy points, i.e., the pairwise spatial-frequency differences remain bounded away from the singular locations of the associated ULA oscillatory sums. Under this condition, the diagonal entries satisfy 
+
+eFωω 
+
+ 
+
+> m,m
+
+= Θ( M 4s ), m = 1 , . . . , K s, (B.13) whereas the off-diagonal entries remain two orders weaker, namely, eFωω 
+
+ 
+
+> m,n
+
+= O(M 2s ), m̸ = n. (B.14) Therefore, for sufficiently large Ms, the inverse matrix is again determined by the inverse order of the diagonal principal terms, which yields 
+
+tr( CRB ω,ULA ) = O(M −4s ). (B.15) Combining (B.12) and (B.15) completes the proof.

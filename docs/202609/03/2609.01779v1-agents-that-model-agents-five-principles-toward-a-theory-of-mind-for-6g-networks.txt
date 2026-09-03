@@ -1,0 +1,451 @@
+Title: Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks
+
+URL Source: https://arxiv.org/pdf/2609.01779v1
+
+Published Time: Thu, 03 Sep 2026 00:08:31 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks 
+
+Hatim Chergui, Senior Member, IEEE , Carolina Fern´ andez-Mart´ ınez, Mehdi Bennis, Fellow, IEEE ,and Merouane Debbah, Fellow, IEEE 
+
+Abstract —Future 6G networks will rely on Large Language Model (LLM) agents to manage the Radio Access Network (RAN). However, current architectures assume inter-agent messages con-vey objective facts. A message is instead a trace of the sender’s reasoning: it carries a subjective conclusion, so a syntactically valid report can propagate an AI hallucination and trigger a cascading outage invisible to protocol validation. Reading such a trace requires a Theory of Mind (ToM)—before acting, the receiver must model what the peer believes, and what a peer in that position should have believed. Modeling these interactions as cognitive channels on a cellular sheaf, we obtain a unified framework for resilient multi-agent systems, from which five design principles emerge: (i) a message is evidence of the sender’s hidden reasoning; (ii) trust is a continuous cognitive Signal-to-Noise Ratio (SNR)— asserted precision over deviation from the modeled peer belief; (iii) network-wide consistency and resistance to hallucination contagion are computable via the sheaf’s Laplacian; (iv) peer-modeling must halt at exactly two levels to conserve compute and survive mutual information decay; and (v) credible capacity is bounded by operational goal alignment, not link bandwidth. A signaling-storm study on locally deployed 1B-parameter telecom language models validates it: cognitive SNR isolates a hallucinating peer that three of its four neighbors agree with, where a divergence gate ranks every wrong peer above the right one; only depth two ToM recovers the correct action; and the spectral gap decides whether a topology reaches consistency inside the near-real-time budget. 
+
+Index Terms —6G, O-RAN, agentic AI society, theory of mind, reasoning, resilience, semantic communication, sheaves, trust. 
+
+I. I NTRODUCTION 
+
+# NETWORK operators envision 6G infrastructures that read their own telemetry, arbitrate conflicting goals, and au-tonomously recover from faults without human intervention [1]. The architecture taking shape to fulfill this vision places multiple AI agents inside the Radio Access Network (RAN) Intelligent Controller (RIC). Built on Large Language Models, these agents subscribe to O-RAN E2 measurement reports, exchange semantic messages, and collaboratively decide how the network should behave [2]. When an agent receives a 
+
+H. Chergui and C. Fern´ andez-Mart´ ınez are with the i2CAT Foundation, Spain. (e-mails: chergui@ieee.org, name.surname@i2cat.net) M. Bennis is with the University of Oulu, Finland (e-mail: mehdi.bennis@oulu.fi). M. Debbah is with the Research Institute for Digital Future, Khalifa University, 127788 Abu Dhabi, UAE (e-mail: merouane.debbah@ku.ac.ae). This work was supported by grants DGR-2026-2-DIGITALSHIELD, funded by the Research and Universities Department of the Catalonian Govern-ment as well as by COALESCE-6G PID2024-163028OB-I00, funded by MICIU/AEI/10.13039/501100011033/FEDER, EU. 
+
+message, it integrates the information into its context window and acts. This process hides a potentially problematic assumption: that a message is synonymous with a direct measurement, and therefore an intact message implies a sound operational decision. For language-model agents, resilience is no longer merely a transport property. A perfectly delivered message can carry a localized conclusion that inadvertently takes a cell down. What protects the network is the receiver’s ability to judge how far to trust the sender’s reasoning. Two critical steps separate the true network state from the final message: what the sender was physically able to observe, and how the sender interpreted that observation. This interpretation step introduces a vulnerability that no current mechanism validates. A message can pass every authentication test yet carry a conclusion that the network reality does not support. 
+
+A. A Failure in Five Steps 
+
+For example, a critical failure mode occurs when a massive number of devices attempt to reattach to a neighboring cell during an outage. Telemetry exhibits spiking Radio Resource Control (RRC) attempts and random-access load, while Physi-cal Resource Block (PRB) utilization paradoxically drops (e.g. below 2%). This PRB collapse stems from signaling congestion, not low demand. Reattaching devices monopolize the control channels with setup messages. This control-plane starvation prevents the scheduler from issuing transmission grants to exist-ing active users. Without these grants, active data bearers stall and are dropped by the congested baseband processor. Unable to allocate resources for user data, the shared data channels empty. User-plane occupancy thus diminishes as control-plane congestion peaks, making low PRB utilization a direct symptom of the storm. To an anomaly-detection agent trained on user-plane metrics, this inverted correlation is an Out-of-Distribution (OoD) input. Lacking precedent, the agent reverts to learned priors, misclas-sifies the cell as idle, and cites the accurate PRB measurement to recommend secondary carrier deactivation. The systemic failure materializes downstream. Because this recommenda-tion aligns with an energy-saving agent’s utility function, it automatically executes the deactivation, converting transient congestion into a hard outage. No protocol is violated, and the measurement is accurate. The failure originates entirely within arXiv:2609.01779v1 [cs.NI] 1 Sep 2026 the sender’s reasoning and propagates because the receiver lacks mechanisms to invalidate the premise. 
+
+B. What Is Missing: Theory of Mind 
+
+To contain such failures, receiving agents must reason about 
+
+how messages are produced. In psychology, this is known as Theory of Mind [3]: the cognitive skill of modeling what someone else believes, including what they might be getting wrong. Theory of Mind separates two situations that appear identical from the outside. When a peer agent disagrees with a receiver, either the peer is observing valid data that the receiver cannot see (warranting more trust), or the peer has misread shared evidence (warranting less trust). Reacting to the disagreement itself cannot distinguish these realities, and guessing incorrectly drops calls. While machine versions of Theory of Mind exist in multi-agent reinforcement learning [4] and LLM-based games [5], there is no unified theory governing them in network control, where decisions occur in milliseconds across multi-vendor agents. 
+
+C. A Society of Agents on a Graph 
+
+We model the control plane as a society of agents positioned on a communication graph G = ( V, E ). Each agent maintains a local world model, observes a fragment of the network, and repeatedly executes a cycle: it forms a belief, projects that belief to neighbors, weighs their responses, and updates its stance under a hard deadline dictated by the control loop. This unified construction seamlessly determines several quantities that otherwise require separate treatments: the model-ing depth of the peers’ beliefs, the required graph connectivity, the rounds needed for consensus, and whether a localized fault cascades. Consider a single communication link. Let s denote the true network state. No single agent directly observes s. Instead, agent j sees local telemetry oj , forms an internal belief bj ,and emits message mj . The receiver, agent i, translates that message into an estimate Qji of bj before acting ai:
+
+s|{z} 
+
+> state
+
+→ oj
+
+|{z} 
+
+> sender’s view
+> ϕj
+
+−−−→ bj
+
+|{z} 
+
+> sender’s belief
+
+→ mj
+
+|{z} 
+
+> message
+
+→ Qji
+
+|{z} 
+
+> receiver’s estimate
+
+→ ai
+
+|{z} 
+
+> action
+
+. (1) Here, ϕj represents the sender’s latent type , and bj its resulting belief; Principle 1 shows that bj is the level-0 component of a richer object, the agent’s stalk. Because the distortion between state s and message mj arises from cognitive reasoning rather than physical propagation, (1) acts as a cognitive channel .Recovering ϕj from a message history is equivalent to channel estimation, and weighting peers based on inferred reliability is equivalent to signal combining. 
+
+Definition 1 (Harsanyi type) . In game theory involving incom-plete information, a player’s type is a latent variable bundling its private information: payoffs, observation model, and beliefs about other players. Nature draws types from a common prior; players observe only their own. Bayes’ rule maps a player’s type to a well-defined distribution over others’ types [6]. The Harsanyi type terminates an otherwise infinite regress of assumptions (e.g., reasoning about a peer requires a belief about their belief about our state, ad infinitum). Bundling this into one variable creates a finite object over which Bayesian inference operates. For a RAN xApp, the type components are, 
+
+ϕj =  pj , β j , A j , π j
+
+ ∈ Φ, ϕj ∼ P0. (2) These govern how an agent translates telemetry into semantics: 
+
+pj is the prior expectation over states; βj collects statistical precisions assigned to priors and evidence; Aj is a mask selecting subscribed E2 counters; and πj is the behavioral policy mapping beliefs to emitted messages. Types are drawn from a codebook Φ under a prior P0, which represents the operator’s catalog of authorized configurations. The system evolves as a repeated Bayesian game on a graph .Each round, agents observe telemetry and emit messages. Receivers update posteriors over neighbors’ types using Bayes’ rule, estimate actual beliefs, apply trust weights, and fuse data. Because types are never directly observed, the evolving system state is the profile of beliefs about these types. To govern this network, we utilize Cellular Sheaf Theory. Each agent’s local world model acts as a mathematical stalk 
+
+attached to its node, growing in dimension with Theory of Mind depth. Links carry projections of that stalk ( restriction maps ). A sheaf, rather than a plain weighted graph, is required because agents are heterogeneous: subscription masks and reasoning depths differ, so stalks differ in dimension and no shared state space exists. The restriction maps absorb this mismatch, letting each link compare only the vocabulary its two endpoints share. Mismatches between projections are accumulated over the graph, weighted by trust, and measured by the sheaf Laplacian [7], whose cohomology further exposes what edge residuals alone cannot— hidden disagreement, where beliefs reconcile on every link yet admit no consistent global assignment. Resilience is thus quantified natively as a property of this operator. II. P RINCIPLE 1: A M ESSAGE IS EVIDENCE OF INFERENCE 
+
+Conventional RAN architectures map state directly to mes-sage, ignoring two intermediate links: localized visibility ( oj )and interpretation ( ϕj ). This reasoning step is precisely where the failures discussed earlier originate. The latent type introduced in (2) and the dynamic belief it produces are distinct objects, and this distinction anchors the framework. The type is the agent’s internal inference machinery: drawn by Nature, never directly observed by peers, and constant throughout the interaction. The belief is the output generated when that machinery processes current telemetry, and it updates every round. Let Tϕj denote the mapping induced by the type. The structured belief state of agent j, its stalk element, is 
+
+xj = Tϕj (oj ) =  x(0)  
+
+> j
+
+, x (1)  
+
+> j
+
+, x (2) 
+
+> j
+
+ ∈ F (j),x(0)  
+
+> j
+
+=  ˆμj , Λj
+
+, Λj = βpri  
+
+> j
+
+I + βlik  
+
+> j
+
+A⊤ 
+
+> j
+
+Aj ,
+
+ˆμj = Λ −1
+
+> j
+
+ βpri  
+
+> j
+
+μj + βlik  
+
+> j
+
+A⊤ 
+
+> j
+
+oj
+
+.
+
+(3) Every symbol traces back to a component of the type ϕj :
+
+μj is the mean of the prior pj , while βpri  
+
+> j
+
+and βlik  
+
+> j
+
+are the calibration parameters weighing expectation against new data. The mask Aj selects the E2 counters the agent subscribes to, so telemetry it never reads cannot move its belief. The remaining component, the policy πj , maps this belief to an emitted message, closing the generative chain (1). Here Λj is a precision matrix : the inverse covariance of the agent’s belief, and the natural multivariate form of “how certain am I”. Two features matter operationally. First, precision adds: the prior contributes βpri  
+
+> j
+
+I uniformly, whereas evidence con-tributes βlik  
+
+> j
+
+A⊤ 
+
+> j
+
+Aj only along directions the agent can actually observe, so an unsubscribed counter adds no confidence in its direction. Second, the mean is precision-weighted, which is why an agent whose βlik  
+
+> j
+
+collapses is pulled toward its prior. The scalar Tr(Λ j ) used in Principle 2 is simply this confidence summed over all directions [8]. The superscripts in xj denote the recursive layers of Theory of Mind, transforming the stalk from a scalar reading into a cognitive model. Level 0 is the agent’s direct belief about the true network state; level 1 models its belief regarding what a peer believes; level 2 models its belief about what that peer believes concerning the agent’s own state. The stalk space F(j)
+
+is the direct sum of these levels, so dim F(j) grows with the depth of recursion—bounded to 2 by Principle 4. Because vastly different agent configurations can produce identical text outputs, evaluating a message by parsing its surface syntax ( mj ) is insufficient. Single-message inversion is ill-posed; identification demands a sequence of exchanges. The receiver must run backward diagnostic reasoning, estimating the sender’s type ϕ to infer the network state s, maintaining a running posterior over the interaction history 1: t. This derived probability is the peer-induced belief (4), 
+
+Qji (s) = X
+
+> ϕ∈Φ
+
+P  bj = s | mj , ϕ | {z } 
+
+> invert ϕ’s policy
+
+Pi
+
+ ϕ | m1: tj , o 1: ti
+
+| {z }
+
+> type posterior from history
+
+. (4) This Bayes recursion reweights candidate types based on how well their policies explain newly received messages, condi-tioned on the receiver’s local telemetry. Aggregating these probabilities yields a posterior estimate Qji (s) of what agent 
+
+j genuinely believes.       
+
+> Principle 1. A peer message mis evidence about the sender’s latent type ϕj, and only indirectly about the network state s.Evaluating it is a backward inference problem over that hidden type utilizing (1), mathematically well-posed only over a history of messages.
+
+This framework highlights the inadequacy of standard anomaly detection, which merely evaluates statistical surprise. A surprising but accurate report from an agent with superior visibility should elevate trust; conversely, a highly predictable report stemming from flawed internal reasoning must diminish it. Only the recursive formulation in (4) distinguishes between the two scenarios. III. P RINCIPLE 2: T RUST IS COGNITIVE SNR, N OT A GATE 
+
+Receiving a peer’s belief estimate ( Qji from Principle 1), a node must decide how much to adjust its own belief. Contem-porary network designs often treat trust as a binary gate, dis-carding messages whose divergence exceeds a static threshold. This ignores the asymmetric costs of errors—misclassifying a 
+
+STORM state as IDLE causes outages, while mistaking NORMAL 
+
+for STORM merely wastes power. Furthermore, discarding a message extracts zero information, which is mathematically optimal only if the peer holds absolutely no valid data [9]. Instead, multi-agent networks should process incoming mes-sages as parallel cognitive channels . Just as wireless receivers use maximal-ratio combining to weight diversity branches by their Signal-to-Noise Ratio (SNR), a cognitive network maxi-mizes fidelity by weighting each input by its Cognitive SNR .Gating is merely the suboptimal extreme of weighting only a single branch. Formally, let j be the sender, i the receiver, and e = ( i, j )
+
+the link. Agent j does not transmit its full internal state, but a projection—the restriction map Fj→e(xj )—translating private reasoning into the link’s shared vocabulary. 
+
+Definition 2 (Cognitive SNR) . On a link from sender j to receiver i, the signal is the precision the sender asserts in its transmitted belief. The noise is the divergence between that transmitted belief and what receiver i expected a sender j to report. The Cognitive SNR reflects confidence discounted by how far it departs from evidence. 1
+
+Let Λj be the precision matrix of the projected belief, and let 
+
+bb (2)  
+
+> j|i
+
+represent the receiver’s expectation of the sender’s belief. We express the signal, noise, and resulting weights as, 
+
+Sj = Tr  Λj
+
+, Nij = DKL 
+
+
+
+Fj→e(xj ) bb (2) 
+
+> j|i
+
+
+
+,γij = Sj
+
+Nij + ϵ , wij = 1 − e−η γ ij ∈ [0 , 1) .
+
+(5) In bb (2)  
+
+> j|i
+
+, the hat denotes an estimate, j|i means “ j as predicted by i,” and (2) indicates a second-order model ( i reasoning about 
+
+j’s reasoning). The signal Sj carries a single index because asserted confidence is intrinsic to the sender. Conversely, noise 
+
+Nij is link-specific; identical messages are judged differently by receivers with different network models. The receiver builds bb (2)  
+
+> j|i
+
+based on what agent j could see , not what it concluded . Applying j’s public data subscription mask 
+
+Aj from (2) (telemetry access metadata), the receiver evaluates                     
+
+> 1“Cognitive” here qualifies the reasoning channel of (1), not cognitive radio:
+> γij is measured over beliefs rather than waveforms, carries both a sender and a receiver index, and is independent of the physical SNR of the underlying link. Table I OPERATOR ’SCOST GEOMETRY : T RUE NETWORK STATE (ROWS )VS .
+> AGENT ’S ASSUMED STATE (COLUMNS ). T HE WORST CASE IS NORMALIZED TO 1. T HIS GEOMETRY DEFINES HOW DIVERGENCE Nij IS MEASURED .
+> Assumed by the agent
+> IDLE NORMAL STORM
+> Truth
+> IDLE 00.10 0.15 NORMAL 0.30 00.12 STORM 1.00 0.35 0
+
+that evidence using a neutral prior. This requires modeling the peer’s situation independent of its internal reasoning—a true second-order model, and the reason Principle 4 places the floor at two levels. Setting j = i yields the self-weight wii .Noise (Kullback-Leibler divergence) is evaluated under the operator’s cost geometry (Table I), heavily penalizing opera-tionally distant confusions. Parameter ϵ prevents division by zero, while η scales γij ’s dynamic range to keep well-separated SNRs distinguishable. Using easily computable precision as the numerator, this ratio natively acts as a hallucination detector by penalizing divergence rather than raw confidence. An agent facing OoD inputs typically fails in two ways: it reverts to a rigid prior overriding actual evidence (asserting high precision on an un-supported conclusion), or its evidence precision βlik  
+
+> j
+
+collapses while still committing to a confident categorical answer. In either case, the receiver expects a peer observing unfamiliar telemetry to report differently, causing Nij to spike, so the discount does not depend on which mode occurred. The first mode mirrors computational psychiatry, where hallucinations occur when dominant internal priors override sensory evidence [10]. Uninformative peers assert no precision, driving Sj → 0
+
+and reproducing a “reject” gate without hard thresholds. To prevent rogue agents from inflating confidence to dominate decisions, long-term reputation is graded by a strictly proper scoring rule [11], preserving influence only for those honest about uncertainty. 
+
+Principle 2. Trust is a fluid, continuous variable measured as the peer’s Cognitive SNR (5): the precision asserted divided by how far that assertion departs from a second-order Theory of Mind expectation. Confidence earns trust only insofar as the evidence warrants it—unjustified certainty and collapsed precision alike are heavily discounted. 
+
+IV. P RINCIPLE 3: A GENT -S OCIETY TOPOLOGY GOVERNS 
+
+CONSISTENCY AND CONTAGION 
+
+Principles 1 and 2 concern a single receiver reading a single peer, and yield one number per link: the trust weight wij . A live RAN control plane consists of many such channels, and those weights turn out to be exactly what the network-scale analysis needs. Do localized beliefs compose into a globally consistent state, and how quickly? Cellular sheaf theory answers both. For any edge e = ( i, j ), the disagreement between the two agents’ projections is the coboundary, 
+
+δ(x)e = Fi→e(xi) − F j→e(xj ), (6) where x = ( x1, . . . , x |V |) collects the stalk elements (3) of all agents, and Fi→e is the same restriction map used in (5). Assembling δ over every edge yields a linear map whose kernel and cokernel carry direct operational significance: 
+
+H0 = ker ( δ) , H1 = coker ( δ) . (7) 
+
+H0, the space of global sections, contains the belief as-signments on which every pair of neighbors agrees; it defines the achievable consensus. H1, the obstruction space, contains underlying disagreements no local adjustment can erase. For scalar stalks, dim H1 reduces directly to the cycle rank of the graph ( dim H1 = |E| − | V | + 1 ). Each independent loop con-tributes one degree of freedom where pairwise agreement fails to guarantee global consistency. A tree topology has zero cycle rank, meaning pairwise verification is globally sufficient—the cognitive equivalent of Kirchhoff’s voltage law. Because δ is defined edge-by-edge, this operation applies seamlessly to a single link, a cluster, or the entire RAN graph. This perfectly matches O-RAN’s hierarchical architecture, pro-viding fast local tests in the near-real-time loop and global tests in the non-real-time loop. The network’s convergence speed follows from the sheaf Laplacian LF = δ⊤δ. Iterative belief exchange reduces the residual ∥δ(x)∥2 at a rate strictly governed by λ2 (its smallest nonzero eigenvalue). Time to consistency scales as τcons ∝
+
+1/λ 2. Because edge weights are strictly the cognitive SNRs from (5), trust and consistency speed are the same physical quantity. Two spectral failure modes emerge. If trust collapses across enough links, the graph approaches mathematical disconnection (λ2 → 0), and τcons diverges. The society never achieves con-sistency; localized hallucinations are not corrected but spread systemically [12]. Conversely, sparse topologies with healthy trust inherently have small spectral gaps, reaching consistency too slowly. The design mandate is singular: keep λ2 above the critical threshold required by the latency budget. 
+
+Principle 3. The coboundary (6) makes local-to-global con-sistency computable at any network scale. Its cohomology (7) cleanly separates achievable consensus ( H0) from irreconcilable disagreement ( H1). The spectral gap of the associated Laplacian dictates the time to consistency and the network’s resistance to hallucination contagion, using cognitive SNRs as edge weights. 
+
+In dense meshes, it is critical that at least one agent per loop is anchored directly to verifiable E2 hardware counters to close the cognitive cycle against physical ground truth. V. P RINCIPLE 4: R ECURSION STOPS AT TWO LEVELS 
+
+Principle 3 left one quantity unpinned: the dimension of the stalk, which enters the Laplacian and therefore the spectral gap. That dimension is set by how many levels of Theory of Mind each agent maintains, so the design question becomes how deep to recurse. In multi-vendor RICs, proprietary bound-aries prevent xApps from inspecting each other’s algorithms. Stable cooperation rests on modeling both the peer’s network beliefs and the peer’s beliefs regarding the receiver’s beliefs, mirroring sociological double contingency [13]. In the stalk of (3) this is the superscript: depth d means retaining the levels 
+
+x(0) , . . . , x (d).This recursion cannot proceed indefinitely. The optimal depth 
+
+d⋆ balances the strategic advantage V (d) against the computa-tional cost C(d) dictated by the near-real-time latency budget 
+
+ℓ, i.e., 
+
+d⋆ = arg max 
+
+> d∈N
+
+ V (d) − ℓ C (d) . (8) Two realities pin this depth to exactly two levels. 
+
+One level is not enough. A level-1 receiver reads assertions but cannot estimate distortion. Calibrating cognitive SNR (5), however, requires a baseline expectation of what the peer ought 
+
+to have said, demanding a second-order model. Level 2 is the minimum depth at which trust becomes computable. 
+
+Three levels are too many. Recursive modeling forms a Markov chain of lossy cognitive channels where the data-processing inequality applies, 
+
+X → Y → Z → W =⇒ I(X; Y ) ≥ I(X; Z) ≥ I(X; W ).
+
+(9) This dictates a monotone decay in mutual information. The distinction lies in physical anchors. Level-2 models terminate in data the receiver can verify via local E2 telemetry, yield-ing falsifiable predictions. The mathematical decay is actively opposed by physical measurement. Level 3 admits no such physical anchor. It concerns what the peer believes about the receiver’s beliefs—a purely psycholog-ical quantity E2 counters cannot observe. The surviving mutual information crashes into the noise floor, driving cognitive SNR and corresponding edge weights to zero. Through (7), the graph mathematically disconnects, irreparably fragmenting the consensus space dim H0. Level 2 is the exact sweet spot: deep enough to calibrate trust, but shallow enough to remain tethered to reality [14]. 
+
+Principle 4. Model the peer, and the peer’s model of the receiver—go no deeper. Level 2 is the minimum depth at which cognitive SNR is mathematically computable, and the absolute maximum depth whose predictions remain anchored by physical telemetry. A third level lacks observable anchors, drives network edge weights to zero, and irreparably fragments the consensus space. 
+
+VI. P RINCIPLE 5: A LIGNMENT , N OT BANDWIDTH , B OUNDS 
+
+COMMUNICATION 
+
+Principles 1 to 4 bound what agents can infer about one another. A final limit is independent of inference entirely and arises from what agents want : even a perfectly calibrated receiver facing a perfectly capable sender learns little if their objectives diverge. We therefore establish a bound on the capacity of the cognitive channel itself. When agents optimize competing utilities, their control-plane messages are costless 0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40     
+
+> objective misalignment
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+> credible transfer  [bits]
+> babbling only (1/4 )
+> bound log 2N()
+> realised, 2-symbol budget realised, 8-symbol budget realised, 64-symbol budget
+> Figure 1. How much two agents can actually tell each other, as their operational goals drift apart. The credible information curve crashes to zero even while the physical transport channel remains wide open.
+
+and unverifiable cheap talk [15]. Indeed, Crawford and Sobel demonstrated that when a sender and a receiver hold divergent objectives, the sender structurally cannot communicate fine-grained, credible information. To formalize this, let ∆ denote a scalar misalignment parameter that quantifies the geometric di-vergence between the agents’ utility functions (i.e., the distance between their preferred optimal actions for a given state). Because the sender is incentivized to skew the receiver’s actions toward its own utility, it will naturally exaggerate its reports. The receiver, being a rational actor, mathematically anticipates this strategic bias. Consequently, highly precise, granular claims lose all credibility, as the receiver knows the sender has a constant motive to shade exact numbers. To establish any believable communication, the interaction must structurally retreat into coarse categorizations, or “bands” of truth. These intervals must be sufficiently wide that the sender cannot profitably lie across boundaries without triggering an outcome that severely penalizes its own utility. The mathematical consequence is that the resolution of credible information strictly degrades as the misalignment of objectives increases. The maximum credible information trans-fer, C, in bits, is bounded by, 
+
+C ≤ log 2 N (∆) , N (∆) = 
+
+
+
+− 12 + 12
+
+q
+
+1 + 2∆
+
+
+
+, (10) where N (∆) defines the maximum number of distinct opera-tional bands the sender can credibly convey. For example, if the misalignment ∆ across utility functions is minimized, the sender might reliably distinguish among four granular states (e.g., “critical,” “high,” “moderate,” and “low”). As the diver-gence ∆ grows, the overwhelming temptation to exaggerate forces the credible bands to widen, collapsing the resolution to two coarse states (e.g., “high” or “low”). This formulation establishes a fundamental limit: objective divergence inherently caps the granularity of communication. Once ∆ reaches 1/4, N (∆) reduces to 1 and the usable capacity is exactly zero. Beyond this threshold, the sender’s bias is so extreme that it will strategically output the exact peer xApps                    
+
+> multi-vendor, unmodified
+> Anomaly Detector
+> Mobility Manager
+> Energy Saver
+> Slice Guardian
+> Eq. (1)
+> Near-RT RIC |coordination layer, per message |10–100 ms
+> message
+> reception
+> i. update sender profile
+> Bayesian posterior over
+> the latent type — Principle 1
+> ii. estimate peer belief
+> Eq. (4) — what the peer
+> actually believes
+> iii. cognitive trust
+> Eq. (5) — Principle 2
+> signal
+> noise
+> continuous weight, no gate
+> own stalk — Eq. (3)
+> iv. trust-weighted
+> fusion
+> collective state
+> LLM context
+> assembly
+> receiving agent
+> control loop unchanged E2 telemetry
+> Non-RT RIC |society monitoring, the network's immune system |> 1 s (Principle 3)
+> i. hidden dissonance
+> over cyclic subgraphs
+> Eq. (6)
+> ii. fragmentation watch
+> consensus dimension and
+> spectral gap — Eq. (7)
+> quarantine
+> rescale trust system-wide
+> before the society collapses
+> belief profile
+> fragmenting?
+> rescale trust
+> —— per-message path (near-RT)
+> - - -society loop (non-RT)
+> —— E2 telemetry
+> —— unchanged control loop
+> Steps i–iv run for each received message before the agent may act. The non-RT loop monitors the society and can rescale
+> trust to quarantine a fragmenting region. Equation numbers refer to the article.
+
+Figure 2. The coordination layer inside a functional RIC, on two timescales. Per message, the near-real-time loop runs four steps before the receiving agent may act: update the posterior over the sender’s latent type, estimate the peer belief Qji , evaluate the cognitive SNR trust weight wij , and fuse the trust-weighted belief with the receiver’s own. In parallel, the non-real-time loop monitors the society, tracking hidden dissonance through the coboundary δ(x)e and watching 
+
+dim H0 for fragmentation, and can rescale trust system-wide to quarantine an affected region. Proprietary agents and the underlying control loop are unmodified. 
+
+same message regardless of the true underlying state. At this point, the messages cease to convey any real information. 
+
+Principle 5. The credible information conveyed between two agents (10) is strictly bounded by the alignment of their op-erational objectives. Because rational receivers anticipate ex-aggeration, precise communication loses granularity. Beyond a critical threshold of misalignment, this informational capacity reaches zero; agents can exchange syntactically perfect messages indefinitely while conveying no usable data. Therefore, objective alignment—not physical link capacity—is the fundamental bot-tleneck to trusted agentic coordination. 
+
+VII. P UTTING IT TOGETHER 
+
+To see how these principles operate in practice, Figure 2 illustrates their integration into a functional RIC. Rather than requiring massive architectural overhauls, these principles are implemented as a lightweight coordination layer explicitly positioned between the raw reception of a message and the LLM context assembly. This strategic placement leaves the underlying control loops fully intact and requires zero mod-ification to the proprietary, multi-vendor agents themselves. The system operates seamlessly across two distinct timescales: a rapid, per-message evaluation loop and a slower, society-wide monitoring loop. During the fast per-message evaluation, the coordination layer intercepts incoming com-munications and executes four mathematically grounded steps before the receiving agent is allowed to act: i) it updates the sender’s profile (Principle 1) by using the new message to refine a running Bayesian posterior probability over the sender’s latent type; ii) it translates this updated profile into a concrete estimate of what the sender actually believes about the network state, represented as Qji in (4); iii) it evaluates cognitive trust (Principle 2) by synthesizing the precision the sender asserts against how far that assertion deviates from expected behavior, outputting the continuous cognitive SNR trust weight wij via (5); and iv) it smoothly blends this trust-weighted peer belief with the receiver’s own internal priors. Only this stabilized, trust-filtered collective state is passed to the agent to drive a network action. Simultaneously, background processes running in the slower non-real-time RIC act as the network’s immune system (Princi-ple 3) by monitoring the overall health of the agent society. This slower loop performs two vital functions: i) it tracks hidden cognitive dissonance via a continuous consistency check that evaluates the coboundary (6) over cyclic subgraphs; and ii) it prevents systemic failure by actively tracking the consensus dimension dim H0 of (7). If localized hallucinations begin to spread and the society shows signs of mathematically fragment-ing, the non-real-time RIC can proactively intervene, rescaling trust weights system-wide to quarantine the affected agents before the network collapses. VIII. C ASE STUDY 
+
+We simulate a near-real-time RIC governing a single cell, wherein the network telemetry undergoes a severe transition from a quiescent idle state to a massive signaling storm .The multi-agent society operating on this RIC comprises five distinct xApps, each instantiated as a locally deployed 1-billion-parameter telecom Small Language Model (SLM), denoted as 
+
+otellm . Each agent is prompted strictly with its specific operational role and its subscribed E2 Service Model, Key Performance Measurements (E2SM-KPM) counters. At every timestep, an agent infers the current network regime and outputs a confidence score. This intrinsically yields a level-0 belief and an asserted precision, Sj , derived directly from the model rather than relying on externally imposed heuristics. Crucially, an agent’s capacity to recognize a given network regime is strictly bounded by its prior training exposure. To ensure methodolog-ical rigor, our evaluation isolates distinct system dynamics: while large-scale topology and latency sweeps (Fig. 3) utilize a calibrated statistical emitter to decouple multi-agent coordina-tion costs from SLM decoding variance, all empirical decision-quality metrics (Tables II and III) are generated entirely by the deployed otellm models. Within this framework, our primary scenario introduces a deliberate informational asymmetry. Four user-plane agents— the Traffic Balancer (acting as the primary receiver), the Energy Saver, the Slice Guardian, and the Anomaly Detector—lack prior training exposure to signaling storms. As the storm man-ifests, these four agents misinterpret the sudden drop in PRB utilization as a symptom of low user demand, erroneously clas-sifying the network state as IDLE . Consequently, the receiver draws an incorrect conclusion from its own local evidence, an error that is subsequently reinforced by three of its peers. Conversely, the Mobility Manager, which monitors Random Access Channel (RACH) and RRC counters and possesses prior training on storm regimes, correctly diagnoses the event. This configuration constructs a highly adversarial consensus environment: to achieve accurate state resolution, a correct minority of one must overcome not only a flawed majority consensus, but also the receiver’s own erroneous initial belief. 
+
+A. Trust Discriminates Where Disagreement Cannot 
+
+Table II details peer evaluation by the Balancer at storm onset. Because all peers comparably displace its initial belief, naive disagreement metrics fail to identify the correct agent. For the deployed SLM, the Anomaly Detector’s failure manifests as a collapse in likelihood precision rather than loud overconfidence. Encountering OoD storm telemetry, it asserts low precision while still erroneously reporting idle . Our trust mechanism captures this via the noise term—as a calibrated peer would not report IDLE under these conditions—driving its cognitive SNR down to −4.3 dB. Conversely, the storm-trained Mobility Manager legitimately asserts high precision ( +7 .8 dB). This 12 dB spread over the mistaken majority yields a thirteenfold advantage in trust weight, exposing a critical flaw in naive consensus: the correct                                                         
+
+> Table II COGNITIVE SNR AT STORM ONSET ,AVERAGED OVER 80 ROUNDS .
+> Peer SjNij γij [dB] wij
+> Anomaly Detector 2.93 11.950 −4.30.036 Mobility Manager 40.00 6.676 +7.80.451 Slice Guardian 3.38 2.720 +3 .60.159 Energy Saver 3.18 2.600 +4 .00.172 Table III RECURSION DEPTH AGAINST DECISION QUALITY AND MEASURED COST .TIMINGS ARE MEDIANS OVER 5RUNS OF 60 MESSAGES ,COVERING THE FULL NESTED EVALUATION PATH .
+> Depth dim F(j)Cost Decision Calibration
+> d(stalk) [ms/msg] accuracy error
+> 010.32 0.000 0.955 150.40 0.050 0.909 221 1.52 1.000 0.676 385 2.57 0.083 0.771
+
+peer diverges most from the group. Consequently, a standard divergence gate actively prefers erroneous agents Area Under the Curve (AUC) = 0.000 . By evaluating cognitive SNR instead of raw divergence, our mechanism perfectly isolates the accurate peer (AUC = 1 .000 ). Applying this internally, the receiver self-assigns a low trust weight ( 0.17 ), enabling the correct minority to overcome both a flawed majority and its own erroneous belief. 
+
+B. Two Levels, and No More 
+
+Table III sweeps the recursion depth of reasoning. Depth 
+
+0 ignores peers entirely, inheriting the Balancer’s own error. Depth 1 incorporates peers but lacks a baseline expectation to weigh them against, reducing trust to a blind guess where the wrong majority wins. Depth 2 successfully recovers the correct action in every trial. Depth 3, however, collapses to near-guessing accuracy while costing significantly more. This failure occurs because the third level attempts to calculate what a peer believes about the receiver’s own beliefs—an abstract quantity unobserved by any E2 counter, causing surviving mutual information to decay into the noise floor. Crucially, our timing measurements reveal the computational bottleneck is not the dimensionality of the mathematical belief object, but the nested second-order evaluation. Therefore, two levels of reasoning provide the exact optimal balance of accuracy and computational efficiency. 
+
+C. Does the Society Converge in Time? 
+
+The ultimate operational question is whether consistency is reachable before the 100 ms near-real-time control loop closes. Fig. 3 (left) plots time-to-consistency against the spectral gap. At depth 2 and moderate trust, topology dictates performance: a tree misses the budget ( 149 ms), a ring succeeds ( 70 ms), a small-world graph accelerates to 29 ms, and a full mesh converges in just 3 ms. Connectivity, trust, and reasoning depth 10 2 10 1 10 0 10 1                  
+
+> spectral gap 2(L)
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> time to consistency [ms]
+> near-RT budget 100 ms
+> tree ring small-world mesh
+> d= 1 (dim = 5 )
+> d= 2 (dim = 21 )
+> d= 3 (dim = 85 )
+> 010 010 110 2
+> cycle rank |E||V| + 1 = dim H1
+> 0.0 0.2 0.4 0.6 0.8
+> unrealisable fraction of pairwise agreements
+> tree ring small-world mesh predicted
+
+Figure 3. The design envelope. Left: time to consistency scales with the network’s spectral gap while per-message cost is set by the nested second-order evaluations each depth requires, so depth, connectivity and trust trade against one another under a fixed latency budget. Right: hidden disagreement is impossible on trees and grows with cycle rank. 
+
+are not independent; they trade against one another through a single measurable scalar. Fig. 3 (right) confirms that while trees exhibit zero hidden disagreement, denser topologies harbor unrealizable agreements that grow alongside cycle rank. Finally, communication capac-ity behaves exactly as predicted: once operational misalignment between agents reaches 25% , usable capacity collapses to zero. Widening the communication alphabet yields no benefit once goal alignment, rather than bandwidth, becomes the binding constraint (Fig. 1). IX. O PEN PROBLEMS 
+
+Transitioning this resilience framework from mathematical models to production-grade O-RAN deployments introduces several practical challenges: (i) Cognitive Channel Estima-tion: Agents must quickly learn how their peers reason. Future work must quantify the “pilot-like” signaling overhead this continuous estimation imposes, ensuring agents can learn peer behaviors without choking the live control plane; (ii) Eliciting Calibrated Precision: Our agents failed when their categor-ical decisions contradicted their collapsing asserted precision. Reliably extracting this precision ( Sj ) from LLMs at line rate— across decoding temperatures and prompt formats—remains an open challenge, as does adapting theoretical communication limits to their bounded rationality; (iii) Real-Time Society Tracking: To prevent “systemic hallucinations,” the network must continuously monitor the agent society’s health. This requires ultra-lightweight statistical tools capable of processing execution logs within the strict microsecond-to-millisecond latency budgets of the near-real-time RIC; (iv) Translating Operator Intents: Our risk-weighted trust mechanism requires precise numerical penalties. Because operators express prior-ities through qualitative Service Level Agreements (SLAs), the industry needs standardized frameworks to automatically translate these high-level business intents into concrete cost matrices; and (v) Hardware-in-the-Loop Validation: This coordination layer requires rigorous benchmarking on phys-ical O-RAN testbeds to evaluate true end-to-end inference latency, memory footprint, and E2 signaling overhead under live, chaotic radio traffic patterns. X. C ONCLUSION 
+
+An agentic 6G RAN operates as an artificial society where valid data can easily propagate flawed conclusions. Network resilience thus relies on continuous, mathematically calibrated trust rather than simple link integrity. Securing these control planes requires equipping the network with a Theory of Mind to evaluate peer reasoning. By treating inter-agent communication as a cognitive channel distorted by subjective reasoning, five principles govern this society: (i) read messages as evidence of hidden types, keeping operational uncertainty explicit via distributions; (ii) scale trust using a continuous cognitive SNR to natively discount hallucinated reports without relying on separate anomaly detectors; (iii) model the agent society as a mathematical sheaf, using its Laplacian for consistency and its spectral gap to bound consensus speed; (iv) cap cognitive recursion at two levels, the depth where trust remains com-putable and survives mutual information decay; and (v) priori-tize objective alignment over raw bandwidth, since misaligned operational goals collapse communication capacity to zero. Operationally, across a society of locally deployed telecom SLMs, this framework recovered the correct action even when a naive divergence gate preferred every mistaken peer over the right one. Ultimately, it unifies reasoning depth, connection density, and consensus speed into a single measurable spectral quantity. REFERENCES [1] TM Forum, “Autonomous networks: Technical architecture,” TM Forum, Tech. Rep. IG1230, 2023, accessed on: Jan. 15, 2025. [Online]. Available: https://www.tmforum.org [2] L. Bariah, Q. Zhao, H. Zou, Y. Tian, F. Bader, and M. Debbah, “Large generative AI models for telecom: The next big thing?” IEEE Commun. Mag. , vol. 62, no. 11, pp. 84–90, 2024. [3] D. Premack and G. Woodruff, “Does the chimpanzee have a theory of mind?” Behav. Brain Sci. , vol. 1, no. 4, pp. 515–526, 1978. [4] N. C. Rabinowitz, F. Perbet, H. F. Song, C. Zhang, S. M. A. Eslami, and M. Botvinick, “Machine theory of mind,” in Proc. Int. Conf. Mach. Learn. (ICML) , 2018, pp. 4218–4227. [5] E. Akata, L. Schulz, J. Coda-Forno, S. J. Oh, M. Bethge, and E. Schulz, “Playing repeated games with large language models,” Nature Human Behaviour , vol. 9, no. 7, p. 1380–1390, july 2025. [6] J. C. Harsanyi, “Games with incomplete information played by “Bayesian” players, I–III,” Manage. Sci. , vol. 14, no. 3, pp. 159–182, 1967. [7] J. Hansen and R. Ghrist, “Toward a spectral theory of cellular sheaves,” 
+
+J. Appl. Comput. Topol. , vol. 3, pp. 315–358, 2019. [8] K. Friston, “The free-energy principle: A unified brain theory?” Nat. Rev. Neurosci. , vol. 11, pp. 127–138, 2010. [9] D. Blackwell, “Equivalent comparisons of experiments,” Ann. Math. Statist. , vol. 24, no. 2, pp. 265–272, 1953. [10] R. A. Adams, K. E. Stephan, H. R. Brown, C. D. Frith, and K. J. Friston, “The computational anatomy of psychosis,” Front. Psychiatry , vol. 4, p. 47, 2013. [11] T. Gneiting and A. E. Raftery, “Strictly proper scoring rules, prediction, and estimation,” J. Amer. Statist. Assoc. , vol. 102, no. 477, pp. 359–378, 2007. [12] R. Pastor-Satorras and A. Vespignani, “Epidemic spreading in scale-free networks,” Phys. Rev. Lett. , vol. 86, no. 14, pp. 3200–3203, 2001. [13] N. Luhmann, Social Systems . Stanford, CA, USA: Stanford Univ. Press, 1995. [14] C. F. Camerer, T.-H. Ho, and J.-K. Chong, “A cognitive hierarchy model of games,” Quart. J. Econ. , vol. 119, no. 3, pp. 861–898, 2004. [15] V. P. Crawford and J. Sobel, “Strategic information transmission,” Econo-metrica , vol. 50, no. 6, pp. 1431–1451, 1982.

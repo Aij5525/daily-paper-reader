@@ -1,0 +1,522 @@
+Title: Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI
+
+URL Source: https://arxiv.org/pdf/2609.02642v1
+
+Published Time: Thu, 03 Sep 2026 01:12:07 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+> 1
+
+# Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI 
+
+Kian Fotovat 1, Kamran Fotovat 2, and Zijun Wang 3
+
+Abstract —Fluid antenna systems (FAS) obtain spatial degrees of freedom by activating a few radiating ports from a dense grid of candidates, but deciding which ports to activate presupposes channel knowledge at ports that are never measured. Prior port-selection work assumes full or near-full channel state information (CSI) and treats the pilot overhead as a fixed cost. We instead formulate port selection and pilot allocation jointly as active inference. A spatio-temporal generative model — sub-wavelength spatial correlation together with an order-p autoregressive tem-poral prior — maintains a Gaussian belief over all N port channels, and the transmitter chooses both the ports it serves and the subset of them it pilots by minimizing an expected free energy that trades achievable rate against information gain and port-switching cost. Selection is greedy and submodular, at 
+
+O(N M ) per slot. On a 441 -port grid with a hybrid front end at 
+
+nRF = 2 K, the agent attains 91% of a full-CSI genie’s sum rate while measuring only 2.3% of the candidate ports; pilots can then be withdrawn from ports that are still served, one fifth of them for 2% of the sum rate and two fifths for 8%. No training is required. 
+
+Index Terms —Fluid antenna systems, port selection, pilot allocation, active inference, expected free energy, partial CSI, Kalman filtering. 
+
+I. I NTRODUCTION 
+
+Fluid antenna systems (FAS), also called movable- or reconfigurable-position antenna systems, replace fixed radiat-ing elements with elements whose position can be adjusted among a dense set of candidate positions, or ports, within a compact aperture [1], [2]. By moving to a favourable point of the spatial fading pattern, an FAS harvests diversity that a fixed array of the same size cannot, using only a handful of radio-frequency (RF) chains, since at any instant only the activated ports are connected to the front end. The pivotal control problem is port selection: deciding slot by slot which subset of the candidates to activate. A port can be scored only if its channel is known, so conventional selection presupposes channel state information (CSI) at every candidate. That is expensive. The aperture is sampled at sub-wavelength spacing, so the ports are packed far more densely than a half-wavelength array and the number of coefficients to estimate grows rapidly with aperture. Worse, only activated ports can be observed at all. The bottleneck is therefore not the selection arithmetic but channel acquisition 
+
+> 1
+
+Dept. of Electrical and Computer Engineering, University of Tehran, Tehran, Iran. 
+
+> 2
+
+Iran University of Science and Technology, Tehran, Iran. 
+
+> 3
+
+Dept. of Electrical Engineering, University at Buffalo, The State University of New York, Buffalo, NY, USA. 
+
+under a sensing budget: the system must decide which ports are worth measuring — and, we add, whether a port that is served needs to be measured at all. Several lines of work approach this and leave the gap open. Learning-based selection — deep reinforcement learning over ports [3], [4] and online bandits [5] — learns policies directly, but treats the full channel as an observed, cost-free input and requires extensive training. Channel estimation for FAS [6], [7], [8] exploits spatial correlation to reconstruct the channel from few pilots, and predictive selection extends this across time, extrapolating the port channels forward from a fixed set of observed ports with an LSTM or a Gaussian process [9], [10]. Both solve estimation in isolation: they recover or predict the channel without deciding what to sense or what to serve, fix in advance which ports are measured, and never weigh a measurement against its cost. What is missing is a formulation in which sensing and serving are chosen jointly under an explicit budget. Active inference supplies that perspective. Rooted in the free-energy principle [11], it casts a decision-maker as an agent holding a generative model of its environment and acting to minimize an expected free energy (EFE), which decomposes into a pragmatic value rewarding goal attainment and an epistemic value rewarding informative actions [12]. The fit to FAS is close: the hidden state is the channel at unmeasured ports, the generative model is its spatial and temporal correlation, the pragmatic value is throughput, and the epistemic value is what a pilot reveals about the ports left unseen. The exploit–explore tension that defines the problem is thus expressed by the EFE rather than engineered in by hand. Our contributions are as follows. 1) We formulate port selection and pilot allocation jointly as active inference under partial CSI. The piloted set is a strict subset of the activated set, making the pilot budget a decision variable rather than a fixed cost — to our knowledge the first such treatment for FAS. 2) We give a concrete agent: a Gaussian belief over all N
+
+ports from a spatial prior and an order-p autoregressive temporal model, with ports and pilots chosen by greedy EFE minimization at O(N M ) per slot, and an exact reduced-rank belief that makes a 21 × 21 grid tractable. 3) We show that the agent reaches 91% of a full-CSI genie’s sum rate while measuring 2.3% of the ports, and degrades gracefully as pilots are further withdrawn from ports it continues to serve. arXiv:2609.02642v1 [eess.SP] 2 Sep 2026 2                                                    
+
+> one of Ncandidate ports
+> activated ,St,|S t|=M— carries data
+> piloted ,Qt⊆ S t,|Q t|=m≤M
+> the M−mactivated-but-unpiloted ports are served without ever being measured , inferred through Rand the AR( p) prior
+> predict belief select Stpilot Qtupdate belief precode & transmit
+> AR( p)dynamics greedy EFE
+> O(N M )uplink
+> mpilots Kalman all Nports downlink
+> Mports belief carried to slot t+ 1
+> Fig. 1. Per-slot operation. The base station activates Mof Ncandidate ports, but spends pilots on only m≤Mof them; the remaining M−mactivated ports carry data while never being measured, their channels supplied by the belief alone. Both the activated set Stand the piloted subset Qtare chosen by minimizing the same expected free energy, which is what turns the pilot budget from a fixed cost into a design variable.
+
+II. F LUID ANTENNA SYSTEM MODEL 
+
+We consider the downlink of a single-cell multiuser system in which a base station (BS) equipped with a fluid antenna serves K single-antenna users. 
+
+A. Array Geometry and Activation 
+
+The BS fluid antenna comprises N = Nx × Ny candidate ports on a uniform planar grid over a compact aperture with sub-half-wavelength spacing. It has M radio-frequency (RF) chains, so in slot t it activates a subset St ⊆ { 1, . . . , N } with 
+
+|S t| = M ; only activated ports radiate and connect to the front end. Serving K streams requires N ≥ M ≥ K. For an index set A, PA ∈ { 0, 1}|A|× N denotes the selection matrix extracting the entries of a vector on A.
+
+B. Spatio-Temporal Channel Model 
+
+Let hk(t) ∈ CN be the channel from the N ports to user k
+
+in slot t. The ports being densely spaced, their coefficients are spatially correlated; under the classical Jakes model for rich scattering [13] the correlation depends only on the separation 
+
+dij ,
+
+Rij = J0
+
+ 2πd ij 
+
+λ
+
+
+
+, (1) with J0(·) the zeroth-order Bessel function of the first kind and λ the wavelength. Collecting these into R, the small-scale fading is correlated Rayleigh, hk ∼ CN (0, β kR), with βk the large-scale gain of user k. Sub-wavelength sampling makes R
+
+strongly rank-deficient, a fact Section III exploits. The channel also ages between slots. Rather than the first-order Gauss–Markov model usual in this literature, we retain 
+
+p past slots, 
+
+hk(t) = 
+
+> p
+
+X
+
+> i=1
+
+ai hk(t − i) + ek(t), ek(t) ∼ CN (0, σ 2 
+
+> v
+
+βkR),
+
+(2) with ek(t) independent of the past. The coefficients a =[a1, . . . , a p]T and innovation variance σ2 
+
+> v
+
+solve the Yule– Walker system Γa = r, σ2 
+
+> v
+
+= r(0) − aTr, for the Jakes temporal autocorrelation r(τ ) = J0(2 πf D Tsτ ), where [Γ]ij =
+
+r(|i − j|), fD is the maximum Doppler frequency and Ts the slot duration; p = 1 recovers the familiar first-order model. 
+
+C. Pilot Allocation Under Partial CSI 
+
+The BS cannot observe the full channel: a port yields information only when it is measured. Prior port-selection work pilots every activated port, spending M pilot resources per slot. We separate the two decisions: in slot t the BS pilots a subset Qt ⊆ S t with |Q t| = m ≤ M of the ports it has activated, observing 
+
+yk(t) = PQt hk(t) + nk(t), nk(t) ∼ CN (0, σ 2 
+
+> e
+
+Im), (3) with σ2 
+
+> e
+
+set by the pilot SNR. The unmeasured ports fall into two classes. Those outside St must be inferred if the BS is ever to select them. The M − m ports in St \ Q t are more unusual: they carry data in this very slot while contributing no measurement, their channels supplied entirely by the belief through (1) and (2) (Fig. 1). Setting m < M turns the pilot budget from a fixed overhead into a quantity the agent chooses. 
+
+D. Hybrid Transmission and Achievable Rate 
+
+The M activated ports are driven by nRF ≤ M RF chains through a fully-connected network of unit-modulus phase shifters, giving the effective precoder 
+
+W = FRF WBB ∈ CM ×K , [FRF ]ij = 1 , ∥W∥2 
+
+> F
+
+≤ P. 
+
+(4) Writing hk, S = PS hk and treating inter-user interference as noise, user k achieves 
+
+Rk = log 2 1 + hH 
+
+> k, S
+
+wk
+
+> 2
+
+P  
+
+> j̸=k
+
+hH 
+
+> k, S
+
+wj 
+
+> 2
+
++ σ2
+
+!
+
+, (5) with σ2 the receiver noise power. The target precoder is a regularized MMSE filter built from the belief rather than from measured CSI, so it accounts for residual uncertainty — dom-inant at the M − m unpiloted ports — which FRF WBB then factorizes by alternating minimization. For a fully-connected network with infinite-resolution shifters, nRF ≥ 2K chains represent any digital precoder exactly [14], [15]. 
+
+E. Switching Cost and Problem Formulation 
+
+Reconfiguring between slots costs delay and energy [16], charged through the number of ports that change, Ct =
+
+|S t △ S t−1| with △ the symmetric set difference. The design problem is 
+
+max  
+
+> {S t,Qt}
+> T
+
+X
+
+> t=1
+> K
+
+X
+
+> k=1
+
+Rk(t) − ηsw Ct
+
+!
+
+s.t. |S t| = M, Qt ⊆ S t, |Q t| = m, 
+
+(6) with ηsw ≥ 0 trading throughput against reconfiguration cost. Its difficulty is that Rk(t) depends on the channel at ports that (3) never reveals — the problem we address next through active inference. 3
+
+III. A CTIVE INFERENCE FOR PORT SELECTION AND PILOT 
+
+ALLOCATION 
+
+We now cast the problem as active inference. The agent holds a generative model of the channel, maintains a Bayesian belief over all N ports (perception), and each slot chooses the activated set and the pilot subset that minimize an expected free energy (action). The generative model needs no new in-gredients: the prior is CN (0, β kR), the transition is the AR( p)dynamics (2), and the likelihood is the partial observation (3). Preferences complete it, and here they are not a hand-tuned vector as in textbook active inference but the communication utility itself — the rate net of switching in (6) — so there is no arbitrary preference to set. 
+
+A. Perception: Complex Kalman Belief 
+
+Stacking the last p snapshots into zk(t) =[hk(t)T, . . . , hk(t − p + 1) T]T ∈ CpN turns (2) into afirst-order recursion zk(t) = Fz k(t − 1) + ϵk(t), with 
+
+F = Ca ⊗ IN for Ca the companion matrix of a, and process noise (e1eT1 ) ⊗ (σ2 
+
+> v
+
+βkR) confined to the current-time block. Observation (3) reads yk(t) = Gz k(t) + nk(t) with 
+
+G = [ PQt 0 ]: pilots see the current channel only. The model is linear-Gaussian, so the exact posterior is Gaussian, q(zk) = CN (ˆ zk, Pk), maintained by a per-user complex Kalman filter. The predict step propagates the belief through the AR dynamics, encoding channel aging, 
+
+ˆzk ← Fˆzk, Pk ← FP kFH + Qk, (7) and the pilots on Qt correct it through the Kalman gain Kk =
+
+PkGH(GP kGH + σ2 
+
+> e
+
+Im)−1,
+
+ˆzk ← ˆzk + Kk
+
+ yk − Gˆzk
+
+, (8) 
+
+Pk ←  I − KkGPk
+
+ I − KkGH + σ2 
+
+> e
+
+KkKH 
+
+> k
+
+. (9) Only the m × m innovation covariance is inverted, regularized by σ2 
+
+> e
+
+Im, so the rank-deficient R needs no artificial jitter, and the Joseph form (9) keeps Pk Hermitian positive semidefinite. The belief over the current channel is the leading block, μk =
+
+Πˆzk and Σk = ΠP kΠH with Π = [ IN 0 ]. Two couplings then do the work, and together they are what permit m < M : spatially the off-diagonals of R carry a measurement to a port’s neighbours, so m pilots inform far more than m ports, and temporally (7) carries information across slots, so a port piloted earlier retains a usable estimate now. 
+
+B. Exact Reduced-Rank Belief 
+
+A 1764 × 1764 covariance per user per slot is infeasible, and unnecessary. Truncating R = BΛB H to the r eigenvalues carrying all but 10 −6 of the energy, and noting hk(t) ∈
+
+range( R), the factorization hk(t) = B c k(t), ck(t) ∈ Cr ,holds exactly : ck is a sufficient statistic. The AR dynamics act identically on every port, so IN becomes Ir , the state falls from pN to pr and the cost from O(( pN )3) to O(( pr )3).At N = 441 the numerical rank is r = 26 : 4.9 × 10 3 less arithmetic at no modelling cost. 
+
+C. Action: Expected Free Energy 
+
+The expected free energy of a policy is conventionally the sum of two terms: a pragmatic term, the expected log-preference over outcomes, and an epistemic term rewarding informative actions. Reconfiguration cost does not need a third term, because preferences are a modelling choice and ours are simply that the agent prefers outcomes with high rate and few port changes, 
+
+ln ˜ p ot | S  = X
+
+> k
+
+Rk(t) − ηsw S △ S t−1 + const , (10) which is exactly the per-slot integrand of the system objective (6). The reconfiguration count is deterministic given the action, so its expectation is itself and the pragmatic value remains in closed form. Scoring a candidate pair (S, Q) therefore needs only the canonical two terms, 
+
+G(S, Q) = −
+
+h
+
+Prag( S) − ηsw S △ S t−1
+
+i
+
+− βw Epis( Q),
+
+(11) with βw > 0 an exploration precision. The bracket is the ex-pected log-preference (10) under the belief. Its first part is the sum rate predicted under the robust MMSE precoder, penalized by the belief’s own residual uncertainty: with μk, S = PS μk,
+
+Σk, S = PS ΣkPH 
+
+> S
+
+,
+
+Prag( S) = X
+
+> k
+
+log 2 1 + μH 
+
+> k, S
+
+wk
+
+> 2
+
+Ik
+
+!
+
+, (12) 
+
+Ik = X 
+
+> j̸=k
+
+μH 
+
+> k, S
+
+wj 
+
+> 2
+
++ X
+
+> j
+
+wH 
+
+> j
+
+Σk, S wj + σ2. (13) The middle term of (13) makes the agent conservative when uncertain: a port with large posterior variance contributes interference the precoder cannot null. It bites hardest at the 
+
+M − m ports served without being piloted, so (12) already prices the cost of not measuring them. The epistemic value is the mutual information the pilots on Q would yield, 
+
+Epis( Q) = X
+
+> k
+
+log 2 det  Im + σ−2 
+
+> e
+
+PQΣkPH
+
+> Q
+
+ . (14) Being a log-determinant rather than a sum of marginal vari-ances, (14) prices redundancy: two candidates that are both uncertain and strongly correlated carry nearly the same infor-mation, so the second earns little once the first is measured. 
+
+D. Greedy Selection of Both Sets 
+
+Exact minimization of (11) is combinatorial in both argu-ments, so we build the sets greedily, each step adding the port whose inclusion most decreases G,
+
+p⋆ = arg max 
+
+> p / ∈S
+
+h
+
+G(S) − G S ∪ { p} i
+
+, (15) until |S t| = M , then building Qt the same way by greed-ily maximizing (14) over Q ⊆ S t (Algorithm 1). This is sequential greedy, not a ranking: being a log-determinant, (14) makes a port’s worth depend on which ports Q already holds. One objective governs both sets — eliminating Q by inner minimization leaves St = arg min S min Q⊆S G, which choosing the two in sequence approximates at O(N M +M m )4
+
+Algorithm 1 Active inference for joint port selection and pilot allocation (slot t)
+
+Require: belief {ˆzk, Pk}Kk=1 , previous set St−1, budgets M ,
+
+m, weights βw, η sw 
+
+Ensure: activated set St, pilot set Qt, precoder W 
+
+> 1:
+
+ˆzk ← Fˆzk, Pk ← FP kFH +Qk ∀k ▷ predict, (7)  
+
+> 2:
+
+S ← ∅  
+
+> 3:
+
+for i = 1 to M do  
+
+> 4:
+
+p⋆ ← arg max p / ∈S 
+
+G(S) − G(S ∪ { p}) ▷ (11)  
+
+> 5:
+
+S ← S ∪ { p⋆} 
+
+> 6:
+
+end for  
+
+> 7:
+
+St ← S ; Q ← ∅  
+
+> 8:
+
+for j = 1 to m do  
+
+> 9:
+
+q⋆ ← arg max q∈S t\Q Epis  Q ∪ { q} ▷ (14)  
+
+> 10:
+
+Q ← Q ∪ { q⋆} 
+
+> 11:
+
+end for  
+
+> 12:
+
+Qt ← Q  
+
+> 13:
+
+transmit pilots on Qt, receive yk 
+
+> 14:
+
+update the belief from the m-dim. innovation ▷ (8), (9)  
+
+> 15:
+
+W ← FRF WBB from the updated belief ▷ (4)  
+
+> 16:
+
+transmit on St; incur ηsw |S t△S t−1|0.45 0.91 1.36 1.81 2.27     
+
+> candidate ports measured (%) 246810
+
+piloted ports m (of M = 10 activated)               
+
+> 10.0 12.5 15.0 17.5 20.0 22.5
+> sum rate (bits/s/Hz)
+> full-CSI genie (no pilot or switching cost) proposed, hybrid nRF =2 K
+> operating point, m= 6
+> Fig. 2. Sum rate against the pilot budget mover 8 channel realizations; the band is the 95% confidence interval. The upper axis restates mas a fraction of the whole candidate grid. Withdrawing pilots from ports that continue to carry data costs little down to m= 6 , below which the belief can no longer cover the gap. The genie is a bound, not a scheme: it knows all Nports without spending pilots and moves between them for free.
+
+per slot. As Epis is monotone submodular and the switching term modular, greedy carries the (1 − 1/e ) guarantee [17] on the information-driven part; in practice it is far tighter, and  Mm
+
+ here is small enough to check exhaustively — greedy is exactly optimal in 95% of slots and never below 0.9996 of it. Order matters: we predict, select, pilot, update, then precode (Fig. 1), so piloted ports carry a posterior error of about σ2
+
+> e
+
+rather than a one-step aging floor. IV. N UMERICAL RESULTS 
+
+A. Simulation Setup 
+
+The BS serves K = 3 single-antenna users from a 2λ × 2λ
+
+planar fluid antenna with N = 441 ports on a 21 × 21 grid,                                                                                                  
+
+> TABLE I OPERATING POINTS ;CONDITIONS AS IN SECTION IV-A, OBJECTIVE (6) AT
+> ηsw = 1 .m/M IS THE PILOTED FRACTION OF THE activated PORTS ,m/N
+> OF THE WHOLE GRID :EVEN m=MIS PARTIAL CSI.
+> mηsw m/M m/N Sw./slot Rate % genie Obj. (%) (%) (b/s/Hz) (b/s/Hz)
+> (a) pilot budget, at ηsw = 1
+> 2120 0.45 1.01 9.65 43.6 8.64 4140 0.91 3.76 14.86 67.2 11.10 6†160 1.36 6.44 18.50 83.7 12.06 8180 1.81 7.25 19.71 89.1 12.46 10 ‡1100 2.27 7.58 20.16 91.2 12.58
+> (b) switching weight, at m= 6 6060 1.36 18.89 17.61 79.6 -1.27
+> 6160 1.36 6.44 18.50 83.7 12.06
+> 6460 1.36 0.00 18.01 81.4 18.01 Full-CSI genie 15.34 22.12 100.0 6.78
+> †operating point used throughout; ‡every activated port piloted.
+
+activating M = 10 per slot through nRF = 6 = 2 K RF chains. Spatial correlation follows (1); the channel evolves as a space-time Jakes process at fD Ts = 0 .1 and the agent models it by (2) with p = 4 , fitted once by Yule–Walker from the assumed Doppler spectrum. Transmit SNR is 15 dB, ρ = 0 .9,
+
+βw = 0 .25 , and T = 40 slots with all results averaged over the second half, so the belief has settled. The full-CSI genie used throughout is a bound, not a competing scheme: it re-selects the best M of all N ports greedily from perfect knowledge of the whole grid, spends no pilots to acquire that knowledge, and pays no reconfiguration cost. No causal, pilot-limited policy can attain it, and every percentage we quote is a fraction of that ceiling. Finally, m = M is the most any partial-sensing scheme can measure without abandoning the budget. 
+
+B. Pilot Budget 
+
+Fig. 2 and block (a) of Table I report sum rate against the pilot budget m. At m = M = 10 the agent reaches 
+
+20 .16 bits/s/Hz, 91 .2% of the genie. The comparison deserves care: m = M pilots every activated port, but that set is 10 
+
+of 441 , so only 2.27% of the array is measured and the other 
+
+97 .7% is inferred from R and the temporal model. The gap to the genie is the price of never looking at the rest of the grid, not of a coarse estimate. Withdrawing pilots costs little over the useful range. At m =6 — 40% fewer pilot symbols — the rate is 18 .50 bits/s/Hz, 
+
+83 .7% of the genie, so 7.5 points of genie-relative rate buy back four of ten pilots. An unpiloted port is not thereby un-known: it is predicted through (2) and tightened by correlation with the piloted ports, since (8) updates the whole reduced-rank state from an m-dimensional innovation. Below m = 6 
+
+that mechanism runs out — 14 .86 (67 .2% ) at m = 4 , 9.65 
+
+(43 .6% ) at m = 2 — a collapse rather than a decline: two measurements cannot keep r = 26 modes in step with the channel, so prediction error outruns the AR model and the precoder inverts a covariance it no longer trusts. Block (a) also shows the budget governing how much the array moves : switching rises monotonically with m, from 1.01 
+
+ports per slot at m = 2 to 7.58 at m = M . An agent that 50 0.05 0.1 0.25 0.5 1 2                   
+
+> epistemic weight βw
+> 10.0 12.5 15.0 17.5 20.0 22.5
+> sum rate (bits/s/Hz)
+> full-CSI genie (no pilot/switching cost) sum rate, ηsw =1
+> switching equalised ( ηsw =4 )operating point, βw= 0.25
+> ports reconfigured / slot
+> 0510
+> ports reconfigured / slot
+> Fig. 3. Epistemic ablation at m= 6 over 8 realizations: everything is held fixed and only the epistemic weight βwis varied, so βw= 0 is pure rate-greedy selection with no active inference; it is stranded at 66 .0% of the genie, against 83 .7% at the marked operating point. The genie again pays neither pilots nor switching. The dashed curve repeats the sweep at ηsw = 4 , where every policy is driven to zero reconfiguration (Table I), so the two arms move identically and the remaining gap cannot be attributed to movement.
+
+cannot see is also unwilling to act, because (11) cannot certify that an unmeasured port is worth the reconfiguration. The objective therefore rises more gently than the rate — 12 .06 
+
+at m = 6 against 12 .58 at m = M — so m = 6 retains 
+
+95 .9% of the best attainable objective for 40% fewer pilots, and we adopt it hereafter. 
+
+C. The Switching Cost 
+
+Block (b) of Table I sweeps the switching weight ηsw at 
+
+m = 6 , and shows how little rate the objective (6) trades away. Raising ηsw from 0 to 4 takes the agent from 18 .89 
+
+reconfigured ports per slot — rebuilding the aperture every slot — to none at all, while the sum rate moves by 0.89 bits/s/Hz: an array that never moves is within 2.7% of one that moves constantly. Rate is also not monotone in ηsw . It peaks at ηsw = 1 
+
+(18 .50 bits/s/Hz) rather than at ηsw = 0 (17 .61 ): charging for movement makes the array faster. Under partial CSI a retained port accumulates posterior precision across slots, whereas an abandoned one takes its belief with it and its replacement starts from the prediction alone, so an unpenalized agent chases marginally better ports and pays in estimation quality. Some reluctance to move is an information policy, not merely a concession to the hardware — a partial-CSI effect invisible to any formulation that assumes the channel is known before the port is chosen. Finally, the genie loses on the objective. It leads by 
+
+3.64 bits/s/Hz in raw rate but reconfigures 15 .34 ports per slot, so at ηsw = 1 its objective is 6.78 against our 18 .01 . Equating the two, (22 .12 − 18 .01) /(15 .34 − 0.00) , the genie is beaten for any ηsw > 0.27 : unless reconfiguring a port is worth less than a quarter of a bit per second per hertz, perfect CSI with no movement discipline is the worse policy. This is the sense in which the switching term earns its place inside the expected free energy rather than being appended to it. 
+
+D. Does the Epistemic Term Earn Its Place? 
+
+Active inference would be an empty relabelling of rate-greedy selection if the epistemic term did no work, so we ablate it: Fig. 3 holds belief, pilot rule, precoder and channel fixed and varies only βw. At βw = 0 the agent selects purely on predicted rate and is stranded at 14 .60 bits/s/Hz, 66 .0% of the genie; at βw = 0 .25 it reaches 18 .50 , 83 .7% .A sceptic can reply that the exploring agent merely moves more, and that movement buys the rate. The dashed curve settles it: at ηsw = 4 both agents are driven to zero recon-figuration, so movement is identical by construction, and the epistemic agent still leads by 4.30 bits/s/Hz — 19 .4 points of genie-relative rate — while mean posterior variance across all 
+
+N ports falls from 0.72 to 0.37 . The term buys knowing where to look , not looking more. The optimum is interior: beyond βw ≈ 0.25 switching saturates near 12 ports per slot and rate falls to 74% of the genie by βw = 2 . We take βw = 0 .25 , which maximizes rate. A smaller βw = 0 .05 does score higher on the ηsw = 1 
+
+objective ( 17 .94 against 12 .06 ), but only by reconfiguring 0.08 
+
+ports per slot — a static array, not a fluid one. The objective rewards standing still; the point of a fluid antenna is that it need not. 
+
+E. Hybrid Transmission 
+
+All results use nRF = 6 = 2 K RF chains, not M = 10 . At this threshold the hybrid precoder (4) is digital-exact: against a fully digital front end the loss is below 0.001 bits/s/Hz at every pilot budget in Table I. The 40% saving in RF chains is free, so the results above are not artefacts of a relaxed transmit architecture. V. C ONCLUSION 
+
+We cast joint port selection and pilot allocation for a fluid antenna as active inference, deriving a two-term expected free energy from an explicit preference density in which reconfiguration cost is a preference over outcomes rather than a third, ad hoc penalty. The agent attains 91 .2% of a full-CSI genie’s sum rate while measuring 2.3% of the candidate ports and 83 .7% while measuring 1.4% , and beats that genie on the reconfiguration-aware objective for any switching price above 0.27 bits/s/Hz per port. Ablating the epistemic term costs 19 .4 points of genie-relative rate at equal switching, so the information term is load-bearing rather than nominal. Both sets are chosen greedily against a monotone submodular epistemic value at O(N M + M m ) per slot. Two extensions are out of scope here: the AR coefficients are fitted once from an assumed Doppler spectrum, and learning them online so the agent tracks an unknown or time-varying fD is left to future work, as is learning the spatial correlation R rather than assuming it from the array geometry. REFERENCES [1] K.-K. Wong, A. Shojaeifard, K.-F. Tong, and Y. Zhang, “Fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 1950–1962, 2021. 6
+
+[2] W. K. New, K.-K. Wong, H. Xu, C. Wang, F. Rostami Ghadi, J. Zhang, J. Rao, R. Murch, P. Ram´ ırez-Espinosa, D. Morales-Jimenez, C.-B. Chae, and K.-F. Tong, “A tutorial on fluid antenna system for 6G networks: Encompassing communication theory, optimization methods and hardware designs,” IEEE Commun. Surveys Tuts. , vol. 27, no. 4, pp. 2325–2377, 2025. [3] J. Liu, K. Liang, L. Zhao, G. Zheng, H. Gu, K.-K. Wong, and C.-B. Chae, “Switching-cost-aware deep reinforcement learning for dynamic port selection in fluid antenna systems,” IEEE Commun. Lett. , vol. 30, pp. 1548–1552, 2026. [4] C. Wang, G. Li, H. Zhang, K.-K. Wong, Z. Li, D. W. K. Ng, and C.-B. Chae, “Fluid antenna system liberating multiuser MIMO for ISAC via deep reinforcement learning,” IEEE Trans. Wireless Commun. , 2024, early access. [5] J. Zou, S. Sun, and C. Wang, “Online learning-induced port selection for fluid antenna in dynamic channel environment,” IEEE Wireless Commun. Lett. , vol. 13, no. 2, pp. 313–317, 2024. [6] Z. Zhang, J. Zhu, L. Dai, and R. W. Heath, Jr., “Successive Bayesian reconstructor for channel estimation in fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 24, no. 3, pp. 1992–2006, 2025. [7] C. Skouroumounis and I. Krikidis, “Fluid antenna with linear MMSE channel estimation for large-scale cellular networks,” IEEE Trans. Com-mun. , vol. 71, no. 2, pp. 1112–1125, 2023. [8] W. K. New, K.-K. Wong, H. Xu, F. Rostami Ghadi, R. Murch, and C.-B. Chae, “Channel estimation and reconstruction in fluid antenna system: Oversampling is essential,” IEEE Trans. Wireless Commun. , vol. 24, no. 1, pp. 309–322, 2025. [9] S. Zhang, J. Mao, Y. Hou, Y. Chen, K.-K. Wong, and X. Tao, “Fast port selection using temporal and spatial correlation for fluid antenna systems,” in Proc. IEEE Stat. Signal Process. Workshop (SSP) , 2023, pp. 95–99. [10] D. Dinis and R. Wichman, “Spatio-temporal port selection in fluid antennas under switching delays,” IEEE Commun. Lett. , vol. 30, pp. 992–996, 2026. [11] T. Parr, G. Pezzulo, and K. J. Friston, Active Inference: The Free Energy Principle in Mind, Brain, and Behavior . MIT Press, 2022. [12] K. Friston, F. Rigoli, D. Ognibene, C. Mathys, T. Fitzgerald, and G. Pez-zulo, “Active inference and epistemic value,” Cognitive Neuroscience ,vol. 6, no. 4, pp. 187–214, 2015. [13] W. C. Jakes, Microwave Mobile Communications . Wiley, 1974. [14] F. Sohrabi and W. Yu, “Hybrid digital and analog beamforming design for large-scale MIMO systems,” IEEE J. Sel. Topics Signal Process. ,vol. 10, no. 3, pp. 501–513, 2016. [15] X. Zhang, A. F. Molisch, and S.-Y. Kung, “Variable-phase-shift-based RF-baseband codesign for MIMO antenna selection,” IEEE Trans. Signal Process. , vol. 53, no. 11, pp. 4091–4103, 2005. [16] J. Otero Mart´ ınez, B. Genoves Guzman, and A. Garc´ ıa Armada, “Correlation and drop velocity in fluid antenna systems: Modeling and performance,” IEEE Trans. Wireless Commun. , 2025. [17] G. L. Nemhauser, L. A. Wolsey, and M. L. Fisher, “An analysis of approximations for maximizing submodular set functions—I,” Mathe-matical Programming , vol. 14, no. 1, pp. 265–294, 1978.

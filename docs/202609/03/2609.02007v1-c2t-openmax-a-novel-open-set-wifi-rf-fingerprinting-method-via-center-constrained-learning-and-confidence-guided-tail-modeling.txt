@@ -1,0 +1,288 @@
+Title: C^2T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling
+
+URL Source: https://arxiv.org/pdf/2609.02007v1
+
+Published Time: Thu, 03 Sep 2026 00:31:57 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# C2T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling 
+
+# Yuanyu Zhang 1, Junjie Yang 1, Ji He 1, Shuangrui Zhao 1, Lele Zheng 1, Yulong Shen 1
+
+> 1
+
+School of Computer Science and Technology, Xidian University yyuzhang@xidian.edu.cn 
+
+Abstract 
+
+Radio frequency fingerprinting (RFF) enables device au-thentication from transmitter-specific hardware imperfections, but practical deployment requires cross-environment open-set recognition. Data augmentation improves environmen-tal generalization, yet may yield dispersed, low-confidence known-class representations that distort the class statistics used by OpenMax. To address this problem, we propose C2T-OpenMax, an enhanced OpenMax framework combining center-constrained learning with confidence-guided tail mod-eling. The former improves intra-class compactness, making class-wise representations more suitable for distance-based modeling. The latter retains only correctly classified, high-confidence logits for mean activation vector estimation and Weibull fitting, reducing bias from ambiguous boundary sam-ples. Together, the two modules refine representation geom-etry and OpenMax construction while preserving augmenta-tion benefits. Experiments on a public WiFi CSI dataset show that C 2T-OpenMax achieves the highest open-set accuracy in seven of eight location groups and outperforms all baselines in area under the receiver operating characteristic curve (AU-ROC) and open-set classification rate (OSCR) across every tested openness level. Under the largest-openness setting, it improves accuracy by 12.31%, AUROC by 0.0887, and OSCR by 0.0856 over the augmented OpenMax baseline. 
+
+# Introduction 
+
+RFF identifies wireless devices through physical layer fea-tures caused by device-specific hardware imperfections. These imperfections arise from unavoidable variations in ra-dio components during manufacturing, making the resulting fingerprints closely related to individual devices and diffi-cult to reproduce exactly (Huang et al. 2017; Xie et al. 2024; Yan et al. 2025; Zhang et al. 2025). For WiFi sys-tems, channel state information (CSI) provides detailed am-plitude and phase responses, from which deep models can learn useful device representations (Meneghello, Rossi, and Restuccia 2022; Yang et al. 2023; Kong and Chen 2024b). However, most existing deep RFF methods follow a closed-set assumption, where all devices observed during testing belong to classes included in the training set. This assump-tion does not hold in practical networks, where previously unseen devices may access the network and changes in lo-cation, collection time, and channel conditions may alter the CSI features of the same device. A model trained under lim-ited environments may therefore confuse channel changes with device differences, causing an authorized device to be classified as another device or rejected as unknown. Mean-while, an unknown device may be incorrectly accepted as an authorized device. Open-set recognition (OSR) must there-fore recognize authorized devices reliably across changing environments while effectively detecting unknown devices. Simply assigning every sample to the known class with the highest score is no longer sufficient for practical deployment (Zhang et al. 2022; Yu et al. 2024; He et al. 2024). Data augmentation is commonly used to improve environ-mental generalization by simulating a wider range of channel conditions. However, augmentation may also produce sam-ples that deviate from the typical distribution of their source devices. Although these samples may still be classified cor-rectly, they often exhibit low classification confidence. When used for known-class modeling, such samples may enlarge known-class acceptance regions, increase inter-device con-fusion, reduce the classification accuracy of authorized de-vices, and make unknown devices more likely to be accepted as authorized devices. This work studies open-set WiFi RFF by combining Deep-CRF with OpenMax. DeepCRF uses channel simulation and Gaussian noise augmentation to learn device representations across different channel conditions. After model training, OpenMax uses the activation vectors of correctly classified training samples to calculate a mean activation vector for each known class. It then calculates the distance from each activation vector to the corresponding mean activation vec-tor and selects the samples with the largest distances to fit a Weibull distribution. During inference, the fitted distribution is used to determine whether a test sample remains within the acceptance region of a known class. However, correct classification alone does not ensure that a sample is suitable for OpenMax construction. Some aug-mented samples may be classified correctly while their ac-tivation vectors deviate from the typical activation pattern of their source devices and exhibit low classification confi-dence. Including these samples may shift the mean activation vector away from the typical class representation and cause large deviations to be treated as normal variations of known classes. As a result, known-class acceptance regions may be-come larger, increasing confusion among authorized devices arXiv:2609.02007v1 [cs.CR] 2 Sep 2026 Figure 1: Motivation of C 2T-OpenMax. (a) In an augmented closed-set representation, correctly classified samples from the same known class can differ in confidence and proximity to the decision boundary. (b) When all correctly classified samples are used for OpenMax construction, low-confidence boundary samples may affect both MAV estimation and the distance tail used for Weibull fitting. (c) Center-constrained learning improves intra-class compactness, while confidence screening refines the samples used for MAV estimation and Weibull tail fitting. The scatter plots are conceptual illustrations rather than exact activation vector distributions. and the risk of accepting unknown devices as authorized devices. To address these issues, we propose C2T-OpenMax, which contains two components: center-constrained learning and confidence-guided tail modeling. We introduce center-constrained learning during model training to constrain the features produced by the feature extractor and improve com-pactness within each known class. Confidence-guided tail modeling selects only correctly classified, high-confidence training samples to construct more representative mean acti-vation vectors and Weibull tail distributions. Together, the two components improve authorized device classification and unknown device detection while preserving the environ-mental generalization provided by data augmentation. Fig. 1 illustrates the studied problem and the corresponding solu-tions. Our main contributions are summarized as follows: 
+
+• We analyze the difficulty of applying OpenMax to an aug-mented WiFi RFF model and show that correctly classi-fied samples with low classification confidence may lead to unreliable known-class modeling. 
+
+• We introduce center-constrained learning during model training to constrain the features produced by the feature extractor and improve compactness within each known class. 
+
+• We propose confidence-guided tail modeling, which uses only correctly classified, high-confidence training sam-ples to construct more representative mean activation vec-tors and Weibull tail distributions. 
+
+# Related Work 
+
+Deep Learning and Channel-Robust RF Fingerprinting 
+
+Deep learning has advanced RFF from hand-crafted sig-nal features toward end-to-end device representation learn-ing (Riyaz et al. 2018). For WiFi systems, CSI provides fine-grained amplitude and phase responses that have been used for physical-layer device identification (Kong and Chen 2023, 2024a,b; Huang et al. 2025). However, received CSI contains both transmitter-dependent characteristics and environment-dependent channel effects, making RFF models sensitive to changes in location, multipath propagation, noise, and acqui-sition conditions. Existing channel-robust approaches suppress such envi-ronmental variations through feature purification, data aug-mentation, auxiliary objectives, or contrastive learning (Shen et al. 2022; Zhang et al. 2023; Kong and Chen 2024b). Deep-CRF (Kong and Chen 2024b), for example, combines chan-nel simulation, Gaussian-noise augmentation, and super-vised contrastive pretraining to improve cross-environment closed-set recognition. We adopt this established closed-set framework and focus on its reliable extension to open-set recognition, rather than proposing a new augmentation or representation-learning method. 
+
+Open-Set Recognition for RF Fingerprinting 
+
+OSR requires a model to classify known classes while re-jecting previously unseen ones. Existing approaches mainly rely on confidence scoring (Hanna, Karunaratne, and Cabric 2020), distribution modeling (Bendale and Boult 2016), re-construction (Huang et al. 2022), or discriminative boundary learning (Chen et al. 2021; Zhou et al. 2025). Confidence-based methods such as maximum softmax probability are simple to apply but can remain overconfident on unknown samples. OpenMax (Bendale and Boult 2016) models the upper tails of class-wise logit distances with Weibull distri-butions. Reconstruction-based methods identify unknowns according to their mismatch with known-class reconstruction patterns, whereas boundary-based methods learn represen-tations that separate known classes from open space. Existing RFF-oriented OSR studies primarily improve unknownness scores, decision boundaries, nuisance-feature suppression, or inference-time adaptation (Yang et al. 2025; Li et al. 2026). In contrast, we examine the reliability of the correctly classified training activation vectors used to construct a known-class statistical model. This issue is par-ticularly relevant to OpenMax because both its class mean activation vectors (MAVs) and Weibull tails are estimated from such training samples. 
+
+Known-Class Modeling under Augmented Representations 
+
+Data augmentation is generally beneficial for RFF because it exposes a closed-set model to broader channel variations and improves cross-environment generalization. However, correctly classified samples in an augmented representation may differ in confidence and in how well they represent the core structure of a known class. These differences may have limited influence on a closed-set decision but become impor-tant when the same activation vectors are used to estimate class MAVs and upper-tail distance distributions. Prior channel-robust RFF studies mainly evaluate repre-sentation robustness and closed-set accuracy, while existing OSR methods mainly optimize unknown rejection. The reli-ability of the known samples used for tail-distribution mod-eling at the intersection of these two settings remains less ex-plored. Our work addresses this gap through representation-level compactness optimization and confidence-guided re-finement of the training samples used for OpenMax con-struction. 
+
+# Problem Formulation and Motivation 
+
+Open-Set WiFi RFF Setting 
+
+Let YK = {1, . . . , K } denote the set of known-device labels available during training. At test time, a CSI sample may come from 
+
+Ytest = YK ∪ Y U ,
+
+where YK ∩ Y U = ∅ and YU denotes previously unseen de-vices. Given an input sample x, the closed-set classifier pro-duces a pre-softmax activation vector v(x) and a probability vector p(x) = softmax( v(x)) over YK , where p(k | x)
+
+denotes the probability assigned to class k. The open-set ob-jective is to assign the correct device label when x belongs to a known class and to output unknown otherwise. Samples from YU are held out from MAV estimation, Weibull fitting, and model construction. 
+
+Tail-Modeling Challenge 
+
+OpenMax constructs a statistical model for each known class from correctly classified training logits. For class k, let 
+
+Ck = {x | y(x) = k, ˆy(x) = k}
+
+denote the set of correctly classified training samples, where 
+
+ˆy(x) = arg max j p(j | x). Conventional OpenMax com-putes the class mean logit vector as 
+
+μbase (k) = 1
+
+|C k|
+
+X
+
+> x∈C k
+
+v(x),
+
+and fits a Weibull distribution to the upper tail of the distances from v(x) to μbase (k).This construction implicitly treats all samples in Ck as equally reliable. However, correct classification only indi-cates that the ground-truth class receives the largest predic-tion score. A correctly classified sample may still have low confidence, lie close to a decision boundary, or be weakly representative of the class core. Such samples can affect OpenMax construction in two related ways. First, including them in the class average may shift the MAV away from the more representative high-confidence region. Second, be-cause all logit distances are defined relative to the estimated MAV, this shift can change the distance values and the order-ing of samples selected for upper-tail fitting. We therefore distinguish the complete correctly classified set Ck from the confidence-screened subset 
+
+Sk = {x ∈ C k | p(k | x) > δ } , Sk ⊆ C k,
+
+where δ is a confidence threshold. The purpose of screening is not to question the benefit of augmentation or to remove samples from closed-set training. Instead, it refines the ob-servations used to summarize an augmented known-class representation during offline OpenMax construction. 
+
+Design Objectives 
+
+A reliable open-set extension should satisfy two complemen-tary objectives. First, the learned known-device representa-tions should be sufficiently compact so that a class reference point captures nominal within-class behavior rather than a highly dispersed collection of channel realizations. Second, the finite sample set used to estimate this reference point and its upper-tail distance distribution should contain reliable class representatives. These objectives require different mechanisms. Representation-level regularization changes the learned feature geometry, whereas confidence screening changes only the subset used for MAV estimation and Weibull fitting. Accordingly, we introduce center-constrained learning during the second closed-set training stage and confidence-guided sample refinement during offline Open-Max construction. The fitting-sample threshold is used only during offline OpenMax construction, whereas inference combines OpenMax recalibrated scores with a separately selected rejection threshold. 
+
+# Method 
+
+Overall Framework 
+
+The adopted DeepCRF model uses two training stages. In Stage I, the feature extractor is trained with supervised con-trastive learning. In Stage II, the feature extractor and clas-sifier are optimized jointly. C 2T-OpenMax keeps the first stage unchanged and adds center loss in the second stage. After training, confidence screening is applied during offline OpenMax construction. C2T-OpenMax extends the adopted augmented closed-set classifier with two complementary components. Fig. 2 presents the representation-learning stage. Channel-oriented augmentation and Stage I supervised contrastive learning are Figure 2: Training framework of C 2T-OpenMax. The aug-mentation strategy and Stage I supervised contrastive learn-ing are adopted from DeepCRF, while center loss is intro-duced in Stage II to improve intra-class compactness. adopted from DeepCRF, while center loss is introduced in Stage II to improve intra-class compactness. Fig. 3 presents the subsequent offline OpenMax-construction stage, where confidence screening refines the training subset used for MAV estimation and Weibull fitting. Algorithm 1 summa-rizes the complete construction procedure. 
+
+Adopted Augmented Closed-Set Framework 
+
+Following DeepCRF (Kong and Chen 2024b), the training set contains original CSI samples and samples generated by channel simulation and Gaussian-noise injection. In Stage I, only the feature extractor is optimized using supervised contrastive learning (SupCon). For representation fi, the ob-jective is 
+
+Lsupcon =
+
+> N
+
+X
+
+> i=1
+
+−1
+
+|P (i)|
+
+X 
+
+> q∈P(i)
+
+log exp  f ⊤ 
+
+> i
+
+fq /τ P 
+
+> a∈A(i)
+
+exp  f ⊤ 
+
+> i
+
+fa/τ  .
+
+(1) where N is the number of samples in the contrastive training batch, P (i) contains the indices of samples sharing the label of sample i, A(i) contains all sample indices except i, and τ is the temperature parameter. Both the augmentation procedure and Stage I training are adopted components rather than contributions of this work. 
+
+Center-Constrained Feature Learning 
+
+In Stage II, the feature extractor and closed-set classifier are optimized jointly. Let B denote a training mini-batch with M = |B| samples. Let p(k | x) denote the predicted probability of class k for sample x, and let yk(x) denote its one-hot label. The cross-entropy loss is 
+
+Lce = − 1
+
+M
+
+X
+
+> x∈B
+> K
+
+X
+
+> k=1
+
+yk(x) log p(k | x). (2) For learned feature f (x) and the center c(y(x)) of its ground-truth class, the center loss is 
+
+Lcenter = 12M
+
+X
+
+> x∈B
+
+∥f (x) − c(y(x)) ∥22 . (3) Although center loss is applied to the intermediate fea-tures, its effect is propagated to the classifier outputs used by OpenMax. By reducing the within-class variation of the input representations to the classifier, it also promotes more com-pact class-wise logit distributions, providing a more stable basis for MAV estimation and distance-based tail modeling. The Stage II objective is 
+
+Lhybrid = Lce + λLcenter , (4) where λ balances classification and compactness objectives. Center loss directly reduces intra-class variation and pro-vides a more compact known-device representation for sub-sequent statistical modeling. Inter-class discrimination is learned jointly through supervised contrastive learning and cross-entropy optimization. 
+
+Figure 3: Confidence-guided OpenMax construction. Cor-rectly classified training samples are further screened accord-ing to the predicted probability assigned to their ground-truth class. The retained training logits are used for MAV estima-tion and Weibull tail fitting. 
+
+Confidence-Guided Tail Modeling 
+
+After closed-set training, the class-wise OpenMax models are constructed offline. Let f (x) = F (x) denote the in-termediate feature representation, and let v(x) = G(f (x)) 
+
+denote the pre-softmax activation vector produced by the classifier. The corresponding probability vector is p(x) = softmax( v(x)) , where p(k | x) denotes the probabil-ity assigned to class k. The predicted class is ˆy(x) =arg max j p(j | x). The screened set for class k is 
+
+Sk = {x ∈ C k | p(k | x) > δ } , Sk ⊆ C k. (5) Here, p(k | x) is the predicted probability assigned to the ground-truth class. Screening changes only the observations used for offline OpenMax construction; it neither modifies the trained feature extractor nor removes samples from closed-set training. The screened MAV is computed as 
+
+μ(k) = 1
+
+|S k|
+
+X
+
+> x∈S k
+
+v(x). (6) For each retained logit vector, we calculate a mixed Euclidean–cosine distance: 
+
+d(x, k ) = ∥v(x) − μ(k)∥2
+
+200 +
+
+
+
+1 − v(x)⊤μ(k)
+
+∥v(x)∥2 ∥μ(k)∥2
+
+
+
+.
+
+(7) Algorithm 1 C2T-OpenMax Construction                                                                                     
+
+> Require: Known-device training set D={(x, y (x)) }; trained feature extractor Fand classifier G; confidence threshold δ;tail ratio r
+> Ensure: Class MAVs {μ(k)}Kk=1 and Weibull models {W k}Kk=1
+> 1: for each x∈ D do
+> 2: f(x)←F(x)
+> 3: v(x)←G(f(x))
+> 4: p(x)←softmax( v(x))
+> 5: ˆy(x)←arg max jp(j|x)
+> 6: end for
+> 7: for k= 1 to Kdo
+> 8: Sk← { x|y(x) = k, ˆy(x) = k, p (k|x)> δ }
+> 9: μ(k)← |S k|−1P
+> x∈S kv(x)
+> 10: Dk← { d(x, k )|x∈ S k}
+> 11: Sort Dkin descending order 12: Tk←largest ⌈r|D k|⌉ distances in Dk
+> 13: Wk←WeibullFit( Tk)
+> 14: end for
+> 15: return {μ(k),Wk}Kk=1
+
+For class k, the distances Dk = {d(x, k ) | x ∈ S k}
+
+are sorted in descending order. The largest proportion r is retained as the tail set Tk = Top ⌈r|D k |⌉ (Dk), and the class-specific Weibull model is Wk = WeibullFit( Tk). In our implementation, δ = 0 .8 and r = 0 .05 . The same screened subset is therefore used to determine the class reference point and the distance distribution from which its upper tail is selected. Fig. 3 illustrates this construction process. The screening operation is applied before MAV estimation, and the resulting MAV is then used to compute and rank the retained logit distances. 
+
+Open-Set Inference 
+
+For a test CSI sample x, the closed-set classifier produces a pre-softmax logit vector and known-class scores. Follow-ing OpenMax (Bendale and Boult 2016), each class-specific Weibull model produces an outlier weight from the distance between the test logit vector and the corresponding MAV. The weight discounts the associated known-class score, and the removed score mass is accumulated into the unknown class. Let ep(c | x) denote the OpenMax recalibrated score for class c ∈ Y K ∪ { u}. Let 
+
+k∗ = arg max 
+
+> k∈Y K
+
+ep(k | x) (8) denote the known class with the largest recalibrated score. The final decision is 
+
+ˆyopen (x) = 
+
+(u, ep(u | x) > ep(k∗ | x) or ep(k∗ | x) < γ, k∗, otherwise ,
+
+(9) where u denotes the unknown class. Here, δ is the fitting-sample screening threshold used only during offline Open-Max construction, whereas γ is the inference-time rejection threshold. The threshold γ is selected on the known-device validation set according to classification accuracy, without using any unknown-device samples. 
+
+# Experiments 
+
+Experimental Setup 
+
+Dataset and protocols. We use the public WiFi CSI dataset released with DeepCRF (DeepCRF 2025). The dataset con-tains CSI measurements collected from multiple WiFi de-vices at nine locations over approximately one year. It cov-ers diverse propagation and acquisition conditions, includ-ing line-of-sight (LOS) and non-line-of-sight (NLOS) links, static and dynamic scenarios, and indoor and outdoor en-vironments. We follow the data partition and augmentation protocol of DeepCRF (Kong and Chen 2024b). P1 and P2 are used for model development, and their held-out test samples are jointly reported as P1–P2. P3–P9 are used for cross-location testing. The cross-location experiment contains 15 known devices and 4 unknown devices. The openness experiment fixes 12 known devices and increases the number of unknown devices from 1 to 7. The ablation study uses 12 known and 7 unknown devices, corresponding to the largest openness setting. 
+
+Baselines and metrics. We compare C2T-OpenMax with maximum softmax probability (MSP) (Hanna, Karunaratne, and Cabric 2020), original OpenMax (Ben-dale and Boult 2016), class-specific semantic reconstruction (CSSR) (Huang et al. 2022), and adversarial reciprocal points learning (ARPL) (Chen et al. 2021). These methods represent confidence-based, distribution-based, reconstruction-based, and discriminative-boundary OSR strategies, respectively. All methods use identical known/unknown device partitions and the same augmented training data; in particular, CSSR and ARPL use the same augmentation protocol. We report open-set accuracy, the area under the receiver operating characteristic curve (AUROC), and the open-set classification rate (OSCR). Open-set accuracy jointly considers correct known-device classification and correct unknown-device rejection: 
+
+Accuracy = Nknown -correct + Nunknown -correct 
+
+Ntotal 
+
+. (10) AUROC measures known–unknown separability. OSCR ad-ditionally considers whether an accepted known sample is assigned to its correct device class and therefore evaluates the trade-off between correct known-device classification and false acceptance of unknown devices (Scheirer et al. 2012). 
+
+Implementation details. The closed-set training configu-ration, including data augmentation and two-stage optimiza-tion, follows DeepCRF (Kong and Chen 2024b). Center loss is added only in Stage II with λ = 0 .005 , while Stage I re-mains unchanged. After training, the pre-softmax logits of correctly classified samples are used for OpenMax construc-tion. We set δ = 0 .8 and use the largest 5% of class-wise distances for Weibull fitting. The mixed Euclidean–cosine distance follows Eq. (7) and is used in both construction and inference. The inference threshold γ is selected using Method P1–P2 P3 P4 P5 P6 P7 P8 P9 MSP 85.83 83.21 79.24 69.99 85.48 70.87 75.95 70.41 OpenMax 85.90 82.82 79.64 69.18 84.21 71.33 75.12 69.56 CSSR 86.12 84.88 86.37 78.92 88.90 75.57 81.67 70.34 ARPL 87.97 80.13 84.32 89.77 94.05 82.78 92.85 66.37 C2T-OpenMax 95.70 86.14 80.46 90.26 96.35 87.38 93.46 84.61 
+
+Table 1: Open-set accuracy (%) across different locations. Bold indicates the best result in each column. P1 and P2 are jointly reported. only known-device validation samples and fixed during test-ing. No unknown-device sample is used for MAV estima-tion, Weibull fitting, or threshold selection, and the same known/unknown assignment is used across locations. 
+
+Comparison Across Locations 
+
+Table ?? reports the open-set accuracy under the 15-known and 4-unknown protocol. C 2T-OpenMax achieves the best result at seven of the eight reported location groups and con-sistently outperforms original OpenMax across all locations. At P1–P2, the accuracy increases from 85.90% to 95.70%, showing that the proposed method is effective not only un-der cross-location shifts but also on held-out real samples collected at the locations involved in model development. The improvements become more pronounced in several cross-location settings. In particular, the gains over origi-nal OpenMax reach 21.08 and 18.34 percentage points at P5 and P8, respectively. Consistent improvements are also observed at P6, P7, and P9, indicating that compact repre-sentation learning and confidence-guided fitting-sample re-finement provide more reliable class-wise statistics under substantial channel variations. P4 is characterized by severe multipath propagation (Kong and Chen 2024b). Although C2T-OpenMax improves original OpenMax from 79.64% to 80.46%, it remains below CSSR and ARPL at this loca-tion. This result suggests that severe multipath can distort the learned representation and classifier logits in a manner that cannot be fully addressed by feature compactness and OpenMax fitting-sample refinement alone. Fig. 4 and Fig. 5 present the corresponding AUROC and OSCR results. Their overall trends are consistent with the accuracy comparison, indicating that the improvements are reflected in both known–unknown separability and correct known-device recognition rather than being caused only by a particular decision threshold. 
+
+Performance Under Different Openness 
+
+We fix 12 known devices and gradually increase the number of unknown devices from 1 to 7. Following the openness definition of Scheirer et al.(Scheirer et al. 2012), the corre-sponding openness ranges from 2.02% to 12.01%. For each openness setting, test samples from all locations are com-bined before AUROC and OSCR are calculated. As shown in Fig. 6a and Fig. 6b, the performance of the evaluated methods generally decreases or fluctuates as more unknown devices are introduced. The variation is not strictly monotonic because different unknown devices can have dif-
+
+Figure 4: AUROC across different locations. 
+
+Figure 5: OSCR across different locations. ferent degrees of similarity to the known-device classes. Therefore, adding an unknown class does not necessarily increase the recognition difficulty by the same amount at every openness level. Across all reported openness settings, C 2T-OpenMax achieves higher AUROC and OSCR than the compared meth-ods. These results indicate that the method maintains reliable known–unknown separability when the composition of the unknown-device set changes. AUROC and OSCR exhibit similar overall trends because both metrics depend on the confidence ordering between known and unknown samples. However, OSCR is more re-strictive because a known sample contributes positively only when it is both accepted and assigned to its correct known-device class. Consistent performance on both metrics there-fore indicates that C 2T-OpenMax improves unknown rejec-tion while preserving useful known-device identification. 
+
+Ablation Study 
+
+Table 2 evaluates the effects of center-constrained learning and confidence-guided sample screening. The experiment (a) AUROC (b) OSCR 
+
+Figure 6: Open-set performance with 12 known devices and an increasing number of unknown devices. Test samples from all locations are combined for evaluation. uses 12 known devices and 7 unknown devices, correspond-ing to the largest openness setting. Test samples from all loca-tions are combined before Accuracy, AUROC, and OSCR are calculated. The base model denotes the adopted augmented closed-set model combined with original OpenMax. Adding center-constrained learning improves accuracy from 83.60% to 88.25%, corresponding to an increase of 4.65 percentage points. AUROC and OSCR increase by 0.0516 and 0.0501, respectively. These results indicate that improv-ing intra-class compactness provides a more stable feature distribution for subsequent OpenMax construction. Confidence-guided sample screening alone increases ac-curacy by 7.13 percentage points, AUROC by 0.0733, and OSCR by 0.0740. The larger individual gain obtained by this component indicates that correctly classified samples are not equally reliable for MAV estimation and Weibull fit-ting. Refining the fitting subset therefore substantially affects the resulting known-class statistical models. Combining both components produces the strongest per-formance. Compared with the base model, C 2T-OpenMax improves accuracy by 12.31 percentage points, AUROC by 0.0887, and OSCR by 0.0856. It also improves accuracy by 5.18 percentage points over confidence screening alone. These results support the intended complementarity of the two components: center loss changes the learned feature ge-ometry, whereas confidence screening changes the samples used to estimate the class-wise statistical model.                
+
+> Method Accuracy (%) AUROC OSCR Base 83.60 0.9018 0.9004 Base + Center 88.25 0.9534 0.9505 Base + Screening 90.73 0.9751 0.9744 C2T-OpenMax 95.91 0.9905 0.9860
+
+Table 2: Ablation results under the 12-known and 7-unknown setting. Test samples from all locations are combined for evaluation. Base denotes the adopted augmented closed-set model with original OpenMax. 
+
+Visualization of Training Samples Used for Weibull Fitting 
+
+OpenMax constructs its MAVs and Weibull models from training logits. Fig. 7 therefore visualizes the class-wise train-  
+
+> (a) Original OpenMax (b) Base + Center
+> (c) Base + Screening (d) C 2T-OpenMax
+
+Figure 7: t-SNE visualization of the class-wise training logits retained for MAV estimation and subsequent tail selection. Confidence screening modifies only the OpenMax construc-tion subset and does not change the trained feature extractor. ing logits used for MAV estimation and Weibull fitting, rather than the complete test-logit distribution. Original OpenMax uses all correctly classified training samples. Introducing center loss changes the learned feature representation and improves intra-class compactness. Confi-dence screening, in contrast, leaves the feature extractor un-changed and removes only correctly classified samples that do not satisfy the confidence requirement. The screening-only visualization should therefore be in-terpreted as a change in the fitting subset rather than a change in the learned feature space. These plots provide qualitative evidence of the distinct roles of the two components; they do not indicate that confidence screening changes the network representation. 
+
+# Conclusion 
+
+This work studies how to reliably extend an augmented closed-set WiFi RFF model to open-set recognition. C 2T-OpenMax combines center-constrained learning, which im-proves intra-class compactness, with confidence-guided tail modeling, which refines the training logits used for MAV estimation and Weibull tail fitting. Experiments across lo-cations, openness settings, ablations, and fitting-sample vi-sualizations demonstrate the complementary effects of the two components. Although implemented with OpenMax, the sample-refinement strategy may also benefit other distance-or tail-distribution-based OSR methods. Severe multipath conditions remain challenging, and future work will explore adaptive screening, more robust tail modeling, and broader validation across devices, receivers, and channel environ-ments. References 
+
+Bendale, A.; and Boult, T. E. 2016. Towards open set deep networks. In Proceedings of the IEEE conference on com-puter vision and pattern recognition , 1563–1572. Chen, G.; Peng, P.; Wang, X.; and Tian, Y. 2021. Adversarial reciprocal points learning for open set recognition. IEEE Transactions on Pattern Analysis and Machine Intelligence ,44(11): 8065–8081. DeepCRF. 2025. DeepCRF Code and Dataset. [Online]. Available: https://github.com/Oriseven/DeepCRF. Hanna, S.; Karunaratne, S.; and Cabric, D. 2020. Deep learn-ing approaches for open set wireless transmitter authoriza-tion. In 2020 IEEE 21st International Workshop on Signal Processing Advances in Wireless Communications (SPAWC) ,1–5. IEEE. He, Y.; Ma, Y.; Qian, R.; Zhao, Y.; Ding, H.; and An, J. 2024. Open-set long-tailed radio frequency fingerprint iden-tification. In 2024 IEEE/CIC International Conference on Communications in China (ICCC) , 1543–1548. IEEE. Huang, H.; Wang, Y.; Hu, Q.; and Cheng, M.-M. 2022. Class-specific semantic reconstruction for open set recog-nition. IEEE transactions on pattern analysis and machine intelligence , 45(4): 4214–4228. Huang, Y.; Wang, W.; Zhang, D.; Wang, J.; Chen, C.; Cao, Y.; and Wang, W. 2025. Enhancing WiFi CSI Fingerprinting: A Deep Auxiliary Learning Approach. IEEE Internet of Things Journal .Huang, Y.; et al. 2017. Radio frequency fingerprint extraction of radio emitter based on I/Q imbalance. Procedia computer science , 107: 472–477. Kong, R.; and Chen, H. 2024a. CSI-RFF: Leveraging micro-signals on CSI for RF fingerprinting of commodity WiFi. 
+
+IEEE Transactions on Information Forensics and Security ,19: 5301–5315. Kong, R.; and Chen, H. 2024b. DeepCRF: Deep learning-enhanced CSI-based RF fingerprinting for channel-resilient WiFi device identification. IEEE Transactions on Informa-tion Forensics and Security , 20: 264–278. Kong, R.; and Chen, H. H. 2023. Physical-layer authentica-tion of commodity Wi-Fi devices via micro-signals on CSI curves. In 2023 IEEE 24th International Workshop on Signal Processing Advances in Wireless Communications (SPAWC) ,486–490. IEEE. Li, T.; Li, Y.; Wen, Z.; Lin, J.; Wan, J.; Su, J.; Wang, C.; and Hong, Z. 2026. RFF-TTA: Physical Information-Aware Prototype for Temporally Varying RF Fingerprinting Online Test-Time-Adaptation. In Proceedings of the AAAI Confer-ence on Artificial Intelligence , volume 40, 686–694. Meneghello, F.; Rossi, M.; and Restuccia, F. 2022. DeepCSI: Rethinking Wi-Fi radio fingerprinting through MU-MIMO CSI feedback deep learning. In 2022 IEEE 42nd In-ternational Conference on Distributed Computing Systems (ICDCS) , 1062–1072. IEEE. Riyaz, S.; Sankhe, K.; Ioannidis, S.; and Chowdhury, K. 2018. Deep learning convolutional neural networks for radio identification. IEEE Communications Magazine , 56(9): 146– 152. Scheirer, W. J.; de Rezende Rocha, A.; Sapkota, A.; and Boult, T. E. 2012. Toward open set recognition. IEEE trans-actions on pattern analysis and machine intelligence , 35(7): 1757–1772. Shen, G.; Zhang, J.; Marshall, A.; and Cavallaro, J. R. 2022. Towards scalable and channel-robust radio frequency finger-print identification for LoRa. IEEE Transactions on Infor-mation Forensics and Security , 17: 774–787. Xie, L.; Peng, L.; Zhang, J.; and Hu, A. 2024. Radio fre-quency fingerprint identification for Internet of Things: A survey. Security and Safety , 3: 2023022. Yan, G.; Fu, X.; Wang, Y.; Zhang, Q.; and Gui, G. 2025. Radio frequency fingerprint identification towards statistical and deep learning features: Review, recent results and future directions. Peer-to-Peer Networking and Applications , 18(3): 116. Yang, J.; Feng, S.; Wang, Y.; Wu, X.; and Yan, M. 2025. OpenRFI: Open-Set Radio Frequency Fingerprint Identifi-cation via Test-Time Fine-Tuning. IEEE Transactions on Mobile Computing .Yang, Z.; Lu, Q.; Zhang, H.; Chen, F.; and Xian, H. 2023. Eliminating rogue access point attacks in IoT: A deep learn-ing approach with physical-layer feature purification and de-vice identification. IEEE Internet of Things Journal , 11(8): 14886–14900. Yu, N.; Wu, J.; Zhou, C.; Shi, Z.; and Chen, J. 2024. Open set learning for RF-based drone recognition via signal se-mantics. IEEE Transactions on Information Forensics and Security , 19: 9894–9909. Zhang, J.; Ardizzon, F.; Piana, M.; Shen, G.; and Tomasin, S. 2025. Physical layer-based device fingerprinting for wireless security: From theory to practice. IEEE Transactions on Information Forensics and Security .Zhang, X.; Huang, Y.; Lin, M.; Tian, Y.; and An, J. 2023. Transmitter identification with contrastive learning in incre-mental open-set recognition. IEEE Internet of Things Jour-nal , 11(3): 4693–4711. Zhang, X.; Lin, M.; Tian, Y.; Huang, Y.; An, J.; and Cui, T. 2022. Data-enhancement-aided protocol-agnostic transmit-ter recognition for open-set in IoT. IEEE Internet of Things Journal , 10(10): 8630–8644. Zhou, Z.; Li, G.; Wang, T.; Zeng, D.; Li, X.; and Wang, Q. 2025. A robust open-set specific emitter identification for complex signals with class-irrelevant features. IEEE Trans-actions on Information Forensics and Security .
