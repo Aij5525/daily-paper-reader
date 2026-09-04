@@ -1,0 +1,265 @@
+Title: On the Impact of Site-Specific Training for a Real-World 5G NR System
+
+URL Source: https://arxiv.org/pdf/2609.04004v1
+
+Published Time: Fri, 04 Sep 2026 01:15:57 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+> 1
+
+# On the Impact of Site-Specific Training for a Real-World 5G NR System 
+
+Reinhard Wiesmayr ∗,1, Nuri Berke Baytekin ∗,1, Chris Dick 2, and Christoph Studer 1
+
+∗equal contribution; 1ETH Zurich, 2NVIDIA; e-mail: wiesmayr@iis.ee.ethz.ch 
+
+Abstract —Site-specific training can improve wireless receiver performance without increasing computational complexity. How-ever, real-world results have so far focused on fully trainable neural receivers and single-layer transmissions. We study site-specific finetuning of three receiver architectures: fully trainable neural, model-driven neural, and model-based. We train and evaluate these receivers using new measurements from a standard-compliant 5G NR testbed at ETH Zurich with dual-layer uplink transmission, including measurement campaigns conducted more than six months apart. Our results show that site-specific finetuning (i) substantially improves fully trainable and model-driven neural receivers, while resulting in only marginal gains for the less tunable model-based receiver; (ii) enables a single neural receiver jointly finetuned for single- and dual-layer transmission to closely match receivers finetuned separately for each configuration; and (iii) remains effective across measurement campaigns separated by more than six months. We also investigate site-specific linear minimum mean-square error channel estimation using covariance matrices estimated from either synthetic channels or site-specific measurements. When combined with iterative detection and decoding, site-specific channel estimation achieves the lowest error rate observed in our datasets. Our finetuning code and measurement datasets are publicly available online. 1
+
+I. I NTRODUCTION 
+
+Site-specific training optimizes wireless receiver performance for a specific deployment area by exploiting the characteristic propagation conditions and radio frequency (RF) hardware impairments. There exist two common approaches: (i) site-specific finetuning , where receiver algorithm parameters are tuned through stochastic gradient descent (SGD) using labeled datasets, and (ii) site-specific parameter adaptation , where parameters of classical receiver algorithms are estimated for a given site. Site-specific finetuning has been applied to several multiple-input multiple-output (MIMO) data detectors: fully-tunable neural receivers (NRXs) [1]–[3], which provide the highest tunability but also exhibit the highest complexity; model-based receivers [4], which build upon low-complexity classical algorithms and introduce only a handful of hyperpa-rameters tuned through deep unfolding [5]; and model-driven neural receivers (MDXs) [6], which strike a balance between flexibility and complexity. Site-specific parameter adaptation includes channel estimation algorithms that leverage channel statistics estimated for the given site [7]. 
+
+The authors used OpenAI GPT 5.6 Sol during preparation of this manuscript. All outputs were independently evaluated and verified by the authors, who take full responsibility for the content of the manuscript. We thank António Maia Barros for his support during measurements. We acknowledge NVIDIA for their sponsorship of this research. 
+
+> 1
+
+https://github.com/IIP-Group/site_specific_training 
+
+Most results on trainable receiver algorithms rely on synthetic data [1]–[3], [7]. However, reference [8] shows that synthetic-data-based results may be overly optimistic. The study in [9] trains an NRX on synthetic data and validates its performance with real-world measurements from a custom single-antenna software-defined radio (SDR) setup; this study reveals that NRXs achieve better results when trained with channel prop-erties that match the specific site. Our initial experiments for site-specific NRX finetuning in [10] show that finetuning with real-world measurement data is highly effective and halves the block error rate (BLER) even on datasets from a user equipment (UE) that was not used for training. However, these initial results were limited to one receiver architecture and to single-user, single-layer MIMO transmission. 
+
+A. Contributions 
+
+This paper investigates the following questions: Question 1: 
+
+Do the significant finetuning gains reported in [10] also apply to (i) other receiver architectures, (ii) dual-layer transmission, and (iii) temporally separated measurement campaigns? Question 2: 
+
+How do the gains from site-specific finetuning compare with those from site-specific parameter adaptation? To answer Question 1, we assess the efficacy of site-specific finetuning across three receiver architectures: (i) the fully-tunable NRX from [3], (ii) the MDX from [6], and (iii) the model-based deep-unfolded interleaved detection and decoding (DUIDD) receiver from [4]. To evaluate the efficacy of finetuning for single-and/or dual-layer transmission and its temporal robustness across measurement campaigns conducted more than half a year apart, we utilize existing as well as new over-the-air (OTA) measurement datasets from the standard-compliant 5G New Radio (5G NR) testbed at ETH Zurich [11] with single-and dual-layer transmission data. To answer Question 2, we study site-specific parameter adaptation by comparing linear minimum mean square error (LMMSE) channel estimation with covariance matrices estimated from synthetic and site-specific measured data for non-iterative and iterative receivers. The measurement datasets and finetuning code required to reproduce the results of this paper are available online. 1
+
+B. Related Work 
+
+Trainable receivers are typically evaluated on stochastic channel models [1]–[4], [6], [7]. Site-specific ray-tracing data has been used for NRX finetuning in [12] and augmented with arXiv:2609.04004v1 [cs.IT] 3 Sep 2026 2
+
+stochastic channel models [13]. Finetuning results with real-world data are limited to our own initial experiments in [10] and subsequent independent work [14]. Our initial work [10] proposed a hybrid automatic repeat request (HARQ)-based data-extraction and NRX-finetuning pipeline and demonstrated real-world gains across several deployment scenarios. The work in [14] reports gains from tuning a different NRX architecture with synthetic and measured data and bit labels only from successful transmissions on a custom single-antenna SDR setup. In contrast, we extend our initial results [10] to a range of different receiver architectures, dual-layer transmission, and temporally separated measurement campaigns. Classical receiver algorithms can be adapted to a specific deployment site, e.g., by estimating site-specific statistical parameters; for example, LMMSE channel estimation relies on channel covariance matrices [15]. Data-driven channel estimators based on Gaussian mixture models (GMMs) also rely on channel statistics, but the approach in [7] was trained and evaluated on synthetic channel data only. Recent OTA results show that gains from training a neural channel estimator with measured data are limited when noisy channel estimates are used as labels [14]. In contrast, we estimate site-specific covariance matrices from noisy least squares (LS) observations by properly accounting for the noise statistics, and we compare the resulting receiver performance with that obtained using covariance estimates from synthetic channels. II. T UNABLE RECEIVER ARCHITECTURES 
+
+We focus on three receiver architectures for our finetuning experiments that all utilize LS channel estimates; more powerful LMMSE channel estimators are studied in Sec. VI. 
+
+A. Fully-Tunable Neural Receiver (NRX) 
+
+The first receiver is the fully-tunable NRX that implements the convolutional and graph neural network (CGNN) archi-tecture for 5G NR physical uplink shared channel (PUSCH) reception from [3] combined with the multi-loss training scheme from [12, Sec. IV-B]. In this architecture, a convolu-tional state-initialization layer processes the received orthogonal frequency division multiplexing (OFDM) resource grid, initial LS channel estimates, and a positional encoding that indicates the distance from each resource element (RE) to the next demodulation reference signal (DMRS). Consecutive unrolled CGNN iterations combine message passing with convolutional state updates. Readout layers transform the final state to soft-outputs for the coded bits. We use the Deep NRX with eight unrolled CGNN iterations (denoted “Large NRX” in [12]) for initial training (denoted pretraining) and subsequent finetuning. The pretrained and finetuned Deep NRX model also yields the Shallow NRX by stopping after two unrolled iterations during evaluation; the Shallow and Deep NRX use approximately 
+
+1.2 · 10 5 and 4.4 · 10 5 active parameters, respectively. 
+
+B. Model-Driven Neural Receiver (MDX) 
+
+The second receiver is the MDX from [6] that combines con-ventional receiver algorithms with a small neural network (NN) to implement joint channel estimation and data detection. In this architecture, one first obtains pilot-aided LS channel estimates from the DMRSs and data-symbol estimates using conventional LMMSE equalization. For each layer, the receiver subtracts the estimated interference from all other layers and reuses the data-symbol estimates as pilots to obtain data-aided (and hopefully improved) LS channel estimates. A two-dimensional residual network (ResNet) with four residual blocks then combines the pilot-aided and data-aided channel estimates. Finally, the resulting refined estimates are used for final LMMSE max-log soft-output data detection [6]. The tunable parameters comprise the weights of the ResNet and coefficients that scale the noise variances used by the two LMMSE equalizers and the soft-output stage; the evaluated implementation contains approximately 2.5 · 10 3 tunable parameters. 
+
+C. Model-Based DUIDD Receiver 
+
+The third receiver is model-based and derived from classical iterative detection and decoding (IDD) [16], which iteratively exchanges soft information between a soft-input soft-output MMSE-PIC detector [17] and the low-density parity-check (LDPC) message passing (MP) decoder. The DUIDD architec-ture interleaves data detection and channel decoding and applies deep unfolding to make the soft-information exchange, decoder message damping, and decoder state forwarding tunable [4]. In our site-specific finetuning experiments, we evaluate untuned classical IDD as a baseline and compare against pretrained and finetuned DUIDD receivers, each of which uses I = 2 MMSE-PIC data detection stages. We also evaluate classical IDD with 
+
+I = 1 , for which MMSE-PIC reduces to non-iterative LMMSE detection. Each MMSE-PIC detection stage is followed by 
+
+Ni = NMP /I LDPC MP decoding iterations. Hence, we fix the total number of MP decoding iterations to NMP = 12 for all model-based IDD and DUIDD receivers investigated. IDD and DUIDD receivers use flooding min-sum check node (CN) updates implemented in NVIDIA Sionna; DUIDD additionally applies tunable message damping from [4] and contains only 30 tunable parameters. The DUIDD receiver—in contrast to the NRX and the MDX—includes the LDPC MP decoder during tuning; the NRX and the MDX denote tunable MIMO detectors that are combined with an external decoder for evaluation. For the NRX, the MDX, and the powerful real-time NVIDIA Aerial receiver [18] (denoted “MMSE Reference Rx”), we utilize the LDPC MP decoder from NVIDIA pyAerial with NMP = 10 
+
+iterations using layered normalized min-sum CN updates. 2
+
+III. S ITE -S PECIFIC DEPLOYMENT SCENARIOS 
+
+We now describe the various deployment scenarios con-sidered in this paper. All datasets consist of PUSCH slot samples , each comprising the OFDM-domain receive signals of one complete uplink (UL) transmission slot. We obtain the measurements with commercial-off-the-shelf (COTS) UEs on the standard-compliant 5G NR testbed at ETH Zurich [11] in the two indoor deployment scenarios shown in Fig. 1. The testbed builds upon the NVIDIA Aerial Testbed (ATB) software platform [19] and uses COTS open RAN radio units       
+
+> 2LDPC MP decoding with 10 layered iterations usually performs better than 12 flooding iterations. However, this choice was an implementation constraint. 3
+> (a) Indoor small laboratory
+> (b) Indoor large office floor
+> Fig. 1: Floor plans (left) and photographs of the serving O-RUs (right) for the two indoor deployment scenarios in June 2026. DMRS Masked (Noise) Data Subcarrier  𝑤
+> OFDM symbol 𝑡
+> Fig. 2: OFDM resource grid of the slot samples used for finetuning and testing, showing 24 of 3276 subcarriers and DMRSs from the first layer. DMRSs from the second layer occupy the even subcarriers of OFDM symbols t∈ { 1,6,11 }.
+
+(O-RUs) with four antennas each, 100 MHz bandwidth centered at 3.45 GHz with 273 physical resource blocks (PRBs), 30 kHz subcarrier spacing, and the time-division duplexing (TDD) slot pattern 3DSU (3 downlink (DL), 1 special, 1 UL). The 
+
+iperf3 tool was used to generate continuous application-layer uplink traffic while carrying one UE at a time along a random trajectory through the measurement area. The testbed records each slot sample from the serving O-RU’s fronthaul. The slot samples used for finetuning and evaluation follow the OFDM resource grid shown in Fig. 2. The testbed is configured for low PUSCH signal-to-noise ratio (SNR) targets for which the link-adaptation algorithm, configured for a target BLER of 10 %, schedules 16-QAM transmissions. Hence, our measurements capture challenging operating points in the MMSE Reference Rx’s BLER-versus-SNR waterfall region. 
+
+A. Indoor Small Laboratory Scenario 1) Dataset from Nov. 2025 with Single-Layer Transmission: 
+
+The first measurement campaign was conducted in the indoor small laboratory in November 2025 and was previously described in [10]. This scenario covers a measurement area of about 3.5 m × 3.5 m that is surrounded by desks and laboratory equipment. Four O-RUs are placed around the measurement area; the serving O-RU is located in the upper-right corner, as in the similar setup shown in Fig. 1a. The measurement campaign comprises two single-layer measurements, one with a Samsung Galaxy S23 and one with an Apple iPhone 14 Pro. The PUSCH SNR target is 7 dB. 
+
+2) Dataset from Jun. 2026 with Single- and Dual-Layer Transmission: The second measurement campaign was con-ducted in June 2026, again in the same small-laboratory environment, more than half a year after the campaign discussed above. The scenario now covers a 5 m × 4 m measurement area with only a single serving O-RU and no passive listeners. This campaign comprises two measurements. The single-layer measurement uses a Samsung Galaxy S23 with a 5 dB PUSCH SNR target; the dual-layer measurement uses a Google Pixel 9 Pro with a 12 dB target. Single-layer transmissions always use DMRS port 0 in code division multiplexing (CDM) group 0, whereas dual-layer transmissions use DMRS ports 0 and 2 in CDM groups 0 and 1, respectively. 
+
+B. Indoor Large Office Floor Scenario 1) Dataset from Nov. 2025 with Single-Layer Transmission: 
+
+The first measurement campaign was conducted on the indoor large office floor in November 2025 and was previously described in [10]. This scenario is about 50 m×30 m and offers a measurement area that covers the corridors and some adjacent rooms. The scenario provides both line-of-sight (LOS) and non-line-of-sight (NLOS) propagation conditions. The campaign comprises two single-layer measurements with the same two UEs and SNR targets as their November 2025 small-laboratory counterparts. 
+
+2) Dataset from Jun. 2026 with Single- and Dual-Layer Transmission: The second measurement campaign was con-ducted in June 2026, again in the same large-office-floor environment, more than half a year after the November 2025 campaign discussed above. The scenario now covers a smaller section of the office floor, comprising a corridor area of approximately 16 m × 12 .5 m with the serving O-RU deployment shown in Fig. 1b. The single- and dual-layer measurements use the same UEs, uplink layer (ULL) configurations, SNR targets, and DMRS configuration as their June 2026 small-laboratory counterparts. IV. E VALUATION PROTOCOL 
+
+We now detail the data extraction procedure, the site-specific finetuning procedure, and our performance evaluation approach. 
+
+A. Finetuning Data Extraction Pipeline 
+
+We extend the site-specific finetuning and evaluation pipeline from [10] to the receiver architectures and ULL configura-tions considered here. For every recorded slot sample, the pipeline extracts the OFDM-domain receive signals and the corresponding scheduling and receiver configuration from NVIDIA Data Lake [20]. Ground-truth bit labels for successful transmissions are obtained from the decoded payload bits. For 4
+
+failed transmissions, we track their HARQ processes and obtain the payload bits from later successful retransmissions. We then re-encode the payload bits using the redundancy version and scrambling configuration of the initial transmission to reconstruct its coded bit labels [10]. We retain slot samples with 16-QAM and modulation and coding scheme (MCS) indices 6–10 from [21, Table 5.1.3.1-2]. For DUIDD finetuning and the corresponding receiver comparison in Fig. 7, we restrict the data to MCS index 10 and one scrambling configuration. The MDX, the non-iterative LMMSE receiver, and the IDD and DUIDD receivers are provided with a scalar pre-equalization wideband noise-variance estimate returned by the NVIDIA pyAerial noise-and-interference estimator [22]; the NRX does not need such a noise-variance estimate. 
+
+B. Dataset Splits for Finetuning and Testing 
+
+For each measurement campaign and ULL configuration, we form disjoint datasets for finetuning and testing. The November 2025 datasets from our previous work [10] use cross-UE finetuning and test data splits; each new June 2026 dataset is split at a manually selected timestamp into two temporally disjoint finetuning and test datasets, because each June 2026 measurement uses only one UE. We construct each finetuning and test dataset such that approximately 10 % of its transport blocks 3 fail with the MMSE Reference Rx. All receivers within a comparison are evaluated on the same test slot samples. 
+
+C. Site-Specific Finetuning Pipeline 
+
+We initialize the finetuning pipeline with receiver parameters pretrained as follows. We pretrain the NRX on randomized 3GPP UMi channels using the single- and dual-user configura-tions from [10], [12] and adapt its frame structure to match the resource grid in Fig. 2. We pretrain the MDX on synthetic 3GPP UMi channels using a single-user, single-layer transmission configuration and the same frame structure. We pretrain the DUIDD receiver on synthetic 3GPP UMi channels and dual-layer transmission for 6 · 10 3 batches: 3 · 10 3 batches with the binary cross-entropy (BCE) loss followed by 3 · 10 3 batches with the normalized LogSumExp BLER loss [23]. After pretraining, we finetune the NRX and MDX with the BCE loss for 10 5 batches of 16 slot samples spanning four consecutive PRBs, which are cropped from the full-band slot samples with 273 PRBs. We finetune the DUIDD receiver for 2 · 10 3 batches of 16 full-band slot samples: the first 10 3
+
+batches use the BCE loss, and the subsequent 10 3 batches use the normalized LogSumExp BLER loss. 
+
+D. Site-Specific Performance Evaluation 
+
+For site-specific performance evaluation, we first study the 
+
+dataset BLER at the measured SNR defined by the PUSCH SNR target [10, Sec. V-C]. The dataset BLER is the fraction of transport blocks that fail after offline receiver processing and LDPC decoding on a fixed test dataset. Remember that the test dataset is itself sampled from measurements such that the MMSE Reference Rx achieves a dataset BLER of about 10 % 
+
+> 3A transport block comprises all coded bits transmitted within a slot.
+
+(cf. Sec. IV-B). In contrast to system-level BLER under link adaptation, the dataset BLER enables fair receiver comparisons on the same recorded transmissions. Second, we study the dataset BLER over a range of effective SNR values by adding complex white Gaussian noise to the test dataset [10, Sec. V-C]. The recorded OFDM-domain received signal follows the model y = s + n, where s ∈ C is the noise-free signal component from all active ULLs with aggregate power Es and n ∈ C is the receiver noise with variance N0.We add complex Gaussian noise z ∼ CN (0 , N z ) according to 
+
+˜y = y + z, where Nz = α(Es + N0) and α ≥ 0. The tested receiver, including its LS channel estimator, then processes ˜y.For the original effective SNR γ = Es/N 0 (cf. the PUSCH SNR targets defined in Sec. III), the resulting effective SNR is SNR eff = Es
+
+N0 + α(Es + N0) = γ
+
+1 + α(γ + 1) . (1) Sweeping α ≥ 0 decreases the effective SNR and yields dataset BLER versus effective SNR curves. V. R ECEIVER FINETUNING RESULTS 
+
+The NRX, MDX, non-iterative LMMSE, IDD, and DUIDD receivers evaluated in this section all use LS channel estimates obtained with the standard PUSCH LS channel estimator from Sionna v0.19.2. This estimator applies frequency-domain orthogonal cover-code (OCC) combining by averaging each pair of channel estimates from adjacent pilot subcarriers; we refer to its outputs as post-OCC-combined LS estimates. The MMSE Reference Rx instead uses multi-stage minimum mean square error (MMSE) channel estimation with delay estimation [18]. 
+
+A. Results With Single-Layer Transmission 1) Model-Driven Neural Receiver Finetuning: We start by analyzing the impact of site-specific finetuning on the MDX. Fig. 3 compares the pretrained MDX with a separate MDX finetuned for each of the single-layer small-laboratory and office-floor scenarios from June 2026. Site-specific finetuning reduces the dataset BLER by about one third (from 0.351 to 0.237) in the small laboratory and by nearly one half (from 0.463 to 0.240) on the office floor. The MMSE Reference Rx achieves a lower dataset BLER than the finetuned MDX in both environments. On the same small-laboratory test data from June 2026, Fig. 4 shows a similar relative reduction by about one third from NRX finetuning. Both the pretrained and finetuned NRXs nevertheless achieve lower absolute dataset BLER than their MDX counterparts, at the cost of substantially more tunable parameters and higher inference latency [6]. 
+
+2) Temporal Robustness of NRX Finetuning: We now inves-tigate the temporal robustness of site-specific NRX finetuning using data from measurement campaigns conducted more than half a year apart. Fig. 4 compares the pretrained and finetuned Shallow NRX (top) and Deep NRX (bottom) on the single-layer small-laboratory data from November 2025 (left) and June 2026 (right). A separate model is finetuned on each measurement campaign and evaluated on both campaigns. For both NRX configurations, using data from the same campaign for finetuning and testing yields the lowest dataset BLER. A 5Small lab Office floor 00.20.40.60.8∆ = 0 .114 ∆ = 0 .223    
+
+> 0.35 0.46 0.24 0.24
+> Test environment Dataset BLER MDX (Pretrained) MDX (FT: Small lab) MDX (FT: Office floor) MMSE Reference Rx
+
+Fig. 3: Dataset BLER of the pretrained and finetuned MDX on the small laboratory (left) and office floor (right) measurements recorded in June 2026 with single-layer transmission. Nov. 2025 Jun. 2026 00.10.20.30.4∆ = 0 .125 ∆ = 0 .057       
+
+> 0.24 0.17 0.11 0.15 0.15 0.11
+> Test dataset Dataset BLER NRX (Pretrained) NRX (FT: Nov. 2025) NRX (FT: Jun. 2026) MMSE Reference Rx
+> (a) Shallow NRX (2 iter.) Nov. 2025 Jun. 2026 00.10.20.30.4∆ = 0 .083 ∆ = 0 .039 0.16 0.13 0.08 0.10 0.11 0.09
+> Test dataset Dataset BLER NRX (Pretrained) NRX (FT: Nov. 2025) NRX (FT: Jun. 2026) MMSE Reference Rx
+> (b) Deep NRX (8 iter.)
+
+Fig. 4: Dataset BLER of the pretrained and finetuned Shallow NRX and Deep NRX on the small laboratory datasets from November 2025 (left) and June 2026 (right) with single-layer transmissions. The legend identifies the finetuning dataset for each NRX (“FT: Nov. 2025” or “FT: Jun. 2026”). 
+
+temporal gap between measurement campaigns for finetuning and testing increases the dataset BLER, most visibly for the Shallow NRX tested on the June 2026 data; nevertheless, an NRX finetuned on either campaign outperforms the pretrained NRX when tested on the other campaign. These observations demonstrate that site-specific finetuning remains effective over time but motivate continued finetuning after deployment. 
+
+B. Results With Dual-Layer Transmission 1) Finetuning on Dual-Layer vs. Single- and Dual-Layer Data: We now investigate in Fig. 5 the effectiveness of NRX finetuning for single- and/or dual-layer transmission, evaluated on dual-layer transmission. Finetuning only on dual-layer data reduces the dataset BLER by more than one third for both NRX depths. The finetuned Deep NRX clearly outperforms the MMSE Reference Rx, whereas the finetuned Shallow NRX Shallow NRX (2 iter.) Deep NRX (8 iter.) 00.10.20.30.4∆ = 0 .087 ∆ = 0 .056   
+
+> 0.23 0.13 0.15 0.07 0.17 0.07
+> NRX architecture Dataset BLER NRX (Pretrained) NRX (FT: 2 ULLs) NRX (FT: 1+2 ULLs) MMSE Reference Rx
+
+Fig. 5: Dataset BLER of the pretrained and finetuned Shallow NRX (2 iter.) and Deep NRX (8 iter.) for dual-layer transmission on the small laboratory dataset from June 2026. The NRXs are finetuned either on dual-layer data (“FT: 2 ULLs”) or on both single- and dual-layer data (“FT: 1+2 ULLs”). 6 7 8 9 10 11 12 10 −1
+
+> 10 0
+
+0.83 dB 0.54 dB 
+
+> Effective SNR [dB] Dataset BLER Pretrained NRX (2 iter.) Pretrained NRX (8 iter.) Finetuned NRX (2 iter.) Finetuned NRX (8 iter.) 25%
+
+Fig. 6: Dataset BLER performance of the pretrained and finetuned Shallow NRX (2 iter.) and Deep NRX (8 iter.) vs. effective SNR on the small laboratory dataset from June 2026 with dual-layer transmission. The arrows indicate the effective SNR improvements to achieve a dataset BLER of 25 %. 
+
+still has a higher dataset BLER. Finetuning on both single- and dual-layer data yields dataset BLERs close to those obtained by finetuning only on dual-layer data with an absolute difference of at most 0.019. The difference is negligible for the Deep NRX and slightly larger for the Shallow NRX. A further experiment not presented in this paper confirms a similar effectiveness of NRX finetuning for single- and/or dual-layer transmission, when evaluated on single-layer transmission. Finetuning on both single- and dual-layer data yields dataset BLERs close to those obtained by finetuning only on single-layer data with an absolute difference of at most 0.004. 
+
+2) Effective SNR Improvement of NRX Finetuning: We now investigate the effective SNR improvements from site-specific NRX finetuning under dual-layer transmission. Fig. 6 evaluates the pretrained and finetuned NRXs over a range of effective SNR values obtained by adding white Gaussian noise to the dual-layer small-laboratory dataset as described in Sec. IV-D. Finetuning improves the dataset BLER throughout the evaluated waterfall region and reduces the required effective SNR to achieve a dataset BLER of 25 % by 0.83 dB for the Shallow NRX and by 0.54 dB for the Deep NRX. 
+
+3) Model-Based DUIDD Receiver Finetuning: Fig. 7 com-pares the non-iterative LMMSE receiver ( I = 1 ) with untuned classical IDD and pretrained and finetuned DUIDD receivers (all with I = 2 ), as well as the Shallow and Deep NRXs and 6Small lab 00.20.40.60.8∆ = 0 .101 ∆ = 0 .153 ∆ = 0 .096         
+
+> 0.67 0.57 0.57 0.39 0.23 0.17 0.07
+> Test environment Dataset BLER Classical LS + LMMSE Classical IDD DUIDD (Pretrained) DUIDD (FT: Small lab) Shallow NRX (Pretrained) Shallow NRX (FT: Small lab) Deep NRX (Pretrained) Deep NRX (FT: Small lab) MMSE Reference Rx
+> Fig. 7: Dataset BLER performance on the small laboratory dataset from June 2026 with dual-layer transmission and MCS index 10. The IDD and DUIDD receivers use I= 2 detection stages.
+
+the MMSE Reference Rx. All receivers are evaluated on the dual-layer small-laboratory data from June 2026, restricted to MCS index 10. This is a different test subset from that used in Fig. 5; the NRX results are therefore not directly comparable. Classical IDD reduces the dataset BLER compared with the non-iterative LMMSE receiver, and the pretrained DUIDD provides a further reduction. Site-specific finetuning of DUIDD, however, reduces the dataset BLER by only another 0.004 in absolute terms. This marginal gain suggests that the receiver’s limited tunability leaves little room for further finetuning. Both NRX configurations achieve lower dataset BLER and substantially larger finetuning gains than DUIDD, but at much higher complexity. The DUIDD receiver has similar complexity to classical IDD and about twice the detection complexity of the non-iterative baseline [4, Sec. V-D]. The figure compares complete receiver chains: the NRXs perform data detection with implicit channel refinement and use the NVIDIA pyAerial LDPC MP decoder with layered normalized min-sum CN updates, whereas IDD and DUIDD operate on LS channel estimates and use flooding min-sum CN updates. The results in Sec. VI show substantial improvements when the model-based receivers instead use LMMSE channel estimates, suggesting that better channel estimation has a greater impact on the dataset BLER than improving the MIMO detectors. VI. S ITE -S PECIFIC PARAMETER ADAPTATION 
+
+We now study the impact of LMMSE channel estimation on the dataset BLER using covariance matrices estimated either from synthetic channels or from site-specific measurements. 
+
+A. LMMSE Channel Estimation 
+
+In contrast to Sec. V, in which we focused on LS channel estimation, we now use the LMMSE interpolator from Sionna v0.19.2 [24] to smoothen (i.e., denoise and interpolate) the LS channel estimates. Sionna approximates the joint three-dimensional LMMSE estimation problem by successive one-dimensional smoothing across the receive antennas, subcarriers, and OFDM symbols, which we execute in this order. For the considered DMRS configurations, only one port is active in each CDM group. Hence, every pilot provides a separate channel observation at its actual subcarrier. We modify Sionna’s PUSCH LS channel estimator to omit orthogonal cover-code averaging and refer to its outputs as direct LS estimates . For one receive antenna, DMRS symbol, and transmission layer, let y[w] ∈ C be the received OFDM-domain signal on subcarrier w and p[w] ∈ C the transmitted DMRS symbol, including its orthogonal cover-code weight. The direct LS estimate is given by 
+
+ˆz[w] = y[w]
+
+p[w] = h[w] + e[w], (2) where h[w] ∈ C is the channel coefficient and e[w] ∈ C the LS estimation error. For frequency-domain smoothing, let h ∈ CW contain the channel coefficients over the W = 3276 active subcarriers for one layer and receive antenna. Stacking the direct estimates from the Np = 1638 pilot subcarriers of one DMRS yields 
+
+ˆz = Sh + e, (3) where S ∈ { 0, 1}Np×W selects the pilot subcarriers with one nonzero entry per row, and e ∈ CNp is the LS estimation error. With the frequency-domain channel covariance Rf =
+
+Ehh H  ∈ CW ×W and error covariance Σf ∈ RNp×Np , the frequency-domain LMMSE estimate is 
+
+ˆh = RfSH  SR fSH + Σf
+
+−1 ˆz. (4) Spatial and temporal smoothing work analogously and use the channel covariance matrices Rs ∈ C4×4 and Rt ∈ C13 ×13 ,respectively. We estimate the three channel covariance matrices for a given deployment site; the corresponding error covariance matrices Σs, Σf, and Σt are derived during runtime from the scalar pre-equalization wideband noise-variance estimate. 
+
+B. Site-Specific Covariance Matrix Estimation 
+
+As a baseline, we estimate the three covariance matrices from synthetic 3GPP UMi channel realizations [25] using the implementation released with [12]. This implementation samples ground-truth full-band OFDM-domain channels for randomized UMi topologies and averages their outer products over channel realizations and all remaining slot sample tensor dimensions not represented by each covariance matrix. For site-specific estimation, we instead use the finetuning data with the resource-grid configuration in Fig. 2. All three estimators follow the same principle: We form second moments from the direct LS estimates in (2) and remove their estimation-error contribution. We estimate the required error statistics from the noise-only fourteenth OFDM symbol after dividing its observations by the DMRS sequence values used to obtain the corresponding direct LS estimates. The dimension-specific estimation procedures and noise corrections are described next. 
+
+1) Spatial Covariance Matrix: For each slot sample, trans-mission layer, DMRS symbol, and pilot subcarrier, we stack the direct LS estimates from the four receive antennas into a vector. Averaging the outer products of these vectors yields the spatial second moment. We form noise vectors analogously 7
+
+and average their outer products to obtain the spatial error covariance ˆΣs ∈ C4×4. Subtracting ˆΣs from the spatial second moment yields the estimated covariance matrix ˆRs.
+
+2) Frequency Covariance Matrix: The DMRSs of each layer occupy only every second subcarrier. Hence, direct LS estimates are unavailable on the remaining subcarriers, and we cannot estimate their cross-correlations directly. We therefore assume that all subcarriers share the same marginal frequency statistics and restrict ˆRf to Hermitian Toeplitz form. This common simplification incurs only minor performance loss [7] and can be justified under the wide-sense stationary uncorrelated scattering (WSSUS) assumption [26]. Although we do not expect our channels to be WSSUS, this restriction reduces the number of parameters from W 2 to W . We therefore estimate the correlation sequence r[q] = E[h[w + q]h∗[w]] for q ∈{− W + 1 , . . . , W − 1}.We first estimate the available even lags. Let ˆcz [2 q] denote the empirical correlation obtained by averaging ˆz[w + 2 q]ˆ z∗[w]
+
+over all valid subcarrier indices, slot samples, receive antennas, transmission layers, and DMRS symbols. We obtain the error correlation ˆce[2 q] by averaging e[w + 2 q]e∗[w] from the processed noise observations in the same manner. The noise-corrected even lags are 
+
+ˆr[2 q] = ˆ cz [2 q] − ˆce[2 q], q = 0 , . . . , N p − 1. (5) Since the effective channel impulse response is shorter than the cyclic prefix (CP), its frequency response varies smoothly across subcarriers. We assume the same for its correlation sequence and obtain the missing odd lags by averaging neighboring even-lag estimates; for the final odd lag, we use the preceding even-lag estimate. Hermitian symmetry yields ˆr[−q] = ˆ r∗[q], and the frequency-domain covariance is 
+
+[ ˆRf]i,j = ˆ r[i − j]. (6) 
+
+3) Temporal Covariance Matrix: For each slot sample, receive antenna, transmission layer, and pilot subcarrier, we interpolate the direct LS estimates at the three DMRS symbols 
+
+t ∈ { 1, 6, 11 } to all 13 PUSCH symbols. We linearly interpolate between adjacent DMRS symbols and extrapolate beyond 
+
+t = 11 using the estimates at t ∈ { 6, 11 }. Stacking channel estimates from all thirteen OFDM symbols into vectors and averaging their outer products yields the temporal second moment. Let A ∈ R13 ×3 contain the corresponding interpolation and extrapolation weights. Assuming independent LS estimation errors with variance ˆσ2 
+
+> e
+
+at the three DMRS positions, the temporal error covariance is 
+
+ˆΣt = ˆ σ2 
+
+> e
+
+AA T , (7) where ˆσ2 
+
+> e
+
+is estimated from the processed noise observations. Subtracting ˆΣt from the temporal second moment yields ˆRt.Lastly, we ensure that all estimated covariance matrices are positive semidefinite by setting negative eigenvalues to zero. 
+
+C. Receiver Adaptation Results 
+
+Due to the high runtime of Sionna’s LMMSE channel estimator, the following evaluations use smaller test datasets 1 ULL 2 ULLs 0.00 0.20 0.40 0.60 0.80 1.00 ∆ = 0 .72 ∆ = 0 .26     
+
+> 0.59 0.68 0.40 0.43 0.83 0.35 0.11 0.09
+> Number of uplink layers (ULLs) Dataset BLER LS (Direct) LS (Post-OCC comb.) LMMSE (UMi) LMMSE (Site-specific)
+> Fig. 8: Dataset BLER performance of the non-iterative LMMSE receiver using linearly interpolated direct or post-OCC-combined LS channel estimates or LMMSE channel estimates based on synthetic UMi or site-specific covariance estimates. Results use the single-layer (left) and dual-layer (right) small-laboratory datasets from June 2026.
+
+than the evaluations in Sec. V. Therefore, the absolute dataset BLER values should be compared only with care. Comparisons with the NRX, the MDX, and the MMSE Reference Rx additionally involve different LDPC decoder algorithms. 
+
+1) Results with Non-Iterative Receivers: Fig. 8 compares di-rect and post-OCC-combined LS (both use linear interpolation) with LMMSE channel estimation in a non-iterative receiver with LMMSE MIMO detection and NMP = 12 LDPC MP decoding iterations. Post-OCC combining improves the LS baseline under both single- and dual-layer transmission due to noise averaging. The covariance estimates obtained from synthetic UMi channels degrade the single-layer receiver even compared with direct LS estimates but improve upon both LS configurations under dual-layer transmission. The single-layer measurements use a lower PUSCH SNR target than the dual-layer measurements (5 dB instead of 12 dB), at which the LMMSE estimator relies more strongly on the assumed channel statistics and is therefore more sensitive to covariance mismatch. Using covariance matrix estimates from site-specific rather than synthetic data reduces the absolute dataset BLER by 0.72 and 0.26 for single- and dual-layer transmission, respectively, and closely matches the MMSE Reference Rx. 
+
+2) Results with Iterative Receivers: Fig. 9 compares direct LS channel estimation with linear interpolation and LMMSE channel estimation in an IDD receiver for a varying number I
+
+of MMSE-PIC MIMO detection stages. Each detection stage is followed by Ni = NMP /I LDPC MP decoding iterations, which keeps the receiver’s total number of decoding iterations fixed at NMP = 12 [4]. Increasing I reduces the dataset BLER with every channel estimator. LMMSE channel estimation with the UMi covariance estimates substantially improves upon direct LS channel estimation, while the site-specific covariance estimates provide an additional reduction. The site-specific configuration already slightly outperforms the MMSE Reference Rx without iterative detection at I = 1 and reduces the dataset BLER further from 0.09 to 0.06 at I = 4 . As this is the lowest dataset BLER observed throughout this work, 81 2 3 400.20.40.60.8       
+
+> 0.68 0.61 0.60 0.58 0.35 0.30 0.29 0.27 0.09 0.08 0.07 0.06
+
+IDD iterations I
+
+> Dataset BLER
+
+LS (Direct) LMMSE (UMi) LMMSE (Site-specific) MMSE Reference Rx 
+
+Fig. 9: Dataset BLER performance versus the number I of MMSE-PIC detection stages using direct LS channel estimates or LMMSE channel estimates based on synthetic UMi or site-specific covariance estimates. All configurations use NMP = 12 LDPC MP decoding iterations and are evaluated on the small-laboratory dataset from June 2026 with dual-layer transmission. 
+
+this result indicates that channel estimation quality plays a crucial role in overall receiver performance. Furthermore, site-specific parameter adaptation yields even larger dataset BLER improvements than site-specific finetuning in Sec. V and [10]. VII. C ONCLUSIONS 
+
+We have shown that site-specific finetuning improves all three evaluated tunable receiver architectures on measured 5G NR data. The gains are substantial for the two neural receiver architectures—the model-driven MDX and fully-tunable NRX— but marginal for the model-based DUIDD receiver, which has limited tunability. One NRX finetuned on both single-and dual-layer data supports both configurations with only minor performance losses compared with using two separate NRXs, one finetuned only on single-layer data and the other only on dual-layer data. Finetuning remains effective across measurement campaigns separated by more than half a year. Overall, our results demonstrate that site-specific finetuning improves real-world receiver performance across architectures, ULL configurations, and measurement campaigns without increasing runtime complexity. We have also shown that channel-estimation quality plays a crucial role in overall receiver performance—possibly even more than the choice of the data detection algorithm. Site-specific parameter adaptation through site-specific covariance estimation enables LMMSE channel estimation to substantially outperform its counterpart using covariance matrices estimated from synthetic UMi channels. Combined with this site-specific channel estimator, IDD achieves the lowest dataset BLER reported in this study and outperforms the MMSE Reference Rx despite using a flooding min-sum decoder rather than pyAerial’s layered normalized min-sum decoder. REFERENCES [1] M. Honkala, D. Korpi, and J. M. J. Huttunen, “DeepRx: Fully convolu-tional deep learning receiver,” IEEE Trans. Wireless Commun. , vol. 20, no. 6, pp. 3925–3940, 2021. [2] D. Korpi, M. Honkala, J. M. Huttunen, and V. Starck, “DeepRx MIMO: Convolutional MIMO detection with learned multiplicative transformations,” in Proc. IEEE Int. Conf. Commun. (ICC) , Jun. 2021. [3] S. Cammerer, F. Aït Aoudia, J. Hoydis, A. Oeldemann, A. Roessler, T. Mayer, and A. Keller, “A neural receiver for 5G NR multi-user MIMO,” in Proc. IEEE Globecom Workshops , Mar. 2023. [4] R. Wiesmayr, C. Dick, J. Hoydis, and C. Studer, “DUIDD: Deep-unfolded interleaved detection and decoding for MIMO wireless systems,” in Proc. Asilomar Conf. Signals, Syst., Comput. , Oct. 2022. [5] A. Balatsoukas-Stimming and C. Studer, “Deep unfolding for commu-nications systems: A survey and some new directions,” in IEEE Int’l Workshop Signal Process. Sys. (SiPS) , Oct. 2019. [6] M. Abdollahpour, M. Bertuletti, Y. Zhang, Y. Li, L. Benini, and A. Vanelli-Coralli, “A compute&memory efficient model-driven neural 5G receiver for edge AI-assisted RAN,” in Proc. IEEE Global Telecommun. Conf. (GLOBECOM) , Dec. 2025. [7] B. Fesl, M. Joham, S. Hu, M. Koller, N. Turan, and W. Utschick, “Channel estimation based on Gaussian mixture models with structured covariances,” in Proc. Asilomar Conf. Signals, Syst., Comput. , Oct. 2022. [8] B. Böck, A. Kasibovic, and W. Utschick, “Wireless channel modeling for machine learning–a critical view on standardized channel models,” 
+
+arXiv:2510.12279 , Oct. 2025. [9] R. Luostari, D. Korpi, M. Honkala, and J. M. Huttunen, “Adapting to reality: Over-the-air validation of AI-based receivers trained with simulated channels,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , Mar. 2025. [10] N. B. Baytekin, R. Wiesmayr, S. Cammerer, C. Dick, and C. Studer, “Site-specific finetuning of neural receivers with real-world 5G NR measurements,” IEEE Int. Workshop Signal Process. Advances Wireless Commun. (SPAWC) , Sep. 2026. [11] R. Wiesmayr, F. Zumegen, S. Taner, C. Dick, and C. Studer, “CSI-based user positioning, channel charting, and device classification with an NVIDIA 5G testbed,” in Proc. Asilomar Conf. Signals, Syst., Comput. ,Oct. 2025. [12] R. Wiesmayr, S. Cammerer, F. Aït Aoudia, J. Hoydis, J. Zakrzewski, and A. Keller, “Design of a standard-compliant real-time neural receiver for 5G NR,” in Int’l Conf. Machine Learning Commun. Netw. , May 2025. [13] B. Durfee, J. De Ocampo, N. Nguyen, S. Tadik, and G. D. Durgin, “Enhancing neural receiver performance through novel training strategies,” in IEEE Opportunity Research Scholars Symp. , Apr. 2025. [14] R. Luostari, D. Korpi, O. Tirkkonen, and H. Holma, “Input-correlated supervision noise limits the benefits of OTA training for learned receivers,” 
+
+arXiv:2608.12918 , Aug. 2026. [15] V. Savaux and Y. Louët, “LMMSE channel estimation in OFDM context: a review,” IET Signal Processing , vol. 11, no. 2, pp. 123–134, 2017. [16] B. Hochwald and S. Ten Brink, “Achieving near-capacity on a multiple-antenna channel,” IEEE Trans. Commun. , vol. 51, no. 3, pp. 389–399, Mar. 2003. [17] C. Studer, S. Fateh, and D. Seethaler, “ASIC implementation of soft-input soft-output MIMO detection using MMSE parallel interference cancellation,” IEEE J. Solid-State Circuits , vol. 46, no. 7, pp. 1754–1765, 2011. [18] NVIDIA, Aerial PHY 5G Algorithms: ChannelEstimator ,2025, accessed: 2026-01-14. [Online]. Available: https://docs.nvidia.com/aerial/cuda-accelerated-ran/24-3/pyaerial/ api_reference/aerial.phy5g.algorithms.html#aerial.phy5g.algorithms. channel_estimator.ChannelEstimator [19] ——, Aerial Testbed (ATB) , 2026, formerly ARC-OTA. Accessed: 2026-07-03. [Online]. Available: https://docs.nvidia.com/aerial/testbed/latest/ [20] ——, Data Lake , 2026, accessed: 2026-07-08. [Online]. Available: https:// docs.nvidia.com/aerial/cuda-accelerated-ran/latest/data_lake/index.html [21] ETSI, “ETSI TS 138 214 V16.2.0: Physical layer procedures for data,” Tech. Rep., Jul. 2020. [22] NVIDIA, pyAerial , 2026, aerial CUDA-Accelerated RAN 25-3 documentation. Accessed: 2026-07-06. [Online]. Available: https: //docs.nvidia.com/aerial/cuda-accelerated-ran/25-3/pyaerial/index.html [23] R. Wiesmayr, G. Marti, C. Dick, H. Song, and C. Studer, “Bit error and block error rate training for ML-assisted communication,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP) , Jun. 2023. [24] J. Hoydis, S. Cammerer, F. Ait Aoudia, A. Vem, N. Binder, G. Marcus, and A. Keller, “Sionna: An open-source library for next-generation physical layer research,” arXiv:2203.11854 , Mar. 2022. [25] ETSI, “Study on channel model for frequencies from 0.5 to 100 GHz,” 3GPP TR 38.901, Nov. 2020, Version 16.1.0. [26] B. Böck, M. Baur, N. Turan, D. Semmler, and W. Utschick, “A statistical characterization of wireless channels conditioned on side information,” 
+
+IEEE Wireless Commun. Lett. , vol. 13, no. 12, pp. 3508–3512, 2024.

@@ -1,0 +1,542 @@
+Title: Indirect Estimation of SINR via SSB and CSI-RS RSRP in 5G NR
+
+URL Source: https://arxiv.org/pdf/2609.03488v1
+
+Published Time: Fri, 04 Sep 2026 00:40:22 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Indirect Estimation of SINR via SSB and CSI-RS RSRP in 5G NR 
+
+Leonardo Spampinato ∗ , Mahamadou Togola †, Matteo Bernab` e∗ , Azim Akhtarshenas ∗,Lorenzo Mario Amorosa ‡ , David L´ opez-P´ erez ∗∗ITEAM Research Institute, Universitat Polit` ecnica de Val` encia, Valencia, Spain; 
+
+> †
+
+CentraleSup´ elec, Gif-sur-Yvette, France; ‡DEI Department, University of Bologna, Bologna, Italy; 
+
+Abstract —Predicting user equipment (UE) performance is essential for proactive network control, resource management, and digital twin sandboxes. However, the inherent flexibility and complexity of beam-based 5G new radio (NR) networks make accurate performance forecasting highly challenging. This paper proposes a data-driven approach to predict the average downlink signal-to-interference-plus-noise ratio (SINR) rely-ing exclusively on standardized reference-signal measurements, namely synchronization signal block (SSB) and channel state information-reference signal (CSI-RS) reference signal received power (RSRP). We formulate this prediction as a supervised learning problem and evaluate various input feature represen-tations using a third generation partnership project (3GPP)-compliant synthetic dataset. Our analysis reveals that filtering measurements based on active CSI-RS beams significantly en-hances prediction accuracy while reducing input dimensionality. This activity-aware strategy demonstrates the strong viability of machine learning models for proactive network optimization. 
+
+I. I NTRODUCTION 
+
+The densification of fifth-generation (5G) new radio (NR) networks, together with the adoption of massive multiple-input multiple-output (mMIMO) antenna arrays and beam-based transmissions, has significantly increased the flexibil-ity of cellular systems. By steering synchronization, refer-ence, and data signals over multiple spatial directions, 5G NR networks can improve coverage, spatial reuse, and user equipment (UE) throughput. At the same time, this flexibility makes radio resource management decisions more complex, since the performance experienced by a UE depends not only on the serving cell, but also on the selected transmission beam, the activity of neighboring cells, and the interference generated over the same time-frequency resources. A long-term objective for modern radio access networks is to correctly predict the performance that a UE would experi-ence under a prospective serving configuration, for example, simulated within a digital twin sandbox, before such a config-uration is actually applied to the real network. This capability is relevant to several network functions. For example, in mo-bility management, the network should assess whether a can-didate target cell can provide sufficient service quality before triggering a handover. Similarly, in energy-saving operation, a cell should be switched off only if its served UEs can be adequately supported by neighbouring cells. In both cases, the key challenge is to estimate the UE performance under radio conditions that may not yet be directly observable. For example, the data rate of an UE can be derived from the available bandwidth and the data channel signal-to-interference-plus-noise ratio (SINR). While the allocated bandwidth can be derived from cell load and scheduling policies, predicting the data channel SINR is very difficult. This complexity arises because such SINR depends not only on the local radio channel and the transmit power, but also on the complex interference dynamics of neighbouring cells. Moreover, this challenge is further amplified in beam-based 5G NR systems. During initial access, UEs measure the reference signal received power (RSRP) associated with synchronization signal blocks (SSBs), which are periodically transmitted to support synchronization and cell selection [1]– [3]. However, SSB beams are not the beams used for data transmission. Data transmission occurs over beams derived from beam refinement and precoding procedures based on channel state information-reference signals (CSI-RSs), which provide a more direct indication of the beam-domain condi-tions relevant for data scheduling. Therefore, inferring data-channel SINR from reference-signal measurements is non-trivial, especially because the interference experienced by a UE depends on data scheduling and which beams are actively carrying data. 
+
+A. Related Work 
+
+Recent works have investigated predicting UEs SINR in cellular networks. In particular, machine learning (ML) has been used to infer SINR from historical channel-quality ob-servations, to reduce reference-signal overhead and improve radio resource management [4]. Other works have explored the use of recurrent and tree-based predictors for SINR forecasting, leveraging mobility attributes, measured signal quality, and radio environment maps [5]. Related line of work studies the potential of chaining the prediction of reference-signal measurements to guide network control policies, such as handover optimization and mobility management [6], or energy-saving cell switch-off strategies, where cell on/off decisions must preserve user service quality while reducing network power consumption [7]. These studies show the potential of data-driven radio-metric prediction for proac-tive network control. However, existing approaches typically focus on temporal forecasting, coverage-map construction, handover triggering, or cell on/off optimization, and do not generally differentiate channel types. 979-8-3195-0489-0/26/$31.00 ©2026 IEEE 
+
+(Special Session) arXiv:2609.03488v1 [cs.NI] 3 Sep 2026 B. Contribution 
+
+In contrast, this paper investigates whether beam-level SSB-RSRP, and CSI-RS-RSRP measurements, can be used to infer the average downlink SINR experienced over scheduled physical resource blocks (PRBs). The rationale behind this approach is that RSRP measurements implicitly encode the UE geometry relative to the surrounding network, together with the effects of propagation, beamforming, and other chan-nel characteristics. Since both the received signal power and the dominant interference components are shaped by these factors, a learning model can infer the latent relationship between the reported measurements and the resulting SINR. All simulations are conducted using Giulia 1, a high-fidelity system-level simulator purpose-built for evaluating heterogeneous cellular networks through a combination of expert, third generation partnership project (3GPP), and AI-based models [8]. Overall, these settings allow us to evaluate the feasibility of the proposed approach under widely adopted channel models, beam configuration, and scheduling condi-tions, as a first step toward more scenario-specific predic-tive UE-performance assessment involving real measurement data, online learning, explicit handover decisions, or dynamic cell switch-off procedures. The main contributions can be summarized as follows:  
+
+> •
+
+We formulate UE downlink SINR estimation from 5G NR reference-signal measurements as a supervised learning problem.  
+
+> •
+
+We build a 3GPP-compliant synthetic dataset including SSB-RSRP, CSI-RS-RSRP, CSI-RS beam activity in-formation, and PRB-level SINR values in a multi-cell mMIMO deployment.  
+
+> •
+
+We design and compare different input feature represen-tations for the SINR predictor, including unfiltered beam measurements, Top-K strongest measurements, and Top-K active CSI-RS measurements.  
+
+> •
+
+We show that CSI-RS beam-activity-aware feature se-lection significantly improves prediction accuracy, while reducing the dimensionality of the input representation. The remainder of this paper is organized as follows. Sec-tion II introduces the considered 5G NR system model, Section III formulates the indirect SINR prediction problem, and describes the input feature representations used by the learning model. Section IV presents the simulation setup and discusses numerical results. Finally, Section V concludes the paper and outlines future research directions. II. S YSTEM MODEL 
+
+In this section, we introduce the models used in this work to build our dataset and conduct our analysis. Here, we con-sider a 5G NR cellular network operating in the sub-6 GHz spectrum (frequency range 1 (FR1)) with carrier frequency 
+
+fc = 3 .5 GHz and full frequency reuse, for which the adopted models are outlined by 3GPP [1], [2], [9]. The network           
+
+> 1Giulia is publicly available at https://github.com/giulia-open-lab/ OpenGiuliaSLS.git. 1000 500 0500 1000
+> X position (m)
+> 1000
+> 500
+> 0500 1000
+> Y position (m)
+> UE cell site
+> Figure 1. 2D Network Layout
+
+operates over a channel bandwidth of 100 MHz, which, for a subcarrier spacing of 30 kHz, corresponds to NPRB = 273 
+
+PRBs, according to 3GPP specifications. 
+
+1) Network and User Layout: In our analysis, we consider an outdoor urban network comprising 19 sites arranged in a 2-tier hexagonal grid, with an inter-site distance dISD . Each site has a height hBS and hosts 3 sectors, whose boresight orientations are evenly spaced by 120 ◦. The set of cells is represented as C, with cardinality denoted as Nc. Here, we assume a fully loaded scenario with a total of Nu single-antenna UEs uniformly distributed over the network area, and we denote the set of all active UEs by U. Figure 1 depicts an example of the resulting 2D network layout. 
+
+2) Cell Antenna Array Unit: Each 5G cell uses a uniform planar array (UPA) with M = 32 vertically polarized ele-ments arranged in Mv = 4 rows and Mh = 8 columns, each connected to its own transceiver. The inter-element spacing is 
+
+λp/2, with λp equal to the carrier wavelength, and each UE is equipped with a single antenna. The 5G cells leverage digital precoding and mMIMO capabilities through active antenna arrays. For each cell c, the matrix Vc = [ vxc , vyc , vzc ]T col-lects the Cartesian coordinates of its antenna elements w.r.t. the panel center [9]. 
+
+3) Channel Model: We adopt the statistical urban macro (UMa) channel model and single-antenna element gain speci-fied by 3GPP in [9]. This model characterizes the propagation between each UE u ∈ U and each cell c ∈ C through large-scale and small-scale fading effects. 
+
+Large-Scale Fading: For each UE u and cell c, the line-of-sight (LoS) probability P LoS  
+
+> u,c
+
+and the path-loss gain ρu,c 
+
+follow the 3GPP UMa models in [9]. The shadow-fading gain 
+
+τu,c is modeled as a zero-mean log-normal random variable whose standard deviation σSF depends on the link condition, with σSF = 4 dB and σSF = 6 dB for LoS and non-LoS (NLoS) links, respectively [9]. To reproduce realistic large-γu,k = βu, ˆcu |hu, ˆcu,k wu, ˆcu,k |2 Pu, ˆcu,k 
+
+βu, ˆcu
+
+P  
+
+> p∈U ˆcu \u
+
+|hu, ˆcu,k wp, ˆcu,k |2 Pp, ˆcu,k + P 
+
+> b∈C\ ˆcu
+
+βu,c 
+
+P 
+
+> i∈U c
+
+|hu,c,k wi,c,k |2 Pi,c,k + σ2
+
+> k
+
+(7) scale variations across the network, we further incorporate 2D spatial correlation among UEs following the model in [10]. The resulting large-scale gain between UE u and cell c is 
+
+βu,c = gu,c ρu,c τu,c , (1) where gu,c denotes the single-element antenna gain. 
+
+Small-Scale Fading: The small-scale fading captures the multi-path nature of the link between each UE u and the 
+
+M antenna elements of cell c, and is modeled as a Rician channel [9]. For each PRB k, the downlink channel vector 
+
+hu,c,k ∈ C1×M is expressed as the weighted sum of a deter-ministic LoS component and a stochastic NLoS component, 
+
+hu,c,k =
+
+r K
+
+1 + K hLoS  
+
+> u,c,k
+
++
+
+r 11 + K hNLoS  
+
+> u,c,k
+
+, (2) where the two terms are weighted by the Rician factor K,whose values are set according to [9]. The NLoS compo-nent is drawn independently for each PRB as hNLoS  
+
+> u,c,k
+
+∼CN (0, IM ). Embracing the plane-wave approximation [9], [11], the LoS component models the phase shift between UE 
+
+u and each of the M antennas of cell c, and is given by 
+
+hLoS  
+
+> u,c,k
+
+= e−j 2πλc d3D  
+
+> u,c
+
+ej 2πλc kTu,c (ϕu,c ,θ u,c ) Vc , (3) where d3D  
+
+> u,c
+
+is the 3D distance between UE u and the panel center of cell c, ϕu,c and θu,c are the corresponding azimuth and zenith angles, and we recall that Vc are the Cartesian coordinates of the panel antennas of cell c. The wave vector 
+
+ku,c (·, ·) represents the phase variation of a plane wave along the three orthogonal spatial directions and is defined as 
+
+ku,c (ϕu,c , θ u,c ) = 
+
+
+
+cos( ϕu,c ) cos( θu,c )sin( ϕu,c ) cos( θu,c )sin( θu,c )
+
+ . (4) 
+
+A. NR Initial Access 
+
+During the initial cell-discovery and access phase, each cell c transmits a set of reference signals (RSs) that enable each UE to synchronize with the network and perform the measurements to select its serving cell and establish a con-nection for data transmission [3]. In NR, these signals are jointly carried by the SSB; hereafter, we refer to the beam used to transmit an SSB as an SSB beam. A distinctive feature of NR, compared with previous cellular generations, is the ability to beamform multiple SSB along multiple spa-tial directions, thereby improving signal strength, coverage flexibility, and interference management. According to the 3GPP specifications [1], [2], each cell c can transmit up to 
+
+N ssb  
+
+> c
+
+SSB beams, with N ssb  
+
+> c
+
+= 8 in the FR1 band (i.e., sub-6 GHz band). It should be noted that these beams are not transmitted simultaneously; instead, each cell performs a beam-sweeping procedure, transmitting them sequentially over time according to a predefined pattern. Each SSB beam is represented by a complex codeword wssb  
+
+> s,c
+
+∈ CM ×1 drawn from a fixed codebook Wssb CB generated via two dimensional discrete Fourier transform (2D-DFT). Then, we denote with 
+
+Wssb the set of the N ssb  
+
+> c
+
+transmitted SSB beams. Each UE u selects its serving cell by measuring the RSRP of each transmitted SSB beam. The RSRP of beam s from cell c is given by 
+
+RSRP ssb  
+
+> u,s,c
+
+= Ek
+
+h
+
+βu,c hu,c,k wssb  
+
+> s,c
+> 2
+
+P ssb 
+
+> s,c
+
+i
+
+, (5) where we recall that P ssb  
+
+> s,c
+
+is the SSB beam transmission power. Here, the expectation is taken over multiple channel realizations across the resource elements assigned to refer-ence signals. Finally, each UE u selects its serving cell ˆcu as the one yielding the highest RSRP. 
+
+B. Data Precoding and PRB SINR 
+
+Each cell c serves its associated UEs Uc by multiplexing the transmitted data across PRBs and beams. To exploit the mMIMO beamforming and multiplexing capabilities of the 5G cells, we adopt a Type-I CSI-RS Codebook precoding scheme [2], [3]. According to this scheme, to define the data precoding of each UE per PRB, each cell transmits a set of CSI-RSs for the channel estimation phase to its set of con-nected UEs Uc. Analogously to the SSB beams, each CSI-RS beam is represented by a complex codeword wcsi  
+
+> s,c
+
+∈ CM ×1
+
+drawn from a fixed codebook Wcsi CB generated via 2D-DFT and mapped to specific resource elements 2. In accordance with the 3GPP FR1 specifications, each cell can transmit up to N csi  
+
+> c
+
+CSI-RS beams, with N csi  
+
+> c
+
+= 32 ; we then denote with 
+
+Wcsi the set of the N csi  
+
+> c
+
+transmitted CSI-RS beams. Then, each UE estimates the received power of each CSI-RS beam to feed back a set of indices characterizing the instantaneous channel conditions. Specifically, the CSI-RS RSRP of beam 
+
+s from cell c over PRB k is computed as follows, 
+
+RSRP csi  
+
+> u,s,c,k
+
+= E
+
+h
+
+βu,c hu,c,k wcsi  
+
+> s,c
+> 2
+
+P csi 
+
+> s,c
+
+i
+
+, (6) where P csi  
+
+> s,c
+
+is the CSI-RS beam transmission power. Unlike the SSB, however, the CSI-RS is mapped to a dedicated set of resource elements and is resolved per PRB, so as to capture the short-term per-PRB conditions that drive the data precoding. Among the fed-back indices, the precoding matrix indicator (PMI) indicates the beam yielding the largest received power, and it will be used by the serving cell to set the precoding vector wu, ˆcu,k of UE u equal to the precoder associated with that beam. Within each cell, PRBs are fully reused across beams and equally split among the UEs served per beam, thereby assuming equal long-term resource allocation among UEs, 
+
+> 2To simplify the notation, the superscript ‘csi’ is used in place of ‘CSI-RS’ throughout the paper.
+
+as typically done in round-robin schedulers. Additionally, it should be noted that in this work we consider a single-layer transmission; therefore, a UE is served by only one beam. Letting wu,c,k denote the precoding codeword assigned to UE u by cell c on PRB k and Pu,c,k the corresponding trans-mit power, the data SINR per PRB γu,k is given by eq. (7). Here, the numerator represents the useful received power, i.e., the power received by UE u from the selected beam on resource k. In the denominator, the first term accounts for intra-cell inter-beam interference, namely the power received on PRB k from other beams of the serving cell sharing the same resource; the second term represents inter-cell interfer-ence from neighboring cells. Finally, σ2 
+
+> k
+
+corresponds to the receiver noise power. III. P ROBLEM FORMULATION 
+
+In this work, we aim at estimating for a given user u
+
+the average SINR across all its scheduled PRBs, denoted as γu, from beam-level RSRP reports. Specifically, the re-port here comprises the RSRP measured on the SSB beams, 
+
+RSRP ssb 
+
+> u,s,c
+
+, and on the CSI-RS beams, RSRP csi 
+
+> u,s,c
+
+, of the serving cell ˆcu and the neighbouring cells c.As detailed in Section II, user data are precoded using Type-I codebook-based feedback [2]. However, this feedback exposes only the dominant beam of the serving cell and is therefore insufficient to characterize the multi-cell, multi-beam interference that shapes the SINR. We instead build on the NR beam-management framework, in which each UE measures the Layer-1 RSRP on its configured SSB and CSI-RS resources (as defined in [12]) and reports them to the network with the corresponding resource indicators [2]. While practical deployments typically report only a subset of these measurements [12], we assume a setting in which the network has access to the complete per-beam measurement report of every UE. Consequently, RSRP ssb  
+
+> u,s,c
+
+and RSRP csi 
+
+> u,s,c
+
+are available for all serving and neighboring beams. Let fθ (·) denote a parameterized estimator. Our objective is to determine the optimal model parameters θ∗ that mini-mizes the mean squared error (MSE) between the estimated and target average SINR across all UEs u ∈ U :
+
+θ∗ = argmin 
+
+> θ
+
+1
+
+|U| 
+
+X
+
+> u∈U
+
+|γu − fθ (xu)|2 , (8) where xu is the input feature vector associated with UE u.
+
+A. SINR Predictor Input Feature 
+
+The construction of the input feature vector xu for the SINR predictor is a key design choice. In the following, we introduce three alternative feature representations, namely: 
+
+Unfiltered , Top-K Strongest , Top-K Active .
+
+1) Unfiltered: The baseline representation constructs xu
+
+by concatenating all measurement reports from both the serving cell and neighboring cells using a fixed, predefined order for all users. Let rssb  
+
+> u
+
+∈ RNssb and rcsi  
+
+> u
+
+∈ RNcsi 
+
+denote the row vectors collecting all SSB- and CSI-RS-based RSRP measurements of user u, with Nssb = NcN ssb  
+
+> c
+
+and 
+
+Ncsi = NcN csi  
+
+> c
+
+. Then the input feature is simply defined as: 
+
+xu = [ rssb  
+
+> u
+
+rcsi  
+
+> u
+
+]T (9) 
+
+2) Top-K Strongest: A second feature engineering strategy involves sorting the measurement reports by their RSRP mag-nitudes. To build this, let rssb  
+
+> u, (i)
+
+denote the i-th largest element of the vector rssb  
+
+> u
+
+, such that rssb  
+
+> u, (1)
+
+≥ rssb  
+
+> u, (2)
+
+≥ · · · ≥ rssb 
+
+> u, (Nssb )
+
+.Similarly, let rcsi  
+
+> u, (i)
+
+denote the i-th largest element of the vector rcsi  
+
+> u
+
+. Then, the Top-K Strongest user input feature is built by only considering the Top-Kssb SSB RSRP reports and the Top-Kcsi CSI-RS RSRP, equivalently: 
+
+xu = [ rssb 
+
+> u, (1)
+
+, . . . , r ssb 
+
+> u, (Kssb )
+
+, r csi 
+
+> u, (1)
+
+, . . . , r csi 
+
+> u, (Kcsi )
+
+]T (10) This filtering has twofold advantages: first, it reduces the input cardinality from Nssb + Ncsi to Kssb + Kcsi , where both limits can be parameters subject to optimization; second, ordering the values ensures that the serving beams (typically the strongest) and the primary interfering beams are at the beginning of the vectors, mitigating the combinatorial com-plexity of the unfiltered approach, which relied on unstruc-tured positional encoding 
+
+3) Top-K Active: However, a strong measurement from an interfering beam does not necessarily translate into realized interference. If the corresponding CSI-RS beam is inactive, i.e., no data are transmitted via that beam across any PRB, it does not generate interference. To account for this, we define a binary activity mask vector acsi , whose elements are 1 if the corresponding CSI-RS beam is active and serving at least one UE, and 0 otherwise. Applying this mask to the CSI-RS measurements yields the activity-filtered vector ˜rcsi  
+
+> u
+
+= rcsi  
+
+> u
+
+⊙
+
+acsi . Letting ˜rcsi  
+
+> u, (i)
+
+denote the i-th largest element of this masked vector, the Top-K Active user feature is formulated as: 
+
+xu =
+
+h
+
+rssb 
+
+> u, (1)
+
+, . . . , r ssb 
+
+> u, (Kssb )
+
+, ˜rcsi 
+
+> u, (1)
+
+, . . . , ˜rcsi 
+
+> u, (Kcsi )
+
+iT
+
+(11) Notably, because we assume that data is scheduled in orthog-onal resources to the SSBs beams, SSB transmissions do not generate data-channel interference and are therefore excluded from the activity mask. IV. N UMERICAL RESULTS 
+
+In this section, we evaluate the numerical performance of the proposed SINR predictor. The dataset used to train the estimator was generated using Giulia , a high-fidelity open-source system-level simulator, configured to follow the spec-ification of the UMa model reported in the 3GPP TR38.901 document [9]. 
+
+A. Synthetic Dataset Generation 
+
+The dataset includes N independent simulations, where each simulation captures the following main events:  
+
+> •
+
+Nu users are randomly and uniformly spread within the considered region;  
+
+> •
+
+each UE u ∈ U connects to the strongest cell ˆcu based on the strongest measured SSB-RSRP; TABLE I SIMULATION PARAMETERS                         
+
+> Parameter Value Parameter Value
+> N1500 Nu570
+> Nc57 Nssb 456
+> Ncsi 1824 K273
+> θ258 ×128 ×1α0.001
+> Z2048 [Kssb , K csi ][32 ,16]
+> •
+
+a beam refinement procedure detects the strongest CSI-RS RSRP from the serving cell, determining the beam index for data transmission, i.e., the data precod-ing vector wu, ˆcu,k used to transmit data;  
+
+> •
+
+Each serving cell schedules transmissions to its asso-ciated UEs across PRBs and beams, using the serving beam identified in the previous step. For each simulation, and for each user, we record the following output:  
+
+> •
+
+The list of RSRP measurements from all SSB and CSI-RS signals transmitted by all cells, yielding the vectors rssb  
+
+> u
+
+and rcsi  
+
+> u
+
+; 
+
+> •
+
+The set of PRBs scheduled to user u from its serving cell ˆcu, denoted as Ku; 
+
+> •
+
+The sequence of SINR values γu,k for each scheduled PRB k ∈ K u; 
+
+> •
+
+The activity mask vector acsi for the current simulation. The target label γu is then calculated as the average SINR over the scheduled PRBs: 
+
+γu = 1
+
+|K u|
+
+X
+
+> k∈Ku
+
+γu,k (12) 
+
+B. SINR Predictor Training 
+
+The generated dataset, comprising N · Nu entries, was shuffled and partitioned into training, validation, and test sets using a 70/15/15 split. To prevent data leakage, all input features were standardized, i.e., scaled to zero mean and unit variance, using only the training set statistics; this identical transformation was then applied to the validation and test sets. The SINR predictor is a three-layer multi layer percep-tron (MLP) parameterized by θ, featuring two hidden layers with ReLU activation and a linear output layer. It was trained via backpropagation to minimize the MSE on mini-batches of size Z, utilizing the Adam optimizer with a learning rate of α.To mitigate overfitting, training was capped at a maximum of 500 epochs, with early stopping enforced if the validation loss failed to decrease for 100 consecutive epochs. All simulation and training settings are summarized in Table I. 
+
+C. Results Discussion 
+
+Fig. 2 shows the learning performance, evaluated in terms of root mean squared error (RMSE), on the training and test sets over epochs for the three different input features defined in Sec. III. It also includes an ablation study on Top-K Active where we removed the top Kssb strongest RSRP vector, resulting in four evaluated configurations: Unfiltered ,    
+
+> 0100 200 300 400 1.00 2.00 3.00 4.00 5.00
+
+Epoch RMSE (dB)            
+
+> Unfiltered Top-KStrongest Top-KActive No SSB
+> Figure 2. SINR predictor input feature xucomparison.. Solid and dashed lines denote validation and training loss, respectively.
+> −20 −10 010 20 0.00 0.12 0.24 0.36 0.48 0.60
+
+Target SINR, γu (dB) Absolute Error (dB)  Mean Error Median Error Sample Dist       
+
+> −20 −10 010 20 00.20.40.60.81
+> Figure 3. Absolute prediction error distribution of the proposed Top-K Active
+> predictor as a function of the target SINR.
+
+Top-K Strongest , Top-K Active , and No SSB . As expected, the Top-K Active configuration outperforms the other input feature alternatives. This is because the predictor receives an ordered sequence of RSRP values for active beams, al-lowing it to infer the resulting user SINR. In contrast, the 
+
+Top-K Strongest approach yields lower precision because the model cannot determine which of the strong beams affect the UE SINR. However, this approach does not require the binary activity vector, and users can report the ordered mea-surements directly to the serving cell. The Unfiltered input, i.e., the basic input feature with raw RSRP measurements, fails to train an effective predictor. Because the input vector leverages a fixed order of beams, the SINR prediction is forced to learn a combinatorial problem; it treats an input differently if interfering beam i and beam j are swapped, even if they contribute equally to the SINR estimation. Fi-nally, the No SSB configuration further reduces the input feature size; however, by removing the RSRP associated with the received SSB signals, the predictor overfits earlier and performs worse. This suggests that even if SSB beams do not actively contribute to the SINR calculation, they enrich the estimation by providing valuable information. Regarding the Top-K Active SINR predictor, Fig. 3 reports the mean and median prediction errors in dB as a function of the target SINR, alongside the distribution of the true SINR in the test dataset. We observe that the SINR follows a Gaussian distribution with a mean of approximately 1 dB and a stan-dard deviation of about 6 dB, indicating that the 3GPP UMa 8 16 32 64 128 256 512 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 
+
+Top Active CSI-RS RSRP, Kcsi         
+
+> Test RMSE (dB)
+> Figure 4. Kcsi comparison.
+> 816 32 64 128 256 512 2.00 2.10 2.20 2.30 2.40 2.50
+
+Top Strongest SSB RSRP, Kssb   
+
+> Test RMSE (dB)
+> Figure 5. Kssb comparison.
+
+is a strong interference-limited scenario. As expected, the SINR prediction error is smaller where most of the samples are concentrated. However, the absolute error distribution becomes asymmetrical at the tails, exhibiting higher errors in the lower SINR regime compared to the high SINR regime. Moreover, the growing difference between the median and mean absolute errors indicates the presence of strong outliers. As highlighted by the previous results, the Top-K selection of active beams is a fundamental feature engineering step that can drastically improve the SINR prediction. However, determining which beams transport data, potentially at each scheduling time period, requires communication overhead between cells. Fig. 4 reports the test set RMSE as a function of the number of ordered top active CSI-RS RSRP measure-ments provided as input to the predictor, denoted as Kcsi .Notably, an optimal value of ˆKcsi = 16 jointly minimizes the estimation error and reduces the inter-cell communica-tion overhead. When Kcsi < ˆKcsi , too few active interferers are considered, limiting the SINR prediction accuracy. Con-versely, when Kcsi > ˆKcsi , the input features include more interfering beam RSRPs, but their contribution to the final SINR estimation is less significant. This yields diminishing returns, considering the additional inter-cell information ex-change required to support the estimation. Similarly, Fig. 5 shows the sweep search for the optimal value of Kssb to use as an input feature. For this experiment, we consider an input feature set containing only the RSRP reports from SSB beams, rssb  
+
+> u
+
+, omitting the CSI-RS reports. By relying solely on SSB reports, the SINR prediction error ranges up to 2.9 dB, achieving its minimum of 2.4 dB when 
+
+ˆKssb = 32 . This is because data is transmitted via CSI-RS beams; therefore, they play a more prominent role in the final SINR prediction. As Kssb decreases, the spatial signature of user u becomes less precise, leading to significant losses in SINR prediction accuracy. While higher values of Kssb do not degrade performance, the increased number of measure-ments each UE must perform and feed back to the serving cell yields diminishing returns. V. C ONCLUSIONS 
+
+In this paper, we introduced a supervised learning frame-work to predict the average downlink SINR of UEs in 5G NR networks leveraging standardized SSB and CSI-RS RSRP measurements report. Our comparative analysis of various input feature representations revealed that a Top-K Active 
+
+filtering strategy, which accounts for actual CSI-RS activity, significantly outperforms unfiltered or strictly strength-based approaches. Furthermore, we demonstrated the existence of an optimal input dimensionality ( Kcsi = 16 and Kssb = 32 )that minimizes estimation error while limiting the neces-sary inter-cell communication overhead. Ultimately, this data-driven methodology proves highly effective for proactive radio-metric estimation. Future research will focus on ex-tending this predictive framework to real-world measurement datasets and utilizing digital twin sandboxing to simulate and optimize closed-loop network control policies, such as predictive handover and dynamic energy-saving procedures. ACKNOWLEDGMENT 
+
+This research is supported by the action CNS2023-144333, financed by MCIN/AEI/10.13039/501100011033 and the Eu-ropean Union “NextGenerationEU”/PRTR. REFERENCES [1] 3GPP TS38.211, “Phisical channels and modulation,” 2023, v.18.0. [2] 3GPP TS38.214, “Phisical layer procedure for data,” 2023, v.18.0. [3] E. Dahlman, S. Parkvall, and J. Skold, 5G NR: The Next Generation Wireless Access Technology . USA: Academic Press, Inc., 2018. [4] R. Ullah, S. N. K. Marwat, A. M. Ahmad, S. Ahmed, A. Hafeez, T. Kamal, and M. Tufail, “A Machine Learning Approach for 5G SINR Prediction,” Electronics , vol. 9, no. 10, p. 1660, 2020. [5] S. B. Mallikarjun, S. C. Kusumapani, N. P. Kuruvatti, B. G. Bhat, and H. D. Schotten, “Machine Learning Based SINR Prediction in Private Campus Networks,” in Proceedings of the IEEE 97th Vehicular Technology Conference (VTC2023-Spring) , 2023, pp. 1–6. [6] J. P. S. H. Lima, A. A. M. de Medeiros, E. P. de Aguiar, E. F. Silva, V. A. de Sousa Jr., M. L. Nunes, and A. L. Reis, “Deep Learning-Based Handover Prediction for 5G and Beyond Networks,” in Proc. of the IEEE Int. Conf. on Communications (ICC) , 2023, pp. 3468–3473. [7] M. Choi, K. Kim, H. Jang, H. Woo, J. S. Pujol-Roig, Y. Wang, H. Yeon, S. Choi, and S. Jang, “Cell On/Off Parameter Optimization for Saving Energy via Reinforcement Learning,” in Proceedings of the IEEE Globecom Workshops (GC Wkshps) , 2021, pp. 1–6. [8] D. L´ opez-P´ erez, N. Piovesan, and M. Bernab` e, “Capacity and energy trade-offs in FR3 6G networks using real deployment data,” 2026. [Online]. Available: https://arxiv.org/abs/2601.13993 [9] 3GPP TR38.901, “Study on channel model for frequencies from 0.5 to 100 GHz,” Mar. 2017, v.14.0. [10] X. Cai and G. Giannakis, “A two-dimensional channel simulation model for shadowing processes,” IEEE Trans. Veh. Technol. , vol. 52, no. 6, pp. 1558–1567, Nov. 2003. [11] E. Bj¨ ornson, J. Hoydis, and L. Sanguinetti, Massive MIMO Networks: Spectral, Energy, and Hardware Efficiency . Now Foundations and Trends, 2017. [12] 3GPP TS38.215, “NR; Physical layer measurements,” 2023, v.18.0.

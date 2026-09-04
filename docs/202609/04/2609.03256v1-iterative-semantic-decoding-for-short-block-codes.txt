@@ -1,0 +1,358 @@
+Title: Iterative Semantic Decoding for Short Block Codes
+
+URL Source: https://arxiv.org/pdf/2609.03256v1
+
+Published Time: Fri, 04 Sep 2026 00:23:10 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Iterative Semantic Decoding for Short Block Codes 
+
+Jiafu Hao, Student Member, IEEE , Chentao Yue, Senior Member, IEEE , Mingcheng Nie, Student Member, IEEE ,Branka Vucetic, Fellow, IEEE , and Yonghui Li, Fellow, IEEE 
+
+Abstract —This paper proposes an iteratively enhanced se-mantic receiver for natural-language text transmission over noisy wireless channels using multiple short block codes. At the transmitter, each sentence is permuted by a character-level interleaver, partitioned into segments, and independently encoded by short block codes. At the receiver, we develop an iterative decoder consisting of a channel decoder and a language model, where a de-interleaver between them disperses the burst decoding errors within each segment across the sentence. In each iteration, the language model denoises the channel decoding output, and the denoised characters verified to be consistent with the channel observations are fed back to the channel decoder as semantic information for the next iteration. Simulation results on the Stanford Natural Language Inference (SNLI) corpus over the additive white Gaussian noise (AWGN) channel show that the proposed receiver achieves approximately 1.5 dB block error rate (BLER) gain over conventional short-block coding, while maintaining BLEU and ROUGE scores above 99% at SNRs beyond 1.0 dB. 
+
+Index Terms —Short block codes, semantic error correction, language model, iterative decoding, ordered statistics decoding. 
+
+I. I NTRODUCTION 
+
+# SEMANTIC communication (SemCom) has emerged as one of the key paradigms for next-generation wireless networks, shifting the design objective from accurate bit-level recovery toward semantic completeness [1]. The core idea of SemCom is to incorporate source-level knowledge, such as linguistic patterns, into the communication process. Among the approaches developed under this paradigm, joint source– channel coding (JSCC) employs a pair of neural networks to jointly optimize source compression and channel error protec-tion, demonstrating better robustness than conventional coding schemes in applications such as wireless image transmission [2] and natural-language transmission [3]. However, adopting JSCC requires substantial modifications to the conventional separate source and channel coding archi-tecture [1], resulting in considerable deployment costs. More-over, JSCC models are typically optimized for specific channel conditions, exhibiting poor generalization when the operating environment changes [4]. These limitations are particularly restrictive in systems with dynamic channel conditions and ser-vice requirements, where JSCC models would require frequent retraining. A representative example is the non-terrestrial net-work (NTN), in which low-Earth-orbit (LEO) satellites support short-packet transmissions under stringent power constraints       
+
+> Jiafu Hao, Chentao Yue, Mingcheng Nie, Branka Vucetic and Yonghui Li are with the School of Electrical and Computer Engineering, The University of Sydney, Sydney, NSW 2006, Australia (e-mail: {jiafu.hao; chentao.yue; mingcheng.nie; branka.vucetic; yonghui.li }@sydney.edu.au). ( Corresponding author: Chentao Yue )Code available: https://github.com/Jeh100/Iterative-SEC. The work of Chentao Yue was supported by ARC under Grant DE250101332.
+
+and low signal-to-noise ratio (SNR) conditions [5], [6]; in this regime, short blocklengths inherently incur a reliability penalty [7]. These constraints motivate a receiver-side augmentation of conventional short-block decoding to preserve compatibility with existing wireless standards while exploiting semantic information to compensate for channel impairments. The semantic error correction (SEC) paradigm augments conventional systems with language-model-based semantic priors, allowing the receiver to exploit linguistic context ei-ther after channel decoding or directly within the decoding process. In particular, the segmented SEC scheme [8] en-codes a sentence with multiple short block codes, so that the correctly decoded segments provide linguistic context for a language model to recover the erroneous ones. Building on this architecture, semantic list decoding (SLD) [9] generates multiple candidate reconstructions for each unreliable segment and selects the candidate most consistent with the received soft information. Other variants exploit semantic priors in most-reliable-basis selection [10], trellis search [11], and Bayesian reliability combining [12]. TokCom [13] designs token-to-bit mappings at the transmitter to make channel errors less semantically destructive. However, all these methods apply semantic correction in a single pass and do not feed the semantic information back to the channel decoder for further refinement. In this paper, we propose an iterative SEC framework that establishes a feedback loop between the language model and the channel decoder. At the transmitter, the sentence is permuted by a character-level interleaver, partitioned into segments, and independently encoded by short block codes. At the receiver, an iterative decoder alternates between ordered statistics decoding (OSD) and language-model denoising. In each iteration, the decoded segments are de-interleaved, which disperses the burst errors within any erroneous segment into isolated character errors across the sentence. The language model then denoises the resulting sentence to produce asemantic estimate. A character-level verification module re-tains only the estimated characters consistent with the corre-sponding channel log-likelihood ratios (LLRs). The retained characters are then pinned as known constraints in the next decoding iteration by adding a large signed bias to their LLRs. Simulation results on the Stanford Natural Language Inference (SNLI) [14] corpus over the additive white Gaussian noise (AWGN) channel show that the proposed design outperforms SEC by approximately 1 dB and the conventional short-code scheme by approximately 1.5 dB in block error rate (BLER), reaching a BLER of 10 −4 at 2.5 dB. Moreover, it main-tains bilingual evaluation understudy (BLEU) [15] and recall-oriented understudy for gisting evaluation (ROUGE) [16] scores above 99% beyond 1.5 dB. arXiv:2609.03256v1 [cs.IT] 3 Sep 2026 2
+
+II. S YSTEM MODEL 
+
+A. Multiple Short Linear Block Codes 
+
+We consider the transmission of a natural-language sentence 
+
+s of character length ℓ over a noisy channel. Each character is first mapped to an 8-bit American Standard Code for Information Interchange (ASCII) representation, yielding a bitstream of total length 8ℓ. Rather than encoding the entire sentence as a single long codeword, the multiple short code (MSC) framework partitions s into q equal-length segments of ℓMSC = ℓ/q characters. This process yields q bitstreams 
+
+{b1, . . . , bq }, each containing k = 8 ℓ/q bits, which are then independently encoded and transmitted. Specifically, each segment bi is encoded by a binary linear block code CMSC (n, k ), which maps k information bits into an n-bit codeword ( n > k) through the generator matrix 
+
+GMSC ∈ { 0, 1}k×n, i.e., ci = biGMSC ∈ { 0, 1}n. Note that we adopt the systematic form GMSC = [ Ik, P], so that the first k positions in a codeword directly carry the transmitted ASCII information bits and the remaining n − k positions serve as parity bits for error protection. The codeword is then binary phase-shift keying (BPSK) modulated as xi = 1 −2ci ∈{− 1, +1 }n and transmitted over an AWGN channel, yielding the received signal 
+
+yi = xi + zi.
+
+Here, zi ∼ N (0, σ 2In) is AWGN with variance σ2 and the SNR is defined as 1/σ 2. At the receiver, all received vectors 
+
+yi, i = 1 , . . . , q , are subsequently converted into LLRs as 
+
+λi = 2 yi/σ 2, and decoded in parallel by a near-maximum-likelihood (ML) short-block decoder (e.g., OSD [17]), yield-ing the bit estimate ˆbi; a decoding error occurs whenever 
+
+ˆbi̸ = bi. The concatenated estimate ˆb = [ˆb1, . . . , ˆbq ] is then mapped through ASCII source decoding to the sentence estimate ˆs = [ˆ s1, . . . , ˆsq ], with each ˆsi of length ℓMSC .Since the q segments are encoded and decoded independently, decoding failures do not propagate across segments, leaving the correctly decoded segments as reliable context for the semantic processing module in Section II-C. 
+
+Remark 1: The framework adopts fixed-length ASCII map-ping rather than source compression, since compression is in-compatible with the character-level interleaving in Section III. Compressing before interleaving removes the character bound-aries on which the interleaver operates, whereas interleaving before compression destroys the linguistic structure that com-pression exploits. The resulting loss is minor, as for short texts, compression methods such as DEFLATE adopted by 3GPP offer little rate saving over the fixed-length ASCII mapping. 
+
+B. Ordered Statistics Decoding 
+
+OSD [17] is a near-ML soft-decision decoder for linear block codes. For BPSK transmission, each entry λi,j of λi
+
+provides both the hard decision and its reliability: hj = 0 for 
+
+λi,j ≥ 0 and hj = 1 otherwise, while αj = |λi,j | measures the reliability of the decision. OSD exploits this information by sorting the received positions in descending order of αj and applying the same permutation to the generator matrix. After Gaussian elimination, the generator matrix is transformed into Parallel    
+
+> Channel Decoder
+> Source Decoder
+> Semantic Error Correction
+> �𝐬𝐬 ̂𝐛𝐛 �𝐬𝐬 Character De-interleaver
+> Semantic
+> Information
+> Character
+> Interleaver
+> Semantic Candidate Generation
+> 𝛌𝛌
+> Error Identification
+> �𝐬𝐬
+> �𝒔𝒔𝒓𝒓
+> Final output
+> Fig. 1. Proposed iterative receiver framework with parallel short block codes and SEC module. Modulation and demodulation are omitted for clarity.
+
+systematic form ˜G = [Ik, ˜P], where the first k positions form the most reliable basis (MRB). OSD then applies test error patterns (TEPs) to the hard decisions in the MRB, re-encodes the resulting hypotheses, and selects the candidate with the minimum weighted Hamming distance to the received soft information. Consequently, assigning a sufficiently large reliability magnitude to a bit position promotes it into the MRB and allows it to act as a highly reliable constraint in subsequent OSD decoding, which is the property exploited by the semantic feedback mechanism in Section III-C. 
+
+C. Semantic Processing Module 1) Pre-trained Language Model: The semantic module is built upon the Bidirectional and Auto-Regressive Transformer (BART) [18], which is a pre-trained sequence-to-sequence neural model that combines a bidirectional encoder with an autoregressive decoder. The BART encoder produces contex-tual representations of the entire input, on which the decoder autoregressively generates output tokens. BART is trained to reconstruct the original text from corrupted input sequences by minimizing a token-level cross-entropy loss, where the corruption is obtained through masking, deletion, and substi-tution. This denoising objective closely resembles the burst error correction task at the receiver, where channel-decoding failures appear as corrupted characters in the decoded text. 
+
+2) SEC Pipeline: The sentence estimate ˆs obtained after parallel channel decoding is fed into the SEC module [8], which operates as a sentence-level denoiser based on a fine-tuned BART model. Specifically, ˆs is first tokenized by the byte pair encoding (BPE) fBPE (·) [19] as 
+
+ˆt = fBPE (ˆ s) = [ˆ t1, ˆt2, . . . , ˆtℓtok ], (1) where ℓtok is the token sequence length, which varies with sentence content. The token sequence ˆt is then passed to the BART-based SEC model, yielding the reconstructed sentence 
+
+˜s = fSEC (ˆ t; θSEC ), (2) where θSEC denotes the fine-tuned model parameters. Note that ˜s is an estimate of s, whose length may differ from ℓ
+
+due to the autoregressive generation of BART; this length mismatch is handled in Section III. III. P ROPOSED ITERATIVE SEC F RAMEWORK 
+
+Building on the SEC scheme [8], we propose an iterative framework, as depicted in Fig. 1. The transmitter interleaves the input sentence at the character level before forwarding it through the standard MSC pipeline, and the receiver iterates between OSD-based channel decoding and SEC-based seman-tic reconstruction. The design of each component is detailed below. 3
+
+A. Sentence Encoding with Character Interleaving 
+
+At the transmitter, the sentence s is first permuted by a character-level interleaver Π( ·), i.e., s′ = Π( s), which arranges the ℓ characters into an N1 × N2 array with N1N2 = ℓ
+
+and reads them out along the orthogonal dimension. Without interleaving, the decoding failure of segment i corrupts a contiguous block of ℓMSC characters in the reconstructed sentence ˆs. Fig. 2 shows the sentence “He played game with Tony.” split into five segments, where corrupts the characters corresponding to the semantically critical word ”Tony”. With interleaving, the same errors are dispersed across the sentence after de-interleaving, so each affected word retains most of its characters, providing strong local evidence for SEC to combine with the surrounding context. The permuted sentence 
+
+s′ is then processed through the MSC pipeline described in Section II-A, where all resulting quantities are marked with a prime, e.g., the transmitted segments b′ 
+
+> i
+
+and the LLRs λ′
+
+> i
+
+.
+
+B. Semantic Feedback Candidate Generation 
+
+At the receiver, each LLR vector λ′ 
+
+> i
+
+is decoded by OSD to obtain the bit estimate ˆb′
+
+> i
+
+. Following the segment-level confidence evaluation in [9, Eq. (11)], we evaluate for each segment the posterior confidence Pi ∈ (0 , 1) that the OSD-decoded segment ˆb′ 
+
+> i
+
+is correct, computed from the correlation between the best OSD candidate codeword and the received vector y′
+
+> i
+
+. Segments with low confidence are regarded as likely OSD decoding failures and are collected into the error pool 
+
+Serr = i : Pi < T OSD , (3) where TOSD ∈ (0 , 1) is a segment-level confidence threshold. If Serr = ∅, no segment is identified as unreliable, and no further SEC-based iterative processing is required. The bitstreams ˆb′ 
+
+> i
+
+then undergo ASCII source decoding and de-interleaving via Π−1(·), yielding the sentence estimate 
+
+ˆs. Subsequently, ˆs is passed to the SEC module, which reconstructs the sentence: 
+
+˜s = fSEC (fBPE (ˆ s); θSEC ) , (4) where ˜s = [˜ s1, . . . , ˜sr , . . . , ˜sℓe ] is the reconstructed sentence with character length ℓe.The reconstructed characters in ˜s corresponding to the segments in Serr are selected as targets for semantic feedback in the next iteration. For these target characters, the verifica-tion module applies two rules in sequence and produces the feedback candidate set V. The candidates in V are fed back to the next OSD iteration, as detailed in Section III-C. 
+
+Rule 1: Substitution-only feedback. BART produces ˜s
+
+through token-by-token generation, and thus the output length is not tied to that of ˆs. Aligning ˆs and ˜s character by character yields four types of edits: substitution, insertion, deletion, and unchanged. Since the feedback must be injected into the OSD of the next iteration, only characters that are aligned with the transmitted bit positions and carry new information are useful. Insertions and deletions destroy the character alignment with the received sequence and thus cannot be injected. Unchanged characters are aligned but provide no new information. The following rule is therefore restricted to substitution positions. He pl  ayed  game  with  \hb?Q  He p\  ayedh  gameb  with?  TonyQ          
+
+> 12345Without
+> Interleaver
+> With
+> Interleaver
+> 12345
+> Fig. 2. Effect of character-level interleaving on a segment decoding failure.
+
+Rule 2: Channel-reliable candidate selection. A substitu-tion proposed by BART is trustworthy only if it does not con-tradict the channel observation. For each target character ˜sr , let 
+
+π(r) = ( i, m ) denote its transmitted position in the interleaved sequence, i.e., the m-th character of segment i ∈ S err , and let λ′ 
+
+> i,m
+
+collect the LLRs at the corresponding systematic positions. Converting ˜sr to its 8-bit ASCII representation ˜br
+
+and the BPSK form ˜xr = 1 − 2˜br , we define the per-character soft correlation score 
+
+ρr = ˜ x⊤ 
+
+> r
+
+λ′
+
+> i,m
+
+, (5) which is large when ˜sr agrees with the channel observation. The character is admitted if its score is sufficiently high, i.e., 
+
+V = (r, ˜sr ) : ρr ≥ Th , (6) where Th > 0 is a reliability threshold. If V = ∅, the character with the largest ρr is admitted only if ρr ≥ Tlow ,where 0 < T low < T h is a secondary threshold, allowing a moderately reliable candidate to be fed back when no high-reliability candidate is available. If no candidate is admitted, the semantic-feedback iteration terminates and the current OSD output is retained. 
+
+C. Semantic Information and Iterative Decoding 
+
+The candidate set V(t) produced at iteration t is indexed in the sentence domain, whereas OSD operates on the interleaved segments. Each candidate (r, ˜sr ) is therefore mapped back to the interleaver domain through π(r) = ( i, m ) before injection. Let λ′(t) 
+
+> i
+
+denote the soft input of OSD at iteration t, initialized as λ′(0)  
+
+> i
+
+= λ′
+
+> i
+
+, and let λ′(t) 
+
+> i,m
+
+collect its entries at the systematic positions of the m-th character of segment i.Each candidate (r, ˜sr ) ∈ V (t) is injected as semantic hard information by updating 
+
+λ′(t+1)  
+
+> i,m
+
+= λ′(t) 
+
+> i,m
+
++ M ˜xr , (7) where ˜xr is the BPSK form defined in Rule 2 and M is a sufficiently large value. These positions rank highest in the OSD reliability ordering and act as known constraints in the next decoding round. All other positions, including the parity bits, remain unchanged from iteration t.The updated vectors {λ′(t+1)  
+
+> i
+
+}qi=1 are decoded in parallel OSD to generate the new error pool S(t+1) err . The iteration terminates when S(t+1) err = ∅ or t + 1 = Imax , where Imax 
+
+is the maximum number of iterations, and the OSD-decoded sentence estimate is returned. Otherwise, the resulting bits are source-decoded, de-interleaved, and passed to the SEC module to generate ˜s(t+1) .IV. S IMULATION RESULTS 
+
+A. Implementation Details 1) Dataset and Training: We use the SNLI corpus [14], with about 19,000 sentences for training and 550 for testing. 40.0 0.5 1.0 1.5 2.0 2.5                       
+
+> SNR (dB)
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> BLER
+> (a) BLER
+> 0.0 0.5 1.0 1.5 2.0 2.5
+> SNR (dB)
+> 20 40 60 80 100
+> BLEU (%)
+> (b) BLEU
+> 1.5 2.0 2.5 97 98 99 100
+> 0.0 0.5 1.0 1.5 2.0 2.5
+> SNR (dB)
+> 40 50 60 70 80 90 100
+> ROUGE (%)
+> (c) ROUGE
+> 1.5 2.0 2.5 99.0 99.5 100.0
+> SEC SEC-Interleaver SEC-Iteration MSC (1024, 512) LDPC code
+
+Fig. 3. BLER, BLEU, and ROUGE comparison of SEC-Interleaver, SEC-Iteration, SEC [8], MSC and LDPC code over the AWGN channel. TABLE I TRAINING AND INFERENCE PARAMETERS .
+
+Param. Value Param. Value Param. Value 
+
+Learning rate 3 × 10 −5 Batch size 128 Imax 5
+
+M 999 Tlow , Th 12.5, 25 TOSD 0.1 
+
+Sentence lengths ℓ range from 57 to 64 characters; each sentence is zero-padded to 64 characters, i.e., 512 bits after ASCII mapping, and the padding is removed before SEC processing. Besides, we set character-interleaving array with 
+
+N1 = q = 8 and N2 = ℓ/q = 8 .The training set DSEC = {(s(j), ˆs(j))}Nj=1 is constructed by transmitting each sentence over an AWGN channel multiple times at SNRs in {0, 0.5, 1, 1.5, 2, 2.5} dB, followed by order-4 OSD decoding and segment-level confidence evaluation. Only sentences that contain at least one erroneously decoded segment are retained, yielding N = 100 ,000 pairs for training. Based on the pretrained BART-base model, fine-tuning is performed by minimizing the token-level cross-entropy loss as 
+
+L = − 1
+
+N
+
+> N
+
+X
+
+> j=1
+> ℓ(j)tok
+
+X 
+
+> τ=1
+
+log P s(j) 
+
+> τ
+
+s(j) 
+
+> <τ
+
+, ˆs(j), (8) where s(j) 
+
+> τ
+
+is the τ -th target token of fBPE (s(j)) and ℓ(j)tok is its token length. The AWGN channel and all coding pipelines are implemented in Sionna [20]; fine-tuning runs on a single NVIDIA RTX 5090 GPU, with hyperparameters listed in Table I. 
+
+2) Benchmarks: We evaluate five schemes, all MSC schemes using CMSC (128 , 64) [9] constructed from the 5G NR polar-code generator matrix in systematic form, with q = 8 
+
+segments per 512-bit sentence:  
+
+> •
+
+MSC [8]: per-segment order-4 OSD decoding without semantic processing.  
+
+> •
+
+LDPC code : the entire 512-bit sentence is encoded using a rate-1/2 5G NR LDPC code with 1024 transmitted bits and decoded by BP with up to 80 iterations.  
+
+> •
+
+SEC [8]: the MSC pipeline followed by a single-pass BART reconstruction.  
+
+> •
+
+SEC-Interleaver: MSC with character-level interleaving and a single SEC pass.  
+
+> •
+
+SEC-Iteration: the proposed iterative SEC framework. 0.0 0.5 1.0 1.5 2.0 2.5               
+
+> SNR (dB)
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> BLER
+> (a) BLER
+> 0.0 0.5 1.0 1.5 2.0 2.5
+> SNR (dB)
+> 20 40 60 80 100
+> ROUGE (%)
+> (b) ROUGE
+> 2.5 99.6 99.8 100.0
+> OSD SEC-Iter-1 SEC-Iter-2 SEC-Iter-3 SEC-Iter-4 SEC-Iter-5
+
+Fig. 4. BLER and ROUGE of SEC-Iteration across five iterations. 
+
+3) Evaluation Metrics: We report sentence-level BLER, in which a block error occurs whenever the recovered sentence differs from the original after all processing. Semantic fidelity is measured by BLEU [15] and ROUGE-L [16], evaluating n-gram precision and longest-common-subsequence similarity, respectively. ROUGE-L is denoted by ROUGE for brevity. 
+
+B. Performance Comparison 
+
+Fig. 3 compares the proposed SEC-Interleaver and SEC-Iteration schemes against the SEC [8] and MSC baselines in terms of BLER, BLEU, and ROUGE. Fig. 4 further examines the convergence behavior of SEC-Iteration across iterations. SEC-Interleaver maintains a coding gain of approximately 
+
+0.4 dB over MSC across the SNR range while substantially improving semantic fidelity, lifting the BLEU and ROUGE scores at 0 dB from 16 .4 and 46 .3 to 57 .4 and 74 .2. Compared with single-pass SEC, the interleaver alone offers no signif-icant benefit under single-pass decoding, because recovering a sentence requires correcting all erroneous characters, and dispersing them does not make this joint task easier for a single BART pass. SEC-Iteration achieves the best BLER performance across the entire SNR range, outperforming SEC by approximately 
+
+1 dB and MSC by approximately 1.5 dB, with BLER re-ductions often exceeding an order of magnitude. At 0 dB, SEC-Iteration reduces the BLER from 0.850 (SEC) to 0.519 .It also outperforms the (1024 , 512) LDPC baseline below approximately 1.75 dB and reaches a BLER of 10 −4 at 
+
+2.5 dB, requires approximately 0.4 dB more SNR than LDPC at BLER, while SEC remains at 3.2 × 10 −3. In terms of semantic fidelity, SEC-Iteration is slightly inferior to SEC below 0.2 dB because it returns the final OSD output rather than the subsequent SEC reconstruction. The OSD output is determined by the channel observations, whereas the SEC 5
+
+TABLE II PER -SENTENCE LATENCY (MS ) AT DIFFERENT SNR S.SNR (dB) 0 0.5 1 1.5 2 2.5 MSC 8.3 8.3 8.3 8.3 8.3 8.3 SEC 45.7 45.7 45.7 45.7 45.7 45.7 
+
+SEC-Iteration 235.1 213.0 154.1 78.9 34.4 14.0 
+
+reconstruction is often more fluent but may overwrite correctly decoded characters with contextually plausible alternatives. It also substantially outperforms LDPC at low SNR, where LDPC achieves only 3.6% BLEU and 8.3% ROUGE at 0 dB. Beyond 1 dB, SEC-Iteration maintains both metrics above 
+
+99% , indicating highly reliable semantic recovery. 
+
+C. Ablation Study 
+
+We validate the two design choices of the character-level reliability verification module through targeted ablations at an SNR of 1.5 dB, where MSC achieves a BLER of 0.247 .
+
+Rule 1: Removing this rule, i.e., pinning every output char-acter by its position regardless of the edit type, increases the BLER from 0.00314 to 0.10514 . Pinning unchanged characters consumes the residual decoding capacity that would otherwise be used to correct genuine errors; moreover, any insertion or deletion misaligns all subsequent characters, so that the pinned values are largely incorrect and severely degrade the next iteration. 
+
+Rule 2: Removing the reliability threshold and admitting all substitution candidates raises the BLER from 0.00314 to 
+
+0.00478 , an increase of approximately 52% . The empirical accuracy of substitution candidates drops from 99 .4% for ρr ≥
+
+Th and 98 .1% for Tlow ≤ ρr < T h down to 83 .9% for ρr <Tlow , which reveals an inherent trade-off in threshold selection: lowering the threshold admits more correct candidates but also introduces more corrupted ones. 
+
+D. Latency Analysis 
+
+We measure the software-level per-sentence latency using the PyTorch-based Sionna implementation, averaged over 550 test sentences. For MSC, the parallel OSD decoding takes about 8.3 ms, while one SEC pass adds 37 .4 ms, giving a total of 45 .7 ms per sentence for SEC. Table II reports the per-sentence latency of the proposed iterative scheme across SNR. Unlike the fixed cost of MSC and SEC, the proposed scheme has an SNR-dependent latency: the iterative refinement terminates early once no unreliable segment remains, so higher SNR sentences require fewer iterations on average. At low SNR ( 0 dB), where most sentences trigger the full iteration budget, the average latency reaches 235 .1 ms. As SNR in-creases, an increasing fraction of sentences converges within fewer iterations, and the average latency drops sharply. At 
+
+2.5 dB, the proposed scheme takes only 14 .0 ms per sentence, which is markedly lower than single-pass SEC and approaches the latency of MSC alone, while achieving substantially better BLER as shown in Fig. 3. V. C ONCLUSION 
+
+This paper proposed an iterative SEC framework in which language-model inference and channel decoding are alter-nately refined over successive rounds for short-block-code transmission of natural-language text. The proposed frame-work first incorporates a character-level interleaver to spread segment-level burst errors. Then, a verification module con-verts language-model reconstructions into semantic feedback by retaining only the characters consistent with the channel observations. The resulting feedback is incorporated into the subsequent decoding pass. Simulation results show approxi-mately 1.5 dB BLER gain over MSC and approximately 1 dB gain over single-pass SEC. REFERENCES [1] D. G¨ und¨ uz et al. , “Beyond transmitting bits: Context, semantics, and task-oriented communications,” IEEE J. Sel. Areas Commun. , vol. 41, no. 1, pp. 5–41, 2023. [2] Bourtsoulatze et al. , “Deep joint source-channel coding for wireless image transmission,” in Proc. IEEE Int. Conf. Acoust. Speech Signal Process. (ICASSP) , 2019, pp. 4774–4778. [3] H. Xie et al. , “Deep learning enabled semantic communication systems,” 
+
+IEEE Trans. Signal Process. , vol. 69, pp. 2663–2675, 2021. [4] C. Bian, Y. Shao, and D. G¨ und¨ uz, “Deepjscc-1++: Robust and bandwidth-adaptive wireless image transmission,” in GLOBECOM 2023 - 2023 IEEE Global Communications Conference , 2023, pp. 3148–3154. [5] 3GPP, “Study on new radio (nr) to support non-terrestrial networks,” 3rd Generation Partnership Project (3GPP), Technical Report TR 38.811, V15.4.0, 2020. [6] O. Kodheli et al. , “Satellite communications in the new space era: A survey and future challenges,” IEEE Commun. Surveys Tuts. , vol. 23, no. 1, pp. 70–109, 2021. [7] Y. Polyanskiy, H. V. Poor, and S. Verdu, “Channel coding rate in the finite blocklength regime,” IEEE Trans. Inf. Theory , vol. 56, no. 5, pp. 2307–2359, 2010. [8] J. Hao, C. Yue, H. Chang, B. Vucetic, and Y. Li, “Short wins long: Short codes with language model semantic correction outperform long codes,” in GLOBECOM 2025 - 2025 IEEE Global Communications Conference ,2025, pp. 1226–1231. [9] J. Hao, C. Yue, W. Liu, Y. Li, and B. Vucetic, “Semantic error correction and decoding for short block channel codes,” arXiv preprint arXiv:2604.22269 , 2026. [10] C. Yue, B. Vucetic, and Y. Li, “Semantic ordered statistics decoding,” 
+
+arXiv preprint arXiv:2605.02296 , 2026. [11] Z. Li, C. Yue, J. Hao, B. Vucetic, and Y. Li, “Llm-viterbi: Semantic-aware decoding for convolutional codes,” arXiv preprint arXiv:2604.19035 , 2026. [12] Y. Wang, Y. Du, S. C. Liew, Y. Pan, F. Zhang, and L. Zhang, “Cl-sec: Cross-layer semantic error correction empowered by language models,” 
+
+arXiv preprint arXiv:2603.26125 , 2026. [13] J. Lee, S. Oh, J. Park, S.-L. Kim, and S.-W. Ko, “Semantics-aware hierarchical token communication: Clustering, bit mapping, and power allocation,” arXiv preprint arXiv:2604.27641 , 2026. [14] S. R. Bowman et al. , “A large annotated corpus for learning natural lan-guage inference,” in Proc. Conf. Empirical Methods Natural Language Process. (EMNLP) , Sep. 2015, pp. 632–642. [15] K. Papineni et al. , “Bleu: a method for automatic evaluation of machine translation,” in Proc. Annu. Meeting Assoc. Comput. Linguistics (ACL) ,Jul. 2002, pp. 311–318. [16] C.-Y. Lin, “ROUGE: A package for automatic evaluation of summaries,” in Text Summarization Branches Out , Jul. 2004, pp. 74–81. [17] M. Fossorier and S. Lin, “Soft decision decoding of linear block codes based on ordered statistics for the rayleigh fading channel with coherent detection,” IEEE Trans. Commun. , vol. 45, no. 1, pp. 12–14, 1997. [18] M. Lewis et al. , “BART: Denoising sequence-to-sequence pre-training for natural language generation, translation, and comprehension,” in 
+
+Proc. Annu. Meeting Assoc. Comput. Linguistics (ACL) , Jul. 2020, pp. 7871–7880. [19] R. Sennrich et al. , “Neural machine translation of rare words with subword units,” in Proc. 54th Annu. Meeting Assoc. Comput. Linguist. (ACL) , 2016, pp. 1715–1725. [20] J. Hoydis et al. , “Sionna: An open-source library for next-generation physical layer research,” 2021. [Online]. Available: https: //arxiv.org/abs/2004.04913

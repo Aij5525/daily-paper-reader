@@ -1,0 +1,413 @@
+Title: TokenComSR: Task-Sensitivity-Guided Token Communication for Wireless Image Super-Resolution
+
+URL Source: https://arxiv.org/pdf/2609.03735v1
+
+Published Time: Fri, 04 Sep 2026 00:57:23 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+> 1
+
+## TokenComSR: Task-Sensitivity-Guided Token Communication for Wireless Image Super-Resolution 
+
+Ye Wang, Li Qiao, Zhen Gao, and Hua Wang 
+
+Abstract —For resource-constrained wireless edge devices over bandwidth-limited fading channels, wireless image transmission using traditional separate coding suffers from the cliff-effect col-lapse. Prevailing deep joint source-channel coding (JSCC) based on convolutional neural networks can mitigate this issue but usually fail to preserve patch-level structures, thereby preventing adaptive per-token power allocation and limiting token-domain compensation for super-resolution (SR). To address these chal-lenges, we propose a token communication framework with SR (TokenComSR). Specifically, we conceive a task-sensitive power allocation (TSPA) module and a signal-to-noise ratio (SNR)-conditioned token refinement module (TRM). TSPA distills training estimates of task sensitivity into inference token power weights, while TRM estimates an SNR-conditioned residual to correct channel-induced distortion in the token domain before decoding. Building on TSPA and TRM, the proposed Token-ComSR pairs a Swin Transformer-based token transceiver with a receiver-side SR module for resource-constrained wireless image transmission. Simulation results confirm the effectiveness of the proposed TSPA and TRM, demonstrating improvements over separate coding and JSCC-SR baselines in both reconstruction fidelity and perceptual quality. 
+
+Index Terms —Token communication, task sensitivity impor-tance, wireless image transmission, super-resolution. 
+
+I. I NTRODUCTION 
+
+Resource-constrained edge devices, such as fixed roadside cameras and sensing nodes, lack onboard compute for local high-resolution (HR) image processing and offload reconstruc-tion to resource-rich servers by transmitting compact low-resolution (LR) observations [1]. Such cloud–edge collabora-tion also supports integrated perception, communication, and computation in 6G networks [2]. Over fading, bandwidth-limited uplinks, however, channel distortion corrupts these representations before reaching the server and propagates through the reconstruction pipeline, fundamentally limiting HR output quality. Conventional separate coding suffers from the cliff effect ,in which quality collapses abruptly once the channel signal-to-noise ratio (SNR) drops below a design threshold, making it ill-suited to varying wireless environments. Semantic com-munication (SC) has emerged as an enabling paradigm for edge intelligence [3], while deep joint source–channel coding (JSCC) mitigates this cliff effect through continuous source-to-channel mappings [4]. Recent SC studies have further explored channel-adaptive semantic generation and interference-aware transmission [5], as well as receiver-side generative recon-struction for perceptual quality enhancement [6]. Under the compute asymmetry of the edge-to-server setup, pairing JSCC 
+
+> Ye Wang and Hua Wang are with the School of Information and Electron-ics, Beijing Institute of Technology (BIT), Beijing 100081, China (e-mail: bit wy@bit.edu.cn; wanghua@bit.edu.cn). Li Qiao is with the Department of Electrical and Computer Engineering, The University of Hong Kong, Pokfulam Road, Hong Kong. Zhen Gao is with Beijing Institute of Technology (BIT), Zhuhai 519088, China, also with the State Key Laboratory of CNS/ATM, Beijing 100081, China, and also with the MIIT Key Laboratory of Complex-Field Intelligent Sensing, Beijing 100081, China. Corresponding authors: Li Qiao and Zhen Gao (e-mail: qiaoli@hku.hk; gaozhen16@bit.edu.cn).
+
+with a receiver-side super-resolution (SR) network is natural: the resource-constrained sensing node transmits compact LR representations while the server reconstructs the HR output [7]. However, different image regions contribute unequally to downstream HR reconstruction, leading to heterogeneous protection requirements for their corresponding latent tokens. Existing JSCC-SR works [8] and adaptive JSCC methods such as ADJSCC [9] rely on convolutional neural network (CNN) encoders whose spatially entangled feature maps lack explicit support for token-level unequal protection or targeted pre-decoding refinement. This mismatch motivates allocating a fixed power budget across tokens according to their influence on HR reconstruction. Recent advances in SC have motivated token communica-tion (TokenCom), which organizes semantic information into addressable token representations aligned with the tokenized structures of generative and multimodal foundation models, thereby providing a structured interface for semantic-aware transmission and reconstruction [10]–[15]. For image-oriented TokenCom, the one-to-one correspondence between token and patch enables per-token power allocation and targeted pre-decoding correction. The same patch-structured attention also underlies state-of-the-art SR networks such as Swin2SR [16], indicating a natural architectural synergy between to-ken transmission and receiver-side SR. Although SwinJSCC [17] demonstrates Swin-Transformer (Swin-T)-based JSCC and prior TokenCom works address multi-perspective token-domain transmission, the explicit connection between down-stream HR-task sensitivity, physical token power, and pre-decoding token repair has received limited attention, motivat-ing the present work. This paper proposes TokenComSR , a TokenCom framework that integrates JSCC with learned SR under the resource-constrained edge-to-server paradigm. Exploiting the token-patch correspondence of the encoder, TokenComSR introduces task-sensitive power allocation (TSPA) at the transmitter and an SNR-conditioned token refinement module (TRM) before image decoding at the receiver, together with a progressive training strategy, enabling E2E optimization of both commu-nication robustness and HR reconstruction quality. The main contributions of this paper are summarized as follows:  
+
+> •
+
+We develop TSPA, which distills downstream task sen-sitivity into token-level unequal power allocation under fixed channel usage and average-power constraints.  
+
+> •
+
+We design TRM as an explicit pre-decoding token-domain repair mechanism that suppresses residual chan-nel noise and restores cross-token relationships before nonlinear decoding and SR.  
+
+> •
+
+We develop a progressive four-phase optimization strat-egy that coordinates the cascaded pipeline through staged activation and dedicated loss combinations, enabling sta-ble E2E convergence. 
+
+Notation : Lowercase, bold lowercase, and bold uppercase letters denote scalars, vectors, and matrices, respectively. (·)∗,
+
+(·)T, and sg( ·) denote complex conjugation, transpose, and stop-gradient, respectively. II. S YSTEM MODEL 
+
+Fig. 1 shows the E2E TokenComSR pipeline. Let ILR ∈
+
+RH×W ×3 denote the LR observation and IHR ∈ RrH ×rW ×3arXiv:2609.03735v1 [cs.IT] 3 Sep 2026 2SwinT Blocks Patch Merging SwinT Blocks Patch Merging SwinT Blocks Patch Merging  
+
+> SwinT Blocks
+> Patch Embedding
+> ···
+> SwinT Blocks
+> Patch Embedding
+> ···
+> Task-Sensitive
+> Power Allocation
+> Wireless Channel
+> SwinT Blocks Patch Division SwinT Blocks Patch Division
+> Token Refinement
+> Super-Resolution
+> SNR Conv3× 3
+> Conv3× 3
+> Super-Resolution
+> Residual SwinT Block
+> Noisy tokens Noisy tokens
+> H×W
+> (r×H)×( r×W),
+> r> 1
+> SwinT Blocks Patch Merging SwinT Blocks Patch Merging SwinT Blocks Patch Merging
+> SwinT Blocks Patch Division SwinT Blocks Patch Division SwinT Blocks
+> Patch Division
+> SwinT Blocks
+> Patch Division
+> SwinT Blocks
+> Patch Division
+> Conv3× 3Leaky ReLU Pixel Shuffle Conv3× 3Conv3× 3Conv3× 3Leaky ReLU Pixel Shuffle Conv3× 3Conv3× 3
+> ×N
+> adaLN Mod.
+> Layer Norm
+> Scale, Shift Multi-Head Self Attn. Gate
+> Layer Norm
+> Scale, Shift FFN Gate
+
+SNR 
+
+> Linear AdaLN Zero Block Layer Norm
+> ×2
+> Scale, Shift Linear
+> Conditioning
+> Noisy tokens Refined tokens
+> adaLN Mod.
+> Layer Norm
+> Scale, Shift Multi-Head Self Attn. Gate
+> Layer Norm
+> Scale, Shift FFN Gate
+
+SNR 
+
+> Linear AdaLN Zero Block Layer Norm
+> ×2
+> Scale, Shift Linear
+> Conditioning
+> Noisy tokens Refined tokens
+> Token Refinement
+> adaLN Mod.
+> Layer Norm
+> Scale, Shift Multi-Head Self Attn. Gate
+> Layer Norm
+> Scale, Shift FFN Gate
+
+SNR   
+
+> Linear AdaLN Zero Block Layer Norm
+> ×2
+> Scale, Shift Linear
+> Conditioning
+> Noisy tokens Refined tokens
+> Token Refinement
+> Layer Norm Attention V2 Layer Norm MLP SwinT Layer SwinT Layer SwinT Layer
+> SwinT Layer
+> Conv3× 3
+> Residual SwinT B lock
+> Layer Norm Attention V2 Layer Norm MLP SwinT Layer SwinT Layer SwinT Layer
+> SwinT Layer
+> Conv3× 3
+> Residual SwinT B lock SwinT Layer
+> Token Energy Nor m
+> Mean Norm
+> Token-Power Pre dictor
+> Softplus
+> Encoder
+> tokens
+> Task Loss Task-Sensitivity
+> Estimation LR IHR
+
+IHR I
+
+> Encoder tokens
+> KL Distillation
+> Loss ip
+> Train-only
+> supervision i
+
+p
+
+> Task-Sensitive Power Allocation
+> Power Shaping
+
+Fig. 1. Overall architecture of the proposed TokenComSR. The LR image is encoded into semantic tokens. TSPA performs token-level power allocation and average-power normalization before transmission. The gray path denotes a training-only teacher branch that guides TSPA to score tokens according to their downstream HR-reconstruction sensitivity. At the remote server, TRM performs SNR-conditioned token refinement, after which the decoder and the SR module reconstruct HR output with upscaling factor r.
+
+its HR target, where r is the SR factor. The transmitter encoder maps ILR into N latent tokens, 
+
+Z = Eϕ(ILR ; ρ) = [ z1, . . . , zN ]T ∈ RN ×C , (1) where C is the real dimension of each token. TSPA assigns the mean-normalized power coefficient 
+
+pi = N qi
+
+PNj=1 qj
+
+, pi > 0, 1
+
+N
+
+NX
+
+i=1 
+
+pi = 1 , (2) where qi > 0 is the predicted token score. The predictor and its task-sensitivity supervision are detailed in Section III. Before transmission, each token is energy-normalized then scaled by √pi, and mapped into complex channel symbols as 
+
+˜zi = zi
+
+pC−1∥zi∥22 + ϵ , X = ξ M
+
+
+
+{√pi ˜zi}Ni=1 
+
+
+
+, (3) where M(·) packs every two real-valued entries into one complex symbol, yielding nc = N C/ 2 channel uses per image. The scaling factor ξ normalizes each image codeword to unit average power, 
+
+1
+
+nc
+
+∥X∥22 = 1 . (4) Because the communication objective is to reconstruct the HR target, we define CBR relative to the number of RGB samples in the target image, 
+
+CBR = nc
+
+3r2HW = N C 
+
+6r2HW . (5) This definition quantifies channel usage relative to the com-plete HR image. Unless otherwise stated, CBR denotes 
+
+CBR HR throughout this paper. For the considered fixed edge-sensing uplink, the wireless channel is modeled as quasi-static Rician block fading, 
+
+Y = hX + N, (6) where 
+
+h =
+
+r KK + 1 +
+
+s
+
+12( K + 1) (gR + j gI), (7) LR Input Sobel map  
+
+> TSPA ma p Varianc e map
+
+Fig. 2. Empirical distribution and spatial maps of token power allocation for the same LR input. 
+
+K ≥ 0 is the linear ratio of the line-of-sight power to the scattered power, gR, g I ∼ N (0 , 1) , and the entries of N are independently distributed as CN (0 , N 0), with N0 = 10 −ρ/ 10 .One realization of h is shared by all symbols of an image and independently resampled across images; K = 0 gives the Rayleigh limit. Thus, TSPA provides unequal token protection under a common channel attenuation rather than exploiting token-selective fading. During training, we sample several K
+
+values to cover different LoS-to-NLoS power ratios, with the same values used for evaluation in Section IV-A. After channel transmission and real–complex unpacking, the received tokens are denoted by ˆZ. The receiver performs token refinement followed by cascaded image decoding and SR reconstruction as 
+
+¯Z = Tω (ˆZ; ρ) = ˆZ + ∆ ω (ˆZ, ρ ), (8) 
+
+ˆIHR = Gθ,ψ (¯Z; ρ), Gθ,ψ ≜ Rψ ◦ D θ . (9) III. P ROPOSED TOKEN COM SR F RAMEWORK 
+
+A. Task-Sensitive Power Allocation (TSPA) 
+
+The TSPA predictor is a lightweight token-wise multilayer perceptron consisting of layer normalization, a bottleneck linear layer, GELU activation, and a scalar output layer. For each encoder token, it produces a positive score 
+
+gi = fη (zi), qi = softplus( gi) + ϵ. (10) 31 4 7 10 13                     
+
+> Channel SNR (dB)
+> 23 24 25 26 27 28 29 30
+> PSNR (dB)
+> +3.10 dB
+> PRAF JSCC SwinJSCC(LR) SwinJSCC(HR) TokenComSR, K=0 TokenComSR, K=2 TokenComSR, K=4 TokenComSR, K=8
+> 14710 13
+> Channel SNR (dB)
+> 0.7 0.75 0.8 0.85 0.9
+> SSIM
+> +15.66%
+> 14710 13
+> Channel SNR (dB)
+> 0.05 0.1 0.15 0.2 0.25
+> LPIPS  #
+> -57.6%
+> Fig. 3. PSNR, SSIM, and LPIPS versus channel SNR at CBR = 1/8 on DIV2K. TokenComSR is evaluated at the trained linear Rician factors K∈ { 0,2,4,8},while the baselines are evaluated at K= 4 . Higher PSNR/SSIM and lower LPIPS indicate better performance.
+
+The scores are converted into the mean-one power coefficients 
+
+pi through (2). During training, a task-sensitivity teacher provides the target distribution for the predictor. Let LHR 
+
+denote the HR-domain L1 loss defined in Section III-D. The first-order sensitivity of token zi is 
+
+si = zi ⊙ ∂LHR 
+
+∂zi 1
+
+. (11) Under a fixed total-power budget, the first-order sensitivity surrogate gives 
+
+min  
+
+> pi>0
+> PNi=1 pi=NN
+
+X
+
+> i=1
+
+si + ϵpi
+
+=⇒ pi ∝ √si + ϵ. (12) This relation defines the teacher weights under the first-order surrogate. Accordingly, the teacher and predicted allocation distributions are 
+
+πi =
+
+√si + ϵ
+
+PNj=1 
+
+√sj + ϵ , ˆπi = pi
+
+N , (13) and align them through 
+
+Lsens = DKL (π∥ ˆπ) = 
+
+> N
+
+X
+
+> i=1
+
+πi log πi
+
+ˆπi
+
+. (14) The teacher distribution is detached in (14) to avoid second-order differentiation. It is removed after training; inference uses only the token input, the predictor, and the deterministic power shaping in (2)–(4). TSPA thus distills downstream HR-reconstruction sensitivity into inference-time token power co-efficients under the fixed symbol and average-power budgets. As illustrated in Fig. 2, TSPA produces a nonuniform mean-one power distribution that emphasizes structurally informative regions while retaining protection for reconstruction-relevant non-edge areas, suggesting that its allocation captures useful edge and texture cues without treating them as the sole importance criterion. 
+
+B. Token Refinement Module 
+
+After wireless transmission, the received tokens may contain residual noise and distortions in their cross-token relationships. Leaving these perturbations entirely to Dθ would require the decoder to simultaneously invert source compression and suppress channel distortion, while the subsequent nonlinear decoding and SR operations may further amplify the remaining errors. We therefore insert TRM before image decoding to estimate an SNR-conditioned residual directly in token space. Structurally, TRM operates entirely on the received noisy latent tokens. TRM first projects them into a refinement space through a linear layer, 
+
+U0 = Win ˆZ + bin , (15) where U0 ∈ RN ×dt denotes the hidden representation. The projected tokens are then processed by L stacked Transformer refinement blocks, 
+
+Uℓ = Bℓ
+
+ Uℓ−1, cρ
+
+, ℓ = 1 , 2, . . . , L, (16) where cρ is a conditioning embedding generated from the nominal SNR. We use L = 2 as a fixed implementation setting in all experiments. Each refinement block adopts an adaLN-Zero design, in which cρ modulates the self-attention and feed-forward paths through shift, scale, and zero-initialized residual gates. The zero-initialized gates make the residual branch close to zero at training onset, so that the initial TRM mapping approximates an identity transformation. After the refinement blocks, the hidden representation is normalized, projected back to the original token space, and added to the received tokens through a residual connection, 
+
+¯Z = ˆZ + Wout Norm  UL; cρ
+
+ + bout . (17) TRM is optimized under the final SR task objective rather than through direct supervision from clean latent tokens. It therefore performs explicit pre-decoding token-domain resid-ual refinement, while global self-attention exploits cross-token context to restore relationships disturbed by the channel. 
+
+C. SR Reconstruction Module in TokenComSR 
+
+Once the refined tokens are decoded into an intermediate LR reconstruction, the bandwidth-compensation task is completed by the SR reconstruction module Rψ . The module comprises a shallow feature extraction layer, multiple stacked residual Swin-T blocks (RSTBs), and a sub-pixel convolution-based upsampling layer. The RSTBs allow the structural information preserved in the decoded feature maps to be further exploited for synthesizing the missing high-frequency details. The features extracted by the shallow layer are passed through NB stacked RSTBs. Each RSTB contains multi-ple Swin-T layers followed by a convolutional layer with 4               
+
+> TABLE I GENERALIZATION PERFORMANCE OF FOUR MODELS ACROSS STANDARD SR BENCHMARKS AT ×2AND ×4. A LL METHODS USE IDENTICAL CHANNEL USAGE AT EACH SCALE ,WITH CBR S OF 1/8AND 1/32 FOR ×2AND ×4,RESPECTIVELY . T HE BEST AND SECOND -BEST RESULTS ARE SHOWN IN RED AND BLUE .
+
+Scale Method Metric Set5 [18] Set14 [19] Kodak24 Urban100 [20] BSD100 [21] 
+
+×2
+
+TokenComSR PSNR 31.276 28.067 28.398 27.101 27.174 SSIM 0.8869 0.8275 0.8423 0.8593 0.8223 LPIPS 0.0588 0.0952 0.0874 0.0723 0.1192 SwinJSCC-LR PSNR 28.631 25.260 25.424 23.162 24.457 SSIM 0.8230 0.7272 0.7253 0.7289 0.6971 LPIPS 0.1147 0.1889 0.2240 0.1907 0.2701 SwinJSCC-HR PSNR 29.882 26.524 26.718 24.514 25.913 SSIM 0.8539 0.7879 0.7916 0.7903 0.7792 LPIPS 0.0639 0.1184 0.1489 0.1417 0.1780 PRAF PSNR 27.294 24.009 24.368 22.060 23.752 SSIM 0.7659 0.6741 0.6860 0.6599 0.6552 LPIPS 0.2217 0.3315 0.4078 0.3786 0.4448 
+
+×4
+
+TokenComSR PSNR 26.954 23.593 24.386 22.694 23.890 SSIM 0.7800 0.6502 0.6663 0.6919 0.6309 LPIPS 0.1787 0.2529 0.2587 0.1969 0.2961 SwinJSCC-LR PSNR 24.171 21.582 22.792 20.407 22.477 SSIM 0.6842 0.5551 0.5822 0.5681 0.5480 LPIPS 0.3292 0.4334 0.4884 0.3982 0.5261 SwinJSCC-HR PSNR 26.646 23.404 24.344 22.208 23.933 SSIM 0.7594 0.6450 0.6638 0.6729 0.6379 LPIPS 0.1540 0.2492 0.2796 0.2585 0.3110 PRAF ∗ PSNR – – – – –SSIM – – – – –LPIPS – – – – –         
+
+> ∗PRAF has no publicly available official implementation. We reproduce only the ×2configuration reported in the original paper and do not introduce an unverified ×4extension; hence, the dashes denote not applicable. Ground Truth TokenComSR SwinJSCC(HR) SwinJSCC(LR) PRAF JSCC
+> Fig. 4. Visual comparison of TokenComSR with baselines at SNR = 10 dB.
+
+residual connections, combining local spatial features with global Transformer interactions. The deep features are then mapped to the target HR output ˆIHR through a pixel-shuffle upsampling module, which expands the spatial dimensions by the upscaling factor r with minimal computational overhead. 
+
+D. Progressive Training 
+
+Let LLR and LHR denote the pixelwise L1 losses at the LR and HR outputs, respectively. Lper denotes the HR-domain VGG-feature loss, and Lsens is defined in (14). At phase s,the active parameters Θs are optimized by 
+
+min 
+
+> Θs
+
+E
+
+h
+
+L(s)i
+
+,
+
+L(s) = λ(s)LR LLR + λ(s)HR LHR + λ(s)per Lper + λsens Lsens .
+
+(18) The expectation is taken over the training images and channel realizations. No additional power penalty is required be-cause (2) directly enforces the mean-one constraint. Let λ(s) = ( λ(s)LR , λ (s)HR , λ (s)per ). In Phase 1, λ(1) = (1 , 0, 0) ;the encoder, decoder, and TSPA predictor are trained, while TRM is bypassed and SR is frozen. In Phase 2, λ(2) =(0 .1, 1, 0.05 wp); the decoder, TRM, and predictor are trained with the encoder and SR frozen. Here, wp is zero for the first 50 Phase-2 epochs and linearly increases to one over the next 50 epochs. In Phase 3, λ(3) = (0 .1, 1, 0.05) and SR is additionally unfrozen. Phase 4 restores the best Phase-3 model and fine-tunes all modules with λ(4) = (0 .1, 1, 0.05) 
+
+and reduced learning rates. The task-sensitivity weight λsens 
+
+is set to 0.05 during the first half of Phase 2 and then linearly annealed to zero over the remaining Phase-2 epochs; it remains zero in the subsequent phases. IV. E XPERIMENTAL RESULTS 
+
+The performance of the proposed TokenComSR framework is evaluated through comprehensive numerical simulations. To-kenComSR is compared against state-of-the-art JSCC schemes with cascaded SR and recent JSCC-SR system. 
+
+A. Experimental Settings 
+
+TokenComSR is trained and evaluated on the DIV2K dataset [22], split into 650 : 75 : 75 images for training, validation, and testing. Random 64 × 64 LR crops and the corresponding 
+
+128 × 128 HR targets are used for training. During training, 
+
+ρ is uniformly sampled from [1,13] dB, while K is uniformly selected from {0, 2, 4, 8}. Evaluation uses several ρ values 51 4 7 10 13              
+
+> Channel SNR (dB)
+> 25 26 27 28 29 30
+> PSNR (dB)
+> TokenComSR(full) No teacher w/ TRM Sobel-Norm w/ TRM Uniform w/ TRM TSPA w/o TRM Uniform w/o TRM
+> 14710 13
+> Channel SNR (dB)
+> 0.74 0.76 0.78 0.8 0.82 0.84 0.86 0.88
+> SSIM
+> 14710 13
+> Channel SNR (dB)
+> 0.08 0.1 0.12 0.14 0.16
+> LPIPS  #
+> 10 28 28.1 28.2 10 0.0875 0.092 0.0965
+> Fig. 5. Ablation study of different power-allocation strategies and TRM configurations in terms of PSNR, SSIM, and LPIPS at CBR = 1/8. Error bars denote the sample standard deviation over five paired channel trials.
+
+and the same four Rician factors. For each CBR setting, we independently train a dedicated model with the corresponding channel dimension. The inference latency is measured on NVIDIA RTX 5090 under the same hardware environment. The baselines include PRAF-JSCC [8] and two SwinJSCC [17] variants: SwinJSCC-LR, which appends a pretrained Swin2SR module after the decoder for HR reconstruction, and SwinJSCC-HR, which applies Swin2SR at the trans-mitter and communicates an HR representation. As the ad-vantages of Deep JSCC over conventional separate source-channel coding under bandwidth-limited fading channels have been extensively established in prior studies, we omit this well-established comparison and focus on more competitive learning-based JSCC baselines. All schemes are evaluated under identical conditions for each operating point, across multiple CBRs and Rician K-factors. Communication quality is measured against the ground-truth HR images using PSNR [23], SSIM [24], and LPIPS [25]; higher PSNR/SSIM and lower LPIPS indicate better performance. 
+
+B. Performance Evaluation 
+
+Fig. 3 compares PSNR, SSIM, and LPIPS versus channel SNR at CBR = 1/8. The baselines are evaluated at linear K =4, while TokenComSR is additionally tested at K ∈ { 0, 2, 4, 8}
+
+in accordance with its multi-K training protocol. All methods use the same channel-use budget and follow the same ×2
+
+and per-image Rician block-fading protocol at each operating point. The performance of all schemes improves smoothly with SNR, without an abrupt quality collapse. For TokenComSR, increasing K from the Rayleigh limit at K = 0 to K = 8 
+
+consistently improves PSNR and SSIM and reduces LPIPS, reflecting the reduced fading severity as the LoS component becomes stronger. Among the compared methods, TokenComSR achieves the highest PSNR and SSIM and the lowest LPIPS across the evaluated SNR range. At SNR = 10 dB, it obtains 28.2305 dB PSNR, 0.85489 SSIM, and 0.08715 LPIPS. Relative to the SwinJSCC-LR baseline, it improves PSNR by 3.10 dB and SSIM by 15.66%, while reducing LPIPS by 57.6%. It also exceeds the SwinJSCC-HR and PRAF JSCC baselines by 1.68 dB and 1.56 dB in PSNR, respectively. The visual com-parison at SNR = 10 dB in Fig. 4 further confirms this percep-tual advantage, showing that TokenComSR better preserves task-relevant structures and important visual details. At an actual SNR of 10 dB, conditioning offsets within 
+
+±3 dB cause a total PSNR variation of only 0.0270 dB and a      
+
+> TABLE II COMPUTATIONAL COMPLEXITY AND INFERENCE LATENCY OF
+> TOKEN COM SR AND THE SWIN JSCC B ASELINES
+
+Method Side Params. (M) GMACs Latency (ms) 
+
+Tx 14.315 1.108 4.562 SwinJSCC-LR Rx 26.403 53.126 24.397 Total 40.718 54.234 28.896 Tx 26.226 56.433 24.168 SwinJSCC-HR Rx 14.131 4.416 5.063 Total 40.357 60.849 29.422 Tx 14.052 1.704 8.859 TokenComSR Rx 23.666 53.752 29.442 Total 37.718 55.455 38.591 maximum degradation of 0.0143 dB relative to matched con-ditioning, indicating low sensitivity to moderate nominal-SNR errors. To evaluate different channel-use budgets, all schemes are independently trained and tested at CBRs of 1/16 , 1/8, and 
+
+1/4 under K = 4 and SNR = 10 dB. TokenComSR achieves PSNR values of 26.90, 28.23 and 29.34 dB, respectively, outperforming the best baseline by 1.30–1.68 dB across the three CBRs. Consistent advantages are also observed in SSIM and LPIPS, confirming that the performance gain persists across different channel-use budgets. 
+
+C. Cross-Dataset Generalization at Different SR Scales 
+
+For each SR scale, we evaluate cross-dataset generalization on Set5 [18], Set14 [19], Kodak24, Urban100 [20], and BSD100 [21] without dataset-specific retraining. As reported in Table I, all methods use identical channel usage, corre-sponding to HR-referenced CBRs of 1/8 and 1/32 for ×2
+
+and ×4, respectively. The results are averaged over five paired channel realizations under per-image Rician block fading at SNR = 10 dB and K = 4 . All metrics are computed on RGB images without border shaving using deterministic 64 ×64 LR crops. At ×2, TokenComSR ranks first in all three metrics across the five benchmarks. Its consistent advantage over SwinJSCC-HR, the strongest competing baseline, covers natural images, texture-rich content, and urban scenes, indicating that the learned task-sensitive protection and token refinement gener-alize beyond the DIV2K test distribution rather than favoring a particular content type. The ×4 setting is more challenging because of its more ill-posed reconstruction and fourfold lower HR-referenced channel-use budget. TokenComSR achieves the 6
+
+best PSNR and SSIM on four datasets and the best LPIPS on three, while outperforming SwinJSCC-HR in all three dataset-averaged metrics. Overall, TokenComSR provides consistently strong results across all three evaluation dimensions under the more demanding ×4 setting. 
+
+D. Ablation Study and Complexity Analysis 
+
+Six independently trained variants are evaluated in Fig. 5. The four configurations formed by TSPA or uniform power allocation with and without TRM constitute a 2 × 2 module-level ablation, isolating the effects of transmitter-side power al-location and receiver-side token refinement. We further include Sobel-based allocation and a teacher-free learned allocator, both with TRM enabled, to examine whether the gain of TSPA arises from the allocation criterion itself or merely from introducing a learned power predictor. The complete TokenComSR achieves the best overall reconstruction fidelity, confirming the complementary roles of TSPA and TRM. Both TSPA and TRM provide consistent, albeit modest, improvements in PSNR and SSIM over the uniform/no-TRM baseline. Their combination yields a clearer perceptual benefit, reducing the five-SNR average LPIPS by 0.0085, of which TRM alone contributes a reduction of 0.0057. Under the matched TRM-enabled comparison, TSPA consistently out-performs the teacher-free allocator in all three metrics. It also achieves lower LPIPS than Sobel at four SNRs and is nearly tied at 1 dB. These results confirm the complementary roles of task-sensitive power allocation and receiver-side token refinement, particularly in improving perceptual reconstruction quality. Table II compares model parameters, multiply-accumulate operations (MACs), and inference latency. TokenComSR uses fewer parameters than both SwinJSCC baselines, with arith-metic complexity comparable to SwinJSCC-LR and lower than SwinJSCC-HR, indicating that its gains do not arise merely from increased model scale. Its approximately one-third higher end-to-end latency represents a reasonable trade-off for the achieved reconstruction improvements. Most computation re-mains at the receiver, consistent with the intended compute-asymmetric edge-to-server architecture. V. C ONCLUSION 
+
+This paper presented TokenComSR, an end-to-end Token-Com framework for wireless transmission of LR observations and receiver-side HR reconstruction. TSPA distills downstream HR-reconstruction sensitivity into token-level power coeffi-cients under fixed channel usage and average-power con-straints, while TRM performs SNR-conditioned token-domain residual refinement before nonlinear decoding and SR. A four-phase progressive training strategy coordinates the coupled transceiver, token refinement, and SR reconstruction modules. Experiments under per-image Rician block fading demonstrate improvements in reconstruction fidelity and perceptual quality, together with robust performance across the evaluated SNRs, Rician factors, channel-use budgets, datasets, and SR scales. Future work will consider time-selective fading, channel-estimation errors, and variable-resolution inference. REFERENCES [1] S. Ozer, H. E. Ilhan, M. A. Ozkanoglu et al. , “Offloading deep learning powered vision tasks from uav to 5g edge server with denoising,” IEEE Trans. Veh. Technol. , vol. 72, no. 6, pp. 8035–8048, 2023. [2] Z. Li, Z. Gao, X. Liu et al. , “Large model enabled embodied intelligence for 6g integrated perception, communication, and computation network,” 
+
+arXiv preprint arXiv:2512.15109 , 2025. [3] W. Yang, Z. Q. Liew, W. Y. B. Lim et al. , “Semantic communication meets edge intelligence,” IEEE Wireless Commun. , vol. 29, no. 5, pp. 28–35, 2022. [4] E. Bourtsoulatze, D. B. Kurka, and D. G¨ und¨ uz, “Deep joint source-channel coding for wireless image transmission,” IEEE Trans. Cogn. Commun. Netw. , vol. 5, no. 3, pp. 567–579, 2019. [5] Y. Yan, L. Li, X. Zhang et al. , “Adaptive semantic generation and noma-based interference-aware transmission for 6g networks,” IEEE Transactions on Wireless Communications , vol. 24, no. 3, pp. 2404– 2416, 2024. [6] K. Zhang, L. Li, W. Lin et al. , “Semantic successive refinement: A generative ai-aided semantic communication framework,” IEEE Trans-actions on Cognitive Communications and Networking , vol. 11, no. 2, pp. 687–699, 2025. [7] Z. Wang, J. Chen, and S. C. H. Hoi, “Deep learning for image super-resolution: A survey,” IEEE Trans. Pattern Anal. Mach. Intell. , vol. 43, no. 10, pp. 3365–3387, 2021. [8] Z. Huang, Y. Jia, W. Wen et al. , “A progressive approach to joint source-channel coding for image super-resolution task in semantic communications,” IEEE Wireless Commun. Lett. , vol. 14, no. 7, pp. 2099–2103, 2025. [9] J. Xu, B. Ai, W. Chen et al. , “Wireless image transmission using deep source channel coding with attention modules,” IEEE Trans. Circuits Syst. Video Technol. , vol. 32, no. 4, pp. 2315–2328, 2021. [10] L. Qiao, M. B. Mashhadi, Z. Gao et al. , “Token communications: A large model-driven framework for cross-modal context-aware semantic communications,” IEEE Wireless Commun. , vol. 32, no. 5, pp. 80–88, 2025. [11] L. Qiao, M. B. Mashhadi, Z. Gao et al. , “Latency-aware generative semantic communications with pre-trained diffusion models,” IEEE Wireless Commun. Lett. , vol. 13, no. 10, pp. 2652–2656, 2024. [12] H. Yin, L. Qiao, Y. Ma et al. , “Generative video semantic communi-cation via multimodal semantic fusion with large model,” IEEE Trans. Veh. Technol. , vol. 75, no. 1, pp. 1701–1706, 2026. [13] H. Wei, W. Ni, W. Wang et al. , “Token communication in the era of large models: An information bottleneck-based approach,” IEEE Wireless Commun. Lett. , vol. 15, pp. 186–190, 2026. [14] J. Men, M. B. Mashhadi, N. Wang et al. , “Video tokencom: Textual intent-guided multi-rate video token communications with uep-based adaptive source-channel coding,” arXiv preprint arXiv:2603.02470 ,2026. [15] L. Qiao, M. B. Mashhadi, Z. Gao et al. , “Todma: Large model-driven massive token communications for semantic multiple access,” arXiv preprint arXiv:2505.10946 , 2025. [16] M. V. Conde, U.-J. Choi, M. Burchi et al. , “Swin2sr: Swinv2 transformer for compressed image super-resolution and restoration,” in Proc. Eur. Conf. Comput. Vis. (ECCV) . Springer, 2022, pp. 669–687. [17] K. Yang, S. Wang, J. Dai et al. , “Swinjscc: Taming swin transformer for deep joint source-channel coding,” IEEE Trans. Cogn. Commun. Netw. ,vol. 11, no. 1, pp. 90–104, 2024. [18] M. Bevilacqua, A. Roumy, C. Guillemot et al. , “Low-complexity single-image super-resolution based on nonnegative neighbor embedding,” in 
+
+Proc. Brit. Mach. Vis. Conf. , 2012, pp. 135.1–135.10. [19] R. Zeyde, M. Elad, and M. Protter, “On single image scale-up using sparse-representations,” in Curves and Surfaces . Springer, 2012, pp. 711–730. [20] J.-B. Huang, A. Singh, and N. Ahuja, “Single image super-resolution from transformed self-exemplars,” in Proc. IEEE Conf. Comput. Vis. Pattern Recognit. , 2015, pp. 5197–5206. [21] D. R. Martin, C. C. Fowlkes, D. Tal et al. , “A database of human segmented natural images and its application to evaluating segmentation algorithms and measuring ecological statistics,” in Proc. IEEE Int. Conf. Comput. Vis. , vol. 2, 2001, pp. 416–423. [22] E. Agustsson and R. Timofte, “NTIRE 2017 challenge on single image super-resolution: Dataset and study,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. Workshops (CVPRW) , 2017. [23] A. Tanchenko, “Visual-PSNR measure of image quality,” J. Vis. Com-mun. Image Represent. , vol. 25, no. 5, pp. 874–878, 2014. [24] Z. Wang, A. C. Bovik, H. R. Sheikh et al. , “Image quality assessment: from error visibility to structural similarity,” IEEE Trans. Image Pro-cess. , vol. 13, no. 4, pp. 600–612, 2004. [25] R. Zhang, P. Isola, A. A. Efros et al. , “The unreasonable effectiveness of deep features as a perceptual metric,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2018, pp. 586–595.

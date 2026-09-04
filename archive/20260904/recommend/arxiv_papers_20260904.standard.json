@@ -1,0 +1,251 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-04T21:21:50.929879+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 4,
+    "deep_cap": 6,
+    "deep_selected": 4,
+    "quick_candidates": 2,
+    "quick_skim_target": 11,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2609.03747v1",
+      "source": "arxiv",
+      "title": "Closing the Semantic-Edge Gap: Tiny Language Models for 6G Wireless Intelligence",
+      "abstract": "Sixth-generation (6G) wireless networks are envisioned as AI-native systems in which semantic communication - transmitting task-relevant meaning rather than raw bits - moves beyond Shannon's classical bit-pipe model. Large language models (LLMs) dominate semantic encoding but are unsuitable for 6G user equipment and IoT devices, given prohibitive memory, energy, and latency costs. Tiny language models (TinyLMs) - compressed via TinyML techniques into kilobyte-to-megabyte memory and milliwatt power budgets - are the missing bridge between LLM-level semantic encoding and 6G edge hardware, yet no prior work systematically maps TinyML techniques onto semantic communication architectures for this purpose. This survey closes that gap through a two-axis taxonomy connecting six compression families (quantization, pruning, knowledge distillation, low-rank adaptation, neural architecture search, hybrid pipelines) to five semantic communication architectures (end-to-end joint source-channel coding, split learning, federated learning, knowledge-graph-assisted, and multi-task/cross-modal communication), synthesized with a quantitative meta-analysis of the model-size-versus-semantic-fidelity Pareto frontier. Representative results include a CNN-Transformer encoder achieving 22 dB PSNR at 33.33% semantic-representation size reduction; a symbolic protocol machine reducing a neural MAC protocol from 4.55 MB to 1 KB (99.98% smaller) with zero performance loss; federated bidirectional knowledge distillation converging under joint model-and-data heterogeneity where FedAvg-style averaging underperforms; and knowledge-graph-assisted probability graphs cutting transmission energy by 65%. The survey identifies nine open research challenges for TinyLM-enabled 6G semantic communication, including two not previously articulated in the literature.",
+      "authors": [
+        "Srikanth Kamath",
+        "Arnav Mathur",
+        "Joslyn Sajan George",
+        "Rahul Jashvantbhai Pandya"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-09-03T12:18:09+00:00",
+      "link": "https://arxiv.org/pdf/2609.03747v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Large and tiny language models for 6G wireless semantic communication",
+      "llm_evidence_cn": "面向6G无线语义通信的大模型综述",
+      "llm_evidence": "面向6G无线语义通信的大模型综述",
+      "canonical_evidence": "面向6G无线语义通信的大模型综述",
+      "llm_tldr_en": "Survey examining LLM limitations in 6G edge devices and proposing tiny language models compressed via TinyML to bridge LLM-level semantic encoding and wireless edge hardware for semantic communication.",
+      "llm_tldr_cn": "第六代无线网络被设想为AI原生系统，语义通信需要从比特传输走向语义编码，但大型语言模型在6G用户设备和IoT设备上面临内存、能耗与时延的严重约束。本文以综述方式指出微型语言模型(TinyLM)是弥合LLM级语义编码与6G边缘硬件之间鸿沟的关键，系统梳理TinyML压缩技术并将其映射到语义通信架构。该工作为资源受限的边缘设备上实现语言模型支持的无线语义智能提供系统化路线图，是迈向AI原生6G无线智能的重要参考。",
+      "llm_tldr": "第六代无线网络被设想为AI原生系统，语义通信需要从比特传输走向语义编码，但大型语言模型在6G用户设备和IoT设备上面临内存、能耗与时延的严重约束。本文以综述方式指出微型语言模型(TinyLM)是弥合LLM级语义编码与6G边缘硬件之间鸿沟的关键，系统梳理TinyML压缩技术并将其映射到语义通信架构。该工作为资源受限的边缘设备上实现语言模型支持的无线语义智能提供系统化路线图，是迈向AI原生6G无线智能的重要参考。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "large language model for wireless communication",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.03977v1",
+      "source": "arxiv",
+      "title": "Cooperative Multi-Task Semantic Communication for Joint Classification and Regression Tasks",
+      "abstract": "Multi-Task semantic communication (SemCom) prioritizes simultaneous execution of multiple tasks over bit-accurate reconstruction in future intelligent networks. In our prior work [1], we introduced the cooperative multi-task SemCom (CMT-SemCom) framework, in which the semantic encoder is divided into a common unit (CU) and multiple specific units (SUs) to facilitate cooperative multi-task processing. However, CMT-SemCom has been evaluated on homogeneous classification tasks on simplistic datasets, limiting its applicability to real-world perception systems. In this paper, we extend our CMT-SemCom to jointly handle heterogeneous classification and regression tasks on the complex Cityscapes dataset. We adopt the information maximization (InfoMax) principle so that it accommodates mixed discrete and continuous semantic variables. In particular, we benchmark the proposed framework against independent single-task training, a conventional task-agnostic digital transmission, and single-encoder multi-decoder SemCom. Additionally, we investigate the impact of CU capacity on joint task performance, providing design insights. Extensive evaluations demonstrate that CMT-SemCom significantly outperforms the benchmarks.",
+      "authors": [
+        "Ahmad Halimi Razlighi",
+        "Mohammad Siddiqur Rahman",
+        "Maximilian H. V. Tillmann",
+        "Edgar Beck",
+        "Armin Dekorsy"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG",
+        "eess.IV",
+        "stat.ML"
+      ],
+      "published": "2026-09-03T15:13:25+00:00",
+      "link": "https://arxiv.org/pdf/2609.03977v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Machine-learning based cooperative semantic communication for joint classification and regression tasks, a wireless-aware task-oriented system design",
+      "llm_evidence_cn": "面向联合分类与回归的多任务语义通信，是无线通信系统中机器学习设计的直接体现",
+      "llm_evidence": "面向联合分类与回归的多任务语义通信，是无线通信系统中机器学习设计的直接体现",
+      "canonical_evidence": "面向联合分类与回归的多任务语义通信，是无线通信系统中机器学习设计的直接体现",
+      "llm_tldr_en": "Extends cooperative multi-task semantic communication to heterogeneous classification and regression on Cityscapes, dividing the semantic encoder into common and task-specific units to support real-world perception tasks in future intelligent wireless networks.",
+      "llm_tldr_cn": "现有的协作式多任务语义通信框架只能在简单数据集上处理单一类型的分类任务，难以支撑真实感知系统的异构任务需求。本文在复杂Cityscapes数据集上扩展该框架，将语义编码器划分为公共单元和多个专用单元，共同完成联合分类与回归，并利用信息最大化准则优化语义表示。实验表明扩展后的多任务语义通信可更好地适应复杂现实场景。该工作属于以机器学习方案设计无线通信系统的重要探索，也为通信与感知任务的融合提供了借鉴。",
+      "llm_tldr": "现有的协作式多任务语义通信框架只能在简单数据集上处理单一类型的分类任务，难以支撑真实感知系统的异构任务需求。本文在复杂Cityscapes数据集上扩展该框架，将语义编码器划分为公共单元和多个专用单元，共同完成联合分类与回归，并利用信息最大化准则优化语义表示。实验表明扩展后的多任务语义通信可更好地适应复杂现实场景。该工作属于以机器学习方案设计无线通信系统的重要探索，也为通信与感知任务的融合提供了借鉴。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.03735v1",
+      "source": "arxiv",
+      "title": "TokenComSR: Task-Sensitivity-Guided Token Communication for Wireless Image Super-Resolution",
+      "abstract": "For resource-constrained wireless edge devices over bandwidth-limited fading channels, wireless image transmission using traditional separate coding suffers from the cliff-effect collapse. Prevailing deep joint source-channel coding (JSCC) based on convolutional neural networks can mitigate this issue but usually fail to preserve patch-level structures, thereby preventing adaptive per-token power allocation and limiting token-domain compensation for super-resolution (SR). To address these challenges, we propose a token communication framework with SR (TokenComSR). Specifically, we conceive a task-sensitive power allocation (TSPA) module and a signal-to-noise ratio (SNR)-conditioned token refinement module (TRM). TSPA distills training estimates of task sensitivity into inference token power weights, while TRM estimates an SNR-conditioned residual to correct channel-induced distortion in the token domain before decoding. Building on TSPA and TRM, the proposed TokenComSR pairs a Swin Transformer-based token transceiver with a receiver-side SR module for resource-constrained wireless image transmission. Simulation results confirm the effectiveness of the proposed TSPA and TRM, demonstrating improvements over separate coding and JSCC-SR baselines in both reconstruction fidelity and perceptual quality.",
+      "authors": [
+        "Ye Wang",
+        "Li Qiao",
+        "Zhen Gao",
+        "Hua Wang"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "eess.SP"
+      ],
+      "published": "2026-09-03T12:06:28+00:00",
+      "link": "https://arxiv.org/pdf/2609.03735v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep joint source-channel coding with token communication for wireless image super-resolution transmission",
+      "llm_evidence_cn": "面向无线图像超分辨率传输的深度联合信源信道编码与令牌通信",
+      "llm_evidence": "面向无线图像超分辨率传输的深度联合信源信道编码与令牌通信",
+      "canonical_evidence": "面向无线图像超分辨率传输的深度联合信源信道编码与令牌通信",
+      "llm_tldr_en": "Proposes TokenComSR, a token-based deep JSCC framework for wireless super-resolution, adding task-sensitive power allocation and SNR-conditioned token refinement to preserve patch structures over fading channels.",
+      "llm_tldr_cn": "针对带宽受限衰落信道下传统分离编码的悬崖效应以及卷积深度JSCC难以保持图像局部结构的问题，提出TokenComSR令牌通信框架，完成无线图像超分辨率传输。框架包含任务敏感功率分配模块与信噪比条件令牌细化模块，实现逐令牌自适应功率分配和超分辨率的令牌域补偿。在相关仿真条件下的结果表明，该方法能有效改善无线图像传输与超分辨率的端到端性能。",
+      "llm_tldr": "针对带宽受限衰落信道下传统分离编码的悬崖效应以及卷积深度JSCC难以保持图像局部结构的问题，提出TokenComSR令牌通信框架，完成无线图像超分辨率传输。框架包含任务敏感功率分配模块与信噪比条件令牌细化模块，实现逐令牌自适应功率分配和超分辨率的令牌域补偿。在相关仿真条件下的结果表明，该方法能有效改善无线图像传输与超分辨率的端到端性能。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.04004v1",
+      "source": "arxiv",
+      "title": "On the Impact of Site-Specific Training for a Real-World 5G NR System",
+      "abstract": "Site-specific training can improve wireless receiver performance without increasing computational complexity. However, real-world results have so far focused on fully trainable neural receivers and single-layer transmissions. We study site-specific finetuning of three receiver architectures: fully trainable neural, model-driven neural, and model-based. We train and evaluate these receivers using new measurements from a standard-compliant 5G NR testbed at ETH Zurich with dual-layer uplink transmission, including measurement campaigns conducted more than six months apart. Our results show that site-specific finetuning (i) substantially improves fully trainable and model-driven neural receivers, while resulting in only marginal gains for the less tunable model-based receiver; (ii) enables a single neural receiver jointly finetuned for single- and dual-layer transmission to closely match receivers finetuned separately for each configuration; and (iii) remains effective across measurement campaigns separated by more than six months. We also investigate site-specific linear minimum mean-square error channel estimation using covariance matrices estimated from either synthetic channels or site-specific measurements. When combined with iterative detection and decoding, site-specific channel estimation achieves the lowest error rate observed in our datasets. Our finetuning code and measurement datasets are publicly available at https://github.com/IIP-Group/site_specific_training",
+      "authors": [
+        "Reinhard Wiesmayr",
+        "Nuri Berke Baytekin",
+        "Chris Dick",
+        "Christoph Studer"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT",
+        "eess.SP"
+      ],
+      "published": "2026-09-03T15:43:06+00:00",
+      "link": "https://arxiv.org/pdf/2609.04004v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Site-specific finetuning of ML receivers on a real 5G NR system",
+      "llm_evidence_cn": "真实5G NR系统中接收机的站点特定微调",
+      "llm_evidence": "真实5G NR系统中接收机的站点特定微调",
+      "canonical_evidence": "真实5G NR系统中接收机的站点特定微调",
+      "llm_tldr_en": "Evaluates site-specific finetuning of fully trainable, model-driven neural receivers and model-based receivers on a real dual-layer 5G NR testbed, showing substantial gains for trainable neural receivers and marginal gains for the model-based approach.",
+      "llm_tldr_cn": "现有站点特定训练的实测研究主要面向全可训练神经接收机与单层传输，缺少标准兼容系统上的系统比较。论文在ETH苏黎世的5G NR测试床上，利用双上行链路和时隔半年以上的测量，对全可训练、模型驱动神经接收机与模型基接收机进行站点特定微调。结果显示微调显著提高前两类接收机性能，而对模型基接收机只有微小改进。这说明给无线接收机加入少量站点数据适配是在真实系统中获得增益的关键。",
+      "llm_tldr": "现有站点特定训练的实测研究主要面向全可训练神经接收机与单层传输，缺少标准兼容系统上的系统比较。论文在ETH苏黎世的5G NR测试床上，利用双上行链路和时隔半年以上的测量，对全可训练、模型驱动神经接收机与模型基接收机进行站点特定微调。结果显示微调显著提高前两类接收机性能，而对模型基接收机只有微小改进。这说明给无线接收机加入少量站点数据适配是在真实系统中获得增益的关键。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2609.03256v1",
+      "source": "arxiv",
+      "title": "Iterative Semantic Decoding for Short Block Codes",
+      "abstract": "This paper proposes an iteratively enhanced semantic receiver for natural-language text transmission over noisy wireless channels using multiple short block codes. At the transmitter, each sentence is permuted by a character-level interleaver, partitioned into segments, and independently encoded by short block codes. At the receiver, we develop an iterative decoder consisting of a channel decoder and a language model, where a de-interleaver between them disperses the burst decoding errors within each segment across the sentence. In each iteration, the language model denoises the channel decoding output, and the denoised characters verified to be consistent with the channel observations are fed back to the channel decoder as semantic information for the next iteration. Simulation results on the Stanford Natural Language Inference (SNLI) corpus over the additive white Gaussian noise (AWGN) channel show that the proposed receiver achieves approximately 1.5 dB block error rate (BLER) gain over conventional short-block coding, while maintaining BLEU and ROUGE scores above 99% at SNRs beyond 1.0 dB.",
+      "authors": [
+        "Jiafu Hao",
+        "Chentao Yue",
+        "Mingcheng Nie",
+        "Branka Vucetic",
+        "Yonghui Li"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-09-03T01:30:12+00:00",
+      "link": "https://arxiv.org/pdf/2609.03256v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Use of language model in physical-layer decoding",
+      "llm_evidence_cn": "语言模型用于短块码物理层迭代解码",
+      "llm_evidence": "语言模型用于短块码物理层迭代解码",
+      "canonical_evidence": "语言模型用于短块码物理层迭代解码",
+      "llm_tldr_en": "Proposes an iterative semantic receiver for noisy wireless text transmission: a channel decoder and a language model exchange verified feedback to denoise short-block-code decoding, improving reliability over iterations.",
+      "llm_tldr_cn": "自然语言文本在无线信道中经短分组码传输时，突发错误会严重损害语义信息。论文提出一种迭代语义接收机：发送端对句子分块独立编码并字符级交织，接收端在信道解码器和语言模型之间交替，语言模型先去除解码噪声，再通过与信道观测比对验证的字符反馈给解码器。仿真表明该迭代机制显著提升了短码在噪声信道下的文本传输语义可靠性。这为语言模型参与物理层解码提供了可行范例。",
+      "llm_tldr": "自然语言文本在无线信道中经短分组码传输时，突发错误会严重损害语义信息。论文提出一种迭代语义接收机：发送端对句子分块独立编码并字符级交织，接收端在信道解码器和语言模型之间交替，语言模型先去除解码噪声，再通过与信道观测比对验证的字符反馈给解码器。仿真表明该迭代机制显著提升了短码在噪声信道下的文本传输语义可靠性。这为语言模型参与物理层解码提供了可行范例。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "physical layer design with large language models",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2609.03488v1",
+      "source": "arxiv",
+      "title": "Indirect Estimation of SINR via SSB and CSI-RS RSRP in 5G NR",
+      "abstract": "Predicting user equipment (UE) performance is essential for proactive network control, resource management, and digital twin sandboxes. However, the inherent flexibility and complexity of beam-based 5G new radio (NR) networks make accurate performance forecasting highly challenging. This paper proposes a data-driven approach to predict the average downlink signal-to-interference-plus-noise ratio (SINR) relying exclusively on standardized reference-signal measurements, namely synchronization signal block (SSB) and channel state information-reference signal (CSI-RS) reference signal received power (RSRP). We formulate this prediction as a supervised learning problem and evaluate various input feature representations using a third generation partnership project (3GPP)-compliant synthetic dataset. Our analysis reveals that filtering measurements based on active CSI-RS beams significantly enhances prediction accuracy while reducing input dimensionality. This activity-aware strategy demonstrates the strong viability of machine learning models for proactive network optimization.",
+      "authors": [
+        "Leonardo Spampinato",
+        "Mahamadou Togola",
+        "Matteo Bernabè",
+        "Azim Akhtarshenas",
+        "Lorenzo Mario Amorosa",
+        "David López-Pérez"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-09-03T07:48:39+00:00",
+      "link": "https://arxiv.org/pdf/2609.03488v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Supervised machine learning for SINR prediction in 5G wireless systems",
+      "llm_evidence_cn": "机器学习用于5G无线系统SINR预测",
+      "llm_evidence": "机器学习用于5G无线系统SINR预测",
+      "canonical_evidence": "机器学习用于5G无线系统SINR预测",
+      "llm_tldr_en": "Data-driven supervised SINR prediction in 5G NR from standardized SSB/CSI-RS RSRP measurements, supporting network management and digital twin performance forecasting.",
+      "llm_tldr_cn": "波束化5G NR网络中用户性能预测对主动网络控制、资源管理与数字孪生很重要，但系统复杂性使SINR预测极具挑战。本文提出一种仅依赖标准参考信号SSB与CSI-RS RSRP测量值来预测下行平均SINR的数据驱动监督学习方法，并评估多种输入特征表示。实验表明该间接估计方法具有可行性，可避免额外专用测量开销，为5G无线系统性能管理提供低成本易部署的机器学习工具。",
+      "llm_tldr": "波束化5G NR网络中用户性能预测对主动网络控制、资源管理与数字孪生很重要，但系统复杂性使SINR预测极具挑战。本文提出一种仅依赖标准参考信号SSB与CSI-RS RSRP测量值来预测下行平均SINR的数据驱动监督学习方法，并评估多种输入特征表示。实验表明该间接估计方法具有可行性，可避免额外专用测量开销，为5G无线系统性能管理提供低成本易部署的机器学习工具。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

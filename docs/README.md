@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-03</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-04</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 7 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 6 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>3</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>4</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>4</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>2</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-03 21:47:31 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-04 21:26:43 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日聚焦7篇前沿研究，精读2篇高分论文，速读3篇交叉方向，覆盖ISAC、人体姿态预测、WiFi指纹识别等热点。最值得关注通信感知计算一体化系统与互质阵列ISAC，均获9.0高分，展现虚拟孔径与资源分配新突破。建议优先追踪高分论文后续扩展，再借LLM根因分析与主动推理思路，迁移到自身定位或优化任务。</p>
+<p>今日共处理6篇论文（精读4篇、速读2篇），重点关注语义通信在6G与多任务场景中的前沿进展。</p>
+<p>最值得精读的两篇9.0分论文：一篇解决6G无线智能的语义-边缘差距问题，另一篇面向分类与回归联合任务设计协作多任务语义通信。</p>
+<p>建议先从这两篇高分论文入手理解核心思路，再速读短码迭代语义解码与5G NR的SINR间接估计作为应用补充。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +73,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">3 篇</strong>
+    <strong class="dpr-home-dashboard-count">4 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="CRB-Guided Sensing and Resource Allocation for Human Pose Prediction in Integrated Sensing, Communication, and Computation Systems">CRB-Guided Sensing and Resource Allocation for Human Pose Prediction in Integrated Sensing, Communication, and Computation Systems</span></li><li><span class="dpr-home-dashboard-paper-title" title="ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and uplink downlink communications">ISAC with Co-Prime Arrays: Virtual-Aperture Sensing and uplink downlink communications</span></li><li><span class="dpr-home-dashboard-paper-title" title="Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks">Agents That Model Agents: Five Principles Toward a Theory of Mind for 6G Networks</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Closing the Semantic-Edge Gap: Tiny Language Models for 6G Wireless Intelligence">Closing the Semantic-Edge Gap: Tiny Language Models for 6G Wireless Intelligence</span></li><li><span class="dpr-home-dashboard-paper-title" title="Cooperative Multi-Task Semantic Communication for Joint Classification and Regression Tasks">Cooperative Multi-Task Semantic Communication for Joint Classification and Regression Tasks</span></li><li><span class="dpr-home-dashboard-paper-title" title="TokenComSR: Task-Sensitivity-Guided Token Communication for Wireless Image Super-Resolution">TokenComSR: Task-Sensitivity-Guided Token Communication for Wireless Image Super-Resolution</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>3</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +86,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">4 篇</strong>
+    <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="C$^2$T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling">C$^2$T-OpenMax: A Novel Open-Set WiFi RF Fingerprinting Method via Center Constrained Learning and Confidence-Guided Tail Modeling</span></li><li><span class="dpr-home-dashboard-paper-title" title="Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI">Active Inference for Joint Port Selection and Pilot Allocation in Fluid Antenna Systems Under Partial CSI</span></li><li><span class="dpr-home-dashboard-paper-title" title="Large Language Models (LLMs) for Telecom Root Cause Analysis (RCA): A Structured Reasoning Framework for Evidence-Grounded Diagnosis">Large Language Models (LLMs) for Telecom Root Cause Analysis (RCA): A Structured Reasoning Framework for Evidence-Grounded Diagnosis</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Iterative Semantic Decoding for Short Block Codes">Iterative Semantic Decoding for Short Block Codes</span></li><li><span class="dpr-home-dashboard-paper-title" title="Indirect Estimation of SINR via SSB and CSI-RS RSRP in 5G NR">Indirect Estimation of SINR via SSB and CSI-RS RSRP in 5G NR</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
 </section>
 </div>
 
