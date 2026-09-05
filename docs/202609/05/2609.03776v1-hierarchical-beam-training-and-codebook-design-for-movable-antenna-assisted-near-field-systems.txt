@@ -1,0 +1,440 @@
+Title: Hierarchical Beam Training and Codebook Design for Movable Antenna-Assisted Near-Field Systems
+
+URL Source: https://arxiv.org/pdf/2609.03776v1
+
+Published Time: Fri, 04 Sep 2026 01:00:34 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Hierarchical Beam Training and Codebook Design for Movable Antenna-Assisted Near-Field Systems 
+
+Meihui Liu, Qian Zhang, Xuejun Cheng, Yuhui Jiao, Yunxiao Li, Ju Liu 
+
+School of Information Science and Engineering, Shandong University, Qingdao, 266237, China Emails: {meihuiliu, qianzhang2021, chengxuejun, yuhuijiao2024, yunxiaoli}@mail.sdu.edu.cn, juliu@sdu.edu.cn 
+
+Abstract —As sixth-generation (6G) communication sys-tems evolve toward higher frequency bands and larger array apertures, the near-field range expands rapidly, making near-field channel estimation increasingly impor-tant and challenging. Beam training has been recognized as an effective approach for channel state information (CSI) acquisition. However, because of the propagation characteristics of spherical waves, beam training needs to perform a joint search in the angle and distance domains, which results in unaffordable beam training overhead. By flexibly reconfiguring antenna positions, movable antenna (MA) technology can fully exploit the spatial variations of wireless channels and achieve more accurate beam fo-cusing, thereby providing additional flexibility for efficient beam training design. Therefore, based on MA-assisted near-field systems, we develop a hierarchical beam training strategy that combines reduced training overhead with high beam gain and design a corresponding hierarchical codebook. This codebook forms focused beams over the joint angle–distance domain, maximizing beam gain within the target region while suppressing energy leakage into non-target regions. Simulation results confirm substantial performance gains of the method over the conventional fixed-position antenna (FPA) system and the far-field beam training method. 
+
+Index Terms —Movable antenna (MA), near-field com-munication, hierarchical beam training, codebook design. 
+
+I. INTRODUCTION Multiple-input multiple-output (MIMO) technology enables efficient spectrum utilization together with fine spatial resolution, and serves as a key technology for improving the capacity and reliability of sixth-generation (6G) communication systems. However, under the con-ventional fixed-position antenna (FPA) architecture, the continuous expansion of antenna array size inevitably leads to considerable hardware expenditure, energy con-sumption, and signal-processing complexity, thereby constituting a bottleneck that constrains further improve-ments in wireless network performance. These limita-tions have motivated the use of movable antenna (MA) technology as an attractive solution. By permitting the antenna elements to reposition within a bounded spa-tial region, MA can utilize location-dependent channel variations across the continuous spatial domain, thereby achieving higher performance gains without requiring additional radio frequency (RF) chains [1]–[3]. When MA systems employ large spatial regions to exploit additional spatial reconfigurability, the enlarged effective array aperture increases the Rayleigh distance, making wireless propagation transition from the far-field regime toward the near-field regime [4]. In this regime, electromagnetic waves exhibit spherical-wave charac-teristics instead of the plane-wave behavior typically assumed for far-field communications. As a consequence, conventional transmission schemes and channel models developed under the far-field plane-wave assumption are no longer suitable [5]–[7]. The considerable pilot and computational burden involved in estimating instanta-neous channel state information (CSI) in large-scale antenna systems has driven the development of compu-tationally lightweight and resource-efficient acquisition techniques [8]. Among these techniques, beam training is particularly attractive because it supports high signal-to-noise ratio (SNR) communication while requiring relatively limited training overhead, making it one of the most promising approaches for efficient CSI acquisition. Unlike far-field beams, which primarily concentrate energy in a specific direction, near-field beams focus energy within a specific spatial region [9], [10]. Con-sequently, traditional far-field beam training schemes that rely solely on angular information are no longer applicable in near-field environments. Accordingly, a variety of beam training techniques tailored to near-field propagation have been explored. Zhang et al. [11] developed a two-stage procedure that reduces the search overhead by decomposing the two-dimensional search into separate stages for angle and distance estimation. arXiv:2609.03776v1 [cs.IT] 3 Sep 2026 More recently, joint angle-distance estimation has been achieved without constructing a dedicated near-field codebook by exploiting the beam-energy distribution of a conventional far-field discrete Fourier transform (DFT) codebook [12]. Despite these advances, existing hierarchical training methods have not provided a multi-resolution codebook that jointly covers the angle and distance domains. Furthermore, beam training and code-book design specifically tailored to MA-assisted near-field systems remain to be fully investigated. In this paper, we exploit the spatial reconfigurabil-ity introduced by MA to further enhance near-field beamforming, achieve more accurate beam focusing, and address the problems of hierarchical beam training and multi-resolution codebook design in MA-assisted near-field systems. The main contributions are listed as follows.  
+
+> •
+
+We establish an MA-assisted near-field system model under spherical-wave propagation and de-velop a hierarchical beam training scheme along with a corresponding multi-resolution codebook covering both the angle and distance domains.  
+
+> •
+
+An efficient block coordinate descent (BCD) algo-rithm is developed to alternately optimize the BS precoding vector and the antenna positions, thereby minimizing the beam pattern matching error. The BS precoding vector optimization subproblem is handled using the Lagrange multiplier method, while the highly nonconvex antenna position opti-mization subproblem is addressed via the projected gradient descent (PGD) method.  
+
+> •
+
+The simulation results verify that the proposed codebook achieves better beam focusing perfor-mance than the FPA and far-field codebooks. Mean-while, the hierarchical beam training scheme main-tains performance close to exhaustive beam training with a considerably lower training overhead. II. SYSTEM MODEL 
+
+A. Channel Model 
+
+The MA system considered for near-field beam train-ing is illustrated in Fig. 1. A BS with 𝑁 MAs com-municates with a single-antenna user. The MAs are allowed to translate over a one-dimensional aperture of length 𝐿 . The 𝑛 -th MA is located at (0, 𝑡 𝑛 ), where 𝑡 𝑛 ∈[− 𝐿 /2, 𝐿 /2]. Using the uniform spherical wave (USW) propagation model [13], the near-field line-of-sight Transmit MA array 
+
+Fig. 1. The model of MA-assisted near-field communi-cation systems. (LOS) channel h between the BS and the user is written as 
+
+h = √𝑁𝛼 a(𝜃, 𝑟 ), (1) where 𝛼 = 1√4 𝜋𝑟 2 denotes the path loss from the center of the MA array to the user, and 𝑟 denotes the corre-sponding distance. The BS spatial angle is defined as 
+
+𝜃 = sin 𝜑 , where 𝜑 denotes the angle of departure (AoD) from the center of the MA array towards the user. The near-field steering vector a(𝜃, 𝑟 ) is expressed as 
+
+a(𝜃, 𝑟 ) = 1
+
+√𝑁 
+
+[
+
+𝑒 − 𝑗 𝑘 𝑐 (𝑟 (1) −𝑟 ) , . . . , 𝑒 − 𝑗 𝑘 𝑐 (𝑟 ( 𝑁 ) −𝑟 ) ]𝑇 
+
+, (2) where 𝑘 𝑐 = 2 𝜋 𝜆 denotes the wavenumber, and 𝜆 denotes the corresponding wavelength. The propagation distance from the 𝑛 -th MA to the user is denoted by 𝑟 (𝑛 ) . Based on the Fresnel approximation [14], 𝑟 (𝑛 ) can be expressed approximately as 
+
+𝑟 (𝑛 ) ≈ 𝑟 − 𝑡 𝑛 𝜃 + 𝑡 2 
+
+> 𝑛
+
+(1 − 𝜃 2)
+
+2𝑟 . (3) Consequently, the steering vector for the user can be reformulated as 
+
+a(𝜃, 𝑟 )= 1
+
+√𝑁 
+
+[
+
+𝑒 − 𝑗 𝑘 𝑐 ( 𝑡 21 (1− 𝜃 2 )   
+
+> 2𝑟 −𝑡 1𝜃 )
+
+,. . .,𝑒 − 𝑗 𝑘 𝑐 ( 𝑡 2      
+
+> 𝑁 (1−𝜃 2)
+> 2𝑟 −𝑡 𝑁 𝜃 )
+
+]𝑇 
+
+.
+
+(4) 
+
+B. Signal Model 
+
+Let 𝑠 represent the BS transmit symbol. The resulting received signal at the user is then written as 
+
+𝑦 = h𝐻 w𝑠 + 𝑧 = √𝑁𝛼 a𝐻 (𝜃, 𝑟 )w𝑠 + 𝑧, (5) where w ∈ C𝑁 ×1 is the precoding vector employed for BS transmission, while 𝑧 ∼ CN ( 0, 𝜎 2) denotes the additive white Gaussian noise (AWGN) observed by the user. III. NEAR-FIELD HIERARCHICAL BEAM TRAINING AND CODEBOOK DESIGN 
+
+A. Hierarchical Beam Training 
+
+Hierarchical beam training reduces training overhead by dividing the search into multiple levels. At the first level, a small number of wide beams cover the entire service region to obtain a coarse estimate of the user’s location. At each subsequent level, narrower beams refine the search within the region selected at the preceding level until the user’s location is accurately identified. We assume that a total of 𝐹 levels are searched, and 
+
+𝑅 regions are searched in each level. Therefore, the hierarchical search requires 𝑅 ×𝐹 beam tests to determine the target user region. In contrast, if an exhaustive search is used, every region at the final level must be searched, corresponding to a training overhead of 𝑅 𝐹 . Therefore, we adopt a hierarchical beam training method with lower training overhead to obtain channel information and improve the effective transmission rate of the system. 
+
+B. Hierarchical Codebook Design 
+
+To accommodate beam training at different levels, we need to design codebooks with corresponding resolu-tions. The codeword design problem is formulated to optimize the actual beam pattern such that it approaches the desired ideal beam pattern as closely as possible, thereby obtaining the corresponding codeword. Specifically, consider the codebook design at 𝑙 -th level, where the coverage region is delineated by the angular interval [𝜃 𝑙, min , 𝜃 𝑙, max ] and the distance interval 
+
+[𝑟 𝑙, min , 𝑟 𝑙, max ]. Then, we perform sampling with 𝐾 points along the angular dimension and 𝑆 points along the distance dimension. The coordinates of the sampled grid points (𝜃 𝑘 , 𝑟 𝑖 ) for the 𝑙 -th level are determined by 
+
+𝜃 𝑘,𝑙 = 𝜃 𝑙, min +
+
+(
+
+𝑘 − 12
+
+)𝜃 𝑙, max − 𝜃 𝑙, min 
+
+𝐾 , 𝑘 = 1, 2, . . . , 𝐾, 𝑟 𝑖,𝑙 = 𝑟 𝑙, min +
+
+(
+
+𝑖 − 12
+
+) 𝑟 𝑙, max − 𝑟 𝑙, min 
+
+𝑆 , 𝑖 = 1, 2, . . . , 𝑆. 
+
+Let 𝑃 𝑘,𝑖 denote the desired amplitude gain at each sampling point (𝜃 𝑘 , 𝑟 𝑖 ). Mathematically, 𝑃 𝑘,𝑖 is given by 
+
+𝑃 𝑘,𝑖 =
+
+{
+
+𝐶 𝑔 , if 𝜃 𝑘,𝑙 ∈ D 𝜃 ,𝑙 and 𝑟 𝑖,𝑙 ∈ D 𝑟 ,𝑙 ,
+
+0, otherwise , (6) where 𝐶 𝑔 > 0 denotes the constant target gain desired within the target area, D𝜃 ,𝑙 and D𝑟 ,𝑙 denote the target angle and distance intervals. This ensures high gain within the target region while suppressing energy leakage into other areas. Based on the sampling grid, the BS precoding vector 
+
+w and the MA position vector t are jointly designed to match the desired beam pattern. At each sampling point (𝜃 𝑘 , 𝑟 𝑖 ), the desired complex response is specified by the target amplitude 𝑃 𝑘,𝑖 and the phase 𝜙 𝑘,𝑖 , where 
+
+𝜙 𝑘,𝑖 denotes an auxiliary phase-alignment term that is updated to match the phase of the actual beam response during the optimization process. Accordingly, the multi-resolution codebook optimization is expressed as 
+
+min  
+
+> w,t
+
+𝑓 (w, t) =
+
+> 𝐾
+
+’
+
+> 𝑘 =1
+> 𝑆
+
+’
+
+> 𝑖 =1
+
+a(𝜃 𝑘 , 𝑟 𝑖 )𝐻 w − 𝑃 𝑘,𝑖 𝑒 𝑗 𝜙 𝑘,𝑖 2
+
+(7a) s.t. CBS : ∥w∥22 ≤ 𝑃 max , (7b) 
+
+CFR : 𝑡 1 ≥ − 𝐿 
+
+2 , 𝑡 𝑁 ≤ 𝐿 
+
+2 , (7c) 
+
+CAC : 𝑡 𝑛 − 𝑡 𝑛 −1 ≥ 𝐷 0, 𝑛 = 2, 3, . . . , 𝑁. (7d) In problem (7), constraint (7b) imposes the BS power budget, constraint (7c) confines the MA positions to 
+
+[− 𝐿 /2, 𝐿 /2], and constraint (7d) guarantees a minimum inter-antenna spacing of 𝐷 0.IV. BS PRECODING AND ANTENNA POSITION OPTIMIZATION To handle the coupled variables in the objective func-tion, we employ the BCD algorithm [15] to alternately update w and t. Let ℓ denote the iteration index. The updates at the (ℓ + 1)-th iteration are formulated as 
+
+w(ℓ+1) = arg min  
+
+> w
+
+𝑓 (w, t(ℓ ) ) s.t. CBS , (8a) 
+
+t(ℓ+1) = arg min  
+
+> t
+
+𝑓 (w(ℓ+1) , t) s.t. CFR , CAC . (8b) 
+
+A. BS Precoding Optimization 
+
+For a given MA position vector, the BS precoding subproblem can be expressed as follows 
+
+min  
+
+> w
+
+𝑓 (w) =
+
+> 𝐾
+
+’
+
+> 𝑘 =1
+> 𝑆
+
+’
+
+> 𝑖 =1
+
+a(𝜃 𝑘 , 𝑟 𝑖 )𝐻 w − 𝑃 𝑘,𝑖 𝑒 𝑗 𝜙 𝑘,𝑖 2
+
+s.t. ∥w∥22 ≤ 𝑃 max .
+
+(9) To facilitate the derivation, let A ∈ C𝑄 × 𝑁 denote the steering matrix composed of the steering vectors 
+
+a(𝜃 𝑘 , 𝑟 𝑖 ) with respect to all sampling points, and let 
+
+p ∈ C𝑄 ×1 denotes the vector containing the target response of these sampled locations, where 𝑄 = 𝐾 × 𝑆 
+
+represents the total number of samples. Based on these definitions, the problem (9) admits the following compact matrix representation. 
+
+min  
+
+> w
+
+∥Aw − p∥22 s.t. ∥w∥22 ≤ 𝑃 max . (10) The Lagrangian associated with problem (10) is 
+
+Lw = ∥Aw − p∥22 + 𝜇 
+
+(
+
+∥w∥22 − 𝑃 max 
+
+)
+
+, (11) where 𝜇 ≥ 0 is the Lagrange multiplier corresponding to the power constraint. The Karush-Kuhn-Tucker (KKT) conditions can be expressed as 
+
+(A𝐻 A + 𝜇 I)w − A𝐻 p = 0; (12a) 
+
+𝜇 ≥ 0; ∥w∥22 ≤ 𝑃 max ; 𝜇 
+
+(
+
+∥w∥22 − 𝑃 max 
+
+)
+
+= 0. (12b) According to the complementary slackness condi-tion, the solution can be categorized into two cases: if w𝐻 𝑢 w𝑢 ≤ 𝑃 max , then 𝜇 = 0, and the optimal BS precoding is the unconstrained least-squares solution, 
+
+w★ = w𝑢 = (A𝐻 A)−1A𝐻 p; If w𝐻 𝑢 w𝑢 > 𝑃 max , then 𝜇 > 
+
+0, and the optimal solution must satisfy ∥w★∥2 = 𝑃 max ,the optimal precoding vector is obtained in a closed-form manner as 
+
+w★ = (A𝐻 A + 𝜇 I)−1A𝐻 p, (13) where 𝜇 is obtained efficiently by a one-dimensional line search. To avoid repeated matrix inversions when determining 
+
+𝜇 , we exploit the eigenvalue decomposition (EVD) of the associated matrix, thereby reducing the computational complexity. 
+
+B. Antenna Position Optimization 
+
+Given the updated BS precoding vector w, the orig-inal joint optimization problem is reduced to a sub-problem with respect to the antenna position vector t.Specifically, we minimize the mismatch between the synthesized beam response and the desired response by optimizing t, subject to the constraints on the physical aperture 𝐿 and the minimum inter-element spacing 𝐷 0.The resulting subproblem is 
+
+min  
+
+> t
+
+𝑓 (t) =
+
+> 𝐾
+
+’
+
+> 𝑘 =1
+> 𝑆
+
+’
+
+> 𝑖 =1
+
+a(𝜃 𝑘 , 𝑟 𝑖 )𝐻 w − 𝑃 𝑘,𝑖 𝑒 𝑗 𝜙 𝑘,𝑖 2
+
+s.t. t ∈ C FR ∩ C AC .
+
+(14) Due to the non-linear phase terms associated with the antenna position 𝑡 𝑛 in the steering vector a(𝜃 𝑘 , 𝑟 𝑖 ), 𝑓 (t)
+
+is highly non-convex. Consequently, we employ the PGD algorithm to optimize the antenna positions. Define the residual term 𝑒 𝑘,𝑖 (t) ≜ a𝐻 (𝜃 𝑘 , 𝑟 𝑖 )w −
+
+𝑃 𝑘,𝑖 𝑒 𝑗 𝜙 𝑘,𝑖 . An equivalent form of the objective function is 𝑓 (t) = Õ𝑘,𝑖 𝑒 𝑘,𝑖 (t)𝑒 ∗ 
+
+> 𝑘,𝑖
+
+(t). Applying the chain rule, the derivative of 𝑓 (t) with respect to the 𝑛 -th antenna position 𝑡 𝑛 is given by 
+
+𝜕 𝑓 (t)
+
+𝜕𝑡 𝑛 
+
+= 2
+
+> 𝐾
+
+’
+
+> 𝑘 =1
+> 𝑆
+
+’
+
+> 𝑖 =1
+
+Re 
+
+{
+
+𝑒 ∗ 
+
+> 𝑘,𝑖
+
+(t) 𝜕𝑒 𝑘,𝑖 (t)
+
+𝜕𝑡 𝑛 
+
+}
+
+. (15) It is worth noting that within the residual term, only the steering vector a(𝜃 𝑘 , 𝑟 𝑖 ) exhibits dependency on 𝑡 𝑛 .Consequently, by differentiating the phase term of the steering vector, we derive the partial derivative with respect to 𝑡 𝑛 as follows. 
+
+𝜕 [a(𝜃 𝑘 , 𝑟 𝑖 )] ∗
+
+> 𝑛
+
+𝜕𝑡 𝑛 
+
+= 𝑗 𝑘 𝑐 
+
+( 1 − 𝜃 2
+
+> 𝑘
+
+𝑟 𝑖 
+
+𝑡 𝑛 − 𝜃 𝑘 
+
+)
+
+[a(𝜃 𝑘 , 𝑟 𝑖 )] ∗
+
+> 𝑛
+
+.
+
+(16) Substituting (16) into (15), we finally obtain the analytical expression for the gradient of the objective function 
+
+𝜕 𝑓 (t)
+
+𝜕𝑡 𝑛 
+
+=2
+
+> 𝐾
+
+’
+
+> 𝑘 =1
+> 𝑆
+
+’
+
+> 𝑖 =1
+
+Re 
+
+{
+
+𝑗 𝑘 𝑐 · 𝑒 ∗ 
+
+> 𝑘,𝑖
+
+(t)×
+
+( 1 − 𝜃 2
+
+> 𝑘
+
+𝑟 𝑖 
+
+𝑡 𝑛 − 𝜃 𝑘 
+
+)
+
+[a]∗
+
+> 𝑛
+
+𝑤 𝑛 
+
+}
+
+,
+
+(17) where [a]𝑛 and 𝑤 𝑛 denote the 𝑛 -th elements of the steer-ing vector and the precoding vector. Based on the partial derivative derived from each antenna, the full gradient vector of the antenna position vector t is constructed as 
+
+∇t 𝑓 (t) =
+
+[ 𝜕 𝑓 𝜕𝑡 1
+
+, . . . , 𝜕 𝑓 𝜕𝑡 𝑁 
+
+]𝑇 
+
+. (18) Based on the derived gradient of the objective func-tion, we update the MA positions along the negative gradient direction. Let 𝑣 denote the iteration index of the PGD algorithm. 
+
+˜t(𝑣 +1) = t(𝑣 ) − 𝜂 (𝑣 ) ∇t 𝑓 (t(𝑣 ) ), (19) where 𝜂 (𝑣 ) is selected using an Armijo backtracking line search so that each accepted step satisfies the prescribed descent condition. To enforce the physical constraints on the updated antenna positions, the intermediate variable ˜t(𝑣 +1) is projected onto the feasible set CFR ∩ C AC .
+
+t(𝑣 +1) = Π CFR ∩C AC 
+
+( ˜t(𝑣 +1) )
+
+= arg min 
+
+> t∈ C FR ∩C AC
+
+∥t − ˜t(𝑣 +1) ∥22.
+
+(20) The projection in (20) constitutes a convex quadratic pro-gramming (QP) problem and can therefore be efficiently handled by conventional convex optimization tools, such as CVX. V. SIMULATION RESULTS In the simulations, the BS employs 𝑁 = 256 MAs. The moving region of the antenna array is set to 𝐿 = 300 𝜆 ,with the minimum inter-antenna spacing constrained to 𝐷 0 = 𝜆 /2. For the considered MA-assisted near-field system, the antenna movement region of length 
+
+𝐿 yields a Rayleigh distance of 2𝐿 2 
+
+> 𝜆
+
+. The noise power 
+
+𝜎 2 and carrier frequency are configured as −110 dBm and 30 GHz. The angle and distance sampling intervals are set to [− 1, 1] and (20 m, 50 m), with user locations distributed within the considered sampling region. The required beam gain 𝐶 𝑔 is determined based on system requirements. We set it to 1 in this paper. Furthermore, the hierarchical beam training framework consists of 3
+
+levels, comprising 4, 16 , and 64 sub-regions, leading to a total of 12 searches. In contrast, the exhaustive beam training scheme needs to search all regions in the third level, thereby requiring a total of 64 searches. In the simulation experiments, under the single-user setting, the CSI associated with the codeword yielding the maximum achievable rate 𝑅 = log 2
+
+(
+
+1 + |h𝐻 w|2
+
+> 𝜎 2
+
+)
+
+is taken as the estimated CSI of the user. 0 5 10 15 20 25 30 35 40 45 50 1550 1600 1650 1700 1750 1800 1850 1900 
+
+Fig. 2. Convergence performance of the proposed algo-rithm. Fig. 2 shows the objective values of the MA and FPA codebooks versus the iteration number for a first-level subregion. Both curves decrease monotonically and converge within a few iterations, indicating the fast convergence of the proposed optimization procedure. Moreover, the MA codebook converges to a significantly lower objective value than the FPA codebook, highlight-ing the performance benefit brought by the additional 0 5 10 15 20 25 012345678910 
+
+Fig. 3. Performance of three-level beam training with the MA codebook, FPA codebook and far-field codebook. 0 5 10 15 20 25 012345678910 
+
+Fig. 4. Performance comparison under different schemes for the third-level beam training process. spatial degrees of freedom (DoFs) afforded by antenna mobility. By reconfiguring the antenna positions within the allowable movement region, the MA system improves near-field beam focusing. Fig. 3 presents an achievable rate comparison among the MA, FPA, and far-field codebooks under three-level hierarchical beam training. The rate increases with the cumulative number of tested codewords. The MA code-book achieves the best near-field performance, whereas the far-field codebook performs the worst because its plane-wave assumption causes significant phase mis-match. In addition, the performance can be further improved by beam training in the subsequent stages within the range determined in the previous stage. These observations confirm that the proposed multi-resolution codebook design supports accurate user localization. Fig. 4 compares the achievable rate versus beam training overhead for different numbers of BS antennas. For the same training overhead, increasing 𝑁 from 128 to 256 improves the achievable rate owing to the increased array gain and finer near-field focusing capability. Fur-10 15 20 25 30 10 11 12 13 14 15 16 17 18 19 20 Fig. 5. Comparison of achievable rate performance ver-sus SNR for the MA codebook, FPA codebook and exhaustive search. thermore, the achievable rate obtained with the MA codebook is higher than that of the FPA codebook under the same number of antennas. Fig. 5 compares the proposed MA codebook, the FPA codebook, and exhaustive search over different SNR levels. The proposed MA codebook closely approaches the exhaustive-search upper bound while requiring sub-stantially less training overhead, demonstrating the ef-fectiveness and efficiency of the hierarchical codebook design. VI. CONCLUSION In this paper, we considered MA-enabled near-field transmission and developed a hierarchical beam train-ing scheme with low training overhead. Specifically, a multi-resolution codebook was designed to enable accurate beam focusing over the joint angle-distance domain. Simulation results showed that the proposed MA codebook provides substantial performance gains over both conventional FPA and far-field codebooks. These gains mainly arise from the additional spatial degrees of freedom introduced by MAs, enabling flex-ible antenna-position reconfiguration for improved sys-tem performance. Furthermore, the results confirm that the proposed hierarchical strategy achieves an achiev-able rate closely approaching the upper bound attained by exhaustive search, while requiring substantially less training overhead, thereby effectively balancing system performance and implementation complexity. REFERENCES 
+
+[1] L. Zhu, W. Ma, and R. Zhang, “Movable antennas for wireless communication: Opportunities and challenges,” IEEE Commun. Mag. , vol. 62, no. 6, pp. 114–120, 2024. [2] J. Ding, Z. Zhou, and B. Jiao, “Movable antenna-aided secure full-duplex multi-user communications,” IEEE Trans. Wireless Commun. , vol. 24, no. 3, pp. 2389–2403, 2025. [3] Q. Zhang, M. Shao, T. Zhang, G. Chen, J. Liu, and P. C. Ching, “An efficient sum-rate maximization algorithm for fluid antenna-assisted ISAC system,” IEEE Commun. Lett. , vol. 29, no. 1, pp. 200–204, 2025. [4] J. An, C. Yuen, L. Dai, M. Di Renzo, M. Debbah, and L. Hanzo, “Near-field communications: Research advances, potential, and challenges,” IEEE Wireless Commun. , vol. 31, no. 3, pp. 100– 107, 2024. [5] L. Zhu, W. Ma, Z. Xiao, and R. Zhang, “Movable antenna enabled near-field communications: Channel modeling and per-formance optimization,” IEEE Trans. Commun. , vol. 73, no. 9, pp. 7240–7256, 2025. [6] S. Yang, C. Xie, W. Lyu, B. Ning, Z. Zhang, and C. Yuen, “Near-field channel estimation for extremely large-scale recon-figurable intelligent surface (XL-RIS)-aided wideband mmWave systems,” IEEE J. Sel. Areas Commun. , vol. 42, no. 6, pp. 1567– 1582, 2024. [7] X. Wei and L. Dai, “Channel estimation for extremely large-scale massive MIMO: Far-field, near-field, or hybrid-field?” 
+
+IEEE Commun. Lett. , vol. 26, no. 1, pp. 177–181, 2022. [8] Q. Zhang, Z. Dong, Y. Zhao, Y. Ge, Y. L. Guan, J. Liu, and C. Yuen, “Multi-resolution codebook design and multiuser interference management for discrete XL-RIS-aided near-field MIMO systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 2826–2842, 2026. [9] H. Zhang, N. Shlezinger, F. Guidi, D. Dardari, M. F. Imani, and Y. C. Eldar, “Beam focusing for near-field multiuser MIMO communications,” IEEE Trans. Wireless Commun. , vol. 21, no. 9, pp. 7476–7490, 2022. [10] H. Zhang, N. Shlezinger, F. Guidi, D. Dardari, and Y. C. Eldar, “6G wireless communications: From far-field beam steering to near-field beam focusing,” IEEE Commun. Mag. , vol. 61, no. 4, pp. 72–77, 2023. [11] Y. Zhang, X. Wu, and C. You, “Fast near-field beam training for extremely large-scale array,” IEEE Wireless Commun. Lett. ,vol. 11, no. 12, pp. 2625–2629, 2022. [12] X. Wu, C. You, J. Li, and Y. Zhang, “Near-field beam training: Joint angle and range estimation with DFT codebook,” IEEE Trans. Wireless Commun. , vol. 23, no. 9, pp. 11 890–11 903, 2024. [13] Y. Liu, Z. Wang, J. Xu, C. Ouyang, X. Mu, and R. Schober, “Near-field communications: A tutorial review,” IEEE Open J. Commun. Soc. , vol. 4, pp. 1999–2049, 2023. [14] E. Björnson, Ö. T. Demir, and L. Sanguinetti, “A primer on near-field beamforming for arrays and reconfigurable intelligent surfaces,” in 2021 55th Asilomar Conference on Signals, Sys-tems, and Computers , 2021, pp. 105–112. [15] Q. Zhang, M. Shao, Q. Li, and J. Liu, “An efficient algorithm for multiuser sum-rate maximization of large-scale active RIS-aided MIMO system,” in Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP) , 2024, pp. 9036–9040.

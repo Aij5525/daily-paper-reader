@@ -1,0 +1,240 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-05T22:06:23.999351+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 5,
+    "deep_cap": 6,
+    "deep_selected": 5,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2608.31149v1",
+      "source": "arxiv",
+      "title": "Learning to deform the matched filter",
+      "abstract": "Analytical signal-processing blocks are interpretable and reliable, but their optimality depends on assumptions that practical hardware and channels violate. Learned replacements can adapt, but often discard the structure that makes the original solution understandable. Here we introduce deformable matched filtering, a platform in which learning steers a bounded deformation of an explicit matched filter instead of replacing the waveform-processing path. In a hardware-in-the-loop optical wireless link, blind state descriptors drive causal, pilotless updates while payload samples, transmitted references, and condition labels remain outside the controller. Receiver deformation generalises across held-out signalling and channel conditions and remains ahead of a span-matched fractionally spaced equaliser after stationary convergence in most tested regimes. A transferable transmitter deformation reduces error-vector magnitude in all 144 held-out evaluations, whereas its additional value after receiver adaptation emerges principally under severe combined distortion. KAN, MLP, and linear controllers provide different condition-dependent advantages within the same filter structure. During 24 hours of uninterrupted changing-condition operation, bounded deformable receivers recover their original operating regime after severe intervening distortion while the persistent conventional equaliser accumulates destructive state. These results establish deformable analytical filters as a reusable middle ground between fixed theory and end-to-end learned signal processing.",
+      "authors": [
+        "Paul Anthony Haigh"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-31T17:50:38+00:00",
+      "link": "https://arxiv.org/pdf/2608.31149v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Machine-learning design of deformable matched filter in optical wireless receiver, direct fit to ML-based wireless system design",
+      "llm_evidence_cn": "在光无线接收机中用学习驱动匹配滤波器变形，直接属于基于机器学习的无线通信系统设计",
+      "llm_evidence": "在光无线接收机中用学习驱动匹配滤波器变形，直接属于基于机器学习的无线通信系统设计",
+      "canonical_evidence": "在光无线接收机中用学习驱动匹配滤波器变形，直接属于基于机器学习的无线通信系统设计",
+      "llm_tldr_en": "Learned bounded deformation of an explicit matched filter adapts optical wireless receivers to hardware and channel mismatches while preserving interpretable structure; hardware-in-loop tests show generalization to unseen conditions.",
+      "llm_tldr_cn": "传统匹配滤波器依赖理想假设，在实际硬件与信道下并非最优，而纯学习替换又会丢失可解释结构。作者提出可变形匹配滤波，用学习对显式匹配滤波器施加有界形变，而不是替换整个波形处理路径。在光无线硬件在环链路中，盲状态描述符驱动因果、无导频更新，接收机对跨信令与信道条件的泛化能力得到验证。这一可解释学习思路可为无线物理层在非理想硬件下的自适应设计提供新方向。",
+      "llm_tldr": "传统匹配滤波器依赖理想假设，在实际硬件与信道下并非最优，而纯学习替换又会丢失可解释结构。作者提出可变形匹配滤波，用学习对显式匹配滤波器施加有界形变，而不是替换整个波形处理路径。在光无线硬件在环链路中，盲状态描述符驱动因果、无导频更新，接收机对跨信令与信道条件的泛化能力得到验证。这一可解释学习思路可为无线物理层在非理想硬件下的自适应设计提供新方向。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.03147v1",
+      "source": "arxiv",
+      "title": "Feasible but Not Safe: Constraint Violations and Report-Channel Attacks in Learned Cell-Free ISAC Association",
+      "abstract": "Learning-based schedulers have been proposed to provide real-time user, target, and access point (AP) association in distributed cell-free integrated sensing and communication systems. In a typical approach, a graph neural network (GNN), trained on labels from a mixed-integer linear program, maps lightweight per-AP statistics to decisions on AP clustering, user and target scheduling, and mode selection in one forward pass. Such solutions assume that hard constraints, enforced only as soft training penalties, hold at inference, and that the self-reported statistics are truthful. Using our ASSENT algorithm as an example, we find that despite high $F_1$ scores, many solutions violate at least one hard constraint, demonstrating that high prediction accuracy does not ensure joint feasibility. Projecting the GNN output onto a feasible solution restores constraint satisfaction with low utility loss, even with a simple greedy repair procedure. We further show that feasibility alone does not guarantee robustness to false data injection attacks. A single malicious AP that reports false information cannot substantially increase its user associations, but can greatly increase the rate of infeasible solutions. The effect of such attacks depends on the type of information being falsified. Misreporting information that affects the objective can largely be mitigated through feasibility projection, whereas falsifying information that affects the constraints cannot. The latter can, however, be detected using a low-complexity cross-AP consistency check. These results show that learned ISAC schedulers should be evaluated using constraint-aware feasibility metrics in addition to conventional accuracy measures.",
+      "authors": [
+        "Mehdi Zafari",
+        "Iman Mohammadi",
+        "A. Lee Swindlehurst"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "cs.LG",
+        "eess.SP"
+      ],
+      "published": "2026-09-02T20:28:21+00:00",
+      "link": "https://arxiv.org/pdf/2609.03147v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Examines learned cell-free ISAC association decisions for constraint violations and report-channel attacks, focusing on reliability of joint sensing and communication schedulers",
+      "llm_evidence_cn": "针对学习式无小区一体化感知与通信关联调度，分析约束可行性与报告信道安全漏洞",
+      "llm_evidence": "针对学习式无小区一体化感知与通信关联调度，分析约束可行性与报告信道安全漏洞",
+      "canonical_evidence": "针对学习式无小区一体化感知与通信关联调度，分析约束可行性与报告信道安全漏洞",
+      "llm_tldr_en": "Analyzes learned GNN-based cell-free ISAC association and shows high-F1 solutions still violate hard constraints and are vulnerable to report-channel attacks, motivating safe learning designs.",
+      "llm_tldr_cn": "学习式调度器被用于分布式无小区一体化感知与通信系统以实时完成用户、目标和接入点的关联决策，但硬约束通常仅作为软训练惩罚，且假设上报统计信息可信。文章以ASSENT算法为例发现尽管F1分数高，大量解仍违反至少一个硬约束，并展示报告信道攻击可进一步破坏决策可行性。结果表明学习式ISAC关联需显式保障约束可行性和对上报信息的鲁棒性，为面向安全的通信感知一体化机器学习设计提供了警示与改进方向。",
+      "llm_tldr": "学习式调度器被用于分布式无小区一体化感知与通信系统以实时完成用户、目标和接入点的关联决策，但硬约束通常仅作为软训练惩罚，且假设上报统计信息可信。文章以ASSENT算法为例发现尽管F1分数高，大量解仍违反至少一个硬约束，并展示报告信道攻击可进一步破坏决策可行性。结果表明学习式ISAC关联需显式保障约束可行性和对上报信息的鲁棒性，为面向安全的通信感知一体化机器学习设计提供了警示与改进方向。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.03245v1",
+      "source": "arxiv",
+      "title": "A Joint Power-Privacy Control Framework for Decentralized Learning over Heterogeneous Wireless Multicasting Networks",
+      "abstract": "In this paper, we propose a decentralized learning framework that incorporates both power control and privacy guarantees. Specifically, we enable a set of clients in a wireless multicast network to jointly train a common model while maintaining a prescribed per-iteration maximum privacy leakage level. The communication network is represented by a rowstochastic adjacency matrix, allowing us to capture asymmetric channel gains as well as heterogeneous maximum transmit power levels. Differential privacy is enforced through an explicit powersplitting strategy that allocates each node's limited maximum transmit power between model coefficients and injected Gaussian noise, thereby jointly controlling learning performance and privacy leakage. We further prove that the proposed algorithm achieves a cumulative regret bound of O(logT), whereTdenotes the time horizon. To evaluate the practical performance of our approach, we perform comprehensive experiments on the CIFAR-10 dataset under both IID and non-IID data distributions, considering different privacy levels, diverse numbers of clients, and various graph topologies. The results demonstrate strong performance across the considered settings and improved performance over existing methods, highlighting the effectiveness of the proposed algorithm under realistic wireless communication constraints.",
+      "authors": [
+        "Amir Ziaeddini",
+        "Yauhen Yakimenka",
+        "Joerg Kliewer"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-09-03T00:56:11+00:00",
+      "link": "https://arxiv.org/pdf/2609.03245v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Decentralized machine learning over wireless multicast networks with power-privacy control",
+      "llm_evidence_cn": "无线多播网络下的去中心化机器学习与功率-隐私联合控制，是机器学习与无线系统设计的结合",
+      "llm_evidence": "无线多播网络下的去中心化机器学习与功率-隐私联合控制，是机器学习与无线系统设计的结合",
+      "canonical_evidence": "无线多播网络下的去中心化机器学习与功率-隐私联合控制，是机器学习与无线系统设计的结合",
+      "llm_tldr_en": "Proposes a decentralized learning framework for wireless multicast networks that jointly controls power and privacy via power-splitting between model coefficients and noise, capturing asymmetric channels with an adjacency matrix.",
+      "llm_tldr_cn": "针对异构无线多播网络上联邦式去中心化学习缺乏系统性的功率与隐私联合控制问题，提出一种新型框架。它用行随机邻接矩阵表示非对称信道增益和异构最大发射功率，并采用显式功率拆分策略将有限功率分配给模型系数与注入高斯噪声，从而在差分隐私约束下支持多客户端联合训练。该工作为在资源受限、信道不均的无线网络中实现隐私保护协作学习提供了建模方法和理论支撑。",
+      "llm_tldr": "针对异构无线多播网络上联邦式去中心化学习缺乏系统性的功率与隐私联合控制问题，提出一种新型框架。它用行随机邻接矩阵表示非对称信道增益和异构最大发射功率，并采用显式功率拆分策略将有限功率分配给模型系数与注入高斯噪声，从而在差分隐私约束下支持多客户端联合训练。该工作为在资源受限、信道不均的无线网络中实现隐私保护协作学习提供了建模方法和理论支撑。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2608.27759v1",
+      "source": "arxiv",
+      "title": "Fast Tri-Hybrid Beamforming via Deep Unfolding",
+      "abstract": "Tri-hybrid multiple-input multiple-output architectures have recently emerged as a promising enabler for next-generation wireless systems, as they potentially provide enhanced design flexibility without a proportional increase in hardware cost or power consumption. However, the resulting triple-domain coupling renders beamforming optimization challenging and computationally demanding. This paper develops a fast tri-hybrid beamforming framework for multiuser downlink systems employing dynamic metasurface antennas (DMAs). Based on the equivalence between weighted sum-rate maximization and weighted sum-minimum mean square error minimization, an iterative algorithm is first derived under per-DMA input power constraints, with all update equations available in closed form, but convergence inherently remains slow. To enable real-time operation, the algorithm is further unfolded into a trainable finite-iteration architecture using graph neural networks that ensure permutation equivariance and support varying numbers of users. Trained on ray-tracing channel data, the unfolded method achieves comparable or higher system sum-rates while reducing runtime by more than an order of magnitude. The method also demonstrates strong scalability, robustness, and generalization across various environments.",
+      "authors": [
+        "Pinjun Zheng",
+        "Md. Jahangir Hossain",
+        "Anas Chaaban"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-08-27T22:48:19+00:00",
+      "link": "https://arxiv.org/pdf/2608.27759v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep unfolding for fast tri-hybrid beamforming in multiuser downlink systems",
+      "llm_evidence_cn": "深度展开驱动的多用户下行三混合波束成形，属于无线通信系统设计的机器学习方法",
+      "llm_evidence": "深度展开驱动的多用户下行三混合波束成形，属于无线通信系统设计的机器学习方法",
+      "canonical_evidence": "深度展开驱动的多用户下行三混合波束成形，属于无线通信系统设计的机器学习方法",
+      "llm_tldr_en": "Proposes a fast tri-hybrid beamforming method for multiuser downlink DMA systems that derives closed-form WMMSE-style updates and applies deep unfolding, enabling low-complexity near-optimal beamforming for next-generation wireless networks.",
+      "llm_tldr_cn": "三混合MIMO架构提升了设计灵活性，但复杂的跨域耦合使波束成形优化计算开销很大。论文利用加权和速率最大化与加权最小均方误差的等价性给出闭式迭代更新，并在此基础上引入深度展开，得到快速且可学习的波束成形框架。在多用户下行动态超表面天线系统中，该方法以明显更低的复杂度逼近最优性能，展示了模型驱动深度学习用于无线通信系统设计的潜力。",
+      "llm_tldr": "三混合MIMO架构提升了设计灵活性，但复杂的跨域耦合使波束成形优化计算开销很大。论文利用加权和速率最大化与加权最小均方误差的等价性给出闭式迭代更新，并在此基础上引入深度展开，得到快速且可学习的波束成形框架。在多用户下行动态超表面天线系统中，该方法以明显更低的复杂度逼近最优性能，展示了模型驱动深度学习用于无线通信系统设计的潜力。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.03776v1",
+      "source": "arxiv",
+      "title": "Hierarchical Beam Training and Codebook Design for Movable Antenna-Assisted Near-Field Systems",
+      "abstract": "As sixth-generation (6G) communication systems evolve toward higher frequency bands and larger array apertures, the near-field range expands rapidly, making near-field channel estimation increasingly important and challenging. Beam training has been recognized as an effective approach for channel state information (CSI) acquisition. However, because of the propagation characteristics of spherical waves, beam training needs to perform a joint search in the angle and distance domains, which results in unaffordable beam training overhead. By flexibly reconfiguring antenna positions, movable antenna (MA) technology can fully exploit the spatial variations of wireless channels and achieve more accurate beam focusing, thereby providing additional flexibility for efficient beam training design. Therefore, based on MA-assisted near-field systems, we develop a hierarchical beam training strategy that combines reduced training overhead with high beam gain and design a corresponding hierarchical codebook. This codebook forms focused beams over the joint angle-distance domain, maximizing beam gain within the target region while suppressing energy leakage into non-target regions. Simulation results confirm substantial performance gains of the method over the conventional fixed-position antenna (FPA) system and the far-field beam training method.",
+      "authors": [
+        "Meihui Liu",
+        "Qian Zhang",
+        "Xuejun Cheng",
+        "Yuhui Jiao",
+        "Yunxiao Li",
+        "Ju Liu"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-09-03T12:48:03+00:00",
+      "link": "https://arxiv.org/pdf/2609.03776v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Near-field wireless channel estimation and hierarchical beam training for 6G/CSI acquisition",
+      "llm_evidence_cn": "近场无线信道估计、分层波束训练与码本设计，属于信道建模与特征研究",
+      "llm_evidence": "近场无线信道估计、分层波束训练与码本设计，属于信道建模与特征研究",
+      "canonical_evidence": "近场无线信道估计、分层波束训练与码本设计，属于信道建模与特征研究",
+      "llm_tldr_en": "Addresses near-field channel estimation in 6G by proposing hierarchical beam training and codebook design for movable antenna systems, reducing joint angle-distance search overhead and improving CSI acquisition.",
+      "llm_tldr_cn": "6G高频段和大阵列使近场信道估计变得重要而困难，球面波传播要求波束训练在角度与距离域联合搜索，开销难以承受。论文针对可移动天线辅助近场系统提出分层波束训练与码本设计，通过灵活调整天线位置利用信道空间变化以实现精确波束聚焦。该方案有望显著降低训练开销、提升近场CSI获取效率，为近场无线信道建模与系统设计提供可行路径。",
+      "llm_tldr": "6G高频段和大阵列使近场信道估计变得重要而困难，球面波传播要求波束训练在角度与距离域联合搜索，开销难以承受。论文针对可移动天线辅助近场系统提出分层波束训练与码本设计，通过灵活调整天线位置利用信道空间变化以实现精确波束聚焦。该方案有望显著降低训练开销、提升近场CSI获取效率，为近场无线信道建模与系统设计提供可行路径。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2609.00937v1",
+      "source": "arxiv",
+      "title": "Exact Payload-Decoupling Conditions for Pilot-Only BEM Channel Estimation With Application to OTFS",
+      "abstract": "In high-mobility doubly dispersive links, basis expansion models (BEMs) reduce channel dimensionality, yet unknown payload symbols generally contaminate conventional matched-pilot channel estimates. This paper establishes the exact conditions under which such estimates become payload-independent and derives a pilot, guard, and data-placement rule that guarantees these conditions. We prove a necessary-and-sufficient zero pilot--data interference (ZPDI) condition under which the matched-pilot least-squares (LS) solution coincides with the maximum-likelihood (ML) estimator for the reduced pilot statistic. When ZPDI holds, estimation requires a single precomputed projection. When it does not, the estimate contains a deterministic, channel-scaled payload bias that persists at high signal-to-noise ratio. A disjoint-support rule, independent of the selected basis, realizes ZPDI through pilot, guard, and data placement. We then specialize the framework to orthogonal time--frequency space (OTFS) and examine its structural and performance consequences. With the generalized complex-exponential BEM (GCE-BEM), the ZPDI estimator remains within about $2$~dB of the perfect channel state information benchmark in bit error rate at speeds up to 500~km/h.",
+      "authors": [
+        "Gianmarco Romano",
+        "Francesco A. N. Palmieri",
+        "Stefano Buzzi",
+        "Giovanni Di Gennaro",
+        "Amedeo Buonanno"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-09-01T08:57:32+00:00",
+      "link": "https://arxiv.org/pdf/2609.00937v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Exact conditions and placement rules for payload-decoupled BEM channel estimation in OTFS",
+      "llm_evidence_cn": "面向OTFS双弥散信道的BEM信道估计与导频数据放置条件",
+      "llm_evidence": "面向OTFS双弥散信道的BEM信道估计与导频数据放置条件",
+      "canonical_evidence": "面向OTFS双弥散信道的BEM信道估计与导频数据放置条件",
+      "llm_tldr_en": "The paper derives necessary-and-sufficient zero pilot-data interference conditions under which pilot-only BEM channel estimates become payload-independent, and provides a pilot, guard, and data-placement rule for OTFS.",
+      "llm_tldr_cn": "在高移动双弥散链路中，BEM降低了信道维度，但未知载荷符号会污染传统匹配导频估计。论文证明：当且仅当满足零导频-数据干扰(ZPDI)条件时，匹配导频最小二乘估计等价于降维导频统计的最大似然估计，由此给出导频、保护间隔与数据的布置规则。条件满足时只需一次预计算投影即可完成载荷无关的信道估计，为OTFS及相似系统的BEM信道估计提供了精确的设计准则。",
+      "llm_tldr": "在高移动双弥散链路中，BEM降低了信道维度，但未知载荷符号会污染传统匹配导频估计。论文证明：当且仅当满足零导频-数据干扰(ZPDI)条件时，匹配导频最小二乘估计等价于降维导频统计的最大似然估计，由此给出导频、保护间隔与数据的布置规则。条件满足时只需一次预计算投影即可完成载荷无关的信道估计，为OTFS及相似系统的BEM信道估计提供了精确的设计准则。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

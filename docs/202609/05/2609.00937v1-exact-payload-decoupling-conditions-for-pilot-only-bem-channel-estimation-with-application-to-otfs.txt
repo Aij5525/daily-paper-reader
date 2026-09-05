@@ -1,0 +1,1071 @@
+Title: Exact Payload-Decoupling Conditions for Pilot-Only BEM Channel Estimation With Application to OTFS
+
+URL Source: https://arxiv.org/pdf/2609.00937v1
+
+Published Time: Wed, 02 Sep 2026 01:01:43 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Exact Payload-Decoupling Conditions for Pilot-Only BEM Channel Estimation With Application to OTFS 
+
+Gianmarco Romano, Francesco A. N. Palmieri, Member, IEEE, Stefano Buzzi, Fellow, IEEE ,Giovanni Di Gennaro, and Amedeo Buonanno, Senior Member, IEEE 
+
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+Abstract —In high-mobility doubly dispersive links, basis ex-pansion models (BEMs) reduce channel dimensionality, yet unknown payload symbols generally contaminate conventional matched-pilot channel estimates. This paper establishes the exact conditions under which such estimates become payload-independent and derives a pilot, guard, and data-placement rule that guarantees these conditions. We prove a necessary-and-sufficient zero pilot–data interference (ZPDI) condition under which the matched-pilot least-squares (LS) solution coincides with the maximum-likelihood (ML) estimator for the reduced pilot statistic. When ZPDI holds, estimation requires a single precomputed projection. When it does not, the estimate contains a deterministic, channel-scaled payload bias that persists at high signal-to-noise ratio. A disjoint-support rule, independent of the selected basis, realizes ZPDI through pilot, guard, and data placement. We then specialize the framework to orthogonal time– frequency space (OTFS) and examine its structural and perfor-mance consequences. With the generalized complex-exponential BEM (GCE-BEM), the ZPDI estimator remains within about 
+
+2 dB of the perfect channel state information benchmark in bit error rate at speeds up to 500 km/h. 
+
+Index Terms —Channel estimation, doubly dispersive channels, basis expansion models, OTFS, pilot symbols. 
+
+I. I NTRODUCTION 
+
+# ACCURATE channel state information (CSI) supports coherent detection, adaptive modulation, and resource al-location, and is therefore required for reliable wireless-system operation [2], [3]. High-mobility scenarios, including high-speed railway (HSR) links, unmanned aerial vehicle (UAV) communications, and low-Earth-orbit (LEO) satellite systems, involve rapidly time-varying channels with large Doppler spreads and severe inter-carrier interference (ICI) [4]–[6]. In these doubly dispersive environments, conventional orthogo-nal frequency-division multiplexing (OFDM) loses subcarrier 
+
+Part of this work was presented at the IEEE International Workshop on Signal Processing Advances in Wireless Communications (SPAWC 2026) [1]. G. Romano, F.A.N. Palmieri and G. Di Gennaro are with Dipartimento di Ingegneria, Università degli Studi della Campania “Luigi Vanvitelli”, Aversa (CE), Italy (e-mails: {gianmarco.romano; francesco.palmieri; gio-vanni.digennaro}@unicampania.it). S. Buzzi is with University of Cassino and Southern Lazio, Cassino, Italy, and with Consorzio Nazionale Interuniversitario per le Telecomunicazioni, Parma, Italy (e-mail: buzzi@unicas.it). A. Buonanno is with Dept. of Energy Technologies and Renewable Sources, ENEA, Portici (NA), Italy (e-mail: amedeo.buonanno@enea.it). 
+
+orthogonality [7]. Orthogonal time–frequency space (OTFS) modulation offers an alternative because high-mobility chan-nels appear approximately sparse and quasi-stationary in the delay–Doppler (DD) domain [8]–[10]. Practical OTFS chan-nels, however, often have fractional Doppler and fractional delay, which spread energy over several DD bins and reduce this sparsity [10], [11]. Existing channel estimators operate either as standalone methods or jointly with symbol detection. Standalone methods provide a channel estimate before payload detection, whereas joint receivers couple or alternate the two tasks. The available approaches include delay–Doppler domain techniques [12], [13], time–frequency domain methods [14], and Bayesian, matching-pursuit, message-passing, and artificial-intelligence-based frameworks [15], [16]. These approaches still face practical limitations. Methods that accommodate fractional parameters often incur high computational cost, whereas deep learning (DL) solutions require substantial training data, com-putation, and energy; these requirements can be prohibitive when propagation conditions change dynamically [16]. Basis expansion models (BEMs) provide a structured para-metric representation of time-varying channels for pilot-assisted estimation. They project the channel response onto a finite-dimensional subspace, reducing the number of un-known parameters while retaining the relevant channel dynam-ics [7], [17], [18]. BEM-based channel estimation has been studied for several modulation schemes and, more recently, for OTFS and waveforms such as affine frequency division multiplexing (AFDM). In practice, channel state information must be obtained primarily from pilot observations and may subsequently be refined through data-aided processing. Even in a data-aided receiver, the first stage must estimate the channel before reliable payload decisions are available. Pilot– data interference (PDI), however, degrades this initial estimate and has prompted several mitigation methods. Recent stud-ies embed BEMs in joint channel-estimation and detection frameworks [19]–[21]. Huang et al. [19], for example, exploit decoded data symbols in a turbo-equalization loop, whereas Guo et al. [20] use generalized compressed sensing and iterative cancellation to mitigate residual PDI. Qu et al. [22] instead adopt a discrete prolate spheroidal sequence (DPSS) subspace with linear minimum mean-squared error (LMMSE) estimation and treat PDI statistically. Liu et al. [23] derive a generalized complex-exponential BEM (GCE-BEM) OTFS input–output model, but their receiver still depends on iterative arXiv:2609.00937v1 [cs.IT] 1 Sep 2026 2
+
+data-aided equalization. Closed-form, non-iterative BEM estimators are also avail-able for specific OTFS settings. Mohebbi et al. [24] derive a two-dimensional discrete prolate spheroidal BEM (DPS-BEM) representation for multiple-input multiple-output OTFS (MIMO-OTFS) and recover the BEM coefficients by least squares under a particular pilot structure. Wu et al. [25] de-velop a GCE-BEM estimator for OTFS with hardware impair-ments using a single-pilot/guard construction. Their statistic nevertheless contains pilot- and data-dependent terms, and the data-dependent component is treated as effective interference or noise. Thus, despite their closed forms, these methods re-main tied to particular BEM choices, pilot structures, statistical assumptions, or treatments of interference. Our central result is a necessary-and-sufficient characteriza-tion of when the conventional matched-pilot BEM estimator is payload-independent and coincides with the maximum-likelihood (ML) estimator for the reduced statistic. Under the resulting zero pilot–data interference (ZPDI) condition, the statistic contains no data term for any admissible payload and coefficient vector. If ZPDI fails, the same filter contains a deterministic, channel-scaled payload bias that persists at high signal-to-noise ratio (SNR) for any fixed pilot-to-data power ratio. We therefore identify the exact boundary between the validity of the least-squares (LS) solution as a precomputable pilot-only ML estimator and its structural contamination by unknown data. Beyond this boundary, the matched-pilot archi-tecture must tolerate, model, or cancel the interference through data-aided processing. A pilot–data orthogonality condition of this kind has appeared before. For cyclic-prefixed affine transmissions over doubly selective channels described by the complex-exponential BEM (CE-BEM), Kannu and Schniter [26] showed that pilot–data orthogonality, together with an optimal-excitation condition, is necessary and sufficient for the Bayesian LMMSE channel estimate to attain its mean-squared error (MSE) lower bound. The present formulation asks a different question, covers a broader model class, and keeps payload decoupling separate from excitation. ZPDI charac-terizes when the conventional matched-pilot projection yields an exactly payload-decoupled, prior-free estimate within the selected BEM subspace, rather than when a statistically op-timal estimator exists. Because the condition is stated at the operator level, it covers arbitrary BEM subspaces, any unitary observation transform, and the cyclic-prefix, zero-padding, and chirp-periodic-prefix guard structures, rather than only the CE-BEM and time-domain cyclic-prefix setting of [26]. In our formulation, the excitation condition also has a distinct and more general role: a scaled-identity pilot Gram matrix governs the estimator conditioning and the associated noise en-hancement, but not whether the estimate is payload-decoupled. Separating these requirements leaves the Gram matrix as a design parameter. It need not be a scaled identity for the estimate to remain exactly payload-independent and can be deliberately non-orthogonal to trade conditioning for Doppler resolution, as in the oversampled GCE-BEM. These distinctions have direct consequences for imple-mentation and error analysis. Unlike iterative data-aided re-ceivers [19], [23] and statistics-dependent designs [22], [25], the ZPDI estimator needs neither payload decisions nor stochastic channel priors. Its matrices depend only on the pilot pattern, basis, and system dimensions; they can therefore be precomputed, leaving an online stage that is linear in the frame length. Once PDI is removed exactly, the remaining error separates into thermal noise shaped by the pilot Gram matrix and modeling error controlled by the BEM. The frame-work replaces heuristic or simulation-only acceptance of a pilot arrangement with a rigorous design criterion and shows whether decoupling, conditioning, or BEM resolution limits the estimate. The paper develops the payload-decoupling characteriza-tion, a design rule that realizes it, and the resulting structural and computational consequences: 1) We prove necessary and sufficient conditions under which the matched pilot projection is exactly decoupled from unknown payload symbols, for arbitrary BEM subspaces and block-linear modulation structures that admit the operator model considered here. The result determines when the conventional matched-pilot LS solution is a valid payload-independent ML estimator for the reduced observation, rather than a data-contaminated estimate. 2) We provide a disjoint-support sufficient condition that is independent of the chosen BEM basis, turning the ZPDI requirement into a concrete rule for placing pilots, guards, and data so that ZPDI holds across arbitrary BEM representations and the considered block-linear modulation structures. 3) We characterize the pilot Gram matrix in terms of identifiability, conditioning, and structure. The analysis shows how the number of pilot observations limits the admissible BEM order, how Gram-matrix conditioning controls noise enhancement, and how zero inter-tap pilot leakage turns the offline inversion from a full dense solve into independent per-tap solves, with a further scalar simplification when the per-tap blocks are diagonal. 4) We develop one detailed OTFS application using the standard full-guard pilot [12]. We prove simultaneous ZPDI and zero pilot–pilot leakage, derive the Toeplitz GCE-BEM Gram matrix and its resolution–conditioning trade-off, and illustrate these results at speeds up to 500 km/h. The remainder of the paper is organized as follows. Sec-tion II presents the system model and BEM representation. Section III develops the pilot-projected LS/ML channel esti-mator and derives the zero pilot–data interference condition. Section IV analyzes the pilot Gram matrix and its role in identifiability, conditioning, and complexity. Section V applies the framework to OTFS modulation and analyzes the resulting GCE-BEM structure. Finally, Section VI presents numerical results, and Section VII concludes the paper. 
+
+Notation: Bold uppercase (A) and lowercase (a) let-ters denote matrices and vectors, respectively. Superscripts 
+
+(·)T , (·)H , and (·)∗ denote transpose, conjugate transpose, and complex conjugate. A−1 denotes the inverse. Operators 3
+
+diag( ·), blkdiag( ·), and vec( ·) denote diagonal matrices, block-diagonal matrices, and column-wise vectorization. ∥ · ∥ 
+
+and ∥·∥ F denote Euclidean and Frobenius norms, while ⊙ and 
+
+⊗ denote Hadamard and Kronecker products. 1[·] denotes the indicator function, and E{·} denotes statistical expectation. II. S YSTEM MODEL AND BEM R EPRESENTATION 
+
+We consider the transmission of a block represented by vector x ∈ CN through a doubly dispersive channel char-acterized by its discrete-time impulse response h[n, ℓ ], where the first index n denotes time (sample index) and the second index ℓ denotes delay (tap index). The time dependence of h[n, ℓ ] captures the Doppler-induced variation of each multipath component across the block, while the finite range 
+
+ℓ ∈ { 0, . . . , L −1} reflects bounded delay spread. The receiver observes additive white Gaussian noise (AWGN) represented by vector v ∈ CN with zero mean and covariance σ2 
+
+> v
+
+I.To eliminate intersymbol interference arising from multipath propagation, a guard of Ng ≥ L − 1 samples is added to each transmitted block. After removing the guard at the receiver, the N -sample useful portion of the received signal satisfies 
+
+y[n] = 
+
+> L−1
+
+X
+
+> ℓ=0
+
+h[n, ℓ ] x[n − ℓ] + v[n], (1) for n = 0 , 1, . . . , N − 1. This equation describes the time-varying convolution between the transmitted signal and the channel [2]. With the tap-based finite-impulse-response (FIR) parametrization, the estimation model does not require the physical Doppler shifts to be integer multiples of the bin resolution. In contrast, delay–Doppler parametrizations must explicitly model the inter-bin leakage caused by off-grid shifts [27]. The input–output relationship (1) can be written as the matrix–vector product 
+
+y = Hx + v, (2) where the effective channel matrix H ∈ CN ×N is constructed as follows. The channel coefficient matrix G ∈ CN ×L,with columns gℓ = [h[0 , ℓ ], . . . , h [N − 1, ℓ ]] T ∈ CN for 
+
+ℓ = 0 , . . . , L − 1, collects the time-varying tap sequences over the block. After guard insertion and removal, the effective interference-free channel matrix decomposes as 
+
+H =
+
+> L−1
+
+X
+
+> ℓ=0
+
+diag( gℓ) Sℓ, (3) where Sℓ ∈ CN ×N is the guard-dependent shift operator. The three guard modes considered here give the following shift structures:  
+
+> •
+
+Cyclic Prefix (CP): Sℓ, cp = Πℓ, where Π is the N × N
+
+cyclic permutation matrix  
+
+> •
+
+Zero Padding (ZP): [Sℓ, zp ]n,k = 1[n = k + ℓ], the nilpotent lower-shift of order ℓ, which treats wrapped samples as zero rather than recycling them.  
+
+> •
+
+Chirp Periodic Prefix (CPP): Sℓ, cpp = ΩℓΠℓ, where 
+
+Ωℓ = diag( ωℓ[k]) N −1 
+
+> k=0
+
+with ωℓ[k] = ej2πc 1(ℓ2−2ℓk )/N 
+
+for k = 0 , . . . , ℓ − 1 and ωℓ[k] = 1 otherwise, so that the chirp phase correction applies only to the ℓ cyclically wrapped samples [27], [28]. The decomposition (3) reveals that the effective channel matrix is a superposition of L time-varying scaled-shift terms, one per delay tap, with the shift structure fully determined by the guard mode. The transmit vector x carries both pilot and data symbols. A symbol vector s ∈ CNs collects Np known pilot symbols 
+
+sp ∈ CNp and Nu unknown payload symbols su ∈ CNu , with 
+
+Ns = Np + Nu. Binary selection matrices Pp ∈ { 0, 1}Ns×Np
+
+and Pu ∈ { 0, 1}Ns×Nu place each class into the common vector as 
+
+s = Ppsp + Pusu, PTp Pu = 0, (4) where the constraint PTp Pu = 0 enforces disjoint pilot and payload positions before modulation. A coding matrix C ∈ CN ×Ns then maps the symbol vector into the transmitted block x = Cs . At the receiver, a unitary transformation D ∈ CN ×N (DH D = I) maps the received block into the desired signal domain. The unified input-output relation is 
+
+r = D
+
+> L−1
+
+X
+
+> ℓ=0
+
+diag( gℓ)Sℓ
+
+!
+
+C (Ppsp + Pusu) + w, (5) where w = Dv ∼ CN (0, σ 2
+
+> w
+
+I).Estimating the full N L -element time-varying channel ma-trix G directly from pilot observations is a high-dimensional problem. For realistic mobile channels satisfying the under-spread property, the true channel degrees of freedom are much smaller than the apparent dimensionality N L of G.BEMs exploit this structural redundancy by representing the channel with Q basis functions and QL coefficients, where 
+
+Q ≪ N . The effective channel dimension is thereby reduced from N L to QL parameters, at the cost of a controlled mod-eling error and with a substantial reduction in pilot overhead and estimation complexity. The general BEM representation of the channel coefficient matrix is 
+
+G = ΦΓ + E, (6) where Φ ∈ CN ×Q is the basis matrix, Γ ∈ CQ×L is the coefficient matrix, and E ∈ CN ×L is the modeling error containing the channel components outside the BEM subspace. The choice of Q must satisfy two competing requirements. It should be much smaller than N to provide meaningful dimensionality reduction, but large enough to keep the mod-eling error acceptably small under the anticipated channel conditions. Substitution of the BEM representation (6) into the system model (5) directly relates the received signal to the BEM coefficients. We first define the guard-shifted transmit vectors 
+
+zℓ = Sℓx, ℓ = 0 , 1, . . . , L − 1, (7) where each vector is the transmit block x shifted by Sℓ
+
+according to the guard structure of the ℓ-th delay tap. We arrange these vectors in the composite block matrix 
+
+Z(x) = [diag( z0), . . . , diag( zL−1)] ∈ CN ×N L , (8) 4
+
+which places the transmit contribution of all delay taps in a form compatible with the time-varying channel response. Define the BEM embedding matrix as 
+
+B ≜ IL ⊗ Φ ∈ CN L ×QL , (9) and using vec( G) = Bγ + vec( E) with γ = vec( Γ) ∈ CQL ,the BEM sensing matrix 
+
+Ψ(x) = DZ (x)B ∈ CN ×QL (10) contains the joint effects of the transmit signal, the basis functions, and the observation-domain transformation. With the effective modeling error η(x) = DZ (x) vec( E), the system model becomes 
+
+r = Ψpγ + Ψu(su)γ + η(x) + w, (11) where Ψ(x) = Ψp + Ψu(su) follows from the linearity of 
+
+Z(·). This separation also identifies which terms are known at the receiver. The pilot contribution Ψpγ supports pilot-only channel estimation, whereas the payload contribution 
+
+Ψu(su)γ depends on unknown data and can interfere with the estimate. The receiver can construct the pilot sensing matrix before detection, but it cannot construct the payload sensing matrix until the data symbols are known. The modeling error η
+
+measures the mismatch between the true channel and its BEM approximation, and its effect depends on the basis functions and on Q.III. P ILOT -P ROJECTED CHANNEL ESTIMATION AND ZERO 
+
+PILOT –D ATA INTERFERENCE 
+
+The BEM representation reduces channel estimation to the recovery of γ from the observation (11). The receiver must estimate these coefficients from the known pilots before equalization, but the system model contains error terms that the receiver cannot reconstruct. In practice, the receiver adopts the observation model 
+
+r = Ψpγ + Ψu(su)γ + w, (12) where the modeling error η(x) is omitted. Any out-of-subspace channel component, however, remains as a mismatch that does not average out with the noise and therefore bounds the achievable accuracy at high SNR. The assumed model still depends on the unknown data symbols, and the receiver must in general solve a joint detection problem. The joint ML estimator of the payload and the channel coefficients minimizes the coupled LS cost 
+
+(ˆ su, ˆγ) = arg min 
+
+> su∈A Nu
+> γ∈CQL
+
+E(su, γ),
+
+E(su, γ) ≜ ∥r − Ψ(su)γ∥2 .
+
+(13) Consider first the genie-aided case in which the receiver knows the transmitted payload block su. For a fixed su, the sensing matrix Ψ(su) is known and (12) becomes a standard linear Gaussian model in γ. If Ψ(su) has full column rank, the LS estimate is 
+
+ˆγ =
+
+
+
+ΨH (su)Ψ(su)
+
+−1
+
+ΨH (su)r, (14) which coincides with the ML estimate under the Gaussian assumption. Since the modeling error has been dropped from (12), even the ML solution may not recover the true γ.Decision-directed receivers approximate the target in (14). Iterative data-aided schemes, such as the BEM-OTFS receiver of Liu et al. [23], begin with a pilot-based channel estimate, use it to detect the payload ˆsu, rebuild the sensing matrix 
+
+Ψ(ˆ su), and refine ˆγ. This refinement exploits the payload, but its accuracy depends on the quality of the initial estimate because reliable payload decisions are unavailable before the channel is known. Errors in the initial estimate can therefore propagate through the payload decisions and into subsequent channel updates. Equation (14) cannot be used in the first stage, so a standalone pilot-only estimator is needed to ini-tialize such a receiver. We consider the conventional matched-pilot estimator, which uses the known pilot sensing matrix Ψp because the payload contribution in (12) is not available at this stage. Ap-plying the matched pilot filter ΨHp projects the received vector onto the pilot subspace and produces the QL -dimensional pilot statistic 
+
+tp ≜ ΨHp r = Rpp γ + Rpu (su)γ + ewp, (15) where 
+
+Rpp ≜ ΨHp Ψp, Rpu (su) ≜ ΨHp Ψu(su), (16) and the projection colors the thermal noise as 
+
+ewp ≜ ΨHp w ∼ CN  0, σ 2
+
+> w
+
+Rpp 
+
+ . (17) The matched filter is the natural reduction for estimating γ
+
+from the pilots, but it does not separate the pilot and payload contributions. The pilot statistic still carries the PDI term 
+
+ζp(su) ≜ Rpu (su)γ, (18) which arises from the cross-correlation Rpu (su) between the pilot and payload sensing matrices. Because it lies in the same 
+
+QL -dimensional subspace used to recover γ, it cannot be separated from the useful term Rpp γ by linear filtering of 
+
+tp alone. The severity of the PDI becomes explicit when the ordinary matched-pilot LS filter R−1 
+
+> pp
+
+is applied to the pilot statistic, which gives 
+
+R−1 
+
+> pp
+
+tp = γ + R−1 
+
+> pp
+
+Rpu (su)γ + R−1 
+
+> pp
+
+ewp. (19) The first term is the desired channel, and the third is a noise contribution that vanishes as σ2 
+
+> w
+
+→ 0. The second term is the PDI, which, unlike the noise, does not vanish at high SNR. Raising the pilot power relative to the payload attenuates but does not cancel it, and averaging over the noise leaves it unchanged, because for a given transmitted block the PDI is a deterministic function of the payload actually sent. A standalone matched-pilot estimator therefore cannot recover the channel reliably unless the PDI term is eliminated or rendered negligible. The proposed approach enforces this requirement directly. If the pilot and payload sensing matrices are designed so that Rpu (su) = 0 for every admissible payload vector, the 5
+
+PDI term disappears from (15) for every channel realization. The resulting estimator is independent of both the transmitted payload realization and any assumed payload distribution in this model. The known pilot Gram matrix then yields a closed-form matched-pilot LS/ML estimator for the reduced pilot statistic. 
+
+A. Zero Pilot–Data Interference Condition 
+
+The pilot statistic in (15) depends on the unknown payload through the term Rpu (su)γ. The matched-pilot estimator is therefore decoupled from the data symbols only if 
+
+Rpu (su) = ΨHp Ψu(su) = 0, ∀ su, (20) which we term the ZPDI condition. 
+
+Proposition 1 (Matched-Pilot Decoupling) . Assume that Ψp
+
+has full column rank, and consider the matched-pilot estimator 
+
+ˆγ = R−1 
+
+> pp
+
+tp. Within the selected BEM subspace, this estimator recovers γ exactly in the noiseless model for every admissible payload vector and every coefficient vector if and only if the ZPDI condition (20) holds. Under (20) ,
+
+ˆγ = R−1 
+
+> pp
+
+tp =
+
+
+
+ΨHp Ψp
+
+−1
+
+ΨHp r, (21) 
+
+which depends only on the pilot matrix Ψp and the received signal r, and coincides with the ML estimator for the reduced pilot-projected observation tp in (15) under Gaussian noise with covariance (17) .Proof: In the noiseless BEM model, the estimation error is, by (15), ˆγ − γ = R−1 
+
+> pp
+
+Rpu (su)γ. If (20) holds, this error vanishes for every su and γ, which proves sufficiency. Conversely, exact recovery for every γ and every admissible 
+
+su requires R−1 
+
+> pp
+
+Rpu (su)γ = 0 for all γ and su; nonsingu-larity of Rpp then gives Rpu (su) = 0 for every admissible payload vector, which proves necessity. Finally, under ZPDI, 
+
+tp ∼ CN (Rpp γ, σ 2
+
+> w
+
+Rpp ), and maximization of the Gaussian likelihood over γ yields ˆγ = R−1 
+
+> pp
+
+tp.Proposition 1 characterizes the validity domain of the famil-iar matched-pilot formula, not new LS algebra. Its necessity result applies specifically to the matched pilot statistic and does not exclude more general oblique projections of the complete observation. Such processing lies outside the reduced statistic tp and may enhance noise. ZPDI instead makes the standard pilot projection payload-independent without this correction. Hereafter, the term ZPDI estimator denotes the standard LS/ML estimator in (21) when the pilot pattern satisfies the ZPDI condition. 
+
+Remark 1 (Relation to the Minimum Mean-Squared-Error Pilot-Aided Transmission Conditions of [26]) . Setting D = I,
+
+Sℓ = Πℓ, and Φ equal to the CE-BEM basis reduces (20) to the pilot–data orthogonality condition of [26], while the optimal-excitation condition there corresponds to Rpp =(Ep/N )I, i.e., the κ(Rpp ) = 1 matched-filter case of Sec-tion IV-C. Here ZPDI and the Gram condition play separate roles: ZPDI alone decides payload independence, for arbitrary BEM subspaces and the guard structures of (3), while the Gram matrix is treated separately as an identifiability, con-ditioning, and complexity parameter (Section IV). This sep-aration admits estimators whose Gram matrix is deliberately not a scaled identity, such as the oversampled GCE-BEM of Section V, which therefore remain valid while lying outside the optimal-excitation characterization of [26]. Condition (20) admits a direct geometric reading. The columns of Ψp are the channel-shifted pilot waveforms through which the matched filter ΨHp observes the BEM co-efficient vector γ, and those of Ψu(su) are the corresponding payload waveforms. The requirement ΨHp Ψu(su) = 0 places the payload column space in the orthogonal complement of the pilot column space for every admissible su, so the payload falls in a subspace the estimator does not observe and the term 
+
+Rpu (su)γ in (15) vanishes for any channel realization. The pilot-design problem thus becomes geometric: decou-pling is obtained by shaping the supports of pilots, guards, and data within the frame so that their channel-shifted images occupy orthogonal subspaces. This decoupling is deterministic. Unlike statistical inter-ference suppression, decision-directed refinement, or iterative joint estimation and detection (13), whose estimates depend on the payload, its statistics, or tentative decisions, the ZPDI estimator reduces to the single matrix–vector product (21); its Gram matrix Rpp depends only on the pilot pattern, the BEM basis, and the system dimensions, and is precomputed once and reused for every frame. The estimate is then limited not by pilot–data interference but only by thermal noise, the conditioning of Rpp , the finite BEM modeling error, and residual support or synchronization mismatch. The orthogonality ΨHp Ψu(su) = 0 is a single global condition. For pilot design, however, it is more informative to examine the condition one delay tap at a time. Writing 
+
+Ψp = [ Ψp, 0, . . . , Ψp,L −1] and similarly for the payload, ZPDI is guaranteed when 
+
+ΨHp,ℓ Ψu,m = 0 ∀ ℓ, m ∈ { 0, 1, . . . , L − 1}, (22) where Ψp,ℓ = D diag( zp,ℓ )Φ and Ψu,m = D diag( zu,m )Φ.Each block ΨHp,ℓ Ψu,m measures the leakage of the data carried at delay m into the pilot observation at delay ℓ. Since the channel can place energy on any of the L taps, a single index pair is not enough: complete decoupling requires all L2 blocks to vanish simultaneously, so that the pilots remain orthogonal to the data after every admissible delay shift. Condition (22) still depends on the BEM basis Φ and can therefore be checked only after the basis has been fixed. A stronger and simpler rule removes this dependence by acting directly on the time-domain pilot and data vectors before application of the basis. This rule requires more than disjoint pilot and data positions in the transmitted block. For every pair of delay shifts (ℓ, m ) ∈ { 0, . . . , L −1}2 applied independently to the pilot and data through the shift operators of (3), the shifted pilot and shifted data must occupy disjoint positions. Disjoint unshifted supports alone do not ensure this property: a delay shift can move the pilot onto a data position, or the data onto a pilot position, even when their original supports are disjoint. 6
+
+Proposition 2 (Disjoint Support Condition for Zero Inter-ference) . Consider the block-structured observation matrices 
+
+Ψp,ℓ = D diag( zp,ℓ )Φ and Ψu,m = D diag( zu,m )Φ, where 
+
+DH D = I. A sufficient condition for ΨHp,ℓ Ψu,m = 0 for all 
+
+ℓ, m is 
+
+z∗ 
+
+> p,ℓ
+
+⊙ zu,m = 0 ∀ ℓ, m ∈ { 0, 1, . . . , L − 1}. (23) 
+
+Proof: The cross-correlation block can be expressed as 
+
+ΨHp,ℓ Ψu,m = ΦH diag( z∗
+
+> p,ℓ
+
+)DH D diag( zu,m )Φ
+
+= ΦH diag( z∗ 
+
+> p,ℓ
+
+⊙ zu,m )Φ, (24) where the second equality uses DH D = I and 
+
+diag( a) diag( b) = diag( a ⊙ b). If (23) holds, the middle diagonal matrix vanishes and the result follows for all ℓ, m .The disjoint-support condition (23) is a practical design rule. The vectors zp,ℓ and zu,m are the pilot and data seen through delay shifts ℓ, m ∈ { 0, . . . , L − 1}, and the condition asks that no shifted pilot land on a shifted data position, so pilot and data must be separated by the full delay support on either side. This is precisely the role of the guard: a narrower guard lets a shifted pilot overlap the data and reintroduces Rpu (su)γ,whereas a wider one only consumes resource elements without improving the decoupling. 
+
+Remark 2 (Use as an iterative-receiver initializer) . The es-timator in (21) is available before payload detection and can therefore initialize decision-directed BEM receivers. After detection, one may rebuild Ψ(ˆ su) and apply the data-aided LS update in (14). Thus the ZPDI estimator can be used either as a stand-alone pilot-only estimator or as the first stage of an iterative receiver, such as [22], [23], without modification. IV. I DENTIFIABILITY , C ONDITIONING , AND COMPLEXITY OF THE ZPDI E STIMATOR 
+
+Once Rpu (su) = 0, the payload term disappears from the pilot statistic and the estimator is governed entirely by the pilot Gram matrix Rpp . This matrix describes the inner geometry of the pilot observation, rather than the level of interference: it is the Gram matrix of the channel-shifted pilot waveforms through which γ is observed. The guard must annihilate Rpu ,whereas, after removal of the data term, Rpp determines whether γ can be recovered and how sensitive that recovery is. Its rank sets coefficient identifiability ; its spectrum sets estimator conditioning and the associated noise enhancement; and its structure sets the computational cost of the inversion. The following subsections examine these roles separately. 
+
+A. Identifiability 
+
+The ZPDI condition removes the payload from the pilot statistic, but it does not guarantee that the QL BEM coeffi-cients in γ can be recovered. The estimator (21) is well defined only if Ψp has full column rank, that is, if 
+
+rank( Ψp) = QL, equivalently Rpp ≻ 0. (25) This requirement is what limits the BEM order. The pilot observation matrix Ψp = DZ pB has QL columns, but it is built from the known pilot excitation Zp ≜ Z(xp),which produces only Nobs ≜ rank( Zp) independent scalar observations. The basis B cannot create observations that the pilots do not excite, so rank( Ψp) ≤ Nobs and full column rank requires 
+
+Nobs ≥ QL. (26) The admissible BEM order is therefore capped at 
+
+Q ≤
+
+ Nobs 
+
+L
+
+
+
+. (27) The bound is a direct count: the L delay taps carry Q coef-ficients each, for QL unknowns, while the pilots supply only 
+
+Nobs independent equations. Choosing Q above (27) makes 
+
+Ψp rank deficient, so distinct coefficient vectors produce the same pilot statistic and no unique estimate exists. The count is necessary but not sufficient, since the retained basis functions may still be linearly dependent under the pilot operator; the operative requirement remains (25). 
+
+B. Conditioning and Noise Enhancement 
+
+Identifiability guarantees that Rpp is invertible, but not that the inversion is well conditioned. Under ZPDI the pilot statistic reduces to tp = Rpp γ + ewp, with ewp given by (17), so once the payload is removed the estimate applies R−1 
+
+> pp
+
+to a noisy pilot statistic and its accuracy depends on how this inverse acts on the matched noise. When Rpp is close to a scaled identity, all coefficient directions are treated comparably and the matched noise is not amplified. When Rpp is nearly singular, the identifiability condition (25) still holds, so the solution remains unique, but small perturbations of the pilot statistic translate into large errors in γ. The condition number 
+
+κ(Rpp ) measures this sensitivity and sets the worst-case noise enhancement of the ZPDI estimator. 
+
+C. Zero Pilot–Pilot Leakage and Inversion Complexity 
+
+By analogy with ZPDI, we define the zero pilot–pilot leakage (ZPPL) condition as 
+
+ΨHp,i Ψp,j = 0, ∀ i̸ = j. (28) This condition nulls the cross-Gram matrices between the pilot observations of different delay taps. It therefore governs whether the coefficient groups of distinct taps remain coupled once ZPDI is established. Partition Rpp into L × L blocks Rij ≜ ΨHp,i Ψp,j , so that 
+
+Rij is the cross-Gram matrix of taps i and j. Under ZPPL every off-diagonal block vanishes, hence 
+
+Rpp = blkdiag( R00 , . . . , RL−1,L −1) , (29) and, provided that each Q × Q diagonal block is nonsingular, the estimator separates into L per-tap estimators, 
+
+ˆγ =
+
+
+
+R−100 ΨHp, 0
+
+...
+
+R−1
+
+> L−1,L −1
+
+ΨHp,L −1
+
+ r. (30) 7
+
+Thus ZPPL makes Rpp block diagonal, but not necessarily diagonal. Diagonality requires, in addition, that distinct BEM functions within the same delay tap be uncorrelated. Since 
+
+[Rℓℓ ]a,b = 
+
+> N−1
+
+X
+
+> n=0
+
+|zp,ℓ [n]|2ϕ∗
+
+> a
+
+[n]ϕb[n], (31) 
+
+Rpp is diagonal if and only if ZPPL holds and  
+
+> N−1
+
+X
+
+> n=0
+
+|zp,ℓ [n]|2ϕ∗
+
+> a
+
+[n]ϕb[n] = 0 , ∀ ℓ, a ̸ = b. (32) Condition (32) is a pilot-weighted orthogonality condition on the BEM functions. The diagonal entries may still differ, so diagonality alone does not imply ideal conditioning. These structural properties translate directly into the inver-sion cost. Let d = QL be the number of unknowns. A dense 
+
+Rpp requires an O(d3) = O(Q3L3) inversion, whereas under ZPPL the L independent blocks reduce this cost to O(LQ 3)
+
+and can be inverted in parallel. When (32) also holds, Rpp is diagonal and the inversion reduces to QL scalar reciprocals. Since the pilot pattern, the BEM basis, and the system dimensions are fixed, the projection 
+
+Wp = R−1 
+
+> pp
+
+ΨHp (33) can be precomputed once and stored. Each frame then requires only the product ˆγ = Wpr, with O(N QL ) online complexity. The benefit of ZPPL is therefore confined to the offline inversion, which it makes cheaper and parallelizable, while the online complexity order remains the same unless further pilot sparsity is exploited. V. OTFS C HANNEL ESTIMATION AND GCE-BEM ANALYSIS 
+
+We apply the preceding framework to OTFS modulation. OTFS maps symbols to the DD domain, where the time-varying channel appears approximately quasi-static and can be estimated and equalized effectively. Fractional Doppler shifts, however, reduce DD sparsity and introduce modeling error when the BEM basis does not represent them adequately. The estimator of Section III operates in any linear transformation domain satisfying DH D = I because the ZPDI condition of Section III-A and the ZPPL condition of Section IV-C do not depend on the observation domain. Setting D = I
+
+places the estimator directly in the time domain, without loss of generality, and gives 
+
+ˆγ = R−1 
+
+> pp
+
+tp =
+
+
+
+ΨHp Ψp
+
+−1
+
+ΨHp r . (34) This time-domain form is the one adopted throughout the OTFS specialization below. 
+
+A. OTFS System Model 
+
+Consider an OTFS delay–Doppler grid represented by a 
+
+K × M matrix S, where K denotes the number of delay bins and M denotes the number of Doppler bins. The total OTFS frame spans N = KM time samples, where N matches the observation interval length in the general formulation of Section II. In the reduced-CP variant of OTFS, one CP is prepended to the entire frame before transmission. After CP removal, the received signal in the DD domain can be expressed as 
+
+r = ( FM ⊗ IK ) H  FHM ⊗ IK
+
+ s + w, (35) where FM is the M -point discrete Fourier transform (DFT) matrix, H is the time-domain doubly dispersive channel ma-trix, s is the KM -dimensional column vector obtained by column vectorization of the DD grid S, and w is the additive noise vector. The system model (35) has the same structure as the general model (5) with the identification D = ( FM ⊗ IK )
+
+and C =  FHM ⊗ IK
+
+.
+
+B. Single Pilot with Full Guard 
+
+We consider an embedded single-pilot pattern in the DD grid, with guard symbols spanning all Doppler bins and the complete delay extent required by the channel support. This is the standard full-guard pilot configuration used in earlier OTFS work, including [12]. We analyze whether this pattern guarantees pilot-only channel estimation under the ZPDI condition. The pilot pattern uses a single pilot symbol sp ∈ C placed at coordinates (kp, m p) within the DD grid, where indices kp ∈{0, . . . , K −1} and mp ∈ { 0, . . . , M −1} specify the delay and Doppler bin positions, respectively. The pilot is surrounded by a rectangular guard region consisting of null symbols, 
+
+S[k, m ] = 
+
+
+
+sp if k = kp, m = mp
+
+0 if kp − L + 1 ≤ k ≤ kp + L − 1,
+
+0 ≤ m ≤ M − 1,
+
+(k, m )̸ = ( kp, m p)
+
+su[k, m ] otherwise (payload symbols) (36) where L denotes the maximum channel delay spread expressed in delay bins, and su[k, m ] represents the payload symbols occupying positions outside the guard region. The guard region contains (2 L − 1) M − 1 null symbols. The pilot is typically positioned at (kp, m p) = ( ⌊K/ 2⌋ − 
+
+1, ⌊M/ 2⌋− 1) , near the geometric center of the delay–Doppler grid. The spectral-efficiency overhead of this pattern is (2 L −
+
+1) M/ (KM ) = (2 L − 1) /K , namely, the fraction of cells reserved for channel estimation rather than data transmission. Because this overhead grows linearly with the channel-length parameter L, it remains moderate for channels with moderate delay spreads but becomes more costly as the delay spread increases. The applicability of the pattern therefore depends on the required balance between estimation accuracy and spectral efficiency. 
+
+C. Analysis of Pilot–Data Orthogonality 
+
+The single-pilot full-guard pattern of (36) satisfies the zero pilot–data interference condition, so that it admits the exact, interference-free ZPDI estimator. 8
+
+We evaluate the orthogonality condition in the equivalent time-domain representation obtained by setting D = I, as established above. 
+
+Proposition 3 (Zero Pilot–Data Interference) . The single-pilot OTFS pattern defined in (36) satisfies the zero pilot–data interference condition 
+
+Rpu (su) = ΨHp Ψu(su) = 0, ∀ su, (37) 
+
+where Ψp = ZpB and Ψu(su) = ZuB are the pilot and pay-load observation matrices in the time-domain specialization 
+
+D = I introduced above. Proof: We verify the disjoint-support condition of Propo-sition 2. A sufficient condition for (37) is 
+
+z∗ 
+
+> p,ℓ
+
+⊙ zu,ν = 0, ∀ ℓ, ν ∈ { 0, 1, . . . , L − 1}, (38) where zp,ℓ and zu,ν are the ℓ-th and ν-th columns of Zp and 
+
+Zu. Vectorizing the DD grid (36) places the unshifted pilot on P0 = {kp + qK | q = 0 , . . . , M − 1}, and the cyclic shift 
+
+zp,ℓ = Πℓzp, 0 moves it to Pℓ = {(kp + ℓ + qK ) mod N |
+
+q = 0 , . . . , M − 1}. The guard region of (36) annihilates the unshifted payload on G = SM −1 
+
+> q=0
+
+{kp − L + 1 + qK, . . . , k p +
+
+L−1+ qK }, and the shifted payload vector satisfies zu,ν [n] = 
+
+xu[( n−ν) mod N ], so it vanishes wherever (n−ν) mod N ∈G, that is, on a copy of G shifted by ν, not on G itself. Placing kp so that [kp −L+1 , k p +L−1] ⊂ { 0, . . . , K −1}
+
+excludes wrap-around for every admissible shift. For n ∈ P ℓ,
+
+n = kp + ℓ + qK , so n − ν = kp + ( ℓ − ν) + qK with 
+
+ℓ − ν ∈ {− (L − 1) , . . . , L − 1}, which always lies in {kp −
+
+L + 1 + qK, . . . , k p + L − 1 + qK } ⊆ G ; hence zu,ν [n] = 
+
+xu[n−ν] = 0 . Every nonzero entry of zp,ℓ therefore falls on a position where zu,ν vanishes, for every ℓ, ν ∈ { 0, . . . , L − 1},which establishes (38) and, by Proposition 2, (37). The orthogonality condition (38) imposes the constraint 
+
+K > 2L − 2. This requirement is necessary and sufficient to prevent wrap-around interference in the cyclic permutations induced by the cyclic prefix under the adopted guard pattern. Indeed, the upper guard boundary (kp + L − 1) must not interfere with the lower boundary (kp −L+1) after modulo-K
+
+wrapping, which requires (kp + L − 1) − (kp − L + 1) < K ,or equivalently 2L − 2 < K . Additionally, proper placement of the pilot with guards on both sides requires L − 1 ≤ kp ≤
+
+K − L, which is possible only when K > 2L − 2.
+
+D. Pilot–Pilot Leakage 
+
+The adopted full-guard pattern satisfies ZPDI. We next determine whether it also satisfies the ZPPL condition in (28). 
+
+Proposition 4 (ZPPL for the OTFS Full-Guard Pattern) . For the single-pilot full-guard pattern, the shifted pilot vectors have disjoint supports across different delay taps, i.e., 
+
+z∗ 
+
+> p,i
+
+⊙ zp,j = 0, i̸ = j, (39) 
+
+and each shifted pilot vector satisfies 
+
+∥zp,i ∥2 = Ep, i = 0 , . . . , L − 1, (40) 
+
+where Ep = |sp|2 denotes the pilot energy. Consequently, the pattern satisfies ZPPL for any BEM basis Φ.Proof: For i̸ = j, the supports of the shifted pilot vectors are 
+
+Pi = {kp + i + qK | q = 0 , . . . , M − 1},
+
+Pj = {kp + j + qK | q = 0 , . . . , M − 1}.
+
+They do not overlap because i̸ = j and, under the condi-tion K > 2L − 2, no modulo-N wrap-around occurs for 
+
+i, j ∈ { 0, . . . , L −1}. Hence no sample can be nonzero in both 
+
+zp,i and zp,j , which proves (39). For i = j, each pilot vector 
+
+zp,i contains M nonzero elements at positions kp + i + qK 
+
+for q = 0 , . . . , M − 1, each with magnitude |sp|/√M due to the inverse symplectic finite Fourier transform (ISFFT) normalization. Thus 
+
+∥zp,i ∥2 = 
+
+> M−1
+
+X
+
+> q=0
+
+sp
+
+√M
+
+> 2
+
+= 
+
+> M−1
+
+X
+
+> q=0
+
+|sp|2
+
+M
+
+= M · |sp|2
+
+M = |sp|2 = Ep
+
+(41) which proves (40). Finally, the cross-Gram identity (24) in the proof of Proposition 2, applied with zu,m replaced by zp,j ,maps the disjoint supports (39) directly to ΨHp,i Ψp,j = 0 for 
+
+i̸ = j, independently of the BEM basis. The proposition establishes elementwise disjoint support, which is the condition required for ZPPL and is stronger than ordinary vector orthogonality. It therefore verifies (28) for the OTFS full-guard pattern. By the general block-diagonal result (29), the pilot Gram matrix Rpp = ΨHp Ψp, with Ψp = ZpB,is therefore block diagonal. Since each delay tap excites M
+
+time-domain samples of equal energy Ep/M , it takes the explicit form 
+
+Rpp = Ep
+
+M blkdiag( T0, T1, . . . , TL−1) , (42) where Tℓ ∈ CQ×Q is the Gram matrix of the Q BEM basis functions sampled at the M pilot positions of delay tap ℓ.Thus Tℓ is the OTFS specialization of the general diagonal block Rℓℓ of Section IV-C, with Rℓℓ = ( Ep/M ) Tℓ. The estimator then separates into the L independent per-tap solves that specialize (30), 
+
+ˆγℓ = M
+
+Ep
+
+T−1 
+
+> ℓ
+
+ΨHp,ℓ r, ℓ = 0 , 1, . . . , L − 1, (43) where Ψp,ℓ is the ℓ-th block column of Ψp.The per-tap form makes the identifiability condition of Section IV-A concrete for OTFS. Each Tℓ is the Gram matrix of Q basis functions observed at only M pilot positions, so its rank cannot exceed M , and the inverse in (43) exists only if 
+
+Q ≤ M. (44) This is the per-tap instance of the general counting condition (26): the single-pilot full-guard pattern supplies Nobs = M
+
+independent observations per delay tap, so the admissible BEM order is bounded by the number of Doppler bins. 9
+
+E. GCE-BEM Analysis 
+
+The full-guard pattern guarantees pilot–data orthogonality for any BEM choice, but the basis functions still determine the pilot Gram matrix Rpp = ΨHp Ψp, which governs numerical conditioning and inversion complexity. Since Rpp is block diagonal, the analysis reduces to the per-tap blocks Tℓ, the Gram matrix of the basis functions restricted to the pilot support Pℓ.We adopt the GCE-BEM basis ϕq [n] = 1√N exp( jω q n), for 
+
+n = 0 , . . . , N − 1 and q = 0 , . . . , Q − 1, with frequencies 
+
+ωq = 2πN R 
+
+ q − ⌈ (Q − 1) /2⌉. The oversampling factor R ≥ 1
+
+sets the Doppler-grid spacing to 2π/ (N R ); R = 1 recovers the conventional CE-BEM on the DFT grid 2π/N , while larger R
+
+refines the Doppler grid and better resolves fractional Doppler components. For the single-pilot pattern, the pilot positions follow n =
+
+kp + ℓ + qK , q = 0 , . . . , M − 1, and direct summation of 
+
+Tℓ[a, b ] = P 
+
+> n∈P ℓ
+
+ϕ∗
+
+> a
+
+[n]ϕb[n] over this geometric sequence gives the closed-form entries 
+
+Tℓ[a, b ] = 1
+
+K exp 
+
+
+
+j 2π(b − a)( kp + ℓ)
+
+N R 
+
+
+
+× exp 
+
+
+
+j π(M − 1)( b − a)
+
+M R 
+
+
+
+DM
+
+ π(b − a)
+
+M R 
+
+
+
+,
+
+(45) where a, b ∈ {0, . . . , Q − 1} and DM (x) =sin( M x )/(M sin x) is the Dirichlet kernel. Equation (45) shows that Tℓ is Hermitian Toeplitz, with diagonal 
+
+Tℓ[a, a ] = 1/K since DM (0) = 1; for R > 1 the Dirichlet kernel populates the off-diagonal entries, which vanish only when b − a is a nonzero multiple of R with 
+
+(b − a) mod M R ̸ = 0. Since Tℓ is generated by the M
+
+pilot samples of Pℓ, rank( Tℓ) ≤ M , confirming for the GCE-BEM the per-tap identifiability ceiling Q ≤ M of (44): the per-tap problem is exactly determined at Q = M ,overdetermined and better conditioned at Q < M , and rank deficient at Q > M . The oversampling factor therefore trades Doppler resolution against conditioning: a larger R reduces the fractional-Doppler modeling error but, through the same loss of basis orthogonality, raises κ(Rpp ) and amplifies the noise at high SNR. When R = 1, the Dirichlet kernel is orthogonal for 
+
+Q ≤ M , so every per-tap block collapses to Tℓ = 1 
+
+> K
+
+IQ
+
+and the pilot Gram matrix reduces to the scaled identity 
+
+Rpp = ( Ep/N )IQL , the diagonal case of Section IV-C with ideal conditioning κ(Rpp ) = 1 and no matrix inversion. The per-tap estimator (43) then reduces to the scaled matched filter 
+
+ˆγℓ = N
+
+Ep
+
+ΨHp,ℓ r, ℓ = 0 , 1, . . . , L − 1. (46) VI. N UMERICAL ILLUSTRATIONS AND END -TO -E ND 
+
+RESULTS 
+
+Propositions 1 and 2 are analytical statements that hold for every admissible payload. The numerical examples instead illustrate their consequences for OTFS and assess the selected GCE-BEM in the presence of model mismatch.                                
+
+> TABLE I SIMULATION PARAMETERS USED IN THE OTFS NUMERICAL EXAMPLES .
+> Parameter Value
+> Carrier frequency 4GHz Subcarrier spacing 15 kHz Number of delay bins ( K)128
+> Number of Doppler bins ( M)16
+> Pilot-plus-guard cells 112
+> Modulation QPSK Channel model TDL-B RMS delay spread 300 ns Channel length ( L)4
+> Oversampling factor ( R)2
+> Mobility values 125 ,500 km/h GCE-BEM order ( Q)3at 125 ;9at 500 km/h CE-BEM stress order ( Q)15 at 125 km/h
+
+The simulations use an OTFS grid with K = 128 delay bins and M = 16 Doppler bins, for a total of KM = 2048 
+
+cells. The channel follows the Third Generation Partnership Project (3GPP) tapped-delay-line B (TDL-B) model [29], with a root-mean-square (RMS) delay spread of 300 ns and Jakes’ Doppler spectrum. We set the carrier frequency to 4 GHz and the subcarrier spacing to ∆f = 15 kHz, consistent with fifth-generation New Radio numerology. For this setting, the discrete-time channel has length L = 4 .A single pilot is placed at (kp, m p) = ( ⌊K/ 2⌋− 1, ⌊M/ 2⌋− 
+
+1) , using the full-guard pattern of Section V. The frame then contains (2 L − 1) M = 112 pilot-plus-guard cells and 1936 
+
+data cells. The corresponding pilot overhead is 
+
+(2 L − 1) MKM = 7128 ≈ 5.5% .
+
+The single nonzero pilot carries the average energy that quadrature phase-shift keying (QPSK) data symbols would transmit over the same (2 L − 1) M cells. All estimators use the same transmitted frame, pilot energy, and noise variance. Table I collects the remaining simulation parameters. We evaluate the bit error rate (BER) and the channel-estimation MSE, defined as MSE = 1
+
+N L E
+
+h
+
+∥G − ˆG∥2
+
+> F
+
+i
+
+,
+
+where G is the true sample-rate channel coefficient matrix and 
+
+ˆG is its estimate. The expectation is taken over the channel, payload, and noise realizations. 
+
+A. Illustration of the ZPDI Consequences 
+
+We first examine three consequences of the analysis before presenting the end-to-end BER and MSE comparisons: the ZPDI decoupling of Proposition 1, the error decomposition in (19), and the Gram-matrix properties developed in Section IV. Unless stated otherwise, the setup is the 500 km/h operating point of Table I ( K = 128 , M = 16 , L = 4 , GCE-BEM with R = 2 and Q = 9 ); only the channel model is replaced, as described next. To remove the confounding effect of BEM modeling error, the channel is synthesized exactly in the BEM subspace, G = ΦΓ with vec( Γ) ∼ CN (0, IQL ), so that 
+
+E = 0 and the only remaining error sources are the two terms of (19): the payload-dependent bias and the thermal 10 
+
+noise shaped by R−1 
+
+> pp
+
+. Expectations are estimated over 400 
+
+independent channel, payload, and noise realizations ( 200 for the pilot-power sweep). The non-ZPDI configuration is the same single-pilot pattern with the delay guard reduced to half-width d = 1 < L − 1 while the Doppler guard remains full, so that a channel shift maps the pilot onto data cells and reintroduces Rpu (su).
+
+Payload decoupling. Figure 1(a) reports the worst-case normalized pilot–data leakage 
+
+ϵmax PDI = max 
+
+> j
+
+ΨHp Ψu(ej ) F
+
+∥Rpp ∥F
+
+, (47) where ej activates a single payload cell. By linearity of 
+
+Ψu(·), vanishing leakage for every elementary ej certifies it for every admissible payload, making (47) a determinis-tic test of (20) rather than a sampled average. Within the tested family of symmetric delay guards d ∈ { 0, . . . , L − 1}
+
+with full Doppler guard, only the full guard d = L − 1
+
+drives ϵmax PDI to machine precision ( < 10 −15 ); deficient guards 
+
+d ∈ {0, 1, 2} leave ϵmax PDI ∈ {8.2, 6.7, 4.7} × 10 −2. This illustrates Proposition 1: the full guard is the member of this family satisfying the disjoint-support rule of Proposition 2, hence making Rpu (su) = 0 for every admissible payload. The operator-level condition (20) does not, in general, single out a specific guard width, and can also be met by algebraic cancellation without disjoint supports. 
+
+Error decomposition and the interference floor. Figure 1(b) plots the measured channel-estimation normalized MSE (NMSE) of the matched-pilot estimator (21) versus SNR (markers, Monte Carlo) against the closed-form prediction (solid lines) obtained from (19), 
+
+NMSE(SNR) = E R−1 
+
+> pp
+
+Rpu (su)γ 2 
+
+> W
+
++ σ2 
+
+> w
+
+tr  WR −1
+
+> pp
+
+
+
+E∥γ∥2
+
+> W
+
+,
+
+(48) with the channel-domain weighting W = IL ⊗ ΦH Φ and 
+
+∥x∥2 
+
+> W
+
+= xH Wx , so that ∥ ˆG − G∥2 
+
+> F
+
+= ∥ˆγ − γ∥2 
+
+> W
+
+under the exact-BEM channel. The Monte Carlo NMSE follows the prediction to within the sampling scatter across the en-tire range. For the ZPDI full-guard pattern the bias term vanishes and the NMSE coincides with the noise-only curve 
+
+σ2 
+
+> w
+
+tr( WR −1 
+
+> pp
+
+), decreasing without a floor. For the non-ZPDI pattern the bias term is constant in SNR and produces the high-SNR floor predicted by (19). Here the pilot carries the QPSK-matched energy of Table I, i.e., unit pilot-to-data power ratio. Figure 2(a) then fixes the data power and sweeps the pilot energy: the floor, evaluated as the SNR-independent bias term of (48), attenuates as 1/Ep but does not vanish at any finite pilot-to-data ratio, so the interference cannot be removed by pilot power alone. 
+
+Identifiability, conditioning, and structure. The counting ceiling Q ≤ M of (44) is basis-independent, so to exhibit it without the R = 2 conditioning confound Figure 2(b) sweeps the BEM order for the full-guard pattern with the well-conditioned CE-BEM ( R = 1 ), for which Rpp = ( Ep/N )IQL 
+
+while Q ≤ M . The smallest eigenvalue λmin (Rpp ) stays at 
+
+Ep/N with zero rank deficit for all Q ≤ M : at Q = M
+
+the per-tap problem is exactly determined but still full rank. 0 1 2 3       
+
+> delay-guard half-width d
+> 10 -15
+> 10 -10
+> 10 -5
+> 10 0
+> 0PDI  = || *pH*u|| F / ||R pp || F
+> (a) worst-case PDI leakage vs guard
+> ZPDI
+> ::0 (m.p.)
+> 010 20 30 40
+> SNR (dB)
+> 10 -4
+> 10 -2
+> 10 0
+> channel-domain NMSE
+> (b) channel NMSE vs SNR
+> ZPDI (d=L-1) (MC) non-ZPDI (d=1) (MC)
+> <w2tr(W R pp -1 ) (noise only)
+
+Fig. 1. Illustration of the ZPDI consequences under an exact-BEM channel (E = 0), at the 500 km/h operating point of Table I ( R = 2 , Q = 9 ). (a) Worst-case normalized pilot–data leakage ϵmax PDI of (47) over all elementary payloads versus delay-guard half-width d: it collapses to machine precision only at the full guard d = L − 1, as predicted by the disjoint-support rule of Proposition 2. (b) Channel-estimation NMSE versus SNR for the ZPDI (d = L − 1) and non-ZPDI ( d = 1 ) patterns: markers are the measured estimator NMSE and solid lines the closed-form prediction (48); the dashed line is the noise-only term. The non-ZPDI floor is the payload-dependent bias of (19). 10 0 10 1       
+
+> pilot-to-data power ratio (×)
+> 10 -2
+> 10 -1
+> high-SNR NMSE floor
+> (a) interference floor vs pilot power
+> non-ZPDI floor (MC)
+> /1/E p
+> 0510 15 20
+> BEM order Q
+> 10 -20
+> 10 -15
+> 10 -10
+> 10 -5
+> 10 0
+> 6min (R pp ) (CE-BEM, R=1) rank deficit QL - rank(R pp )
+> 0246810 12 14 16
+> (b) identifiability ceiling Q 5M
+> Q > M
+
+Fig. 2. (a) High-SNR NMSE floor of the non-ZPDI pattern versus pilot-to-data power ratio, at fixed data power: the floor attenuates as 1/Ep (dashed) but stays positive at every finite ratio, as anticipated after (19). (b) Smallest eigenvalue (left, CE-BEM R = 1 ) and rank deficit QL − rank( Rpp ) (right) of the full-guard Gram matrix versus BEM order Q: Rpp is full rank for 
+
+Q ≤ M and rank-deficient by L(Q − M ) for Q > M , illustrating the identifiability ceiling (44). 
+
+For Q > M the rank deficit opens as L(Q − M ) and λmin 
+
+drops to zero, so structural singularity begins at Q = M + 1 ,illustrating the ceiling (44); the numerical rank uses the toler-ance QL ε ∥Rpp ∥. Table II collects the remaining deterministic checks at the Q = 9 , R = 2 operating point: the off-tap Gram energy is zero to machine precision, verifying the ZPPL block-diagonalization of (42), and the per-tap blocks match the closed-form Toeplitz expression (45) to 3 × 10 −16 . The condition number κ(Rpp ) ≈ 7.0 × 10 5 enters the predicted noise term σ2 
+
+> w
+
+tr( WR −1 
+
+> pp
+
+) of (48) and quantifies the noise enhancement of this R = 2 oversampled basis discussed in Section IV-B; the CE-BEM limit R = 1 gives κ(Rpp ) = 1 .
+
+B. ZPDI Estimator 
+
+The standalone ZPDI receiver uses a time-domain linear minimum mean-squared error (TD-LMMSE) equalizer built from the estimated channel, compared against perfect CSI, the 11                                                   
+
+> TABLE II GRAM -MATRIX DIAGNOSTICS FOR THE OTFS FULL -GUARD PATTERN ,
+> ILLUSTRATING THE ANALYSIS OF SECTION IV. R OWS ARE EVALUATED AT THE Q= 9 ,R= 2 OPERATING POINT UNLESS STATED ;THE IDENTIFIABILITY ROW USES THE CE-BEM ( R= 1 ).
+> Quantity Measured Predicted
+> ϵmax PDI (full guard) <10 −15 0(20) Off-tap Gram energy (rel.) <10 −15 0(28) Toeplitz closed-form error 2.8×10 −16 0(45)
+> rank( Rpp ),Q= 9 36 QL = 36
+> Rank deficit at Q=M+1 (R=1 )L= 4 L(Q−M)(44)
+> κ(Rpp ),R=2 /R=1 7.0×10 5/1—
+
+estimator of Raviteja et al. [12], and the pilot-only initializa-tion of the iterative BEM receiver of Liu et al. [23]. Since [12] returns the DD-domain matrix bHdd ∈ CK×M
+
+rather than BEM coefficients, we recover slot-rate coefficients per delay tap ℓ by an inverse DFT along Doppler, 
+
+gℓ[q] =  
+
+> M−1
+
+X
+
+> m=0
+
+bHdd [kp + ℓ, m ] ej2πqm/M , q = 0 , . . . , M − 1,
+
+(49) and linearly interpolate to the sample-rate vector gℓ used by the TD-LMMSE equalizer and in the MSE evaluation. The simulations consider v = 125 and 500 km/h. The BEM order is selected within 
+
+Qmin ≜ 2
+
+
+
+Rν max 
+
+M
+
+∆f
+
+
+
++ 1 ≤ Q ≤ M, (50) where Tobs = M/ ∆f is the frame observation time (the M Doppler symbols, each of duration 1/∆f ), so that ⌈Rν max Tobs ⌉ counts the GCE-BEM Doppler-grid points needed on each side of the zero-Doppler term; hence Qmin is the smallest odd GCE-BEM order covering [−νmax , ν max ] and the upper bound is the identifiability limit in (44). Increasing 
+
+Q reduces modeling error but enlarges the coefficient vector and Gram matrix; the MSE decomposition in [1] confirms this trade-off (noise term grows linearly with Q, mismatch term decreases). The Liu receiver [23] uses the R = 1 GCE-BEM (CE-BEM special case) with QS = 15 for initialization and the R = 2 GCE-BEM with QL = 9 for data-aided refinement; since M = 16 , QS = 15 is the largest admissible odd order in (50). Figs. 3a and 4a report BER versus SNR. At v = 125 km/h, GCE-BEM ( Q = 3) stays close to perfect CSI, whereas CE-BEM floors at moderate-to-high SNR even at its largest admissible order Q = 15 . At v = 500 km/h, the ZPDI estimator ( R = 2 , Q = 9 ) is within about 2 dB of perfect CSI at high SNR. ZPDI removes pilot–data interference but not basis mismatch, so the BER still depends on the selected BEM. The Liu initialization ( R = 1 , QS = 15 ) floors at high SNR despite the largest admissible odd CE-BEM order, consistent with residual basis mismatch. The estimator of [12] lies between the two and also floors at v = 500 km/h, where fractional Doppler distorts the reconstructed pilot response. Figs. 3b and 4b show the corresponding MSE. The CE-BEM and Liu-initialization floors account for their BER floors, and the estimator of [12] sits above the ZPDI GCE-BEM curve with a clear floor at v = 500 km/h. The ZPDI GCE-BEM 
+
+Algorithm 1 Decision-directed receiver with ZPDI initializa-tion                                                                      
+
+> Require: r,sp,Pp,Pu,Φ,Wp,Dec ,Imax ,ϵstop .
+> Ensure: ˆsu,ˆG.1: ˆγ(0) ←Wpr.2: Reshape ˆγ(0) into ˆΓ(0) .3: ˆG(0) ←ΦˆΓ(0) .4: for i= 0 , . . . , I max −1do
+> 5: ˆs(i)
+> u←Dec (r; ˆG(i)).6: Build Ψu(ˆ s(i)
+> u)and form Ψ(ˆ s(i)
+> u) = Ψp+Ψu(ˆ s(i)
+> u).7: Update ˆγ(i+1) by (51). 8: Reshape ˆγ(i+1) into ˆΓ(i+1) .9: ˆG(i+1) ←ΦˆΓ(i+1) .10: ϵupd
+> i←(N L )−1∥ˆG(i+1) −ˆG(i)∥2
+> F.11: if ϵupd
+> i≤ϵstop then
+> 12: break
+> 13: end if
+> 14: end for
+> 15: return latest ˆs(i)
+> uand ˆG(i+1) .
+
+MSE keeps decreasing with SNR in both scenarios, with no visible interference-induced floor. 
+
+C. ZPDI Initialization of a Decision-Directed Receiver 
+
+The pilot-only ZPDI estimate can initialize an iterative receiver: tentative payload decisions define a data-aided LS update that approximates the genie-aided estimator in (14). We evaluate this decision-directed receiver at v = 500 km/h. Both branches share the same OTFS frame, TDL-B channel, pilot energy, full-guard pattern, and TD-LMMSE detector as before, so the comparison isolates the pilot-only initialization. The ZPDI-initialized branch uses (R, Q ) = (2 , 9) in both stages; the Liu receiver [23] uses (R, Q S ) = (1 , 15) for initialization and (R, Q L) = (2 , 9) for refinement, varying the number of refinements. Algorithm 1 gives the receiver steps, where Dec (r; ˆG) is the TD-LMMSE detector followed by hard QPSK slicing. At iteration i, the detected payload defines the data-aided LS update 
+
+ˆγ(i+1) =
+
+
+
+ΨH (ˆ s(i) 
+
+> u
+
+)Ψ(ˆ s(i) 
+
+> u
+
+)
+
+−1
+
+ΨH (ˆ s(i) 
+
+> u
+
+)r. (51) The iterations stop at Imax or when the update metric ϵupd  
+
+> i
+
+≜
+
+(N L )−1∥ ˆG(i+1) − ˆG(i)∥2 
+
+> F
+
+falls below ϵstop , for example, 
+
+10 −2.Initialization requires only the precomputed projection 
+
+Wpr, while each refinement costs O(N (QL )2 + ( QL )3) plus the detector cost, dominated by forming and solving the data-dependent normal matrix ΨH (ˆ s(i) 
+
+> u
+
+)Ψ(ˆ s(i) 
+
+> u
+
+).Fig. 5 compares the two receivers. Two refinements after ZPDI initialization bring the BER close to perfect CSI and below the standalone pilot-only ZPDI curve. The Liu receiver retains high-SNR BER floors after one and two iterations; a limit of 20 iterations reduces the floor but stays above the ZPDI-initialized curve. The MSE behaves analogously: two data-aided refinements after ZPDI initialization match the 20-iteration Liu result at high SNR. Since both branches share the same refinement basis and LS update, the difference is due to the pilot-only initialization. 12 0 2 4 6 8 10 12 14 16 18 20 22 
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate
+> Raviteja Liu init. step ZPDI CE-BEM ZPDI GCE-BEM Perfect CSI
+
+(a) BER 0 2 4 6 8 10 12 14 16 18 20 22  
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Mean Squared Error
+> Raviteja Liu init. step ZPDI CE-BEM ZPDI GCE-BEM
+
+(b) MSE Fig. 3. (a) BER and (b) MSE versus SNR at v = 125 km/h for the setup in Table I. The curves show the ZPDI estimator with GCE-BEM, the CE-BEM stress case, the initial pilot-only step of the Liu receiver [23] with (R, Q S ) = (1 , 15) , the estimator of [12], and perfect CSI. The CE-BEM stress case and the Liu initialization retain high-SNR floors at the largest admissible odd CE-BEM order, which is consistent with BEM mismatch. The ZPDI estimator contains no pilot–data interference by construction; see (19). 0 2 4 6 8 10 12 14 16 18 20 22 
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate
+> Raviteja Liu init. step ZPDI GCE-BEM Perfect CSI
+
+(a) BER 0 2 4 6 8 10 12 14 16 18 20 22  
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Mean Squared Error
+> Raviteja Liu init. step ZPDI GCE-BEM
+
+(b) MSE Fig. 4. (a) BER and (b) MSE versus SNR at v = 500 km/h. The estimators are the same as in Fig. 3, except that the CE-BEM stress case is omitted; the Liu initialization uses (R, Q S ) = (1 , 15) . The reference floors are consistent with BEM or time-domain reconstruction mismatch. The ZPDI estimator has no visible floor over the simulated SNR range; see (19). 
+
+VII. C ONCLUSION 
+
+This paper established exact conditions for payload-decoupled pilot-only BEM channel estimation. The result iden-tifies when the usual matched-pilot LS estimate is payload-independent and equals the ML estimator for the reduced pilot statistic. If ZPDI fails, residual PDI becomes a deterministic, channel-scaled bias that produces a high-SNR error floor at any fixed pilot-to-data power ratio and cannot be removed by averaging. The operator-level condition covers arbitrary BEM subspaces, any unitary observation transform, and CP, ZP, and CPP guards. A basis-agnostic disjoint-support rule provides an explicit criterion for pilot, guard, and data placement. It gives an exact design test for a candidate pilot pattern. The separate pilot Gram matrix then governs identifiability, conditioning, and the cost of the single offline inversion. Under ZPDI, the online estimator requires one precomputed projection with complexity linear in the frame length, while its error separates into thermal noise and BEM modeling error. For the OTFS single-pilot full-guard pattern, ZPDI and zero pilot–pilot leakage hold simultaneously. Controlled exact-BEM examples confirmed the predicted leakage, bias-plus-noise decomposition, high-SNR floor, and pilot-Gram structure. Over the 3GPP TDL-B channel, the ZPDI estimator with GCE-BEM approached perfect-CSI BER at 125 and 
+
+500 km/h and reliably initialized decision-directed refinement, whereas CE-BEM and the reference estimators exhibited high-SNR floors. 13 0 5 10 15 20 
+
+> SNR (dB)
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Bit Error Rate
+> Liu iters 1 Liu iters 2 Liu max iters 20 ZPDI GCE-BEM ZPDI iters 2 Perfect CSI
+
+(a) BER 0 5 10 15 20  
+
+> SNR (dB)
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Mean Squared Error
+> Liu iters 1 Liu iters 2 Liu max iters 20 ZPDI GCE-BEM ZPDI iters 2
+
+(b) MSE Fig. 5. Decision-directed receiver results at v = 500 km/h: (a) BER and (b) channel-estimation MSE. The standalone ZPDI GCE-BEM curve uses 
+
+(R, Q ) = (2 , 9) . The ZPDI-initialized curves apply two data-aided LS refinements with the same basis. The Liu receiver [23] uses (R, Q S ) = (1 , 15) for initialization and (R, Q L) = (2 , 9) for refinement; its curves show one iteration, two iterations, and at most 20 iterations. 
+
+REFERENCES [1] G. Romano, F. A. N. Palmieri, S. Buzzi, G. Di Gennaro, and A. Buo-nanno, “Non-iterative BEM-Based OTFS Channel Estimation with Full-Guard Embedded Pilots,” in Proc IEEE Int Workshop Signal Process Adv Wirel. Commun SPAWC , 2026. [2] D. Tse and P. Viswanath, Fundamentals of Wireless Communication .Cambridge: Cambridge University Press, 2005. [3] A. Goldsmith, Wireless Communications . Cambridge: Cambridge University Press, 2005. [4] X. Chen, W. Chen, X. Gong, B. Ai, and I. Wassell, “Wireless channel estimation for high-speed rail communications: Challenges, solutions and future directions,” High-Speed Railw. , vol. 1, no. 1, pp. 18–22, Mar. 2023. [5] A. A. Khuwaja, Y. Chen, N. Zhao, M.-S. Alouini, and P. Dobbins, “A Survey of Channel Modeling for UAV Communications,” IEEE Commun. Surv. Tutor. , vol. 20, no. 4, pp. 2804–2821, 2018. [6] A. M. Darya and S. Abdallah, “EM-Based Channel Estimation for mMIMO LEO SATCOM Under Imperfect Doppler Compensation,” 
+
+IEEE Trans. Veh. Technol. , pp. 1–6, 2025. [7] F. Hlawatsch and G. Matz, Wireless Communications Over Rapidly Time-Varying Channels . Academic Press, 2011. [8] R. Hadani, S. Rakib, M. Tsatsanis, A. Monk, A. J. Goldsmith, A. F. Molisch, and R. Calderbank, “Orthogonal Time Frequency Space Mod-ulation,” in 2017 IEEE Wirel. Commun. Netw. Conf. WCNC . San Francisco, CA, USA: IEEE, Mar. 2017, pp. 1–6. [9] Z. Wei, W. Yuan, S. Li, J. Yuan, G. Bharatula, R. Hadani, and L. Hanzo, “Orthogonal Time-Frequency Space Modulation: A Promising Next-Generation Waveform,” IEEE Wirel. Commun. , vol. 28, no. 4, pp. 136– 144, Aug. 2021. [10] Y. Hong, T. Thaj, and E. Viterbo, Delay-Doppler Communications: Principles and Applications . Academic Press, 2022. [11] Q. Deng, Y. Ge, and Z. Ding, “A Unifying View of OTFS and Its Many Variants,” IEEE Commun. Surv. Tutor. , pp. 1–1, 2025. [12] P. Raviteja, K. T. Phan, and Y. Hong, “Embedded Pilot-Aided Channel Estimation for OTFS in Delay–Doppler Channels,” IEEE Trans. Veh. Technol. , vol. 68, no. 5, pp. 4906–4917, May 2019. [13] W. Yuan, S. Li, Z. Wei, J. Yuan, and D. W. K. Ng, “Data-Aided Channel Estimation for OTFS Systems With a Superimposed Pilot and Data Transmission Scheme,” IEEE Wirel. Commun. Lett. , vol. 10, no. 9, pp. 1954–1958, Sep. 2021. [14] H.-T. Sheng and W.-R. Wu, “Time-Frequency Domain Channel Estima-tion for OTFS Systems,” IEEE Trans. Wirel. Commun. , vol. 23, no. 2, pp. 937–948, Feb. 2024. [15] E. Aslandogan, H. Ilhan, B. A. Ozden, E. Aydin, E. Basar, M. Wen, M. D. Renzo, and V. Poor, “A Comprehensive Survey of Channel Estimation Techniques for OTFS in 6G and Beyond Wireless Networks,” Dec. 2025. [16] B. Li, Q. Zheng, X. Tian, M. Yang, G. Gui, W. Jiang, H. Lei, J. Jiang, F. Shu, A. Elhanashi, and S. Saponara, “A Survey of Artificial Intelligence Enabled Channel Estimation Methods: Recent Advance, Performance, and Outlook,” Artif. Intell. Rev. , vol. 58, no. 6, p. 187, Apr. 2025. [17] G. Giannakis and C. Tepedelenlioglu, “Basis expansion models and diversity techniques for blind identification and equalization of time-varying channels,” Proc. IEEE , vol. 86, no. 10, pp. 1969–1986, Oct. 1998. [18] X. Ma, G. Giannakis, and S. Ohno, “Optimal training for block trans-missions over doubly selective wireless fading channels,” IEEE Trans. Signal Process. , vol. 51, no. 5, pp. 1351–1366, May 2003. [19] X. Huang, A. Farhang, and R.-R. Chen, “Channel Estimation and Turbo Equalization for Coded OTFS and OFDM: A Comparison,” IEEE Wirel. Commun. Lett. , vol. 12, no. 9, pp. 1613–1617, Sep. 2023. [20] Q. Guo, H. Jiang, J. Xiang, and Y. Zhong, “Low Complexity Iterative Channel Estimation and Detection Based on Pilot-Assisted for ZP-OTFS,” IEEE Commun. Lett. , vol. 29, no. 4, pp. 724–728, Apr. 2025. [21] ——, “A CS-BEM OTFS Channel Estimation Approach for Sparse Continuous Doppler-Spread Channels,” IEEE Wirel. Commun. Lett. ,vol. 13, no. 11, pp. 2985–2989, Nov. 2024. [22] H. Qu, G. Liu, L. Zhang, M. A. Imran, and S. Wen, “Low-Dimensional Subspace Estimation of Continuous-Doppler-Spread Channel in OTFS Systems,” IEEE Trans. Commun. , vol. 69, no. 7, pp. 4717–4731, Jul. 2021. [23] Y. Liu, Y. L. Guan, and D. G. G., “Near-Optimal BEM OTFS Receiver With Low Pilot Overhead for High-Mobility Communications,” IEEE Trans. Commun. , vol. 70, no. 5, pp. 3392–3406, May 2022. [24] A. Mohebbi, W.-P. Zhu, and M. O. Ahmad, “Two-Dimensional DPS-BEM Based Channel Estimation for MIMO OTFS Systems,” IEEE Trans. Veh. Technol. , vol. 75, no. 3, pp. 4352–4368, Mar. 2026. [25] H. Wu, H. Chen, Q. Peng, Q. Luo, and J. Ou, “Performance Analysis of BEM-based Channel Estimation for OTFS with Hardware Impairments,” Feb. 2025. [26] A. P. Kannu and P. Schniter, “Design and Analysis of MMSE Pilot-Aided Cyclic-Prefixed Block Transmissions for Doubly Selective Chan-nels,” IEEE Trans. Signal Process. , vol. 56, no. 3, pp. 1148–1160, Mar. 2008. [27] W. Benzine, A. Bemani, N. Ksairi, and D. Slock, “Models, Methods, and Waveforms for Estimation and Prediction of Sparse Time-Varying Channels,” IEEE Trans. Wirel. Commun. , vol. 25, pp. 9623–9638, 2026. [28] A. Bemani, N. Ksairi, and M. Kountouris, “Affine Frequency Division Multiplexing for Next Generation Wireless Communications,” IEEE Trans. Wirel. Commun. , vol. 22, no. 11, pp. 8214–8229, Nov. 2023. [29] 3GPP, “Study on channel model for frequencies from 0.5 to 100 GHz,” 3rd Generation Partnership Project (3GPP), Tech. Rep. TR 38.901, Version 18.0.0, Release 18, May 2024.

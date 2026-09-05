@@ -1,0 +1,2292 @@
+Title: Fast Tri-Hybrid Beamforming via Deep Unfolding
+
+URL Source: https://arxiv.org/pdf/2608.27759v1
+
+Published Time: Mon, 31 Aug 2026 00:19:16 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+> 1
+
+# Fast Tri-Hybrid Beamforming via Deep Unfolding 
+
+Pinjun Zheng, Md. Jahangir Hossain, and Anas Chaaban 
+
+Abstract —Tri-hybrid multiple-input multiple-output architec-tures have recently emerged as a promising enabler for next-generation wireless systems, as they potentially provide enhanced design flexibility without a proportional increase in hardware cost or power consumption. However, the resulting triple-domain coupling renders beamforming optimization challenging and computationally demanding. This paper develops a fast tri-hybrid beamforming framework for multiuser downlink systems employing dynamic metasurface antennas (DMAs). Based on the equivalence between weighted sum-rate maximization and weighted sum-minimum mean square error minimization, an iterative algorithm is first derived under per-DMA input power constraints, with all update equations available in closed form, but convergence inherently remains slow. To enable real-time operation, the algorithm is further unfolded into a trainable finite-iteration architecture using graph neural networks that ensure permutation equivariance and support varying numbers of users. Trained on ray-tracing channel data, the unfolded method achieves comparable or higher system sum-rates while reducing runtime by more than an order of magnitude. The method also demonstrates strong scalability, robustness, and generalization across various environments. 
+
+Index Terms —Dynamic metasurface antenna, deep learning, deep unfolding, deep unrolling, graph neural network, Graph-SAGE, multiuser beamforming, tri-hybrid MIMO. 
+
+I. I NTRODUCTION 
+
+Tri-hybrid multiple-input multiple-output (MIMO) has re-cently emerged as a novel transceiver architecture with the potential to serve as a cornerstone of next-generation MIMO communication systems [1], [2]. It extends the well-known hybrid digital-analog MIMO architecture [3]–[5] by incorpo-rating a third layer consisting of a reconfigurable antenna array or tunable radio frequency (RF) front end, commonly referred to as the antenna domain or electromagnetic (EM) domain [6]– [8]. The main advantage of such a tri-hybrid architecture lies in providing additional antenna-domain control without proportionally increasing RF complexity or power consump-tion [1], [9], [10]. This offers enhanced design flexibility for meeting the stringent performance requirements of next-generation wireless networks. The antenna domain reconfigurability can be implemented in various ways, depending on the employed antenna technolo-gies. Representative examples include dynamic metasurface antennas (DMAs) [11], pixel antennas [12], lens antennas [13], and fluid antennas [14]. These technologies enable dynamic adaptation of antenna characteristics, such as radiation pat-tern, polarization, operating frequency, and other EM proper-ties [15]. Although these technologies have been extensively studied in the antenna community, their integration into tri-hybrid MIMO remains largely underexplored. Notably, recent 
+
+> The authors are with the School of Engineering, The University of British Columbia, Kelowna, BC V1V 1V7, Canada (e-mail: pinjun.zheng@ubc.ca; jahangir.hossain@ubc.ca; anas.chaaban@ubc.ca).
+
+studies have shown that tri-hybrid MIMO architectures em-ploying DMAs can achieve a more favorable trade-off between spectral and energy efficiency by jointly leveraging the distinct hardware characteristics of the digital, analog, and antenna domains [2], [9]. An early study also demonstrates enhanced hardware efficiency when pattern-reconfigurable antennas are incorporated [16]. Moreover, the use of multifunctional com-pound reconfigurable antennas in tri-hybrid systems is under active investigation [17]. Indeed, additional reconfigurability had already been explored in conventional hybrid MIMO architectures before the advent of tri-hybrid MIMO, through mechanisms such as dynamic RF-chain selection and dy-namic subarray connections designed to improve hardware efficiency and beamforming performance [18]–[20]. However, these mechanisms primarily reconfigure the analog-domain feed network, whereas tri-hybrid MIMO introduces an addi-tional and distinct antenna-domain processing layer that can be configured independently while operating complementarily with the digital and analog domains. Despite these advantages, tri-hybrid architecture also com-plicates the beamforming design, as it involves the joint opti-mization of digital, analog, and EM precoders under practical hardware constraints, for which no simple solution exists. Several studies have sought to address the tri-hybrid beam-forming problem, the vast majority of which adopt alternating optimization frameworks that iteratively update the precoders across domains by combining various optimization techniques. For example, the authors of [10] proposed an alternating op-timization method that integrates penalty dual decomposition and coordinate descent methods for tri-hybrid beamforming based on radiation-center reconfigurable antennas. In [21], a solution for pinching-antenna-assisted multiuser downlink was developed by combining zero-forcing (ZF) beamforming with probabilistic learning. The work in [22] addressed tri-hybrid beamforming for integrated sensing and communication using an alternating scheme based on sequential quadratic programming and adaptive gradient projection. While the tech-nical details of these approaches vary widely due to differing optimization objectives and system models, they all rely on the coordinated use of multiple optimization techniques. This complexity is inherent to tri-hybrid beamforming, arising from the coupled design variables and constraints introduced by the multi-domain architecture. In theoretical studies of beamforming algorithms for such complex systems, computational efficiency is easily over-looked when primary attention is placed on asymptotic con-vergence performance. In practice, however, beamforming in MIMO communications is inherently latency-sensitive, as the channel coherence time is typically limited and real-time reconfiguration is required [23]. This challenge is particularly pronounced in tri-hybrid beamforming, where most algorithms rely on numerous iterations or alternating updates across arXiv:2608.27759v1 [eess.SP] 27 Aug 2026 2
+
+the three precoding domains, which can significantly slow down convergence. In fact, a few existing works in tri-hybrid beamforming have already emphasized computational efficiency. For instance, the algorithms in [24] and [25] reduce per-iteration complexity by designing closed-form updates. Nonetheless, low-complexity updates alone do not fully re-solve the computational burden, as the overall cost also depends on convergence speed. Some low-complexity methods require hundreds of iterations to converge, as reported in [21], [25], which can still lead to substantial runtime in practice. To fill this gap, deep unfolding (or unrolling ) provides a principled approach to accelerating iterative algorithms by em-bedding trainable components into the iterative procedure [26]. While it does not simplify individual updates, the added trainable components can enhance the update rules and achieve improved performance within fewer iterations after proper training. Deep unfolding has been successfully applied to a range of related problems, such as interference network power allocation [27], joint radar-communication beamforming [28], and more [29], [30]. Motivated by these advances, this paper advocates deep unfolding as an effective means of accelerating tri-hybrid beamforming without compromising performance. We focus on a tri-hybrid beamforming problem based on DMAs in a multiuser downlink scenario. Targeting real-time communications, our goal is to develop an algorithm that provides a high-quality tri-hybrid precoding design rapidly. The proposed solution consists of two main steps: we first 
+
+(i) develop a low-complexity (but potentially slow-converging) iterative algorithm, and then (ii) design a deep unfolding network to accelerate its convergence. Although this paper focuses on a specific antenna type, the presented paradigm can be readily adapted to tri-hybrid beamforming problems under different system configurations. Specifically, our contributions are summarized as follows:  
+
+> •
+
+We develop an iterative algorithm for the downlink sum-rate maximization problem in a multiuser tri-hybrid MIMO system employing DMAs. The algorithm is de-rived based on the weighted sum-minimum mean-square error (WMMSE) equivalence principle combined with a few alternating optimization steps. Each update equation is provided in closed-form to ensure low per-iteration complexity, although the overall runtime remains consid-erable due to slow convergence caused by the extensive alternating updates.  
+
+> •
+
+We propose a data-driven method based on deep unfold-ing to accelerate convergence. Specifically, we introduce a set of trainable components into the iterative proce-dure, with parameters learned from user channel state information (CSI) features via a deep neural network. In particular, an architecture based on the graph sample and aggregate (GraphSAGE) algorithm is developed to inductively learn the acceleration parameters from user CSI, maintaining permutation equivariance and naturally accommodating a varying number of users.  
+
+> •
+
+We train the proposed deep learning model using ray-tracing channel data generated for multiple cities and evaluate it on data collected from a different city. To ensure effective training, we design problem-specific data preprocessing and parameter initialization strategies. The proposed method is comprehensively evaluated in terms of acceleration performance, scalability, robustness to CSI errors, and generalization capability. The training code and our trained network weights are available in [31]. The rest of the paper is organized as follows. Section II introduces the system model and formulates the tri-hybrid beamforming problem. Section III develops an iterative algo-rithm to solve the formulated problem, which, while effective, inevitably suffers from slow convergence. To address this limitation, Section IV proposes a deep unfolding approach to accelerate the algorithm. Section V presents numerical results. Finally, Section VI discusses the limitations of the proposed method, and Section VII concludes the paper. We use the following notation throughout the paper. Non-bold lowercase and uppercase letters (e.g., a, A ) denote scalars, bold lowercase letters (e.g., a) denote vectors, and bold uppercase letters (e.g., A) denote matrices. We use [a]i to denote the ith entry of vector a, and use [A]i,j to denote the entry at the ith row and jth column of the matrix A.The superscripts (·)T, (·)H, and (·)−1 represent the transpose, Hermitian (conjugate transpose), and inverse operators, respec-tively. In addition, j denotes the imaginary unit with j2 = −1.The operators Re( ·) and Im( ·) extract the real and imaginary parts of a complex quantity, respectively, and vec( ·) denotes the vectorization operator that stacks the columns of a matrix into a single column vector. The operator diag( ·) constructs a diagonal matrix from its argument, while blkdiag( ·) constructs a block-diagonal matrix from its arguments. II. S YSTEM MODEL 
+
+We consider a multiuser tri-hybrid MIMO downlink system, whose architecture is illustrated in Fig. 1. The transmitter is a base station (BS) equipped with NRF RF chains and 
+
+NT DMAs. Each DMA is a tunable leaky-wave antenna composed of NC quasi-passive radiating elements, whose resonant responses can be adjusted through semiconductor tuning components, such as varactors, thereby changing the amplitude and phase of the radiated signals [11]. As a result, the BS comprises a total of NCNT effective radiating elements. The BS serves K users simultaneously. The kth user is equipped with Mk antennas and is allocated NS,k data streams. Accordingly, the total number of transmitted downlink data streams is NS = PKk=1 NS,k . Typically, the system dimensions satisfy NS ≤ NRF ≤ NT.
+
+A. Tri-Hybrid Precoding Architecture 
+
+Let sk ∈ CNS,k denote the data symbol vector intended for the kth user, and define the aggregated symbol vector as 
+
+s = [ sT 
+
+> 1
+
+, . . . , sT 
+
+> K
+
+]T ∈ CNS . We assume E[ss H] = I. The BS employs a three-stage precoding architecture. Specifically, the data symbols are first processed by a baseband digital precoder 
+
+FBB ∈ CNRF ×NS , followed by an RF-domain analog precoder 
+
+FRF ∈ CNT×NRF , and finally by an antenna-domain precoder 
+
+FA ∈ CNCNT×NT implemented by the DMAs. The resulting transmitted signal is given by FAFRF FBB s. Assuming a nar-rowband communication model, the characteristics of these three precoders are detailed below. 3RF chain RF chain 
+
+> …………………
+
+<latexit sha1_base64="JD9Ok/5vAp9Xy17iqFvY/ddL/w8=">AAACynicbZFNT+MwEIbdsCxsly5fx71YVCvtqUoQX0cEFw57AGlLKzVR5TiTYtV2ItsBVVZu/AaucOQv8W/WSbMSKYxk6fU7z8jjmTjnTBvff+t4a1/Wv25sfut+3+r92N7Z3bvVWaEoDGnGMzWOiQbOJAwNMxzGuQIiYg6jeH5Z5Uf3oDTL5F+zyCESZCZZyigxzgpDQcxdnFpdToPpTt8f+HXgjyJoRB81cT3d7byGSUYLAdJQTrSeBH5uIkuUYZRD2Q0LDTmhczKDiZOSCNCRrZsu8S/nJDjNlDvS4Np9X2GJ0HohYkdWTerVXGV+lpsUJj2LLJN5YUDS5UNpwbHJcDUBnDAF1PCFE4Qq5nrF9I4oQo2bU+uVWLT+0HTe64YSHmgmBJGJDRUk5SSIrA3rtK3uth+U5SroJu8GRVrwf+/TgpgX0KJrY4niFXamAGQLXjoN7XYbrG7yo7g9HAQng+Obo/75RbPlTfQTHaDfKECn6BxdoWs0RBTl6Ak9oxfvj6e8hWeXqNdpavZRK7zHf9HU5Kk=</latexit> 
+
+s1
+
+<latexit sha1_base64="Gc3f5Pn/JapcftXIZzI+KAv9CGg=">AAACynicbZHPa9swFMcVr9vSbNna9diLaCjsFOyxX8eyXQrtIYUlLcQmyPJzIiLJRpJbgvBtf8Ou7bH/Uv+byo4HdZIHgq++7/PQ03txzpk2vv/U8V7tvX7ztrvfe/e+/+HjweGnic4KRWFMM56pm5ho4EzC2DDD4SZXQETM4Tpe/q7y17egNMvkH7PKIRJkLlnKKDHOCkNBzCJOrS5nF7ODgT/068DbImjEADUxmh12HsMko4UAaSgnWk8DPzeRJcowyqHshYWGnNAlmcPUSUkE6MjWTZf41DkJTjPljjS4dl9WWCK0XonYkVWTejNXmbty08KkPyPLZF4YkHT9UFpwbDJcTQAnTAE1fOUEoYq5XjFdEEWocXNqvRKL1h+azvu9UMIdzYQgMrGhgqScBpG1YZ221d0OgrLcBN3k3aBIC/7v7SyIeQEtujbWKN5g5wpAtuC109But8HmJrfF5Msw+D78dvV1cPar2XIXHaMT9BkF6Ac6Q+dohMaIohz9Q/fowbv0lLfy7Br1Ok3NEWqF9/cZDyHkww==</latexit> 
+
+sK
+
+> …
+
+UE 
+
+<latexit sha1_base64="YIsgTcKQU3lOFBTO4/tCX1+vZE0=">AAAC1nicdZFBb9MwFMfdMGAUBh1IXLhYVEicqiTb2u02gYQ4DrRulZqocpyXzprtRLazqfLCDXHlM3BCgi/Et8FJM4lU40mW/v6/35Of30sKzrTx/T89797W/QcPtx/1Hz/ZefpssPv8TOelojClOc/VLCEaOJMwNcxwmBUKiEg4nCeX7+v8+RUozXJ5alYFxIIsJcsYJcZZi8HLSBBzkWT2Q7VopM7sZ6cHQ390dDgOD0Lsj3x/Eu6NaxFO9sM9HDinjiFq42Sx2/sZpTktBUhDOdF6HviFiS1RhlEOVT8qNRSEXpIlzJ2URICObfOBCr9xToqzXLkjDW7cfyssEVqvROLIpsfNXG3elZuXJjuMLZNFaUDS9UNZybHJcT0NnDIF1PCVE4Qq5nrF9IIoQo2bWeeVRHT+0Ha+048kXNNcCCJTGylIq3kQWxs1aVvf7TCoqk3QbcENinTgW+/OgoSX0KEbY43iDXapAGQHXjst7XZ7u0D8f3EWjoLx6ODT/vD4XbvlbfQKvUZvUYAm6Bh9RCdoiii6QT/QL/Tbm3lfvK/etzXq9dqaF6gT3ve/Uazpkw==</latexit> 
+
+FRF 
+
+<latexit sha1_base64="rrjf6eP+0mOGB0ctN+pc5+8QCCg=">AAACynicbZE9T+QwEIa9Ob5u+T7KayxWSFSrBPFVIq6hoADpFpA20cpxJouF7US2A4qsdPwG2qPkL/FvcLI5iSyMZOn1O8/I45k450wb33/veT8WFpeWV372V9fWNza3tn/d6KxQFEY045m6i4kGziSMDDMc7nIFRMQcbuOHP3X+9hGUZpn8a8ocIkGmkqWMEuOsMBTE3MepLatJMNka+EO/CfxVBK0YoDauJtu9tzDJaCFAGsqJ1uPAz01kiTKMcqj6YaEhJ/SBTGHspCQCdGSbpiu855wEp5lyRxrcuJ8rLBFalyJ2ZN2kns/V5ne5cWHS08gymRcGJJ09lBYcmwzXE8AJU0ANL50gVDHXK6b3RBFq3Jw6r8Si84e28/V+KOGJZkIQmdhQQVKNg8jasEnb+m4HQVXNg27yblCkA//3vi2IeQEdujFmKJ5jpwpAduCZ09Jut8H8Jr+Km4NhcDw8uj4cnJ23W15Bv9Eu2kcBOkFn6AJdoRGiKEcv6B969S495ZWenaFer63ZQZ3wnj8A4Ajkrw==</latexit> 
+
+y1
+
+<latexit sha1_base64="1bsLDqc4JxI+PeldmtKFGHKQYlo=">AAACynicbZHPTtwwEMa9gZZlW1r+HLlYXSH1tEqqUjgiuHDgsEgsIG2ileNMFmttJ7IdUGTl1mfoFY68Em+Dkw1SszCSpc/f/EYez8Q5Z9r4/kvPW1v/9Hmjvzn48nXr2/ftnd1rnRWKwoRmPFO3MdHAmYSJYYbDba6AiJjDTbw4q/M396A0y+SVKXOIBJlLljJKjLPCUBBzF6e2rGaL2fbQH/lN4PciaMUQtTGe7fSewySjhQBpKCdaTwM/N5ElyjDKoRqEhYac0AWZw9RJSQToyDZNV/jAOQlOM+WONLhx/6+wRGhditiRdZN6NVebH+WmhUmPI8tkXhiQdPlQWnBsMlxPACdMATW8dIJQxVyvmN4RRahxc+q8EovOH9rOtwahhAeaCUFkYkMFSTUNImvDJm3rux0GVbUKusm7QZEO/OZ9WBDzAjp0YyxRvMLOFYDswEunpd1ug9VNvhfXv0bBn9Hh5e/hyWm75T7aRz/QTxSgI3SCztEYTRBFOfqHHtGTd+Epr/TsEvV6bc0e6oT39xVoteTp</latexit> 
+
+yk
+
+<latexit sha1_base64="3bj1zEcSy68vz2o1vZVKiZyXcXY=">AAACynicbZHPTtwwEMa9oX+WpZQFjlysripxWiVVW3pE5YIEh0ViAWkTrRxnsljYTmQ7oMjKrc/AFY68Em+Dkw1SszCSpc/f/EYez8Q5Z9r4/nPPW/vw8dPn/vpg48vm163h9s6FzgpFYUoznqmrmGjgTMLUMMPhKldARMzhMr45qvOXt6A0y+S5KXOIBFlIljJKjLPCUBBzHae2rOYn8+HIH/tN4LciaMUItTGZb/eewiSjhQBpKCdazwI/N5ElyjDKoRqEhYac0BuygJmTkgjQkW2arvB35yQ4zZQ70uDG/b/CEqF1KWJH1k3q1VxtvpebFSb9E1km88KApMuH0oJjk+F6AjhhCqjhpROEKuZ6xfSaKEKNm1PnlVh0/tB2vjkIJdzRTAgiExsqSKpZEFkbNmlb3+0oqKpV0E3eDYp04Ffv3YKYF9ChG2OJ4hV2oQBkB146Le12G6xu8q24+DEOfo9/nf0cHf5tt9xHe+gb2kcBOkCH6BhN0BRRlKN79IAevVNPeaVnl6jXa2t2USe8fy8dVeTJ</latexit> 
+
+yK
+
+++
+
+> …
+
+UE 
+
+> …
+
+UE 
+
+<latexit sha1_base64="6aUmTRYexYiJ0sfgW65bmKjBo/8=">AAACynicbZHPjtMwEMbdLLBLodAuRy4WFRKnKkFo2WO1XHrgsEj0j9REleNMWqu2E9nOriort30GrnDklfZt1kmDRNqOZOnzN7+RxzNxzpk2vv/Y8c6ePX9xfvGy++p1783b/uByprNCUZjSjGdqERMNnEmYGmY4LHIFRMQc5vH2W5Wf34HSLJM/zS6HSJC1ZCmjxDgrDAUxmzi1k3IVrPpDf+TXgY9F0IghauJ2Nej8DZOMFgKkoZxovQz83ESWKMMoh7IbFhpyQrdkDUsnJRGgI1s3XeKPzklwmil3pMG1+3+FJULrnYgdWTWpD3OVeSq3LEx6HVkm88KApPuH0oJjk+FqAjhhCqjhOycIVcz1iumGKEKNm1PrlVi0/tB03uuGEu5pJgSRiQ0VJOUyiKwN67St7nYYlOUh6CbvBkVa8D/vZEHMC2jRtbFH8QG7VgCyBe+dhna7DQ43eSxmn0fB1ejqx5fh+KbZ8gV6jz6gTyhAX9EYTdAtmiKKcvQL/UZ/vO+e8nae3aNep6l5h1rhPTwBbFzkfw==</latexit> 
+
+H1
+
+<latexit sha1_base64="i9O4dk+Dd04Q4RELOQEMG6CwA84=">AAACynicbZHNrtMwEIXdAJdS6KWFJRuLColVlVxdFZYVbLpgUST6IzVR5TiT1qrtRLYDqqzseAa2sOSVeBucNEik7UiWjs98I49n4pwzbXz/T8d78PDRzePuk97TZ/3b54Phi6XOCkVhQTOeqXVMNHAmYWGY4bDOFRARc1jFh49VfvUVlGaZ/GKOOUSC7CRLGSXGWWEoiNnHqZ2V28N2MPLHfh34UgSNGKEm5tth53eYZLQQIA3lROtN4OcmskQZRjmUvbDQkBN6IDvYOCmJAB3ZuukSv3FOgtNMuSMNrt3/KywRWh9F7MiqSX2eq8xruU1h0veRZTIvDEh6eigtODYZriaAE6aAGn50glDFXK+Y7oki1Lg5tV6JResPTef9XijhG82EIDKxoYKk3ASRtWGdttXdjoKyPAfd5N2gSAv+510tiHkBLbo2Tig+Y3cKQLbgk9PQbrfB+SYvxfJuHEzGk8/3o+mHZstd9Aq9Rm9RgN6hKZqhOVoginL0A/1Ev7xPnvKOnj2hXqepeYla4X3/C/T65Lk=</latexit> 
+
+Hk
+
+<latexit sha1_base64="uAANWbVUh8OyEBHv5RzHSAlp9Dk=">AAACynicbZFBa9swFMcVr1u7bFmT7diLaCjsFOwx0h7Ddim0hwyatBCbIMvPqYgkG0nuCMK3fYZd12O/Ur9NZceDOu0DwV//93vo6b0450wb33/seG/23r7bP3jf/fCx9+mwP/g811mhKMxoxjN1ExMNnEmYGWY43OQKiIg5XMfrn1X++g6UZpm8MpscIkFWkqWMEuOsMBTE3MapPS+XF8v+0B/5deCXImjEEDUxXQ46D2GS0UKANJQTrReBn5vIEmUY5VB2w0JDTuiarGDhpCQCdGTrpkt84pwEp5lyRxpcu88rLBFab0TsyKpJvZurzNdyi8KkZ5FlMi8MSLp9KC04NhmuJoATpoAavnGCUMVcr5jeEkWocXNqvRKL1h+aznvdUMJvmglBZGJDBUm5CCJrwzptq7sdBmW5C7rJu0GRFvzfe7Ug5gW06NrYoniHXSkA2YK3TkO73Qa7m3wp5t9GwXg0/vV9OPnRbPkAHaFj9BUF6BRN0DmaohmiKEd/0T907116ytt4dot6nabmC2qF9+cJqZrkmQ==</latexit> 
+
+HK
+
+<latexit sha1_base64="spVnBbb6FNT6tI3k3Lnhi1fC/UY=">AAAC1nicdZHPa9swFMcV71eXrVu6wS67iIXBTsF226S7lQzGjh0sbSA2QZafU1FJNpLcEjT3Vnbd37DTYPuH9t9MdlyYQ/dA8NX3fR56ei8pONPG9//0vHv3Hzx8tPO4/+Tp7rPng70XpzovFYUZzXmu5gnRwJmEmWGGw7xQQETC4Sy5+FDnzy5BaZbLL2ZdQCzISrKMUWKctRy8igQx50lmP1bLRurMTqfVcjD0R++PxuFhiP2R70/C/XEtwslBuI8D59QxRG2cLPd6P6M0p6UAaSgnWi8CvzCxJcowyqHqR6WGgtALsoKFk5II0LFtPlDht85JcZYrd6TBjftvhSVC67VIHNn0uJ2rzbtyi9JkR7FlsigNSLp5KCs5Njmup4FTpoAavnaCUMVcr5ieE0WocTPrvJKIzh/aznf7kYQrmgtBZGojBWm1CGJroyZt67sdBlW1DbotuEGRDnzr3VmQ8BI6dGNsULzFrhSA7MAbp6Xdbm8XiP8vTsNRMB4dfj4YHk/bLe+g1+gNeocCNEHH6BM6QTNE0Vf0A/1Cv725d+3deN82qNdra16iTnjf/wIibOl/</latexit> 
+
+FBB 
+
+……
+
+Baseband Precoder 
+
+> …………
+
+RF Precoder PA DMAs 
+
+> …
+
+<latexit sha1_base64="WV9oqHf6k8eOhpDmNtZou3/tplg=">AAAC1XicdZHPa9swFMcVb+269Fe6sdMuoqHQU7DdLulu3QZjxw6WphCbIMvPqagkG0neCMK3sev+ht3G9hftv5nsuDCH7oHgq+/7PPT0XlJwpo3v/+l5jx5vbT/Zedrf3ds/OBwcPbvWeakoTGnOc3WTEA2cSZgaZjjcFAqISDjMkrt3dX72GZRmufxkVgXEgiwlyxglxlmLwYtIEHObZPZ9tWikzuybajEY+qPXF+PwVYj9ke9PwrNxLcLJeXiGA+fUMURtXC2Oej+jNKelAGkoJ1rPA78wsSXKMMqh6kelhoLQO7KEuZOSCNCxbfqv8IlzUpzlyh1pcOP+W2GJ0HolEkc2LW7mavOh3Lw02UVsmSxKA5KuH8pKjk2O62HglCmghq+cIFQx1yumt0QRatzIOq8kovOHtvP9fiThC82FIDK1kYK0mgextVGTtvXdDoOq2gTdEtygSAe+9x4sSHgJHbox1ijeYJcKQHbgtdPSbrf3C8T/F9fhKBiPxh/Ph5dv2y3voJfoGJ2iAE3QJfqArtAUUWTRD/QL/fZmXuV99b6tUa/X1jxHnfC+/wVWkukz</latexit> 
+
+FA
+
+<latexit sha1_base64="BL3WXxATaHwiLx9hOReLdCFT8W4=">AAACy3icbZHPatwwEMa1Ttqm26b5d+xFZAn0tNilJD2GFkovDWnpJgu2WWR5vBGRZEeSW7aqj32GXJNbXilvE63tQuzNgODTN79Bo5mk4Ewb378feGvrz56/2Hg5fPV6883W9s7umc5LRWFCc56raUI0cCZhYpjhMC0UEJFwOE8uPy/z579AaZbLn2ZRQCzIXLKMUWKcFZ/MIkHMhc7sjy/VbHvkj/068KoIWjFCbZzOdgZ3UZrTUoA0lBOtw8AvTGyJMoxyqIZRqaEg9JLMIXRSEgE6tnXXFT5wToqzXLkjDa7dxxWWCK0XInFk3WM/tzSfyoWlyT7GlsmiNCBp81BWcmxyvBwBTpkCavjCCUIVc71iekEUocYNqvNKIjp/aDvfHEYSftNcCCJTGylIqzCIrY3qtF3e7Sioqj7oRu8GRTrwf+/JgoSX0KFro0Fxj50rANmBG6el3W6D/iZXxdn7cXA4Pvz+YXT8qd3yBnqL9tE7FKAjdIy+olM0QRRdoWt0g269b572/nh/G9QbtDV7qBPevwe+iOUH</latexit> 
+
+NRF 
+
+<latexit sha1_base64="W78kcgDZzz1q3yr4p+nduPW77Qs=">AAACynicbZFNS8QwEIaz9Xv91qOX4CJ4WloR9Sh68SCi4KqwLUuaTtdgkpYkVZbQm7/Bqx79S/4bs90KdnUg8OadZ8hkJs4508b3v1rezOzc/MLiUnt5ZXVtfWNz605nhaLQoxnP1ENMNHAmoWeY4fCQKyAi5nAfP52P8/fPoDTL5K0Z5RAJMpQsZZQYZ4VXg1AQ86hTe1sONjp+168C/xVBLTqojuvBZuszTDJaCJCGcqJ1P/BzE1miDKMcynZYaMgJfSJD6DspiQAd2arpEu85J8FpptyRBlfu7wpLhNYjETuyanE6Nzb/y/ULk55Elsm8MCDp5KG04NhkeDwBnDAF1PCRE4Qq5nrF9JEoQo2bU+OVWDT+UHe+2g4lvNBMCCITGypIyn4QWRtWaTu+205QltOgm7wbFGnAP96/BTEvoEFXxgTFU+xQAcgGPHFq2u02mN7kX3F30A2Oukc3h53Ts3rLi2gH7aJ9FKBjdIou0DXqIYpy9Ibe0Yd36Slv5NkJ6rXqmm3UCO/1G/Pf5Lk=</latexit> 
+
+NT
+
+<latexit sha1_base64="73ucMIZ9trKPZvaTvWuRVVer09k=">AAACynicbZFNS8QwEIaz9Xv91qOX4CJ4WloR9Sh68SCi4KqwLUuaTtdgkpYkVZbQm7/Bqx79S/4bs90KdnUg8OadZ8hkJs4508b3v1rezOzc/MLiUnt5ZXVtfWNz605nhaLQoxnP1ENMNHAmoWeY4fCQKyAi5nAfP52P8/fPoDTL5K0Z5RAJMpQsZZQYZ4VXg1AQ86hTe14ONjp+168C/xVBLTqojuvBZuszTDJaCJCGcqJ1P/BzE1miDKMcynZYaMgJfSJD6DspiQAd2arpEu85J8FpptyRBlfu7wpLhNYjETuyanE6Nzb/y/ULk55Elsm8MCDp5KG04NhkeDwBnDAF1PCRE4Qq5nrF9JEoQo2bU+OVWDT+UHe+2g4lvNBMCCITGypIyn4QWRtWaTu+205QltOgm7wbFGnAP96/BTEvoEFXxgTFU+xQAcgGPHFq2u02mN7kX3F30A2Oukc3h53Ts3rLi2gH7aJ9FKBjdIou0DXqIYpy9Ibe0Yd36Slv5NkJ6rXqmm3UCO/1G8vD5Kg=</latexit> 
+
+NC
+
+<latexit sha1_base64="OnMBBlfqsL0/Y3nC6AI98J+aqTA=">AAACv3icbZHNSgMxEMfT9bt+VT16CRbBU9kVqR6rXjwq2Cp0F8lmpzWYZJckq5SwT+BV38FX8m1Mtyu4tQOBf/7zGzKZiTPOtPH974a3tLyyura+0dzc2t7Zbe3tD3SaKwp9mvJUPcZEA2cS+oYZDo+ZAiJiDg/xy/U0//AKSrNU3ptJBpEgY8lGjBLjrLvgqdX2O34Z+L8IKtFGVdw+7TW+wiSluQBpKCdaDwM/M5ElyjDKoWiGuYaM0BcyhqGTkgjQkS07LfCxcxI8SpU70uDS/VthidB6ImJHCmKe9Xxuai7KDXMzuogsk1luQNLZQ6OcY5Pi6bdxwhRQwydOEKqY6xXTZ6IINW44tVdiUftD1fl2M5TwRlMhiExsqCAphkFkbVim7fRu20FRzINu3G5QpAb/egsLYp5DjS6NGYrn2LECkDV45lS0220wv8n/YnDaCbqd7t1Zu3dVbXkdHaIjdIICdI566Abdoj6iCNA7+kCf3qU39qSXzVCvUdUcoFp4kx9E9N+k</latexit> 
+
+1
+
+<latexit sha1_base64="kaxaqNH6+6m5XTBcO5GLevzIHUs=">AAACv3icbZHNSgMxEMfT9bt+69FLsAieyq6IevTj4tGCbYXuItnstIYm2SXJKiXsE3jVd/CVfBvT7Qpu7UDgn//8hkxm4owzbXz/u+EtLa+srq1vNDe3tnd29/YPejrNFYUuTXmqnmKigTMJXcMMh6dMARExh348vpvm+6+gNEvlo5lkEAkykmzIKDHO6oyf91p+2y8D/xdBJVqoiofn/cZXmKQ0FyAN5UTrQeBnJrJEGUY5FM0w15AROiYjGDgpiQAd2bLTAp84J8HDVLkjDS7dvxWWCK0nInakIOZFz+em5qLcIDfDq8gymeUGJJ09NMw5NimefhsnTAE1fOIEoYq5XjF9IYpQ44ZTeyUWtT9UnW83QwlvNBWCyMSGCpJiEETWhmXaTu+2FRTFPOjG7QZFavCvt7Ag5jnU6NKYoXiOHSkAWYNnTkW73Qbzm/wvemft4KJ90TlvXd9WW15HR+gYnaIAXaJrdI8eUBdRBOgdfaBP78YbedLLZqjXqGoOUS28yQ/Nkt/e</latexit> 
+
+k
+
+<latexit sha1_base64="Quqf9SasYPXAD016DcYx9IByHNQ=">AAACv3icbZHNSgMxEMfT9bt+69FLsAieyq6IevTjInixYFuhu0g2O63BJLskWaWEfQKv+g6+km9jul3BbR0I/POf35DJTJxxpo3vfze8hcWl5ZXVteb6xubW9s7uXk+nuaLQpSlP1WNMNHAmoWuY4fCYKSAi5tCPX24m+f4rKM1S+WDGGUSCjCQbMkqMszp3Tzstv+2XgedFUIkWquL+abfxFSYpzQVIQznRehD4mYksUYZRDkUzzDVkhL6QEQyclESAjmzZaYGPnJPgYarckQaX7t8KS4TWYxE7UhDzrGdzE/O/3CA3w4vIMpnlBiSdPjTMOTYpnnwbJ0wBNXzsBKGKuV4xfSaKUOOGU3slFrU/VJ1vNkMJbzQVgsjEhgqSYhBE1oZl2k7uthUUxSzoxu0GRWrwr/dvQcxzqNGlMUXxDDtSALIGT52KdrsNZjc5L3on7eCsfdY5bV1eV1teRQfoEB2jAJ2jS3SL7lEXUQToHX2gT+/KG3nSy6ao16hq9lEtvPEPgjLfvg==</latexit> 
+
+K
+
+Fig. 1. Schematic of a tri-hybrid MIMO downlink system with a BS equipped with NRF RF chains and NT DMAs serving K users. 
+
+1) Fully Connected RF Precoding: We consider a fully connected RF precoding architecture, where each RF chain is connected to all DMAs. Consequently, FRF is a full matrix. Since the RF precoder is implemented using phase shifters, its entries are constrained to constant modulus. Without loss of generality, we adopt the normalization |[FRF ]i,j |2 =1/N T, ∀i, j , while the digital precoder FBB is unconstrained. 
+
+2) Per-DMA Input Power Constraints: Since the DMAs are assumed to be quasi-passive [11], they provide no additional power gain. Accordingly, the power constraint is imposed only at their inputs. As illustrated in Fig. 1, the signals processed by the RF precoder are amplified by a dedicated power amplifier (PA) before being fed into each DMA. Since each PA operates independently and has a limited linear operating range and maximum output capability, the input power to each DMA must be individually constrained. Accordingly, we impose a 
+
+per-DMA input power constraint as 
+
+FRF FBB FHBB FHRF 
+
+
+
+n,n ≤ Pn, n = 1 , 2, . . . , N T. (1) 
+
+3) DMA Precoding Model: Each DMA is a leaky-wave antenna that successively radiates the guided EM wave through its NC tunable elements. Across the DMA array, however, the 
+
+NT DMAs are excited concurrently, as the digital- and analog-domain signal paths operate in parallel. Mathematically, the antenna-domain precoding performed by the nth DMA can be represented by applying a weight vector wn ∈ CNC to its input signal. As a result, the antenna-domain precoder admits the block-diagonal structure FA = blkdiag( w1, w2, . . . , wNT ).The weight vector wn is determined by the physical char-acteristics of the DMA. Specifically, it can be expressed as 
+
+wn = [ ηn, 1αn, 1, . . . , η n,N C αn,N C ]T, (2) where ηn,m denotes the complex waveguide response from the feed point to the mth element, and αn,m represents the tunable response of that element. Generally, ηn,m can be obtained via full-wave simulations for a given hardware imple-mentation [32], and several analytical models have also been developed to characterize it [33]–[36]. The tunable element response αn,m can be modeled using the Lorentzian resonator model [11], [32], under which αn,m = j+ejϕn,m 
+
+2 , where 
+
+ϕn,m ∈ [0 , 2π) denotes the controllable phase shift. Defining ηn ≜ [ηn, 1, η n, 2, . . . , η n,N C ]T, Gn ≜ diag( ηn),and un ≜ [ejϕn, 1 , e jϕn, 2 , . . . , e jϕn,N C ]T, the DMA weight vector wn can be written in a compact form as [35], [36] 
+
+wn = 12 Gnun + j
+
+2 ηn, n = 1 , 2, . . . , N T. (3) Hence, {un}NT
+
+n=1 represents the adjustable components in FA.For simplicity, the mutual coupling among the DMA elements, which may distort the designed antenna-domain precoder when sufficiently strong, is neglected in this paper. Related studies on DMA mutual coupling can be found in, e.g., [34], [37], [38]. Although often viewed as an impairment, mutual coupling can also be exploited to improve system performance when properly modeled [38], [39]. Incorporating this effect into the proposed framework is left for future work. Note that, although both FRF and FA provide beamforming capabilities, they play complementary rather than redundant roles. Specifically, FRF maps the outputs of a limited number of RF chains to the inputs of the reconfigurable front end, whereas FA further shapes the resulting radiation through the reconfigurable antenna-domain responses. The hybrid use of both beamformers offers the following two benefits: 
+
+• Balancing spectral and energy efficiency. The RF-domain precoder FRF is realized using RF phase shifters, which provide direct phase control and strong beamforming capability at the expense of high power consumption (typically tens of mW per element). In contrast, the antenna-domain precoder FA is controlled by low-power semiconductor tuning components, such as varactors (typ-ically μW or less per element), while the Lorentzian-constrained response limits beamforming flexibility. Their hybrid use therefore achieves a favorable balance between spectral and energy efficiency; see, e.g., [1, Fig. 5]. 
+
+• Enhancing scalability. Unlike conventional DMA-based communication systems, where each DMA typically re-quires a dedicated RF chain [33], [35], [40], the analog precoder FRF maps signals from NRF RF chains to NT
+
+DMAs. This architecture improves scalability by allow-ing more DMAs to be deployed without proportionally increasing the number of RF chains. 4
+
+B. Signal Transmission and Performance Metric 
+
+Consider a narrowband downlink signal model. Let Hk ∈
+
+CMk ×NCNT denote the downlink channel matrix from the BS to the kth user. Under the tri-hybrid precoding architecture, the received signal at the kth user can be written as 
+
+yk = HkFAFRF FBB ,k sk +X
+
+> i̸=k
+
+HkFAFRF FBB ,i si + nk, (4) where FBB ,k ∈ CNRF ×NS,k is the digital precoder correspond-ing to sk such that [FBB ,1, FBB ,2, . . . , FBB ,K ] = FBB . The first term in (4) is the desired signal, the second term represents the multiuser interference, and nk ∼ CN (0, σ 2
+
+> k
+
+IMk ) models the additive white Gaussian noise at the kth user. Assuming Gaussian signaling, the achievable spectral effi-ciency of the kth user is given by [4], [41] 
+
+Rk = log 2 det 
+
+
+
+IMk + HkFAFRF FBB ,k FHBB ,k FHRF FHA HH
+
+> k
+
+×
+
+ X 
+
+> i̸=k
+
+HkFAFRF FBB ,i FHBB ,i FHRF FHA HH 
+
+> k
+
++ σ2
+
+> k
+
+IMk
+
+−1
+
+.
+
+(5) To characterize the overall system performance, we adopt the weighted sum-rate (WSR) defined as 
+
+R =
+
+> K
+
+X
+
+> k=1
+
+βkRk, (6) where βk > 0 denotes the priority weight for the kth user. 
+
+C. Problem Formulation 
+
+The goal of tri-hybrid beamforming is to jointly design the antenna-domain, RF-domain, and baseband precoders so as to maximize the system WSR. This leads to the following optimization problem: 
+
+max 
+
+> FA,FRF ,FBB
+
+R
+
+s.t. FRF FBB FHBB FHRF 
+
+ 
+
+> n,n
+
+≤ Pn, ∀n, 
+
+|[FRF ]i,j |2 = 1 /N T, ∀i, j, 
+
+|[un]m|2 = 1 , ∀n, m. 
+
+(7) Different from existing studies on DMA beamforming [33], [35], fully connected DMA architectures [42], and single-user DMA-based tri-hybrid systems [9], Problem (7) jointly accounts for multiuser MIMO precoding, baseband and RF processing, Lorentzian-constrained DMA weights, and per-DMA input power constraints. To the best of the authors’ knowledge, this particular problem formulation has not pre-viously been investigated in the literature. This problem is highly nonconvex due to the coupled optimization variables and the constant-modulus constraints imposed by the RF and antenna-domain hardware. To render the problem more tractable, we adopt a two-stage strategy commonly used in large-scale hybrid beamforming. Specifically, we first define an intermediate virtual fully digital precoder FD = FRF FBB ∈ CNT×NS such that FDFHD
+
+ 
+
+> n,n
+
+≤
+
+Pn, ∀n. This allows us to relax (7) as 
+
+max 
+
+> FA,FD
+
+R
+
+s.t. FDFHD
+
+ 
+
+> n,n
+
+≤ Pn, ∀n, 
+
+|[un]m|2 = 1 , ∀n, m. 
+
+(P1) Compared with (7), Problem P1 reduces an optimization variable and removes the RF constant-modulus constraints, therefore admitting a simpler structure, while still respecting the per-DMA input power constraint and the physical con-straints of the DMAs. After obtaining a solution {Fopt A , Fopt D }
+
+to Problem P1, we recover the hybrid precoders by decom-posing the fully digital precoder into the RF and baseband components. This leads to the following second-stage problem: 
+
+min 
+
+> FRF ,FBB
+
+∥Fopt D − FRF FBB ∥2
+
+> F
+
+s.t. |[FRF ]i,j |2 = 1 /N T, ∀i, j, 
+
+FRF FBB FHBB FHRF 
+
+ 
+
+> n,n
+
+≤ Pn, ∀n. 
+
+(P2) A large body of prior work has demonstrated that designing an unconstrained fully digital precoder followed by matrix decomposition yields near-optimal performance for large-scale hybrid architectures [43]–[45]. This approach provides an effective balance between performance and tractability. III. I TERATIVE TRI -H YBRID BEAMFORMING 
+
+This section develops a model-based iterative algorithm for solving Problem (7), following the two-stage strategy presented in Section II-C. We primarily focus on Problem P1, which constitutes the main challenge of the tri-hybrid beam-forming design, whereas Problem P2 has been well studied in the literature and can be effectively handled using existing methods [43]–[45]. Our solution to Problem P1 builds on the WMMSE equivalence detailed below. 
+
+A. Preliminaries on WMMSE Equivalence 
+
+Problem P1 is non-convex due to the strong coupling among the optimization variables. A well-established approach to address this type of problem in multiuser MIMO systems is to exploit the equivalence between WSR maximization and WMMSE minimization [41], [46]–[48]. Based on this relationship, we can reformulate Problem P1 into an equiv-alent WMMSE minimization problem, which enables a more tractable algorithmic design. The mathematical core of the WMMSE equivalence is summarized in the following lemma adapted from [47]. 
+
+Lemma 1 ([47]): Given a matrix A ∈ Cn×ℓ and any positive definite matrix N ∈ Cn×n, the following equality holds: 
+
+ln det  I + AA HN−1 = max   
+
+> Ω≻0,Γ
+
+ln det( Ω) − Tr( ΩE (Γ)) + ℓ, 
+
+(8) where Ω ∈ Cℓ×ℓ and Γ ∈ Cn×ℓ are auxiliary variables, and 
+
+E(Γ) is a matrix function defined as 
+
+E(Γ) = ( I − ΓHA)( I − ΓHA)H + ΓHNΓ . (9) 5
+
+The optimal Γopt and Ωopt for the right-hand side of (8) are given in closed-form as 
+
+Γopt = ( AA H + N)−1A, (10) 
+
+Ωopt =  E(Γopt )−1 =  I − (Γopt )HA−1. (11) 
+
+Proof: See [46], [47]. □
+
+Based on Lemma 1, we perform the following substitutions: 
+
+A ← HkFAFD,k , (12) 
+
+N ← X
+
+> i̸=k
+
+HkFAFD,i FHD,i FHA HH 
+
+> k
+
++ σ2
+
+> k
+
+IMk , (13) where FD,k ∈ CNT×NS,k is the virtual digital precoder corre-sponding to sk such that [FD,1, FD,2, . . . , FD,K ] = FD. Thus, Problem P1 is equivalent to 
+
+max   
+
+> FA,FD
+> {Ωk≻0},{Γk}
+> K
+
+X
+
+> k=1
+
+βk
+
+
+
+log 2 det( Ωk) − Tr  ΩkEk(Γk)
+
+s.t. FDFHD
+
+ 
+
+> n,n
+
+≤ Pn, ∀n, 
+
+|[un]m|2 = 1 , ∀n, m. 
+
+(14) Here, Ek(Γk) is given by 
+
+Ek(Γk) = ( I − ΓH 
+
+> k
+
+HkFAFD,k )( I − ΓH 
+
+> k
+
+HkFAFD,k )H
+
++ X
+
+> i̸=k
+
+ΓH 
+
+> k
+
+HkFAFD,i FHD,i FHA HH 
+
+> k
+
+Γk + σ2
+
+> k
+
+ΓH 
+
+> k
+
+Γk. (15) While more variables are introduced, Problem (14) becomes more tractable. The resulting problem admits a block-wise structure that naturally lends itself to an alternating opti-mization framework. Given a proper initialization, we can update variable blocks {Ωk}, {Γk}, FA, and FD sequentially while keeping the others fixed. In what follows, we show that each subproblem either admits a closed-form optimal solution or yields a closed-form update that guarantees monotonic improvement of the objective value. 
+
+B. Update Auxiliary Variables {Γk} and {Ωk}
+
+According to (10), we first update Γk ∈ CMk ×NS,k as 
+
+Γopt  
+
+> k
+
+=
+
+ KX
+
+> i=1
+
+HkFAFD,i FHD,i FHA HH 
+
+> k
+
++ σ2
+
+> k
+
+IMk
+
+−1
+
+× HkFAFD,k , ∀k. (16) With Γk = Γopt  
+
+> k
+
+, ∀k, we then update Ωk ∈ CNS,k ×NS,k 
+
+according to (11) as 
+
+Ωopt  
+
+> k
+
+=
+
+
+
+INS,k − ΓH 
+
+> k
+
+HkFAFD,k 
+
+−1
+
+, ∀k. (17) 
+
+C. Update Precoding Variables FA and FD
+
+Following (14), we update FA and FD given updated 
+
+{Γk, Ωk} by solving the following problem: 
+
+min 
+
+> FA,FD
+> K
+
+X
+
+> k=1
+
+βkTr 
+
+
+
+ΩkEk
+
+ Γk
+
+
+
+s.t. FDFHD
+
+ 
+
+> n,n
+
+≤ Pn, ∀n, 
+
+|[un]m|2 = 1 , ∀n, m. 
+
+(18) Considering the per-DMA input power constraint, we se-quentially optimize the components associated with each DMA to avoid coupled constraints. We partition FD as 
+
+FD = [ FD,1, FD,2, . . . , FD,K ] = 
+
+
+
+vH
+
+> 1
+
+vH
+
+> 2
+
+...
+
+vH
+
+> NT
+
+ , (19) where each vH 
+
+> n
+
+∈ C1×NS denotes the precoder for the signal fed into the nth DMA. This partition ensures that each vn is subject to a single power constraint, i.e., ∥vn∥22 ≤ Pn, ∀n.Recall that FA = blkdiag( w1, w2, . . . , wNT ), where wn =(Gnun + j ηn)/2 is the weight vector corresponding to the 
+
+nth DMA and un is the tunable phase shift. Consequently, the digital precoder vn and the DMA tuning vector un naturally form a coupled variable block associated with the same physical unit. This motivates an inner block-wise optimization loop: we optimize (vn, un) for each DMA sequentially, so that each subproblem involves only a single power constraint. We now focus on optimizing (vn, un) associated with the nth DMA. We partition Hk = [ Hk, 1, Hk, 2, . . . , Hk,N T ],where each Hk,n ∈ CMk ×NC is the channel matrix from the nth DMA to the kth user. Moreover, we partition vH 
+
+> n
+
+=[vH
+
+> n, 1
+
+, vH
+
+> n, 2
+
+, . . . , vH 
+
+> n,K
+
+], where vH 
+
+> n,k
+
+∈ C1×NS,k is the precoder corresponding to symbol sk and the nth DMA. By inspecting the objective function in (18) together with the expression of 
+
+Ek in (15), we observe that the product HkFAFD,i always appears as a composite term. Therefore, we can express 
+
+HkFAFD,i in terms of un and vn as 
+
+HkFAFD,i =
+
+> NT
+
+X
+
+> n=1
+
+Hk,n wnvH
+
+> n,i
+
+= Hk,n wnvH 
+
+> n,i
+
++ X
+
+> m̸=n
+
+Hk,m wmvH
+
+> m,i
+
+.
+
+(20) Substituting (20) into (18) and omitting all constant terms independent of un and vn, we obtain the subproblem for the 
+
+nth DMA as 
+
+min 
+
+> un,vn
+
+∥vn∥22wH 
+
+> n
+
+Bn,n wn + 2Re {wH 
+
+> n
+
+(Qn − Dn)vn}
+
+s.t. wn = ( Gnun + j ηn)/2,
+
+∥vn∥22 ≤ Pn,
+
+|[un]m|2 = 1 , m = 1 , 2, . . . , N C.
+
+(21) where 
+
+Bq,p =
+
+> K
+
+X
+
+> k=1
+
+βkHH 
+
+> k,q
+
+ΓkΩkΓH 
+
+> k
+
+Hk,p ∈ CNC×NC ,
+
+Qn = X
+
+> m̸=n
+
+Bn,m wmvH 
+
+> m
+
+∈ CNC×NS ,
+
+Dn = β1HH
+
+> 1,n
+
+Γ1Ω1, . . . , β K HH
+
+> K,n
+
+ΓK ΩK
+
+ ∈ CNC×NS .
+
+We further adopt an alternating optimization strategy for Problem (21) with respect to (w.r.t.) un and vn, which results in simple closed-form update expressions, as detailed below. 6
+
+1) Update vn Given un: The optimization of vn given un
+
+can be expressed as 
+
+min 
+
+> vn
+
+an∥vn∥22 + 2Re {dH 
+
+> n
+
+vn}
+
+s.t. ∥vn∥22 ≤ Pn,
+
+(22) where an = wH 
+
+> n
+
+Bn,n wn and dn = ( QH 
+
+> n
+
+− DH 
+
+> n
+
+)wn. When 
+
+dn̸ = 0, this subproblem has a closed-form solution as 
+
+vopt  
+
+> n
+
+= −dn min 
+
+ 1
+
+an
+
+,
+
+√Pn
+
+∥dn∥2
+
+
+
+. (23) Since Ωk ≻ 0 by Lemma 1, an > 0 always holds. In the extreme case where dn = 0, the optimal solution is vopt  
+
+> n
+
+= 0.
+
+2) Update un Given vn: Fixing vn, the optimization of 
+
+un in (21) can be rewritten as 
+
+min 
+
+> un
+
+uH 
+
+> n
+
+Mnun + Re {uH 
+
+> n
+
+bn}
+
+s.t. |[un]m| = 1 , ∀m, (24) where Mn = ∥vn∥22 
+
+> 4
+
+GH 
+
+> n
+
+Bn,n Gn and bn = GH 
+
+> n
+
+(Qn −Dn)vn +2jMn1. Here, 1 denotes the NC-length all-ones vector. This subproblem is a unit-modulus quadratic program, which can be solved using techniques such as manifold optimization [49]. However, such methods are iterative and may incur substantial computational overhead, especially since this is a subproblem appearing within an outer alternating-optimization loop. Computing the exact optimum of (24) is practically unnecessary, and an appropriate update that ensures a monotonic non-increase of the objective is ade-quate. Following the principle of majorization-minimization optimization [50]–[52], we instead minimize a quadratic upper bound of the objective, which leads to a computationally lightweight closed-form update given by 
+
+un = ej arg 
+
+ (ρnI−Mn)un− 12 bn
+
+
+
+, (25) where ρn is chosen such that ρn ≥ λmax (Mn), with 
+
+λmax (Mn) denoting the maximum eigenvalue of Mn. The proof of the monotonic non-increasing property of (25) is provided in the Appendix. 
+
+D. Algorithm Summary 
+
+Overall, the proposed iterative algorithm for solving P1 is summarized in Alg. 1. Although this algorithm follows an alternating optimization framework, each subproblem admits a closed-form update that guarantees a monotonic non-decrease of the objective value of P1. Since this objective function, i.e., WSR, is upper-bounded, Alg. 1 converges in terms of the objective value of Problem P1. After obtaining Fopt A and Fopt D , the virtual digital precoder 
+
+Fopt D is decomposed into the hybrid precoders Fopt RF and Fopt BB 
+
+by solving Problem P2. Since this decomposition problem has been extensively studied and numerous existing methods can be readily applied with minor adaptations, we do not detail the solution of Problem P2 in this paper. Instead, we adopt the algorithm in [45] whenever solving P2 is required. However, it should be noted that, since this RF-baseband decomposition is solved approximately, it does not guarantee local optimality for the original nonconvex Problem 7. 
+
+Algorithm 1 An Iterative Algorithm to Solve Problem P1
+
+Input: Channel matrices {Hk}, priority weights {βk},per-DMA input power constraints {Pn}, complex waveg-uide response {ηn}, maximum iterations L. 
+
+> 1:
+
+Initialize: F(0)  
+
+> A
+
+, F(0)  
+
+> D
+
+, set iteration index ℓ = 0 . 
+
+> 2:
+
+repeat  
+
+> 3:
+
+Update Γ(ℓ+1)  
+
+> k
+
+using (16) with F(ℓ) 
+
+> A
+
+, F(ℓ) 
+
+> D
+
+. 
+
+> 4:
+
+Update Ω(ℓ+1)  
+
+> k
+
+using (17) with F(ℓ) 
+
+> A
+
+, F(ℓ) 
+
+> D
+
+, Γ(ℓ+1)  
+
+> k
+
+. 
+
+> 5:
+
+for n = 1 to NT do  
+
+> 6:
+
+Update v(ℓ+1)  
+
+> n
+
+using (23).  
+
+> 7:
+
+Update u(ℓ+1)  
+
+> n
+
+using (25).  
+
+> 8:
+
+end for  
+
+> 9:
+
+w(ℓ+1)  
+
+> n
+
+=  Gnu(ℓ+1)  
+
+> n
+
++ j ηn
+
+/2, n = 1 , . . . , N T 
+
+> 10:
+
+F(ℓ+1)  
+
+> A
+
+= blkdiag  w(ℓ+1) 1 , . . . , w(ℓ+1) 
+
+> NT
+
+. 
+
+> 11:
+
+F(ℓ+1)  
+
+> D
+
+= v(ℓ+1) 1 , . . . , v(ℓ+1) 
+
+> NT
+
+H. 
+
+> 12:
+
+ℓ ← ℓ + 1  
+
+> 13:
+
+until ℓ ≥ L or convergence.  
+
+> 14:
+
+Set Fopt A = F(ℓ) 
+
+> A
+
+and Fopt D = F(ℓ) 
+
+> D
+
+.
+
+E. Complexity Analysis 
+
+The computational complexity of Alg. 1 is evaluated per outer iteration. Updating the auxiliary variables {Γk}Kk=1 leads to complexity O  P Kk=1 MkNCN 2
+
+> T
+
+, while updating {Ωk}Kk=1 
+
+requires O  P Kk=1 N 3 
+
+> S,k
+
++ NS,k NCN 2
+
+> T
+
+. Constructing the cou-pling matrices Bq,p , Qn, and Dn dominates the matrix-assembly cost and scales as O  P Kk=1 N 2
+
+> T
+
+(NCMkNS,k +
+
+N 2 
+
+> C
+
+NS,k ). The sequential DMA updates require eigenvalue and matrix-vector operations, yielding O(NTN 3 
+
+> C
+
++NTN 2 
+
+> C
+
+NS).Therefore, the total per-iteration complexity can be written as 
+
+Citer = O
+
+
+
+N 2
+
+> T
+
+N 3
+
+> C
+> K
+
+X
+
+> k=1
+
+MkNS,k 
+
+
+
+. (26) If the algorithm runs for L iterations, the overall complexity is O(LCiter ). For large DMA arrays, the dominant scaling is governed by the quadratic dependence on NT.IV. D EEP ALGORITHM UNFOLDING 
+
+Although Alg. 1 has monotonic objective-value convergence and low per-iteration complexity, its multi-domain alternating structure may still require a large number of iterations. This limitation motivates the deep-unfolding design below, which treats Alg. 1 as a structured model-based backbone and learns to improve its finite-iteration performance from data. 
+
+A. Rationale for the Unfolding Design 
+
+Using a representative problem instance, Fig. 2 evalu-ates the convergence performance of solving Problems P1and P2 using the proposed Alg. 1 and [45], respectively. The system setup and simulation environment are described in Section V-A. It is clearly shown that solving Problem P1constitutes the main computational bottleneck. Specifically, Alg. 1 requires several seconds to converge, whereas solving Problem P2 is approximately two orders of magnitude faster. 7                            
+
+> 020 40 60 80 100 120 140 160 180 200 0510 15 20 25 Max = 24.63 bps/Hz 1.07 s 2.62 s 4.17 s
+> Iteration L
+> Weighted Sum-Rate [bps/Hz]
+> (a) Solving Problem P1 using the proposed Alg. 1
+> 010 20 30 40 50 60 22.5 23 23.5 24 24.5 25 Max = 24.62 bps/Hz 0.033 s 0.047 s 0.062 s
+> Iteration L
+> Weighted Sum-Rate [bps/Hz]
+> (b) Solving Problem P2 using the algorithm in [45]
+> Fig. 2. Convergence performance and runtime of the algorithms for solving Problem P1 and P2.
+
+Motivated by these observations, we seek to accelerate Alg. 1 to solve Problem P1 faster. We achieve this by incor-porating a deep unfolding architecture. The goal is to learn a more efficient update rule from data, leading the algorithm to a solution with the desired performance in only a few iterations. Consider a real-time communication scenario in which only a limited number of algorithmic iterations (i.e., a constrained runtime) can be performed within each channel coherence interval. We assume that Alg. 1 is allowed to run for at most 
+
+L iterations. Under such constraints, asymptotic convergence becomes less relevant, and the performance achieved after 
+
+L iterations constitutes the primary performance metric. To optimize the L-iteration performance, we adopt an algorithm unfolding framework whose computational pipeline is depicted in Fig. 3. The unfolded algorithm consists of L layers, each corresponding to one iteration of Alg. 1. Building upon Alg. 1, each layer is augmented with a set of learnable components. These components are detailed in the subsequent subsections. The proposed unfolded solver is related to, yet distinct from, existing WMMSE algorithms and their variants. First, although Alg. 1 is developed within the WMMSE framework [41], [46], [47], its main contribution lies in deriving low-complexity updates for the resulting subproblems subject to per-DMA input-power and Lorentzian constraints. Regarding the un-folding design, the existing graph neural network (GNN)-based unfolding method in [27] also incorporates learnable modules into a WMMSE-type procedure. However, it focuses on scalar power allocation in single-antenna networks, whereas the present work targets complex-valued matrix precoding and antenna-domain DMA tuning. Another relevant variant is the matrix-inverse-free WMMSE algorithm in [48], which modi-fies conventional WMMSE updates to reduce the per-iteration complexity by avoiding matrix inversions. In contrast, our unfolding design addresses a different bottleneck by learning acceleration components that improve finite-iteration perfor-mance, thereby reducing the number of required iterations. 
+
+B. Accelerating Updates of Auxiliary Variables 
+
+We first modify (17) to accelerate the update of the auxiliary variables {Γk, Ωk} as 
+
+Ωopt  
+
+> k
+
+=
+
+
+
+INS,k − ΓH 
+
+> k
+
+HkFAFD,k 
+
+−1
+
++ Xk + XH 
+
+> k
+
+, ∀k, (27) where Xk ∈ CNS,k ×NS,k is a trainable matrix that can be optimized to guide the update toward improved solutions beyond those obtained by the original update rule. Since the original Ωopt  
+
+> k
+
+is Hermitian, we add Xk + XH 
+
+> k
+
+to preserve its Hermiticity. This augmented matrix is obtained by 
+
+{Xk}Kk=1 = Ψ a
+
+ {Hk, σ k, β k}Kk=1 ; θa
+
+, (28) where Ψa denotes a deep neural network and θa denotes its trainable weights. The subscript “ a” is short for “auxiliary,” indicating that the corresponding network is used for auxiliary-variable updates. We allocate a distinct network for each layer in Fig. 3 with the same architecture but different weights, which is distinguished using a superscript (ℓ) on θa. The design of Ψa is specified as follows. 
+
+1) Deep Network Selection: Function (28) indicates that the augmented terms {Xk}Kk=1 are learned from a given set of system parameters, i.e., a problem instance. In multiuser MIMO systems, the number of active users K is generally uncertain and may vary across scenarios, resulting in problem instances with different dimensions. Hence, Ψa must be trained in an inductive manner. In addition, this module should be permutation equivariant w.r.t. user ordering, meaning that re-indexing the users should result in a consistent re-ordering of the outputs. To satisfy these requirements, we implement 
+
+Ψa as an I-layer GraphSAGE network [53]. As illustrated in Fig. 4a, this is a GNN defined on a fully connected graph with 
+
+K nodes, each representing a user. This architecture naturally supports a variable number of users and ensures permutation equivariance, since the learned message-passing mechanism is independent of both the graph size and the node indexing. 
+
+2) Input Data Preprocessing: The input of Ψa is the set of parameters that fully describes the problem instance. The input of the kth node consists of the kth user-specific parameters 
+
+(Hk, σ k, β k). We use a K-row matrix Y(0) to denote the initial node feature input to the first layer of the GNN, where each row corresponds to the feature of a node/user. We illustrate in the following how Y(0) is computed for a given problem instance. A problem instance is uniquely determined by parameters 
+
+{Hk, σ k, β k}Kk=1 . Further, observing the definition of the spectral efficiency in (5), we see that its landscape w.r.t. 8Layer 1 Layer 1 Layer 1 
+
+<latexit sha1_base64="z5SI1nVQQpoUQTgXqTZ4F2J8bCc=">AAACwnicbZHRTtswFIbdbAwo6wbjkhtrEdKuqmSaGJcIuNhlkWhBaqLKcU5bU9sJtrOpMnkFbtkj7JX2NjhpkEjpkSz9/s935ONzkpwzbYLgf8d7937rw/bObnfvY+/T5/2DLyOdFYrCkGY8U7cJ0cCZhKFhhsNtroCIhMNNsrio8je/QWmWyWuzzCEWZCbZlFFiKisCzif7ftAP6sBvRdgIHzUxmBx0/kVpRgsB0lBOtB6HQW5iS5RhlEPZjQoNOaELMoOxk5II0LGtmy3xsXNSPM2UO9Lg2n1dYYnQeikSRwpi5no9V5mbcuPCTE9jy2ReGJB09dC04NhkuPo5TpkCavjSCUIVc71iOieKUOPm03olEa0/NJ33upGEPzQTgsjURgrSchzG1kZ12lZ364dluQ66ibtBkRb84m0sSHgBLbo2ViheY2cKQLbgldPQbrfh+ibfitH3fnjSP7n64Z+dN1veQUfoK/qGQvQTnaFfaICGiKI5ekRP6K936d15955eoV6nqTlErfAengEIqeEq</latexit> 
+
+ω <latexit sha1_base64="+ArhPYhV91QVYH7Ge1n/kjfxRjY=">AAACv3icbZHNSgMxEMfT9bt+69FLsAieyq6IevTj4sGDBdsK3UWy2WkNJtklySol7BN41XfwlXwb0+0KbutA4J///IZMZuKMM218/7vhLSwuLa+srjXXNza3tnd293o6zRWFLk15qh5jooEzCV3DDIfHTAERMYd+/HIzyfdfQWmWygczziASZCTZkFFinNW5e9pp+W2/DDwvgkq0UBX3T7uNrzBJaS5AGsqJ1oPAz0xkiTKMciiaYa4hI/SFjGDgpCQCdGTLTgt85JwED1PljjS4dP9WWCK0HovYkYKYZz2bm5j/5Qa5GV5ElsksNyDp9KFhzrFJ8eTbOGEKqOFjJwhVzPWK6TNRhBo3nNorsaj9oep8sxlKeKOpEEQmNlSQFIMgsjYs03Zyt62gKGZBN243KFKDf71/C2KeQ40ujSmKZ9iRApA1eOpUtNttMLvJedE7aQdn7bPOaevyutryKjpAh+gYBegcXaJbdI+6iCJA7+gDfXpX3siTXjZFvUZVs49q4Y1/AISN378=</latexit> 
+
+L
+
+<latexit sha1_base64="OnMBBlfqsL0/Y3nC6AI98J+aqTA=">AAACv3icbZHNSgMxEMfT9bt+VT16CRbBU9kVqR6rXjwq2Cp0F8lmpzWYZJckq5SwT+BV38FX8m1Mtyu4tQOBf/7zGzKZiTPOtPH974a3tLyyura+0dzc2t7Zbe3tD3SaKwp9mvJUPcZEA2cS+oYZDo+ZAiJiDg/xy/U0//AKSrNU3ptJBpEgY8lGjBLjrLvgqdX2O34Z+L8IKtFGVdw+7TW+wiSluQBpKCdaDwM/M5ElyjDKoWiGuYaM0BcyhqGTkgjQkS07LfCxcxI8SpU70uDS/VthidB6ImJHCmKe9Xxuai7KDXMzuogsk1luQNLZQ6OcY5Pi6bdxwhRQwydOEKqY6xXTZ6IINW44tVdiUftD1fl2M5TwRlMhiExsqCAphkFkbVim7fRu20FRzINu3G5QpAb/egsLYp5DjS6NGYrn2LECkDV45lS0220wv8n/YnDaCbqd7t1Zu3dVbXkdHaIjdIICdI566Abdoj6iCNA7+kCf3qU39qSXzVCvUdUcoFp4kx9E9N+k</latexit> 
+
+1
+
+<latexit sha1_base64="d/ONs51Oe/OpVcoPF6TYIovq+C8=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2m1/p/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz94W9qM=</latexit> 
+
+F(0) 
+
+A , F(0) 
+
+D <latexit sha1_base64="dRgdGBM3RvL45/RaOsI9/vtj/Q0=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2u1gp/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz+Ls9qU=</latexit> 
+
+F(1) 
+
+A , F(1) 
+
+D
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+<latexit sha1_base64="2n0SfD0s3A4pJOmqcEP/Z0gR1bg=">AAAC+3icbVFNaxQxGM6OX3W1utWjl+AiVNBlpkgVvFRbigcPFdy2sDMumcw729AkMySZliXkx4gXKb32N/Raj/03zc6O4mz3hcCT53le3q+05EybMLzuBHfu3rv/YOVh99Hj1SdPe2vP9nVRKQpDWvBCHaZEA2cShoYZDoelAiJSDgfp8fZMPzgBpVkhv5tpCYkgE8lyRonx1Lj3MRbEHKW53XXjGurcfnI/7PrXt9Fr92aJuvNPHff64SCsA98GUQP6qIm98Vrnd5wVtBIgDeVE61EUliaxRBlGObhuXGkoCT0mExh5KIkAndh6SodfeSbDeaH8kwbX7P8ZlgitpyL1zrrVRW1GLtNGlck/JJbJsjIg6bxQXnFsCjxbGc6YAmr41ANCFfO9YnpEFKHGL7ZVJRWtGZrOV7uxhFNaCEFkZmMFmRtFibVxLdvZ3/Yj5xaN/lR+UaRl/sstTUh5BS13TcyteME7UQCyZZ4zjdvfNlq85G2wvzGINgeb3971tz43V15BL9BLtI4i9B5toS9oDw0RRT/RJbpCfwIX/ArOgvO5Neg0Oc9RK4KLGwMS978=</latexit> 
+
+F(L→1) 
+
+A , F(L→1) 
+
+D
+
+<latexit sha1_base64="R2lIbkicwn/0DN8JPIUBkmtPi88=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VgVxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy3yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6D/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz82G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D8YrwBQ==</latexit> 
+
+Fopt A
+
+<latexit sha1_base64="tLyJCGO2+DWx5OgG2wi3VdIvSdw=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VhUxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy7yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6T/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz80G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D+MvwCA==</latexit> 
+
+Fopt D
+
+… …
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="1BQIN+JbGq53t3c6DMRUXvB7rZI=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0bZCd5FsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5rt6/TXFHo0ZSn6iEmGjiT0DPMcHjIFBARcxjEz1fT/OAFlGapvDeTDCJBxpKNGCXGWXfyInjcafsdvwz8VwSVaKMqbh5bjc8wSWkuQBrKidbDwM9MZIkyjHIommGuISP0mYxh6KQkAnRky14LfOicBI9S5Y40uHR/V1gitJ6I2JGCmCc9n5ua/+WGuRmdR5bJLDcg6eyhUc6xSfH04zhhCqjhEycIVcz1iukTUYQaN57aK7Go/aHqfLMZSnilqRBEJjZUkBTDILI2LNN2erftoCjmQTdwNyhSg3+8fwtinkONLo0ZiufYsQKQNXjmVLTbbTC/yb+if9wJTjuntyft7mW15VW0jw7QEQrQGeqia3SDeoiiMXpD7+jDu/KYl3lqhnqNqmYP1cKz3yRs4GM=</latexit> 
+
+n = 1 <latexit sha1_base64="/A0lTbr6xkykc0wBRe9+AB1qFMU=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0Wqhu5RsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5r90GnuaLQoylPVT8mGjiT0DPMcOhnCoiIOTzGz1fT/OMLKM1SeW8mGUSCjCUbMUqMs+7kxfFwp+13/DLwXxFUoo2quBm2Gp9hktJcgDSUE60HgZ+ZyBJlGOVQNMNcQ0boMxnDwElJBOjIlr0W+NA5CR6lyh1pcOn+rrBEaD0RsSMFMU96Pjc1/8sNcjM6jyyTWW5A0tlDo5xjk+Lpx3HCFFDDJ04QqpjrFdMnogg1bjy1V2JR+0PV+WYzlPBKUyGITGyoICkGQWRtWKbt9G7bQVHMg27gblCkBv94/xbEPIcaXRozFM+xYwUga/DMqWi322B+k3/Fw3EnOO2c3p60u5fVllfRPjpARyhAZ6iLrtEN6iGKxugNvaMP78pjXuapGeo1qpo9VAvPfgMmx+Bk</latexit> 
+
+n = 2 <latexit sha1_base64="lhjtaluLRYCM8X8OsCGjoC+nNpk=">AAACzHicbZFBT9swFMfdsEFXBmvZcRdr1SROVYJQ2QWpggsnxCQKlZqscpyXYmE7ke2AKitXPgNXOPGV9m3mppm0tDzJ0t//93vy83txzpk2vv+n5W19+Li90/7U2f28t/+l2zu40VmhKIxpxjM1iYkGziSMDTMcJrkCImIOt/H9+TJ/+wBKs0xem0UOkSBzyVJGiXHWb3l6OQsFMXc6tdflrNv3B34VeFMEteijOq5mvdZbmGS0ECAN5UTraeDnJrJEGUY5lJ2w0JATek/mMHVSEgE6slXbJf7hnASnmXJHGly5/1dYIrReiNiRVYvruaX5Xm5amPRnZJnMCwOSrh5KC45NhpczwAlTQA1fOEGoYq5XTO+IItS4STVeiUXjD3Xne51QwiPNhCAysaGCpJwGkbVhlbbLu+0HZbkOutm7QZEG/M97tyDmBTToyliheI2dKwDZgFdOTbvdBuub3BQ3R4NgOBj+Ou6Pzuott9E39B0dogCdoBG6QFdojChS6Bm9oFfv0jOe9coV6rXqmq+oEd7TX9rc5Xg=</latexit> 
+
+n = NT
+
+…
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+Eq. (27) Eq. (16) Eq. (23) Eq. (25) Eq. (23) Eq. (25) Eq. (23) Eq. (25) 
+
+P2 
+
+<latexit sha1_base64="XQMUn6wbduQmLQU/G38T/bQdrB0=">AAACynicbZHPTtwwEMa9aQt0y/8euVhdVeK0SlC1cET0woHDInUBaROhiTO7WNhOZDuglZUbz9ArPfaV+jY42SA1CyNZ+vzNb+TxTFoIbmwY/usFHz5+Wlvf+Nz/srm1vbO7t39l8lIznLBc5PomBYOCK5xYbgXeFBpBpgKv0/ufdf76AbXhufplFwUmEuaKzzgD6604lmDvGAg3ro5udwfhMGyCvhVRKwakjfHtXu9vnOWslKgsE2DMNAoLmzjQljOBVT8uDRbA7mGOUy8VSDSJa5qu6HfvZHSWa3+UpY37f4UDacxCpp6smzSrudp8Lzct7ewkcVwVpUXFlg/NSkFtTusJ0IxrZFYsvACmue+VsjvQwKyfU+eVVHb+0Ha+1Y8VPrJcSlCZizVm1TRKnIubtKvvbhBV1SroJ+8HBR341Xu3IBUldujGWKJ0hZ1rRNWBl05L+91Gq5t8K66OhtFoOLr8MTg9a7e8QQ7IN3JIInJMTsk5GZMJYaQgv8kz+RNcBDpYBG6JBr225ivpRPD0ApbQ5JE=</latexit> 
+
+P2 <latexit sha1_base64="2Y4tI+1JkyOpzUDUGnhXZzsfrKM=">AAADDHicbZHNihQxEMcz7dc6ujqrRy/BQfAgQ7csq8dlhMWDh1Wc3YXpdkinq2fD5qNJ0soQ8go+h2fxJl59Bj3qk5jp6QW7dwoC//zrV6RSlVecGRvHvwfRtes3bt7auT28c3f33v3R3oMTo2pNYUYVV/osJwY4kzCzzHI4qzQQkXM4zS9erfOnH0EbpuR7u6ogE2QpWckoscFajN6kgtjzvHRHftFIU7p3R/6Du7yoynr/DG/BptM+thiN40ncBL4qklaMURvHi73Bl7RQtBYgLeXEmHkSVzZzRFtGOfhhWhuoCL0gS5gHKYkAk7nm2x4/CU6BS6XDkRY37v8VjghjViIPZNNlP7c2t+XmtS1fZo7JqrYg6eahsubYKryeIS6YBmr5KghCNQu9YnpONKE2TLrzSi46f2g73x2mEj5RJQSRhUs1FH6eZM6lTdqt726ceN8Hw+7CoEgHvvS2FuS8hg7dGBsU99ilBpAdeOO0dNht0t/kVXHyfJIcTA7e7o8Pp+2Wd9Aj9Bg9RQl6gQ7Ra3SMZoiir+gX+oP+Rp+jb9H36McGjQZtzUPUiejnP+TbAY0=</latexit> 
+
+Fopt RF , Fopt BB 
+
+<latexit sha1_base64="RxM8nJJFfD8IPxys6q7Z6hCqvg4=">AAAC2HicdZHPb9MwFMfd8GsUxjq4IHGxqJA4VUk22u2ANMEFicuQ6FbRhMhxXjqrthPZzlBlBXFDXPkbOHCB/4f/BqfNJFKNJ1l6/r7P0/uVlpxp4/t/et6Nm7du39m52793f/fB3mD/4ZkuKkVhSgteqFlKNHAmYWqY4TArFRCRcjhPl6+b+PklKM0K+d6sSogFWUiWM0qMk5LB48hGgpiLNLezOllGdWKXL4P649tkMPRHx0fj8EWI/ZHvT8KDceOEk8PwAAdOaWyIWjtN9ns/o6yglQBpKCdazwO/NLElyjDKoe5HlYaS0CVZwNy5kgjQsV2PUONnTslwXij3pMFr9d8MS4TWK5E6smlXb8ca8brYvDL5UWyZLCsDkm4K5RXHpsDNPnDGFFDDV84hVDHXK6YXRBFq3NY6VVLRmaHtfLcfSfhECyGIzGykIKvnQWxttA7b5m+HQV1vg+4OblGkA19p1yakvIIOvRY2KN5iFwpAduCN0tLutlcHxP93zsJRMB6N3x0OT161V95BT9BT9BwFaIJO0Bt0iqaIos/oB/qFfnsfvC/eV+/bBvV6bc4j1DHv+18VE+o/</latexit> 
+
+{Xk}Kk=1 
+
+<latexit sha1_base64="3FTjYlU9Te9t5TJCIHuvQoSkov0=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqchJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2Tcvb+DW</latexit> 
+
+z2 <latexit sha1_base64="my89rTD8ezoWL89SKiqleeecUfs=">AAAC0HicdZHPbtQwEMa94V9ZKGzhyMVihcRplaRlt9yq9sIJFdRtK22iyHEmW6u2E9lOYWtFFVeegSuIV+JtcLKpRFZlJEvjb34jj79JS8608f0/A+/e/QcPH209Hj55uv3s+WjnxakuKkVhTgteqPOUaOBMwtwww+G8VEBEyuEsvTxq6mdXoDQr5IlZlRALspQsZ5QYJyWj0XViPyaRIOZC5/akrpPR2J+835+G70LsT3x/Fu5OmySc7YW7OHBKE2PUxXGyM/gdZQWtBEhDOdF6EfiliS1RhlEO9TCqNJSEXpIlLFwqiQAd23b0Gr9xSobzQrkjDW7VfzssEVqvROrIdsbNWiPeVVtUJt+PLZNlZUDS9UN5xbEpcOMDzpgCavjKJYQq5mbF9IIoQo1zq/dKKnp/6CbfHkYSvtBCCCIzGynI6kUQWxu1Zdvc7Tio603Q+e+MIj34VruzIeUV9OhWWKN4g10qANmD10pHu93eLhD/PzkNJ8F0Mv20Nz447La8hV6h1+gtCtAMHaAP6BjNEUVX6Af6iX55n72v3o33bY16g67nJeqF9/0vGDTnJw==</latexit> 
+
+zNT
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer i Layer I
+
+<latexit sha1_base64="NBBG21SmNab1Lzdc+Vbm719Ts+g=">AAACzHicbZFBT9swFMfdwBgrKxQ47mJRIXGqkmkqHBG7IE1CTFqhUhMqx3lpLWwnsp2hysp1n4HrdtpX4tvgpEEihSdZ+vv/fk9+fi/OOdPG95863sbmh62P25+6O597u3v9/YMbnRWKwphmPFOTmGjgTMLYMMNhkisgIuZwG99/r/K3v0FplslfZplDJMhcspRRYpx1FwpiFnFqJ+XM/ihn/YE/9OvAb0XQiAFq4nq23/kfJhktBEhDOdF6Gvi5iSxRhlEOZTcsNOSE3pM5TJ2URICObN12iY+dk+A0U+5Ig2v3dYUlQuuliB1ZtanXc5X5Xm5amPQsskzmhQFJVw+lBccmw9UMcMIUUMOXThCqmOsV0wVRhBo3qdYrsWj9oem81w0lPNBMCCITGypIymkQWRvWaVvd7SAoy3XQzd4NirTgF+/dgpgX0KJrY4XiNXauAGQLXjkN7XYbrG/yrbj5OgxGw9HPb4Pzi2bL2+gLOkInKECn6Bxdoms0RhQp9Ij+on/elWc865Ur1Os0NYeoFd6fZ22u5bU=</latexit> 
+
+XK
+
+<latexit sha1_base64="zPl8fcfKIWczfDjiVpo1Eb2ls8o=">AAACzHicbZHPT9swFMfdAAM6uvHjyMWimrRTlUxTx7HaLjshJlGo1GSV47y0Vm0nsh1QZeXK38B1nPiX+G/mpEEihSdZ+vr7Pk9+fi/OOdPG95873tb2zofdvf3ux4Pep8+HR8fXOisUhTHNeKYmMdHAmYSxYYbDJFdARMzhJl7+qvI3t6A0y+SVWeUQCTKXLGWUGGf9DQUxizi1k3Jml+XssO8P/DrwWxE0oo+auJwddZ7CJKOFAGkoJ1pPAz83kSXKMMqh7IaFhpzQJZnD1ElJBOjI1m2X+ItzEpxmyh1pcO2+rrBEaL0SsSOrNvVmrjLfy00Lk55Hlsm8MCDp+qG04NhkuJoBTpgCavjKCUIVc71iuiCKUOMm1XolFq0/NJ33uqGEO5oJQWRiQwVJOQ0ia8M6bau77QdluQm62btBkRb84r1bEPMCWnRtrFG8wc4VgGzBa6eh3W6DzU2+FdffBsFwMPzzvT/62Wx5D52iM/QVBegHGqHf6BKNEUUKPaB/6NG78IxnvXKNep2m5gS1wrv/D7ku5dU=</latexit> 
+
+Xk
+
+<latexit sha1_base64="gWa23MAyaWIRLkc6h1OKBL4So1U=">AAAC0HicbZFBT9swFMfdwDYoMAo77mJRIXGhSibEdkTjwhGmFSo1UeU4L8Wq7US2w1ZZEeLKZ+AK4ivt28xJg0QKT7L09//9nvz8Xpxzpo3v/+t4K6sfPn5aW+9ubG593u7t7F7qrFAUhjTjmRrFRANnEoaGGQ6jXAERMYereHZa5a9uQGmWyd9mnkMkyFSylFFinDXp9UJBzHWc2lE5sbPDoJz0+v7ArwO/FUEj+qiJ88lO5zlMMloIkIZyovU48HMTWaIMoxzKblhoyAmdkSmMnZREgI5s3XqJ952T4DRT7kiDa/d1hSVC67mIHVk1qpdzlfleblyY9EdkmcwLA5IuHkoLjk2GqznghCmghs+dIFQx1yum10QRaty0Wq/EovWHpvOtbijhD82EIDKxoYKkHAeRtWGdttXd9oOyXAbd/N2gSAt+8d4tiHkBLbo2FiheYqcKQLbghdPQbrfB8ibfistvg+B4cHxx1D/52Wx5DX1Fe+gABeg7OkFn6BwNEUU36AE9oifvl/fXu/XuFqjXaWq+oFZ49/8Bf5DmeA==</latexit> 
+
+Xk→1
+
+<latexit sha1_base64="/uBQSHr3d56s78fbrZWaTG+MpoI=">AAACzHicbZHPT9swFMfdwPhRBhR25GJRTeJUJdNUOFZw4TQxaaWVmqxynJdiYTuR7YAqK9f9DbuyE/8S/82cNJOWlidZ+vr7Pk9+fi/OOdPG99863tb2h53dvf3uwcfDo+Peyem9zgpFYUwznqlpTDRwJmFsmOEwzRUQEXOYxI83VX7yBEqzTP4wyxwiQRaSpYwS46yfoSDmIU7ttJzboJz3+v7ArwNviqARfdTE3fyk8xomGS0ESEM50XoW+LmJLFGGUQ5lNyw05IQ+kgXMnJREgI5s3XaJPzsnwWmm3JEG1+7/FZYIrZcidmTVpl7PVeZ7uVlh0qvIMpkXBiRdPZQWHJsMVzPACVNADV86QahirldMH4gi1LhJtV6JResPTeeH3VDCM82EIDKxoYKknAWRtWGdttXd9oOyXAfd7N2gSAv+571bEPMCWnRtrFC8xi4UgGzBK6eh3W6D9U1uivsvg2A4GH7/2h9dN1veQ2foHF2gAF2iEbpFd2iMKFLoN3pBf7xvnvGsV65Qr9PUfEKt8H79BTBW5Zs=</latexit> 
+
+X1 Global mean pooling 
+
+<latexit sha1_base64="eGqcOq1hyhiExn+KRILQUQyv+uQ=">AAAC3HicbZFBSxwxFMezo23tttbVHttDcCn0tMwU0V4E0YunYsFVYWccMpk3azDJDEnGsg25iDfptZ/Ba/tt+m2anZ1CZ/VB4J//+z3y8l5WcaZNGP7pBSurz56/WHvZf/V6/c3GYHPrTJe1ojCmJS/VRUY0cCZhbJjhcFEpICLjcJ5dH83z5zegNCvlqZlVkAgylaxglBhvpYP3sf2eytilVu5H7tJ+SWNBzJUu7Klz6WAYjsIm8GMRtWKI2jhJN3sPcV7SWoA0lBOtJ1FYmcQSZRjl4PpxraEi9JpMYeKlJAJ0YptvOPzBOzkuSuWPNLhx/6+wRGg9E5knmx6Xc3PzqdykNsXnxDJZ1QYkXTxU1BybEs9ngnOmgBo+84JQxXyvmF4RRajxk+u8konOH9rO1/uxhG+0FILI3MYKcjeJEmvjJm3ndzuMnFsG/S78oEgH/uc9WZDxGjp0YyxQvMROFYDswAunpf1uo+VNPhZnn0bR7mj3687w4LDd8hp6h7bRRxShPXSAjtEJGiOKbtED+oV+B5fBXXAf/FigQa+teYs6Efz8C7PQ7Ao=</latexit> 
+
+{zn}NT
+
+n=1 
+
+> … …… …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+k, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+<latexit sha1_base64="YDtvqIWLlqxued9F4Y3OvLZxx1A=">AAADJ3icbVFNb9QwEPWGrxIobOHIxWWFxGmVoKpwQargUolLkdi20jqsHGeStdZ2ItsBraz8H/gxiBuCI7+BK0g42RSRbUey9PzmPc94Jq0ENzaKfoyCa9dv3Ly1czu8c3f33v3x3oNTU9aawYyVotTnKTUguIKZ5VbAeaWBylTAWbp63ebPPoA2vFTv7LqCRNJC8Zwzaj21GBdEQG6JI/tkPyQpFFw5qjVdN441IZHULtPcHTcLt2oICYnhhaQXlxTsPwwq6424fYtoXiwtaX0v4+b9m8V4Ek2jLvBlEPdggvo4WeyNPpGsZLUEZZmgxszjqLKJr2E5E+B7qw1UlK1oAXMPFZVgEtdNpMFPPJPhvNT+KIs79n+Ho9KYtUy9sv2i2c615FW5eW3zF4njqqotKLYplNcC2xK348UZ18CsWHtAmea+V8yWVFNm/RIGVVI5+EPf+W5IFHxkpZTUD5RoyJp5nDhHurRr724SN8220K/VD4oOxBfclYZU1DBQd8RGire0hQZQA/GG6dV+t/H2Ji+D02fT+HB6+PZgcvSq3/IOeoQeo6coRs/RETpGJ2iGGPqCfqHf6E/wOfgafAu+b6TBqPc8RIMIfv4FfWcKXQ==</latexit> 
+
+
+
+Hk
+
+ωk
+
+εk
+
+
+
+Kk=1 
+
+Eq. (33) 
+
+<latexit sha1_base64="j2eV1eqoZ/6BR2mQWgWEiR+Hhbo=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqcBJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2TctFODV</latexit> 
+
+z1
+
+Eq. (33) Eq. (33) ……
+
+<latexit sha1_base64="crrFys1Tcba6nH+kKODnOif+hNc=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk33e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Y4PiHg==</latexit> 
+
+ω1 <latexit sha1_base64="ZhA41itMP1QraVKOuZpSSzvl+xU=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk/3e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Zd7iHw==</latexit> 
+
+ω2 <latexit sha1_base64="dP0zPBtjlkk5aavoobPnKhd0CAA=">AAAC03icdZHPatwwEMa1Tv+k26bdJMdeRJdCT4vtJLvpLaSXnkoK2SSwNkaWx7sikmwkuWURvpRc+wy9po/Ut6nsdaBe0gHB6Pt+g0YzacmZNr7/Z+DtPHn67Pnui+HLV3uv34z2D650USkKc1rwQt2kRANnEuaGGQ43pQIiUg7X6e2nxr/+BkqzQl6adQmxIEvJckaJcVIyOozUqkjslyQSxKx0bi/rOhmN/cnH02l4EmJ/4vuz8GjaJOHsODzCgVOaGKMuLpL9wX2UFbQSIA3lROtF4JcmtkQZRjnUw6jSUBJ6S5awcKkkAnRs2+5r/N4pGc4L5Y40uFX/rbBEaL0WqSPbHre9RnzMW1QmP40tk2VlQNLNQ3nFsSlwMwqcMQXU8LVLCFXM9YrpiihCjRtY75VU9P7Qdb43jCR8p4UQRGY2UpDViyC2Nmpt29ztOKjrbdCtwA2K9OAH7dGClFfQo1thg+ItdqkAZA/eKB3tdvuwQPz/5CqcBNPJ9Ovx+Oy82/IueoveoQ8oQDN0hj6jCzRHFK3RL3SPfntzz3o/vLsN6g26mkPUC+/nX1596HA=</latexit> 
+
+ωNT
+
+<latexit sha1_base64="EN3QXmw08iH2VykrnfB+C5hCRe4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4cuaZHw1ISzX7iXJtMjtRoafJ24NjtYXwA9+QkCIw7bicDkax9O4DXxZJJ0Yoy5my4PBF5JrVklQjglq7SKJS5d6ahxnAuohqSyUlJ3TFSyCVFSCTX374Bo/CU6OC23Cpxxu3YsVnkrbdB7ItuHdXGNelVtUrniReq7KyoFi24uKSmCncTM9nHMDzIlNEJQZHnrFbE0NZS7MuHdLJntv6DrfHxIFn5iWkqrcEwN5vUhS70mb9s3Zj5O63gXD1sKgaA/+711ZkIkKenRrbFG8w64MgOrBW6ejw26T3U1eFidPp8nR9Ojds/Hxq27Le+gReowmKEHP0TF6i2Zojhj6in6hP+hv9Dn6Fn2PfmzRaNDVPES9iH7+A81X/hU=</latexit> 
+
+!p
+
+(·; ω(ω)
+
+p
+
+)
+
+<latexit sha1_base64="bTzCJGIrYUIwfj+dwuYC/mcnkW4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4WlNMr6aEJZr95JkWuR2I8PPE7cGR+sL4Ac/ISDEYVtxuByN42ncBr4skk6MURez5cHgC8k1qyQoxwS1dpHEpUs9NY4zAfWQVBZKys7pChZBKirBpr59cI2fBCfHhTbhUw637sUKT6VtOg9k2/BurjGvyi0qV7xIPVdl5UCx7UVFJbDTuJkezrkB5sQmCMoMD71itqaGMhdm3Lslk703dJ3vD4mCT0xLSVXuiYG8XiSp96RN++bsx0ld74Jha2FQtAf/964syEQFPbo1tijeYVcGQPXgrdPRYbfJ7iYvi5On0+RoevTu2fj4VbflPfQIPUYTlKDn6Bi9RTM0Rwx9Rb/QH/Q3+hx9i75HP7ZoNOhqHqJeRD//AYKE/fc=</latexit> 
+
+!a
+
+(·; ω(ω)
+
+a
+
+)
+
+Input MLP Readout 
+
+MLP 
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer j Layer J
+
+> … …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+<latexit sha1_base64="zJdYaVh4yq/dtBYzd251jLTyaN4=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhlZk9bjoZY8rOLsL0zK+pK+zYZK0JKkyhN7Em3j1TxCv+s/435h2KtjZfVD6zfd9Hnl5j1VSWBfHf0bRtes3bt7auz2+c3f/3v3JwYNTW9aG45yXsjTnDCxKoXHuhJN4XhkExSSesfXbNn/2EY0VpX7vNhVmClZaFIKDC9Zy8jhV4C5Y4Y+b5fo5Ta1YKQgqZejCfzmZxrO4C3pZJL2Ykj5OlgejH2le8lqhdlyCtYskrlzmwTjBJTbjtLZYAV/DChdBalBoM989pKFPg5PTojTh04527v8VHpS1G8UC2bZtd3OteVVuUbvideaFrmqHmm8vKmpJXUnbqdBcGOROboIAbkTolfILMMBdmN3gFqYGb+g73x+nGj/xUinQuU8N5s0iybxPu7Rvz36aNM0uGLYRBgUD+J93ZQGTNQ7oztiidIddGUQ9gLdOT4fdJrubvCxOX8ySw9nhu5fTozf9lvfII/KEPCMJeUWOyDE5IXPCyWfyk/wiv6MP0Zfoa/Rti0ajvuYhGUT0/S/qJ+wP</latexit> 
+
+Hk, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+Input MLP Readout 
+
+MLP 
+
+Fig. 3. Computational pipeline of the unfolded Alg. 1. Layer 1 Layer 1 Layer 1 
+
+<latexit sha1_base64="z5SI1nVQQpoUQTgXqTZ4F2J8bCc=">AAACwnicbZHRTtswFIbdbAwo6wbjkhtrEdKuqmSaGJcIuNhlkWhBaqLKcU5bU9sJtrOpMnkFbtkj7JX2NjhpkEjpkSz9/s935ONzkpwzbYLgf8d7937rw/bObnfvY+/T5/2DLyOdFYrCkGY8U7cJ0cCZhKFhhsNtroCIhMNNsrio8je/QWmWyWuzzCEWZCbZlFFiKisCzif7ftAP6sBvRdgIHzUxmBx0/kVpRgsB0lBOtB6HQW5iS5RhlEPZjQoNOaELMoOxk5II0LGtmy3xsXNSPM2UO9Lg2n1dYYnQeikSRwpi5no9V5mbcuPCTE9jy2ReGJB09dC04NhkuPo5TpkCavjSCUIVc71iOieKUOPm03olEa0/NJ33upGEPzQTgsjURgrSchzG1kZ12lZ364dluQ66ibtBkRb84m0sSHgBLbo2ViheY2cKQLbgldPQbrfh+ibfitH3fnjSP7n64Z+dN1veQUfoK/qGQvQTnaFfaICGiKI5ekRP6K936d15955eoV6nqTlErfAengEIqeEq</latexit> 
+
+ω <latexit sha1_base64="+ArhPYhV91QVYH7Ge1n/kjfxRjY=">AAACv3icbZHNSgMxEMfT9bt+69FLsAieyq6IevTj4sGDBdsK3UWy2WkNJtklySol7BN41XfwlXwb0+0KbutA4J///IZMZuKMM218/7vhLSwuLa+srjXXNza3tnd293o6zRWFLk15qh5jooEzCV3DDIfHTAERMYd+/HIzyfdfQWmWygczziASZCTZkFFinNW5e9pp+W2/DDwvgkq0UBX3T7uNrzBJaS5AGsqJ1oPAz0xkiTKMciiaYa4hI/SFjGDgpCQCdGTLTgt85JwED1PljjS4dP9WWCK0HovYkYKYZz2bm5j/5Qa5GV5ElsksNyDp9KFhzrFJ8eTbOGEKqOFjJwhVzPWK6TNRhBo3nNorsaj9oep8sxlKeKOpEEQmNlSQFIMgsjYs03Zyt62gKGZBN243KFKDf71/C2KeQ40ujSmKZ9iRApA1eOpUtNttMLvJedE7aQdn7bPOaevyutryKjpAh+gYBegcXaJbdI+6iCJA7+gDfXpX3siTXjZFvUZVs49q4Y1/AISN378=</latexit> 
+
+L
+
+<latexit sha1_base64="OnMBBlfqsL0/Y3nC6AI98J+aqTA=">AAACv3icbZHNSgMxEMfT9bt+VT16CRbBU9kVqR6rXjwq2Cp0F8lmpzWYZJckq5SwT+BV38FX8m1Mtyu4tQOBf/7zGzKZiTPOtPH974a3tLyyura+0dzc2t7Zbe3tD3SaKwp9mvJUPcZEA2cS+oYZDo+ZAiJiDg/xy/U0//AKSrNU3ptJBpEgY8lGjBLjrLvgqdX2O34Z+L8IKtFGVdw+7TW+wiSluQBpKCdaDwM/M5ElyjDKoWiGuYaM0BcyhqGTkgjQkS07LfCxcxI8SpU70uDS/VthidB6ImJHCmKe9Xxuai7KDXMzuogsk1luQNLZQ6OcY5Pi6bdxwhRQwydOEKqY6xXTZ6IINW44tVdiUftD1fl2M5TwRlMhiExsqCAphkFkbVim7fRu20FRzINu3G5QpAb/egsLYp5DjS6NGYrn2LECkDV45lS0220wv8n/YnDaCbqd7t1Zu3dVbXkdHaIjdIICdI566Abdoj6iCNA7+kCf3qU39qSXzVCvUdUcoFp4kx9E9N+k</latexit> 
+
+1
+
+<latexit sha1_base64="d/ONs51Oe/OpVcoPF6TYIovq+C8=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2m1/p/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz94W9qM=</latexit> 
+
+F(0) 
+
+A , F(0) 
+
+D <latexit sha1_base64="dRgdGBM3RvL45/RaOsI9/vtj/Q0=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2u1gp/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz+Ls9qU=</latexit> 
+
+F(1) 
+
+A , F(1) 
+
+D
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+<latexit sha1_base64="2n0SfD0s3A4pJOmqcEP/Z0gR1bg=">AAAC+3icbVFNaxQxGM6OX3W1utWjl+AiVNBlpkgVvFRbigcPFdy2sDMumcw729AkMySZliXkx4gXKb32N/Raj/03zc6O4mz3hcCT53le3q+05EybMLzuBHfu3rv/YOVh99Hj1SdPe2vP9nVRKQpDWvBCHaZEA2cShoYZDoelAiJSDgfp8fZMPzgBpVkhv5tpCYkgE8lyRonx1Lj3MRbEHKW53XXjGurcfnI/7PrXt9Fr92aJuvNPHff64SCsA98GUQP6qIm98Vrnd5wVtBIgDeVE61EUliaxRBlGObhuXGkoCT0mExh5KIkAndh6SodfeSbDeaH8kwbX7P8ZlgitpyL1zrrVRW1GLtNGlck/JJbJsjIg6bxQXnFsCjxbGc6YAmr41ANCFfO9YnpEFKHGL7ZVJRWtGZrOV7uxhFNaCEFkZmMFmRtFibVxLdvZ3/Yj5xaN/lR+UaRl/sstTUh5BS13TcyteME7UQCyZZ4zjdvfNlq85G2wvzGINgeb3971tz43V15BL9BLtI4i9B5toS9oDw0RRT/RJbpCfwIX/ArOgvO5Neg0Oc9RK4KLGwMS978=</latexit> 
+
+F(L→1) 
+
+A , F(L→1) 
+
+D
+
+<latexit sha1_base64="R2lIbkicwn/0DN8JPIUBkmtPi88=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VgVxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy3yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6D/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz82G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D8YrwBQ==</latexit> 
+
+Fopt A
+
+<latexit sha1_base64="tLyJCGO2+DWx5OgG2wi3VdIvSdw=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VhUxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy7yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6T/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz80G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D+MvwCA==</latexit> 
+
+Fopt D
+
+… …
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="1BQIN+JbGq53t3c6DMRUXvB7rZI=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0bZCd5FsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5rt6/TXFHo0ZSn6iEmGjiT0DPMcHjIFBARcxjEz1fT/OAFlGapvDeTDCJBxpKNGCXGWXfyInjcafsdvwz8VwSVaKMqbh5bjc8wSWkuQBrKidbDwM9MZIkyjHIommGuISP0mYxh6KQkAnRky14LfOicBI9S5Y40uHR/V1gitJ6I2JGCmCc9n5ua/+WGuRmdR5bJLDcg6eyhUc6xSfH04zhhCqjhEycIVcz1iukTUYQaN57aK7Go/aHqfLMZSnilqRBEJjZUkBTDILI2LNN2erftoCjmQTdwNyhSg3+8fwtinkONLo0ZiufYsQKQNXjmVLTbbTC/yb+if9wJTjuntyft7mW15VW0jw7QEQrQGeqia3SDeoiiMXpD7+jDu/KYl3lqhnqNqmYP1cKz3yRs4GM=</latexit> 
+
+n = 1 <latexit sha1_base64="/A0lTbr6xkykc0wBRe9+AB1qFMU=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0Wqhu5RsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5r90GnuaLQoylPVT8mGjiT0DPMcOhnCoiIOTzGz1fT/OMLKM1SeW8mGUSCjCUbMUqMs+7kxfFwp+13/DLwXxFUoo2quBm2Gp9hktJcgDSUE60HgZ+ZyBJlGOVQNMNcQ0boMxnDwElJBOjIlr0W+NA5CR6lyh1pcOn+rrBEaD0RsSMFMU96Pjc1/8sNcjM6jyyTWW5A0tlDo5xjk+Lpx3HCFFDDJ04QqpjrFdMnogg1bjy1V2JR+0PV+WYzlPBKUyGITGyoICkGQWRtWKbt9G7bQVHMg27gblCkBv94/xbEPIcaXRozFM+xYwUga/DMqWi322B+k3/Fw3EnOO2c3p60u5fVllfRPjpARyhAZ6iLrtEN6iGKxugNvaMP78pjXuapGeo1qpo9VAvPfgMmx+Bk</latexit> 
+
+n = 2 <latexit sha1_base64="lhjtaluLRYCM8X8OsCGjoC+nNpk=">AAACzHicbZFBT9swFMfdsEFXBmvZcRdr1SROVYJQ2QWpggsnxCQKlZqscpyXYmE7ke2AKitXPgNXOPGV9m3mppm0tDzJ0t//93vy83txzpk2vv+n5W19+Li90/7U2f28t/+l2zu40VmhKIxpxjM1iYkGziSMDTMcJrkCImIOt/H9+TJ/+wBKs0xem0UOkSBzyVJGiXHWb3l6OQsFMXc6tdflrNv3B34VeFMEteijOq5mvdZbmGS0ECAN5UTraeDnJrJEGUY5lJ2w0JATek/mMHVSEgE6slXbJf7hnASnmXJHGly5/1dYIrReiNiRVYvruaX5Xm5amPRnZJnMCwOSrh5KC45NhpczwAlTQA1fOEGoYq5XTO+IItS4STVeiUXjD3Xne51QwiPNhCAysaGCpJwGkbVhlbbLu+0HZbkOutm7QZEG/M97tyDmBTToyliheI2dKwDZgFdOTbvdBuub3BQ3R4NgOBj+Ou6Pzuott9E39B0dogCdoBG6QFdojChS6Bm9oFfv0jOe9coV6rXqmq+oEd7TX9rc5Xg=</latexit> 
+
+n = NT
+
+…
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+Eq. (26) Eq. (16) Eq. (23) Eq. (25) Eq. (23) Eq. (25) Eq. (23) Eq. (25) 
+
+P2 
+
+<latexit sha1_base64="XQMUn6wbduQmLQU/G38T/bQdrB0=">AAACynicbZHPTtwwEMa9aQt0y/8euVhdVeK0SlC1cET0woHDInUBaROhiTO7WNhOZDuglZUbz9ArPfaV+jY42SA1CyNZ+vzNb+TxTFoIbmwY/usFHz5+Wlvf+Nz/srm1vbO7t39l8lIznLBc5PomBYOCK5xYbgXeFBpBpgKv0/ufdf76AbXhufplFwUmEuaKzzgD6604lmDvGAg3ro5udwfhMGyCvhVRKwakjfHtXu9vnOWslKgsE2DMNAoLmzjQljOBVT8uDRbA7mGOUy8VSDSJa5qu6HfvZHSWa3+UpY37f4UDacxCpp6smzSrudp8Lzct7ewkcVwVpUXFlg/NSkFtTusJ0IxrZFYsvACmue+VsjvQwKyfU+eVVHb+0Ha+1Y8VPrJcSlCZizVm1TRKnIubtKvvbhBV1SroJ+8HBR341Xu3IBUldujGWKJ0hZ1rRNWBl05L+91Gq5t8K66OhtFoOLr8MTg9a7e8QQ7IN3JIInJMTsk5GZMJYaQgv8kz+RNcBDpYBG6JBr225ivpRPD0ApbQ5JE=</latexit> 
+
+P2 <latexit sha1_base64="2Y4tI+1JkyOpzUDUGnhXZzsfrKM=">AAADDHicbZHNihQxEMcz7dc6ujqrRy/BQfAgQ7csq8dlhMWDh1Wc3YXpdkinq2fD5qNJ0soQ8go+h2fxJl59Bj3qk5jp6QW7dwoC//zrV6RSlVecGRvHvwfRtes3bt7auT28c3f33v3R3oMTo2pNYUYVV/osJwY4kzCzzHI4qzQQkXM4zS9erfOnH0EbpuR7u6ogE2QpWckoscFajN6kgtjzvHRHftFIU7p3R/6Du7yoynr/DG/BptM+thiN40ncBL4qklaMURvHi73Bl7RQtBYgLeXEmHkSVzZzRFtGOfhhWhuoCL0gS5gHKYkAk7nm2x4/CU6BS6XDkRY37v8VjghjViIPZNNlP7c2t+XmtS1fZo7JqrYg6eahsubYKryeIS6YBmr5KghCNQu9YnpONKE2TLrzSi46f2g73x2mEj5RJQSRhUs1FH6eZM6lTdqt726ceN8Hw+7CoEgHvvS2FuS8hg7dGBsU99ilBpAdeOO0dNht0t/kVXHyfJIcTA7e7o8Pp+2Wd9Aj9Bg9RQl6gQ7Ra3SMZoiir+gX+oP+Rp+jb9H36McGjQZtzUPUiejnP+TbAY0=</latexit> 
+
+Fopt RF , Fopt BB 
+
+<latexit sha1_base64="RxM8nJJFfD8IPxys6q7Z6hCqvg4=">AAAC2HicdZHPb9MwFMfd8GsUxjq4IHGxqJA4VUk22u2ANMEFicuQ6FbRhMhxXjqrthPZzlBlBXFDXPkbOHCB/4f/BqfNJFKNJ1l6/r7P0/uVlpxp4/t/et6Nm7du39m52793f/fB3mD/4ZkuKkVhSgteqFlKNHAmYWqY4TArFRCRcjhPl6+b+PklKM0K+d6sSogFWUiWM0qMk5LB48hGgpiLNLezOllGdWKXL4P649tkMPRHx0fj8EWI/ZHvT8KDceOEk8PwAAdOaWyIWjtN9ns/o6yglQBpKCdazwO/NLElyjDKoe5HlYaS0CVZwNy5kgjQsV2PUONnTslwXij3pMFr9d8MS4TWK5E6smlXb8ca8brYvDL5UWyZLCsDkm4K5RXHpsDNPnDGFFDDV84hVDHXK6YXRBFq3NY6VVLRmaHtfLcfSfhECyGIzGykIKvnQWxttA7b5m+HQV1vg+4OblGkA19p1yakvIIOvRY2KN5iFwpAduCN0tLutlcHxP93zsJRMB6N3x0OT161V95BT9BT9BwFaIJO0Bt0iqaIos/oB/qFfnsfvC/eV+/bBvV6bc4j1DHv+18VE+o/</latexit> 
+
+{Xk}Kk=1 
+
+<latexit sha1_base64="3FTjYlU9Te9t5TJCIHuvQoSkov0=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqchJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2Tcvb+DW</latexit> 
+
+z2 <latexit sha1_base64="my89rTD8ezoWL89SKiqleeecUfs=">AAAC0HicdZHPbtQwEMa94V9ZKGzhyMVihcRplaRlt9yq9sIJFdRtK22iyHEmW6u2E9lOYWtFFVeegSuIV+JtcLKpRFZlJEvjb34jj79JS8608f0/A+/e/QcPH209Hj55uv3s+WjnxakuKkVhTgteqPOUaOBMwtwww+G8VEBEyuEsvTxq6mdXoDQr5IlZlRALspQsZ5QYJyWj0XViPyaRIOZC5/akrpPR2J+835+G70LsT3x/Fu5OmySc7YW7OHBKE2PUxXGyM/gdZQWtBEhDOdF6EfiliS1RhlEO9TCqNJSEXpIlLFwqiQAd23b0Gr9xSobzQrkjDW7VfzssEVqvROrIdsbNWiPeVVtUJt+PLZNlZUDS9UN5xbEpcOMDzpgCavjKJYQq5mbF9IIoQo1zq/dKKnp/6CbfHkYSvtBCCCIzGynI6kUQWxu1Zdvc7Tio603Q+e+MIj34VruzIeUV9OhWWKN4g10qANmD10pHu93eLhD/PzkNJ8F0Mv20Nz447La8hV6h1+gtCtAMHaAP6BjNEUVX6Af6iX55n72v3o33bY16g67nJeqF9/0vGDTnJw==</latexit> 
+
+zNT
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer i Layer I
+
+<latexit sha1_base64="NBBG21SmNab1Lzdc+Vbm719Ts+g=">AAACzHicbZFBT9swFMfdwBgrKxQ47mJRIXGqkmkqHBG7IE1CTFqhUhMqx3lpLWwnsp2hysp1n4HrdtpX4tvgpEEihSdZ+vv/fk9+fi/OOdPG95863sbmh62P25+6O597u3v9/YMbnRWKwphmPFOTmGjgTMLYMMNhkisgIuZwG99/r/K3v0FplslfZplDJMhcspRRYpx1FwpiFnFqJ+XM/ihn/YE/9OvAb0XQiAFq4nq23/kfJhktBEhDOdF6Gvi5iSxRhlEOZTcsNOSE3pM5TJ2URICObN12iY+dk+A0U+5Ig2v3dYUlQuuliB1ZtanXc5X5Xm5amPQsskzmhQFJVw+lBccmw9UMcMIUUMOXThCqmOsV0wVRhBo3qdYrsWj9oem81w0lPNBMCCITGypIymkQWRvWaVvd7SAoy3XQzd4NirTgF+/dgpgX0KJrY4XiNXauAGQLXjkN7XYbrG/yrbj5OgxGw9HPb4Pzi2bL2+gLOkInKECn6Bxdoms0RhQp9Ij+on/elWc865Ur1Os0NYeoFd6fZ22u5bU=</latexit> 
+
+XK
+
+<latexit sha1_base64="zPl8fcfKIWczfDjiVpo1Eb2ls8o=">AAACzHicbZHPT9swFMfdAAM6uvHjyMWimrRTlUxTx7HaLjshJlGo1GSV47y0Vm0nsh1QZeXK38B1nPiX+G/mpEEihSdZ+vr7Pk9+fi/OOdPG95873tb2zofdvf3ux4Pep8+HR8fXOisUhTHNeKYmMdHAmYSxYYbDJFdARMzhJl7+qvI3t6A0y+SVWeUQCTKXLGWUGGf9DQUxizi1k3Jml+XssO8P/DrwWxE0oo+auJwddZ7CJKOFAGkoJ1pPAz83kSXKMMqh7IaFhpzQJZnD1ElJBOjI1m2X+ItzEpxmyh1pcO2+rrBEaL0SsSOrNvVmrjLfy00Lk55Hlsm8MCDp+qG04NhkuJoBTpgCavjKCUIVc71iuiCKUOMm1XolFq0/NJ33uqGEO5oJQWRiQwVJOQ0ia8M6bau77QdluQm62btBkRb84r1bEPMCWnRtrFG8wc4VgGzBa6eh3W6DzU2+FdffBsFwMPzzvT/62Wx5D52iM/QVBegHGqHf6BKNEUUKPaB/6NG78IxnvXKNep2m5gS1wrv/D7ku5dU=</latexit> 
+
+Xk
+
+<latexit sha1_base64="gWa23MAyaWIRLkc6h1OKBL4So1U=">AAAC0HicbZFBT9swFMfdwDYoMAo77mJRIXGhSibEdkTjwhGmFSo1UeU4L8Wq7US2w1ZZEeLKZ+AK4ivt28xJg0QKT7L09//9nvz8Xpxzpo3v/+t4K6sfPn5aW+9ubG593u7t7F7qrFAUhjTjmRrFRANnEoaGGQ6jXAERMYereHZa5a9uQGmWyd9mnkMkyFSylFFinDXp9UJBzHWc2lE5sbPDoJz0+v7ArwO/FUEj+qiJ88lO5zlMMloIkIZyovU48HMTWaIMoxzKblhoyAmdkSmMnZREgI5s3XqJ952T4DRT7kiDa/d1hSVC67mIHVk1qpdzlfleblyY9EdkmcwLA5IuHkoLjk2GqznghCmghs+dIFQx1yum10QRaty0Wq/EovWHpvOtbijhD82EIDKxoYKkHAeRtWGdttXd9oOyXAbd/N2gSAt+8d4tiHkBLbo2FiheYqcKQLbghdPQbrfB8ibfistvg+B4cHxx1D/52Wx5DX1Fe+gABeg7OkFn6BwNEUU36AE9oifvl/fXu/XuFqjXaWq+oFZ49/8Bf5DmeA==</latexit> 
+
+Xk→1
+
+<latexit sha1_base64="/uBQSHr3d56s78fbrZWaTG+MpoI=">AAACzHicbZHPT9swFMfdwPhRBhR25GJRTeJUJdNUOFZw4TQxaaWVmqxynJdiYTuR7YAqK9f9DbuyE/8S/82cNJOWlidZ+vr7Pk9+fi/OOdPG99863tb2h53dvf3uwcfDo+Peyem9zgpFYUwznqlpTDRwJmFsmOEwzRUQEXOYxI83VX7yBEqzTP4wyxwiQRaSpYwS46yfoSDmIU7ttJzboJz3+v7ArwNviqARfdTE3fyk8xomGS0ESEM50XoW+LmJLFGGUQ5lNyw05IQ+kgXMnJREgI5s3XaJPzsnwWmm3JEG1+7/FZYIrZcidmTVpl7PVeZ7uVlh0qvIMpkXBiRdPZQWHJsMVzPACVNADV86QahirldMH4gi1LhJtV6JResPTeeH3VDCM82EIDKxoYKknAWRtWGdttXd9oOyXAfd7N2gSAv+571bEPMCWnRtrFC8xi4UgGzBK6eh3W6D9U1uivsvg2A4GH7/2h9dN1veQ2foHF2gAF2iEbpFd2iMKFLoN3pBf7xvnvGsV65Qr9PUfEKt8H79BTBW5Zs=</latexit> 
+
+X1 Global mean pooling 
+
+<latexit sha1_base64="eGqcOq1hyhiExn+KRILQUQyv+uQ=">AAAC3HicbZFBSxwxFMezo23tttbVHttDcCn0tMwU0V4E0YunYsFVYWccMpk3azDJDEnGsg25iDfptZ/Ba/tt+m2anZ1CZ/VB4J//+z3y8l5WcaZNGP7pBSurz56/WHvZf/V6/c3GYHPrTJe1ojCmJS/VRUY0cCZhbJjhcFEpICLjcJ5dH83z5zegNCvlqZlVkAgylaxglBhvpYP3sf2eytilVu5H7tJ+SWNBzJUu7Klz6WAYjsIm8GMRtWKI2jhJN3sPcV7SWoA0lBOtJ1FYmcQSZRjl4PpxraEi9JpMYeKlJAJ0YptvOPzBOzkuSuWPNLhx/6+wRGg9E5knmx6Xc3PzqdykNsXnxDJZ1QYkXTxU1BybEs9ngnOmgBo+84JQxXyvmF4RRajxk+u8konOH9rO1/uxhG+0FILI3MYKcjeJEmvjJm3ndzuMnFsG/S78oEgH/uc9WZDxGjp0YyxQvMROFYDswAunpf1uo+VNPhZnn0bR7mj3687w4LDd8hp6h7bRRxShPXSAjtEJGiOKbtED+oV+B5fBXXAf/FigQa+teYs6Efz8C7PQ7Ao=</latexit> 
+
+{zn}NT
+
+n=1 
+
+> … …… …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+<latexit sha1_base64="zJdYaVh4yq/dtBYzd251jLTyaN4=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhlZk9bjoZY8rOLsL0zK+pK+zYZK0JKkyhN7Em3j1TxCv+s/435h2KtjZfVD6zfd9Hnl5j1VSWBfHf0bRtes3bt7auz2+c3f/3v3JwYNTW9aG45yXsjTnDCxKoXHuhJN4XhkExSSesfXbNn/2EY0VpX7vNhVmClZaFIKDC9Zy8jhV4C5Y4Y+b5fo5Ta1YKQgqZejCfzmZxrO4C3pZJL2Ykj5OlgejH2le8lqhdlyCtYskrlzmwTjBJTbjtLZYAV/DChdBalBoM989pKFPg5PTojTh04527v8VHpS1G8UC2bZtd3OteVVuUbvideaFrmqHmm8vKmpJXUnbqdBcGOROboIAbkTolfILMMBdmN3gFqYGb+g73x+nGj/xUinQuU8N5s0iybxPu7Rvz36aNM0uGLYRBgUD+J93ZQGTNQ7oztiidIddGUQ9gLdOT4fdJrubvCxOX8ySw9nhu5fTozf9lvfII/KEPCMJeUWOyDE5IXPCyWfyk/wiv6MP0Zfoa/Rti0ajvuYhGUT0/S/qJ+wP</latexit> 
+
+Hk, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+<latexit sha1_base64="YDtvqIWLlqxued9F4Y3OvLZxx1A=">AAADJ3icbVFNb9QwEPWGrxIobOHIxWWFxGmVoKpwQargUolLkdi20jqsHGeStdZ2ItsBraz8H/gxiBuCI7+BK0g42RSRbUey9PzmPc94Jq0ENzaKfoyCa9dv3Ly1czu8c3f33v3x3oNTU9aawYyVotTnKTUguIKZ5VbAeaWBylTAWbp63ebPPoA2vFTv7LqCRNJC8Zwzaj21GBdEQG6JI/tkPyQpFFw5qjVdN441IZHULtPcHTcLt2oICYnhhaQXlxTsPwwq6424fYtoXiwtaX0v4+b9m8V4Ek2jLvBlEPdggvo4WeyNPpGsZLUEZZmgxszjqLKJr2E5E+B7qw1UlK1oAXMPFZVgEtdNpMFPPJPhvNT+KIs79n+Ho9KYtUy9sv2i2c615FW5eW3zF4njqqotKLYplNcC2xK348UZ18CsWHtAmea+V8yWVFNm/RIGVVI5+EPf+W5IFHxkpZTUD5RoyJp5nDhHurRr724SN8220K/VD4oOxBfclYZU1DBQd8RGire0hQZQA/GG6dV+t/H2Ji+D02fT+HB6+PZgcvSq3/IOeoQeo6coRs/RETpGJ2iGGPqCfqHf6E/wOfgafAu+b6TBqPc8RIMIfv4FfWcKXQ==</latexit> 
+
+
+
+Hk
+
+ωk
+
+εk
+
+
+
+Kk=1 
+
+Eq. (33) 
+
+<latexit sha1_base64="j2eV1eqoZ/6BR2mQWgWEiR+Hhbo=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqcBJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2TctFODV</latexit> 
+
+z1
+
+Eq. (33) Eq. (33) ……
+
+<latexit sha1_base64="crrFys1Tcba6nH+kKODnOif+hNc=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk33e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Y4PiHg==</latexit> 
+
+ω1 <latexit sha1_base64="ZhA41itMP1QraVKOuZpSSzvl+xU=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk/3e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Zd7iHw==</latexit> 
+
+ω2 <latexit sha1_base64="dP0zPBtjlkk5aavoobPnKhd0CAA=">AAAC03icdZHPatwwEMa1Tv+k26bdJMdeRJdCT4vtJLvpLaSXnkoK2SSwNkaWx7sikmwkuWURvpRc+wy9po/Ut6nsdaBe0gHB6Pt+g0YzacmZNr7/Z+DtPHn67Pnui+HLV3uv34z2D650USkKc1rwQt2kRANnEuaGGQ43pQIiUg7X6e2nxr/+BkqzQl6adQmxIEvJckaJcVIyOozUqkjslyQSxKx0bi/rOhmN/cnH02l4EmJ/4vuz8GjaJOHsODzCgVOaGKMuLpL9wX2UFbQSIA3lROtF4JcmtkQZRjnUw6jSUBJ6S5awcKkkAnRs2+5r/N4pGc4L5Y40uFX/rbBEaL0WqSPbHre9RnzMW1QmP40tk2VlQNLNQ3nFsSlwMwqcMQXU8LVLCFXM9YrpiihCjRtY75VU9P7Qdb43jCR8p4UQRGY2UpDViyC2Nmpt29ztOKjrbdCtwA2K9OAH7dGClFfQo1thg+ItdqkAZA/eKB3tdvuwQPz/5CqcBNPJ9Ovx+Oy82/IueoveoQ8oQDN0hj6jCzRHFK3RL3SPfntzz3o/vLsN6g26mkPUC+/nX1596HA=</latexit> 
+
+ωNT
+
+<latexit sha1_base64="EN3QXmw08iH2VykrnfB+C5hCRe4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4cuaZHw1ISzX7iXJtMjtRoafJ24NjtYXwA9+QkCIw7bicDkax9O4DXxZJJ0Yoy5my4PBF5JrVklQjglq7SKJS5d6ahxnAuohqSyUlJ3TFSyCVFSCTX374Bo/CU6OC23Cpxxu3YsVnkrbdB7ItuHdXGNelVtUrniReq7KyoFi24uKSmCncTM9nHMDzIlNEJQZHnrFbE0NZS7MuHdLJntv6DrfHxIFn5iWkqrcEwN5vUhS70mb9s3Zj5O63gXD1sKgaA/+711ZkIkKenRrbFG8w64MgOrBW6ejw26T3U1eFidPp8nR9Ojds/Hxq27Le+gReowmKEHP0TF6i2Zojhj6in6hP+hv9Dn6Fn2PfmzRaNDVPES9iH7+A81X/hU=</latexit> 
+
+!p
+
+(·; ω(ω)
+
+p
+
+)
+
+<latexit sha1_base64="bTzCJGIrYUIwfj+dwuYC/mcnkW4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4WlNMr6aEJZr95JkWuR2I8PPE7cGR+sL4Ac/ISDEYVtxuByN42ncBr4skk6MURez5cHgC8k1qyQoxwS1dpHEpUs9NY4zAfWQVBZKys7pChZBKirBpr59cI2fBCfHhTbhUw637sUKT6VtOg9k2/BurjGvyi0qV7xIPVdl5UCx7UVFJbDTuJkezrkB5sQmCMoMD71itqaGMhdm3Lslk703dJ3vD4mCT0xLSVXuiYG8XiSp96RN++bsx0ld74Jha2FQtAf/964syEQFPbo1tijeYVcGQPXgrdPRYbfJ7iYvi5On0+RoevTu2fj4VbflPfQIPUYTlKDn6Bi9RTM0Rwx9Rb/QH/Q3+hx9i75HP7ZoNOhqHqJeRD//AYKE/fc=</latexit> 
+
+!a
+
+(·; ω(ω)
+
+a
+
+)
+
+Input MLP Readout 
+
+MLP 
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer j Layer J
+
+> … …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+<latexit sha1_base64="zJdYaVh4yq/dtBYzd251jLTyaN4=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhlZk9bjoZY8rOLsL0zK+pK+zYZK0JKkyhN7Em3j1TxCv+s/435h2KtjZfVD6zfd9Hnl5j1VSWBfHf0bRtes3bt7auz2+c3f/3v3JwYNTW9aG45yXsjTnDCxKoXHuhJN4XhkExSSesfXbNn/2EY0VpX7vNhVmClZaFIKDC9Zy8jhV4C5Y4Y+b5fo5Ta1YKQgqZejCfzmZxrO4C3pZJL2Ykj5OlgejH2le8lqhdlyCtYskrlzmwTjBJTbjtLZYAV/DChdBalBoM989pKFPg5PTojTh04527v8VHpS1G8UC2bZtd3OteVVuUbvideaFrmqHmm8vKmpJXUnbqdBcGOROboIAbkTolfILMMBdmN3gFqYGb+g73x+nGj/xUinQuU8N5s0iybxPu7Rvz36aNM0uGLYRBgUD+J93ZQGTNQ7oztiidIddGUQ9gLdOT4fdJrubvCxOX8ySw9nhu5fTozf9lvfII/KEPCMJeUWOyDE5IXPCyWfyk/wiv6MP0Zfoa/Rti0ajvuYhGUT0/S/qJ+wP</latexit> 
+
+Hk, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+Input MLP Readout 
+
+MLP 
+
+(a) Ψa(·; θa)Layer 1 Layer 1 Layer 1 
+
+<latexit sha1_base64="z5SI1nVQQpoUQTgXqTZ4F2J8bCc=">AAACwnicbZHRTtswFIbdbAwo6wbjkhtrEdKuqmSaGJcIuNhlkWhBaqLKcU5bU9sJtrOpMnkFbtkj7JX2NjhpkEjpkSz9/s935ONzkpwzbYLgf8d7937rw/bObnfvY+/T5/2DLyOdFYrCkGY8U7cJ0cCZhKFhhsNtroCIhMNNsrio8je/QWmWyWuzzCEWZCbZlFFiKisCzif7ftAP6sBvRdgIHzUxmBx0/kVpRgsB0lBOtB6HQW5iS5RhlEPZjQoNOaELMoOxk5II0LGtmy3xsXNSPM2UO9Lg2n1dYYnQeikSRwpi5no9V5mbcuPCTE9jy2ReGJB09dC04NhkuPo5TpkCavjSCUIVc71iOieKUOPm03olEa0/NJ33upGEPzQTgsjURgrSchzG1kZ12lZ364dluQ66ibtBkRb84m0sSHgBLbo2ViheY2cKQLbgldPQbrfh+ibfitH3fnjSP7n64Z+dN1veQUfoK/qGQvQTnaFfaICGiKI5ekRP6K936d15955eoV6nqTlErfAengEIqeEq</latexit> 
+
+ω <latexit sha1_base64="+ArhPYhV91QVYH7Ge1n/kjfxRjY=">AAACv3icbZHNSgMxEMfT9bt+69FLsAieyq6IevTj4sGDBdsK3UWy2WkNJtklySol7BN41XfwlXwb0+0KbutA4J///IZMZuKMM218/7vhLSwuLa+srjXXNza3tnd293o6zRWFLk15qh5jooEzCV3DDIfHTAERMYd+/HIzyfdfQWmWygczziASZCTZkFFinNW5e9pp+W2/DDwvgkq0UBX3T7uNrzBJaS5AGsqJ1oPAz0xkiTKMciiaYa4hI/SFjGDgpCQCdGTLTgt85JwED1PljjS4dP9WWCK0HovYkYKYZz2bm5j/5Qa5GV5ElsksNyDp9KFhzrFJ8eTbOGEKqOFjJwhVzPWK6TNRhBo3nNorsaj9oep8sxlKeKOpEEQmNlSQFIMgsjYs03Zyt62gKGZBN243KFKDf71/C2KeQ40ujSmKZ9iRApA1eOpUtNttMLvJedE7aQdn7bPOaevyutryKjpAh+gYBegcXaJbdI+6iCJA7+gDfXpX3siTXjZFvUZVs49q4Y1/AISN378=</latexit> 
+
+L
+
+<latexit sha1_base64="OnMBBlfqsL0/Y3nC6AI98J+aqTA=">AAACv3icbZHNSgMxEMfT9bt+VT16CRbBU9kVqR6rXjwq2Cp0F8lmpzWYZJckq5SwT+BV38FX8m1Mtyu4tQOBf/7zGzKZiTPOtPH974a3tLyyura+0dzc2t7Zbe3tD3SaKwp9mvJUPcZEA2cS+oYZDo+ZAiJiDg/xy/U0//AKSrNU3ptJBpEgY8lGjBLjrLvgqdX2O34Z+L8IKtFGVdw+7TW+wiSluQBpKCdaDwM/M5ElyjDKoWiGuYaM0BcyhqGTkgjQkS07LfCxcxI8SpU70uDS/VthidB6ImJHCmKe9Xxuai7KDXMzuogsk1luQNLZQ6OcY5Pi6bdxwhRQwydOEKqY6xXTZ6IINW44tVdiUftD1fl2M5TwRlMhiExsqCAphkFkbVim7fRu20FRzINu3G5QpAb/egsLYp5DjS6NGYrn2LECkDV45lS0220wv8n/YnDaCbqd7t1Zu3dVbXkdHaIjdIICdI566Abdoj6iCNA7+kCf3qU39qSXzVCvUdUcoFp4kx9E9N+k</latexit> 
+
+1
+
+<latexit sha1_base64="d/ONs51Oe/OpVcoPF6TYIovq+C8=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2m1/p/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz94W9qM=</latexit> 
+
+F(0) 
+
+A , F(0) 
+
+D <latexit sha1_base64="dRgdGBM3RvL45/RaOsI9/vtj/Q0=">AAAC93icbVHdShwxGM2OtrWrtmu99Ca4CAplmSlFe2mrFC8VXBV2xiWT+WYNJpkhybQsYR5FvBNvfYbe6gP0bczOjuCs+0Hg5Jzz8f3FOWfa+P7/lrew+O79h6WP7eWV1U+fO2tfznRWKAp9mvFMXcREA2cS+oYZDhe5AiJiDufx9cFEP/8DSrNMnppxDpEgI8lSRolx1LCzFwpiruLU/i6HFdSp/Vle2u1gp/w6RzustWGn6/f8KvBbENSgi+o4Hq617sMko4UAaSgnWg8CPzeRJcowyqFsh4WGnNBrMoKBg5II0JGtJizxlmMSnGbKPWlwxb7OsERoPRaxc1aNzmoTcp42KEz6I7JM5oUBSaeF0oJjk+HJunDCFFDDxw4QqpjrFdMrogg1bqmNKrFozFB3vtoOJfylmRBEJjZUkJSDILI2rGQ7+dtuUJazRncmtyjSML9wcxNiXkDDXRFTK57xjhSAbJinTO12tw1mL/kWnH3rBbu93ZPv3f1f9ZWX0AbaRNsoQHtoHx2hY9RHFN2gf+gRPXlj79a78+6nVq9V56yjRngPz+Ls9qU=</latexit> 
+
+F(1) 
+
+A , F(1) 
+
+D
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+<latexit sha1_base64="2n0SfD0s3A4pJOmqcEP/Z0gR1bg=">AAAC+3icbVFNaxQxGM6OX3W1utWjl+AiVNBlpkgVvFRbigcPFdy2sDMumcw729AkMySZliXkx4gXKb32N/Raj/03zc6O4mz3hcCT53le3q+05EybMLzuBHfu3rv/YOVh99Hj1SdPe2vP9nVRKQpDWvBCHaZEA2cShoYZDoelAiJSDgfp8fZMPzgBpVkhv5tpCYkgE8lyRonx1Lj3MRbEHKW53XXjGurcfnI/7PrXt9Fr92aJuvNPHff64SCsA98GUQP6qIm98Vrnd5wVtBIgDeVE61EUliaxRBlGObhuXGkoCT0mExh5KIkAndh6SodfeSbDeaH8kwbX7P8ZlgitpyL1zrrVRW1GLtNGlck/JJbJsjIg6bxQXnFsCjxbGc6YAmr41ANCFfO9YnpEFKHGL7ZVJRWtGZrOV7uxhFNaCEFkZmMFmRtFibVxLdvZ3/Yj5xaN/lR+UaRl/sstTUh5BS13TcyteME7UQCyZZ4zjdvfNlq85G2wvzGINgeb3971tz43V15BL9BLtI4i9B5toS9oDw0RRT/RJbpCfwIX/ArOgvO5Neg0Oc9RK4KLGwMS978=</latexit> 
+
+F(L→1) 
+
+A , F(L→1) 
+
+D
+
+<latexit sha1_base64="R2lIbkicwn/0DN8JPIUBkmtPi88=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VgVxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy3yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6D/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz82G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D8YrwBQ==</latexit> 
+
+Fopt A
+
+<latexit sha1_base64="tLyJCGO2+DWx5OgG2wi3VdIvSdw=">AAAC5HicbZHPaxQxFMez06p1tXarx15CV8HTMiOl9VhUxGML3bawMy6ZzJttaH4MSUZZQv6B0lvx6tmjV/1P/G/Mzk6hs+2DwDff93nk5b284szYOP7Xi9bWHz1+svG0/+z55outwfbLU6NqTWFMFVf6PCcGOJMwtsxyOK80EJFzOMsvPy7yZ99AG6bkiZ1XkAkyk6xklNhgTQevU0HsRV66z37aSFO6T/6ru9Wqst5PB8N4FDeB74ukFUPUxtF0u/crLRStBUhLOTFmksSVzRzRllEOvp/WBipCL8kMJkFKIsBkrvmOx2+CU+BS6XCkxY17t8IRYcxc5IFsulzNLcyHcpPalu8zx2RVW5B0+VBZc2wVXswGF0wDtXweBKGahV4xvSCaUBsm2HklF50/tJ1v9lMJ36kSgsjCpRoKP0ky59Im7RZ3N0y8XwXDTsKgSAe+9R4syHkNHboxliheYWcaQHbgpdPSYbfJ6ibvi9N3o2R/tH+8Nzz80G55A+2gXfQWJegAHaIv6AiNEUVX6Df6g/5GZXQd3UQ/lmjUa2teoU5EP/8D+MvwCA==</latexit> 
+
+Fopt D
+
+… …
+
+<latexit sha1_base64="Y4IpEfsPxhYTul0j6Nan8mt4KLw=">AAADAXicbZFBSxwxFMezY2t1rXbVo5fQRbDQLjNSbI9qRXq00FVhZ7pkMm/WYJIZkkxlCXPyw1hv4tXP4LWl36bZ2Sk46z4I/PN/v0de3otzzrTx/b8tb+HFy8VXS8vtldera2866xunOisUhT7NeKbOY6KBMwl9wwyH81wBETGHs/jyyyR/9hOUZpn8bsY5RIKMJEsZJcZZw85BKIi5iFN7XA4rqVN7UP6wOyFw/iF4V76fAxw9BYadrt/zq8DPRVCLLqrjZLje+hUmGS0ESEM50XoQ+LmJLFGGUQ5lOyw05IRekhEMnJREgI5s9dcSbzsnwWmm3JEGV+7TCkuE1mMRO7LqdjY3MeflBoVJP0eWybwwIOn0obTg2GR4MjicMAXU8LEThCrmesX0gihCjRtv45VYNP5Qd77aDiVc0UwIIhMbKkjKQRBZG1ZpO7nbblCWs6BbmBsUacD/vbkFMS+gQVfGFMUz7EgByAY8dWra7TaY3eRzcbrbC/Z6e98+dvcP6y0voS30Fu2gAH1C++grOkF9RNENekS/0R/v2rv17rz7Keq16ppN1Ajv4R+eNfqV</latexit> 
+
+F(ω→1) 
+
+A , F(ω→1) 
+
+D
+
+<latexit sha1_base64="1BQIN+JbGq53t3c6DMRUXvB7rZI=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0bZCd5FsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5rt6/TXFHo0ZSn6iEmGjiT0DPMcHjIFBARcxjEz1fT/OAFlGapvDeTDCJBxpKNGCXGWXfyInjcafsdvwz8VwSVaKMqbh5bjc8wSWkuQBrKidbDwM9MZIkyjHIommGuISP0mYxh6KQkAnRky14LfOicBI9S5Y40uHR/V1gitJ6I2JGCmCc9n5ua/+WGuRmdR5bJLDcg6eyhUc6xSfH04zhhCqjhEycIVcz1iukTUYQaN57aK7Go/aHqfLMZSnilqRBEJjZUkBTDILI2LNN2erftoCjmQTdwNyhSg3+8fwtinkONLo0ZiufYsQKQNXjmVLTbbTC/yb+if9wJTjuntyft7mW15VW0jw7QEQrQGeqia3SDeoiiMXpD7+jDu/KYl3lqhnqNqmYP1cKz3yRs4GM=</latexit> 
+
+n = 1 <latexit sha1_base64="/A0lTbr6xkykc0wBRe9+AB1qFMU=">AAACwXicbZHNSgMxEMfT9bt+Vo9egkXwVHZF1ItQ9OJR0Wqhu5RsdlqDSXZJskoJ+whe9RV8Jd/GdLuCWx0I/POf35DJTJxxpo3vfzW8hcWl5ZXVteb6xubW9k5r90GnuaLQoylPVT8mGjiT0DPMcOhnCoiIOTzGz1fT/OMLKM1SeW8mGUSCjCUbMUqMs+7kxfFwp+13/DLwXxFUoo2quBm2Gp9hktJcgDSUE60HgZ+ZyBJlGOVQNMNcQ0boMxnDwElJBOjIlr0W+NA5CR6lyh1pcOn+rrBEaD0RsSMFMU96Pjc1/8sNcjM6jyyTWW5A0tlDo5xjk+Lpx3HCFFDDJ04QqpjrFdMnogg1bjy1V2JR+0PV+WYzlPBKUyGITGyoICkGQWRtWKbt9G7bQVHMg27gblCkBv94/xbEPIcaXRozFM+xYwUga/DMqWi322B+k3/Fw3EnOO2c3p60u5fVllfRPjpARyhAZ6iLrtEN6iGKxugNvaMP78pjXuapGeo1qpo9VAvPfgMmx+Bk</latexit> 
+
+n = 2 <latexit sha1_base64="lhjtaluLRYCM8X8OsCGjoC+nNpk=">AAACzHicbZFBT9swFMfdsEFXBmvZcRdr1SROVYJQ2QWpggsnxCQKlZqscpyXYmE7ke2AKitXPgNXOPGV9m3mppm0tDzJ0t//93vy83txzpk2vv+n5W19+Li90/7U2f28t/+l2zu40VmhKIxpxjM1iYkGziSMDTMcJrkCImIOt/H9+TJ/+wBKs0xem0UOkSBzyVJGiXHWb3l6OQsFMXc6tdflrNv3B34VeFMEteijOq5mvdZbmGS0ECAN5UTraeDnJrJEGUY5lJ2w0JATek/mMHVSEgE6slXbJf7hnASnmXJHGly5/1dYIrReiNiRVYvruaX5Xm5amPRnZJnMCwOSrh5KC45NhpczwAlTQA1fOEGoYq5XTO+IItS4STVeiUXjD3Xne51QwiPNhCAysaGCpJwGkbVhlbbLu+0HZbkOutm7QZEG/M97tyDmBTToyliheI2dKwDZgFdOTbvdBuub3BQ3R4NgOBj+Ou6Pzuott9E39B0dogCdoBG6QFdojChS6Bm9oFfv0jOe9coV6rXqmq+oEd7TX9rc5Xg=</latexit> 
+
+n = NT
+
+…
+
+<latexit sha1_base64="UI7e26A8nSjgdVYC19qFUlm19l0=">AAAC/XicbVFdS9xAFJ1N1eq26to++jK4FCzIkohoXwRtS/FRwVVhky6Tyc3u4MwkzEyUZQj9MaXQh9LX/oa+1qf+m85mU9qse2HgzDnncr/inDNtfP93y3uytLzydHWt/ez5+sZmZ+vFlc4KRaFPM56pm5ho4ExC3zDD4SZXQETM4Tq+fTfVr+9AaZbJSzPJIRJkJFnKKDGOGnaOQ0HMOE7th3JYQZ3a0/Kj3Q2B89fl3gL5/T952On6Pb8K/BgENeiiOs6HW62vYZLRQoA0lBOtB4Gfm8gSZRjlULbDQkNO6C0ZwcBBSQToyFZzlviVYxKcZso9aXDF/p9hidB6ImLnrHqd16bkIm1QmPRNZJnMCwOSzgqlBccmw9Ol4YQpoIZPHCBUMdcrpmOiCDVutY0qsWjMUHe+3g4l3NNMCCITGypIykEQWRtWsp3+bTcoy3mjO5ZbFGmY/3ILE2JeQMNdETMrnvOOFIBsmGdM7Xa3DeYv+Rhc7feCw97hxUH35G195VW0jXbQLgrQETpBZ+gc9RFFn9FP9As9eJ+8L9437/vM6rXqnJeoEd6PP/eY+bE=</latexit> 
+
+F(ω)
+
+A , F(ω)
+
+D
+
+Eq. (26) Eq. (16) Eq. (23) Eq. (25) Eq. (23) Eq. (25) Eq. (23) Eq. (25) 
+
+P2 
+
+<latexit sha1_base64="XQMUn6wbduQmLQU/G38T/bQdrB0=">AAACynicbZHPTtwwEMa9aQt0y/8euVhdVeK0SlC1cET0woHDInUBaROhiTO7WNhOZDuglZUbz9ArPfaV+jY42SA1CyNZ+vzNb+TxTFoIbmwY/usFHz5+Wlvf+Nz/srm1vbO7t39l8lIznLBc5PomBYOCK5xYbgXeFBpBpgKv0/ufdf76AbXhufplFwUmEuaKzzgD6604lmDvGAg3ro5udwfhMGyCvhVRKwakjfHtXu9vnOWslKgsE2DMNAoLmzjQljOBVT8uDRbA7mGOUy8VSDSJa5qu6HfvZHSWa3+UpY37f4UDacxCpp6smzSrudp8Lzct7ewkcVwVpUXFlg/NSkFtTusJ0IxrZFYsvACmue+VsjvQwKyfU+eVVHb+0Ha+1Y8VPrJcSlCZizVm1TRKnIubtKvvbhBV1SroJ+8HBR341Xu3IBUldujGWKJ0hZ1rRNWBl05L+91Gq5t8K66OhtFoOLr8MTg9a7e8QQ7IN3JIInJMTsk5GZMJYaQgv8kz+RNcBDpYBG6JBr225ivpRPD0ApbQ5JE=</latexit> 
+
+P2 <latexit sha1_base64="2Y4tI+1JkyOpzUDUGnhXZzsfrKM=">AAADDHicbZHNihQxEMcz7dc6ujqrRy/BQfAgQ7csq8dlhMWDh1Wc3YXpdkinq2fD5qNJ0soQ8go+h2fxJl59Bj3qk5jp6QW7dwoC//zrV6RSlVecGRvHvwfRtes3bt7auT28c3f33v3R3oMTo2pNYUYVV/osJwY4kzCzzHI4qzQQkXM4zS9erfOnH0EbpuR7u6ogE2QpWckoscFajN6kgtjzvHRHftFIU7p3R/6Du7yoynr/DG/BptM+thiN40ncBL4qklaMURvHi73Bl7RQtBYgLeXEmHkSVzZzRFtGOfhhWhuoCL0gS5gHKYkAk7nm2x4/CU6BS6XDkRY37v8VjghjViIPZNNlP7c2t+XmtS1fZo7JqrYg6eahsubYKryeIS6YBmr5KghCNQu9YnpONKE2TLrzSi46f2g73x2mEj5RJQSRhUs1FH6eZM6lTdqt726ceN8Hw+7CoEgHvvS2FuS8hg7dGBsU99ilBpAdeOO0dNht0t/kVXHyfJIcTA7e7o8Pp+2Wd9Aj9Bg9RQl6gQ7Ra3SMZoiir+gX+oP+Rp+jb9H36McGjQZtzUPUiejnP+TbAY0=</latexit> 
+
+Fopt RF , Fopt BB 
+
+<latexit sha1_base64="RxM8nJJFfD8IPxys6q7Z6hCqvg4=">AAAC2HicdZHPb9MwFMfd8GsUxjq4IHGxqJA4VUk22u2ANMEFicuQ6FbRhMhxXjqrthPZzlBlBXFDXPkbOHCB/4f/BqfNJFKNJ1l6/r7P0/uVlpxp4/t/et6Nm7du39m52793f/fB3mD/4ZkuKkVhSgteqFlKNHAmYWqY4TArFRCRcjhPl6+b+PklKM0K+d6sSogFWUiWM0qMk5LB48hGgpiLNLezOllGdWKXL4P649tkMPRHx0fj8EWI/ZHvT8KDceOEk8PwAAdOaWyIWjtN9ns/o6yglQBpKCdazwO/NLElyjDKoe5HlYaS0CVZwNy5kgjQsV2PUONnTslwXij3pMFr9d8MS4TWK5E6smlXb8ca8brYvDL5UWyZLCsDkm4K5RXHpsDNPnDGFFDDV84hVDHXK6YXRBFq3NY6VVLRmaHtfLcfSfhECyGIzGykIKvnQWxttA7b5m+HQV1vg+4OblGkA19p1yakvIIOvRY2KN5iFwpAduCN0tLutlcHxP93zsJRMB6N3x0OT161V95BT9BT9BwFaIJO0Bt0iqaIos/oB/qFfnsfvC/eV+/bBvV6bc4j1DHv+18VE+o/</latexit> 
+
+{Xk}Kk=1 
+
+<latexit sha1_base64="3FTjYlU9Te9t5TJCIHuvQoSkov0=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqchJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2Tcvb+DW</latexit> 
+
+z2 <latexit sha1_base64="my89rTD8ezoWL89SKiqleeecUfs=">AAAC0HicdZHPbtQwEMa94V9ZKGzhyMVihcRplaRlt9yq9sIJFdRtK22iyHEmW6u2E9lOYWtFFVeegSuIV+JtcLKpRFZlJEvjb34jj79JS8608f0/A+/e/QcPH209Hj55uv3s+WjnxakuKkVhTgteqPOUaOBMwtwww+G8VEBEyuEsvTxq6mdXoDQr5IlZlRALspQsZ5QYJyWj0XViPyaRIOZC5/akrpPR2J+835+G70LsT3x/Fu5OmySc7YW7OHBKE2PUxXGyM/gdZQWtBEhDOdF6EfiliS1RhlEO9TCqNJSEXpIlLFwqiQAd23b0Gr9xSobzQrkjDW7VfzssEVqvROrIdsbNWiPeVVtUJt+PLZNlZUDS9UN5xbEpcOMDzpgCavjKJYQq5mbF9IIoQo1zq/dKKnp/6CbfHkYSvtBCCCIzGynI6kUQWxu1Zdvc7Tio603Q+e+MIj34VruzIeUV9OhWWKN4g10qANmD10pHu93eLhD/PzkNJ8F0Mv20Nz447La8hV6h1+gtCtAMHaAP6BjNEUVX6Af6iX55n72v3o33bY16g67nJeqF9/0vGDTnJw==</latexit> 
+
+zNT
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer i Layer I
+
+<latexit sha1_base64="NBBG21SmNab1Lzdc+Vbm719Ts+g=">AAACzHicbZFBT9swFMfdwBgrKxQ47mJRIXGqkmkqHBG7IE1CTFqhUhMqx3lpLWwnsp2hysp1n4HrdtpX4tvgpEEihSdZ+vv/fk9+fi/OOdPG95863sbmh62P25+6O597u3v9/YMbnRWKwphmPFOTmGjgTMLYMMNhkisgIuZwG99/r/K3v0FplslfZplDJMhcspRRYpx1FwpiFnFqJ+XM/ihn/YE/9OvAb0XQiAFq4nq23/kfJhktBEhDOdF6Gvi5iSxRhlEOZTcsNOSE3pM5TJ2URICObN12iY+dk+A0U+5Ig2v3dYUlQuuliB1ZtanXc5X5Xm5amPQsskzmhQFJVw+lBccmw9UMcMIUUMOXThCqmOsV0wVRhBo3qdYrsWj9oem81w0lPNBMCCITGypIymkQWRvWaVvd7SAoy3XQzd4NirTgF+/dgpgX0KJrY4XiNXauAGQLXjkN7XYbrG/yrbj5OgxGw9HPb4Pzi2bL2+gLOkInKECn6Bxdoms0RhQp9Ij+on/elWc865Ur1Os0NYeoFd6fZ22u5bU=</latexit> 
+
+XK
+
+<latexit sha1_base64="zPl8fcfKIWczfDjiVpo1Eb2ls8o=">AAACzHicbZHPT9swFMfdAAM6uvHjyMWimrRTlUxTx7HaLjshJlGo1GSV47y0Vm0nsh1QZeXK38B1nPiX+G/mpEEihSdZ+vr7Pk9+fi/OOdPG95873tb2zofdvf3ux4Pep8+HR8fXOisUhTHNeKYmMdHAmYSxYYbDJFdARMzhJl7+qvI3t6A0y+SVWeUQCTKXLGWUGGf9DQUxizi1k3Jml+XssO8P/DrwWxE0oo+auJwddZ7CJKOFAGkoJ1pPAz83kSXKMMqh7IaFhpzQJZnD1ElJBOjI1m2X+ItzEpxmyh1pcO2+rrBEaL0SsSOrNvVmrjLfy00Lk55Hlsm8MCDp+qG04NhkuJoBTpgCavjKCUIVc71iuiCKUOMm1XolFq0/NJ33uqGEO5oJQWRiQwVJOQ0ia8M6bau77QdluQm62btBkRb84r1bEPMCWnRtrFG8wc4VgGzBa6eh3W6DzU2+FdffBsFwMPzzvT/62Wx5D52iM/QVBegHGqHf6BKNEUUKPaB/6NG78IxnvXKNep2m5gS1wrv/D7ku5dU=</latexit> 
+
+Xk
+
+<latexit sha1_base64="gWa23MAyaWIRLkc6h1OKBL4So1U=">AAAC0HicbZFBT9swFMfdwDYoMAo77mJRIXGhSibEdkTjwhGmFSo1UeU4L8Wq7US2w1ZZEeLKZ+AK4ivt28xJg0QKT7L09//9nvz8Xpxzpo3v/+t4K6sfPn5aW+9ubG593u7t7F7qrFAUhjTjmRrFRANnEoaGGQ6jXAERMYereHZa5a9uQGmWyd9mnkMkyFSylFFinDXp9UJBzHWc2lE5sbPDoJz0+v7ArwO/FUEj+qiJ88lO5zlMMloIkIZyovU48HMTWaIMoxzKblhoyAmdkSmMnZREgI5s3XqJ952T4DRT7kiDa/d1hSVC67mIHVk1qpdzlfleblyY9EdkmcwLA5IuHkoLjk2GqznghCmghs+dIFQx1yum10QRaty0Wq/EovWHpvOtbijhD82EIDKxoYKkHAeRtWGdttXd9oOyXAbd/N2gSAt+8d4tiHkBLbo2FiheYqcKQLbghdPQbrfB8ibfistvg+B4cHxx1D/52Wx5DX1Fe+gABeg7OkFn6BwNEUU36AE9oifvl/fXu/XuFqjXaWq+oFZ49/8Bf5DmeA==</latexit> 
+
+Xk→1
+
+<latexit sha1_base64="/uBQSHr3d56s78fbrZWaTG+MpoI=">AAACzHicbZHPT9swFMfdwPhRBhR25GJRTeJUJdNUOFZw4TQxaaWVmqxynJdiYTuR7YAqK9f9DbuyE/8S/82cNJOWlidZ+vr7Pk9+fi/OOdPG99863tb2h53dvf3uwcfDo+Peyem9zgpFYUwznqlpTDRwJmFsmOEwzRUQEXOYxI83VX7yBEqzTP4wyxwiQRaSpYwS46yfoSDmIU7ttJzboJz3+v7ArwNviqARfdTE3fyk8xomGS0ESEM50XoW+LmJLFGGUQ5lNyw05IQ+kgXMnJREgI5s3XaJPzsnwWmm3JEG1+7/FZYIrZcidmTVpl7PVeZ7uVlh0qvIMpkXBiRdPZQWHJsMVzPACVNADV86QahirldMH4gi1LhJtV6JResPTeeH3VDCM82EIDKxoYKknAWRtWGdttXd9oOyXAfd7N2gSAv+571bEPMCWnRtrFC8xi4UgGzBK6eh3W6D9U1uivsvg2A4GH7/2h9dN1veQ2foHF2gAF2iEbpFd2iMKFLoN3pBf7xvnvGsV65Qr9PUfEKt8H79BTBW5Zs=</latexit> 
+
+X1 Global mean pooling 
+
+<latexit sha1_base64="eGqcOq1hyhiExn+KRILQUQyv+uQ=">AAAC3HicbZFBSxwxFMezo23tttbVHttDcCn0tMwU0V4E0YunYsFVYWccMpk3azDJDEnGsg25iDfptZ/Ba/tt+m2anZ1CZ/VB4J//+z3y8l5WcaZNGP7pBSurz56/WHvZf/V6/c3GYHPrTJe1ojCmJS/VRUY0cCZhbJjhcFEpICLjcJ5dH83z5zegNCvlqZlVkAgylaxglBhvpYP3sf2eytilVu5H7tJ+SWNBzJUu7Klz6WAYjsIm8GMRtWKI2jhJN3sPcV7SWoA0lBOtJ1FYmcQSZRjl4PpxraEi9JpMYeKlJAJ0YptvOPzBOzkuSuWPNLhx/6+wRGg9E5knmx6Xc3PzqdykNsXnxDJZ1QYkXTxU1BybEs9ngnOmgBo+84JQxXyvmF4RRajxk+u8konOH9rO1/uxhG+0FILI3MYKcjeJEmvjJm3ndzuMnFsG/S78oEgH/uc9WZDxGjp0YyxQvMROFYDswAunpf1uo+VNPhZnn0bR7mj3687w4LDd8hp6h7bRRxShPXSAjtEJGiOKbtED+oV+B5fBXXAf/FigQa+teYs6Efz8C7PQ7Ao=</latexit> 
+
+{zn}NT
+
+n=1 
+
+> … …… …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+<latexit sha1_base64="zJdYaVh4yq/dtBYzd251jLTyaN4=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhlZk9bjoZY8rOLsL0zK+pK+zYZK0JKkyhN7Em3j1TxCv+s/435h2KtjZfVD6zfd9Hnl5j1VSWBfHf0bRtes3bt7auz2+c3f/3v3JwYNTW9aG45yXsjTnDCxKoXHuhJN4XhkExSSesfXbNn/2EY0VpX7vNhVmClZaFIKDC9Zy8jhV4C5Y4Y+b5fo5Ta1YKQgqZejCfzmZxrO4C3pZJL2Ykj5OlgejH2le8lqhdlyCtYskrlzmwTjBJTbjtLZYAV/DChdBalBoM989pKFPg5PTojTh04527v8VHpS1G8UC2bZtd3OteVVuUbvideaFrmqHmm8vKmpJXUnbqdBcGOROboIAbkTolfILMMBdmN3gFqYGb+g73x+nGj/xUinQuU8N5s0iybxPu7Rvz36aNM0uGLYRBgUD+J93ZQGTNQ7oztiidIddGUQ9gLdOT4fdJrubvCxOX8ySw9nhu5fTozf9lvfII/KEPCMJeUWOyDE5IXPCyWfyk/wiv6MP0Zfoa/Rti0ajvuYhGUT0/S/qJ+wP</latexit> 
+
+Hk, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+<latexit sha1_base64="YDtvqIWLlqxued9F4Y3OvLZxx1A=">AAADJ3icbVFNb9QwEPWGrxIobOHIxWWFxGmVoKpwQargUolLkdi20jqsHGeStdZ2ItsBraz8H/gxiBuCI7+BK0g42RSRbUey9PzmPc94Jq0ENzaKfoyCa9dv3Ly1czu8c3f33v3x3oNTU9aawYyVotTnKTUguIKZ5VbAeaWBylTAWbp63ebPPoA2vFTv7LqCRNJC8Zwzaj21GBdEQG6JI/tkPyQpFFw5qjVdN441IZHULtPcHTcLt2oICYnhhaQXlxTsPwwq6424fYtoXiwtaX0v4+b9m8V4Ek2jLvBlEPdggvo4WeyNPpGsZLUEZZmgxszjqLKJr2E5E+B7qw1UlK1oAXMPFZVgEtdNpMFPPJPhvNT+KIs79n+Ho9KYtUy9sv2i2c615FW5eW3zF4njqqotKLYplNcC2xK348UZ18CsWHtAmea+V8yWVFNm/RIGVVI5+EPf+W5IFHxkpZTUD5RoyJp5nDhHurRr724SN8220K/VD4oOxBfclYZU1DBQd8RGire0hQZQA/GG6dV+t/H2Ji+D02fT+HB6+PZgcvSq3/IOeoQeo6coRs/RETpGJ2iGGPqCfqHf6E/wOfgafAu+b6TBqPc8RIMIfv4FfWcKXQ==</latexit> 
+
+
+
+Hk
+
+ωk
+
+εk
+
+
+
+Kk=1 
+
+Eq. (33) 
+
+<latexit sha1_base64="j2eV1eqoZ/6BR2mQWgWEiR+Hhbo=">AAACwXicdZHdTtswFMfdwPgog9FxyY21ComrKgmsZXfVuNkliBWQmqhynNNiYTuR7TAVK4/ALbwCr7S3wWmDtFTsSJaO/+d3dL6SnDNtfP9vy1tb/7SxubXd3vm8u/dlv/P1WmeFojCiGc/UbUI0cCZhZJjhcJsrICLhcJPcn1fxmwdQmmXyt5nnEAsyk2zKKDFOunqcBJP9rt/7cdYPv4fY7/n+IDzpV044OA1PcOCUyrqototJp/UapRktBEhDOdF6HPi5iS1RhlEOZTsqNOSE3pMZjJ0riQAd20WvJT5ySoqnmXJPGrxQ/82wRGg9F4kjBTF3ejVWiR/FxoWZnsWWybwwIOmy0LTg2GS4GhynTAE1fO4cQhVzvWJ6RxShxq2nUSURjRnqznfbkYQ/NBOCyNRGCtJyHMTWRouwrf62G5TlKugW7hZFGvC79mFCwgto0AthieIVdqYAZANeKjXtbvt+QPx/5zrsBf1e//K0O/xZX3kLHaJv6BgFaICG6Be6QCNE0Qw9oWf04p17zMs9tUS9Vp1zgBrm2TctFODV</latexit> 
+
+z1
+
+Eq. (33) Eq. (33) ……
+
+<latexit sha1_base64="crrFys1Tcba6nH+kKODnOif+hNc=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk33e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Y4PiHg==</latexit> 
+
+ω1 <latexit sha1_base64="ZhA41itMP1QraVKOuZpSSzvl+xU=">AAACxHicdZHdatswFMcVt9u6rN3a7nI3omHQq2C7XdLdlRbGLjtY0kJsgiyfJFr1YSR5Iwj3GXa7PsFeaW8zOXGhDu0BwdH//A7nKys4MzYM/3WCre0XL1/tvO6+2d17+27/4HBsVKkpjKjiSt9kxABnEkaWWQ43hQYiMg7X2e1lHb/+CdowJb/bZQGpIHPJZowS66VxohdqGk/3e2H/89kg/hTjsB+Gw/hkUDvx8DQ+wZFXauuhxq6mB52/Sa5oKUBayokxkygsbOqItoxyqLpJaaAg9JbMYeJdSQSY1K3arfBHr+R4prR/0uKV+jjDEWHMUmSeFMQuzGasFp+KTUo7O0sdk0VpQdJ1oVnJsVW4nh3nTAO1fOkdQjXzvWK6IJpQ6zfUqpKJ1gxN53vdRMIvqoQgMneJhryaRKlzySrs6r/rRVW1Cfqd+0WRFvygPZmQ8RJa9EpYo3iDnWsA2YLXSkP72z4cED/vjON+NOgPvp32zi+aK++gD+gIHaMIDdE5+oqu0AhR9AP9Rn/QffAl4IEJyjUadJqc96hlwd1/Zd7iHw==</latexit> 
+
+ω2 <latexit sha1_base64="dP0zPBtjlkk5aavoobPnKhd0CAA=">AAAC03icdZHPatwwEMa1Tv+k26bdJMdeRJdCT4vtJLvpLaSXnkoK2SSwNkaWx7sikmwkuWURvpRc+wy9po/Ut6nsdaBe0gHB6Pt+g0YzacmZNr7/Z+DtPHn67Pnui+HLV3uv34z2D650USkKc1rwQt2kRANnEuaGGQ43pQIiUg7X6e2nxr/+BkqzQl6adQmxIEvJckaJcVIyOozUqkjslyQSxKx0bi/rOhmN/cnH02l4EmJ/4vuz8GjaJOHsODzCgVOaGKMuLpL9wX2UFbQSIA3lROtF4JcmtkQZRjnUw6jSUBJ6S5awcKkkAnRs2+5r/N4pGc4L5Y40uFX/rbBEaL0WqSPbHre9RnzMW1QmP40tk2VlQNLNQ3nFsSlwMwqcMQXU8LVLCFXM9YrpiihCjRtY75VU9P7Qdb43jCR8p4UQRGY2UpDViyC2Nmpt29ztOKjrbdCtwA2K9OAH7dGClFfQo1thg+ItdqkAZA/eKB3tdvuwQPz/5CqcBNPJ9Ovx+Oy82/IueoveoQ8oQDN0hj6jCzRHFK3RL3SPfntzz3o/vLsN6g26mkPUC+/nX1596HA=</latexit> 
+
+ωNT
+
+<latexit sha1_base64="EN3QXmw08iH2VykrnfB+C5hCRe4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4cuaZHw1ISzX7iXJtMjtRoafJ24NjtYXwA9+QkCIw7bicDkax9O4DXxZJJ0Yoy5my4PBF5JrVklQjglq7SKJS5d6ahxnAuohqSyUlJ3TFSyCVFSCTX374Bo/CU6OC23Cpxxu3YsVnkrbdB7ItuHdXGNelVtUrniReq7KyoFi24uKSmCncTM9nHMDzIlNEJQZHnrFbE0NZS7MuHdLJntv6DrfHxIFn5iWkqrcEwN5vUhS70mb9s3Zj5O63gXD1sKgaA/+711ZkIkKenRrbFG8w64MgOrBW6ejw26T3U1eFidPp8nR9Ojds/Hxq27Le+gReowmKEHP0TF6i2Zojhj6in6hP+hv9Dn6Fn2PfmzRaNDVPES9iH7+A81X/hU=</latexit> 
+
+!p
+
+(·; ω(ω)
+
+p
+
+)
+
+<latexit sha1_base64="bTzCJGIrYUIwfj+dwuYC/mcnkW4=">AAADBnicbZFNi9RAEIZ74tc6ujqrRy+NgzB7GRKRVfCyKIjHEZzdhek4dDqVmWb7I3R3lKHJ3Z/iQbyJV3+DN9EfYycTYTO7BSFvv/UUXV2VlYJbF8e/B9G16zdu3tq7Pbxzd//e/dHBgxOrK8NgzrTQ5iyjFgRXMHfcCTgrDVCZCTjNzl83+dOPYCzX6r3blJBKulK84Iy6YC1Hb8jM8iWR1K1t4WlNMr6aEJZr95JkWuR2I8PPE7cGR+sL4Ac/ISDEYVtxuByN42ncBr4skk6MURez5cHgC8k1qyQoxwS1dpHEpUs9NY4zAfWQVBZKys7pChZBKirBpr59cI2fBCfHhTbhUw637sUKT6VtOg9k2/BurjGvyi0qV7xIPVdl5UCx7UVFJbDTuJkezrkB5sQmCMoMD71itqaGMhdm3Lslk703dJ3vD4mCT0xLSVXuiYG8XiSp96RN++bsx0ld74Jha2FQtAf/964syEQFPbo1tijeYVcGQPXgrdPRYbfJ7iYvi5On0+RoevTu2fj4VbflPfQIPUYTlKDn6Bi9RTM0Rwx9Rb/QH/Q3+hx9i75HP7ZoNOhqHqJeRD//AYKE/fc=</latexit> 
+
+!a
+
+(·; ω(ω)
+
+a
+
+)
+
+Input MLP Readout 
+
+MLP 
+
+… …
+
+Message passing Message passing 
+
+Layer 1 Layer j Layer J
+
+> … …
+
+<latexit sha1_base64="qJ5zqyKvzHoW7/LvfcCB0QHan9Q=">AAAC3nicbZHPbtQwEMa94V9ZKGzhiIQsVkgc0CpBqPRYwaXHIrFtpU20jJ3J1qrtRLZDtbJyQ9wQVx4BcYWX4W1wskEi244U5fM3v5HHM6ySwro4/jOKbty8dfvOzt3xvfu7Dx5O9h6d2LI2HOe8lKU5Y2BRCo1zJ5zEs8ogKCbxlF28a/Onn9BYUeoPbl1hpmClRSE4uGAtJ09TBe6cFf6oWSYvaWrFSkFQKUMX/svJNJ7FXdCrIunFlPRxvNwb/UjzktcKteMSrF0kceUyD8YJLrEZp7XFCvgFrHARpAaFNvPdQxr6PDg5LUoTPu1o5/5f4UFZu1YskG3bdjvXmtflFrUrDjIvdFU71HxzUVFL6kraToXmwiB3ch0EcCNCr5SfgwHuwuwGtzA1eEPf+e441XjJS6VA5z41mDeLJPM+7dK+Pftp0jTbYNhGGBQM4H/etQVM1jigO2OD0i12ZRD1AN44PR12m2xv8qo4eTVL9mf7719PD9/2W94hT8gz8oIk5A05JEfkmMwJJ5/JT/KL/I4+Rl+ir9G3DRqN+prHZBDR979KWuth</latexit> 
+
+H1, ω 1, ε 1
+
+<latexit sha1_base64="zJdYaVh4yq/dtBYzd251jLTyaN4=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhlZk9bjoZY8rOLsL0zK+pK+zYZK0JKkyhN7Em3j1TxCv+s/435h2KtjZfVD6zfd9Hnl5j1VSWBfHf0bRtes3bt7auz2+c3f/3v3JwYNTW9aG45yXsjTnDCxKoXHuhJN4XhkExSSesfXbNn/2EY0VpX7vNhVmClZaFIKDC9Zy8jhV4C5Y4Y+b5fo5Ta1YKQgqZejCfzmZxrO4C3pZJL2Ykj5OlgejH2le8lqhdlyCtYskrlzmwTjBJTbjtLZYAV/DChdBalBoM989pKFPg5PTojTh04527v8VHpS1G8UC2bZtd3OteVVuUbvideaFrmqHmm8vKmpJXUnbqdBcGOROboIAbkTolfILMMBdmN3gFqYGb+g73x+nGj/xUinQuU8N5s0iybxPu7Rvz36aNM0uGLYRBgUD+J93ZQGTNQ7oztiidIddGUQ9gLdOT4fdJrubvCxOX8ySw9nhu5fTozf9lvfII/KEPCMJeUWOyDE5IXPCyWfyk/wiv6MP0Zfoa/Rti0ajvuYhGUT0/S/qJ+wP</latexit> 
+
+Hk, ω k, ε k
+
+<latexit sha1_base64="/J5CrtibbdKJUxnSscQbFqjhyKU=">AAAC3nicbZHPi9QwFMcz9dc6ujqrR0GCg+BBhnaR1eOilwUvKzi7C9MyvqSvs2GTtCSpMoTexJt49U8Qr/rP+N+YdirY2X1Q+s33fR55eY9VUlgXx39G0bXrN27e2rk9vnN39979yd6DE1vWhuOcl7I0ZwwsSqFx7oSTeFYZBMUknrKLN23+9CMaK0r93q0rzBSstCgEBxes5eRxqsCds8IfNcu3z2lqxUpBUClDF/7LyTSexV3QyyLpxZT0cbzcG/1I85LXCrXjEqxdJHHlMg/GCS6xGae1xQr4BaxwEaQGhTbz3UMa+jQ4OS1KEz7taOf+X+FBWbtWLJBt23Y715pX5Ra1K15lXuiqdqj55qKiltSVtJ0KzYVB7uQ6COBGhF4pPwcD3IXZDW5havCGvvPdcarxEy+VAp371GDeLJLM+7RL+/bsp0nTbINhG2FQMID/eVcWMFnjgO6MDUq32JVB1AN44/R02G2yvcnL4mR/lhzMDt69mB6+7re8Qx6RJ+QZSchLckiOyDGZE04+k5/kF/kdfYi+RF+jbxs0GvU1D8kgou9/AQTH668=</latexit> 
+
+HK, ω K, ε K
+
+<latexit sha1_base64="lJBlnjTwLiLzxFyoFbMY845Bync=">AAAC6nicbZHPihQxEMYz7b91dHVWj16CgyCiQ7fI6nHRyx5XcHYXppuhkq6eDZOkmyStDKHfQbyJVw8+gVd9Dd/GdE8L9uwWBL589SuSqmKVFNbF8Z9RdO36jZu39m6P79zdv3d/cvDg1Ja14TjnpSzNOQOLUmicO+EknlcGQTGJZ2z9rs2ffURjRak/uE2FmYKVFoXg4IK1nDxLFbgLVvjjZunXL5LmOU2tWCnobylD1+vlZBrP4i7oZZH0Ykr6OFkejH6keclrhdpxCdYukrhymQfjBJfYjNPaYgV8DStcBKlBoc1811RDnwQnp0VpwtGOdu7/FR6UtRvFAtm2YHdzrXlVblG74k3mha5qh5pvHypqSV1J2wnRXBjkTm6CAG5E+CvlF2CAuzDHwStMDXrof74/TjV+4qVSoHOfGsybRZJ5n3Zp3979NGmaXTBsJgwKBvA/78oCJmsc0J2xRekOuzKIegBvnZ4Ou012N3lZnL6cJYezw/evpkdv+y3vkUfkMXlKEvKaHJFjckLmhJPP5Cf5RX5HMvoSfY2+bdFo1Nc8JIOIvv8Fv93wiQ==</latexit> 
+
+Hk→1, ω k→1, ε k→1
+
+Input MLP Readout 
+
+MLP (b) Ψp(·; θp)
+
+Fig. 4. Architectures of the GNN modules Ψa(·; θa) and Ψp(·; θp).
+
+(FA, FRF , FBB ) does not change if we scale {Hk, σ k}Kk=1 .More precisely, we have 
+
+Rk
+
+ FA, FRF , FBB ; {Hk, σ k}Kk=1 
+
+
+
+= Rk
+
+ FA, FRF , FBB ; {aHk, aσ k}Kk=1 
+
+, (29) given any non-zero number a. Similarly, scaling the user weights {βk}Kk=1 only introduces a common multiplicative factor to the landscape of WSR w.r.t. (FA, FRF , FBB ).To mitigate these ambiguities and also ensure stable model training, we first normalize the system parameters. Specifi-cally, we define 
+
+H ≜
+
+
+
+σ1 vec(Re {H1})T vec(Im {H1})T
+
+... ... ...
+
+σK vec(Re {HK })T vec(Im {HK })T
+
+ ,
+
+β ≜ β1, β 2, . . . , β K
+
+T .
+
+Note that the construction of H requires the assumption 
+
+M1 = · · · = MK ≜ M , which can be freely specified as a design parameter at the BS for downlink beamforming. If this condition is not satisfied, the channel matrices {Hk}Kk=1 
+
+can be appropriately truncated or cyclically extended to ensure dimensional alignment. Then, we normalize them as 
+
+˜H =
+
+pK(2 M N CNT + 1) H
+
+∥H∥F
+
+, ˜β =
+
+√Kβ
+
+∥β∥2
+
+, (30) so that the squared norms of ˜H and ˜β equal their respective dimensions. A simple construction of Y(0) is thus given by 
+
+[ ˜H, ˜β]. When using equal user weights, i.e., β1 = · · · = βK ,the vector ˜β can be omitted. To further enhance the represen-tational capacity of the deep model, an multi-layer perceptron (MLP) can be employed to extract latent features prior to the GNN, yielding 
+
+Y(0) = MLP  [ ˜H, ˜β]; θin a
+
+, (31) where θin a denotes the trainable weights of this MLP. 
+
+3) Message Passing: Let y(i)
+
+k denote the feature of node k
+
+at layer i. The corresponding node feature matrix of this layer is then defined as Y(i) ≜ y(i)1 , y(i)2 , . . . , y(i)
+
+K
+
+T. The message passing from layer i to layer i + 1 using the GraphSAGE algorithm can be described as [53] 
+
+y(i+1) 
+
+k = ϕ
+
+
+
+W(i)
+
+ y(i)
+
+k
+
+T,
+
+ 1
+
+K − 1
+
+X
+
+r̸ =k
+
+y(i)
+
+r
+
+TT
+
+, ∀k
+
+where W(i) denotes the trainable weight associated with layer i, and ϕ(·) denotes a nonlinear activation function, such as the rectified linear unit (ReLU). 
+
+4) Final Feature Readout: We read out the matrix Xk from node k in the last layer of the GNN through another MLP. Mathematically, we have 
+
+vec(Re( Xk)) T,vec(Im( Xk)) TT = MLP  y(I)
+
+k ; θout a
+
+, (32) 9
+
+where θout a denotes the trainable weights of this MLP. Based on the above architecture, the set of trainable param-eters in module Ψa is given by θa = θin a , {W(i)}Ii=1 , θout a .
+
+C. Accelerating Updates of Precoders 
+
+In addition to the auxiliary variables, we further accelerate the updates of the precoder-related variables {vn, un} by unfolding the iterative rule in (25) into a learnable architecture. Rather than introducing an augmented term into (25) as in (27), we adopt a more restrained and computationally efficient strategy, i.e., using a neural network to adaptively select the hyperparameter ρn. Because this module outputs only scalar parameters, it remains lightweight. Specifically, we parameterize ρn in (25) as 
+
+ρn = λmax (Mn) + zn, ∀n, (33) where the offsets {zn}NT 
+
+> n=1
+
+are generated by a deep network 
+
+{zn}NT 
+
+> n=1
+
+= Ψ p
+
+ {Hk, σ k, β k}Kk=1 ; θp
+
+. (34) Similarly, the subscript “p” here is short for “precoder,” indicating that the corresponding network is used for precoder updates. Again, each layer in Fig. 3 has an independent Ψp
+
+module with its own set of weights θ(ℓ) 
+
+> p
+
+.The function Ψp is implemented as a J-layer GNN, whose architecture is illustrated in Fig. 4b. The input data prepro-cessing and message-passing procedure in Ψp follow the same design as described in Section IV-B. Since the desired outputs 
+
+{zn}NT 
+
+> n=1
+
+are global quantities that are independent of the number of nodes/users, we employ a graph-level mean pooling operator in the final layer to aggregate node-wise features into a global representation. Specifically, letting Y(J) denote the node feature matrix of the last GNN layer, we compute 
+
+yT = 1
+
+K 1TY(J). (35) The desired output z = [ z1, . . . , z NT ]T is then obtained via an MLP readout layer, i.e., 
+
+z = MLP( y; θout p ). (36) 
+
+D. Model Training 
+
+The proposed unfolded algorithm becomes effective only after proper training. A few key design aspects of the training process are discussed below. 
+
+1) Loss Function: Let H ≜ {Hk, σ k, β k}Kk=1 denote a problem instance for brevity. We denote the mapping imple-mented by each layer in Fig. 3 as g(·), such that 
+
+F(ℓ) 
+
+> A
+
+, F(ℓ) 
+
+> D
+
+= g F(ℓ−1)  
+
+> A
+
+, F(ℓ−1)  
+
+> D
+
+; H, θ(ℓ), (37) where θ(ℓ) denotes the set of trainable parameters at layer ℓ,consisting of θ(ℓ) 
+
+> a
+
+and θ(ℓ) 
+
+> p
+
+. Stacking L layers together defines the overall mapping G(·) as: 
+
+F(L) 
+
+> A
+
+, F(L) 
+
+> D
+
+= G F(0)  
+
+> A
+
+, F(0)  
+
+> D
+
+; H, Θ, (38) where Θ ≜ {θ(1) , . . . , θ(L)} collects all trainable parameters. Our objective is to maximize the system sum-rate achieved after L layers. Since the sum-rate is a function of both the problem instance H and the resulting precoders, the achieved performance can be written as 
+
+R F(L) 
+
+> A
+
+, F(L) 
+
+> D
+
+; H = R
+
+
+
+G F(0)  
+
+> A
+
+, F(0)  
+
+> D
+
+; H, Θ; H
+
+
+
+. (39) Given a dataset of problem instances D, we define the training loss as 
+
+L(Θ) = −EH∼ D R
+
+
+
+G F(0)  
+
+> A
+
+, F(0)  
+
+> D
+
+; H, Θ; H
+
+
+
+. (40) Model training amounts to minimizing L(Θ) w.r.t. Θ,which is a nonconvex optimization problem. Nevertheless, since all components in (40) are differentiable, the optimiza-tion can be efficiently performed using stochastic gradient de-scent. This is an unsupervised learning method; only problem instances are required, without any labeled optimal solutions, which facilitates practical implementation. 
+
+2) Iteration Initialization: A critical aspect of the proposed framework is that the initialization of the L-layer iterations must be fixed. This can be seen from (40), where the loss explicitly depends on the initial precoders F(0)  
+
+> A
+
+, F(0)  
+
+> D
+
+. Any change in the initialization alters the optimization landscape of the training loss. Therefore, the initialization must remain identical during both the training and inference phases. A similar observation was reported in [54]. 
+
+3) Model Weight Initialization: The model parameters Θ
+
+can be initialized in various ways. We recommend initializing the trainable weights in the output layer of each module to zero, while initializing all other weights using standard schemes such as Xavier or Kaiming initialization. This strategy significantly improves training stability. As can be observed from (27) and (33), this initialization ensures that the initial augmented terms {Xk} and {zn} are zero. Consequently, be-fore training, the unfolded architecture exactly reproduces the original Alg. 1. This provides a strong and meaningful starting point, allowing training to progressively improve upon the model-based solution using data. In contrast, a fully random initialization of Θ may lead to poor initial performance, which is often worse than the model-based baseline, thereby slowing training convergence. 
+
+E. Complexity and Scalability Discussion 1) GNN Complexity: We first quantify the cost of the trainable GNN modules. Following the standard GraphSAGE message-passing implementation [53], let E denote the set of graph edges used for neighbor aggregation, where |E| =
+
+O(K2) for the fully connected graph used in this paper. Let 
+
+M1 = · · · = MK = M and omit ˜β. The input feature dimension of each user node is d = 2M N CNT + 1 . For a generic module with S GraphSAGE layers, hidden width 
+
+h, and output dimension r, its forward complexity can be summarized as 
+
+CGS (d, h, r, S ) = O KCin (d, h )+ S(|E| h+Kh 2)+ ξCout (h, r ),
+
+where Cin (d, h ) and Cout (h, r ) are the input and readout MLP costs, respectively, and ξ = K for node-level readout and 
+
+ξ = 1 for graph-level readout after mean pooling. In each unfolded layer, assuming NS,1 = · · · = NS,K = NS,user , Ψa
+
+is node-level with output dimension ra = 2 N 2
+
+> S,user
+
+, whereas 10 
+
+Ψp is graph-level with output dimension rp = NT. Hence, the additional GNN cost per unfolded layer is 
+
+CGNN = CGS (d, h a, r a, S a) + CGS (d, h p, r p, S p). (41) Thus, the GNN cost grows linearly with d = O(M N CNT)
+
+through the input MLPs, quadratically with K through the fully connected user graph, linearly with the number of GraphSAGE layers, and polynomially with the hidden widths through the linear transformations and readout. 
+
+2) Offline Training Complexity: Let |D| denote the number of training problem instances, E the number of training epochs, B the batch size, and PΘ the number of trainable parameters. For each problem instance, a forward pass runs 
+
+L unfolded layers, where each layer consists of the model-based update with cost Citer evaluated in (26) and the trainable GNN modules with cost CGNN . The WSR-based loss in (40) is then backpropagated through the unfolded computation graph. Under standard reverse-mode automatic differentiation, as implemented in modern deep-learning platforms such as PyTorch [55], the backward pass has the same asymptotic order as the forward pass up to a constant factor. Hence, the offline training complexity can be expressed as 
+
+O
+
+
+
+E|D|κL (Citer + CGNN ) + E
+
+ |D|
+
+B
+
+
+
+PΘ
+
+
+
+, (42) where κ is a constant accounting for the backward pass, and the second term represents the per-batch cost of updating the trainable network parameters, which scales linearly with PΘ
+
+for standard optimizers such as SGD or Adam. 
+
+3) Online Inference Complexity: During online inference, the network parameters are fixed and no gradient computation or optimizer update is performed. For one problem instance, the real-time cost is therefore 
+
+O(L(Citer + CGNN ) + CP2) , (43) where CP2 is the cost of the final RF-baseband decomposition in Problem P2. The computational complexity of solving this decomposition problem has been extensively evaluated in the literature; an example can be found in [45]. Compared with Alg. 1, the unfolded solver adds the GNN inference cost CGNN 
+
+in each unfolded layer, but it typically uses a much smaller number of layers L. The reduction in the number of required iterations is the main source of the runtime savings. 
+
+4) Additional Scalability Remarks: Two additional scal-ability aspects are worth noting. First, the number of RF chains NRF does not enter the dimensions of Ψa or Ψp,because the unfolded solver operates on the virtual fully digital precoder FD in Problem P1. Thus, changing NRF only affects the final RF-baseband decomposition cost CP2 and the achievable decomposition accuracy. Second, the GraphSAGE-based architecture is inductive with respect to the user graph. Although changing K modifies the number of graph nodes and edges, and thus the message-passing complexity, it does not alter the network architecture or require retraining. V. N UMERICAL RESULTS 
+
+This section presents the simulation results. The simulation setup is described first, followed by the evaluation of the proposed method.                                                              
+
+> TABLE I SIMULATION SYSTEM PARAMETERS
+> Parameter Value
+> Number of users K3–5
+> Number of antennas per user Mk4
+> Number of data streams per user NS,k 2
+> Number of RF chains NRF 10
+> Number of DMAs NT20
+> Number of elements per DMA NC5
+> Per-DMA power constraint Pn1 mW
+> Carrier frequency 28 GHz
+> Bandwidth 20 MHz ♯
+> Noise power spectral density −174 dBm /Hz
+> ♯The mmWave band at 28 GHz can support wider band-widths up to hundreds of MHz. Here, a 20 MHz bandwidth is adopted to be consistent with the narrowband assumption. TABLE II NETWORK ARCHITECTURE OF UNFOLDING MODULES ΨaAND Ψp
+> Module Input MLP GNN layers Readout MLP
+> Ψa801 →406 →12 12 →12 →12 12 →10 →8Ψp801 →415 →30 30 →30 →30 30 →25 →20
+
+A. Simulation Setup 1) System Configuration: Unless otherwise specified, the system parameters are set as listed in Table I. The elements in each DMA are assumed to be linearly and uniformly dis-tributed with half-wavelength spacing. The signal propagation inside the DMA (i.e., the complex waveguide response) of the 
+
+mth element of the nth DMA is modeled as [33] 
+
+ηn,m = e−dn,m (ϱm+j ϖm), (44) where dn,m denotes the one-dimensional location of the mth 
+
+element in the nth DMA, with the feeding point taken as the origin. Here, ϱm represents the waveguide attenuation coeffi-cient and ϖm denotes the signal wavenumber. Following [33], we set ϱm = 0 .6 m −1.
+
+2) Training Settings: The proposed GNN-based unfolding network is implemented using the PyTorch platform [55]. Throughout the evaluation, equal user weights are adopted, i.e., β1 = · · · = βK = 1 . Consequently, the input feature of each user node in the GNNs Ψa and Ψp corresponds to a row of ˜H defined in (30), which has a dimension of 
+
+2MkNCNT + 1 = 801 . These features are first processed by a shared input MLP to extract latent representations, then propagated through the multi-layer GraphSAGE network, and finally mapped to the output via a shared readout MLP, as illustrated in Fig. 4. The number of layers and the width of each layer in the deep networks are summarized in Table II. All networks employ the ReLU activation function. We adopt the DeepMIMO dataset [56] to train the proposed unfolding network. As an unsupervised learning approach, the training relies on a collection of unlabeled problem instances. As defined in Section IV-D1, each problem instance H com-prises the channel matrices and noise levels of K users. To enhance generalization, we allow the number of users to vary across instances, where K is randomly generated within the range 3 ≤ K ≤ 5, as also shown in Table I. Specifically, 11 
+
+we collect a total of 28,595 channel realizations from the New York, Los Angeles, and Chicago scenarios provided by DeepMIMO. These channel data are then randomly combined to construct 20,000 problem instances, forming the training dataset D. For evaluation, we use an independent test set consisting of 1,000 problem instances generated from the Miami scenario. This separation between training and testing data completely avoids data leakage and ensures a fair per-formance assessment. The network is trained using the Adam optimizer [57], with a learning rate progressively decayed from 
+
+10 −3 to 10 −6. We further employ dropout [58] to enhance generalization capability, with a dropout rate of 10% .
+
+3) Evaluation Settings: All runtime evaluations are con-ducted on a MacBook Pro (macOS 26.3) with an Apple M1 Pro chip. To better position the proposed method within the existing literature, we adopt two benchmark algorithms based on prior work. As the specific multiuser MIMO DMA-based tri-hybrid WSR problem in (7) has not been directly studied in prior work, no off-the-shelf benchmark is available for exactly the same setting. Therefore, the adopted benchmarks are constructed by combining several existing methods developed for related problems, as detailed below:  
+
+> •
+
+AO-MO: This is an algorithm originally proposed in [35] to address the multiuser downlink beamforming prob-lem with DMAs. It adopts an alternating optimization framework that iteratively applies the WMMSE and Rie-mannian manifold optimization algorithms to optimize 
+
+FA and FD. Since the original method in [35] only designs FA and FD, we introduce an additional step that decomposes the resulting fully digital precoder FD
+
+into FRF and FBB using the algorithm in [45], thereby adapting it to our tri-hybrid beamforming setting. The manifold optimization steps are implemented using the Pymanopt toolbox [59].  
+
+> •
+
+Mat. Decomp.: Another approach is based on matrix decomposition, which, as discussed in Section II-C, is widely used in conventional hybrid digital-analog beam-forming [43]–[45] due to its reduced complexity. To the best of our knowledge, this framework has not been extended to tri-hybrid MIMO. Here, we adapt it to the tri-hybrid setting and employ it as a second bench-mark. Specifically, we first optimize a virtual precoder 
+
+˜F = FAFRF FBB subject only to a total power constraint 
+
+∥ ˜F∥2 
+
+> F
+
+≤ PNT 
+
+> n=1
+
+Pn, which can be efficiently solved using, e.g., the algorithm in [47]. Let ˜Fopt denote the resulting solution. We then decompose ˜Fopt into FA and FD by solving 
+
+min 
+
+> FA,FD
+
+∥ ˜Fopt − FAFD∥2
+
+> F
+
+s.t. FDFHD
+
+ 
+
+> n,n
+
+≤ Pn, ∀n, 
+
+|[un]m|2 = 1 , ∀n, m, 
+
+(45) which can be efficiently handled via alternating op-timization on Riemannian manifolds [59], but with a substantially simpler objective function. Finally, FD is factorized into {FRF , FBB } by solving Problem P2 using the method presented in [45].                            
+
+> -40 -30 -20 -10 010 0510 15 20 Per-DMA input power [dBm] WSR [bps/Hz]
+> Virtual fully-digital FDand FA
+> Two-stage decomp. ( NRF = 8 )Two-stage decomp. ( NRF = 6 )Direct tri-domain AO ( NRF = 8 )Direct tri-domain AO ( NRF = 6 )
+> −5012 14 16
+> Fig. 5. WSR versus per-DMA input power for the two-stage model-based solution and the direct tri-domain alternating-optimization baseline with K=3users and two streams per user. The virtual curve is obtained by solving Problem P1 before RF-baseband decomposition, while the two-stage curves report the WSR after decomposing FDinto {FRF ,FBB }for different NRF .The direct baseline alternates over {FA,FRF ,FBB }.
+
+B. Model-Based Algorithm Performance 
+
+Before evaluating the unfolded solver, this subsection first assesses the performance of the developed Alg. 1. Figure 5 is presented to quantify the performance loss introduced by the second-stage RF-baseband decomposition. The two-stage curves evaluate the realizable precoders obtained after approx-imating FD by FRF FBB for different numbers of RF chains, while the virtual fully-digital curve serves as a reference. For most input-power levels and numbers of RF chains, we ob-serve that the adopted RF-baseband decomposition introduces only a negligible performance loss compared to the virtual fully-digital reference, indicating its effectiveness. Moreover, increasing NRF enlarges the feasible representation space of the RF-baseband decomposition. In the low-power regime, the two two-stage curves ( NRF = 8 and NRF = 6 ) nearly overlap. In the high-power regime, however, the impact of the decomposition becomes more pronounced. The NRF = 8 
+
+curve remains close to the fully-digital reference, whereas the 
+
+NRF = 6 curve exhibits an increasing gap as the input-power budget grows. This behavior indicates that the RF-baseband decomposition error can become a dominant limiting factor when the RF-chain dimension is restrictive and the per-DMA input-power constraint is high. To further understand the performance of the two-stage decomposition, we additionally consider a direct tri-domain alternating optimization (AO) baseline. This is a purpose-built reference implementation rather than a standard benchmark established in the literature. This baseline does not introduce the virtual precoder FD; instead, after updating the WMMSE auxiliary variables, it directly alternates over FBB , FRF ,and FA, where FRF and FA are updated through projected gradient-type steps that enforce the corresponding hardware constraints. To reduce initialization bias, all methods use three 12        
+
+> 050 100 150 200 250 300 -20 -18 -16 -14 -12 -10 -8 Batch Training loss: negative WSR [bps/Hz]
+> Nonzero initialization of output-layer weights Zero initialization of output-layer weights (Negative) optimized WSR via model-based Alg. 1
+> Fig. 6. Training loss versus batch index. Each batch contains 50 problem instances, and the training loss is the negative mean WSR over a batch.
+
+random starts and retain the best solution; the direct AO baseline also uses the previous power-point solution as a warm start. As shown in Fig. 5, when NRF = 8 , the two-stage design outperforms the direct AO baseline over the entire tested power range. When NRF = 6 , the direct AO baseline exceeds the two-stage curve only in a limited high-power region, which is consistent with the amplified decomposition loss under a strin-gent RF-chain dimension. These results suggest that directly optimizing the three precoders, although avoiding a matrix-decomposition step, faces a more difficult nonconvex problem with strongly coupled variables and can easily converge to poor stationary points. In contrast, the two-stage formulation provides an easier optimization route that works very well in practice. Since the direct AO baseline is introduced only to examine the effect of the two-stage decomposition and does not offer superior overall performance, it is not included as a standard benchmark in the subsequent evaluations. 
+
+C. Unfolded Model Training and Inference 
+
+In this subsection, we assess the proposed unfolded model. We first evaluate the training performance by examining the convergence behavior of the training loss. Figure 6 com-pares the proposed weight initialization strategy introduced in Section IV-D3, namely zero initialization of the output-layer weights, with its nonzero random initialization counterpart. All remaining network weights are initialized using Kaiming initialization [60]. As described in Section IV-D1, the training loss is the negative mean WSR over each batch. Here, each batch contains 50 problem instances. We also evaluate the average optimized WSR over the same batch using Alg. 1 with the same layer number L and plot its negative value in Fig. 6 as a reference. Only when the training loss falls below this level does the proposed deep learning model achieve performance improvement. Both the unfolded network and Alg. 1 use a fixed number of iterations L = 3 . The results validate the analysis in Section IV-D3, showing that zero initialization of the output-layer weights provides the unfolded algorithm with                         
+
+> 0510 15 20 25 30 35 00.2 0.4 0.6 0.8 1WSR [bps/Hz] CDF
+> Alg. 1 ( L=4) Alg. 1 ( L=10) Alg. 1 ( L=50) Alg. 1 ( L=200) Direct GNN Unfolded Alg. 1 ( L=2) Unfolded Alg. 1 ( L=3) Unfolded Alg. 1 ( L=4)
+> Fig. 7. CDFs of the optimized WSR on the test set with 1,000 problem instances. Alg. 1 with L={4,10 ,50 ,200 }is compared with its unfolded version using L={2,3,4}iterations as well as a direct GNN benchmark. The unfolded Alg. 1 with L= 4 and the direct GNN benchmark contain 2,734,332 and 2,739,190 trainable parameters, respectively.
+
+a high-quality starting point that matches the performance of the original algorithm. In contrast, random initialization yields a random starting point that is worse than the original solution, thereby making training harder. This zero-initialization design is critical for training the unfolded algorithm, as it ensures that learning improves upon a high-quality baseline instead of optimizing from a random point. Next, we evaluate the acceleration performance of the proposed unfolding approach. Figure 7 shows the cumulative distribution function (CDF) of the optimized WSR over 1,000 problem instances in the test set. Alg. 1 with L =
+
+{4, 10 , 50 , 200 } iterations is compared with its unfolded coun-terpart using L = {2, 3, 4} iterations. The results indicate that, after proper training, the unfolded algorithm can substantially reduce the required number of iterations without compromis-ing performance. For example, the unfolded algorithm with only two iterations achieves performance comparable to that of Alg. 1 after 50 iterations, while the four-layer unfolded algorithm attains performance similar to that of Alg. 1 after 200 iterations. These results demonstrate that the proposed deep unfolding architecture effectively learns to accelerate the original iterative procedure, resulting in substantial com-putational savings. Importantly, this performance gain arises from the integration of model-based optimization and data-driven learning, rather than from deep learning alone. To verify this, we further implement a direct GNN benchmark that learns the tri-domain precoders directly from channel features without exploiting the model-based algorithm. As shown in Fig. 7, even though this benchmark has slightly more trainable parameters than the proposed unfolded solver with L = 4 
+
+and is trained using the same dataset, it performs significantly worse. This highlights the advantage of the proposed model-based deep unfolding framework over a purely data-driven approach. 13 
+
+0.2 0.5 1 2 5 10 510 15 20 25 30 35 Runtime [seconds] Achieved WSR [bps/Hz]     
+
+> Unfolded Alg. 1 ( L=2) Unfolded Alg. 1 ( L=4) Unfolded Alg. 1 ( L=6) Alg. 1 ( L=200) Benchmark: AO-MO Benchmark: Mat. Decomp.
+
+Fig. 8. Achieved WSR versus runtime over 16 sample problem instances. TABLE III ACHIEVED WSR VERSUS RUNTIME FOR DIFFERENT ALGORITHMS .THE VALUES ARE REPORTED AS MEAN ± STANDARD DEVIATION .
+
+Algorithm Runtime [s] WSR [bps/Hz] 
+
+Alg. 1 ( L = 200 ) 6.342 ± 1.522 17 .960 ± 7.057 
+
+Unfolded Alg. 1 ( L = 2 ) 0.192 ± 0.034 14 .675 ± 5.806 
+
+Unfolded Alg. 1 ( L = 4 ) 0.300 ± 0.059 17 .868 ± 7.681 
+
+Unfolded Alg. 1 ( L = 6 ) 0.387 ± 0.058 18 .373 ± 8.204 
+
+Benchmark: AO-MO 4.231 ± 2.387 15 .450 ± 7.122 
+
+Benchmark: Mat. Decomp. 0.271 ± 0.034 11 .174 ± 4.947 
+
+We further evaluate the runtime of the proposed algorithms to quantify their computational efficiency. We compare it with the two benchmark approaches to position our method within the literature. Figure 8 plots the achieved WSR versus the measured runtime over 16 sample problem instances, and the corresponding quantitative results are summarized in Table III. The results clearly show that the unfolding design can reduce the actual runtime by more than an order of magnitude without sacrificing the achieved WSR. In particular, increasing the number of unfolded layers leads to higher WSR but also longer runtime, indicating a trade-off between optimization performance and execution time. Moreover, compared with the two benchmark approaches, the proposed unfolded algorithm stands out by achieving high WSR at low runtime, which is a performance regime unattained by the two benchmarks. 
+
+D. Scalability, Robustness, and Generalization 
+
+Figure 9 presents the achieved WSR versus the number of unfolding layers. Increasing the number of layers improves performance, but saturation occurs for L > 5. Since the execution time increases linearly with the number of unfolding layers, this indicates a trade-off between performance and computational efficiency. We further evaluate the scalability of the proposed method w.r.t. the array configuration, including the number of DMAs NT and the number of elements per DMA NC. Since the CSI dimension in the GNN modules 
+
+L = 2 L = 3 L = 4 L = 5 L = 6 L = 7 010 20 30 40 
+
+Number of unfolding layers Achieved WSR [bps/Hz] 
+
+> Min–Max Range Mean
+
+Fig. 9. Achieved WSR versus number of unfolding layers. 
+
+10 −4 10 −3 10 −2 10 −1
+
+510 15 20 25 CSI NMSE Achieved WSR [bps/Hz] 
+
+> Alg. 1 ( L=200) Alg. 1 ( L=50) Unfolded Alg. 1 ( L=4) Unfolded Alg. 1 ( L=2)
+
+Fig. 10. Achieved WSR evaluated using noisy CSI. The curves show the mean over the test set, and the blue and orange shaded regions denote the standard deviation for the unfolded Alg. 1 with L = 2 and L = 4 , respectively. 
+
+depends on both NT and NC, the unfolded networks are trained separately for each tested array configuration. The resulting WSR and runtime are summarized in Table IV. The results show that the proposed unfolding strategy remains effective as the array configuration scales up. In general, larger array configurations lead to higher WSR and longer runtimes for all the tested methods. A practical concern for the proposed method is its robust-ness to imperfect CSI, as obtaining accurate CSI remains a major challenge in real-world MIMO systems, particularly in massive MIMO [61]. In Fig. 10, we evaluate the achieved WSR under noisy CSI using Alg. 1 and its unfolded version. The noisy CSI is generated as ˆHk = Hk + Ek, ∀k, where 
+
+Ek is a full matrix whose entries are independent and identi-cally distributed (i.i.d.) complex zero-mean Gaussian random variables, with power adjusted to achieve different normalized 14 
+
+TABLE IV SCALABILITY COMPARISON W .R.T. NT AND NC . E ACH ENTRY REPORTS THE AVERAGE WSR AND RUNTIME OVER 128 TEST PROBLEM INSTANCES .                                    
+
+> NTNC
+> Unfolded Alg. 1 (L=2) Unfolded Alg. 1 (L=4) Unfolded Alg. 1 (L=6) Alg. 1 (L=200) Benchmark: AO-MO Benchmark: Mat. Decomp. 10 510.01 bps/Hz, 0.049 s 11.85 bps/Hz, 0.061 s 12.52 bps/Hz, 0.083 s 12.96 bps/Hz, 2.159 s 10.57 bps/Hz, 2.382 s 7.27 bps/Hz, 0.106 s 20 513.35 bps/Hz, 0.178 s 16.07 bps/Hz, 0.238 s 16.12 bps/Hz, 0.307 s 16.24 bps/Hz, 6.643 s 13.44 bps/Hz, 4.339 s 11.00 bps/Hz, 0.326 s 30 515.26 bps/Hz, 0.292 s 19.70 bps/Hz, 0.422 s 20.77 bps/Hz, 0.561 s 18.99 bps/Hz, 14.045 s 16.42 bps/Hz, 7.320 s 13.62 bps/Hz, 0.574 s 10 10 10.45 bps/Hz, 0.039 s 13.01 bps/Hz, 0.061 s 14.71 bps/Hz, 0.084 s 12.97 bps/Hz, 2.119 s 13.43 bps/Hz, 2.969 s 7.34 bps/Hz, 0.221 s 10 15 12.91 bps/Hz, 0.041 s 13.82 bps/Hz, 0.064 s 17.64 bps/Hz, 0.089 s 15.90 bps/Hz, 2.224 s 15.93 bps/Hz, 4.141 s 7.54 bps/Hz, 0.334 s
+
+Miami Austin Columbus Dallas 
+
+0510 15 20     
+
+> Average WSR [bit/s/Hz]
+> Unfolded Alg. 1 ( L=2) Unfolded Alg. 1 ( L=4) Unfolded Alg. 1 ( L=6) Alg. 1 ( L=200) Benchmark: AO-MO Benchmark: Mat. Decomp.
+
+Fig. 11. Achieved WSR evaluated using channel datasets from different cities generated by the DeepMIMO platform. 
+
+mean squared error (NMSE) levels. The CSI NMSE is defined as ∥Ek∥2
+
+> F
+
+/∥Hk∥2
+
+> F
+
+. The results show that, for both the original iterative Alg. 1 and its unfolded version, increasing the number of iterations reduces robustness to CSI errors. This effect is more pronounced in the unfolded algorithm. For example, the unfolded algorithm with L = 2 exhibits robustness comparable to that of the original Alg. 1 with L = 200 , whereas the robustness of the unfolded algorithm with L = 4 degrades substantially. These findings indicate that the proposed deep unfolding method is more effective when accurate CSI is available. Nevertheless, the performance degradation due to inaccurate CSI remains limited, while the advantage of higher computational efficiency is consistently maintained. Finally, we assess the generalization capability of the pro-posed method. In Fig. 11, we compare the proposed Alg. 1, its unfolded version, and the two benchmark schemes on channel datasets generated from Miami (the predefined test set) and three additional cities, namely Austin, Columbus, and Dallas, within the DeepMIMO platform. All these datasets are different from those used for training, as described in Section V-A2. The results clearly show that both the pro-posed Alg. 1 and its unfolded version consistently achieve strong performance and outperform the benchmarks across all city scenarios, demonstrating robust generalization capability. Although Alg. 1 also achieves high WSR, the significantly reduced runtime makes the unfolded Alg. 1 a more practical solution for real-time deployment. VI. L IMITATIONS 
+
+Although the effectiveness of the proposed deep unfolding method has been demonstrated for tri-hybrid beamforming, several limitations should be acknowledged. First, the method requires offline training before deployment. Furthermore, for tri-hybrid beamforming systems employing different antenna technologies or system architectures, the unfolding network must be redesigned and retrained accordingly. No unified so-lution currently exists for all tri-hybrid beamforming scenarios. In addition, while this paper focuses on a specific DMA-based tri-hybrid architecture, the proposed algorithm may experience performance degradation in practical implementa-tions due to the omission of certain realistic hardware con-siderations. For example, practical DMAs exhibit frequency-selective responses, making wideband effects important, par-ticularly in high-frequency communications [62], [63]. More-over, DMA reconfiguration is typically achieved by tuning the resonant characteristics (e.g., the resonant frequency or effective impedance) of individual elements using components such as varactors or PIN diodes [11]. Consequently, the achiev-able element responses are often confined to a limited feasible region or finite-resolution tuning, rather than allowing arbitrary phase-shift control. Incorporating these practical hardware constraints into the algorithm design is an important direction for future research. VII. C ONCLUSION 
+
+While tri-hybrid MIMO architectures offer significant po-tential for flexible and efficient communications, their multi-domain structure poses substantial challenges for beamforming optimization. The strong coupling among design variables and hardware constraints makes the problem inherently complex and computationally intensive. By studying a representative multiuser tri-hybrid system employing dynamic metasurface antennas, this paper shows that deep algorithm unfolding provides an effective means of reducing this computational burden, thereby facilitating real-time implementation. The effectiveness of the proposed approach relies on carefully de-signed trainable networks that integrate model-based optimiza-tion with data-driven learning. Moreover, this study reveals a conceptual shift in algorithm design under the deep unfolding framework, where the asymptotic convergence behavior of the original iterative solver becomes less critical, while low per-iteration complexity and an iteration structure amenable to unfolding emerge as more important design considerations for developing a fast solver. 15 
+
+APPENDIX 
+
+In this proof, we omit the DMA index n for brevity. Let u(t)
+
+denote a feasible point of un in (24), and write the objective function as 
+
+f (u) = uHMu + 2Re {(b/2) Hu}. (A.1) This is a unit-modulus quadratic program in the form con-sidered in [52]. Applying the quadratic majorization in [52, Eqs. (2)–(3)] with a ρ ≥ λmax (M) gives the following linear surrogate over |[u]m| = 1 :
+
+g u|u(t) = 2Re 
+
+n
+
+uH
+
+(M − ρI)u(t) + 12 b
+
+o 
+
++ 2 ρN C −  u(t)HMu (t). (A.2) The constant-modulus minimizer of this surrogate follows from the phase-projection solution in [52, eq. (6)], namely 
+
+u(t+1) = ej arg 
+
+ (ρI−M)u(t)− 12 b
+
+
+
+. (A.3) Therefore, (25) is one majorization-minimization update for (24). Since g(u|u(t)) upper-bounds f (u) and is tight at 
+
+u(t), the standard majorization-minimization descent prop-erty [51, Eqs. (2)–(5)] guarantees 
+
+f  u(t+1)  ≤ g u(t+1) |u(t) ≤ g u(t)|u(t) = f  u(t).
+
+This completes the proof. ACKNOWLEDGMENT 
+
+The authors would like to thank Prof. Robert W. Heath Jr. for his helpful comments on the system modeling. REFERENCES [1] R. W. Heath, J. Carlson, N. V. Deshpande et al. , “The tri-hybrid MIMO architecture,” IEEE Wireless Communications , vol. 33, no. 1, pp. 199– 206, 2026. [2] M. R. Castellanos, S. Yang, C.-B. Chae et al. , “Embracing reconfigurable antennas in the tri-hybrid MIMO architecture for 6G and beyond,” IEEE Trans. Commun. , vol. 74, pp. 381–401, 2026. [3] A. Alkhateeb, J. Mo, N. Gonzalez-Prelcic et al. , “MIMO precoding and combining solutions for millimeter-wave systems,” IEEE Commun. Mag. , vol. 52, no. 12, pp. 122–131, 2014. [4] F. Sohrabi and W. Yu, “Hybrid digital and analog beamforming design for large-scale antenna arrays,” IEEE J. Sel. Top. Signal Process. , vol. 10, no. 3, pp. 501–513, 2016. [5] S. S. Ioushua and Y. C. Eldar, “A family of hybrid analog–digital beamforming methods for massive MIMO systems,” IEEE Trans. Signal Process. , vol. 67, no. 12, pp. 3243–3257, 2019. [6] K. Ying, Z. Gao, S. Chen et al. , “Reconfigurable massive MIMO: Harnessing the power of the electromagnetic domain for enhanced information transfer,” IEEE Wireless Commun. , vol. 31, no. 3, pp. 125– 132, 2024. [7] M. Liu, M. Li, R. Liu et al. , “Reconfigurable antenna arrays: Bridging electromagnetics and signal processing,” IEEE Commun. Mag. , pp. 1–7, 2026. [8] P. Zheng, R. Wang, Y. Zhang et al. , “Reconfigurable antennas for 6G: Technologies, prototypes, architectures, and signal processing,” 2025. [Online]. Available: https://arxiv.org/abs/2506.00657 [9] M. R. Castellanos, J. Carlson, and R. W. Heath, “Energy-efficient tri-hybrid precoding with dynamic metasurface antennas,” in 57th Asilomar Conference on Signals, Systems, and Computers , 2023, pp. 1625–1630. [10] Y. Li, C. Qi, S. Mao et al. , “Tri-hybrid beamforming for radiation-center reconfigurable antenna array: Spectral efficiency and energy efficiency,” 
+
+IEEE Trans. Wireless Commun. , 2026, early access. [11] D. R. Smith, O. Yurduseven, L. P. Mancera et al. , “Analysis of a waveguide-fed metasurface antenna,” Phys. Rev. Appl. , vol. 8, p. 054048, Nov 2017. [Online]. Available: https://link.aps.org/doi/10.1103/ PhysRevApplied.8.054048 [12] S. Shen, Y. Sun, S. Song et al. , “Successive boolean optimization of planar pixel antennas,” IEEE Trans. Antennas Propag. , vol. 65, no. 2, pp. 920–925, 2017. [13] X. Gao, L. Dai, S. Zhou et al. , “Wideband beamspace channel estimation for millimeter-wave MIMO systems relying on lens antenna arrays,” 
+
+IEEE Trans. Signal Process. , vol. 67, no. 18, pp. 4809–4824, 2019. [14] R. Wang, P. Zheng, V. Varma Kotte et al. , “Electromagnetically re-configurable fluid antenna system for wireless communications: Design, modeling, algorithm, fabrication, and experiment,” IEEE J. Sel. Areas Commun. , vol. 44, pp. 1464–1479, 2026. [15] J. Costantine, Y. Tawk, S. E. Barbin et al. , “Reconfigurable antennas: Design and applications,” Proc. IEEE , vol. 103, no. 3, pp. 424–437, 2015. [16] P. Zheng, Y. Zhang, T. Y. Al-Naffouri et al. , “Tri-hybrid multi-user precoding using pattern-reconfigurable antennas: Fundamental models and practical algorithms,” IEEE Trans. Commun. , 2026, early access. [17] M. Liu, M. Li, R. Liu et al. , “Secure ISAC systems empowered by compound reconfigurable antenna arrays,” 2025. [Online]. Available: https://arxiv.org/abs/2508.16055 [18] A. Kaushik, J. Thompson, E. Vlachos et al. , “Dynamic RF chain selection for energy efficient and low complexity hybrid beamforming in millimeter wave MIMO systems,” IEEE Trans. Green Commun. Netw. ,vol. 3, no. 4, pp. 886–900, 2019. [19] S. Park, A. Alkhateeb, and R. W. Heath, “Dynamic subarrays for hybrid precoding in wideband mmWave MIMO systems,” IEEE Trans. Wireless Commun. , vol. 16, no. 5, pp. 2907–2920, 2017. [20] H. Li, M. Li, Q. Liu et al. , “Dynamic hybrid beamforming with low-resolution PSs for wideband mmWave MIMO-OFDM systems,” IEEE J. Sel. Areas Commun. , vol. 38, no. 9, pp. 2168–2181, 2020. [21] J.-C. Chen and P.-C. Wu, “Tri-hybrid beamforming for pinching-antenna-assisted MU-MISO downlink,” IEEE Wireless Commun. Lett. ,vol. 15, pp. 460–464, 2026. [22] S. Zhang, S. Zeng, B. Di et al. , “Tri-hybrid holographic beamforming for integrated sensing and communication,” 2026. [Online]. Available: https://arxiv.org/abs/2602.03000 [23] R. Wiesmayr, S. Cammerer, F. A. Aoudia et al. , “Design of a standard-compliant real-time neural receiver for 5G NR,” in Proc. IEEE Int. Conf. Mach. Learn. Commun. Netw. (ICMLCN) , 2025, pp. 1–6. [24] T. Fang, M. Ma, M. Juntti et al. , “Tri-hybrid beamforming design for integrated sensing and communications,” 2026. [Online]. Available: https://arxiv.org/abs/2601.16036 [25] J. Chen, X. Lei, Y. Zhang et al. , “Integrated sensing and communication with tri-hybrid beamforming across electromagnetically reconfigurable antennas,” 2025. [Online]. Available: https://arxiv.org/abs/2510.14530 [26] V. Monga, Y. Li, and Y. C. Eldar, “Algorithm unrolling: Interpretable, efficient deep learning for signal and image processing,” IEEE Signal Process Mag. , vol. 38, no. 2, pp. 18–44, 2021. [27] A. Chowdhury, G. Verma, C. Rao et al. , “Unfolding WMMSE using graph neural networks for efficient power allocation,” IEEE Trans. Wireless Commun. , vol. 20, no. 9, pp. 6004–6017, 2021. [28] J. Zhang, C. Masouros, F. Liu et al. , “Low-complexity joint radar-communication beamforming: From optimization to deep unfolding,” 
+
+IEEE J. Sel. Top. Signal Process. , vol. 19, no. 5, pp. 856–871, 2025. [29] S. Khobahi, N. Shlezinger, M. Soltanalian et al. , “LoRD-Net: Unfolded deep detection network with low-resolution receivers,” IEEE Trans. Signal Process. , vol. 69, pp. 5651–5664, 2021. [30] A. Jagannath, J. Jagannath, and T. Melodia, “Redefining wireless com-munication for 6G: Signal processing meets deep learning with deep unfolding,” IEEE Trans. Artif. Intell. , vol. 2, no. 6, pp. 528–536, 2021. [31] P. Zheng, “Research,” https://zpinjun.github.io/research, 2026, accessed Jul. 23, 2026. [32] J. Carlson, M. R. Castellanos, and R. W. Heath, “Hierarchical codebook design with dynamic metasurface antennas for energy-efficient arrays,” 
+
+IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 14 790–14 804, 2024. [33] H. Zhang, N. Shlezinger, F. Guidi et al. , “Beam focusing for near-field multiuser MIMO communications,” IEEE Trans. Wireless Commun. ,vol. 21, no. 9, pp. 7476–7490, 2022. [34] R. J. Williams, P. Ram´ ırez-Espinosa, J. Yuan et al. , “Electromagnetic based communication model for dynamic metasurface antennas,” IEEE Trans. Wireless Commun. , vol. 21, no. 10, pp. 8616–8630, 2022. 16 
+
+[35] S. F. Kimaryo and K. Lee, “Downlink beamforming for dynamic metasurface antennas,” IEEE Trans. Wireless Commun. , vol. 22, no. 7, pp. 4745–4755, 2023. [36] M. Bayraktar, N. Gonz´ alez-Prelcic, H. Chen et al. , “Near-field full-duplex integrated sensing and communication with dynamic metasur-face antennas,” in 58th Asilomar Conference on Signals, Systems, and Computers , 2024, pp. 609–613. [37] H. Prod’homme and P. del Hougne, “Mutual coupling in dynamic metasurface antennas: Foe, but also friend,” IEEE Wireless Commun. ,vol. 32, no. 4, pp. 30–36, 2025. [38] H. Prod’homme, J. Tapie, L. Le Magoarou et al. , “Benefits of mutual coupling in dynamic metasurface antennas,” IEEE Trans. Antennas Propag. , vol. 74, no. 3, pp. 2589–2604, 2026. [39] P. Zheng, S. Tarboush, H. Sarieddeen et al. , “Mutual coupling-aware channel estimation and beamforming for RIS-assisted communications,” 
+
+IEEE Trans. Wireless Commun. , vol. 25, pp. 4374–4390, 2026. [40] N. Shlezinger, O. Dicker, Y. C. Eldar et al. , “Dynamic metasurface antennas for uplink massive MIMO systems,” IEEE Trans. Commun. ,vol. 67, no. 10, pp. 6829–6843, 2019. [41] S. S. Christensen, R. Agarwal, E. De Carvalho et al. , “Weighted sum-rate maximization using weighted MMSE for MIMO-BC beamforming design,” IEEE Trans. Wireless Commun. , vol. 7, no. 12, pp. 4792–4799, 2008. [42] K. A. Boateng, S. F. Kimaryo, and K. Lee, “Beamforming for fully connected dynamic metasurface antennas,” IEEE Access , vol. 14, pp. 17 207–17 224, 2026. [43] X. Yu, J.-C. Shen, J. Zhang et al. , “Alternating minimization algorithms for hybrid precoding in millimeter wave MIMO systems,” IEEE J. Sel. Top. Signal Process. , vol. 10, no. 3, pp. 485–500, 2016. [44] W. Ni, X. Dong, and W.-S. Lu, “Near-optimal hybrid processing for massive MIMO systems via matrix decomposition,” IEEE Trans. Signal Process. , vol. 65, no. 15, pp. 3922–3933, 2017. [45] J. Jin, Y. R. Zheng, W. Chen et al. , “Hybrid precoding for millimeter wave MIMO systems: A matrix factorization approach,” IEEE Trans. Wireless Commun. , vol. 17, no. 5, pp. 3327–3339, 2018. [46] Q. Shi, M. Razaviyayn, Z.-Q. Luo et al. , “An iteratively weighted MMSE approach to distributed sum-utility maximization for a MIMO interfering broadcast channel,” IEEE Trans. Signal Process. , vol. 59, no. 9, pp. 4331–4340, 2011. [47] X. Zhao, S. Lu, Q. Shi et al. , “Rethinking WMMSE: Can its complexity scale linearly with the number of BS antennas?” IEEE Trans. Signal Process. , vol. 71, pp. 433–446, 2023. [48] L. Pellaco and J. Jald´ en, “A matrix-inverse-free implementation of the MU-MIMO WMMSE beamforming algorithm,” IEEE Trans. Signal Process. , vol. 70, pp. 6360–6375, 2022. [49] N. Boumal, An introduction to optimization on smooth manifolds .Cambridge University Press, 2023. [50] Y. Sun, P. Babu, and D. P. Palomar, “Majorization-minimization algo-rithms in signal processing, communications, and machine learning,” 
+
+IEEE Trans. Signal Process. , vol. 65, no. 3, pp. 794–816, 2017. [51] A. Breloy, S. Kumar, Y. Sun et al. , “Majorization-minimization on the stiefel manifold with application to robust sparse PCA,” IEEE Trans. Signal Process. , vol. 69, pp. 1507–1520, 2021. [52] X. He and J. Wang, “QCQP with extra constant modulus constraints: Theory and application to SINR constrained MmWave hybrid beam-forming,” IEEE Trans. Signal Process. , vol. 70, pp. 5237–5250, 2022. [53] W. Hamilton, Z. Ying, and J. Leskovec, “Inductive representation learning on large graphs,” in Advances in Neural Information Processing Systems , vol. 30, 2017. [54] H. Sun, X. Chen, Q. Shi et al. , “Learning to optimize: Training deep neural networks for interference management,” IEEE Trans. Signal Process. , vol. 66, no. 20, pp. 5438–5453, 2018. [55] A. Paszke, S. Gross, F. Massa et al. , “PyTorch: An imperative style, high-performance deep learning library,” in Advances in Neural Information Processing Systems (NeurIPS) , vol. 32, 2019. [56] A. Alkhateeb, “DeepMIMO: A generic deep learning dataset for mil-limeter wave and massive MIMO applications,” in Proc. of Information Theory and Applications Workshop (ITA) , San Diego, CA, Feb 2019, pp. 1–8. [57] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” in International Conference on Learning Representations (ICLR) , 2015. [58] N. Srivastava, G. Hinton, A. Krizhevsky et al. , “Dropout: a simple way to prevent neural networks from overfitting,” J. Mach. Learn. Res. , vol. 15, no. 1, p. 1929–1958, Jan. 2014. [59] J. Townsend, N. Koep, and S. Weichwald, “Pymanopt: A python toolbox for optimization on manifolds using automatic differentiation,” 
+
+J. Mach. Learn. Res. , vol. 17, no. 137, p. 1–5, 2016. [Online]. Available: http://jmlr.org/papers/v17/16-177.html [60] K. He, X. Zhang, S. Ren et al. , “Delving deep into rectifiers: Surpassing human-level performance on imagenet classification,” in Proc. of the IEEE International Conference on Computer Vision (ICCV) , December 2015. [61] M. Ke, Z. Gao, Y. Wu et al. , “Compressive sensing-based adaptive active user detection and channel estimation: Massive access meets massive MIMO,” IEEE Trans. Signal Process. , vol. 68, pp. 764–779, 2020. [62] J. M. Carlson, N. V. Deshpande, M. R. Castellanos et al. , “Wideband dynamic metasurface antenna performance with practical design char-acteristics,” IEEE Trans. Wireless Commun. , vol. 25, pp. 4674–4690, 2026. [63] N. V. Deshpande, J. Carlson, M. R. Castellanos et al. , “Frequency-selective beamforming and single-shot beam training with dynamic metasurface antennas,” IEEE Trans. Wireless Commun. , 2026, early access.
