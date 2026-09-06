@@ -1,0 +1,133 @@
+Title: Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions
+
+URL Source: https://arxiv.org/pdf/2608.30890v1
+
+Published Time: Tue, 01 Sep 2026 02:49:41 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+# Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions 
+
+Cláudio Modesto ∗, Lucas Mozart ∗, Cleverson Nahum ∗,Bruno Castro ∗, Aldebaro Klautau ∗
+
+LASSE, Federal University of Pará ∗
+
+Email: claudio.barata@itec.ufpa.br ∗
+
+Abstract —Network planning is an important task in wireless communications, as it helps network operators avoid unnecessary costs. In the context of the internet of things, using long-range wide-area network tech-nologies in the Amazon rainforest, a key challenge is ensuring reliable communication between end-devices and gateways (GWs). In this sense, this reliability is strongly affected by channel conditions. Thus, during the planning phase, choosing the appropriate channel model is an important decision for accurate simula-tions. Given this motivation, in this work, we propose an optimization model to evaluate the impact of different types of channels on coverage and packet delivery ratio in a forest scenario. We used channels from ray tracing, empirical, and stochastic approaches to assess how decisions made during the network planning phase, in terms of the channel used, affect GW placement and, specifically, the percentage of end-devices covered and the reliability of the communication system. Our results show that GW placement based on site-independent channels can overestimate the number of GWs required to meet the network requirements, whereas using site-specific channels allows us to satisfy the same require-ments with fewer GWs. 
+
+Keywords —Forest environment, internet of things (IoT), network planning. 
+
+I. Introduction Network planning represents an important aspect of wireless network communication in the phases before the actual deployment of the network [1]. For certain regions, such as the Amazon rainforest sites, this type of task is essential to ensure reliable connectivity for several applications, such as internet of things (IoT) devices used in fauna and flora tracking applications related to wildlife conservation [2], [3]. Under this motivation, a specific task related to network planning in long range wide area network (LoRaWAN) commu-nications is the positioning of gateways (GWs). In this sense, this kind of problem is extremely dependent on the type of channel used to model the propagation ef-fects inherent to this type of communication, such that it is possible to use site-independent approaches repre-sented by stochastic [4] and empirical channels [5], [6], or site-specific channels [7] obtained from ray tracing (RT) simulators, such as Sionna or Wireless InSite ®
+
+(WI) [8]. Considering these several ways to model the physical propagation effects of this type of communication, the problem of LoRaWAN GWs positioning has been widely investigated in the literature [5], [9], [10], [11], with each work adopting specific objectives regarding GW positioning. Nevertheless, most converge on two com-mon characteristics: a focus on macro-urban scenarios and the use of site-independent channel models men-tioned earlier. Therefore, challenges related to forest environments and the specific effects of the site in the propagation model are simplified. To address this gap, we extend our previous work [7] and investigate the impact of different channel models in Amazon forest-like LoRaWAN scenarios. Therefore, our contributions to this paper are: 
+
+• An optimization model for GW placement in forest scenarios using RT-based channels. 
+
+• An analysis of the impact of channel model choices on packet delivery ratio (PDR) and coverage met-rics in the context of network planning in forest scenarios. 
+
+• Open artifacts for the community containing ahighly detailed forest 3D scenario and a dataset with large scale parameters obtained with a RT simulator. 1
+
+The remainder of this paper is organized as follows: Section II describes the GW placement problem consid-ered in this work, with details on the objective function 
+
+> 1
+
+Source code is available at: https://github.com/lasseufpa/forest-rt Copyright Notice arXiv:2608.30890v1 [cs.NI] 31 Aug 2026 to be optimized, the decision variables, and constraints. Section III details the proposed experiments to eval-uate the impact of different channel models on GW position in forest scenarios. Using this proposed exper-iment, Section IV discusses the main results obtained. Finally, Section V concludes this work and outlines its main results. II. Gateway placement optimization We initially assume that each GW can be placed in the position index p, which belongs to the set of candidate locations P = {1, 2, . . . , p, . . . , P }, where each element corresponds to a Cartesian coordinate on the grid, and P denotes the total number of candidate positions. We also assume that an end-device (ED) d
+
+comes from a set D = {1, 2, . . . , d, . . . , D } consisting of a total of D devices. Furthermore, each ED can use the s-th spreading factor (SF) from a set of SF con-figurations S. With these sets, we formally formulate the problem addressed in this work as a binary integer linear programming (BILP) with three binary decision variables xp, apd, and yps . xp indicates whether a GW is installed at position p. apd indicates whether the GW in position p is serving the d-th ED. Finally, yps indicates if the p-th GW is operating with s-th SF. Each possible GW position is associated with an aggregated PDR without collisions PDR no_collision , such that PDR no_collision = [ f (1) , f (2) , . . . , f (p), . . . , f (P )] , (1) where f : K → [0 , 1] is a function that maps adeployed GW position to its corresponding aggregate PDR no_collision . In this case, we used a PDR without collisions because computing all the GW interactions and their resulting collisions in all possible GW posi-tions was too computationally demanding. Therefore, considering this system model, our goal is to minimize the number of deployed GW, leading to the following objective function: 
+
+min 
+
+> xp
+
+X
+
+> p∈P
+
+xp. (2) Let ρ denote the received power threshold for each ED, and let ωd represent the received power achieved by the d-th ED after the GW is positioned. Then, the first constraint of the objective function in Eq. (2) is intended to ensure that a certain percentage of the total ED is covered and consists of multiple received-power coverage constraints, one for each ED. This can be expressed as follows: 
+
+X
+
+> d∈D
+
+X
+
+> p∈P
+
+βpd xp
+
+|P| 
+
+ ≥ α|D| , (3) which α indicates the percentage of ED that should be covered, βpd = 0 indicates that the d-th ED is not covered by the GW in the p-th position ( ωd < ρ ), and 
+
+βpd = 1 indicates that the ED is covered by the GW at the p-th position ( ωd ≥ ρ). The second set of constraints is related to the PDR achieved from the positioned GWs. Therefore, knowing that γ is the minimum PDR threshold, we define the PDR constraint as follows: 
+
+X
+
+> s∈S
+
+ζps yps = xp, ∀p ∈ P , (4) which ζps is a binary parameter that indicates whether the GW positioned in the p-th location is providing a sufficient PDR Ωp to all EDs that satisfy the minimum requirements, with ζps = 0 not satisfying ( Ωp < γ ) and 
+
+ζps = 1 satisfying the requirement ( Ωp ≥ γ). Finally, the last two sets of constraints concern the uniqueness of the GW–ED link, ensuring that each ED is covered by at most one GW and only by a selected GW that provides coverage. Formally, we can define this as: 
+
+X
+
+> p∈P
+
+apd ≤ 1, ∀d ∈ D , (5) and 
+
+apd ≤ βpd xpd, ∀d ∈ D , ∀p ∈ P . (6) III. Experiments Intended to evaluate the impacts of the channel model choices on the GW placement optimization in a forest scenario, we propose several experiments in a rural scenario, as defined in Fig. 1. This 3D scenario can be characterized by a highly detailed geometry, with a total of 870 008 faces. Moreover, this scenario is predominantly composed of vegetation, with the following electromagnetic parameters: the relative per-mittivity equal to 1.1 and conductivity equal to 0.5 [12]. 
+
+Figure 1: 3D forest scenario used in the proposed experiments. The cubes in the scenario represent the possible GW positions. For the GW placement optimization problem, we considered the 6 × 7 grid of possible GW positions. For each possible position, a GW is deployed in a height of 17 m. The positioned GWs should serve the set of D,considering the following spatial organization depicted in Fig. 2. Each ED has a height of 2 m.700 600 500 400 300 
+
+> x (m)
+> 800 850 900 950 1000 1050 1100 1150
+> y (m)
+> Position of all end-devices (D = 39)
+> End-device
+
+Figure 2: Upper view perspective of spatial organization of ED in the 3D scenario. For all experiments, we consider two groups of chan-nel models. The first group consists of site-independent channel models composed of Okumura-Hata, 3GPP-RMa [4], log-distance, and COST-231. The second group consists of RT-based channel models obtained from WI using the X3D and Full-3D RT algorithms. For the site-independent channels, we configured these models considering the log-distance model with a path-loss exponent of 3.76 and a reference distance of 32 m. For the frequency-dependent models (excluding the log-distance model), we used a carrier frequency of 1 GHz . Finally, for the models that incorporate the heights of the GW and ED, we used the previously specified values of 17 m for the GW and 2 m for the ED. For the site-specific channel model obtained from RT simulator, we considered the parameters defined in Table I. Table I: RT simulation parameters used for the experiments with site-specific channels using WI  
+
+> Simulation parameter Value Carrier frequency (
+
+GHz ) 1     
+
+> Radiation pattern Isotropic Tx polarization Vertical Maximum number of interactions 6Tx waveform Sinusoid Interactions Diffraction and reflection
+
+Using these configurations, the first experiment con-siders a spatial analysis of how different the GW posi-tioning is when we consider different channel models. For the thresholds, we assumed the minimum received power ρ = −95 dBm , the minimum PDR γ = 0.7,and the minimum percentage of ED covered α = 0 .8.The second experiment is a sensitivity analysis re-lated to the minimum received power ( ρ) threshold in the optimization model. Finally, we conducted these simulations considering the RT-LoRaWAN framework from [7] in a configured environment, as defined by Table II. In this environment, we primarily used tools such as WI and ns-3 [13]. For ns-3 simulations, we utilized a server equipped with an Intel ® Xeon Silver 4514Y, a NVIDIA ® A2 GPU, and 512 GB of RAM. For RT simulations with WI, we used a server equipped with an Intel ® Core ™ i7-10700F CPU @ 2.90 GHz, a NVIDIA ®
+
+GeForce 3060 GPU, and 64 GB of RAM. Table II: Setup configuration used to generate data and solve the proposes GW placement optimization       
+
+> Tool Version Operating system Ubuntu 20.04.6 and Windows 10 Pyomo 6.9.5 ns-3 3.45 GLPK 4.65 Wireless InSite 3.4.5
+
+IV. Experimental Results For the first experiment, the spatial analysis of the optimization result, depicted in Fig. 3, shows high sensitivity in the number of suggested GWs across site-specific and site-independent channel models. 700 600 500 400 300 
+
+> x (m) 800 850 900 950 1000 1050 1100 1150 y (m) Optimized solution using different channels COST-231 Log-distance Okumura-Hata WI (X3D) 3GPP-RMa WI (Full 3D)
+
+Figure 3: Optimized solution for GW placement in the forest scenario, considering site-specific and site-independent channels. In this spatial analysis, the number of deployed GWs can vary significantly depending on the channel model. For example, with the COST-231 channel, the number of GWs is 4, whereas with the log-distance model, it increases to 8. Using Okumura-Hata or 3GPP-RMa, the number of suggested GWs is only 1, but in different positions. For the site-specific channels, starting WI X3D and Full 3D, the number of GWs remains the same in equal positions. In this analysis, we observe that the position and number of GWs obtained using the Log-distance and 3GPP-RMa channel models are close to each other (likewise the solutions using WI X3D and Full 3D). However, although similar optimized solutions are applied with these channel models, their impact is not uniform. When considering the percentage of covered GW and the PDR, we can see the difference between both solutions, as depicted in Fig. 4. 020 40 60 80 100 120           
+
+> EDs covered (%)
+> 97.44 84.62 84.62 97.44 100.00 92.31
+> Percentage of covered EDs ( = 0.8)
+> Okumura-Hata COST-231 Log-distance 3GPP-RMa WI (Full 3D) WI (X3D)
+> Channel models
+> 020 40 60 80 100
+> Average PDR (%)
+> 71.43 79.08 77.13 70.95 76.53 77.21
+> Average PDR across all GWs in Forest ( = 0.7)
+
+Figure 4: Percentage of covered ED (upper) and average PDR (bottom), considering solutions using different channel models. From Fig. 4, we observe that, according to the log-distance model, the percentage of covered EDs remains below 85%, whereas the 3GPP-RMa and Okumura-Hata models predict coverage of nearly 98%. For the site-specific channels, even when the GWs are placed at the same locations, the resulting coverage percentages differ, with the solution using WI Full 3D achieving full coverage. Furthermore, when we incorporate the PDR into the analysis, the impact of the channel characteris-tics becomes more evident, allowing us to quantify the cost of achieving a given PDR in terms of the number of GW. In this context, models such as Log-distance and COST-231 require a significantly higher number of GW to achieve similar PDR as that obtained using RT chan-nels, with just one GW. This clear difference between site-specific and site-independent channel models can be particularly problematic for network planning in forest environments and highlights the importance of considering channels obtained from specific sites. In this sense, this difference in each result can bias the decisions of network operators regarding deployment, hiding possible connectivity issues and increasing un-expected maintenance costs after the deployment pro-cess. For the second set of evaluations, we have a sensi-tivity analysis considering different values of ρ. In this sense, Fig. 5 depicts the number of GWs for each value of ρ with fixed thresholds for the minimum number of covered devices and PDR. From this result, we can detect that for some channel models, the optimization process presents no feasible solution. This is the case for the Okumura-Hata and 3GPP-RMa models. -100.0 -95.0 -90.0 -85.0 -80.0 -75.0 -70.0 -65.0                                           
+
+> Okumura-Hata COST-231 Log-distance 3GPP-RMa WI (X3D) WI (Full 3D)
+> Channel model
+> 11123XXX24832 32 32 32 32 4832 32 32 32 32 32 1111123X111225829 11111237Number of gateways across different values of
+> 510 15 20 25 30 Required number of gateways
+
+Figure 5: Sensitivity analysis considering values of ρ
+
+from −100 to −65 dBm , α = 0 .8, and γ = 0 .7.Another important aspect is the striking difference between site-specific and site-independent models in the number of required GWs for some values of ρ. A remarkable result is the ratio of GWs to EDs required to achieve a minimum received power of −85 dBm . While the log-distance and COST-231 models each require 32 GWs, which is essentially an unrealistic deployment of almost one GW per ED, the WI X3D and WI Full 3D solutions require only 2 and 1 GWs, respectively. V. Conclusions In this paper, we proposed an optimization model for GW placement in amazonian environments that incor-porates different types of channel models, including RT-based, empirical, and stochastic approaches. For the empirical and stochastic channels, we constructed a network environment with a pre-defined position grid to allocate all GWs and EDs. For the site-specific chan-nel, we used the same position grid in a 3D scenario that included trees and vegetation, explicitly account-ing for their electromagnetic properties. Using these environments, we conducted several experiments that reveal a strong sensitivity of the optimized solutions to the chosen channel model. In our spatial analysis, we observed that even when GWs are placed at the same locations, employing different channel models can re-sult in significantly different percentages of covered EDs and PDR. Furthermore, in the sensitivity analysis of the received power threshold, we detected that some site-independent channel models can present infeasi-bility issues that are not present in the site-specific channels obtained from WI. Finally, from this sensitivity analysis, we also show that the optimization process with some site-independent channels can generate un-realistic solutions, suggesting, for example, almost one GW per ED to satisfy the coverage constraints. Acknowledgment This study was financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior -Brasil (CAPES), in part by the Conselho Nacional de Desenvolvimento Científico e Tecnológico (CNPq); the Brasil 6G project (01245.020548/2021-07), supported by RNP and MCTI; in part by the Innovation Center; in part by the Project Smart 5G Core And MUltiRAn Inte-gration SAMURAI (MCTIC/CGI.br/FAPESP under Grant 2020/05127-2); and in part by the National Institute of Science and Technology (INCT) STREAM, funded by the CNPq, process no. 409179/2024-8. References 
+
+[1] B. Paul, C. Assi, and G. Kaddoum, “LoRaWAN Network Plan-ning,” IEEE Transactions on Green Communications and Net-working , vol. 8, no. 4, pp. 1413–1426, 2024. [2] R. Ross, B. Anderson, B. Bienvenu, E. L. Scicluna, and K. A. Robert, “WildTrack: An IoT System for Tracking Passive-RFID Microchipped Wildlife for Ecology Research,” Automa-tion , vol. 3, no. 3, pp. 426–438, 2022. [3] T. A. Wild, L. van Schalkwyk, P . Viljoen, G. Heine, N. Richter, B. Vorneweg, J. C. Koblitz, D. K. N. Dechmann, W. Rogers, J. Partecke, N. Linek, T. Volkmer, T. Gregersen, R. W. Havmøller, K. Morelle, A. Daim, M. Wiesner, K. Wolter, W. Fiedler, R. Kays, V. O. Ezenwa, M. Meboldt, and M. Wikelski, “A Multi-species Evaluation of Digital Wildlife Monitoring Using the Sigfox IoT Network,” Animal Biotelemetry , vol. 11, no. 1, p. 13, Mar 2023. [Online]. Available: https://doi.org/10.1186/ s40317-023-00326-1 [4] 3rd Generation Partnership Project (3GPP), “Study on Channel Model for Frequencies from 0.5 to 100 GHz,” 3GPP, Technical Report TR 38.901, June 2022, version 17.0.0, Section 7.6, pp. 55–60. [5] F. P. Correia, S. R. d. Silva, F. B. S. d. Carvalho, M. S. d. Alencar, K. D. R. Assis, and R. M. Bacurau, “LoRaWAN Gateway Placement in Smart Agriculture: An Analysis of Clustering Algorithms and Performance Metrics,” Energies , vol. 16, no. 5, 2023. [6] W. T. Pires-Jr, D. C. da Silva, R. S. Silva, L. d. L. Pinto, A. Oliveira-Jr, M. J. Abdel-Rahman, and K. V. Cardoso, “QoS-aware Optimal Deployment of LoRa Gateways in UAV-enabled LoRaWANs,” in Simpósio Brasileiro de Redes de Computadores e Sistemas Distribuídos (SBRC) . SBC, 2024, pp. 574–587. [7] C. Modesto, L. Mozart, G. Gonçalves, C. Nahum, B. Castro, and A. Klautau, “LoRaWAN Gateway Placement for Network Planning Using Ray Tracing-Based Channel Models,” IEEE Open Journal of the Communications Society , vol. 7, pp. 6612– 6624, 2026. [8] Remcom, “Wireless InSite® 3D Wireless Prediction Software Overview | Remcom — remcom.com,” https://www.remcom. com/resources/brochures/wireless-insite-overview, 2026, [Ac-cessed 03-13-2026]. [9] J. Mhatre, A. Lee, H. Lee, T. N. Nguyen, and K. Suo, “Improving Energy Efficiency and Reliability by Optimizing Gateway Place-ment in Dense LoRaWAN Networks,” in 2024 IEEE 10th World Forum on Internet of Things (WF-IoT) , 2024, pp. 340–345. [10] M. Said, M. Jabberi, A. Hakiri, H. K. Ben Ayed, and N. Mellouli, “Optimal LoRaWAN Gateway Placement for Efficient Large-Scale IoT Deployments,” in 2025 International Wireless Com-munications and Mobile Computing (IWCMC) , 2025, pp. 1210– 1215. [11] N. Matni, J. Moraes, H. Oliveira, D. Rosário, and E. Cerqueira, “LoRaWAN Gateway Placement Model for Dynamic Internet of Things Scenarios,” Sensors , vol. 20, no. 15, 2020. [12] R. Tewari, S. Swarup, and M. Roy, “Evaluation of Relative Per-mittivity and Conductivity of Forest Slab from Experimentally Measured Data on Lateral Wave Attenuation Constant,” Inter-national Journal of Electronics Theoretical and Experimental ,vol. 61, no. 5, pp. 597–605, 1986. [13] T. R. Henderson, M. Lacage, G. F. Riley, C. Dowell, and J. Kopena, “Network Simulations With the ns-3 Simulator,” 
+
+SIGCOMM demonstration , vol. 14, no. 14, p. 527, 2008.

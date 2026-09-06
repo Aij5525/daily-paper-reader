@@ -1,0 +1,716 @@
+Title: THz-SynC: Collective Synthesis with Contextual-Bandit-Assisted Coordination for Reconfigurable Hybrid Optical-THz AI Datacenters
+
+URL Source: https://arxiv.org/pdf/2609.04025v1
+
+Published Time: Fri, 04 Sep 2026 01:17:51 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# THz-SynC: Collective Synthesis with Contextual-Bandit-Assisted Coordination for Reconfigurable Hybrid Optical–THz AI Datacenters 
+
+Jingting Jiang and Chong Han Shanghai Jiao Tong University, Shanghai, China. E-mail: jingting.jiang, chong.han@sjtu.edu.cn 
+
+Abstract —Terahertz (THz) wireless interconnects offer high-capacity, low-latency, and energy-efficient rack-to-rack links capable of on-demand connectivity reconfiguration, serving as a promising complement to optical fabrics for communication-intensive distributed AI training datacenters. However, co-optimizing optical and THz resources to minimize collective completion time and transmission energy remains challenging due to dynamic optical congestion, THz channel fluctuations, and heterogeneous compute stragglers. Existing reconfigurable data-center designs predominantly optimize network topology and traffic routing, with limited consideration of collective communication semantics in distributed AI workloads over hybrid fabrics. To address these challenges, we propose THz-SynC, a novel framework that integrates collective synthesis with contextual-bandit-assisted hybrid-fabric coordination to optimize the tradeoff between collective completion time and transmission energy. By exploiting collective-specific semantics, THz-SynC synthesizes tailored communication topologies for All-to-All and AllReduce patterns while dynamically allocating THz resources. Furthermore, a contextual-bandit coordinator adaptively routes communication chunks across optical and THz links and selects rack power budgets leveraging real-time observations of network states and collective semantics. Trace-driven evaluations show that THz-SynC outperforms wired-only, wireless-only, and hybrid baselines, achieving a superior delay–energy Pareto frontier under dynamic network conditions. 
+
+Index Terms —THz communication, datacenter networks, col-lective synthesis, distributed learning 
+
+I. I NTRODUCTION 
+
+Artificial intelligence models are increasingly trained across large clusters of GPUs and specialized accelerators. As model size, expert count, and parallelism degree continue to grow, training performance depends not only on computation throughput but also on the ability of the interconnect to move activations, tokens, and gradients at scale [1], [2]. These transfers are dominated by collective communication. Pipeline parallelism (PP) generates point-to-point (P2P) activation and gradient exchanges, mixture-of-experts (MoE) models intro-duce irregular All-to-All (A2A) traffic, and data parallelism requires repeated AllReduce (AR) synchronization. The com-pletion time of these collectives directly affects pipeline stalls and iteration time, which makes the network an important design component of distributed AI systems. Current AI clusters primarily rely on electrical and optical fabrics. These technologies provide high capacity and mature reliability, but their fixed cabling and switch hierarchy limit how rapidly connectivity can follow changing communication demands. Bursty collective traffic can concentrate load on shared links and buffers, producing queueing and backpressure even when the nominal link rate is high. Wired interconnects incur substantial cabling complexity and deployment cost, and become increasingly difficult to scale as AI clusters expand. Reconfigurable optical networks improve adaptability by ad-justing logical connectivity, but remain constrained by circuit configuration overhead and multi-hop forwarding. These limi-tations motivate a more flexible fabric that can establish direct rack-to-rack links according to the communication demand. Wireless interconnects provide such reconfigurability with-out rewiring. Millimeter-wave and optical wireless technolo-gies have therefore been investigated for data center networks [3], [4]. Among emerging wireless technologies, terahertz (THz) communication [5] is particularly well suited to wireless data centers, especially for communication-intensive AI train-ing workloads [6]. The wide spectrum can support substan-tially higher peak rates than millimeter-wave systems, which is increasingly important as rapidly growing model sizes generate massive gradient-communication demands during distributed training. Compared with optical wireless links, which are more susceptible to dust and partial obstructions [7], THz links can provide more robust connectivity. Furthermore, in suitable short-range applications, THz links also have the potential to reduce energy per bit by bypassing multiple switching stages and avoiding repeated electro-optical conversion [6]. However, exploiting a THz overlay for distributed training remains an open problem. Existing reconfigurable or wireless data center designs mainly optimize network topology and traffic routing based on aggregate demand matrices [7], [8]. Such abstractions aren’t well suited to distributed training collectives, whose execution depends not only on path selec-tion but also on specific communication semantics. In parallel, collective communication systems [9] optimize schedules for primitives such as AR and A2A, but most assume fixed electrical or optical fabrics and overlook how on-demand wireless links can complement the wired network. Conse-quently, collective-aware communication synthesis for hybrid wired–wireless coordination remains unexplored. Furthermore, the time-varying wired congestion, THz channel fluctuations, arXiv:2609.04025v1 [eess.SP] 3 Sep 2026 and compute stragglers have increased the challenges of co-ordinating optical and THz fabrics. To address these problems, we present THz-SynC, acollective-synthesis and hybrid-fabric coordination framework for distributed AI training over reconfigurable optical and THz data-center networks. THz-SynC first synthesizes collective-specific communication structures that account for the char-acteristics of THz networks. For each synthesized flow, a contextual-bandit coordinator determines the number of chunks assigned to the optical and THz fabrics, together with the transmission power budget of each participating rack based on the current network conditions. More specifically, wired chunks traverse the optical network, whereas wireless chunks are served through multi-round scheduling and wireless re-source allocation. Under the selected rack-level power budgets, the wireless scheduler minimizes round completion time while accounting for heterogeneous compute stragglers. The main contributions are summarized as follows  
+
+> •
+
+We develop collective-aware synthesis for a reconfig-urable THz overlay. The synthesized structures account for heterogeneous compute stragglers and enable concur-rent wireless transmissions without violating collective semantics.  
+
+> •
+
+We design a contextual-bandit-assisted coordinator for hybrid optical and THz fabrics. It jointly determines per-flow wired and wireless chunk ownership and rack-level THz power budgets from dynamic network and workload context.  
+
+> •
+
+We build a trace-driven simulation that integrates Megatron-LM-style [10] training dependencies. Simula-tion results demonstrate that THz-SynC achieves a better delay–energy tradeoff than the baselines. II. R ELATED WORK 
+
+Reconfigurable Optical Datacenters. Fiber-based recon-figurable datacenter networks use optical circuit switches (OCSs) to reshape rack-level connectivity as traffic demand changes. c-Through and Helios augment packet-switched fab-rics with optical circuits, placing high-volume transfers on di-rect optical paths while retaining an electrical network for gen-eral traffic [11], [12]. Instead, RotorNet [13] avoids demand-driven circuit assignment by cycling through a predetermined sequence of matchings, whereas Opera [14] maintains a time-varying expander and lets bulk traffic wait for direct cir-cuits while forwarding latency-sensitive traffic over available multi-hop paths. Sirius [15] further co-designs a flat optical fabric with nanosecond-scale switching, routing, scheduling, congestion control, and synchronization. These systems span traffic-aware hybrid fabrics, periodic reconfiguration, and fast all-optical switching, but their control interfaces generally operate on demand matrices or circuit schedules rather than the dependency and completion semantics of training collectives. 
+
+Wireless Datacenters. Existing wireless data-center de-signs primarily rely on millimeter-wave and free-space optical (FSO) technologies, using directional links either as temporary  
+
+> Fig. 1. Hybrid Optical–THz Data center.
+
+shortcuts over a wired fabric or as the primary rack-to-rack in-terconnect. As complements to wired networks, [3] introduces multi-gigabit 60-GHz flyways to augment capacity between congested rack pairs, while [16] proposes a 3D beamforming architecture that reflects directional signals from the ceiling to extend communication range and mitigate blockage and inter-ference. A fully wireless design in [17] instead arranges 60-GHz transceivers and racks around a Cayley-graph topology. FireFly [4] and ProjecToR [7] replace radio-frequency links with steerable FSO links to create reconfigurable rack-to-rack connectivity. 
+
+Collective Communication Optimization and Synthe-sis. Collective communication research tailors communication algorithms and training fabrics to the topology of wired GPU clusters. For instance, SCCL [18] encodes topology-specific collective synthesis as an SMT problem and searches for latency- and bandwidth-efficient algorithms. Blink [19] constructs collective primitives by packing spanning trees over heterogeneous links. TACCL [9] introduces communication sketches that constrain routing and ordering choices, enabling synthesis across multi-node heterogeneous topologies. Be-yond collective libraries, TopoOpt [20] co-optimizes DNN parallelization, routing, and a reconfigurable wired optical topology. Additionally, Meta’s RoCE deployment [21] adapts topology, routing, transport, and collective-library behavior to production training traffic. Although existing studies opti-mize collective communication through topology, routing, and scheduling, integrating collectives with more flexible wireless connectivity remains insufficiently explored. III. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+We consider a distributed AI training cluster interconnected by a wired optical fabric and a reconfigurable THz wireless overlay. The optical fabric provides persistent baseline con-nectivity, while network reconfiguration is realized primarily through the THz overlay, which establishes directional single-hop rack-to-rack links on demand. 
+
+A. Hybrid Optical–THz Data centers 
+
+As illustrated in Fig. 1, the data center arranges racks on multiple concentric rings. We focus on the datacenter containing S rings, indexed by s ∈ { 1, . . . , S }, and R racks per ring, indexed by r ∈ { 1, . . . , R }. Rack vs,r has global index i = sR + r. The radius of ring s is ρs = ρ0 + s∆ρ,where ρ0 is the innermost radius and ∆ρ is the radial spacing between adjacent rings. All rings share the same angular grid, so racks with the same index r across different rings lie along the same radial line. Let ∆θ denote the fixed angular spacing between consecutive racks. Therefore, given two racks i = vs,r 
+
+and j = vs′,r ′ , the distance can be calculated by 
+
+dij =
+
+q
+
+ρ2 
+
+> s
+
++ ρ2 
+
+> s′
+
+− 2ρsρs′ cos(( r − r′)∆ θ), (1) Since all rack-top transceivers are installed at the same height, the vertical component does not affect dij . This ring-shaped placement reduces the rack-to-rack blockage commonly ob-served in regular row-column layouts. More importantly, racks distributed along the same ring can maintain line-of-sight (LoS) paths in the circumferential direction, enabling efficient direct inter-rack THz communication. This property is particularly aligned with distributed learning workloads, whose collective operations frequently involve concurrent data exchanges among multiple racks. The data center may concurrently host multiple training jobs. We suppose that the data center is divided into multiple fan-ring partitions to support different training jobs. Each partition contains a subset of rings and a selected set of racks on those rings. Let Vm denote the racks assigned to job m. The provisioning layer allocates disjoint rack and communication resources to different jobs, such that Vm ∩V m′ = ∅, m̸ =
+
+m′. We therefore focus on one representative partition, and the THz-SynC procedure can be executed independently in the remaining partitions without resource conflicts. Within a partition, PP stages are mapped to distinct rings. Racks with the same lane index r across these rings host the corresponding PP ranks and form a radial PP lane. Racks on ring s host different DP ranks of PP stage s. Hence, forward activations and backward gradients are primarily exchanged across adja-cent rings, whereas DP collectives, including MoE A2A and gradient AR, primarily operate within a ring. The optical fabric provides persistent baseline connectivity and operates in full-duplex mode. Each ring s is associated with a switch ws. Every rack on ring s connects to ws through an optical fiber of capacity Cacc , while the ring switches are interconnected by optical fibers of capacity Cinter . For racks 
+
+i = vs,r and j = vs′,r ′ , the wired path is 
+
+PWij =
+
+(
+
+(i, w s, j ), s = s′,
+
+(i, w s, w s′ , j ), s̸ = s′. (2) Each rack-facing port maintains a queue of capacity Bnic ,and each switch output maintains a queue of capacity Bout .Switch ws also provides a shared buffer of capacity Bs for its output queues. Let Qℓ(t) denote the occupancy of the queue associated with directed link ℓ. The finite-buffer constraints are 
+
+0 ≤ Qℓ(t) ≤ Bℓ, X
+
+> ℓ∈δ+(ws)
+
+Qℓ(t) ≤ Bs, (3) where Bℓ = Bnic for rack-facing queues and Bℓ = Bout for switch output queues. The set δ+(ws) contains the directed output links of ws. Consider a wired flow f released at time 
+
+trel  
+
+> f
+
+, transmitted from rack i to rack j, and divided into a packet set Kf . Its completion time is determined by the arrival of its last packet. Therefore, the actual wired transmission delay is given by 
+
+T Of = max 
+
+> k∈K f
+
+T adm  
+
+> f,k
+
++ X
+
+> ℓ∈P Wij
+
+
+
+T q 
+
+> f,k,ℓ
+
++ Lf,k 
+
+Cℓ
+
++ τ sw 
+
+> ℓ
+
+ , (4) where Lf,k is the size of packet k, Cℓ is the capacity of link ℓ, and T q 
+
+> f,k,ℓ
+
+is the queueing delay caused by other traffic. The term τ sw  
+
+> ℓ
+
+denotes switch-processing delays. The admission delay T adm  
+
+> f,k
+
+captures the waiting time incurred when the corresponding port queue or shared buffer lacks sufficient space. This formulation follows store-and-forward forwarding and neglects propagation delay in the optical fiber. Furthermore, each rack carries a THz transceiver at its top. The THz wireless network can provide on-demand one-hop connectivity that bypasses multihop wired forwarding, and offloads congested wired paths according to collective traffic demands. Based on the channel measurements reported in [6], the LoS and non-line-of-sight (NLoS) path losses between racks i and j are modeled as 
+
+P L LoS (dij , f ) = 18 .8 log 10 dij + 82 .69 + 20 log 10 
+
+ ff0
+
+
+
+,P L NLoS (dij , f ) = 7 .6 log 10 dij + 106 .6 + 20 log 10 
+
+ ff0
+
+
+
+.
+
+(5) Here, f0 is the reference frequency. The model is applicable to the 290 –310 GHz frequency band. The resulting channel power gain is given by 
+
+gij = 10 −P L LoS (dij ,f )/10 + X
+
+> n
+
+10 −P L NLoS ,n(dij ,f )/10 . (6) The NLoS term represents the aggregate contribution of in-direct propagation paths characterized by the measurements in [6]. Each THz transceiver supports Nc non-overlapping subbands, denoted by C = {1, . . . , N c}, where each subband c
+
+has same bandwidth Bc. Let xcij (t) ∈ { 0, 1} indicate whether rack i transmits to rack j on subband c. Each rack operates in half-duplex mode on an individual subband, which follows 
+
+X 
+
+> j̸=i
+
+ bcij (t) + bcji (t) ≤ 1, ∀i, c ∈ C . (7) Given the transmission power pcij (t) allocated to link i → j
+
+on subband c, its achievable rate can be calculated as 
+
+rcij (t) = Bc log 2 1 + pcij (t)Gg cij (t)
+
+N0Bc + Icij (t)
+
+!
+
+, (8) where G is the receiving antenna gain and N0 denotes the noise power spectral density. Owing to the high directionality of THz beams, the term Icij (t), which denotes residual inter-link interference, can be treated as additional noise [22]. B. Training Trace and Collective Communication 
+
+Large-scale training usually combines DP, PP, and tensor parallelism (TP). We assume TP communication remains within each rack and is efficiently supported by mature NCCL implementations over high-bandwidth intra-rack fabrics. We therefore focus on the inter-rack bottleneck, including P2P ex-changes between adjacent pipeline stages, A2A token dispatch and combine in MoE models, and AR gradient synchronization across DP replicas. We represent the communication behavior of one or more training iterations by a training trace 
+
+T = ( E, ≺) , E = e1, e 2, . . . , e |E| , (9) where E is the set of inter-rack communication events and ≺
+
+is the strict partial order induced by the training computation graph. An edge e′ ≺ e indicates that event e cannot become executable before e′ completes. A chain such as e1 → e2 →· · · describes one dependency path, but the complete trace is a directed acyclic graph that permits branches and concurrent events. Each event can be described as 
+
+e = ( τe, Ve, De, r e, Pred( e)) , (10) where τe ∈ { P2P , A2A , AR } is the communication type, Ve
+
+is the participating rack set, and De is its semantic demand descriptor. For P2P and A2A, De specifies the directed byte demand Deij from source rack i to destination rack j. For AR, De records the local tensor size and reduction semantics, while the resulting source-destination transfers depend on the adopted collective synthesis scheme. The nominal release time 
+
+re is obtained from the trace, and Pred( e) = {e′ ∈ E : e′ ≺ e}
+
+contains the preceding communication events. 
+
+C. Problem Formulation 
+
+In this work, our target is to jointly optimize the completion time and transmission energy of all communication events in the training trace. However, the optimization must account for the time-varying service conditions of both the optical and THz fabrics. We denote the network state at time t by ω(t).In the optical fabric, background traffic, including control signaling, network log, and traffic from other partitions sharing the same switch infrastructure, arrives according to a Poisson process and shares finite output queues and switch buffers. The resulting queue occupancies evolve with packet arrivals and link service, which produces time-varying admission and queueing delays. The THz wireless links may experience time-varying channel deterioration due to blockage and propaga-tion fluctuations. Another practical factor is the presence of compute stragglers [23], which delay the availability of data generated by individual racks. Let δstr  
+
+> i,e
+
+≥ 0 denote the straggler delay of rack i during event e, the release time of a flow generated at rack if is rf,k = re + δstr  
+
+> if,e
+
+. Given the time-varying conditions of both fabrics and their distinct data rate and energy characteristics, optical and THz resources must be jointly scheduled. For event e, let Fe denote its logical flow set. Each flow 
+
+f ∈ F e carries Df data units from rack if to rack jf and is partitioned into Kf = ⌈Df /B ch ⌉ chunks, where each chunk carries at most Bch data units. The chunk set is denoted by 
+
+Kf = {1, . . . , K f }. For each chunk k ∈ K f , we define two binary variables xOf,k and xTf,k that indicate its assignment to the optical and THz fabrics, respectively. Traffic splitting is performed independently for each logical flow. Therefore, the completion time of flow f can be described as 
+
+Tf = max T Of , T Tf . (11) Let f O and f T denote the subflows composed of the chunks satisfying xOf,k = 1 and xTf,k = 1 , respectively. The optical completion time T Of follows the delay model defined in 4. The THz completion time is expressed as 
+
+T Tf = Φ Tf
+
+ f T , se, he, be, pe, ω(t) , (12) where se, he, be, and pe denote the collective synthesis struc-ture, transmission schedule, subband allocation, and power allocation, respectively. The function also depends on the re-alized network state ω(t). The collective-specific formulation of ΦTf (·) is presented in the Sec. IV. The dynamic transmission energy of event e consists of optical and THz components, which is 
+
+Ee = EOe + ETe . (13) The optical transmission energy can be calculated as 
+
+EOe = ϵO X 
+
+> f∈F e
+
+DOf , (14) where ϵO is the fixed optical transmission-energy coefficient per data unit [] and DOf denote the data volume of flow f
+
+assigned to the optical fabric. Let He denote the THz trans-mission stages of event e, and Ae,h contain the transmissions activated during stage h. The THz transmission energy is 
+
+ETe = X
+
+> h∈H e
+
+∆e,h 
+
+X
+
+> u∈A e,h
+
+pu,e,h , (15) where ∆e,h is the duration of stage h and pu,e,h is the transmit power allocated to transmission u.Based on the preceding completion-time and energy mod-els, we formulate a trace-level optimization that jointly de-termines chunk assignment, collective execution, and THz resource allocation. We define the fabric-assignment variables as x = {xOf,k , x Tf,k } and collect the transmission scheduling, subband allocation, and power allocation decisions in a =
+
+{he, be, pe}e∈E . Let I = {(e, f, k ) | e ∈ E , f ∈ F e, k ∈ K f }.Given WT , W E ≥ 0 and WT + WE = 1 , the overall problem is formulated as 
+
+min  
+
+> x,a
+
+WT
+
+X
+
+> e∈E
+
+Te
+
+T ref + WE
+
+X
+
+> e∈E
+
+Ee
+
+Eref (16a) 
+
+s.t. xOf,k + xTf,k = 1 , ∀(e, f, k ) ∈ I , (16b) 
+
+rf,k = r0 
+
+> e
+
++ δstr  
+
+> if,e
+
+, ∀(e, f, k ) ∈ I , (16c) 
+
+X
+
+> c∈C
+
+X 
+
+> j̸=i
+
+pcij,e,h ≤ P max  
+
+> i
+
+, ∀e, h, i, (16d) 
+
+X 
+
+> j̸=i
+
+ bcij,e,h + bcji,e,h 
+
+ ≤ 1, ∀e, h, i, c. (16e) Fig. 2. THz-SynC Workflow. 
+
+Constraint (16b) assigns each chunk exclusively to either the optical or THz fabric. Constraint (16c) incorporates the source-rack straggler delay into the chunk release time. Con-straint (16d) limits the aggregate THz transmit power of each rack during every transmission stage. In (16e), bcij,e,h = 1 
+
+indicates that rack i transmits to rack j over subband c during transmission rounds h. This constraint enforces per-subband half-duplex operation by preventing a rack from transmitting and receiving simultaneously. Problem (16a) is a mixed-integer nonlinear program. Directly solving the full problem for every communication event is impractical because the feasible action space grows jointly with the number of flows, chunks, transmission rounds, and subbands. We therefore separate the problem into collective-specific synthesis, wireless resource allocation, and optical-THz coordination developed in Sec. IV. IV. TH Z-S YNC DESIGN 
+
+A. Overall 
+
+THz-SynC decomposes the joint problem into three layers with distinct responsibilities. Collective synthesis translates a communication event into logical flows and precedence constraints that preserve its semantics. A collective-specific contextual bandit assigns each flow’s chunks to the optical or THz fabric and selects a wireless power budget for every transmitting rack. The wireless executor then schedules ready THz chunks in synchronous rounds and determines their sub-bands, transmit powers, and round duration. This separation keeps collective correctness independent of learned decisions while allowing the hybrid fabric to adapt to wired congestion, THz channel fluctuations, and compute stragglers. The execution workflow of THz-SynC is illustrated in Fig. 2. Once the computational dependencies of an event e are satisfied, THz-SynC synthesizes its P2P, A2A, or AR flows and their precedence. It then collects the current flow attributes, wired queue states, THz gains, and straggler indicators. The corresponding collective-specific bandit selects the number of THz-owned chunks for every flow and a power budget for each potential transmitting rack. Chunk ownership remains fixed throughout the event. Wired-owned chunks enter the optical network when ready, while THz-owned chunks enter a wireless ready frontier. The wireless scheduler repeatedly chooses a feasible concurrent set from the frontier. A power allocator computes the minimum powers that serve the se-lected chunks within a common round duration under the rack budgets. Completion states and collective frontiers are updated synchronously at the end of each round. When all completion conditions of e hold, its measured completion time and transmission energy produce a delayed reward for the bandit that selected its action. The bandit then updates its action-value estimates using this reward to improve subsequent decisions under similar contexts. Unlike A2A or AR, P2P transmission requires no collective-specific synthesis, and each P2P chunk assigned to the THz fabric is transmitted over the currently best subband using the allocated power budget. 
+
+B. All-to-All Synthesis 
+
+An A2A event specifies a directed demand Deij from each source rack i to each destination rack j. Its logical flow set is 
+
+FA 
+
+> e
+
+= fij | i, j ∈ V e, i ̸ = j, D eij > 0 . (17) THz-SynC does not impose a predetermined permutation on these transfers. Instead, it executes the event over multiple transmission rounds. At the beginning of round h, the set 
+
+Ae,h contains the THz-owned chunks whose source data have been released and that have not completed. The scheduler approximates the largest conflict-free subset permitted by the current half-duplex subband and power constraints. The selected chunks are transmitted concurrently and complete at the common round boundary. Unselected chunks remain in the frontier, while newly released chunks become eligible in subsequent rounds. Hence, a source straggler delays only its outgoing chunks. This design guarantees complete delivery of the required data while allowing ready sources to proceed independently, thereby mitigating the impact of stragglers on the overall completion time. For each a ∈ A e,h and c ∈ C , let ba,c = 1 indicate that chunk a is transmitted on subband c. The round schedule is obtained from 
+
+max 
+
+> b
+
+X
+
+> a∈A e,h
+
+X
+
+> c∈C
+
+ba,c (18a) s.t. X
+
+> c∈C
+
+ba,c ≤ 1, ∀a ∈ A e,h , (18b) 
+
+X
+
+> a:v∈{ ia,j a}
+
+ba,c ≤ 1, ∀v, c ∈ C , (18c) 
+
+X
+
+> a:v∈{ ia,j a}
+
+X
+
+> c∈C
+
+ba,c ≤ NRF , ∀v, (18d) 
+
+ba,c ∈ { 0, 1}, ∀a, c. (18e) Problem (18) is a generalized b-matching problem, where constraint (18b) ensures that each chunk is assigned to at most one subband. We approximately solve the problem using a channel-aware greedy matching followed by local aug-mentation. The matching cardinality is the primary criterion, while the observed channel quality guides the selection of chunk–subband edges. Each candidate edge is inserted only if the subband occupancy remains feasible. The matching is then improved by replacing one selected edge with two feasible unselected edges whenever this exchange increases the number of concurrent transmissions. The resulting chunk-subband assignment is denoted by 
+
+Mh = {(a, c ) | ba,c = 1 } .
+
+For the fixed assignment Mh, THz-SynC minimizes the common round duration by solving 
+
+min  
+
+> ∆h,p
+
+∆h
+
+s.t. X
+
+> (a,c )∈M h,i a=v
+
+pa,c ≤ P bud  
+
+> v
+
+, ∀v, Bch ≤ ∆hrcia,j a (pa,c ), ∀(a, c ) ∈ M h,pa,c ≥ 0, ∆h ≥ 0.
+
+(19) For a trial duration ∆, the minimum required power of a selected transmission is 
+
+preq  
+
+> a,c
+
+(∆) = inf p ≥ 0 | Bch ≤ ∆rcia,j a (p) . (20) A trial duration is feasible when 
+
+X
+
+> (a,c )∈M h,i a=v
+
+preq  
+
+> a,c
+
+(∆) ≤ P bud  
+
+> v
+
+, ∀v. (21) Since preq  
+
+> a,c
+
+(∆) decreases monotonically with ∆, an upper bound is first expanded until feasibility is reached, after which bisection returns ∆h and the corresponding minimum powers. All chunks in Mh complete at the common round boundary. The ready frontier is then updated, and the procedure repeats until every directed A2A chunk has completed. 
+
+C. AllReduce Synthesis 
+
+A conventional ring AR performs reduce-scatter and all-gather over 2( N − 1) ordered rounds, giving a dependency depth that grows linearly with the number of participating racks N . A delayed rack can therefore stall the current round and propagate its delay to subsequent rounds. In contrast, THz links allow each rack to communicate with multiple neighbors concurrently on different subbands. THz-SynC partitions the tensor into multiple shards and assigns each shard to a dis-tinct rooted tree, enabling reduce and broadcast transmissions across trees to proceed in parallel over separate subbands. This reduces sequential communication rounds. The tree construc-tion also places compute-delayed racks closer to the roots, shortening their remaining dependency paths and mitigating straggler impact. We consider Nc trees below. Let DR 
+
+> e
+
+be the tensor size of AR event e. It is divided into Nc shards indexed by S = {1, 2, . . . , N c}. Shard σ is carried by a directed tree Tσ = ( Ve, ET 
+
+> σ
+
+) with root oσ . Reduce transmissions follow child-to-parent edges, while broadcast transmissions reverse these edges. At event activation, THz-SynC selects Nc distinct roots from the participating racks. Racks with larger delays are preferred as roots when their THz links to the remaining participants are sufficiently reliable, which places potential stragglers closer to the aggregation endpoints. The remaining roots are selected from racks that maintain generally favorable channel conditions to the other participants. Each tree is expanded greedily under the common fanout limit Nc. Racks with larger straggler delays are inserted first, followed by racks with better channel conditions. For each new rack, feasible parents are the racks already inserted in the tree that have residual fanout to the new rack. For shard σ and node v, let rloc  
+
+> σ,v
+
+denote the availability time of the local contribution. A non-root node can transmit a reduced chunk only after its local contribution and the corresponding contributions from all children are available. Its reduce-ready time is 
+
+Rred  
+
+> σ,v
+
+= max 
+
+
+
+Rloc  
+
+> σ,v
+
+, max   
+
+> u∈ch σ(v)
+
+Cred 
+
+> σ,u
+
+
+
+. (22) For a leaf node, the second term is omitted. This dependency allows ready subtrees to proceed independently, while a de-layed rack affects only the path from that rack to the root. The reduction of shard σ completes at its root at 
+
+Jσ = max 
+
+
+
+Rloc  
+
+> σ,o σ
+
+, max    
+
+> u∈ch σ(oσ)
+
+Cred 
+
+> σ,u
+
+
+
+. (23) The root starts broadcasting after Jσ . Each non-root node can forward a broadcast chunk after receiving that chunk from its parent, which can be stated as 
+
+Rb 
+
+> σ,v
+
+=
+
+(
+
+Jσ , v = oσ ,Cb 
+
+> σ,v
+
+, v̸ = oσ . (24) Event e completes only after every broadcast chunk of all shards has arrived. Unlike A2A, the transmission order of AR chunks is con-strained by the tree dependencies. In each transmission round, all currently ready child-to-parent transmissions in the reduce phase, or parent-to-child transmissions in the broadcast phase, are executed concurrently subject to the wireless resource constraints. Let Mh still denote the transmissions assigned to wireless subround h. Since their logical order has already been determined by the precedence executor, the remaining problem assigns one subband to every transmission and minimizes the common subround duration as follows 
+
+min  
+
+> ∆h,b,p
+
+∆h (25a) s.t. X
+
+> c∈C
+
+ba,c = 1 , ∀a ∈ M h, (25b) 
+
+X
+
+> a∈M h,v ∈{ ia,j a}
+
+ba,c ≤ 1, ∀v, c ∈ C , (25c) 
+
+X
+
+> a∈M h,v ∈{ ia,j a}
+
+X
+
+> c∈C
+
+ba,c ≤ Nc, ∀v, (25d) 
+
+X
+
+> a∈M h,i a=v
+
+X
+
+> c∈C
+
+pa,c ≤ P bud  
+
+> v
+
+, ∀v, (25e) 
+
+Baba,c ≤ ∆hrcia,j a (pa,c ), ∀a, c, (25f) 
+
+ba,c ∈ { 0, 1}, ∆h ≥ 0. (25g) Here, Ba denotes the data volume of all THz-owned chunks carried by tree-edge transmission a.THz-SynC uses a channel-aware greedy procedure for sub-band assignment. Ready transmissions with fewer suitable subbands or weaker channel conditions are processed first. Each transmission is assigned the available subband with the highest channel gain that satisfies the endpoint and sub-band constraints. After the subband assignment is done, the continuous power allocator determines the minimum feasible subround duration and the corresponding transmit powers. For the resulting subband mapping c(a), the minimum power required by transmission a under a trial duration ∆
+
+is 
+
+preq  
+
+> a
+
+(∆) = inf 
+
+n
+
+p ≥ 0 Ba ≤ ∆rc(a) 
+
+> ia,j a
+
+(p)
+
+o
+
+. (26) The trial duration is feasible if 
+
+X
+
+> a∈M h,i a=v
+
+preq  
+
+> a
+
+(∆) ≤ P bud  
+
+> v
+
+, ∀v. (27) Because preq  
+
+> a
+
+(∆) decreases monotonically with ∆, the execu-tor expands an initial upper bound until feasibility is reached and then applies bisection. The returned powers are 
+
+p⋆a = preq  
+
+> a
+
+(∆ ⋆h). (28) This procedure obtains the minimum common duration for the given subband assignment within the bisection tolerance. 
+
+D. Collective-Specific Contextual Bandit Design 
+
+The performance of the optical and THz fabrics varies with the current wired queues, THz channel conditions, flow sizes, and compute delays. A fixed traffic split rule cannot adapt to these variations. THz-SynC therefore uses a contextual bandit to learn the performance of fabric coordination actions from previously completed collective events. Moreover, acontextual bandit is well suited to this problem because the action selected for one collective does not determine the logical state of the next collective through a reusable Markov transition. Although network queues and channels evolve, their current values are directly included in the context observed at each decision. This design avoids learning unnecessary state transitions and assigns one delayed outcome to each complete coordination action. THz-SynC maintains an independent Neu-ralLinearUCB model for P2P, A2A, and AR. This separation allows each model to learn the completion behavior of its own flow structure and collective semantics without interference from the reward distributions of the other collective types. Let ye denote the context observed when collective event e
+
+becomes active. For each flow f ∈ F e, the current implemen-tation constructs the feature vector as 
+
+ye,f =
+
+
+
+if , j f , M f , s if ,e , Q if jf , U if jf ,
+
+n
+
+gcif jf
+
+o
+
+> c∈C
+
+
+
+.
+
+(29) Here, if and jf are the source and destination rack indices, and ˜Mf represents the number of chunks carried by the flow. The binary variable sif ,e indicates whether the source rack experiences a compute delay. The terms Qif jf and 
+
+Uif jf denote the queued data and the maximum shared-buffer occupancy along the wired path, respectively. The remaining entries are the normalized THz gains on the Nc subbands. The bandit selects one action when event e is activated 
+
+ae =
+
+nHe,f f ∈F e
+
+, P bud  
+
+> e,i i∈V e
+
+
+
+. (30) For a flow containing Kf chunks, nHe,f ∈ {0, . . . , K f }
+
+specifies the number of chunks assigned to the THz fabric. The second action component specifies the power budget of each sending rack P bud  
+
+> e,i
+
+= βe,i P max  
+
+> i
+
+, βe,i ∈ B . B is the configured set of normalized power levels. A rack with no THz-owned outgoing chunk is assigned zero power. The complete Cartesian product of the flow counts and rack power levels grows rapidly with the number of flows. Therefore, THz-SynC evaluates a fixed-size structured candidate set Ae, rather than enumerating the complete action space. Each action is encoded as 
+
+ve(a) = 
+
+( nHe,f 
+
+Mf
+
+) 
+
+> f∈F e
+
+,
+
+( P bud 
+
+> e,i
+
+P max 
+
+> i
+
+)
+
+> i∈V e
+
+ , (31) with the same padding and masks as the context. The joint action is generated through a coordinate-wise beam search. The search progressively expands the THz chunk count of each flow and the power level of each active sender, while retaining only the highest-scoring partial actions at every step until a complete action is obtained. For each collective type, NeuralLinearUCB maps the con-catenated context and action vector to a nonlinear representa-tion, which can be described as 
+
+ϕe,a = ϕθ ([ ye, ve(a)]) . (32) The linear head estimates the expected reward and its uncer-tainty as 
+
+bμe(a) = bwTϕe,a , (33) 
+
+σe(a) = 
+
+q
+
+ϕT
+
+> e,a
+
+A−1ϕe,a . (34) The selected action is 
+
+a⋆e = arg max 
+
+> a∈A e
+
+[bμe(a) + ασ e(a)] , (35) where α controls the exploration of uncertain actions. The selected ownership and rack power budgets are then committed for the complete event. After event e completes, THz-SynC computes the delayed reward re = −
+
+
+
+WT Te  
+
+> Tref
+> τ(e)
+
++ WE EWe +EHe 
+
+> Eref
+> τ(e)
+
+
+
+. Each event pro-duces one reward for its complete action. For the completed sample, the linear posterior is updated as 
+
+A ← A + ϕe,a ⋆ ϕT 
+
+> e,a ⋆
+
+, (36) 
+
+b ← b + reϕe,a ⋆ , bw = A−1b. (37) The full context-action sample and reward are also appended to the replay buffer of the corresponding collective. At fixed update intervals, the neural encoder is trained from replay samples using the squared reward-prediction error. Since the feature representation changes after encoder training, the linear posterior is subsequently rebuilt from the replay buffer. This procedure enables immediate online updates while allowing the nonlinear representation to adapt to accumulated network observations. V. P ERFORMANCE EVALUATION 
+
+A. Simulation Setup 
+
+We develop an event-driven simulator that jointly mod-els the training dependency graph, the shared wired optical fabric, and the reconfigurable THz overlay. Unless otherwise specified, the simulated partition contains 32 racks arranged on four concentric rings, with eight racks per ring and one ring assigned to each PP stage. The innermost-ring radius is ρ0 = 4 m , and the inter-ring spacing is ∆ρ = 2 m .Both the rack-to-switch access links and the inter-ring switch links operate at Cacc = Cinter = 100 Gbps . The wired transmission-energy coefficient is ϵO = 40 pJ /bit /hop . The THz overlay provides Nc = 4 non-overlapping subbands, each with bandwidth Bc = 5 GHz , spanning the 290 –310 GHz 
+
+band. We set the receive-antenna gain to G = 25 dBi and the maximum transmit power of each rack to P max  
+
+> i
+
+= 0 .1 W .Each inter-rack flow is partitioned into scheduling chunks of at most Bch = 512 KiB .Our workload generator follows the dependency structure of the non-interleaved 1F1B pipeline schedule in Megatron-LM. We use four PP stages, eight data-parallel ranks per stage, and eight microbatches per iteration. MoE layers are placed in two PP stages, and gradient synchronization is divided into four AR buckets. Rather than imposing a prede-fined communication mixture, the generator releases forward-activation and backward-gradient P2P events, MoE dispatch and combine A2A events, and AR events according to their producer dependencies in the training graph. Each P2P flow carries 16 MiB , each source contributes 12 MiB to an A2A operation, and each AR bucket contains 128 MiB . For each experiment, all compared methods replay the same training trace and THz channel realizations. 
+
+B. Performance of THz-SynC 
+
+We first evaluate whether context-dependent hybrid-fabric decisions improve the delay-energy tradeoff over static fabric assignments and other learning methods. We report the reward, total transmission energy, and total collective completion time in each iteration. The reward weights are WT = 0 .7 and 
+
+WE = 0 .3. We compare THz-SynC with five baselines. All-Wired assigns every chunk to the wired fabric, while All-Wireless assigns every chunk to the THz overlay. Fixed Ratio 
+
+assigns 50% of every flow’s chunks to each fabric and uses 50% of the rack maximum power for active wireless senders. 
+
+Shared-NeuralLinearUCB uses one NeuralLinearUCB model across P2P, A2A, and AR. DDQN is a well-established deep reinforcement learning algorithm using the same state and action spaces. Figs.3-5 compare the performance over 20 training itera-tions. Averaged over iterations 11-20, THz-SynC achieves a collective completion time of 1,050 ms, an energy consump-tion of 14.51 J, and the highest reward of −0.54 . Its latency is 11.3% lower than Shared-NeuralLinearUCB , 13.8% lower than Fixed Ratio, and 19.6% lower than DDQN . The single-fabric baselines represent two performance extremes. All-Wired maintains a completion time of 1,359 ms but consumes 27.52 J, whereas All-Wireless reduces the energy to 1.13 J at the cost of increasing the completion time to 1,758 ms. 
+
+Shared-NeuralLinearUCB consumes slightly less energy than THz-SynC, at 12.71 J, but its completion time increases to 1,186 ms. The low energy consumption of All-Wireless confirms that short-range THz transmission can be more energy-efficient than a switched wired fabric in the considered data-center topology, which is consistent with analysis in [6]. However, relying exclusively on either fabric cannot jointly address network fluctuations. THz-SynC instead learns these dynamics and adapts the fabric split and power budget for each com-munication event, outperforming the static single-fabric and fixed-ratio policies. It also achieves higher reward than DDQN and the shared-bandit variant. The former is less effective in this one-step decision problem, while the latter uses a common model across heterogeneous collective semantics. Assigning a dedicated bandit to each collective avoids such cross-semantic interference. Since the current objective places greater weight on delay, THz-SynC does not minimize energy alone. It accepts a moderate energy increase over Shared-NeuralLinearUCB to obtain the lowest completion time and, consequently, the highest overall reward. 
+
+C. Performance of Collective Synthesis 
+
+We next isolate the effect of collective synthesis from the long-term training trace and the hybrid-fabric controller. In this experiment, we only consider a single THz wireless ring and do not include the wired fabric, background traffic, or bandit decisions. The physical ring has 16 fixed rack positions and a diameter of 20 m. For a scale of N ∈ 4, 6, 8, 10 , 12 }, we activate the first N positions instead of redistributing the racks over the entire ring. Each point in Fig. 6 reports the mean completion time over 30 paired Monte Carlo seeds. In the no-straggler case, the data generated by all racks become ready simultaneously at the nominal release time. In the straggler case, max(1 , ⌈N/ 8⌉) racks receive an additional arrival delay uniformly sampled between 50 and 100 ms. We use a 512 MiB 
+
+tensor for AR and generate a directed A2A demand matrix with exactly 64 MiB of outgoing traffic per rack. Figures 6(a) and 6(b) evaluate A2A synthesis. We compare emphProposed with four baselines. Demand-Sorted Permu-tation repeatedly constructs one-to-one permutations by pri-oritizing the greatest remaining source-destination demands and completes each permutation before forming the next one. 
+
+Cyclic Synchronous instead serves rack pairs according to fixed cyclic offsets and advances to the next offset only after all transfers in the current offset complete. The remaining two baselines are ablations of Proposed . Without stragglers, the completion time of Proposed increases from 17.7 ms at four racks to 24.2 ms at 12 racks. At N = 12 , it reduces completion time by 26.2% over Demand-Sorted Permutation and 57.1% over Cyclic Synchronous . Under stragglers, Proposed still completes in 92.3 ms, compared with 116.2 and 140.4 ms for the two baselines. Fig. 3. Reward versus iteration. Fig. 4. Total transmission energy versus iteration. Fig. 5. Total collective completion time versus iteration.     
+
+> (a) A2A with compute stragglers. (b) A2A without compute stragglers. (c) AR with compute stragglers. (d) AR without compute stragglers. Fig. 6. Completion-time comparison of different schemes for A2A and AR collectives with and without compute stragglers.
+
+Figures 6(c) and 6(d) report the AR results. Proposed 
+
+executes Nc rooted trees concurrently, while Ring retains 
+
+2( N −1) dependent stages and Single Tree uses one unsharded reduction tree. At N = 12 , Proposed completes in 495.4 ms without stragglers, compared with 577.2 ms for Ring and 613.0 ms for Single Tree . With stragglers, the corresponding times are 507.9, 659.0, and 714.2 ms, yielding reductions of 22.9% and 28.9%. The additional straggler-induced delay is only 12.5 ms for Proposed , but reaches 81.8 ms for Ring and 101.2 ms for Single Tree . Concurrent trees and readiness-aware dependencies therefore limit the extent to which a delayed rack propagates along the collective critical path. The ablations further confirm the contributions of both phys-ical scheduling and power allocation. At N = 12 , replacing channel-aware scheduling increases completion time by 7.3– 14.0% across the four evaluated A2A and AR settings, while equal power allocation incurs a 13.3–28.1% increase. The performance gaps are relatively limited at small rack counts, where contention and dependency depth remain low. As the collective scale grows, synchronization barriers, unfavorable subband assignments, and bottleneck links accumulate, mak-ing the benefits of collective-specific synthesis and resource allocation increasingly evident. 
+
+D. Impact of reward weight 
+
+Finally, we examine how the reward weights control the operating point of THz-SynC. We evaluate three configura-tions, (WT , W E ) ∈ { (0 .7, 0.3) , (0 .5, 0.5) , (0 .3, 0.7) }, under the same trace and channel-generation rules. Each bar in Fig. 7 reports the average over converged 5 iterations. Increasing the energy weight yields a clear delay–energy tradeoff. Across the weight settings from (0 .7, 0.3) to (0 .3, 0.7) , latency increases from 1,040.0 to 1,278.0 ms, while energy decreases from 14.32 to 11.41 J, respectively. These results confirm that the reward  
+
+> Fig. 7. Impact of Reward Weights on the Delay–Energy Tradeoff.
+
+weights effectively control the operating point, enabling THz-SynC to achieve different tradeoffs according to application requirements. VI. C ONCLUSION 
+
+We presented THz-SynC, a collective-aware framework for coordinating optical and THz fabrics in distributed AI training data centers. THz-SynC combines collective-specific synthesis for A2A and AR with contextual-bandit-assisted traffic split-ting and rack-level power control. Its wireless executor further coordinates transmission scheduling, subband assignment, and power allocation under heterogeneous stragglers. Trace-driven evaluations show that the proposed collective synthesis im-proves communication efficiency, while adaptive hybrid-fabric coordination achieves a more favorable completion-time and transmission energy tradeoff than baselines. REFERENCES [1] Z. Jiang, H. Lin, Y. Zhong, Q. Huang, Y. Chen, Z. Zhang, Y. Peng, X. Li, C. Xie, S. Nong et al. , “ {MegaScale }: Scaling large language model training to more than 10,000 {GPUs },” in 21st USENIX Symposium on Networked Systems Design and Implementation (NSDI 24) , 2024, pp. 745–760. [2] S. Shi, X. Zhou, S. Song, X. Wang, Z. Zhu, X. Huang, X. Jiang, F. Zhou, Z. Guo, L. Xie et al. , “Towards scalable distributed training of deep learning on public cloud clusters,” Proceedings of Machine Learning and Systems , vol. 3, pp. 401–412, 2021. [3] D. Halperin, S. Kandula, J. Padhye, D. Whetherall, and V. Bahl, “Augmenting data center networks with multi-gigabit wireless links,” in ACM SIGCOMM , 2011. [4] N. Hamedazimi, Z. Qazi, H. Gupta, V. Sekar, S. R. Das, J. P. Longtin, H. Shah, and A. Tanwer, “Firefly: A reconfigurable wireless data center fabric using free-space optics,” in Proceedings of the 2014 ACM conference on SIGCOMM , 2014, pp. 319–330. [5] I. F. Akyildiz, C. Han, Z. Hu, S. Nie, and J. M. Jornet, “Terahertz band communication: An old problem revisited and research directions for the next decade,” IEEE Transactions on Communications , vol. 70, no. 6, pp. 4250–4285, 2022. [6] C. Han, M. Zhu, W. Zhao, Z. Yu, G. Huang, G. Wang, Z. Chen, W. Tong, and W. Zhang’s, “When wires can’t keep up: Reconfigurable ai data centers empowered by terahertz wireless communications,” IEEE Wireless Communications , 2026. [7] M. Ghobadi, R. Mahajan, A. Phanishayee, N. Devanur, J. Kulkarni, G. Ranade, P.-A. Blanche, H. Rastegarfar, M. Glick, and D. Kilper, “Projector: Agile reconfigurable data center interconnect,” in Proceed-ings of the 2016 ACM SIGCOMM Conference , 2016, pp. 216–229. [8] Y. Mao, Q. Zhai, X. Liu, X. Han, F. Li, S. Zhao, Y. Zhou, Z. Yao, and X. Zhu, “Atro: A fast algorithm for topology engineering of reconfigurable datacenter networks,” in IEEE INFOCOM 2026-IEEE Conference on Computer Communications . IEEE, 2026, pp. 1–10. [9] A. Shah, V. Chidambaram, M. Cowan, S. Maleki, M. Musuvathi, T. Mytkowicz, J. Nelson, O. Saarikivi, and R. Singh, “ {TACCL }:Guiding collective algorithm synthesis using communication sketches,” in 20th USENIX Symposium on Networked Systems Design and Imple-mentation (NSDI 23) , 2023, pp. 593–612. [10] M. Shoeybi, M. Patwary, R. Puri, P. LeGresley, J. Casper, and B. Catan-zaro, “Megatron-lm: Training multi-billion parameter language models using model parallelism,” arXiv preprint arXiv:1909.08053 , 2019. [11] G. Wang, D. G. Andersen, M. Kaminsky, K. Papagiannaki, T. E. Ng, M. Kozuch, and M. Ryan, “c-through: Part-time optics in data centers,” in Proceedings of the ACM SIGCOMM 2010 Conference , 2010, pp. 327–338. [12] N. Farrington, G. Porter, S. Radhakrishnan, H. H. Bazzaz, V. Subra-manya, Y. Fainman, G. Papen, and A. Vahdat, “Helios: a hybrid electri-cal/optical switch architecture for modular data centers,” in Proceedings of the ACM SIGCOMM 2010 Conference , 2010, pp. 339–350. [13] W. M. Mellette, R. McGuinness, A. Roy, A. Forencich, G. Papen, A. C. Snoeren, and G. Porter, “Rotornet: A scalable, low-complexity, optical datacenter network,” in Proceedings of the Conference of the ACM Special Interest Group on Data Communication , 2017, pp. 267–280. [14] W. M. Mellette, R. Das, Y. Guo, R. McGuinness, A. C. Snoeren, and G. Porter, “Expanding across time to deliver bandwidth efficiency and low latency,” arXiv preprint arXiv:1903.12307 , 2019. [15] H. Ballani, P. Costa, R. Behrendt, D. Cletheroe, I. Haller, K. Jozwik, F. Karinou, S. Lange, K. Shi, B. Thomsen et al. , “Sirius: A flat datacenter network with nanosecond optical switching,” in Proceedings of the Annual conference of the ACM Special Interest Group on Data Communication on the applications, technologies, architectures, and protocols for computer communication , 2020, pp. 782–797. [16] W. Zhang, X. Zhou, L. Yang, Z. Zhang, B. Y. Zhao, and H. Zheng, “3d beamforming for wireless data centers,” in Proceedings of the 10th ACM workshop on hot topics in networks , 2011, pp. 1–6. [17] J.-Y. Shin, E. G. Sirer, H. Weatherspoon, and D. Kirovski, “On the feasibility of completely wireless datacenters,” in Proceedings of the eighth ACM/IEEE symposium on Architectures for networking and communications systems , 2012, pp. 3–14. [18] Z. Cai, Z. Liu, S. Maleki, M. Musuvathi, T. Mytkowicz, J. Nelson, and O. Saarikivi, “Synthesizing optimal collective algorithms,” in Proceed-ings of the 26th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming , 2021, pp. 62–75. [19] G. Wang, S. Venkataraman, A. Phanishayee, J. Thelin, N. Devanur, and I. Stoica, “Blink: Fast and generic collectives for distributed ml,” arXiv preprint arXiv:1910.04940 , 2019. [20] W. Wang, M. Khazraee, Z. Zhong, M. Ghobadi, Z. Jia, D. Mudigere, Y. Zhang, and A. Kewitsch, “ {TopoOpt }: Co-optimizing network topol-ogy and parallelization strategy for distributed training jobs,” in 20th USENIX Symposium on Networked Systems Design and Implementation (NSDI 23) , 2023, pp. 739–767. [21] A. Gangidi, R. Miao, S. Zheng, S. J. Bondu, G. Goes, H. Morsy, R. Puri, M. Riftadi, A. J. Shetty, J. Yang et al. , “Rdma over ethernet for distributed training at meta scale,” in Proceedings of the ACM SIGCOMM 2024 Conference , 2024, pp. 57–70. [22] X. Zhang, C. Han, and X. Wang, “Joint beamforming-power-bandwidth allocation in terahertz NOMA networks,” in Proc. IEEE Int. Conf. Sens., Commun., Netw. (SECON) , 2019, pp. 1–9. [23] J. Lin, Z. Jiang, Z. Song, S. Zhao, M. Yu, Z. Wang, C. Wang, Z. Shi, X. Shi, W. Jia et al. , “Understanding stragglers in large model training using what-if analysis,” in 19th USENIX Symposium on Operating Systems Design and Implementation (OSDI 25) , 2025, pp. 483–498.

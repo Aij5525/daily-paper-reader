@@ -1,0 +1,824 @@
+Title: Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers
+
+URL Source: https://arxiv.org/pdf/2609.01699v1
+
+Published Time: Thu, 03 Sep 2026 00:03:56 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers 
+
+Mingjie Zhu, Ziming Yu, Guangjian Wang and Chong Han, Senior Member, IEEE 
+
+Abstract —The rapid growth of AI computing has driven increasing demands for flexible and high-capacity data-center interconnections. Owing to its ultra-wide bandwidth and high spatial reuse capability, terahertz (THz) communication has emerged as a promising solution for future wireless data centers, while digital twins (DTs) enable efficient wireless planning and real-time optimization. In this work, a measurement-driven multi-layer DT framework is proposed for THz wireless data centers, where the physical twin at the measurement layer, channel twin at the construction layer, system performance at the evaluation layer, and resource allocation from the manipulation layer are progressively constructed from bottom to top. First, extensive channel measurements are conducted at 140, 220, and 300 GHz to characterize frequency-dependent propagation behaviors. Based on the tri-band measurements, a measurement-calibrated physical twin is established by jointly optimizing the geometry, material, antenna, and hybrid propagation models. On top of the physical twin, a line-of-sight (LoS)-aware implicit neural field is developed to construct an AI channel twin for efficient channel reconstruction. The proposed AI twin learns location-dependent channel statistics from the calibrated twin, enabling real-time prediction of received power and LoS prob-ability. Moving further up and building upon the reconstructed channel field, a system-level evaluation layer is then derived to analyze coverage and interference for both AP-to-rack and rack-to-rack communications. Experimental results show that the proposed AI twin achieves lower power reconstruction error than existing neural-field baselines while maintaining real-time infer-ence capability. Moreover, the ceiling-mounted AP deployment achieves over 90% coverage under a 10 dB signal-to-interference-plus-noise ratio (SINR) threshold, demonstrating the effectiveness of the proposed DT framework for THz wireless data-center planning and optimization. 
+
+Index Terms —Terahertz Communications, Multi-layer Digital Twin, Wireless Data Center. 
+
+I. I NTRODUCTION 
+
+Modern data centers play a critical role in supporting cloud computing, artificial intelligence (AI), and large-scale distributed storage systems [1], [2]. With the rapid growth of data-intensive applications, information traffic within a data center has increased dramatically, calling for a more flexible and low-latency architecture [3], [4]. To this end, Terahertz (THz) wireless data center (WDC) has emerged as a promising connection architecture for next-generation AI clusters [1], due                                       
+
+> Mingjie Zhu is with the Terahertz Wireless Communications (TWC) Interdisciplinary Research Center, Shanghai Jiao Tong University, Shanghai 200240, China (E-mail: mingjie.zhu@sjtu.edu.cn). Ziming Yu and Guangjian Wang are with Huawei Technologies Company Ltd., Chengdu 611731, China (e-mail: yuziming@huawei.com). Chong Han is with the Terahertz Wireless Communications (TWC) Interdisciplinary Research Center, and Cooperative Medianet Innovation Center (CMIC), School of Information Science and Electronic Engi-neering, Shanghai Jiao Tong University, Shanghai 200240, China (E-mail: chong.han@sjtu.edu.cn).
+
+to its ultra-wide bandwidth and highly directional transmis-sion [5]–[7]. These characteristics make THz wireless links capable of supporting extremely high data rates with low la-tency and high energy efficiency, while also enabling dynamic and reconfigurable network topologies. However, the practical deployment and operation of THz wireless data centers require reliable network planning, interference management, and real-time resource allocation. Such functions cannot rely solely on static models or offline simulations, motivating the need for an accurate and adaptive digital twin (DT) [8]–[11] that can faithfully represent the wireless environment and support system-level decision-making. The propagation mechanism in a wireless data center is fun-damental for THz-WDC optimization and deployment. THz propagation is highly sensitive to environmental dynamics, which are prevalent in realistic data-center scenarios. As a result, reliable network planning, interference management, and real-time resource allocation rely on an accurate and adaptive digital twin (DT) [8]–[11] that can accurately perceive the physical environment, faithfully reconstruct the wireless propagation characteristics, efficiently evaluate network per-formance, and ultimately support intelligent network optimiza-tion. Such a closed-loop DT enables continuous interactions between the physical and virtual worlds, providing a founda-tion for autonomous wireless network management. However, realizing such a DT remains challenging. First, the DT must be grounded in realistic propagation measurements in order to capture the frequency-dependent characteristics of THz chan-nels. Second, the DT requires a channel representation that is both physically consistent and measurement validated, so that the virtual model faithfully reproduces the real propagation behaviors. Third, the channel representation should support real-time interaction, requiring substantially lower computa-tional complexity than conventional RT simulations. Finally, the reconstructed channel knowledge should be translated into network-level intelligence, enabling coverage evaluation, deployment planning, and resource optimization. Since the fidelity of a wireless DT fundamentally relies on accurate channel knowledge, obtaining realistic propagation data becomes the first and foremost prerequisite for DT construction. Therefore, channel measurement serves as the foundation for DT construction. A growing body of literature has investigated channel measurements for THz communica-tions [12]–[15]. Existing measurement campaigns have char-acterized path loss, delay dispersion, angular characteristics, and blockage effects in various THz scenarios [16], [17]. In [14], channel measurement is carried out at 140 GHz in a wireless data center, whereas physical-layer evaluation is not discussed. A cluster-based model is established for THz chan-arXiv:2609.01699v1 [cs.LG] 1 Sep 2026 2
+
+nel representation in a data center in [13], and a hybrid model for THz wireless data centers is utilized in [15]. However, measurements in wireless data-center environments remain relatively limited, particularly for multi-band characterization and DT-oriented applications. To faithfully reproduce the measured propagation behaviors, an effective DT further requires a channel representation that is both physically consistent and measurement validated. Built upon measurement data, the channel twin of wireless DTs has been predominantly realized through ray-tracing (RT)-based methodologies [18]–[20]. By leveraging site-specific geometries and electromagnetic propagation mechanisms, RT enables the reconstruction of multipath propagation character-istics with high physical interpretability. Recent studies have further incorporated calibration techniques to improve the con-sistency between simulations and measurements [18], while experimental validations have demonstrated certain feasibility of RT for THz channel characterization [20]. Besides reconstruction fidelity, a practical DT should also support real-time interaction with the physical world. To this end, AI-enabled channel twins have recently emerged as a promising solution for wireless DT construction [11], [21]– [25]. By learning the underlying mapping between environ-mental features and channel responses, AI-based methods can substantially reduce computational overhead while maintain-ing satisfactory prediction accuracy. Existing studies have ex-plored generative models, diffusion models, generative adver-sarial networks (GANs), and transformer-based architectures for channel generation and channel estimation. In particular, the integration of physics-based knowledge and data-driven learning has demonstrated significant potential for accelerating DT construction in future 6G networks [11]. However, most existing AI channel twins focus on generic communication scenarios and often overlook the blockage-sensitive propaga-tion characteristics and highly structured layouts encountered in THz wireless data centers. Furthermore, the relationship between AI-based channel twins and measurement-calibrated physical models remains insufficiently investigated. Once an accurate channel twin has been established, it can further support network-level decision making. DTs have been increasingly employed for network-level optimization and autonomous decision making [10], [26]. By coupling environment-aware channel prediction with optimization al-gorithms, DTs enable efficient deployment planning, coverage analysis, interference management, and resource allocation. Nevertheless, existing optimization-oriented DTs generally rely on either computationally intensive RT simulations or simplified channel abstractions, limiting their ability to provide both high fidelity and real-time responsiveness in complex indoor environments. Motivated by the above observations, we propose ameasurement-driven multi-layer digital twin for THz wireless data centers, as illustrated in Fig. 1. The proposed framework is organized into four functional layers from bottom to top. The measurement layer constitutes the foundation of the physical twin, aiming to capture the physical characteristics of the wireless environment through multi-source measure-ments. It includes the channel measurement, environment Construction Layer Evaluation Layer      
+
+> Manipulation Layer
+> link selection Resource allocation Coverage metrics Link quality
+> Calibrated Ray tracing Channel measurements Environment measurements Material measurements Data-base RF Map
+> Measurement Layer
+> Real-time Feedback
+> Path Feedback
+> Fig. 1. Multi-layer DT architecture.
+
+measurement, and material measurement. The construction layer builds a channel map of a wireless data center, including a measurement-calibrated RT twin and an AI twin. The calibrated RT twin mitigates the discrepancies between RT and measurements, while the AI twin accelerates the channel representation via AI channel models. The channel twins construct a virtual counterpart capable of reproducing the ob-served propagation behaviors. The evaluation layer translates the reconstructed channel statistics into system metrics such as coverage, interference, and achievable rate, bridging the gap between channel-level predictions and network-level per-formance assessment. Finally, the manipulation layer exploits the evaluation results to perform access-point deployment, beam management, user association, and interference-aware optimization, thereby enabling closed-loop planning and real-time decision making. By jointly leveraging multi-band chan-nel measurements, physics-based modeling, and AI-assisted channel reconstruction, the multi-layer DT achieves both high fidelity and computational efficiency, providing a practical platform for channel characterization, network evaluation, and intelligent optimization in future THz wireless data centers. The main contributions of this paper are summarized as follows:  
+
+> •
+
+We propose a measurement-driven multi-layer DT frame-work for THz wireless data centers. The proposed frame-work integrates a geometry twin constructed from LiDAR point clouds, a material twin calibrated using THz-TDS measurements, and a measurement-calibrated channel twin combining ray tracing and channel parameter ex-3
+
+traction. By jointly incorporating geometric, material, and propagation information, the multi-layer DT significantly improves the fidelity and physical consistency of site-specific THz DTs.  
+
+> •
+
+For the measurement layer, we conduct a comprehen-sive tri-band channel measurement campaign in a real-istic wireless data-center environment at 140, 220, and 300 GHz. Extensive channel characteristics, including path loss, delay dispersion, angular properties, blockage effects, and multipath clustering behaviors, are extracted and analyzed, providing valuable insights into frequency-dependent THz propagation mechanisms in data-center scenarios.  
+
+> •
+
+For the construction layer, we develop a blockage-aware AI channel twin based on an improved implicit neu-ral field (INF) to enable real-time channel reconstruc-tion and system evaluation. Different from conventional coordinate-based neural fields, the proposed model in-corporates distance-aware propagation priors, grid-based LoS probability maps, and a LoS-adaptive dual-expert architecture to explicitly capture the distinct propagation behaviors of LoS and NLoS links in blockage-dominated data-center environments. The proposed AI twin achieves high channel reconstruction accuracy while substantially reducing the computational complexity compared with full RT simulations.  
+
+> •
+
+For the evaluation layer, we derive analytical cover-age and rate evaluation models for THz wireless data centers. The resulting closed-form coverage expressions establish a direct connection between channel predic-tion and network-level performance metrics, enabling efficient coverage estimation, interference analysis, and deployment evaluation. The proposed framework pro-vides a complete closed-loop workflow from channel measurement and DT construction to intelligent network optimization. The remainder of the paper is organized from bottom to top of the multi-layer DT. The measurement layer, construction layer, and evaluation layer are introduced respectively in Sections II, section III, and section IV. Finally, Section V draws the conclusion II. M EASUREMENT LAYER 
+
+The physical characteristics of the WDC are constituted through multi-source measurements, including channel mea-surement, environment measurement, and material measure-ment. This section presents the measurement campaign at 140, 220, and 300 GHz and the extracted propagation characteris-tics, which serve as the physical foundation of the multi-layer DT. 
+
+A. Tri-band channel measurement 1) Measurement Setups: Fig. 2(a) shows the channel mea-surement setup deployed inside the wireless data-center en-vironment. The transmitter (Tx) location, receiver (Rx) lo-cations, antenna configurations, and scanning procedures are maintained consistently across all frequency bands to ensure Tx Rx 
+
+(a) Rx Tx Glass Metal Wall Metal Column  
+
+> Racks Racks
+
+123  
+
+> 124567811 10 912 13
+> 3
+> 14 Metal Column
+> Racks Racks
+
+123 
+
+> 124567811 10 912 13
+> 3
+> 14
+
+(b)  
+
+> Fig. 2. THz channel measurement in the data center. (a) A photo of our THz sounder system; (b) Measurement topology in the data center scenario.
+
+fair cross-band comparisons. For the 140 GHz and 220 GHz bands, a correlation-based channel measurement system is employed, providing an effective measurement bandwidth of 1.536 GHz. For the 300 GHz band, a VNA-based channel sounder is adopted to capture the channel frequency responses (CFRs) over the 290–310 GHz frequency range. Different measurement systems are used because the two platforms provide complementary frequency coverage. The significantly larger bandwidth of 20 GHz provides a delay resolution of 0.05 ns, corresponding to a distance resolution of approx-imately 1.5 cm. During the measurements, the Tx remains fixed while a directional scanning scheme is implemented at the Rx. Specifically, the azimuth angle is scanned from 0◦ to 
+
+355 ◦ with a step size of 5◦, while the zenith angle ranges from 
+
+−20 ◦ to 20 ◦ with the same angular resolution. This configu-ration enables the acquisition of high-resolution angular and delay-domain channel characteristics across all three frequency bands. Prior to each measurement campaign, back-to-back calibration is performed to eliminate the responses of cables, mixers, amplifiers, and other hardware components, thereby ensuring that the extracted channel characteristics accurately represent the propagation behavior of the wireless data-center 4                       
+
+> TABLE I MEASUREMENT CONFIGURATION .
+> Parameter 300 GHz (VNA) 140/220 GHz (Correlation-based) Center Frequency 300 GHz 140/220 GHz Bandwidth 20 GHz 1.536 GHz Frequency Points 2001 2048 IF Bandwidth 1 kHz 1.536 GHz Transmit Power 10 dBm Tx/Rx Antenna Type Horn antenna Tx/Rx Height Tx: 2.4 m (rack-to-rack), 2.7 m (AP); Rx: 2.4 m (LoS), 1.7 m (NLoS) Angular Scanning Azimuth: 5◦,0◦–355 ◦; Zenith: 5◦,−20 ◦–20 ◦
+> Antenna Gain 26 dBi Half-Power Beamwidth Horizontal: 8◦; Vertical: 6◦
+
+environment. The measurement configurations are summarized in Table I. 
+
+2) Measurement Scenario: As illustrated in Fig. 2(b), the measurements cover four cases in the data center, corre-sponding to line-of-sight (LoS) and non-line-of-sight (NLoS) conditions for both Rack-to-Rack and AP-to-User links. A total of 29 Tx-Rx locations are measured. Tx 1 is positioned alongside the rack, with 9 LoS and 3 NLoS Rxs alongside the rack, acting as the rack-to-rack communication. Tx 2 is positioned in front of the rack, with 5 Rxs (Rx 4−8) alongside the rack, representing the rack-to-rack communication in the other direction. Tx 3 simulates an access point (AP), located at the center of the ceiling, with 9 LoS and 3 NLoS Rxs alongside the rack, simulating AP-to-rack communication. 
+
+B. Channel Parameter Extraction 
+
+The first step of the physical twin is to extract channel parameters from the measured directional channel response. After directional scanning, the channel response can be repre-sented in the delay-angle domain as 
+
+P (τ, θ, φ ) = |h(τ, θ, φ )|2, (1) which forms the power-angle-delay profile (PADP). The signal model is 
+
+h(τ, θ, φ ) = 
+
+> L
+
+X
+
+> ℓ=1
+
+αℓδ(θ − θℓ)δ(φ − φℓ)δ(τ − τℓ) (2) where αℓ and τℓ stand for the complex amplitude and delay of arrival (DoA) at the Rx of the ℓth path among all the L
+
+MCPs. The MPC parameters are then extracted from the PADP through an iterative peak-search procedure. At each iteration, the strongest local maximum exceeding a predefined threshold is identified as 
+
+P (τ ) = 
+
+( max 
+
+> θℓ, φ ℓ
+
+|h(τℓ, θ ℓ, φ ℓ)|2, |h(τℓ, θ ℓ, φ ℓ)|2 > thr 0, otherwise .
+
+(3) The detected peak provides an initial estimate of the cor-responding MPC. Each path is therefore represented by a parameter vector 
+
+Θℓ = {τℓ, θ ℓ, φ ℓ, α ℓ}. (4) After extracting the multipath parameters from the measure-ments, frequency-dependent channel characteristics can be fur-ther analyzed and compared across different THz bands. The cross-band similarity is first quantified through the correlation coefficient of the path loss measurements. For two frequency bands fi and fj , the correlation coefficient is calculated as 
+
+ρfi.f j =
+
+PNn=1 
+
+
+
+PL fi 
+
+> n
+
+− PL fi
+
+  
+
+PL fi 
+
+> n
+
+− PL fj
+
+rPNn=1 
+
+
+
+PL fj 
+
+> n
+
+− PL fi
+
+2rPNn=1 
+
+
+
+PL fj 
+
+> n
+
+− PL fj
+
+2
+
+(5) The resulting correlation matrix provides insights into the consistency of propagation characteristics among different fre-quency bands and reveals the degree of frequency dependency in the data-center environment. 
+
+C. Physical Twin Observations 
+
+The physical twin first provides a comprehensive charac-terization of the multipath propagation mechanisms inside the wireless data-center environment. The spatial distributions of the extracted MPCs for the three measured frequency bands together is presented in Fig. 3(a) to (c). The MPC trajectories are projected onto the horizontal plane to visualize the dominant propagation mechanisms between the transmitter and all receiver locations. For all three frequency bands, the strongest MPC is consis-tently dominated by the LoS component, demonstrating that the direct propagation path remains the primary communica-tion mechanism inside the open rack corridors. Besides the LoS path, strong reflected components can be observed from the rear glass wall and metallic rack surfaces, while a large number of weaker diffuse MPCs are distributed around the dominant reflections. These observations indicate that both specular reflections and diffuse scattering contribute signifi-cantly to the THz channel characteristics in practical data-center environments. Notably, the LoS path is observed in 52% of the measured receiver locations, while the remaining 48% are dominated by NLoS propagation due to rack blockage. The difference in the number of extracted MPCs is mainly attributed to the different measurement systems. Besides verifying the reconstructed propagation paths, it is also important to investigate whether the propagation char-acteristics remain consistent across different THz frequency 5AP (-0.6,0)  
+
+> Racks
+> Power/dB
+> 18 19
+> 20 21 22 23
+> 24 25 29
+> 1
+> 23
+> 4
+
+(a) AP  
+
+> Power /dB
+
+(b) AP  
+
+> Power /dB
+
+(c) -2 0 2 4 6 8X (m) -4 -2 0246Y (m) 
+
+> -120 -115 -110 -105 -100 -95 -90 -85 Power (dBm)
+
+(d) -2 0 2 4 6 8X (m) -4 -2 0246Y (m)  
+
+> -120 -115 -110 -105 -100 -95 -90 -85 Power (dBm)
+
+(e) -2 0 2 4 6 8X (m) -4 -2 0246Y (m)  
+
+> -110 -105 -100 -95 -90 -85 Power (dBm)
+
+(f) 
+
+Fig. 3. MPC Twins. (a)-(c) Physical twin of 300, 220, and 140 GHz; (d)-(f) RT twin of 300, 220, and 140 GHz. TABLE II CORRELATION MATRIX AMONG THE THREE BANDS .Frequency (GHz) 140 220 300 140 1 0.943 0.909 220 0.943 1 0.981 300 0.909 0.981 1
+
+bands. To quantitatively investigate the similarity among dif-ferent THz frequency bands, Table II summarizes the correla-tion coefficients of the measured path losses, as calculated in (5). Strong correlations are observed among all three frequency bands. These results indicate that the spatial variations of the large-scale channel characteristics are highly consistent across the three frequency bands. In particular, the correlation of 0.981 between 220 and 300 GHz suggests that the two higher-frequency bands exhibit highly similar spatial propagation patterns in the investigated data-center environment, while the slightly lower correlation between 140 and 300 GHz indicates a relatively stronger frequency-dependent variation over a wider frequency separation. Nevertheless, the correla-tion remains above 0.9 for all frequency pairs, demonstrating substantial cross-band consistency and suggesting that the dominant propagation structures, such as blockage and major reflection regions, are largely shared across the three bands. III. C ONSTRUCTION LAYER 
+
+Based on the tri-band measurements and the extracted channel characteristics, the channel twin is constructed to provide an accurate yet computationally efficient represen-tation of the THz propagation environment. The proposed 
+
+Fig. 4. Power distribution of the representative Tx 1–Rx 3 link at 300 GHz. 
+
+channel twin consists of two complementary components, i.e., a calibrated RT twin and an AI twin. The former improves the physical fidelity of RT using measurement data, while the latter enables efficient channel reconstruction through a learning-based neural representation. 
+
+A. Measurement-calibrated RT Twin 
+
+The calibrated RT twin serves as the physical foundation of the proposed channel twin, providing both an accurate representation of the propagation environment and reliable supervision for the subsequent AI twin. To maximize the consistency between simulations and practical measurements, the RT model is calibrated using the measured tri-band channel data from multiple aspects. Specifically, the discrepancies 6
+
+between RT and measurements are mitigated through four complementary calibrations:  
+
+> •
+
+Geometry Calibration To establish a geometry-aware DT of the THz data center environment, a LiDAR-based three-dimensional reconstruction framework was adopted to capture the detailed spatial structure of the measurement scenario. Compared with conventional man-ually constructed layouts, LiDAR scanning enables a more accurate representation of rack deployment, corridor structures, cable distributions, and other irregular objects that significantly affect THz propagation characteristics.  
+
+> •
+
+Material Calibration Frequency-dependent electromag-netic material properties are extracted using THz time-domain spectroscopy (THz-TDS), enabling accurate characterization of dielectric constants, conductivity, and reflection behaviors across the 140/220/300 GHz bands [27].  
+
+> •
+
+Antenna Calibration THz communications could reply on high-gain directional horn antennas to achieve narrow-beam transmission, thereby reducing interference and improving spatial reuse. To accurately reproduce the prac-tical propagation characteristics, the measured antenna radiation patterns are incorporated into the RT simulation.  
+
+> •
+
+Propagation Calibration Deterministic RT alone is in-sufficient for capturing the diffuse multipath characteris-tics in blockage-rich THz data-center environments. A hybrid propagation model [28] combining determinis-tic specular components and diffuse scattering mecha-nisms is introduced to compensate for unresolved multi-path components and rough-surface scattering effects in blockage-rich THz data-center scenarios. Specifically, the calibration process is formulated as the following optimization problem: 
+
+θ∗ = arg min 
+
+> θ
+
+X
+
+> n
+
+D
+
+
+
+c(n)
+
+> meas
+
+, c(n)RT (θ)
+
+
+
+(6) where θ = θg , θ m, θ g denotes the set of geometry, material, and propagation parameters to be calibrated, respectively. 
+
+c(n) 
+
+> meas
+
+and c(n)RT represent the measured and simulated channel descriptors at the n-th location, including the multipath power, delay, and angular characteristics, i.e., 
+
+c = {Pl, τ l, φ l, θ l}Nl=1 (7) At the geometry layer, high-resolution LiDAR point clouds are employed to reconstruct the rack structures, corridors, and blockage boundaries of the data center, thereby reducing geometric approximation errors in the RT environment. The reconstructed point cloud is further converted into triangular meshes used by the RT engine, i.e., 
+
+G = {vi, fj } , (8) where vi denotes the mesh vertices and fj represents the corresponding triangular facets. The geometric model directly determines the visibility, reflection paths, and blockage rela-tionships in the RT simulation. At the material layer, frequency-dependent dielectric pa-rameters are extracted using THz-TDS measurements. The material properties directly affect the Fresnel reflection co-efficients in the RT simulation. The complex permittivity of representative data-center materials is characterized through THz-TDS measurements. The frequency-dependent dielectric property is expressed as 
+
+˜ε = εr − j σ
+
+2πf ε 0
+
+, (9) where εr denotes the relative permittivity, σ is the conductivity, and ε0 is the vacuum permittivity. Accordingly, the reflection loss used in the RT calibration is computed as 
+
+RL = −20 log 10 |Γ|, (10) which directly determines the reflected-path attenuation in the RT simulation. The antenna radiation characteristics are incorporated into the RT simulation through the measured directional antenna patterns. The received power of each propagation path is given by 
+
+Pr = Pt + Gt(θt, ϕ t) + Gr (θr , ϕ r ) − P L, (11) where Gt(·) and Gr (·) denote the directional gains of the transmitting and receiving antennas, respectively. The mea-sured antenna patterns are imported into the RT engine to ac-curately reproduce the beamwidth and side-lobe characteristics observed during channel measurements. Although the calibrated geometry, material properties, and antenna patterns significantly improve the deterministic prop-agation accuracy, conventional RT still fails to capture dif-fuse scattering caused by rough surfaces, cable trays, server equipment, and irregular rack structures. Therefore, a hybrid propagation model is further introduced to compensate for the missing diffuse multipath components. Specifically, the chan-nel response is modeled as the superposition of deterministic specular components and diffuse scattering components, as 
+
+hhybrid (τ, θ, φ ) = hRT (τ, θ, φ ) + hs(τ, θ, φ ), (12) where 
+
+hs(τ, θ, φ ) = 
+
+> L
+
+X
+
+> ℓ
+
+X
+
+> p
+
+αℓ,p δ(τ − τℓ,p ) · δ(θ − θℓ,p ) · δ(φ − φℓ,p )+
+
+> Ls
+
+X
+
+> q
+
+X
+
+> s
+
+αq,s δ(τ − τq,s ) · δ(θ − θq,s ) · δ(φ − φq,s ),
+
+(13) where p denotes the pth subpath of ray-traced ℓth cluster, while 
+
+q stands for the qth subpath of non-RT sth cluster. L and 
+
+Ls represent the number of ray-traced clusters and non-RT clusters, respectively. 
+
+τRMS ,ℓ =
+
+vuutP 
+
+> p
+
+Pp,ℓ (τp,ℓ − ¯τℓ)2
+
+P 
+
+> p
+
+Pp,ℓ 
+
+, (14) 
+
+fmeas (i) = P meas 
+
+> i
+
+PMi=1 P meas 
+
+> i
+
+, (15) Comparing the measured and RT-generated MPC distribu-tions in Fig. 3, it can be observed that the calibrated RT twin 7
+
+successfully reproduces the dominant propagation paths and their corresponding arrival directions at all three frequency bands. Nevertheless, the conventional specular-only RT fails to capture numerous low-power diffuse components observed in the measurements, especially around rack edges and rear-wall reflections. These missing MPCs motivate the introduction of the proposed hybrid propagation model presented in Section III-B. Although the dominant propagation mechanisms can be reproduced by the calibrated RT twin, discrepancies still exist for diffuse scattering components. To further investigate the discrepancies between the measured and simulated channels, a representative receiver (Rx3 at 300 GHz) is selected for detailed analysis. Fig. 4 illustrates the cumulative power distributions of the three dominant multipath clusters extracted from the measurements. Three well-separated clusters can be identified, corresponding to the LoS component, the rear-wall reflection, and the rack reflection, respectively. Besides the dominant paths, each cluster also contains numerous weak MPCs caused by diffuse scattering and angular spreading, leading to a long-tail power distribution. Fig. 5 compares the corresponding PADPs obtained from the measurement and the calibrated RT simulation. It can be observed that the calibrated RT successfully reconstructs all three dominant propagation paths with high accuracy. Specifically, the delay errors of the three dominant MPCs are only 0.072 ns, 0.350 ns, and 0.241 ns, respectively, while the corresponding power differences are within 1 dB, demonstrat-ing the effectiveness of the geometry and material calibration. Nevertheless, an obvious discrepancy can still be observed around the second cluster. As indicated by the untraced path in Fig. 5(a), the measurement contains an additional weak MPC that cannot be reproduced by the deterministic RT simulation. This path is mainly generated by diffuse scattering from irregular rack surfaces and surrounding equipment, which are not explicitly modeled by conventional specular ray trac-ing. Consequently, the calibrated RT captures the dominant propagation mechanisms but still underestimates the diffuse multipath components observed in practical environments. The influence of these missing diffuse components can be further quantified through the RMS delay spread. The measured RMS delay spread is 0.3923 ns, whereas the de-terministic RT predicts only 0.3691 ns, corresponding to an underestimation of approximately 5.9%. After incorporating the proposed hybrid propagation model, the predicted RMS delay spread increases to 0.3957 ns, which differs from the measurement by less than 1%. This result demonstrates that the hybrid model effectively compensates for the insufficient diffuse scattering representation of conventional RT while preserving the dominant propagation characteristics. Overall, the above observations indicate that the calibrated RT twin ac-curately reconstructs the dominant LoS and specular reflection paths, while the proposed hybrid propagation model further recovers the missing diffuse scattering components. Together, they provide a high-fidelity physical twin that serves as the foundation for the subsequent AI channel twin and system-level DT. 123
+
+> untraced path
+
+(a) 1 23
+
+(b)  
+
+> Fig. 5. PADP of (a) Physical Twin; (b) Calibrated RT Twin.
+
+B. AI Twin 
+
+While the measurement-calibrated RT twin provides physi-cally interpretable channel predictions, its computational com-plexity remains a major challenge for real-time network eval-uation and optimization. For example, the data center scenario requires computation over thousands of wireless links [1], making full RT simulations computationally prohibitive. To address this limitation, an AI twin is incorporated into the proposed DT framework as an acceleration engine. To capture the blockage-sensitive propagation characteris-tics of THz wireless data centers, a LoS-aware INF architec-ture in Fig. 6 is developed. The network takes the transmitter-receiver geometry as input, including spatial coordinates, propagation distance, and a grid-based LoS probability prior derived from the geometry twin. Positional encoding is further employed to enhance the representation capability of high-frequency spatial variations. Unlike conventional coordinate-based neural fields that utilize a single regression network [29], the proposed architecture incorporates a LoS-adaptive dual-expert mechanism. Specifically, a shared encoder first extracts common spatial features, which are subsequently processed by dedicated LoS and NLoS expert branches. A gating module then adaptively combines the outputs of the two experts according to the local visibility condition. Such a design explicitly reflects the fundamentally different propagation be-haviors of LoS and NLoS links in blockage-dominated THz environments, where path-loss characteristics, shadowing ef-8Spatial Coordinate (x, y)    
+
+> NLoS MLP Backbone Power
+> Positional Encoding (sin/cos)
+> Input Grid Los Information
+> Gating LoS MLP Backbone LoS Probability
+> ∑
+> Blockage LoS NLoS
+> Fig. 6. RT-conditioned implicit neural field.
+
+Algorithm 1 Construction of the AI-Assisted Channel Twin 
+
+Require: Calibrated RT environment E, receiver region A,grid size ∆, number of samples per grid Ns
+
+Ensure: Trained AI channel twin Fθ 
+
+> 1:
+
+Divide A into multiple grids Gm 
+
+> 2:
+
+for each grid Gm do  
+
+> 3:
+
+Randomly generate Ns receiver locations  
+
+> 4:
+
+for each sampled receiver position do  
+
+> 5:
+
+Run RT simulation  
+
+> 6:
+
+Extract channel parameters {Pr , τ, ϕ, θ } 
+
+> 7:
+
+Determine LoS/NLoS condition  
+
+> 8:
+
+end for  
+
+> 9:
+
+Compute LoS probability pL,m  
+
+> 10:
+
+end for  
+
+> 11:
+
+Construct training dataset D 
+
+> 12:
+
+for each sample in D do  
+
+> 13:
+
+Generate positional encoding  
+
+> 14:
+
+Query corresponding grid-based LoS probability  
+
+> 15:
+
+Form input feature [x, y, d, p L] 
+
+> 16:
+
+end for  
+
+> 17:
+
+Train LoS-adaptive dual-expert neural field  
+
+> 18:
+
+Obtain AI channel twin Fθ
+
+fects, and multipath contributions exhibit significantly different statistical properties. The proposed LoS-aware INF model explicitly incorporates the distance-dependent propagation prior and the grid-based LoS probability map obtained from the geometry twin. Let 
+
+u = [ x, y ]⊤ denote the 2D receiver coordinate, and let d be the Tx-Rx distance. The neural field is formulated as a nonlinear mapping function 
+
+Fθ : ( u, d, p L) → y, (16) where u = ( x, y ) denotes the receiver location, d is the Tx-Rx distance, pL is the grid-based LoS prior, and y represents the predicted channel response, including received power and optionally delay/angular statistics. To improve numerical stability and enable multi-scale rep-resentation learning, the input features are normalized as 
+
+˜u = u − μu
+
+σu
+
+, ˜d = d − μd
+
+σd
+
+. (17)  
+
+> Fig. 7. Training sets and test sets for AI Twin.
+
+Furthermore, positional encoding is applied to capture high-frequency spatial variations in THz propagation: 
+
+γ(x) = sin(2 kπx), cos(2 kπx)Kk=0 . (18) The model is trained by jointly optimizing the power prediction error and the LoS gating error. The power regression loss is defined as 
+
+Lpower = 1
+
+N
+
+> N
+
+X
+
+> n=1
+
+ ˆP (n) − P (n)gt 
+
+2
+
+, (19) while the LoS classification loss is given by the binary cross-entropy, 
+
+LLoS = − 1
+
+N
+
+> N
+
+X
+
+> n=1
+
+h
+
+y(n)LoS log ˆ p(n) 
+
+> L
+
++
+
+
+
+1 − y(n)LoS 
+
+
+
+log 
+
+
+
+1 − ˆp(n)
+
+> L
+
+i 
+
+,
+
+(20) where yLoS ∈ { 0, 1} is the ground-truth LoS label obtained from the grid-based visibility map. The overall training objec-tive is 
+
+L = λ1Lpower + λ2LLoS , (21) where λ1 and λ2 are weighting factors used to balance power reconstruction and LoS-aware propagation learning. To construct the dataset for AI twin training, the measure-ment plane is first partitioned into multiple spatial regions, as 90 100 200 300 400 500 600 700 800 epoch 0.001 0.002 0.003 0.004 LOSS  
+
+> Our proposed AI twin INF model MLP model
+> Fig. 8. Training loss of different AI model.
+
+illustrated in Fig. 7. A region-based spatial partition strategy is adopted to better evaluate the generalization capability of the AI twin. Specifically, the entire data-center area is divided into a series of non-overlapping sub-regions. The colored regions are selected as training sets, while the white regions are re-served as test sets. For each training region, a large number of receiver locations are generated through spatial sampling, and the corresponding channel parameters are obtained from the calibrated RT twin. The generated channel database includes the receiver coordinates, propagation distance, LoS probability, and channel characteristics such as received power, delay, and angular information. It is noteworthy that the testing regions are completely excluded from the training process. Such a spatial hold-out strategy provides a more rigorous evaluation of the model’s capability to learn the underlying propagation mechanisms and reconstruct continuous channel fields in blockage-dominated THz data-center environments. Fig. 8 compares the training convergence of the proposed AI channel twin, the conventional INF-based model, and the simple MLP baseline. It can be observed that all models converge rapidly during the initial training stage, indicating that the large-scale path-loss trend can be efficiently learned from the generated channel dataset. However, the proposed model consistently achieves the lowest training loss throughout the entire optimization process. After 800 epochs, the loss of the proposed model decreases to approximately 5 × 10 −4, sig-nificantly outperforming both the INF-based and MLP-based baselines. The faster convergence and lower final loss indicate that the proposed architecture provides a more physically consistent representation of THz propagation than generic coordinate-based neural fields. Fig. 9 compares the reconstructed power maps generated by different AI channel twins against the calibrated RT ground truth. As shown in Fig. 9(a), the calibrated RT twin reveals strong spatial variations caused by rack blockage, corridor-guided propagation, and specular reflections. Distinct LoS corridors can be observed along the central aisle, while deep shadowing regions are formed behind the rack structures. Fig. 9(b) presents the reconstruction results of the proposed AI channel twin. The dominant propagation structures are accurately reproduced, including the blockage boundaries, reflected regions, and corridor-enhanced propagation zones. More importantly, the reconstructed field exhibits smooth spa-tial transitions while preserving the sharp power discontinuities introduced by rack blockage, demonstrating that the proposed model successfully learns both large-scale path-loss trends                 
+
+> TABLE III PERFORMANCE COMPARISON OF DIFFERENT AI C HANNEL TWINS .Model RMSE in dB Runtime (ms) MLP 7.504 138.7 INF 6.302 75 Proposed 5.881 143 RT -1.8×10 6
+
+and blockage-dependent propagation mechanisms. In contrast, the conventional INF model shown in Fig. 9(c) suffers from noticeable over-smoothing. Although the general propagation trend can still be reconstructed, the blockage boundaries become significantly blurred, and several deep-shadow regions disappear. This observation suggests that positional encoding alone is insufficient for representing the highly discontinuous propagation characteristics of blockage-dominated THz envi-ronments. The simple MLP baseline shown in Fig. 9(d) exhibits even larger reconstruction errors. Due to the absence of propagation-aware priors, the predicted power field contains unrealistic spatial artifacts and fails to preserve the under-lying physical propagation structures. Consequently, the re-constructed field deviates substantially from the RT-generated reference. To further evaluate the generalization capability of the proposed AI twin, two additional transmitter configurations are considered, including a corridor-centered deployment and a corner deployment, as illustrated in Fig. 9(e) and Fig. 9(f). Despite the significant change in the transmitter position, the proposed model remains capable of reconstructing the dominant propagation structures and blockage patterns. This result demonstrates that the proposed architecture can learn the underlying propagation mechanisms of the calibrated DT. Table III compares the reconstruction accuracy and infer-ence latency of different channel reconstruction approaches. Compared with the conventional MLP and INF models, the proposed LoS-aware AI twin achieves the lowest reconstruc-tion error while maintaining real-time inference capability. Although the introduction of the grid-based LoS prior and dual-expert architecture slightly increases the inference time, the overall latency remains within hundreds of milliseconds, which is negligible for offline digital-twin construction and network evaluation. The RT results are not included in the table because they serve as the reference on the test set. More importantly, all learning-based approaches significantly out-perform conventional RT in terms of computational efficiency. While a complete RT simulation requires approximately 1.8 ×
+
+10 6 ms for dense channel reconstruction, the proposed AI twin completes the same task within only 143 ms, corresponding to more than four orders of magnitude acceleration. Such computational efficiency enables rapid channel prediction over large deployment areas and provides practical support for real-time coverage evaluation and deployment optimization. Overall, the proposed AI twin achieves a favorable trade-off between reconstruction accuracy and computational complex-ity. By incorporating propagation-aware priors into the neural field, the proposed model preserves the dominant physical characteristics of THz propagation while maintaining suffi-10 6 4 2 0 2 4 6X (m) 4
+
+> 2
+> 024Y (m)
+> RT THz Power Map at z = 1.8 m
+> 225
+> 200
+> 175
+> 150
+> 125
+> 100
+> Power (dB)
+
+(a) 6 4 2 0 2 4 6X (m) 4 
+
+> 2
+> 024Y (m)
+> Predicted THz Power Map at z = 1.8 m
+> 180
+> 160
+> 140
+> 120
+> 100
+> Predicted Power (dB)
+
+(b) 6 4 2 0 2 4 6X (m) 4 
+
+> 2
+> 024Y (m)
+> Predicted THz Power Map at z = 1.8 m
+> 160
+> 140
+> 120
+> 100
+> Predicted Power (dB)
+
+(c) 6 4 2 0 2 4 6X (m) 4
+
+> 2
+> 024Y (m)
+> Predicted THz Power Map at z = 1.8 m
+> 140
+> 120
+> 100
+> 80
+> Predicted Power (dB)
+
+(d) 6 4 2 0 2 4 6X (m) 4 
+
+> 2
+> 024Y (m)
+> Predicted THz Power Map at z = 1.8 m
+> 300
+> 250
+> 200
+> 150
+> 100
+> Predicted Power (dB)
+
+(e) 6 4 2 0 2 4 6X (m) 4 
+
+> 2
+> 024Y (m)
+> Predicted THz Power Map at z = 1.8 m
+> 250
+> 200
+> 150
+> 100
+> Predicted Power (dB)
+
+(f) 
+
+Fig. 9. Received power map. (a) RT Twin; (b) Our proposed AI twin; (c) INF-based AI Twin; (d) Simple MLP-based AI Twin; (e) Proposed AI twin (corridor Tx case); (f) Proposed AI twin (Corner Tx case) 
+
+ciently low inference latency for system-level DT applications. In conclusion, the proposed AI channel twin is capable of efficiently reconstructing spatially continuous channel maps, including received power, path-loss distributions, and LoS probability fields, while preserving the dominant propagation mechanisms observed in the calibrated RT simulations. By coupling the high-fidelity RT twin with the lightweight AI twin, the proposed framework achieves a favorable trade-off between physical accuracy and computational efficiency, forming the foundation for real-time digital-twin-assisted op-timization in future THz wireless data centers. IV. E VALUATION LAYER 
+
+The evaluation layer translates channel-level information into network-level performance metrics empowered by the measurement layer. The evaluation layer bridges the gap between channel-level predictions and network-level perfor-mance assessment. Based on the outputs of the channel twin, including path loss, received power, delay dispersion, angular characteristics, and LoS probability, this layer evaluates the communication performance of the THz wireless data center through analytical and simulation-based approaches. Specifically, the evaluation layer constructs spatially con-tinuous maps of signal strength, interference, signal-to-interference-plus-noise ratio (SINR), coverage probability, and achievable rate throughout the data-center environment. Unlike conventional approaches that require repeated RT simulations for each deployment configuration, the proposed framework directly utilizes the outputs of the channel twin to estimate communication performance in real time. Furthermore, analytical coverage and rate models are in-corporated to establish a direct relationship between channel statistics and network performance indicators. By combining the predicted LoS probability, received-power statistics, and blockage information, closed-form coverage expressions can be derived, enabling rapid evaluation of network quality under different deployment strategies. Consequently, the evaluation layer provides a computationally efficient platform for large-scale performance assessment and forms the basis for subse-quent optimization and decision-making procedures. Based on the proposed DT, the AP deployment and resource allocation problem can be formulated as 
+
+max 
+
+> V
+
+1
+
+NRNRX
+
+> i=1
+
+R(v0, vi) + X
+
+> 0≤i,j ≤NR,i ̸=j
+
+R(vi, vj) (22a) 
+
+s.t. (xi, y i, z i) ∈ V (22b) 
+
+NR ≥ 1, N P ∈ N (22c) 
+
+1 ≤ i, j ≤ NR ∀i, j ∈ N (22d) 
+
+Pc(γi) > P th (22e) where V denotes the set of AP deployment positions, R(·)
+
+represents the achievable rate between communication nodes, and Pc(γi) denotes the coverage probability under the SINR threshold γi.To solve the optimization problem in (22), the achievable rate and the corresponding SINR distribution should first be derived. Based on the constructed DT, system-level perfor-mance metrics such as interference and coverage [30] can be efficiently evaluated. The signal-to-interference-plus-noise ratio (SINR) at a receiver is expressed as 
+
+SINR = SI + PN
+
+= PtG0Kug(u)
+
+P 
+
+> i∈Φ0/AP 0
+
+PtGiKxi g(xi) + N0B ,
+
+(23) 11 
+
+where Pt is the transmit power, G0 and Gi denote the antenna gains of the desired and interfering links, Ku and Kxi capture path loss and shadowing effects obtained from the DT, g(·)
+
+represents small-scale fading, N0 is the noise spectral density, and B is the system bandwidth. Coverage probability is defined as the probability that the received SINR exceeds a predefined threshold T , i.e., 
+
+Pc(T ) = 
+
+Z Z Z 
+
+> V
+
+(pL(u)Pc,L (T ) + pN (u)Pc,N (T )) f (v)d V, 
+
+(24) where f (v) denotes the spatial probability density of receiver locations, while pL(u) and pN (u) denote the probabilities of LoS and NLoS propagation obtained from the proposed geom-etry twin. The proposed analytical framework is applicable to two representative communication paradigms in wireless data centers, namely AP-to-rack communications and rack-to-rack communications. 
+
+A. AP Deployment 
+
+The AP-to-rack scenario corresponds to the infrastructure-based downlink transmission, where a ceiling-mounted AP communicates with multiple server racks. Owing to the highly directional antennas and severe propagation attenuation at THz frequencies, the interference from neighboring APs is typically much weaker than the thermal noise. Therefore, the communication system can be approximated as a noise-limited network, 
+
+SINR( u) ≈ S(u)
+
+N0B (25) Following the measurement observations, the received power in the logarithmic domain is approximated by a Gaussian distribution, 
+
+S(u) ∼ N  μS (u), σ 2 
+
+> S
+
+(u) , (26) where the location-dependent mean and variance are directly predicted by the proposed AI channel twin. Consequently, the LoS conditional coverage probability can be derived in closed form as 
+
+Pc,L (T ) = Q
+
+ 10 log 10 (T N 0B) − μS (u)
+
+σS (u)
+
+
+
+(27) where Q(·) is the Gaussian Q-function. Similarly, the NLoS coverage probability is given by 
+
+Pc,N (T ) = Q
+
+ 10 log 10 (T N 0B) − μS,N (u)
+
+σS,N (u)
+
+
+
+(28) Therefore, the spatial coverage probability can be efficiently evaluated without invoking computationally expensive RT simulations. Instead, the AI twin predicts the local channel statistics, from which the coverage probability is directly obtained through the above closed-form expressions. Fig. 10(a) presents the coverage probability under different carrier frequencies. As expected, the coverage probability monotonically decreases with the SINR threshold, since fewer receiver locations satisfy increasingly stringent communication requirements. Among the three frequency bands, the 140 GHz 
+
+Algorithm 2 Coverage Evaluation Using AI Channel Twin 
+
+Require: AI channel twin Fθ , coverage threshold T
+
+Ensure: Coverage probability Pc(T ) 
+
+> 1:
+
+for each receiver location u do  
+
+> 2:
+
+Query grid-based LoS probability  
+
+> 3:
+
+Predict received power statistics using Fθ 
+
+> 4:
+
+Compute conditional coverage Pc,L (T |u) and 
+
+Pc,N (T |u) 
+
+> 5:
+
+end for  
+
+> 6:
+
+Evaluate [ Pc(T ) = 1
+
+> M
+
+PMm=1 
+
+h
+
+pL,m Pc,L + (1 −
+
+pL,m )Pc,N 
+
+i
+
+] return Pc(T )Over 90% 10dB 
+
+(a) 10dB 
+
+> Best performed
+
+(b)  
+
+> Fig. 10. Coverage Probability of (a) different frequency bands, and (b) different AP positions.
+
+system consistently achieves the highest coverage probabil-ity over the entire SINR range, followed by the 220 GHz and 300 GHz bands. The performance degradation at higher frequencies mainly results from the increased free-space path loss, stronger molecular absorption, and higher sensitivity to blockage, which jointly reduce the received signal power and consequently lower the achievable SINR. Although higher-frequency bands provide larger available bandwidth, their coverage becomes more limited under identical transmit power and antenna configurations. This observation demonstrates the inherent trade-off between spectrum availability and propaga-tion robustness in THz wireless data centers. It is worth noting that the coverage curves exhibit the steepest transition in the SINR range of approximately 15–35 dB. This indicates that 12 
+
+the majority of receiver locations operate within this SINR region, where small improvements in channel quality can significantly increase the overall network coverage. Therefore, this operating region is particularly suitable for AP deployment optimization and beam management. Fig. 10(b) compares the coverage performance under dif-ferent AP deployment locations, including the corridor AP, corner AP, and ceiling-mounted AP configurations. Among the three deployment strategies, the ceiling AP achieves the highest coverage probability over most SINR thresholds. Benefiting from its centrally elevated position, the ceiling deployment provides shorter average propagation distances and fewer blockage events, thereby maintaining stronger LoS connectivity to the majority of server racks. The corridor AP exhibits intermediate performance. Although the transmitter is located inside the main propagation corridor, several racks remain partially shadowed by neighboring cabinets, leading to localized coverage degradation. In contrast, the corner deployment consistently achieves the lowest coverage prob-ability. Since most communication links experience longer propagation distances and multiple blockage events, both the received power and the LoS probability decrease significantly, resulting in inferior network coverage. 
+
+B. Concurrent Rack-to-rack Communications 
+
+Besides infrastructure-based access, future wireless data centers also require direct rack-to-rack communications, where multiple concurrent links coexist within the same deployment area. In this case, mutual interference among simultaneous transmissions cannot be neglected. The channel gains between all rack pairs are first organized into a channel matrix, 
+
+G =
+
+
+
+0 g12 g13 · · · 
+
+g21 0 g23 · · · 
+
+g31 g32 0 · · · · · · 
+
+ , (29) where gij denotes the channel gain from rack i to rack j
+
+predicted by the DT. Assuming equal transmit powers, the aggregate interference experienced by receiver i is 
+
+Ii = X 
+
+> j̸=i
+
+Ptgji bj , (30) where bj ∈ { 0, 1} denotes the transmission activity indica-tor. Since the individual channel gains approximately follow lognormal distributions, the aggregate interference can be approximated by another lognormal random variable using the Fenton–Wilkinson approximation, 
+
+Ii ∼ ln N (μI , σ 2 
+
+> I
+
+). (31) The corresponding coverage probability is therefore 
+
+Pc = P
+
+ Si
+
+Ii + N > T 
+
+
+
+= Φ  
+
+> Si
+> T
+
+− N − μI
+
+σI
+
+!
+
+, (32) 
+
+(a) (b)  
+
+> Fig. 11. (a) Average SINR and (b) Aggregate throughput of concurrent rack-to-rack communications
+
+where Φ( ·) denotes the cumulative distribution function of the standard Gaussian distribution. Compared with the AP-to-rack scenario, the rack-to-rack case explicitly captures the impact of concurrent transmissions and thus provides a more realistic performance evaluation for dense wireless data-center networks. Therefore, the average rate can be derived as 
+
+¯R = B
+
+ln 2 
+
+Z ∞
+
+> 0
+
+Pc(T )1 + T dT. (33) Overall, the proposed analytical framework establishes the connection between the AI channel twin and the system-level DT. The channel twin estimates the location-dependent channel statistics, from which the achievable rate, interference, and coverage probability can be efficiently derived. Conse-quently, the evaluation layer bridges the gap between channel reconstruction and intelligent network optimization, providing the theoretical foundation for the subsequent manipulation layer. Fig. 11 presents the average SINR of the rack-to-rack com-munication scenario as the number of simultaneously active transmission links increases. The analytical results are com-pared with Monte Carlo simulations for the three measured frequency bands. As expected, the average SINR gradually decreases with the number of active communication links due to the accumulation of co-channel interference. When only a few links are simultaneously active, the interference level remains relatively low, and the network is primarily limited by thermal noise. As more rack pairs are activated, the aggregate interference becomes the dominant performance bottleneck, resulting in a continuous degradation of the received SINR. Despite the SINR degradation, the aggregate throughput in-creases with the number of concurrent links. This indicates that the throughput gain from spatially concurrent transmissions outweighs the loss in per-link spectral efficiency within the considered deployment range. Among the three frequency bands with the same bandwidth of 20 GHz, the 140-GHz system achieves the highest aggregate throughput, followed by the 220- and 300-GHz systems. V. C ONCLUSION 
+
+We have proposed a measurement-driven multi-layer DT framework for THz wireless data centers. In the measurement layer, tri-band measurements at 140, 220, and 300 GHz are first conducted to capture the propagation characteristics of 13 
+
+a realistic data-center environment. In the construction layer, a calibrated RT twin is constructed by jointly optimizing the geometry, material, antenna, and propagation models. An AI twin is then developed to enable efficient channel reconstruction with high accuracy and low latency. In the evaluation layer, the reconstructed channel field is used to build an evaluation twin for coverage and interference anal-ysis. In the manipulation layer, power allocation and beam manipulation technologies [31], e.g., airy beam design, can be utilized to complete the closed-loop optimization. The proposed framework establishes an end-to-end pipeline from channel measurement to network optimization, bridging phys-ical fidelity and computational efficiency. The experimental results validate the effectiveness of the measurement-calibrated RT twin and demonstrate that the proposed AI twin can accurately reconstruct the channel field while significantly accelerating inference. In addition, the system-level results confirm the potential of the proposed DT for THz wireless data-center planning and deployment optimization, indicating that the centered AP below the ceiling can provide the best coverage for the wireless data center. REFERENCES [1] C. Han, M. Zhu, W. Zhao, Z. Yu, G. Huang, G. Wang, Z. Chen, W. Tong, and W. Zhang’s, “When wires can’t keep up: Reconfigurable ai data centers empowered by terahertz wireless communications,” IEEE Wireless Communications , pp. 1–9, 2026. [2] A. S. Hamza, J. S. Deogun, and D. R. Alexander, “Wireless commu-nication in data centers: A survey,” IEEE Communications Surveys & Tutorials , vol. 18, no. 3, pp. 1572–1595, 2016. [3] C. A. Thraskias, E. N. Lallas, N. Neumann, L. Schares, B. J. Offrein, R. Henker, D. Plettemeier, F. Ellinger, J. Leuthold, and I. Tomkos, “Survey of photonic and plasmonic interconnect technologies for intra-datacenter and high-performance computing communications,” IEEE Communications Surveys & Tutorials , vol. 20, no. 4, pp. 2758–2783, 2018. [4] T. Benson, A. Akella, and D. A. Maltz, “Network traffic characteristics of data centers in the wild,” in Proceedings of the 10th ACM SIGCOMM Conference on Internet Measurement , ser. IMC ’10. New York, NY, USA: Association for Computing Machinery, 2010, p. 267–280. [Online]. Available: https://doi.org/10.1145/1879141.1879175 [5] I. F. Akyildiz, C. Han, Z. Hu, S. Nie, and J. M. Jornet, “Terahertz band communication: An old problem revisited and research directions for the next decade,” IEEE Transactions on Communications , vol. 70, no. 6, pp. 4250–4285, 2022. [6] Z. Chen, C. Han, Y. Wu, L. Li, C. Huang, Z. Zhang, G. Wang, and W. Tong, “Terahertz wireless communications for 2030 and beyond: A cutting-edge frontier,” IEEE Communications Magazine , vol. 59, no. 11, pp. 66–72, 2021. [7] H.-J. Song and T. Nagatsuma, “Present and future of terahertz com-munications,” IEEE Transactions on Terahertz Science and Technology ,vol. 1, no. 1, pp. 256–263, 2011. [8] R. Minerva, G. M. Lee, and N. Crespi, “Digital twin in the iot context: A survey on technical features, scenarios, and architectural models,” 
+
+Proceedings of the IEEE , vol. 108, no. 10, pp. 1785–1824, 2020. [9] K. Duran, L. Verda Cakir, Y. Yigit, K. Huseynov, S. Ram Kusu, M. Ali Ert¨ urk, and B. Canberk, “Toward digital twin-as-a-service (dtaas) platforms: A survey on architecture, design requirements, and perfor-mance metrics,” IEEE Communications Surveys & Tutorials , vol. 28, pp. 1845–1878, 2026. [10] M. Manalastas, M. Umar Bin Farooq, S. Muhammad Asad Zaidi, H. Naeem Qureshi, Y. Sambo, and A. Imran, “From simulators to digital twins for enabling emerging cellular networks: A tutorial and survey,” 
+
+IEEE Communications Surveys & Tutorials , vol. 27, no. 4, pp. 2693– 2732, 2025. [11] D. He, K. Guan, D. Yan, H. Yi, Z. Zhang, X. Wang, Z. Zhong, and N. Zorba, “Physics and ai-based digital twin of multi-spectrum propagation characteristics for communication and sensing in 6g and beyond,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 11, pp. 3461–3473, 2023. [12] C. Han, Y. Wang, Y. Li, Y. Chen, N. A. Abbasi, T. K¨ urner, and A. F. Molisch, “Terahertz wireless channels: A holistic survey on measurement, modeling, and analysis,” IEEE Communications Surveys & Tutorials , vol. 24, no. 3, pp. 1670–1707, 2022. [13] C.-L. Cheng, S. Sangodoyin, and A. Zaji´ c, “THz cluster-based modeling and propagation characterization in a data center environment,” IEEE Access , vol. 8, pp. 56 544–56 558, 2020. [14] G. Song, Y. Li, J. Jiang, C. Han, Z. Yu, Y. Du, and Z. Wang, “Channel measurement and characterization at 140 GHz in a wireless data center,” in Proc. of 2022 IEEE Global Communications Conference (GLOBECOM) , 2022, pp. 4764–4769. [15] J. M. Eckhardt, T. Doeker, and T. K¨ urner, “Hybrid channel model for low terahertz links in a data center,” IEEE Open Journal of the Communications Society , vol. 5, pp. 4731–4745, 2024. [16] S. Ju, D. Shakya, H. Poddar, Y. Xing, O. Kanhere, and T. S. Rappaport, “142 ghz sub-terahertz radio propagation measurements and channel characterization in factory buildings,” IEEE Transactions on Wireless Communications , vol. 23, no. 7, pp. 7127–7143, 2024. [17] Y. Li, Z. Yu, and C. Han, “Vmcm: Vision-aided multi-modal channel measurement and modeling in terahertz urban macrocell,” IEEE Trans-actions on Wireless Communications , vol. 25, pp. 18 515–18 530, 2026. [18] C. Ruah, O. Simeone, J. Hoydis, and B. Al-Hashimi, “Calibrating wireless ray tracing for digital twinning using local phase error esti-mates,” IEEE Transactions on Machine Learning in Communications and Networking , vol. 2, pp. 1193–1215, 2024. [19] M. S. Abouamer, R. J. Williams, and P. Popovski, “Prediction of wireless channel statistics with ray tracing and uncalibrated digital twin,” IEEE Wireless Communications Letters , vol. 14, no. 9, pp. 2713–2717, 2025. [20] Z. Yuan, G. Yu, Y. Lyu, J. Zhang, F. Zhang, and W. Fan, “Site-specific ray-tracing and experimental validation for thz channel characterization,” 
+
+IEEE Transactions on Terahertz Science and Technology , vol. 15, no. 3, pp. 319–331, 2025. [21] C. Han, J. Jiang, Z. Hu, M. Tao, and W. Zhang, “When ai meets terahertz: A survey on the symbiosis of artificial intelligence and terahertz networks,” 2026. [Online]. Available: https://arxiv.org/abs/ 2604.22706 [22] H. Ye, L. Liang, G. Y. Li, and B.-H. Juang, “Deep learning-based end-to-end wireless communication systems with conditional gans as unknown channels,” IEEE Transactions on Wireless Communications ,vol. 19, no. 5, pp. 3133–3143, 2020. [23] N. Omi, S. Kojima, and C.-J. Ahn, “Vae-gan-based semantic commu-nication for high-quality image transmission,” IEEE Transactions on Wireless Communications , vol. 25, pp. 9799–9813, 2026. [24] Z. Hu, Y. Li, and C. Han, “Transfer learning enabled transformer-based generative adversarial networks for modeling and generating terahertz channels,” Communications Engineering , vol. 3, no. 1, p. 153, 2024. [25] R. Li, J. Sun, and J. Xue, “Generative diffusion-based bayesian modeling for universal channel estimation,” IEEE Journal on Selected Areas in Communications , vol. 44, pp. 3104–3119, 2026. [26] M. Belgiovine, C. Dick, and K. Chowdhury, “Better together: Leveraging multiple digital twins for deployment optimization of airborne base stations,” IEEE Transactions on Mobile Computing , vol. 25, no. 3, pp. 3920–3935, 2026. [27] Z. Fang, Y. Lyu, Z. Yu, and C. Han, “Environment reconstruction in Terahertz monostatic sensing: Joint millimeter-level geometry mapping and material identification,” IEEE Journal of Selected Topics in Elec-tromagnetics, Antennas and Propagation , vol. 1, no. 1, pp. 265–277, 2025. [28] Y. Chen, Y. Li, C. Han, Z. Yu, and G. Wang, “Channel measurement and ray-tracing-statistical hybrid modeling for low-Terahertz indoor com-munications,” IEEE Transactions on Wireless Communications , vol. 20, no. 12, pp. 8163–8176, 2021. [29] M. Zhu, Y. Lyu, Z. Yu, and C. Han, “A measurement-calibrated AI-assisted digital twin for terahertz wireless data centers,” in 2026 IEEE Vehicular Technology Conference (VTC2026-Fall) , 2026. [30] Y. Wu, J. Kokkoniemi, C. Han, and M. Juntti, “Interference and cov-erage analysis for terahertz networks with indoor blockage effects and line-of-sight access point association,” IEEE Transactions on Wireless Communications , vol. 20, no. 3, pp. 1472–1486, 2021. [31] W. Zhao, S. Abadal, G. Song, J. Jiang, and C. Han, “Terahertz wireless data center: Gaussian beam or airy beam?” IEEE Transactions on Wireless Communications , vol. 25, pp. 7922–7938, 2026.

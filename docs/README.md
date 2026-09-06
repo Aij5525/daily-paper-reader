@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-05</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-06</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
     <strong class="dpr-home-dashboard-count">共 6 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>5</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>4</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-05 22:11:04 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-06 21:21:08 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日共处理6篇论文，精读5篇、速读1篇，核心聚焦于匹配滤波学习与无线通信感知安全议题。最值得关注的是《Learning to deform the matched filter》与《Feasible but Not Safe》两篇高分工作，前者用可变形匹配滤波提升检测性能，后者揭示了无蜂窝通信感知关联中的约束违例与报告信道攻击风险。建议普通读者优先从这两篇切入，理解模型驱动优化与系统安全漏洞的实践边界，后续再结合OTFS信道估计等速读内容补充基础概念。</p>
+<p>今日精读两篇8.0分论文，聚焦6G空天地数字孪生与太赫兹无线数据中心的信道建模。</p>
+<p>最值得关注的方向：基于遥感地图的站点特定信道建模，以及三频段信道测量赋能多层数字孪生。</p>
+<p>后续可扩展了解速读中的LoRaWAN网关布局、WiFi光流估计与RF声学定位等交叉应用。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +73,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">5 篇</strong>
+    <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Learning to deform the matched filter">Learning to deform the matched filter</span></li><li><span class="dpr-home-dashboard-paper-title" title="Feasible but Not Safe: Constraint Violations and Report-Channel Attacks in Learned Cell-Free ISAC Association">Feasible but Not Safe: Constraint Violations and Report-Channel Attacks in Learned Cell-Free ISAC Association</span></li><li><span class="dpr-home-dashboard-paper-title" title="A Joint Power-Privacy Control Framework for Decentralized Learning over Heterogeneous Wireless Multicasting Networks">A Joint Power-Privacy Control Framework for Decentralized Learning over Heterogeneous Wireless Multicasting Networks</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Site-specific Channel Modeling Based on Remote-Sensing Maps for 6G Space--Air--Ground Digital Twins">Site-specific Channel Modeling Based on Remote-Sensing Maps for 6G Space--Air--Ground Digital Twins</span></li><li><span class="dpr-home-dashboard-paper-title" title="Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers">Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>5</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +86,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">4 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Exact Payload-Decoupling Conditions for Pilot-Only BEM Channel Estimation With Application to OTFS">Exact Payload-Decoupling Conditions for Pilot-Only BEM Channel Estimation With Application to OTFS</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions">Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions</span></li><li><span class="dpr-home-dashboard-paper-title" title="WiFlow: Estimating Optical Flow using WiFi Channel State Information">WiFlow: Estimating Optical Flow using WiFi Channel State Information</span></li><li><span class="dpr-home-dashboard-paper-title" title="ARFT: A Synchronized Multimodal RF-Acoustic Dataset for Positioning in Distributed Environments">ARFT: A Synchronized Multimodal RF-Acoustic Dataset for Positioning in Distributed Environments</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
 </section>
 </div>
 
