@@ -1,0 +1,202 @@
+Title: Lightweight CFR-Based Modulation Adaptation in a Real-Time MIMO-OFDM SDR Testbed
+
+URL Source: https://arxiv.org/pdf/2609.00903v2
+
+Published Time: Thu, 03 Sep 2026 00:46:20 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Lightweight CFR-Based Modulation Adaptation in a Real-Time MIMO-OFDM SDR Testbed 
+
+Luca Borst, Maryam Ansarifard, Ankith Vinayachandran, Kishor C. Joshi, George Exarchakos 
+
+Department of Electrical Engineering, Eindhoven University of Technology, Eindhoven, The Netherlands Emails: L.Borst@student.tue.nl, {M.Ansarifard, A.Vinayachandran, K.C.Joshi, G.Exarchakos }@tue.nl 
+
+Abstract —Conventional link adaptations typically rely on scalar link-quality indicators such as signal-to-noise ratio (SNR), while richer channel state information (CSI) can improve adaptation at higher processing complexity. This paper investigates a compact alternative for modulation selection in a real-time multiple-input multiple-output orthogonal frequency-division multiplexing (MIMO-OFDM) system, using channel frequency response (CFR) magnitude descriptors. A dataset of 87,817 over-the-air (OTA) samples is collected using a USRP-based testbed, with CFR measurements extracted at the base station (BS) from received uplink pilots. Decision tree (DT), random forest (RF), and k-nearest neighbours (KNN) classifiers are evaluated using BS-side SNR, CFR features, and their combination. SNR-only classifiers achieve 35%–42% test accuracy, whereas CFR-only features achieve 73.6%, 81.4%, and 80.0% for DT, RF, and KNN, respectively. CFR-based performance is maintained near the 10% BLER reliability thresholds, with RF reaching 82.8%. A depth-7 DT with 123 leaves is further integrated into the LabVIEW C Node for real-time inference. The results show that compact BS-side CFR descriptors provide more discriminative information than the available scalar BS-side SNR while remaining suitable for lightweight SDR implementation. 
+
+Index Terms —link adaptation, adaptive modulation, machine learning, MIMO-OFDM, software-defined radio 
+
+I. INTRODUCTION Link adaptation is a key mechanism for maintaining reliable and spectrally efficient communication over time-varying wireless channels. By adapting transmission parameters to the instantaneous channel conditions, a wireless system can balance robustness against achievable data rate. This becomes particularly important in multiple-input multiple-output orthog-onal frequency-division multiplexing (MIMO-OFDM) systems, where the propagation channel varies not only over time but also across transmit–receive antenna pairs and OFDM subcarriers. Multipath propagation, frequency-selective fading, interference, and path loss can therefore affect different parts of the transmitted signal differently. Modulation adaptation addresses this trade-off by selecting a more robust low-order modulation under unfavourable channel conditions and a higher-order modulation when the channel can support a larger data rate. Link-adaptation decisions require information about the propagation channel. In frequency-division duplexing (FDD) systems, channel state information (CSI) is generally estimated at the receiver from reference or pilot symbols and conveyed to the transmitter through channel-quality feedback. In time-division duplexing (TDD) systems, however, uplink and down-link propagation occur in the same frequency band at different time instances. Under the channel-reciprocity assumption, uplink pilot measurements can therefore be used at the base station (BS) to obtain a representation of the corresponding downlink channel, reducing the need for explicit receiver-side CSI feedback. Conventional link adaptations commonly relies on scalar link-quality indicators, such as signal-to-noise ratio (SNR), signal-to-interference-plus-noise ratio (SINR), or channel quality indicator (CQI), to a suitable transmission configuration using predefined thresholds. Outer-loop link adaptation (OLLA) fur-ther adjusts these thresholds according to ACK/NACK feedback in order to compensate for prediction errors and changing channel conditions [1]–[3]. Such approaches provide low-complexity decision mechanisms and are well suited to practical implementations. However, reducing the channel condition to a scalar metric does not explicitly retain the frequency-selective structure present in a MIMO-OFDM channel. Consequently, two different channel realisations with similar average SNR may exhibit different channel-frequency responses across the OFDM bandwidth, potentially resulting in different modulation reliability. 
+
+A. Related Work 
+
+Machine learning (ML) has increasingly been investigated as an alternative to fixed threshold-based link adaptations [4]. Several approaches retain conventional scalar link-quality indi-cators as model inputs. For example, contextual or supervised learning methods have used SNR [5], SINR, CQI, received-signal-strength information, and ACK/NACK [6] observations to predict suitable modulation and coding schemes. These methods improve the mapping between conventional link-quality measurements and transmission decisions, but the channel is still represented either through a small number of scalar indicators or indirectly through receiver feedback. A different line of work exploits richer CSI representations. In [7], for example, a feedback-free ML-based link-adaptation framework uses the full complex channel matrix as input to a CNN-LSTM architecture for MCS prediction, achiev-ing 92.5% test accuracy and outperforming threshold-based baselines. Such approaches demonstrate that high-dimensional CSI contains information that can be useful for link adaptation beyond conventional scalar metrics. However, processing the full complex CSI matrix increases the dimensionality of the learning problem and typically requires more complex model architectures and inference operations. 
+
+> This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. arXiv:2609.00903v2 [eess.SY] 2 Sep 2026
+
+ML-based modulation-only adaptation has also been consid-ered independently of coding-rate optimisation. Decision-tree-based modulation selection was investigated in [8], while a random-forest-based modulation-order selection approach was proposed in [9]. These works demonstrate that modulation adaptation can be treated as an independent ML classification problem. However, they were primarily evaluated in simulated narrowband or hybrid FSO/RF environments rather than in a real-time MIMO-OFDM SDR implementation. The existing literature therefore presents two main design directions: low-complexity link adaptation based on scalar channel-quality indicators, and richer CSI-based approaches that retain substantially more channel information at the cost of increased dimensionality and implementation complexity. Comparatively less attention has been given to the intermediate design point between these two extremes; exploiting the frequency-dependent channel information available in the channel frequency response (CFR), while compressing it into a small number of descriptors suitable for lightweight real-time inference. The CFR describes the complex-valued gain per OFDM subcarrier, representing the channel in the frequency domain, whereas CSI also covers time-domain or spacial characteristics [10]. This work investigates this intermediate design point using an over-the-air (OTA) MIMO-OFDM testbed implemented with NI USRP hardware and the LabVIEW Communications framework [11]. Under TDD channel reciprocity, uplink pilot measurements are processed at the BS to obtain the CFR. Instead of providing the complete complex CFR across all subcarriers to the learning model, its magnitude response is compressed into four statistical descriptors (mean, standard deviation, range, and slope), representing the average channel magnitude and its variation across frequency. These descriptors are then used for ML-based modulation selection. The study considers modulation adaptation independently of channel-coding-rate optimisation in order to isolate the effect of the channel representation on the modulation-selection problem. Three supervised classifiers, a decision tree (DT), random forest (RF), and k-nearest neighbours (KNN), are evaluated using three input configurations: BS-side SNR only, CFR magnitude descriptors only, and their combination. The resulting performance is evaluated using OTA measurements, including samples close to the modulation reliability boundaries. Finally, a complexity-constrained DT is translated into C-based if–else rules and integrated into the real-time LabVIEW processing chain. The main contributions of this work are summarised as follows:  
+
+> •
+
+An OTA experimental evaluation of CFR-based modula-tion selection in a real-time MIMO-OFDM SDR testbed using compact CFR magnitude descriptors rather than the full complex CSI matrix.  
+
+> •
+
+A systematic comparison of BS-side SNR, CFR-derived features, and their combination across DT, RF, and KNN classifiers, including evaluation close to the modulation reliability boundaries.  
+
+> •
+
+BS-side CFR-based classifiers outperform SNR-only classifiers (73.6%–81.4% vs. 35%–42% test accuracy), with performance maintained or improved near the 10% BLER reliability thresholds, reaching 82.8% for the RF CFR+SNR classifier.  
+
+> •
+
+A complexity-aware real-time implementation of a depth-7 DT with 123 leaves in the LabVIEW C Node, enabling modulation inference using a bounded sequence of thresh-old comparisons without online retraining or GPU-based inference. II. SYSTEM MODEL This section gives a system overview and describes the signal model and the experimental OTA setup used in this study. 
+
+A. System Overview 
+
+The testbed consists of a real-time MIMO-OFDM system implemented using NI USRP-2954 SDR hardware and the LabVIEW Communications framework. The system operates in a downlink configuration where Nt and Nr denote the number of antennas at the BS and the mobile station (MS), respectively. In this setup, Nt = 14 and Nr = 1, resulting in a frequency-dependent channel matrix H[k] ∈ CNr ×Nt (see Section II-B). This is physically implemented using 7 NI USRP-2954 SDRs forming the BS and 1 NI USRP-2954 SDR forming the MS, all connected to NI VERT2450 antennas. On the downlink, the BS performs modulation selection and OFDM waveform generation, including pilot insertion and cyclic-prefix addition. For channel acquisition, the MS transmits uplink pilot symbols that are received by the BS. The BS processes these pilots to estimate the uplink CFR and, under the TDD channel-reciprocity assumption, uses this estimate as a representation of the corresponding downlink channel. CFR magnitude descriptors are subsequently extracted and provided to the ML-based modulation selector. The selected modulation index is then passed to the downlink frame scheduler and OFDM modulator. The MS performs downlink OFDM demodulation and computes SNR and BLER measurements, which are logged for threshold derivation and performance evaluation but are not required as inputs to the CFR-based classifier during inference. An overview of this processing chain is shown in Fig. 1. 
+
+B. MIMO-OFDM Signal Model 
+
+The wireless channel is characterised by the CFR across OFDM subcarriers [12] as follows: 
+
+H = H[1] H[2] · · · H[Nsub ] , (1) where H[k] = |H[k]|e j∠H[k] denotes the complex-valued CFR of the kth subcarrier. Channel estimation for the proposed modulation-selection pipeline is performed at the BS using pilot symbols transmitted by the MS on the uplink. Let 
+
+HUL [k] denote the estimated uplink CFR on the kth subcarrier. Under the TDD reciprocity assumption, the corresponding downlink propagation channel can be inferred from the uplink measurement, i.e., HDL [k] ≈ HT
+
+> UL
+
+[k], with the matrix transpose accounting for the reversal of transmitter and receiver roles. An Inference / control path (BS, real-time)   
+
+> Uplink pilot-based channel acquisition modulation selection
+> Evaluation path (MS, offline analysis only)
+> Downlink reception performance evaluation
+> Wireless channel
+> Channel reciprocity (TDD) Pilot extraction / LS channel estimation
+> Estimate
+> CFR smoothing + feature extraction
+> Magnitude mean, std, range slope
+> Modulation classification
+> Decision tree (QPSK/16-QAM/64-QAM)
+> BS USRP
+> (Rx)
+> antennas
+> OFDM modulator (downlink)
+> Modulation index, pilot symbols, IFFT, CP
+> BS USRP
+> (Tx)
+> antennas
+> MS USRP
+> (Rx / Tx)
+> antenna
+> Compute link quality metrics Data logging
+> Store measurements for analysis
+> BLER curve fitting & threshold derivation (offline)
+> To compute reliability thresholds
+> Performance evaluation
+> Compare schemes
+
+Fig. 1: System architecture of the TDD MIMO-OFDM testbed. Uplink pilots transmitted by the MS are used for BS-side CFR estimation using a least-squares (LS) algorithm. Under channel reciprocity, CFR-derived features are provided to the deployed decision-tree classifier for downlink modulation selection. MS-side SNR and BLER are used only for measurement analysis and performance evaluation. automatic reciprocity calibration compensates for transceiver chain impact on the estimated channel, ensuring reciprocity [11]. The BS therefore uses the uplink-derived CFR as the channel representation for modulation selection. Channel estimation is performed via a LS algorithm at pilot subcarriers and applied to MMSE-based precoder design at the BS [13]. The number of subcarriers Nsub is equal to 1200, with a subcarrier spacing of 15 kHz. The system utilises 12 subcarriers per resource block (RB), resulting in NRB = 100 resource blocks. 
+
+C. OTA Measurement Setup 
+
+All experimental results are obtained using an OTA measure-ment configuration under controlled indoor conditions (Fig. 2). The MS antenna is extended from the receiver host through a 5 m, 50 Ω coaxial cable to simulate channel attenuation, positioned 60 cm from the testbed to create a line-of-sight (LoS) scenario. Communication is carried out at a carrier frequency of 4.2 GHz with a channel bandwidth of 20 MHz. The MS remains stationary to ensure repeatable channel conditions during data acquisition. 
+
+Fig. 2: OTA measurement setup: NI USRP-2954 testbed with 14 BS antennas and 1 MS antenna at 60 cm distance LoS. III. MODULATION ADAPTATION METHODOLOGY 
+
+This section describes data acquisition, processing, and the methods used to evaluate traditional and ML-based modulation adaptation under OTA conditions. 
+
+A. Data acquisition 
+
+Building on the OTA setup described in Section II, mea-surements are collected under controlled channel conditions to construct the dataset used for classifier training and evaluation. For each modulation scheme, the BS transmit power is swept over 100 discrete levels, covering operating conditions from high-BLER regions to reliable transmission below the 10% BLER threshold. At each power level, channel and link-quality measurements are recorded over a fixed observation interval of 30 s. Two measurement streams are logged simultaneously. BS-side quantities, including the CFR and SNR BS , are sampled at 
+
+fs,BS = 10 Hz, whereas the MS-side SNR MS and BLER MS are recorded at fs,MS = 1 Hz. Because of the different sampling rates, each BS-side observation is associated with the tempo-rally nearest MS-side measurement using timestamp synchroni-sation. This distinction is important for the proposed inference architecture. The BS-side quantities constitute the candidate inputs for modulation classification, while the downlink MS-side measurements are used only for (uncoded) BLER-curve fitting, reliability-threshold derivation, and offline performance analysis. The corresponding uplink BLER is not considered due to this study’s downlink-only scope. In particular, SNR MS 
+
+and BLER MS are not provided to the deployed CFR-based classifier during real-time inference. In addition to average channel quality, the CFR contains information about the variation of the channel response across OFDM subcarriers. Such frequency-selective behaviour arises from multipath propagation and is not explicitly represented by a single scalar SNR value [10]. CFR-derived features are therefore extracted to provide a compact representation of both the average channel magnitude and its frequency-domain variation. Prior to feature extraction, the raw CFR magnitude is smoothed using a Savitzky–Golay filter [14], [15]. The filter performs a local LS polynomial approximation that suppresses high-frequency measurement fluctuations while preserving the underlying shape of the frequency response [14]. A polynomial degree of N = 3 and a window half-length of M = 49 samples are used, corresponding to a total window length of 2 M +1 = 99 samples. For each modulation scheme, a logistic sigmoid is fitted to the measured BLER MS –SNR MS relationship using LS. The SNR corresponding to a target BLER of 10% is extracted from the fitted curve and used to define the reliability and transition regions considered in Section IV-A. Before classifier training, constraint masks are applied to remove corrupted or physically implausible observations according to empirically selected bounds on the measured SNR and CFR magnitude statistics. 
+
+B. Feature Engineering 
+
+Rather than using the full CFR across all OFDM sub-carriers, the smoothed CFR magnitude is compressed into four descriptors: mean |H[k]|, standard deviation σ|H[k]|, range 
+
+∆|H[k]|, and first-order LS slope ˆ α|H[k]|. These features capture the average channel magnitude, its variation, and the overall frequency-domain trend [10], while substantially reducing the input dimensionality. Together with the BS-side SNR, these quantities form the set of candidate features available for modulation classification at the BS. The complete BS-side feature vector is defined as 
+
+xBS =
+
+h
+
+SNR BS |H[k]| σ|H[k]| ∆|H[k]| ˆα|H[k]|
+
+iT
+
+. (2) To assess the contribution of the channel representation independently of the classifier architecture, three feature configurations are evaluated: 
+
+xSNR = [ SNR BS ]T , xCFR =
+
+h
+
+|H[k]|, σ|H[k]|, ∆|H[k]|, ˆα|H[k]|
+
+iT
+
+,
+
+xCFR +SNR = xBS .
+
+(3) The MS-side quantities SNR MS and BLER MS are excluded from all classifier input vectors. As described in Section III-A, they are used only for BLER-curve fitting, reliability-threshold derivation, and offline performance analysis. Consequently, the evaluated feature sets contain only quantities available from the BS processing chain during inference. The relative contribution of the individual features is anal-ysed in Section IV-C to determine whether the classification performance is primarily associated with the average CFR magnitude or with its variation across frequency. 
+
+C. Machine Learning-Based Modulation Selection 
+
+Modulation selection is formulated as a three-class super-vised classification problem with QPSK, 16-QAM, and 64-QAM as the output classes. The transmitted modulation is used as the class label, since BLER-based labelling leads to strongly imbalanced reliability regions. The fitted BLER thresholds are instead used for the transition-region analysis in Section IV-D. DT, RF, and KNN classifiers are evaluated to compare classification performance and implementation complexity. The DT recursively partitions the feature space using feature-dependent thresholds and produces an interpretable sequence of if–else decisions [16]. This structure is particularly suitable for embedded deployment because a bounded-depth tree can be translated directly into conditional C code. RF extends the tree-based approach by combining predictions from multiple 5 10 15 20 25 30 35 40  
+
+> SNR MS (dB)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> BLER MS
+> QPSK (thr: 13.02 dB) 16-QAM (thr: 20.42 dB) 64-QAM (thr: 27.04 dB) 10% BLER
+
+Fig. 3: Measured MS-side BLER versus SNR MS for QPSK, 16-QAM, and 64-QAM under the 60 cm LoS configuration. The fitted sigmoid curves and corresponding 10% BLER reliability thresholds are also shown. trees trained on randomised subsets of the data and features, generally improving robustness at the expense of increased inference and implementation complexity [17]. KNN provides a non-parametric comparison by assigning each observation to the most common class among its k nearest training samples according to the selected distance metric [18]. The dataset is split into 80% training and 20% test samples, with 5-fold cross-validation used for model selection and hyperparameter tuning. Each classifier is evaluated using the three BS-side feature configurations introduced in Section III-B: SNR-only, CFR-only, and CFR+SNR. This comparison isolates the effect of the channel representation from the choice of classifier. Feature importance is subsequently analysed for the tree-based models in Section IV-C to determine which BS-side measurements contribute most strongly to the predictions. RF and KNN serve as offline performance references, while DT is also considered for deployment because its bounded-depth decision rules can be translated directly into C if–else statements. For real-time deployment, CFR extraction, smoothing, fea-ture computation, and DT inference are executed in the LabVIEW processing chain at fs,BS = 10 Hz. To avoid rapid modulation switching, the scheduler is updated only after the same modulation is predicted for three consecutive inference intervals, corresponding to 0.30 s. IV. E XPERIMENTAL RESULTS 
+
+This section presents the OTA measurement and offline classification results. 
+
+A. Data Acquisition & Channel Characterisation 
+
+After applying the constraint masks described in Sec-tion III-A, the final dataset contains 87,817 OTA observations, with 36.2% QPSK, 28.2% 16-QAM, and 35.5% 64-QAM samples. Fig. 3 shows the measured BLER MS –SNR MS relationship and fitted sigmoid curves. The 10% BLER reliability thresholds 5 10 15 20 25 30 35 40  
+
+> SNR MS (dB)
+> 0200 400 600 800
+> Count
+> QPSK 16-QAM 64-QAM QPSK/16-QAM window 16-QAM/64-QAM window
+
+(a) SNR MS distribution with ±3 dB transition windows. 5 10 15 20 25 30 35 40  
+
+> SNR BS (dB)
+> 0200 400 600 800 1000 1200 1400
+> Count
+> QPSK 16-QAM 64-QAM
+
+(b) SNR BS distributions across modulation classes. 
+
+Fig. 4: SNR distributions for MS-side and BS-side. are 13.0 dB, 20.4 dB, and 27.0 dB for QPSK, 16-QAM, and 64-QAM, respectively, and are used in the transition-region analysis of Section IV-D. Although the transmitted-modulation classes are relatively balanced, the reliability regions are not: only 0.1% of QPSK samples lie below its threshold, while only 5.3% of 64-QAM samples lie above its threshold. This imbalance motivates the use of transmitted modulation rather than BLER-based labels for classifier training. The measured SNR MS spans 11.9–29.6 dB, covering the tran-sition from unreliable to reliable operation for the considered modulation schemes. In contrast, the class-conditional SNR BS 
+
+means are tightly clustered at 28.2, 28.4, and 28.9 dB for QPSK, 16-QAM, and 64-QAM, respectively, with within-class standard deviations of 1.7–2.3 dB. As shown in Fig. 4b, the SNR BS distributions strongly overlap across modulation classes, consistent with BS-side array gain and the use of uplink-pilot SNR while varying downlink transmit power. This limits the discriminative value of SNR BS and motivates the CFR-derived representation. 
+
+B. Offline Classification Performance 
+
+Table I compares the performance of the three classifiers across the considered BS-side feature sets. SNR-only models perform poorly, consistent with the strong overlap in SNR BS 
+
+observed in Section IV-A, whereas CFR-derived features substantially improve both test and cross-validation accuracy. Adding SNR BS to the CFR features provides little additional TABLE I: Classification accuracy (%) on the full dataset and transition region subset. CV: 5-fold cross-validation mean ±
+
+std.                                                                                        
+
+> Full dataset Transition regions Classifier Feature set Test CV Test CV DT SNR-only 42.0 41 .5±0.139.6 39 .7±0.3DT CFR-only 73.6 73 .2±0.378.2 77 .8±0.4DT CFR + SNR 73.5 73 .4±0.378.4 77 .7±0.5RF SNR-only 35.3 35 .2±0.335.4 34 .8±0.5RF CFR-only 81.4 81 .2±0.481.9 81 .6±0.2RF CFR + SNR 81.6 81 .6±0.382.8 82 .1±0.2KNN SNR-only 37.3 37 .2±0.237.1 37 .5±0.7KNN CFR-only 80.0 79 .8±0.481.1 80 .9±0.2KNN CFR + SNR 78.0 78 .1±0.380.7 79 .9±0.3
+
+benefit, indicating that the compact CFR representation captures most of the useful discriminative information under the considered conditions. The close agreement between the test and cross-validation results further indicates stable performance across the considered data splits. RF achieves the highest offline accuracy, while DT is selected for real-time deployment because its inference can be implemented directly as compact conditional C code. A depth of d = 7, corresponding to 123 leaves, is selected by 5-fold cross-validation as a suitable performance–complexity operating point. 
+
+C. Feature Importance 
+
+The classification results in Table I show that the performance improvement is primarily associated with the introduction of CFR-derived features. To examine which individual mea-surements drive this improvement, Fig. 5 reports the feature importance of the DT and RF models trained using the CFR+SNR feature set. For both classifiers, SNR BS receives substantially lower importance than the CFR-derived features, contributing only 1.0% for DT and 9.5% for RF. This is consistent with the limited performance gain observed when SNR BS is added to the CFR feature set and indicates that the scalar BS-side SNR provides little additional discriminative information under the considered measurement conditions. The mean CFR magnitude |H[k]| is the most influential feature for both tree-based models, accounting for 63.3% of the DT importance and 38.0% of the RF importance. The remaining importance is distributed among the CFR range, standard deviation, and slope features, indicating that the classifiers exploit both the average magnitude level and, to a lesser extent, the variation of the channel response across frequency. These results suggest that the observed classification gain is driven predominantly by the compact CFR representation rather than by the available scalar SNR BS measurement. 
+
+D. Transition Region Analysis 
+
+Classifier performance in the previous sections was evaluated over the full range of measured channel conditions. For link adaptation, however, particular attention is required near the reliability thresholds, where small changes in channel 0 10 20 30 40 50 60 70 Importance (%) Mean mag. Range mag. Std. mag. Slope mag. SNR BS 
+
+> 63.3% 23.3% 11.1% 1.3% 1.0% 38.0% 20.8% 16.7% 15.0% 9.5%
+> DT-CFR+SNR RF-CFR+SNR
+
+Fig. 5: Feature importance for DT and RF (CFR+SNR feature subset). KNN is excluded as it does not provide a native feature importance measure. SNR BS contributes only 1.0% and 9.5% for DT and RF respectively. quality can affect the suitability of a modulation scheme. To evaluate whether the CFR-derived representation remains informative in these more critical operating regions, the analysis is restricted to samples lying within ±3 dB of the 10% BLER thresholds of QPSK and 16-QAM, located at 13.0 dB and 20.4 dB, respectively. This results in the two SNR intervals 
+
+[10 .0, 16 .0] dB and [17 .4, 23 .4] dB. The resulting subset contains 56,211 samples, corresponding to approximately 64% of the full dataset, with relatively balanced transmitted-modulation proportions of 37.4% QPSK, 31.9% 16-QAM, and 30.8% 64-QAM. As illustrated in Fig. 4a, the class distributions overlap substantially within these regions, providing a more challenging setting for modulation classification. The corresponding classification results are reported in Table I. The SNR-only models remain close to the perfor-mance expected from a three-class classifier with limited discriminative information, whereas the CFR-based models maintain or improve their performance relative to the full-dataset evaluation. Adding SNR BS to the CFR representation again provides only a limited additional benefit. Overall, the transition-region results indicate that the advantage of the CFR-derived representation is retained in channel conditions close to the measured BLER reliability thresholds, where modulation decisions are particularly sensitive to changes in link quality. V. C ONCLUSION 
+
+This paper experimentally evaluated compact BS-side CFR magnitude descriptors for ML-based modulation classification in a real-time MIMO-OFDM SDR system. Using 87,817 OTA observations, CFR-based features consistently outperformed the SNR-only baseline, while adding SNR BS provided little additional benefit. The same trend was retained near the measured 10% BLER reliability thresholds. Feature-importance analysis further showed that the mean CFR magnitude is the dominant input. Although RF achieved the highest offline performance, the depth-7 DT with 123 leaves offered a more practical performance–complexity trade-off and was successfully in-tegrated into the LabVIEW C Node for real-time inference at 10 Hz. The evaluation is limited to stationary indoor LoS conditions and magnitude-only CFR features. Future work will consider mobility, NLoS propagation, richer CFR/CIR features, and extension to joint modulation-and-coding adaptation. REFERENCES [1] F. Blanquez-Casado, G. Gomez, M. del Carmen Aguayo-Torres, and J. T. Entrambasaguas, “eOLLA: an enhanced outer loop link adaptation for cellular networks,” EURASIP Journal on Wireless Communications and Networking , vol. 2016, no. 1, p. 20, 2016. [2] M. P. Mota, D. C. Araujo, F. H. C. Neto, A. L. F. D. Almeida, and F. R. Cavalcanti, “Adaptive modulation and coding based on reinforcement learning for 5G networks,” in 2019 IEEE Globecom Workshops (GC Wkshps) . IEEE, 2019, pp. 1–6. [3] K. K. Mohan, S. S. Das, and P. Ray, “Link Adaptation Schemes Based on Parametric Estimation of SNR Distribution Over Nakagami-m Fading Channels,” IEEE Transactions on Communications , vol. 67, no. 2, pp. 1537–1553, 2019. [4] E. Bobrov, D. Kropotov, H. Lu, and D. Zaev, “Massive MIMO adaptive modulation and coding using online deep learning algorithm,” IEEE Communications Letters , vol. 26, no. 4, pp. 818–822, 2021. [5] D. G. S. Pivoto, J. S. Ferreira, M. S. B. Cunha, F. A. De Figueiredo, and L. L. Mendes, “Contextual bandit-based AMC for quasi-stationary wireless backhaul links on SDR platforms,” IEEE Open Journal of the Communications Society , 2026. [6] R. Wiesmayr, L. Maggi, S. Cammerer, J. Hoydis, F. A. Aoudia, and A. Keller, “Salad: Self-adaptive link adaptation,” arXiv preprint arXiv:2510.05784 , 2025. [7] Q. An, M. Zafari, C. Dick, S. Segarra, A. Sabharwal, and R. Doost-Mohammady, “Ml-based feedback-free adaptive MCS selection for massive multi-user MIMO,” in 2023 57th Asilomar Conference on Signals, Systems, and Computers . IEEE, 2023, pp. 157–161. [8] F. Ismail, S. G. Khawaja, A. M. Khan, U. H. Shah, M. U. Akram, and A. Shaukat, “Cognitive link adaptation via modulation scheme classification in narrowband networks under AWGN and SUI channel conditions,” Scientific Reports , vol. 15, no. 1, p. 27604, 2025. [9] J. Shao, Y. Liu, X. Du, and T. Xie, “Adaptive modulation scheme for soft-switching hybrid FSO/RF links based on machine learning,” in 
+
+Photonics , vol. 11, no. 5. MDPI, 2024, p. 404. [10] D. Tse and P. Viswanath, Fundamentals of Wireless Communication .Cambridge University Press, 2005. [11] National Instruments, LabVIEW Communications MIMO Application Framework 1.5 , Oct. 2018, doc. 377799A-01. [Online]. Available: https://download.ni.com/evaluation/rf/MIMO Application Framework Manual ver 1.5.pdf [12] A. Goldsmith, Wireless Communications . Cambridge University Press, 2005. [13] T. L. Marzetta, E. G. Larsson, H. Yang, and H. Q. Ngo, Fundamentals of Massive MIMO . Cambridge University Press, 2016. [14] R. W. Schafer, “What is a Savitzky-Golay filter?” IEEE Signal Processing Magazine , vol. 28, no. 4, pp. 111–117, 2011. [15] J. Miloˇ s, J. Blumenstein, A. Prokeˇ s, T. Mikul´ aˇ sek, and C. Mecklenbr¨ auker, “Improved RMS Delay Spread Estimation for mmWave Channels Using Savitzky–Golay Filters,” Electronics , vol. 8, no. 12, p. 1530, 2019. [16] J. Good, T. Kovach, K. Miller, and A. Dubrawski, “Feature learning for interpretable, performant decision trees,” Advances in Neural Information Processing Systems , vol. 36, pp. 66 571–66 582, 2023. [17] G. James, D. Witten, T. Hastie, R. Tibshirani, and J. Taylor, An Introduction to Statistical Learning . Cham: Springer International Publishing, 2023. [18] R. K. Halder, M. N. Uddin, M. A. Uddin, S. Aryal, and A. Khraisat, “Enhancing k-nearest neighbor algorithm: a comprehensive review and performance analysis of modifications,” Journal of big data , vol. 11, no. 1, p. 113, 2024.

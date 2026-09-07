@@ -1,0 +1,466 @@
+Title: Energy-Efficient Waveform Design for ISAC Systems: An Ambiguity-Domain QoS Perspective
+
+URL Source: https://arxiv.org/pdf/2609.05390v1
+
+Published Time: Mon, 07 Sep 2026 01:19:48 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+2026 Asia Pacific Signal and Information Processing Association Annual Summit and Conference (APSIPA ASC) 
+
+# Energy-Efficient Waveform Design for ISAC Systems: An Ambiguity-Domain QoS Perspective 
+
+Ngoc-Son Duong ∗, Trung-Hieu Nguyen #∗, and Quang-Truong Can †∗ Faculty of Electronic Engineering, Posts and Telecommunications Institute of Technology, Hanoi, Vietnam  
+
+> †
+
+Faculty of Electronics and Telecommunications, VNU University of Engineering and Technology, Hanoi, Vietnam E-mail: {sondn, hieunt }@ptit.edu.vn, truongcq@vnu.edu.vn ( #Corresponding Author) 
+
+Abstract —Integrated sensing and communication (ISAC) re-quires transmit waveforms that simultaneously preserve commu-nication quality, provide reliable sensing, and remain compatible with practical radio-frequency front ends. This paper considers a discrete-time ISAC waveform design problem that minimizes transmit power from the perspective of a novel metric termed the ambiguity-domain sensing signal-to-interference-plus-noise ratio (AF-SINR). The proposed AF-SINR quantifies the ratio between the desired ambiguity-function mainlobe power and the weighted aggregate sidelobe leakage plus noise within a local delay-Doppler region of interest, thereby providing a localized and noise-aware sensing-QoS measure. To enable ISAC operation, the waveform is further required to satisfy per-user effective communication-SINR constraints, while a peak-to-average power ratio (PAPR) constraint is imposed to facilitate practical implementation. The resulting energy-minimization problem is nonconvex due to the fractional QoS expressions, quartic ambiguity terms, and waveform-dependent PAPR constraint. To address this chal-lenge, we propose a fractional-programming successive-convex-approximation (FP-SCA) algorithm. Simulation results verify that the proposed method satisfies all requirements while preserving localized ambiguity suppression over the local delay-Doppler region. 
+
+Index Terms —6G, ISAC, ambiguity-domain sensing, energy-efficient waveform design, fractional programming, successive convex approximation. 
+
+I. I NTRODUCTION 
+
+Integrated sensing and communication (ISAC) is regarded as an emerging technology for beyond-5G and sixth-generation wireless networks as it can support data transmission and environmental sensing simultaneously on a common waveform and radio-frequency front end [1], [2], [3]. In contrast with a communication-only design, an ISAC transmitter must control not only user-level communication quality but also the tem-poral, spectral, and spatial structure of the probing waveform. This is especially important for orthogonal frequency-division multiplexing (OFDM) systems because their multicarrier struc-ture is well suited for range and Doppler processing. However, the random communication symbols can create high sidelobes in the ambiguity function [3], [4]. To handle this problem, a substantial body of research has examined OFDM waveform design from several related perspectives. From an information theoretic viewpoint, Wei et al. design ISAC waveform throught power allocation and beamforming problem under sensing and communication mutual information constraints [5]. Mean-while, He et al. improved sensing performance without degrad-ing the communication link by transmitting additional sensing signals through the null space of the communication channel [6]. Beyond these signal level designs, Zhang et al. exploited the flexibility of OFDM across the time and frequency domains by jointly adjusting resource allocation to improve sensing and positioning while preserving communication performance [7]. In different scene, practical transmitter limitations have motivated another line of research on PAPR reduction, since large OFDM peaks require greater power amplifier backoff and reduce transmitter efficiency [8], [9]. More recently, attention has shifted toward direct control of the ambiguity response. In [4], Li et al. minimized the range Doppler integrated sidelobe level under symbol level precoding and constant modulus constraints . Similarly, Feng et al. considered weighted peak and integrated sidelobe metrics together with PAPR control and constructive interference constraints for communication [10]. From the above, three observations motivate this work. First, minimizing an integrated sidelobe level (ISL) alone does not define a sensing quality of services (QoS) in the presence of receiver noise, because both the mainlobe and sidelobes scale with waveform energy. Second, while peak-aware or integrated sidelobe metrics are useful, they do not explicitly indicate if the sensing output achieves a required balance between the desired signal (target) and the combined effects of leakage and noise. Third, a practical energy-efficient transmitter should minimize power while satisfying sensing QoS, communication QoS requirements, and a low-PAPR condition. These considerations motivate an ambiguity-domain sensing SINR, denoted AF-SINR, that incorporates the desired ambiguity mainlobe, weighted delay-Doppler sidelobe leakage, and matched-filter noise in one QoS constraint. The main contributions are summarized as follows.  
+
+> •
+
+We formulate a transmit-power minimization problem with a novel AF-SINR sensing QoS constraint, per-user communication SINR constraints, and a PAPR constraint. The sensing metric has a direct physical interpretation as the matched-filter mainlobe-to-leakage-plus-noise ratio.  
+
+> •
+
+We develop an FP-SCA algorithm tailored to the proposed ISAC waveform design. The method combines quadratic transforms for the fractional sensing and communication QoS constraints with first-order affine approximations of the ambiguity-function, such that each successive convex subproblem is formulated as a second-order cone pro-gram. arXiv:2609.05390v1 [eess.SP] 4 Sep 2026 The remainder of this paper is organized as follows. Sec-tion II introduces the discrete-time ISAC waveform model, the ambiguity-domain sensing metric, and the minimum-energy waveform design problem under communication-QoS and PAPR constraints. Section III presents the proposed FP-SCA algorithm. Section IV provides numerical results and compar-isons with benchmark designs. Finally, Section V concludes the paper and discusses future research directions. II. P ROBLEM FORMULATION 
+
+A. Ambiguity-Domain sensing SINR 
+
+Consider a complex baseband transmit block represented by 
+
+x = [ x0, x 1, . . . , x N −1]⊤ ∈ CN , (1) where N is the discrete waveform length. The vector can rep-resent a time-domain OFDM block or a vectorized waveform after fixing a transmit architecture. Let τ and ν denote integer circular delay and normalized Doppler bins, respectively. The circular delay matrix Jτ and Doppler modulation matrix Dν
+
+are defined such that 
+
+[Jτ x]n = x(n−τ ) mod N , (2) and 
+
+Dν = diag 
+
+
+
+ej2πνn/N N −1
+
+> n=0
+
+(3) The discrete periodic ambiguity sample at the delay-Doppler cell (τ, ν ) is 
+
+χτ,ν (x) = xHDν Jτ x = xHQτ,ν x. (4) Let the origin cell be the ambiguity mainlobe. Since Q0,0 = I,its value is 
+
+χ0,0(x) = ∥x∥22. (5) Let Q be a prescribed region of interest (RoI) excluding the origin. This region identifies delay-Doppler cells where sidelobes can mask weak echoes or create false detections [7]. We define the AF-SINR as 
+
+ΓAF (x) = |χ0,0(x)|2
+
+P 
+
+> q∈Q
+
+wq |χq (x)|2 + σ2AF ∥x∥22 + σ20
+
+. (6) where wq ≥ 0 denotes the weight assigned to the q-th delay-Doppler cell. The numerator in (6) is the desired ambiguity mainlobe power. The first term in the denominator is the weighted sidelobe leakage over the RoI. The second term models the output noise power of a matched filter whose reference waveform scales with the transmit block, while the third represents a waveform-independent noise. Physically, it measures the ability of the matched-filter response to echo from nearby clutter, neighboring targets, and noise. Unlike the integrated sidelobe level [4], which only measures the total sidelobe energy, the AF-SINR explicitly accounts for the mainlobe strength and receiver noise. Similarly, whereas the peak sidelobe level [7] focuses only on the strongest sidelobe, the AF-SINR captures the cumulative effect of all weighted sidelobes in the local RoI. The metric can also be interpreted as a counterpart of the signal-to-clutter-plus-noise ratio, although it does not require explicit target or clutter coefficients. This makes AF-SINR particularly suitable for waveform optimiza-tion, since it directly imposes a sensing-QoS threshold while jointly reflecting local ambiguity suppression, transmit energy, and noise robustness. Similar to standard SINR requirements, we need AF-SINR satisfies 
+
+ΓAF (x) ≥ γAF , (7) where γAF is a required AF-SINR threshold. 
+
+B. Communication QoS 
+
+In addition to the sensing functionality, the transmit wave-form is required to support downlink communication with K
+
+users. Rather than explicitly modeling a conventional multiuser precoder and symbol vector, we adopt an effective waveform-response model. For k-th user, let dk ∈ CN denote the desired waveform-response vector, where the scalar projection dH 
+
+> k
+
+x
+
+characterizes the useful communication component induced by 
+
+x. Moreover, let Ik = [ ik, 1, ik, 2, . . . , ik,L k ] ∈ CN ×Lk collect the interference-response vectors associated with user k. The interference term IH 
+
+> k
+
+x therefore aggregates the waveform-dependent residual interference across Lk effective interfer-ence components. Accordingly, the desired signal power and the interference power experienced by k-th user are respec-tively given by 
+
+Sk(x) = dH 
+
+> k
+
+x 2 , (8) and 
+
+Ik(x) = IH 
+
+> k
+
+x 22 =
+
+> Lk
+
+X
+
+> ℓ=1
+
+iH
+
+> k,ℓ
+
+x 2 . (9) Let σ2C,k denote the effective noise power at k-th user, which may include thermal noise. The resulting communication SINR is modeled as 
+
+Γk(x) = dH 
+
+> k
+
+x 2
+
+IH 
+
+> k
+
+x 22 + σ2C,k 
+
+, k = 1 , . . . , K. (10) It is noted that (10) is a reduced form of the linear com-munication SINR. Specifically, the channel coefficients, fixed transmit/receive beamformers, and linear waveform-projection operators are absorbed into the effective desired-response vector dk and the interference-response matrix Ik. These quan-tities are assumed to be known, e.g., from channel estimation and predetermined transceiver processing. To guarantee the communication QoS, the waveform must satisfy 
+
+Γk(x) ≥ γk, k = 1 , . . . , K, (11) where γk > 0 is the prescribed SINR target. 
+
+C. PAPR constraint 
+
+Apart from AF-SINR and communication QoS, another important requirement is the low PAPR. Maintaining a low PAPR is critical for maximizing both hardware efficiency and overall communication and sensing performance. A waveform with a low PAPR allows the transmitter’s power amplifier to operate closer to its saturation region, which significantly enhances energy efficiency without inducing severe non-linear distortion. The discrete-time PAPR is defined as 
+
+PAPR( x) = N max n |xn|2
+
+∥x∥22
+
+. (12) A finite upper bound ρ > 1 is imposed as 
+
+|xn|2 ≤ ρN ∥x∥22, n = 0 , ..., N − 1. (13) Herein, parameter ρ balances envelope regularity and design flexibility. A smaller ρ improves hardware compatibility but restricts amplitude degrees of freedom. The limiting case ρ = 1 
+
+corresponds to constant-modulus (CM) signaling. In this work, we prefer a design with low PAPR because the feasible of CM set degenerates into a nonconvex phase manifold. We refer the reader to manifold optimization [11] or gradient projection methods [12] if interested in CM constraints. 
+
+D. Problem formulation 
+
+Along with the constraints mentioned above, the waveform energy minimization problem is formulated as 
+
+minimize 
+
+> x∈CN
+
+∥x∥22 (14a) 
+
+subject to ΓAF (x) ≥ γAF , (14b) 
+
+Γk(x) ≥ γk, k = 1 , . . . , K, (14c) 
+
+|xn|2 ≤ ρN ∥x∥22, n = 0 , . . . , N − 1. (14d) Problem (14) is nonconvex mainly because the AF-SINR contains quartic terms. In the next section, we develop a conic method for obtaining a feasible solution. III. P ROPOSED FP-SCA M ETHOD 
+
+A. Quadratic transform for QoS ratios 
+
+At r-th iteration, using Theorem 2 in [13], we update the sensing auxiliary variable as 
+
+y(r)AF = χ0,0(x(r))
+
+P 
+
+> q∈Q
+
+wq |χq (x(r))|2 + σ2AF ∥x(r)∥22 + σ20
+
+. (15) Similarly, the k-th communication auxiliary variable is 
+
+y(r) 
+
+> k
+
+= dH 
+
+> k
+
+x(r)
+
+∥IH 
+
+> k
+
+x(r)∥22 + σ2C,k 
+
+. (16) These updates convert the fractional QoS requirements into difference-of-quadratic expressions when the auxiliary vari-ables are fixed [13]. 
+
+B. Local ambiguity approximation 
+
+The ambiguity sample in (4) is a complex quadratic form. At x(r), we use the local model 
+
+ˆχq (x; x(r)) = ( x(r))HQq x + xHQq x(r) − (x(r))HQq x(r).
+
+(17) It creates an affine complex expression in the variable vector and enables a conic representation of the aggregate sidelobe term. Because general delay-Doppler operators are not nec-essarily Hermitian, (17) is employed as a local sequential approximation. Consequently, the original QoS constraints are explicitly rechecked after each update, and a restoration step is applied before accepting the next iterate. For the mainlobe, the local approximation reduces to 
+
+ˆχ0,0(x; x(r)) = 2 Re {
+
+
+
+x(r)H
+
+x} − ∥ x(r)∥22. (18) With fixed y(r)AF , the sensing QoS is approximated as 
+
+γAF + |y(r)AF |2
+
+ X
+
+> q∈Q
+
+wq | ˆχq (x; x(r))|2
+
++ σ2AF ∥x∥22 + σ20
+
+
+
+≤ 2 Re 
+
+n 
+
+y(r)AF 
+
+∗
+
+ˆχ0,0(x; x(r))
+
+o
+
+.
+
+(19) Similarly, the communication QoSs become 
+
+γk + |y(r) 
+
+> k
+
+|2  ∥IH 
+
+> k
+
+x∥22 + σ2C,k 
+
+ ≤ 2 Re 
+
+n 
+
+y(r)
+
+> k
+
+∗
+
+dH 
+
+> k
+
+x
+
+o
+
+. (20) 
+
+C. PAPR successive convex approximation 
+
+The right-hand side of (13) contains ∥x∥22, which is convex and therefore cannot be retained directly on the right-hand side of a convex inequality. Its affine lower bound at x(r) is 
+
+p(x; x(r)) = 2 Re {
+
+
+
+x(r)H
+
+x} − ∥ x(r)∥22. (21) Then, we can use a PAPR surrogate, which is defined as 
+
+|xn|2 ≤ ρN p(x; x(r)), n = 0 , . . . , N − 1. (22) 
+
+D. Convexified problem 
+
+After convexing the cost function and constraints, problem in (14) becomes 
+
+minimize x ∥x∥22
+
+subject to (19) , (20) , (22) . (23) 
+
+E. Feasibility restoration 
+
+The local ambiguity model in (17) is not a global inner approximation for arbitrary non-Hermitian Qq . To retain an original-QoS feasible waveform, let x = √P u, ∥u∥2 = 1 , and 
+
+B(u) = P 
+
+> q∈Q
+
+wq |uHQq u|2. The original AF-SINR becomes 
+
+ΓAF (P, u) = P 2
+
+P 2B(u) + P σ 2AF + σ20
+
+. (24) Therefore, the minimum power is the positive root of 
+
+[1 − γAF B(u)] P 2 − γAF σ2AF P − γAF σ20 = 0 , (25) provided that 1 − γAF B(u) > 0. The solution to (25) is 
+
+PAF (u) = γAF σ2AF + pγ2AF σ4AF + 4 γAF σ20 (1 − γAF B(u)) 2(1 − γAF B(u)) .
+
+(26) Likewise, define Sk(u) = |dH 
+
+> k
+
+u|2 and Ik(u) = ∥IH 
+
+> k
+
+u∥22, the minimum power required for user k is 
+
+PC,k (u) = γkσ2C,k 
+
+Sk(u) − γkIk(u) , (27) Algorithm 1: Proposed SCA-based algorithm for (14) 
+
+Input: Initial waveform x(0) , maximum iteration number rmax , and tolerance ϵ
+
+Output: x⋆
+
+r ← 0;
+
+while r < r max do 
+
+Update y(r)AF and {y(r) 
+
+> k
+
+}Kk=1 using (15) and (16); Solve (23) and denote its solution by ˜x(r+1) ;
+
+u(r+1) ← ˜x(r+1) /∥˜x(r+1) ∥2;Compute B(u(r+1) ), {Sk(u(r+1) )}Kk=1 , and 
+
+{Ik(u(r+1) )}Kk=1 ;
+
+if 1 − γAF B(u(r+1) ) ≤ 0 or 
+
+∃k ∈ { 1, . . . , K } : Sk(u(r+1) ) − γkIk(u(r+1) ) ≤ 0
+
+then break 
+
+Compute PAF (u(r+1) ) from (26); Compute PC,k (u(r+1) ) from (27) for all k;Compute restored power by (28); 
+
+x(r+1) ←
+
+q
+
+P (r+1) req u(r+1) ;
+
+if ∥x(r+1) ∥22 − ∥ x(r)∥22
+
+max 1, ∥x(r)∥22
+
+≤ ϵ then break ;
+
+r ← r + 1 ;
+
+x⋆ ← x(r);
+
+return x⋆;whenever the denominator is positive. The restored power is 
+
+Preq (u) = max {PAF (u), P C,1(u), . . . , P C,K (u)} . (28) Since PAPR is scale invariant, restoring x by pPreq u main-tains the candidate PAPR while preserving the original AF-SINR and communication SINR requirements. The pseu-docode for our proposed algorithm is given by Algorithm 1. IV. S IMULATION RESULTS AND DISCUSSION 
+
+A. Simulation Configuration 
+
+For performance evaluation, the proposed method is com-pared against a radar-only design, which is formulated by dropping the communication-QoS constraints while maintain-ing the same AF-SINR and PAPR requirements. The principal performance metric is the required transmit power, reported in dBm, when i) changing the AF-SINR threshold while the communication-QoS target remains fixed and ii) changing the communication-QoS requirement while the AF-SINR thresh-old is held fixed. In this simulation, the ISAC system has to serve K = 3 users using a waveform of the length N = 32 .The reference sensing-QoS target is γAF = 16 dB, while the communication-SINR target is set to γk = 20 dB for all users. Moreover, the PAPR threshold is fixed at ρ = 1 .5, and the maximum number of iterations is set to 10 .
+
+B. Simulation results and Discussion 0 1 2 3 4 5 6 7 8 9 10                      
+
+> −9
+> −8
+> −7
+> −6
+> Iteration Tx power [dBm]
+> Proposed Radar-only
+> (a) Transmit-power convergence 012345678910 16 16 .216 .416 .6
+> Iteration AF SINR [dB]  Proposed Radar-only AF-SINR target
+> (b) AF-SINR convergence 012345678910 00.511.52
+> Iteration PAPR [dB]
+> Proposed Radar-only PAPR threshold
+> (c) PAPR convergence Fig. 1. Convergence behavior of the proposed ISAC and radar-only designs.
+
+1) On the convergence behavior: Fig. 1 illustrates the convergence behavior of the proposed design and radar-only design, both initialized under same conditions. As can be seen, both methods reduce the required transmit power and reach a stable-state after four iterations. Interestingly, while the radar-only design converges directly to the target AF-SINR, the proposed method fluctuate before stabilizing. Moreover, the PAPR values of both waveforms gradually increase and finally approach the prescribed threshold, indicating that the PAPR constraint becomes active at convergence. Crucially, even with the communication-QoS requirements, the proposed design achieves a same transmit power compared to that of the radar-only scheme. 
+
+2) Visualizing local ambiguity-domain shaping: Fig. 2shows the ambiguity-shaping characteristics among the three waveforms. As can be seen, the periodic chirp exhibits a highly structured ambiguity pattern, with a low background level but several periodic replicas that appear as isolated high peaks across the delay-Doppler plane. Despite its high sensing efficiency, this waveform offers no communication capability. In contrast, the radar-only and proposed waveforms explicitly shape the AF over the local delay-Doppler RoI. The radar-only waveform exhibits the darkest colors within the protected RoI, indicating the strongest local sidelobe suppression because all waveform degrees of freedom are devoted to sensing function. The proposed waveform preserves the same RoI-centered −10 0 10 
+
+−10 010 
+
+Delay bin Doppler bin 
+
+Periodic chirp 
+
+−10 0 10 
+
+−10 010 
+
+Delay bin Doppler bin 
+
+Radar-only 
+
+−10 0 10 
+
+−10 010 
+
+Delay bin Doppler bin 
+
+Proposed 
+
+−80 
+
+−60 
+
+−40 
+
+−20 0                              
+
+> AF power [dB] Fig. 2. Visual comparison of normalized periodic ambiguity-function power maps for the periodic chirp [14], radar-only, and proposed ISAC waveforms. 036912 15
+> −25
+> −20
+> −15
+> −10
+> −50
+> γAF [dB] Tx power [dBm]
+> Proposed, σ2AF = 0 dB Proposed, σ2AF =−5dB Proposed, σ2AF =−10 dB Radar-only, σ2AF = 0 dB Radar-only, σ2AF =−5dB Radar-only, σ2AF =−10 dB
+> Fig. 3. Required transmit power versus AF-SINR requirement.
+
+low sidelobe structure, albeit with a slightly brighter RoI than the radar-only design. This increase reflects the sensing-communication trade-off, as part of the waveform design freedom must be allocated to satisfy the communication QoS constraints. Lastly, we can recognize that ambiguity energy outside the RoI is allowed to remain relatively high. This can be exploited to satisfy the communication requirements while preserving the prescribed local sensing performance [7]. 
+
+3) Transmit-power requirement under varying AF-SINR tar-gets: Fig. 3 depicts the required transmit power as a function of the AF-SINR requirement under different filter noise. As we can see, the transmit power increases monotonically with 
+
+γAF , and a larger σ2AF consistently incurs a higher power cost. Notably, at low γAF for the case σ2AF = −5 dB and σ2AF = −10 dB, the proposed design requires a higher transmit power than the radar-only scheme because the sensing constraint is relatively loose, whereas the communication QoS constraints remain active. In this regime, the minimum transmit power is determined by the communication-induced power requirement rather than by the AF-SINR requirement. As γAF 20 25 30 35 40 45           
+
+> −14
+> −12
+> −10
+> −8
+> −6
+> −4
+> −2024
+> γC[dB] Tx power [dBm]
+> σ2AF = 0 dB
+> σ2AF =−5dB
+> σ2AF =−10 dB
+> Fig. 4. Required transmit power versus communication QoS requirement.
+
+increases, the sensing constraint becomes dominant for both schemes. Consequently, the power gap decreases and the two curves tend to converge. 
+
+4) Transmit-power requirement under varying communication-QoS targets: Fig. 4 illustrates the required transmit power versus the communication QoS target γC under different filter noise coefficients. At low communication-QoS requirements, each curve exhibits an approximately constant power floor. This behavior indicates a sensing-limited regime, in which the AF-SINR constraint dominates the power requirement. Accordingly, a larger matched-filter noise coefficient σ2AF leads to a higher sensing-induced power floor, since additional transmit energy is required to compensate for the noise term in the AF-SINR denominator. As γC increases, the communication QoS constraints gradually become active, causing the required power to increase. The curves associated with smaller σ2AF begin to rise at lower γC values because their sensing-induced power floors are lower. Hence, the communication constraint becomes dominant earlier. At sufficiently stringent communication-QoS targets, the three curves nearly converge, demonstrating that the transmit power is then primarily determined by the communication requirement rather than the sensing noise level. V. C ONCLUSIONS 
+
+This paper investigated a minimum-energy ISAC wave-form design problem under AF-SINR requirement, per-user communication QoS constraints, and a PAPR constraint. The proposed AF-SINR provides a localized sensing-QoS measure by comparing the desired ambiguity mainlobe power against the weighted sidelobe leakage and noise within a local delay-Doppler RoI. To handle the resulting nonconvex problem, an FP-SCA algorithm was developed to iteratively obtain feasible low-energy waveform solutions. Simulation results showed that the proposed waveform preserves localized ambiguity suppression while satisfying all constrains. The results also reveal the trade-off, in which the proposed waveform incurs a communication-induced power penalty under relaxed sensing requirements, whereas its power consumption approaches that of the radar-only design when the AF-SINR requirement becomes dominant. Future work will consider more detailed comparisons with waveform designs based on alternative sens-ing metrics, such as ISL, PSL, as well as structured waveforms including OFDM, chirp-based, and phase-coded designs. REFERENCES 
+
+[1] F. Liu et al., “Integrated Sensing and Communications: Toward Dual-Functional Wireless Networks for 6G and Beyond,” IEEE Journal on Selected Areas in Commu-nications , vol. 40, no. 6, pp. 1728–1767, 2022. DOI :10.1109/JSAC.2022.3156632 [2] J. A. Zhang et al., “Enabling Joint Communication and Radar Sensing in Mobile Networks—A Survey,” IEEE Communications Surveys & Tutorials , vol. 24, no. 1, pp. 306–345, 2022. DOI : 10 . 1109 / COMST . 2021 . 3122519 [3] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint Radar and Communication Design: Applications, State-of-the-Art, and the Road Ahead,” 
+
+IEEE Transactions on Communications , vol. 68, no. 6, pp. 3834–3862, 2020. DOI : 10 . 1109 / TCOMM . 2020 . 2973976 [4] P. Li, M. Li, R. Liu, Q. Liu, and A. L. Swindlehurst, “MIMO-OFDM ISAC Waveform Design for Range-Doppler Sidelobe Suppression,” IEEE Transactions on Wireless Communications , vol. 24, no. 2, pp. 1001– 1016, 2025. DOI : 10.1109/TWC.2024.3503605 [5] Z. Wei et al., “Waveform Design for MIMO-OFDM Integrated Sensing and Communication System: An Information Theoretical Approach,” IEEE Transactions on Communications , vol. 72, no. 1, pp. 496–509, 2024. 
+
+> DOI
+
+: 10.1109/TCOMM.2023.3317258 [6] Y. He, G. Yu, Z. Tang, J. Wang, and H. Luo, “A Dual-Functional Sensing-Communication Waveform Design Based on OFDM,” IEEE Transactions on Wireless Com-munications , vol. 23, no. 11, pp. 16 962–16 978, 2024. 
+
+> DOI
+
+: 10.1109/TWC.2024.3448456 [7] F. Zhang, T. Mao, R. Liu, Z. Han, S. Chen, and Z. Wang, “Cross-Domain Dual-Functional OFDM Wave-form Design for Accurate Sensing/Positioning,” IEEE Journal on Selected Areas in Communications , vol. 42, no. 9, pp. 2259–2274, 2024. DOI : 10.1109/JSAC.2024. 3414001 [8] Y. Huang, S. Hu, S. Ma, Z. Liu, and M. Xiao, “Design-ing Low-PAPR Waveform for OFDM-Based RadCom Systems,” IEEE Transactions on Wireless Communica-tions , vol. 21, no. 9, pp. 6979–6992, 2022. DOI : 10 . 1109/TWC.2022.3153606 [9] P. Varshney, P. Babu, and P. Stoica, “Low-PAPR OFDM Waveform Design for Radar and Communication Sys-tems,” IEEE Transactions on Radar Systems , vol. 1, pp. 69–76, 2023. DOI : 10.1109/TRS.2023.3275210 [10] X. Feng, Z. Zhao, Y. Zhao, Z. Zhao, L. Meng, and Y. L. Guan, “OFDM-Based Waveform Design for MIMO DFRC Systems With Reduced Range Sidelobes: AMajorization-Minimization Approach,” IEEE Transac-tions on Vehicular Technology , vol. 74, no. 3, pp. 4582– 4596, 2025. DOI : 10.1109/TVT.2024.3498953 [11] K. Alhujaili, V. Monga, and M. Rangaswamy, “Transmit mimo radar beampattern design via optimization on the complex circle manifold,” IEEE Transactions on Signal Processing , vol. 67, no. 13, pp. 3561–3575, 2019. DOI :10.1109/TSP.2019.2914884 [12] C. G. Tsinos, A. Arora, S. Chatzinotas, and B. Otter-sten, “Joint transmit waveform and receive filter design for dual-function radar-communication systems,” IEEE Journal of Selected Topics in Signal Processing , vol. 15, no. 6, pp. 1378–1392, 2021. DOI : 10.1109/JSTSP.2021. 3112295 [13] K. Shen and W. Yu, “Fractional Programming for Communication Systems—Part I: Power Control and Beamforming,” IEEE Transactions on Signal Process-ing , vol. 66, no. 10, pp. 2616–2630, 2018. DOI : 10 . 1109/TSP.2018.2812733 [14] J. J. Benedetto, I. Konstantinidis, and M. Rangaswamy, “Phase-Coded Waveforms and Their Design,” IEEE Signal Processing Magazine , vol. 26, no. 1, pp. 22–31, 2009. DOI : 10.1109/MSP.2008.930416

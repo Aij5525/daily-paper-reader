@@ -1,0 +1,324 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-07T23:10:25.191173+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 5,
+    "deep_cap": 6,
+    "deep_selected": 5,
+    "quick_candidates": 3,
+    "quick_skim_target": 11,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2609.00903v2",
+      "source": "arxiv",
+      "title": "Lightweight CFR-Based Modulation Adaptation in a Real-Time MIMO-OFDM SDR Testbed",
+      "abstract": "Conventional link adaptation typically relies on scalar link-quality indicators such as signal-to-noise ratio (SNR), while richer channel state information (CSI) can improve adaptation at the cost of higher processing complexity. This paper investigates a compact alternative for modulation selection in a real-time multiple-input multiple-output orthogonal frequency-division multiplexing (MIMO-OFDM) system using channel frequency response (CFR) magnitude descriptors. A dataset of 87,817 over-the-air (OTA) samples is collected using a USRP-based testbed, with CFR measurements extracted at the base station (BS) from received uplink pilots. Decision tree (DT), random forest (RF), and k-nearest neighbours (KNN) classifiers are evaluated using BS-side SNR, CFR features, and their combination. SNR-only classifiers achieve 35%-42% test accuracy, whereas CFR-only features achieve 73.6%, 81.4%, and 80.0% for DT, RF, and KNN, respectively. CFR-based performance is maintained near the 10% BLER reliability thresholds, with RF reaching 82.8%. A depth-7 DT with 123 leaves is further integrated into the LabVIEW C Node for real-time inference. The results show that compact BS-side CFR descriptors provide more discriminative information than the available scalar BS-side SNR while remaining suitable for lightweight SDR implementation.",
+      "authors": [
+        "Luca Borst",
+        "Maryam Ansarifard",
+        "Ankith Vinayachandran",
+        "Kishor C. Joshi",
+        "George Exarchakos"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-09-01T08:32:04+00:00",
+      "link": "https://arxiv.org/pdf/2609.00903v2",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Machine-learning modulation adaptation using channel frequency response features in real-time MIMO-OFDM",
+      "llm_evidence_cn": "基于CFR幅度描述设计轻量ML调制选择，直接服务于无线通信系统设计",
+      "llm_evidence": "基于CFR幅度描述设计轻量ML调制选择，直接服务于无线通信系统设计",
+      "canonical_evidence": "基于CFR幅度描述设计轻量ML调制选择，直接服务于无线通信系统设计",
+      "llm_tldr_en": "Collects 87,817 over-the-air CFR samples from a USRP-based MIMO-OFDM testbed and evaluates decision tree, random forest and k-NN classifiers for modulation selection, showing compact channel frequency response descriptors enable low-complexity link adaptation.",
+      "llm_tldr_cn": "无线链路自适应通常依赖SNR等标量指标，丰富的信道状态信息虽可提高精度却带来较高处理复杂度。作者在实时MIMO-OFDM软件无线电平台中，利用基站上行导频提取信道频响(CFR)幅度描述作为特征。他们采集了87,817个空中信道样本，并比较决策树、随机森林和KNN等轻量分类器的调制选择效果。结果表明紧凑的CFR描述能在较低复杂度下实现可靠调制自适应，适合部署于实际无线通信系统。",
+      "llm_tldr": "无线链路自适应通常依赖SNR等标量指标，丰富的信道状态信息虽可提高精度却带来较高处理复杂度。作者在实时MIMO-OFDM软件无线电平台中，利用基站上行导频提取信道频响(CFR)幅度描述作为特征。他们采集了87,817个空中信道样本，并比较决策树、随机森林和KNN等轻量分类器的调制选择效果。结果表明紧凑的CFR描述能在较低复杂度下实现可靠调制自适应，适合部署于实际无线通信系统。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.04707v1",
+      "source": "arxiv",
+      "title": "Wireless Foundation Models: State-of-the-Art and Open Challenges",
+      "abstract": "Wireless foundation models (WFMs) have emerged as a promising approach for learning reusable representations from large-scale wireless data and adapting them to downstream tasks. However, the rapidly growing literature remains fragmented across modalities, pretraining objectives, architectures, adaptation strategies, and evaluation protocols, making it difficult to assess progress toward broadly transferable models. This survey provides a systematic analysis of WFMs for physical-layer applications. We first introduce the main WFM design components, including pretraining, backbone architectures, and downstream adaptation. We then organize the literature into five physical-layer task families: signal recognition and demodulation, channel representation learning, RF sensing and localization, beam management, and spectrum sensing and monitoring, while separately examining multi-task PHY models. Across these categories, we analyze how existing models are pretrained, adapted, and evaluated, with particular attention to downstream task diversity and the distinction between in-distribution, partial-shift, and out-of-distribution transfer. Our analysis shows that current WFMs provide increasing evidence of reusable wireless representations, but this evidence varies considerably across task families and evaluation settings. Differences in datasets, modalities, architectures, pretraining objectives, adaptation protocols, and distribution shifts make it difficult to determine which design choices drive transfer and generalization. We conclude by identifying open directions for improving data availability, evaluation rigor, generalization, efficient adaptation, and real-world deployment, providing a unified framework for understanding the current WFM landscape and the requirements for developing more reusable foundation models for future physical-layer wireless systems.",
+      "authors": [
+        "Alonso M. Pacheco Huachaca",
+        "Juan J. Rodriguez Rodriguez",
+        "Ahmed Aboulfotouh",
+        "Nelson L. S. da Fonseca",
+        "Carlos A. Astudillo",
+        "Hatem Abou-Zeid"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.AI"
+      ],
+      "published": "2026-09-04T04:26:04+00:00",
+      "link": "https://arxiv.org/pdf/2609.04707v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Survey systematically reviews wireless foundation model pretraining, backbones, adaptation and physical-layer tasks; direct requirement match.",
+      "llm_evidence_cn": "系统综述无线基础模型的预训练设计与物理层任务适配，与无线基础模型预训练需求直接匹配。",
+      "llm_evidence": "系统综述无线基础模型的预训练设计与物理层任务适配，与无线基础模型预训练需求直接匹配。",
+      "canonical_evidence": "系统综述无线基础模型的预训练设计与物理层任务适配，与无线基础模型预训练需求直接匹配。",
+      "llm_tldr_en": "This survey organizes wireless foundation models for physical-layer applications by pretraining objectives, backbone architectures and downstream adaptation, and categorizes literature into signal recognition/demodulation, channel representation learning and other task families.",
+      "llm_tldr_cn": "无线基础模型旨在从大规模无线数据中学习可复用表示并适配下游任务，但研究在模态、预训练目标、架构与评估协议上仍碎片化。本文对面向物理层应用的无线基础模型进行系统分析，先给出预训练、骨干网络与下游适配等核心设计组件，再把文献归入信号识别与解调、信道表示学习等五类物理层任务族。通过结构化梳理，文章刻画了通用可迁移无线基础模型的研究进展，并明确了当前评测缺口与开放挑战。",
+      "llm_tldr": "无线基础模型旨在从大规模无线数据中学习可复用表示并适配下游任务，但研究在模态、预训练目标、架构与评估协议上仍碎片化。本文对面向物理层应用的无线基础模型进行系统分析，先给出预训练、骨干网络与下游适配等核心设计组件，再把文献归入信号识别与解调、信道表示学习等五类物理层任务族。通过结构化梳理，文章刻画了通用可迁移无线基础模型的研究进展，并明确了当前评测缺口与开放挑战。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "foundation model pre-training for wireless applications",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.05390v1",
+      "source": "arxiv",
+      "title": "Energy-Efficient Waveform Design for ISAC Systems: An Ambiguity-Domain QoS Perspective",
+      "abstract": "Integrated sensing and communication (ISAC) requires transmit waveforms that simultaneously preserve communication quality, provide reliable sensing, and remain compatible with practical radio-frequency front ends. This paper considers a discrete-time ISAC waveform design problem that minimizes transmit power from the perspective of a novel metric termed the ambiguity-domain sensing signal-to-interference-plus-noise ratio (AF-SINR). The proposed AF-SINR quantifies the ratio between the desired ambiguity-function mainlobe power and the weighted aggregate sidelobe leakage plus noise within a local delay-Doppler region of interest, thereby providing a localized and noise-aware sensing-QoS measure. To enable ISAC operation, the waveform is further required to satisfy per-user effective communication-SINR constraints, while a peak-to-average power ratio (PAPR) constraint is imposed to facilitate practical implementation. The resulting energy-minimization problem is nonconvex due to the fractional QoS expressions, quartic ambiguity terms, and waveform-dependent PAPR constraint. To address this challenge, we propose a fractional-programming successive-convex-approximation (FP-SCA) algorithm. Simulation results verify that the proposed method satisfies all requirements while preserving localized ambiguity suppression over the local delay-Doppler region.",
+      "authors": [
+        "Ngoc-Son Duong",
+        "Trung-Hieu Nguyen",
+        "Quang-Truong Can"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-09-04T17:41:13+00:00",
+      "link": "https://arxiv.org/pdf/2609.05390v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Joint communication and sensing ISAC waveform design",
+      "llm_evidence_cn": "面向ISAC系统的通感一体化波形设计，直接对应联合通信与感知",
+      "llm_evidence": "面向ISAC系统的通感一体化波形设计，直接对应联合通信与感知",
+      "canonical_evidence": "面向ISAC系统的通感一体化波形设计，直接对应联合通信与感知",
+      "llm_tldr_en": "Proposes energy-efficient discrete-time ISAC waveform design that minimizes transmit power using AF-SINR, a local ambiguity-domain sensing QoS measure balancing desired mainlobe power against sidelobe leakage and noise.",
+      "llm_tldr_cn": "ISAC要求发射波形同时保障通信质量、感知可靠性与射频前端兼容性。针对该问题，论文提出离散时间ISAC波形设计目标：在最小化发射功率的同时，用新的模糊域感知信干噪比(AF-SINR)量化服务质量。AF-SINR刻画了期望模糊函数主瓣功率与局部时延-多普勒区域内加权旁瓣泄漏及噪声的比值，可提供局部且噪声感知的感知QoS约束。基于该度量进行功率优化的设计能够兼顾节能与通感性能，为一体化系统的波形设计提供了新准则。",
+      "llm_tldr": "ISAC要求发射波形同时保障通信质量、感知可靠性与射频前端兼容性。针对该问题，论文提出离散时间ISAC波形设计目标：在最小化发射功率的同时，用新的模糊域感知信干噪比(AF-SINR)量化服务质量。AF-SINR刻画了期望模糊函数主瓣功率与局部时延-多普勒区域内加权旁瓣泄漏及噪声的比值，可提供局部且噪声感知的感知QoS约束。基于该度量进行功率优化的设计能够兼顾节能与通感性能，为一体化系统的波形设计提供了新准则。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.04271v1",
+      "source": "arxiv",
+      "title": "Quantum-Assisted Memory-Efficient Training for Parameter-Intensive Wi-Fi-Based Human Activity Recognition",
+      "abstract": "Wi-Fi-based human activity recognition (HAR) has become an important part of integrated sensing and communications, paving the way for a range of context-aware services. However, most existing Wi-Fi-based HAR systems rely on deep learning (DL) models that are computationally and memory intensive in both training and inference, which poses significant challenges for real-world deployment. Conventional training requires simultaneous updates of millions of parameters, leading to prohibitive memory consumption. In this paper, we propose a novel quantum-assisted memory-efficient training framework (Q-MET) designed to improve efficiency in both training and inference. Q-MET utilizes a hybrid quantum classical neural network to indirectly generate parameters for HAR models, significantly reducing the trainable parameter count compared to direct optimization. To further support the deployment on resource-constrained devices, we integrate structured pruning during the training phase. Experimental results demonstrate that Q-MET achieves a 90% to 95% reduction in trainable parameters compared with conventional backpropagation-based DL training while maintaining or even exceeding classical classification accuracy. Additionally, Q-MET supports lightweight inference through structured pruning, achieving 75% to 85% model sparsity with less than 2% loss in classification accuracy. To the best of our knowledge, this work represents the first quantum-assisted approach to simultaneously tackle memory inefficiencies in both the training and inference stages of HAR systems.",
+      "authors": [
+        "To Truong An",
+        "Jie Zhang",
+        "Guolin Yin",
+        "Junqing Zhang",
+        "Yanjiao Li",
+        "Trung Q. Duong",
+        "Simon L. Cotton"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-09-02T19:31:22+00:00",
+      "link": "https://arxiv.org/pdf/2609.04271v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Wi-Fi-based HAR as integrated sensing and communications, with quantum-assisted memory-efficient training",
+      "llm_evidence_cn": "将Wi-Fi人体活动识别作为通信感知一体化应用，并提出量子辅助的存储高效训练框架",
+      "llm_evidence": "将Wi-Fi人体活动识别作为通信感知一体化应用，并提出量子辅助的存储高效训练框架",
+      "canonical_evidence": "将Wi-Fi人体活动识别作为通信感知一体化应用，并提出量子辅助的存储高效训练框架",
+      "llm_tldr_en": "Proposes Q-MET, a hybrid quantum-classical memory-efficient training framework for Wi-Fi-based human activity recognition, a key integrated sensing and communication application, reducing parameter update memory and improving efficiency in training and inference.",
+      "llm_tldr_cn": "基于Wi-Fi的人体活动识别已成为通信感知一体化的重要应用，但其深度学习模型参数多、训练内存大，不利部署。为解决这一问题，本文提出量子辅助的存储高效训练框架Q-MET，采用混合量子-经典神经网络降低训练过程的参数更新成本，同时提升训练和推理效率。Q-MET针对参数量密集的Wi-Fi感知模型，结合量子计算特性减少内存消耗。该框架为通信感知一体化中智能感知模型的资源受限应用提供了高效训练思路。",
+      "llm_tldr": "基于Wi-Fi的人体活动识别已成为通信感知一体化的重要应用，但其深度学习模型参数多、训练内存大，不利部署。为解决这一问题，本文提出量子辅助的存储高效训练框架Q-MET，采用混合量子-经典神经网络降低训练过程的参数更新成本，同时提升训练和推理效率。Q-MET针对参数量密集的Wi-Fi感知模型，结合量子计算特性减少内存消耗。该框架为通信感知一体化中智能感知模型的资源受限应用提供了高效训练思路。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2609.04851v1",
+      "source": "arxiv",
+      "title": "Coupled Control and Wireless World Models for Resilient Remote Robotic Control",
+      "abstract": "Remote robotic systems operating over wireless networks must maintain reliable control despite limited communication resources, changing channel conditions, and environmental disturbances.However, continuously transmitting high-dimensional sensory observations, such as camera images, increases communication overhead and energy consumption while reducing robustness under unreliable connectivity.To address these challenges, this paper proposes a resilient communication-aware remote robotic control framework based on coupled control and wireless Joint Embedding Predictive Architecture (JEPA) world models that jointly capture robot dynamics and wireless channel evolution from visual observations and a combination of raw and structured radio frequency (RF) representations based on spectrograms and Persistence Images(PIs).The learned latent representations enable predictive communication scheduling by jointly forecasting future robot states and wireless conditions, thereby reducing unnecessary uplink transmissions while maintaining reliable control performance.Furthermore, an adaptive resilience mechanism detects latent prediction discrepancies and efficiently adapts perception embeddings to accommodate wireless and visual environmental changes without retraining the complete control policy.The proposed framework is evaluated in a synchronized Gazebo-Robot Operating System (ROS)-Sionna robot-wireless simulation environment under diverse wireless propagation and perception perturbations.Experimental results demonstrate significant improvements in communication efficiency, robustness, and resilience while maintaining navigation performance compared with conventional Proportional Integral Derivative (PID), model-free Deep Q-Network (DQN), and predictive approaches based on Vision Transformers(ViTs).",
+      "authors": [
+        "H. P. Madushanka",
+        "Sumudu Samarakoon",
+        "Mehdi Bennis"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.LG"
+      ],
+      "published": "2026-09-04T08:09:55+00:00",
+      "link": "https://arxiv.org/pdf/2609.04851v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Coupled control and wireless JEPA world models jointly model wireless channel evolution for communication-aware remote control",
+      "llm_evidence_cn": "耦合控制与无线JEPA世界模型共同建模无线信道演化，用于通信感知的远程控制",
+      "llm_evidence": "耦合控制与无线JEPA世界模型共同建模无线信道演化，用于通信感知的远程控制",
+      "canonical_evidence": "耦合控制与无线JEPA世界模型共同建模无线信道演化，用于通信感知的远程控制",
+      "llm_tldr_en": "Coupled control-and-wireless JEPA world models jointly capture robot dynamics and wireless channel evolution from visual and RF observations, enabling resilient communication-aware remote robotic control under limited and unreliable wireless links.",
+      "llm_tldr_cn": "远程机器人系统经由无线网络控制时，持续回传高维图像会浪费通信资源，在信道条件变化时也不鲁棒。本文提出通信感知的远程控制框架，将控制模型与无线世界模型耦合，利用联合嵌入预测架构（JEPA）同时学习机器人动力学和无线信道演化。模型从视觉观测以及原始/结构化射频信息中预测状态，从而降低对连续图像传输的依赖。该研究为动态无线环境下实现弹性远程机器人控制提供了世界模型驱动的新设计。",
+      "llm_tldr": "远程机器人系统经由无线网络控制时，持续回传高维图像会浪费通信资源，在信道条件变化时也不鲁棒。本文提出通信感知的远程控制框架，将控制模型与无线世界模型耦合，利用联合嵌入预测架构（JEPA）同时学习机器人动力学和无线信道演化。模型从视觉观测以及原始/结构化射频信息中预测状态，从而降低对连续图像传输的依赖。该研究为动态无线环境下实现弹性远程机器人控制提供了世界模型驱动的新设计。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2609.01510v1",
+      "source": "arxiv",
+      "title": "Data-Driven Case Study of gNB Placement Optimization in a Private Indoor 5G Testbed",
+      "abstract": "Accurate radio planning is a fundamental requirement for the deployment of wireless networks in indoor environments, where signal propagation is strongly affected by walls, partitions, and other structural obstacles. Despite the availability of standardized propagation models, their ability to represent the characteristics of specific deployment scenarios is often limited, motivating the use of measurement-driven approaches. In this context, this paper presents a data-driven case study of next generation NodeB (gNB) placement optimization in an office using measurements collected from an experimental fifth generation (5G) testbed. A propagation model is trained from reference signal received power (RSRP) measurements using distance and wall count as input features and integrated with a combinatorial search framework. The proposed workflow is used to evaluate alternative deployment strategies under different optimization criteria. Results indicate that satisfactory indoor coverage and improved cell-edge conditions can be achieved with a small number of gNBs.",
+      "authors": [
+        "Diogo de O. Soares",
+        "Victor F. Monteiro",
+        "Fco. Rodrigo P. Cavalcanti",
+        "Vicente A. de Sousa",
+        "J. Pedro B. Lima"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI"
+      ],
+      "published": "2026-09-01T16:40:33+00:00",
+      "link": "https://arxiv.org/pdf/2609.01510v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Machine-learning trained propagation model from RSRP measurements for data-driven gNB placement optimization in indoor 5G",
+      "llm_evidence_cn": "基于RSRP测量训练传播模型的数据驱动室内5G基站布点优化",
+      "llm_evidence": "基于RSRP测量训练传播模型的数据驱动室内5G基站布点优化",
+      "canonical_evidence": "基于RSRP测量训练传播模型的数据驱动室内5G基站布点优化",
+      "llm_tldr_en": "Trains a site-specific propagation model from indoor 5G RSRP measurements and uses it to optimize next-generation NodeB placement, showing data-driven radio planning better represents indoor 5G propagation than standardized generic models.",
+      "llm_tldr_cn": "室内5G无线网络规划依赖能反映特定场景的传播模型，而标准模型难以刻画墙体等结构影响。该文利用私有5G测试台采集的RSRP测量，结合距离和墙体损耗训练站点特定的传播模型。在该模型基础上进行gNB布点优化案例研究，验证测量驱动方法比通用标准模型更贴近实际部署环境，提升覆盖预测和选址准确性。该工作展示数据驱动传播建模在无线网络规划中的实用价值。",
+      "llm_tldr": "室内5G无线网络规划依赖能反映特定场景的传播模型，而标准模型难以刻画墙体等结构影响。该文利用私有5G测试台采集的RSRP测量，结合距离和墙体损耗训练站点特定的传播模型。在该模型基础上进行gNB布点优化案例研究，验证测量驱动方法比通用标准模型更贴近实际部署环境，提升覆盖预测和选址准确性。该工作展示数据驱动传播建模在无线网络规划中的实用价值。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless communication system design with machine learning",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2609.04945v1",
+      "source": "arxiv",
+      "title": "Task-oriented Framework for Communication-Efficient Federated Learning: From Isolated Optimization to Holistic Synergy",
+      "abstract": "Communication bottlenecks remain a primary obstacle to the large-scale deployment of federated learning (FL). This article proposes a comprehensive framework for building communication-efficient FL, founded on three fundamental pillars: model compression, client selection, and resource allocation. We first survey state-of-the-art techniques for each pillar, specifically elucidating how quantization, pruning, and low-rank approximation reduce payloads; how intelligent client schedulers exploit heterogeneity; and how emerging communication paradigms such as Integrated Sensing and Communication (ISAC) and Over-the-Air Computation (AirComp) redefine bandwidth and energy utilization. Subsequently, these insights are unified through a task-oriented design philosophy that couples strategy selection with cross-layer, multi-objective optimization. To validate the proposed framework, we present an autonomous driving case study with two complementary experiments: a task-oriented client scheduling strategy that improves object detection accuracy under the same communication time budget, and a joint quantization-bandwidth optimization that further reduces total training time under dynamic networks. Together, the experiments demonstrate the advantages of holistic task-oriented design for real-world FL deployment.",
+      "authors": [
+        "Fuqiang Pan",
+        "Yan Liu",
+        "Erwu Liu",
+        "Arumugam Nallanathan"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-09-04T09:53:56+00:00",
+      "link": "https://arxiv.org/pdf/2609.04945v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Framework integrating ISAC and AirComp into communication-efficient federated learning over wireless",
+      "llm_evidence_cn": "面向无线联邦学习的整体协同框架，涵盖ISAC与AirComp",
+      "llm_evidence": "面向无线联邦学习的整体协同框架，涵盖ISAC与AirComp",
+      "canonical_evidence": "面向无线联邦学习的整体协同框架，涵盖ISAC与AirComp",
+      "llm_tldr_en": "Framework for communication-efficient federated learning built on model compression, client selection and resource allocation. Reviews quantization/pruning/low-rank methods, and highlights how ISAC and AirComp redefine bandwidth and energy utilization in wireless FL.",
+      "llm_tldr_cn": "大规模联邦学习部署受通信瓶颈制约。该文提出以模型压缩、客户端选择和资源分配为三大支柱的任务导向通信高效联邦学习框架，系统回顾了量化、剪枝与低秩近似等模型压缩手段，以及利用客户端异质性的调度技术和面向任务的自适应分配策略。文章还探讨了集成感知与通信（ISAC）与空中计算（AirComp）等新兴通信范式对带宽和能量利用的重新定义，并指出这些要素应从孤立优化走向整体协同，为无线联邦学习提供综合性方案。",
+      "llm_tldr": "大规模联邦学习部署受通信瓶颈制约。该文提出以模型压缩、客户端选择和资源分配为三大支柱的任务导向通信高效联邦学习框架，系统回顾了量化、剪枝与低秩近似等模型压缩手段，以及利用客户端异质性的调度技术和面向任务的自适应分配策略。文章还探讨了集成感知与通信（ISAC）与空中计算（AirComp）等新兴通信范式对带宽和能量利用的重新定义，并指出这些要素应从孤立优化走向整体协同，为无线联邦学习提供综合性方案。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2609.05396v1",
+      "source": "arxiv",
+      "title": "A Deep Generative Model for Synthesizing Labeled Wireless Signals",
+      "abstract": "Wireless signals with position-related labels are pivotal for both performance evaluation and model training in the realm of wireless sensing. However, acquiring real-world datasets is often challenged by significant measurement and labeling costs. Traditional methods for synthesizing labeled wireless signals typically rely on environmental models, leading to extensive hyper-parameter tuning and inadequate realism for comprehensive model training purposes. To address these limitations, we introduce a novel deep learning (DL)-based method, namely Inter-Instance Generative Adversarial Networks (IIns-GAN), to generate realistic labeled wireless signals. The generated signals are particularly adaptive to different environment scenarios and well-suited for various model training tasks, including distance estimation and environment identification. We have conducted extensive experiments on public Ultra-Wideband (UWB) datasets to evaluate the realism and utility of the generated signals. The results demonstrate that the signals generated by IIns-GAN mirror the physical characteristics of real-world measurements, and significantly contribute to the improvement of model training in diverse wireless sensing tasks.",
+      "authors": [
+        "Yuxiao Li",
+        "Keke Hu",
+        "Santiago Mazuelas",
+        "Yuan Shen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-09-04T17:44:54+00:00",
+      "link": "https://arxiv.org/pdf/2609.05396v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep generative synthesis of realistic labeled wireless signals across environment scenarios for channel/signal modeling",
+      "llm_evidence_cn": "基于深度生成模型的无线信号合成技术，用于不同场景的信道/信号特性建模",
+      "llm_evidence": "基于深度生成模型的无线信号合成技术，用于不同场景的信道/信号特性建模",
+      "canonical_evidence": "基于深度生成模型的无线信号合成技术，用于不同场景的信道/信号特性建模",
+      "llm_tldr_en": "Position-labeled wireless signals are costly to collect, and model-based generation is unrealistic. This paper presents IIns-GAN, an inter-instance GAN that synthesizes realistic labeled wireless signals across environment scenarios, supporting model training in wireless sensing and communications.",
+      "llm_tldr_cn": "无线感知模型的训练依赖带位置标签的无线信号，实测采集成本高，传统依赖环境模型的合成方法真实感不足且难调参。本文提出IIns-GAN，利用样例间生成对抗网络合成适应不同环境场景的带标签无线信号。实验表明生成样本的分布真实性和多样性更好，可有效支撑无线感知模型的训练和性能评估。",
+      "llm_tldr": "无线感知模型的训练依赖带位置标签的无线信号，实测采集成本高，传统依赖环境模型的合成方法真实感不足且难调参。本文提出IIns-GAN，利用样例间生成对抗网络合成适应不同环境场景的带标签无线信号。实验表明生成样本的分布真实性和多样性更好，可有效支撑无线感知模型的训练和性能评估。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

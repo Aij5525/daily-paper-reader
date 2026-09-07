@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-06</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-07</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 6 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 8 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>4</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>5</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>3</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-06 21:21:08 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-07 23:16:14 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,9 +62,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读两篇8.0分论文，聚焦6G空天地数字孪生与太赫兹无线数据中心的信道建模。</p>
-<p>最值得关注的方向：基于遥感地图的站点特定信道建模，以及三频段信道测量赋能多层数字孪生。</p>
-<p>后续可扩展了解速读中的LoRaWAN网关布局、WiFi光流估计与RF声学定位等交叉应用。</p>
+<p>今日精读5篇、速读3篇，聚焦无线通信与AI融合的前沿落地；最值得关注两篇9.0分研究：实时MIMO-OFDM测试平台中的轻量CFD调制自适应，以及无线基础模型的现状与开放挑战；若想快速入门，建议优先从无线基础模型综述切入，再结合具体测试平台案例加深理解。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -73,12 +71,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">2 篇</strong>
+    <strong class="dpr-home-dashboard-count">5 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Site-specific Channel Modeling Based on Remote-Sensing Maps for 6G Space--Air--Ground Digital Twins">Site-specific Channel Modeling Based on Remote-Sensing Maps for 6G Space--Air--Ground Digital Twins</span></li><li><span class="dpr-home-dashboard-paper-title" title="Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers">Tri-Band Channel Measurement-Enabled Multi-Layer Digital Twin for Terahertz Wireless Data Centers</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Lightweight CFR-Based Modulation Adaptation in a Real-Time MIMO-OFDM SDR Testbed">Lightweight CFR-Based Modulation Adaptation in a Real-Time MIMO-OFDM SDR Testbed</span></li><li><span class="dpr-home-dashboard-paper-title" title="Wireless Foundation Models: State-of-the-Art and Open Challenges">Wireless Foundation Models: State-of-the-Art and Open Challenges</span></li><li><span class="dpr-home-dashboard-paper-title" title="Energy-Efficient Waveform Design for ISAC Systems: An Ambiguity-Domain QoS Perspective">Energy-Efficient Waveform Design for ISAC Systems: An Ambiguity-Domain QoS Perspective</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>2</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>5</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -86,12 +84,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">4 篇</strong>
+    <strong class="dpr-home-dashboard-count">3 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions">Ray Tracing-Based LoRaWAN Gateway Placement for Reliable Connectivity in Amazonian Regions</span></li><li><span class="dpr-home-dashboard-paper-title" title="WiFlow: Estimating Optical Flow using WiFi Channel State Information">WiFlow: Estimating Optical Flow using WiFi Channel State Information</span></li><li><span class="dpr-home-dashboard-paper-title" title="ARFT: A Synchronized Multimodal RF-Acoustic Dataset for Positioning in Distributed Environments">ARFT: A Synchronized Multimodal RF-Acoustic Dataset for Positioning in Distributed Environments</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Data-Driven Case Study of gNB Placement Optimization in a Private Indoor 5G Testbed">Data-Driven Case Study of gNB Placement Optimization in a Private Indoor 5G Testbed</span></li><li><span class="dpr-home-dashboard-paper-title" title="Task-oriented Framework for Communication-Efficient Federated Learning: From Isolated Optimization to Holistic Synergy">Task-oriented Framework for Communication-Efficient Federated Learning: From Isolated Optimization to Holistic Synergy</span></li><li><span class="dpr-home-dashboard-paper-title" title="A Deep Generative Model for Synthesizing Labeled Wireless Signals">A Deep Generative Model for Synthesizing Labeled Wireless Signals</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>4</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>3</strong></span></div>
 </section>
 </div>
 

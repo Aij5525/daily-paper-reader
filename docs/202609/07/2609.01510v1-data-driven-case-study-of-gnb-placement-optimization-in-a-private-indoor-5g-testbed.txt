@@ -1,0 +1,211 @@
+Title: Data-Driven Case Study of gNB Placement Optimization in a Private Indoor 5G Testbed
+
+URL Source: https://arxiv.org/pdf/2609.01510v1
+
+Published Time: Wed, 02 Sep 2026 01:49:09 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> XLIV BRAZILIAN SYMPOSIUM ON TELECOMMUNICATIONS AND SIGNAL PROCESSING - SBrT 2026, SEPTEMBER 29TH TO OCTOBER 2ND, 2026, SALVADOR, BA
+
+# Data-Driven Case Study of gNB Placement Optimization in a Private Indoor 5G Testbed 
+
+Diogo de O. Soares, Victor F. Monteiro, Fco. Rodrigo P. Cavalcanti, Vicente A. de Sousa Jr. and J. Pedro B. Lima 
+
+Abstract — Accurate radio planning is a fundamental require-ment for the deployment of wireless networks in indoor environ-ments, where signal propagation is strongly affected by walls, partitions, and other structural obstacles. Despite the availability of standardized propagation models, their ability to represent the characteristics of specific deployment scenarios is often limited, motivating the use of measurement-driven approaches. In this context, this paper presents a data-driven case study of next generation NodeB (gNB) placement optimization in an office using measurements collected from an experimental fifth generation (5G) testbed. A propagation model is trained from reference signal received power (RSRP) measurements using distance and wall count as input features and integrated with a combinatorial search framework. The proposed workflow is used to evaluate alternative deployment strategies under different optimization criteria. Results indicate that satisfactory indoor coverage and improved cell-edge conditions can be achieved with a small number of gNBs. 
+
+Keywords — 5G testbed, Indoor Radio Planning, Measurement-Based Modeling, USRP, LightGBM. 
+
+I. I NTRODUCTION 
+
+The evolution of fifth generation (5G) mobile communica-tions has fostered the emergence of new industrial and enter-prise use cases involving real-time monitoring, automation, immersive applications and intelligent services. To support these applications, many organizations are adopting private 5G networks in indoor environments [1] as an alternative to conventional wireless technologies, e.g., Wi-Fi, benefiting from dedicated spectrum access, enhanced reliability, mobility management, and fine-grained control of network resources. However, the successful deployment of private cellular infras-tructures in indoor environments depends on accurate radio planning, since signal propagation is strongly influenced by walls, partitions, furniture, and other structural obstacles. As a result, the positioning of next generation NodeBs (gNBs) becomes a key design parameter, directly influencing coverage, service quality, and user experience. 
+
+Diogo, Victor and Rodrigo are with the Wireless Telecommunications Research Group (GTEL), Federal University of Ceará (UFC), Fortaleza, Brazil ({diogosoares, victor, rodrigo}@gtel.ufc.br). Vicente is with the Leading Advanced Technologies Center of Excellence (LANCE), Uni-versidade Federal do Rio Grande do Norte (UFRN), Natal, Brazil (vi-cente.sousa@ufrn.br). João Pedro is with Instituto Atlântico, Fortaleza, Brazil (joao_brasil@atlantico.com.br). V. F. Monteiro and R. P. Cavalcanti were sup-ported by CNPq under the Grants DT-308267/2022-2 and DT-303625/2022-8, respectively. This work was partially supported by the Brazilian Funding Authority for Studies and Projects (FINEP) and the Ministry of Science, Technology and Innovation (MCTI) through the project “AITD LITEC: Ad-vances in Artificial Intelligence for Digital Transformation at the Laboratory of Technological Innovation and Scientific Experiments”, FINEP Reference No. 1039/24, Grant Agreement No. 01.24.0581.00. We attest that generative AI was used for linguistic editing and text refinement. 
+
+Several propagation models have been proposed to support indoor network planning [2]. Standardized models, such as those specified by the International Telecommunication Union (ITU) and the Third Generation Partnership Project (3GPP), generally estimate path loss as a function of distance while ac-counting for shadowing effects through statistical parameters. Other approaches incorporate the attenuation introduced by walls and structural obstacles through deterministic formula-tions. Although these models are widely adopted in planning tools and feasibility studies, their accuracy may be limited when applied to specific deployment scenarios whose archi-tectural characteristics differ from the assumptions considered during model development. Recent advances in machine learning (ML) have enabled the development of measurement-driven propagation models capa-ble of learning complex relationships directly from empirical radio data. By exploiting signal measurements collected in real deployments, these approaches can capture propagation effects that are difficult to represent through analytical formulations alone. Nevertheless, the availability of experimental datasets remains a limiting factor, since many studies rely exclusively on simulations or publicly available traces, often lacking validation in operational wireless environments. Motivated by this challenge, this work investigates indoor gNB placement optimization using measurements collected from a private 5G testbed [3] deployed in a real office en-vironment. The experimental infrastructure was implemented using the open-source srsRAN platform and software-defined radio (SDR) hardware. An extensive measurement campaign was conducted to collect reference signal received power (RSRP) samples under different propagation conditions. These measurements were then used to train a LightGBM-based propagation model using physically meaningful features de-rived from geometry and obstacle information. The resulting model is integrated with a combinatorial search framework to evaluate alternative gNB deployment configurations according to different optimization objectives. In particular, two placement criteria are investigated: coverage maximization and max-min signal optimization, the latter aim-ing to improve service conditions for users located in cell-edge regions. The proposed workflow allows the generation and evaluation of multiple deployment scenarios without requiring additional measurement campaigns. II. E XPERIMENTAL SETUP 
+
+Our experimental 5G testbed is illustrated in Fig. 1. It was implemented as a standalone private 5G network composed of arXiv:2609.01510v1 [cs.NI] 1 Sep 2026 XLIV BRAZILIAN SYMPOSIUM ON TELECOMMUNICATIONS AND SIGNAL PROCESSING - SBrT 2026, SEPTEMBER 29TH TO OCTOBER 2ND, 2026, SALVADOR, BA 
+
+Fig. 1: Experimental 5G testbed. 
+
+Fig. 2: Indoor floor plan and gNB locations. a gNB, a 5G Core (5GC), and a commercial user equipment (UE). The gNB was implemented using the open-source srsRAN framework running on a laptop computer, which was connected through a USB interface to an Ettus Research USRP B210 acting as the radio front-end. The 5GC was implemented using Open5GS running on a desktop computer. The gNB and the 5GC were interconnected through a wired Ethernet link, while the UE, a Samsung Galaxy S25 smartphone, accessed the network through the 5G air interface. The Cellular-Pro software was used to perform RSRP measurements. The radio access link operated at 3.7 GHz, corresponding to 5G New Radio (NR) band n78. This setup enabled the collection of RSRP measurements from an experimental 5G deployment, capturing the effects of the radio front-end, pro-tocol stack, commercial terminal, and indoor environment. Specifically, two measurement campaigns were conducted in an office environment. Fig. 2 shows the floor plan of the considered indoor scenario together with the measurement locations. The two stars identify the gNB positions adopted during the campaigns. Blue dots correspond to locations measured in both campaigns, while red and green dots indicate points measured exclusively in the first and second campaigns, respectively. The environment spans approximately 35 .64 ×
+
+10 .00 m and comprises a variety of interconnected indoor spaces separated by multiple internal partitions, creating di-verse propagation conditions that are representative of real-world office deployments. In the first campaign, the gNB was positioned close to internal structural obstacles. This configuration intentionally created propagation conditions characterized by multiple wall crossings and severe attenuation, allowing the dataset to cap-ture highly obstructed radio links typically found in indoor cellular deployments. In the second campaign, the gNB was placed in a more open area of the floor plan with partial visibility towards the main corridor. This arrangement generated longer propagation paths with fewer obstacles and stronger line-of-sight components, complementing the propagation conditions observed in the first campaign. The combination of both datasets resulted in a diverse collection of RSRP samples spanning different distances, visibility conditions, and obstruction levels. This diversity is essential for enabling the propagation model to generalize across distinct deployment configurations rather than special-izing in a single gNB location. Specifically, the first and second campaigns yielded 147 and 133 measurement points, respectively, resulting in a total dataset of 280 RSRP samples. The measurements cover a wide range of gNB–UE distances and obstruction conditions, providing sufficient variability for training and evaluating the proposed propagation model. To support the subsequent propagation analysis, the en-vironment was represented by a two-dimensional geometric model derived from the building floor plan. A total of 39 wall segments were manually mapped and incorporated into the propagation analysis framework. This geometric representation enabled the automatic identification of structural obstacles intersecting the direct propagation path between the gNB and UE locations, allowing obstacle-related information to be incorporated into the learning process. III. D ATA -D RIVEN PROPAGATION MODELING 
+
+This section describes the methodology adopted to construct the propagation model used throughout the optimization pro-cess. The proposed approach combines feature engineering techniques with a machine-learning-based regressor trained from experimentally collected RSRP measurements. The objective of the propagation model is to estimate the received signal level at arbitrary UE locations while preserving the ability to generalize across different gNB placements. A direct use of gNB and UE coordinates as model inputs would introduce a strong dependency on the specific geometries observed during training, potentially leading to spatial overfit-ting and poor generalization when evaluating new deployment configurations. To address this limitation, the original coordinate informa-tion was transformed into physically meaningful propagation descriptors. For each gNB–UE pair, two features were ex-tracted: the Euclidean distance between the devices and the number of walls intersecting the direct propagation path. The gNB–UE distance is computed as 
+
+di,k = p(Xi − Xk)2 + ( Yi − Yk)2, (1) where (Xi, Y i) and (Xk, Y k) denote the coordinates of the UE and gNB, respectively. The second feature quantifies the number of walls crossed by the direct propagation path connecting the gNB and UE. This parameter is obtained by evaluating the intersections between the line segment joining both locations and the wall segments defined in the floor plan: 
+
+wi,k =
+
+> Nwalls
+
+X
+
+> j=1
+
+I
+
+
+
+L(PT X k , P RX i ) ∩ W j̸ = ∅
+
+
+
+, (2) where I(·) denotes the indicator function, L(·) represents the direct propagation path, and Wj corresponds to the j-th wall segment in the geometric representation of the environment. XLIV BRAZILIAN SYMPOSIUM ON TELECOMMUNICATIONS AND SIGNAL PROCESSING - SBrT 2026, SEPTEMBER 29TH TO OCTOBER 2ND, 2026, SALVADOR, BA 
+
+As a result, each measurement sample is represented by the feature vector 
+
+xi,k = [ di,k , w i,k ]T , (3) while the target variable corresponds to the measured RSRP value associated with the considered gNB–UE pair. This representation enables the learning algorithm to cap-ture the dominant attenuation mechanisms present in indoor propagation, namely distance-dependent path loss and obstacle penetration losses, while reducing the dependence on absolute gNB coordinates. The propagation model was implemented using the Light Gradient Boosting Machine (LightGBM) [4], a gradient-boosting framework based on decision trees. LightGBM was selected due to its ability to efficiently model nonlinear re-lationships while maintaining low computational complexity and strong predictive performance on tabular datasets. Specifically, the model learns the nonlinear mapping 
+
+[di,k , w i,k ] → RSRP i,k from the measurements collected during the experimental campaign. To evaluate its predictive performance, the dataset was ran-domly divided into training and validation subsets, comprising 70% and 30% of the available samples, respectively. Unlike analytical propagation models, which typically rely on predefined attenuation formulas, the adopted approach directly infers the relationship between environmental charac-teristics and received signal levels from empirical observations. This allows the model to capture propagation effects that may be difficult to represent analytically, including the combined influence of multiple obstacles and irregular indoor layouts. Because the model relies exclusively on distance and ob-stacle information, it can estimate signal levels for previously unobserved gNB locations, enabling the evaluation of hypo-thetical deployments without additional measurements. IV. GNB P LACEMENT OPTIMIZATION 
+
+Once the propagation model is trained, it can be used to estimate the received signal level for arbitrary gNB locations within the considered floor plan. This capability enables the evaluation of alternative deployment configurations without requiring additional measurement campaigns. The objective of the optimization process is to determine the optimal placement of a set K of simultaneously deployed gNBs according to predefined performance criteria. For a given number of deployed gNBs, the optimization algorithm searches over the candidate location set and identifies the configuration that maximizes the selected objective function. In this work, inter-cell interference is not explicitly con-sidered. Instead, the deployed gNBs are assumed to operate on orthogonal frequency resources, such that the received signal quality at each location depends exclusively on the propagation conditions between the UE and the serving gNB. This assumption is equivalent to allocating distinct portions of the available spectrum to neighboring cells and allows the analysis to focus exclusively on the impact of gNB placement on network coverage. The optimization process is formulated as a combinatorial search problem in which a subset of candidate gNB locations is selected according to a predefined performance criterion. For this, a set of candidate gNB locations is uniformly distributed over the floor plan with a spatial resolution of 1 m. For each candidate position, the propagation model is used to estimate the RSRP over the entire evaluation grid. When multiple gNBs are simultaneously deployed, the ef-fective signal level experienced at each UE location is assumed to correspond to the strongest available signal. Therefore, the effective received power at location i is given by 
+
+RSRP eff  
+
+> i
+
+= max RSRP i, 1, RSRP i, 2, . . . , RSRP i, |K| ,
+
+(4) where K denotes the set of active gNBs and RSRP i,k repre-sents the signal level predicted for location i from gNB k. This operation generates a composite coverage map representing the best signal available at each point of the environment. The first optimization criterion, called herein Coverage Maximization, seeks to maximize the percentage of locations where RSRP exceeds a predefined coverage threshold. Let τ
+
+denote the minimum acceptable RSRP. The optimal deploy-ment is obtained by solving 
+
+K∗ 
+
+> cov
+
+= arg max 
+
+> K⊂M
+
+1
+
+|I| 
+
+X
+
+> i∈I
+
+I  RSRP eff  
+
+> i
+
+≥ τ  , (5) where M denotes the set of candidate locations and I repre-sents the set of evaluation points. In this work, the coverage threshold is fixed at −95 dBm. When multiple deployments achieve the same coverage per-centage, the average RSRP over the environment is used as a secondary selection criterion. Although coverage maximization generally increases the served area, it may neglect locations experiencing poor propa-gation conditions. To improve service quality at the cell edge, a second optimization criterion is considered, called herein as Max–Min Optimization. Its objective is to maximize the weakest signal level observed throughout the environment: 
+
+K∗ 
+
+> maxmin
+
+= arg max 
+
+> K⊂M
+
+
+
+min  
+
+> i∈I
+
+RSRP eff 
+
+> i
+
+
+
+. (6) It prioritizes deployments that improve the worst-case prop-agation conditions, reducing coverage holes and enhancing signal availability in challenging regions of the floor plan. Similarly to the other criterion, ties are resolved using the average effective RSRP as a secondary metric. V. R ESULTS AND DISCUSSION 
+
+First, we evaluated the predictive performance of the adopted propagation model, i.e., LightGBM, through a com-parison with alternative machine-learning regressors, namely K-Nearest Neighbors (KNN), AdaBoost (ADA), Gradient Boosting Regressor (GBR), and Random Forest (RF). Model accuracy was assessed using the mean absolute error (MAE), mean squared error (MSE), and root mean squared error (RMSE). Table I summarizes the obtained results. The results indicate that LightGBM achieved the best overall predictive performance among the evaluated models, yielding the lowest RMSE and MSE values. Although KNN obtained a slightly lower MAE, LightGBM exhibited greater XLIV BRAZILIAN SYMPOSIUM ON TELECOMMUNICATIONS AND SIGNAL PROCESSING - SBrT 2026, SEPTEMBER 29TH TO OCTOBER 2ND, 2026, SALVADOR, BA 
+
+TABLE I: Prediction performance of the evaluated regression models                   
+
+> Regressor MAE (dB) MSE (dB 2)RMSE (dB) LightGBM 5.50 51.02 7.02
+> KNN 5.27 51.70 7.03 ADA 5.83 55.18 7.31 GBR 5.79 69.12 8.12 RF 5.96 69.16 8.15
+
+robustness against larger prediction errors, resulting in superior overall accuracy. Although the obtained prediction errors may appear rela-tively high at first glance, they should be interpreted in the context of the considered deployment scenario. Indoor radio propagation at 3.7 GHz is strongly affected by multipath propagation, shadowing, furniture, wall composition, and other environmental factors that are not explicitly represented by the adopted feature set. Despite relying exclusively on two physi-cally interpretable features, namely gNB–UE distance and wall count, the proposed model achieved an RMSE close to 7 dB, which is comparable to the variability commonly observed in indoor propagation environments [5, Table 7.5-6 Part-1: Indoor Office]. These results indicate that the selected feature representation captures the dominant propagation mechanisms with sufficient accuracy to support deployment planning and comparative placement analysis. Consequently, LightGBM was selected as the propagation model employed throughout the subsequent placement optimization analysis. Figures 3 and 4 illustrate the coverage maps obtained under the coverage-maximization and max–min criteria for the one-and four-gNB deployment scenarios, respectively. It should be emphasized that the evaluated multi-gNB sce-narios are not intended to represent realistic deployment rec-ommendations for the considered office environment. In fact, given the relatively small dimensions of the investigated floor plan, deploying several closely spaced gNBs would rarely be justified in practice from either a coverage or cost perspective. Instead, these scenarios are used to investigate how different optimization objectives influence gNB placement and coverage characteristics as additional deployment degrees of freedom become available. The considered configurations should there-fore be interpreted as a controlled sensitivity analysis that provides a broader validation of the proposed optimization framework under increasingly flexible deployment conditions. Furthermore, it is important to highlight that, although the selected office environment represents a relatively small-scale scenario, the proposed methodology is not restricted to this set-ting and can be readily extended to larger indoor deployments, where multiple gNBs are often required to satisfy coverage and capacity requirements. For the single-gNB case (Fig. 3), the criteria place the gNB in different regions of the floor plan. The coverage-maximization solution selects a location near the left side of the building, where a large open area can be reached with relatively limited wall penetration. In contrast, the max–min formulation positions the gNB closer to the offices area, reduc-ing the maximum distance to remote locations and improving 0 5 10 15 20 25 30 35 
+
+> Distância X (metros)
+> 0510
+> Distância Y (metros)
+> AP
+> 108
+> 105
+> 102
+> 99
+> 96
+> 93
+> 90
+> RSRP
+
+(a) Coverage Maximization (1 gNB). 0 5 10 15 20 25 30 35 
+
+> Distância X (metros)
+> 0510
+> Distância Y (metros)
+> AP
+> 108
+> 105
+> 102
+> 99
+> 96
+> 93
+> 90
+> RSRP
+
+(b) Max–Min Optimization (1 gNB). Fig. 3: Coverage maps obtained for a single deployed gNB under the two optimization criteria. 0 5 10 15 20 25 30 35 
+
+> Distância X (metros)
+> 0510
+> Distância Y (metros)
+> AP
+> 108
+> 105
+> 102
+> 99
+> 96
+> 93
+> 90
+> RSRP
+
+(a) Coverage Maximization (4 gNBs). 0 5 10 15 20 25 30 35 
+
+> Distância X (metros)
+> 0510
+> Distância Y (metros)
+> AP
+> 108
+> 105
+> 102
+> 99
+> 96
+> 93
+> 90
+> RSRP
+
+(b) Max–Min Optimization (4 gNBs). Fig. 4: Coverage maps obtained for four simultaneously deployed gNBs under the two optimization criteria. signal availability in the corridor and offices located further from the gNB. As a consequence, the coverage-oriented solution provides stronger signal levels over a larger contiguous area, whereas the max–min placement produces a more balanced signal distribution throughout the environment. Although neither configuration is capable of providing satisfactory coverage to the entire floor plan with a single gNB, the difference between the optimization philosophies already becomes apparent. The distinction between the optimization objectives be-comes considerably clearer when four gNBs are available. Under the coverage-maximization criterion, the gNBs are distributed so as to expand the area exceeding the target RSRP threshold, creating several regions with strong signal levels while leaving some highly attenuated zones largely unchanged. Conversely, the max–min solution places the gNBs in a manner that specifically targets poorly covered regions, resulting in a noticeably more homogeneous coverage pattern across the XLIV BRAZILIAN SYMPOSIUM ON TELECOMMUNICATIONS AND SIGNAL PROCESSING - SBrT 2026, SEPTEMBER 29TH TO OCTOBER 2ND, 2026, SALVADOR, BA 
+
+entire floor plan. This behavior illustrates the fundamental trade-off between the two optimization objectives. The coverage-maximization criterion seeks to increase the number of adequately served lo-cations, whereas the max–min formulation prioritizes improve-ments in the most challenging propagation conditions. The visual differences observed in the coverage maps suggest that the latter strategy may be particularly attractive for industrial and enterprise deployments where service continuity across the entire operational area is more important than maximizing coverage in already well-served regions. The cumulative effect of these deployment decisions can be further observed in the cumulative distribution functions (CDFs) shown in Fig. 5. 
+
+−140 −130 −120 −110 −100 −90 00.20.40.60.81
+
+−95 
+
+RSRP (dBm) CDF 
+
+> 1gNB Coverage 1gNB Max-Min 4gNB Coverage 4gNB Max-Min
+
+Fig. 5: CDF for the one- and four-gNB deployment scenarios under the coverage maximization and max–min optimization criteria, highlighting the 10th percentile. For the single-gNB scenario, both optimization criteria produce very similar lower-tail behavior, reflecting the limited flexibility available when only one gNB can be deployed. However, differences emerge in the four-gNB case. The max– min formulation shifts the lower tail of the distribution toward higher RSRP values, indicating an improvement for users located in unfavorable propagation conditions. This effect is particularly visible around the highlighted 10th percentile, which captures the behavior of the weakest covered locations. While the coverage-maximization criterion maintains alarger fraction of locations above the target threshold, the max–min strategy reduces the severity of coverage holes and improves the worst service conditions throughout the environment. Therefore, the CDFs confirm that the observed differences are not restricted to isolated regions of the floor plan but instead affect the overall spatial distribution of received signal levels. To generalize these observations, Table II summarizes the performance obtained for all deployment scenarios ranging from one to four simultaneously active gNBs. The quantitative results corroborate the trends previously observed in both the coverage maps and the CDFs. For all evaluated deployment scenarios, the coverage-maximization formulation achieves the largest coverage ratio, whereas the max–min criterion consistently provides superior performance for both the 10th-percentile and worst-case RSRP metrics. More importantly, the results indicate that the benefits of TABLE II: Optimization Criteria Comparison 
+
+NgNB 
+
+Coverage Ratio (%) 10th Percentile (dBm) Worst-Case RSRP (dBm) Coverage  1 14.0 -131.7 -136.1 2 22.4 -130.7 -131.1 3 30.5 -130.7 -130.7 4 37.1 -111.5 -120.7 
+
+> Max–Min
+
+1 9.6 -131.1 -136.1 2 15.5 -116.5 -120.7 3 22.4 -107.5 -116.5 4 26.0 -106.3 -113.2 
+
+the max–min strategy become increasingly pronounced as ad-ditional deployment resources become available. From two de-ployed gNBs onward, substantial improvements are observed in the lower-tail metrics, demonstrating that the optimization process successfully exploits the additional placement flexibil-ity to improve the most disadvantaged locations. At the same time, the coverage-maximization criterion continues to favor a larger served area, producing a persistent trade-off between coverage expansion and cell-edge performance. Overall, the results demonstrate that the proposed data-driven framework can support indoor radio planning by iden-tifying deployment configurations tailored to different opera-tional objectives. Depending on the target application, network designers may prioritize either maximizing the covered area or improving service reliability in the most challenging regions of the environment, both of which can be systematically evaluated using the proposed methodology. VI. C ONCLUSION 
+
+This paper presented a data-driven framework for indoor gNB placement optimization based on measurements col-lected from a 5G testbed. A LightGBM-based propagation model was trained from experimental RSRP measurements and used to evaluate alternative deployment configurations under coverage-maximization and max–min optimization criteria. Results demonstrated that the proposed methodology can support indoor radio planning while revealing the trade-off between coverage expansion and cell-edge performance. Fu-ture work includes optimization formulations incorporating interference and capacity constraints. REFERENCES [1] Ericsson, “Demand for indoor connectivity driving the need for en-hanced performance,” Ericsson, Ericsson Mobility Report, Nov. 2023. [2] ITU, “Propagation data and prediction methods for the planning of indoor radiocommunication systems and radio local area networks in the frequency range from 300 MHz to 450 GHz,” ITU Radiocommunication Sector (ITU-R), Geneva, Switzerland, ITU-R P.1238-13, Sep. 2025. [3] R. P. Alves, J. G. A. da S. Alves, M. R. Camelo, W. O. de Feitosa, V. F. Monteiro, and F. R. P. Cavalcanti, Experimental comparison of 5G SDR platforms: srsRAN x OpenAirInterface , 2024. arXiv: 2406. 01485 .[4] G. Ke et al., “Lightgbm: A highly efficient gradient boosting decision tree,” Advances in neural information processing systems , vol. 30, 2017. [5] 3GPP, “Study on channel model for frequencies from 0.5 to 100 GHz,” TR 38.901, Mar. 2026, v.18.3.0.
