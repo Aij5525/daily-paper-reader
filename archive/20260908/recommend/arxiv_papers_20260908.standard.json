@@ -1,0 +1,94 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-09-08T21:57:56.421910+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 1,
+    "deep_cap": 6,
+    "deep_selected": 1,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [
+    {
+      "id": "2609.04669v1",
+      "source": "arxiv",
+      "title": "Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM",
+      "abstract": "Communication systems can reuse their transmitted signals for sensing without dedicated radar transmissions. For an established DFT-preprocessed orthogonal chirp division multiplexing (DFT-P-OCDM) waveform, this task becomes difficult when several physical paths in a doubly selective channel fall into the same co-delay-Doppler bin. In this case, the number of resolvable delay classes inferred from the pilot may be smaller than the number of physical paths within the co-bin. This mismatch increases the difficulty of path number determination, fractional Doppler offset estimation, and channel reconstruction. We derive a pointwise relationship between the input and output in the DFT preprocessed Fresnel (DPF) domain for doubly selective channels with multiple paths within the co-delay-Doppler bin. Based on this input and output relation, we propose the two stage ultra high resolution (TSUR) framework. The first stage uses pilots of the phase progression to estimate delay, while the second stage uses the leakage samples to estimate the Doppler and the number of paths within each delay class. Furthermore, we derive CRLBs and analyze how the pilot configuration trades sensing resolution and communication recovery. Simulation results demonstrate that TSUR resolves same delay paths within a co-delay-Doppler bin, remains robust to exist delay offsets, and achieves lower fractional Doppler estimation errors than sequential extraction and off-grid baselines.",
+      "authors": [
+        "Mingxuan Han",
+        "Weile Zhang",
+        "Feifei Gao"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-09-04T03:02:06+00:00",
+      "link": "https://arxiv.org/pdf/2609.04669v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reuses DFT-P-OCDM communication signals for high-resolution sensing and multipath channel estimation within co-delay-Doppler bins",
+      "llm_evidence_cn": "复用DFT-P-OCDM通信信号进行感知，解决共时延-多普勒分格内多径的高分辨率估计与信道重构",
+      "llm_evidence": "复用DFT-P-OCDM通信信号进行感知，解决共时延-多普勒分格内多径的高分辨率估计与信道重构",
+      "canonical_evidence": "复用DFT-P-OCDM通信信号进行感知，解决共时延-多普勒分格内多径的高分辨率估计与信道重构",
+      "llm_tldr_en": "Identifies problem of multiple physical paths within one co-delay-Doppler bin in DFT-P-OCDM sensing; derives input-output relationship in DFT-preprocessed Fresnel domain for high-resolution path estimation.",
+      "llm_tldr_cn": "在仅用通信信号同时实现感知与通信的系统中，DFT预编码OCDM波形在时延-多普勒共格内存在无法分辨的多径分量，影响路径数和多普勒估计及信道重构。本文推导了DFT预编码Fresnel域中的点对点输入输出关系，并据此提出一种超高分辨方法，用于解算同一共时延-多普勒箱内的多条物理路径。研究表明该方法可显著提升路径分辨率、分数多普勒估计与信道重建精度，为通感一体化波形的高精度感知提供支撑。",
+      "llm_tldr": "在仅用通信信号同时实现感知与通信的系统中，DFT预编码OCDM波形在时延-多普勒共格内存在无法分辨的多径分量，影响路径数和多普勒估计及信道重构。本文推导了DFT预编码Fresnel域中的点对点输入输出关系，并据此提出一种超高分辨方法，用于解算同一共时延-多普勒箱内的多条物理路径。研究表明该方法可显著提升路径分辨率、分数多普勒估计与信道重建精度，为通感一体化波形的高精度感知提供支撑。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "joint communication and sensing in wireless networks",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2609.04836v1",
+      "source": "arxiv",
+      "title": "Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays",
+      "abstract": "Extremely large-scale multiple-input multiple-output (XL-MIMO) enables near-field location-specific beam focusing for sixth-generation (6G) communications. Uniform circular arrays (UCAs), with rotational symmetry and uniform azimuth coverage, have emerged as a key enabling architecture for near-field XL-MIMO systems. In this paper, we propose a resolution-aware hierarchical codebook for near-field UCA systems, along with an efficient two-stage beam training scheme to significantly reduce the training overhead. Specifically, we characterize the minimum resolvable distance of UCA systems in the near-field region based on a geometric spherical-wave propagation model, revealing their spatial resolution capability in the joint angle--distance domain. Guided by this result, we design a UCA-specific hierarchical codebook, where a power-efficient distance-robust beamforming (DRBF) codebook provides coarse azimuth localization and a full-precision (FP) codebook sampled according to the minimum resolvable distance enables refined angle--distance beam search. The regularized modal compensation suppresses weak-mode amplification and provides a controllable tradeoff between absolute amplitude gain under unit-norm transmission and distance robustness. Based on this codebook, we develop a hierarchical decoupled-architecture Bayesian regression (HDA-BAR) scheme for fast and accurate near-field beam training. For the considered array configuration, the resulting HDA-BAR training procedure requires $384$ probing slots, corresponding to an approximately \\(99.66\\%\\) overhead reduction relative to the conventional near-field exhaustive-search benchmark.",
+      "authors": [
+        "Gen Luo",
+        "Hang Yuan",
+        "Xiaozheng Gao",
+        "Minwei Shi",
+        "Chong Han",
+        "Kai Yang"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP"
+      ],
+      "published": "2026-09-04T07:51:40+00:00",
+      "link": "https://arxiv.org/pdf/2609.04836v1",
+      "tags": [
+        "keyword:wireless-llm",
+        "query:wireless-llm"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Near-field spherical-wave propagation model and minimum resolvable distance characterization for wireless channel modeling and beam training",
+      "llm_evidence_cn": "基于近场球面波传播模型刻画信道最小可分辨距离，服务无线信道特性分析",
+      "llm_evidence": "基于近场球面波传播模型刻画信道最小可分辨距离，服务无线信道特性分析",
+      "canonical_evidence": "基于近场球面波传播模型刻画信道最小可分辨距离，服务无线信道特性分析",
+      "llm_tldr_en": "For near-field UCA-based XL-MIMO, the paper characterizes spatial resolution via a geometric spherical-wave channel model and designs a resolution-aware hierarchical codebook with two-stage beam training to cut overhead.",
+      "llm_tldr_cn": "该文研究近场XL-MIMO均匀圆形阵列UCA系统，基于几何球面波传播模型刻画近场区域内信道的最小可分辨距离，揭示系统的空间分辨率能力。作者进一步提出分辨率感知的分层码本与两阶段波束训练算法。结果表明该方案可在保证波束聚焦性能的同时显著降低训练开销，为6G近场通信的低开销波束管理提供理论依据。",
+      "llm_tldr": "该文研究近场XL-MIMO均匀圆形阵列UCA系统，基于几何球面波传播模型刻画近场区域内信道的最小可分辨距离，揭示系统的空间分辨率能力。作者进一步提出分辨率感知的分层码本与两阶段波束训练算法。结果表明该方案可在保证波束聚焦性能的同时显著降低训练开销，为6G近场通信的低开销波束管理提供理论依据。",
+      "llm_tags": [
+        "query:wireless-llm"
+      ],
+      "matched_query_tag": "query:wireless-llm",
+      "matched_query_text": "wireless channel characteristics and modeling",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

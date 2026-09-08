@@ -1,0 +1,1682 @@
+Title: Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays
+
+URL Source: https://arxiv.org/pdf/2609.04836v1
+
+Published Time: Mon, 07 Sep 2026 00:39:01 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays 
+
+Gen Luo, Hang Yuan, Xiaozheng Gao, Member, IEEE ,Minwei Shi, Chong Han, Senior Member, IEEE , Kai Yang, Member, IEEE 
+
+Abstract —Extremely large-scale multiple-input multiple-output (XL-MIMO) enables near-field location-specific beam focusing for sixth-generation (6G) communications. Uniform circular arrays (UCAs), with rotational symmetry and uniform azimuth coverage, have emerged as a key enabling architecture for near-field XL-MIMO systems. In this paper, we propose a resolution-aware hierarchical codebook for near-field UCA systems, along with an efficient two-stage beam training scheme to significantly reduce the training overhead. Specifically, we characterize the minimum resolvable distance of UCA systems in the near-field region based on a geometric spherical-wave propagation model, revealing their spatial resolution capability in the joint angle–distance domain. Guided by this result, we design a UCA-specific hierarchical codebook, where apower-efficient distance-robust beamforming (DRBF) codebook provides coarse azimuth localization and a full-precision (FP) codebook sampled according to the minimum resolvable distance enables refined angle–distance beam search. The regularized modal compensation suppresses weak-mode amplification and provides a controllable tradeoff between absolute amplitude gain under unit-norm transmission and distance robustness. Based on this codebook, we develop a hierarchical decoupled-architecture Bayesian regression (HDA-BAR) scheme for fast and accurate near-field beam training. For the considered array configuration, the resulting HDA-BAR training procedure requires 384 probing slots, corresponding to an approximately 
+
+99 .66% overhead reduction relative to the conventional near-field exhaustive-search benchmark. 
+
+Index Terms —Near-field communications, uniform circular array (UCA), beam training, codebook design. 
+
+I. I NTRODUCTION 
+
+Emerging sixth-generation (6G) applications, including the Internet of Everything (IoE), motivate extremely large-scale multiple-input multiple-output (XL-MIMO) as a key technol-ogy for improving spectral efficiency through highly direc-tional transmission [1]–[4]. In millimeter-wave and terahertz XL-MIMO systems, the enlarged array aperture and shortened wavelength significantly extend the near-field region [5]–[9]. Consequently, conventional far-field plane-wave models and discrete Fourier transform (DFT)-based angular codebooks 
+
+G. Luo, H. Yuan, X. Gao, and K. Yang are with the School of Information and Electronics, Beijing Institute of Technology, Beijing 100081, China (email: gen.luo@bit.edu.cn, yuanhang@bit.edu.cn, gaoxi-aozheng@bit.edu.cn, yangkai@ieee.org). M. Shi is with the School of Cyberspace Science and Technology, Beijing Institute of Technology, Beijing 100081, China (e-mail: shimin-wei@bit.edu.cn). C. Han is with the Terahertz Wireless Communications (TWC) Labo-ratory, Shanghai Jiao Tong University, Shanghai 200240, China (e-mail: chong.han@sjtu.edu.cn). 
+
+become inadequate [10]. Instead, spherical-wave channel mod-els are required, under which near-field beamforming can jointly exploit angular and distance information to realize location-specific energy focusing [11], [12], thereby providing additional distance-domain resolution and spatial multiplexing gains [13]–[15]. Thus, near-field-tailored codebook design and efficient beam training are essential for fully exploiting the potential of XL-MIMO systems. 
+
+A. Prior Works 
+
+In near-field channels, the array response is jointly de-termined by angle and distance, leading to inherent angle– distance coupling. For uniform linear array (ULA)-based near-field beam training, the polar-domain codebook discretizes the channel space in the joint angular–range domain, with each beamforming vector associated with a prescribed angular– distance sample. In this construction, the angular dimension is uniformly quantized, whereas the distance samples are arranged in a non-uniform manner to match the near-field fo-cusing characteristics [16]. However, due to the additional dis-tance dimension, exhaustive beam training based on such code-books incurs prohibitively high overhead, which scales with the product of the angular and distance sampling sizes [17]. To alleviate this burden, two-phase near-field beam training schemes have been introduced, where the angular direction is first identified and the range is then refined [18]. Coarse-to-fine beam training schemes have also been investigated, where low-resolution beams are first used for coarse localization and high-resolution beams are subsequently employed for beam refine-ment [19]–[22]. More recent efforts have explored inference-based near-field beam training, where the correlation among near-field codewords is leveraged to identify the optimal beam with only a few beam probes [23]. Although these approaches effectively reduce the train-ing overhead of near-field beam search, most of them are developed for ULA-based systems. However, ULAs suffer from angle-dependent effective aperture shrinkage in the near-field region, especially for users located at large incidence or departure angles, which leads to non-uniform near-field cov-erage [24]. In contrast, uniform circular arrays (UCAs), owing to their geometrically rotationally symmetric structure, are expected to provide more uniform array responses across dif-ferent azimuth directions [25], [26]. From an implementation perspective, this rotational symmetry also facilitates uniform sectorization, full-azimuth processing, and codebook reuse un-arXiv:2609.04836v1 [eess.SP] 4 Sep 2026 2
+
+der azimuth rotation. Thus, UCAs have attracted considerable attention in near-field XL-MIMO systems. In particular, it was shown in [27] that, benefiting from rotational symmetry, UCAs can provide a more uniform and broader near-field region over all angular directions compared to ULAs, allowing more users to benefit from near-field communications. For near-field UCA systems, a concentric-ring codebook was further proposed in [27], where the codewords are sampled in both the angular and distance domains to characterize the spa-tial focusing property of near-field channels. However, such joint discretization in the angular and distance domains also increases the codebook size rapidly, resulting in high beam training overhead. Phase-mode excitation has been exploited in UCA beam-forming design to realize low-complexity beamspace process-ing [28]. Furthermore, a low-dimensional UCA codebook has been developed to reduce the complexity of near-field beam training [29]. However, although this low-dimensional UCA codebook can reduce the training overhead, its beamforming design reduces the number of effective spatial modes, thereby increasing the beamwidth. This may weaken the near-field spatial focusing capability and spatial multiplexing potential of UCAs, making it difficult to fully exploit the additional gains brought by near-field propagation. Although several studies have investigated near-field beam-forming and codebook design for UCAs, the fundamental spatial resolution capability of UCAs, i.e., the ability to resolve users with different azimuth angles and propagation distances in the near-field region, remains insufficiently characterized. This capability directly reflects the level of spatial focusing, which is crucial for resolution-aware codebook design, as it provides a quantitative basis for codebook spatial sam-pling. Motivated by this, the design of UCA-specific near-field codebooks that fully exploit the joint angle–distance spatial resolution capability of UCAs and the development of corresponding low-overhead beam training methods deserve further investigation. 
+
+B. Our Contributions 
+
+Motivated by these challenges, we first investigate the near-field spatial resolution of UCAs over the joint angle– distance domain and then construct a hierarchical codebook tailored to the resulting resolution characteristics. Based on this codebook, we further design an efficient Bayesian re-gression (BAR)-based hierarchical beam training scheme. The main contributions of this paper are summarized as follows. 1) We characterize the spatial resolution of near-field UCA systems in the joint angle–distance domain. Starting from a geometric spherical-wave propagation model, we derive an approximate closed-form expression for the minimum resolvable distance. This result reveals the local angle–distance separability of UCAs and provides a theoretical basis for near-field codebook sampling. 2) We design a hierarchical codebook specifically for near-field UCA systems. In Layer-1, building upon the phase-mode representation of the UCA response, we propose a power-efficient DRBF codebook that suppresses weak-mode amplification through regularized modal compen-sation and maximizes the worst-case absolute amplitude gain over each coarse angle–distance sector subject to a distance-ripple constraint. The retained phase-mode order sets the nominal angular bandwidth, while exact-manifold verification determines the final sectorization. In Layer-2, a full-precision (FP) codebook is constructed by sampling the angular and radial domains according to the derived minimum resolvable distance, enabling high-resolution beam refinement. This hierarchical design can reduce the search space while preserving high-resolution near-field focusing capability. 3) We develop a hierarchical decoupled-architecture Bayesian regression (HDA-BAR) beam training scheme based on the proposed hierarchical codebook. In Stage-1, the DRBF codebook is used for coarse azimuth localization. In Stage-2, BAR-based fine search is per-formed over the pruned full-precision codebook, where a proposed diagonal angular–range coupling (DAC) ker-nel exploits the structured correlation among near-field codewords for efficient optimal beam identification. This scheme enables accurate near-field beam identification with substantially reduced training overhead. 4) Numerical simulations are conducted to validate the accuracy of our analysis and to evaluate the effectiveness of the proposed codebook design and beam training scheme. Simulation results show that the achievable rate of the proposed HDA-BAR scheme approaches that of exhaustive search as the reference SNR in-creases. By exploiting hierarchical candidate pruning and correlation-aware BAR search, the scheme reduces the total beam-training overhead by 99 .66% relative to exhaustive search under the considered configuration. 
+
+Organization: The rest of this paper is structured as fol-lows. Section II introduces the system model. Section III analyzes the near-field spatial resolution of the UCA and derives the minimum resolvable distance. Section IV presents the proposed two-layer hierarchical codebook design. Section V develops the proposed HDA-BAR beam training scheme. Simulation results are provided in Section VI, followed by conclusions in Section VII. 
+
+Notation: Boldface lowercase and uppercase letters de-note vectors and matrices, respectively. (·)T , (·)H , and (·)∗
+
+represent the transpose, Hermitian transpose, and complex conjugate, respectively. ∥ · ∥ 2 denotes the Euclidean norm, and E[·] denotes expectation. CN (0 , σ 2) denotes the zero-mean circularly symmetric complex Gaussian distribution with variance σ2. The imaginary unit is denoted by j, and Ip
+
+denotes the p × p identity matrix. II. S YSTEM MODEL 
+
+We consider a narrowband downlink millimeter-wave (mmWave) communication system. We adopt a narrowband model to focus on spatial resolution and codebook design; wideband extensions accounting for frequency-dependent array responses and beam squint are left for future work. As illustrated in Fig. 1, a base station (BS) equipped with a UCA consisting of N antennas communicates with K
+
+single-antenna users. For ease of exposition, all users are 3
+
+Fig. 1: Geometric relationship between the UCA and the near-field user 
+
+assumed to be located on the same 2D plane as the UCA. Let K = {1, 2, . . . , K } denote the user set. The location of User k, k ∈ K , is specified by the polar coordinate pair 
+
+(rk, ϕ k), where ϕk denotes the azimuth angle with respect to the array center and rk represents the distance from User k
+
+to the array center. The BS employs a UCA with radius Rt,where the antenna elements are uniformly distributed along the circular aperture. Specifically, the n-th antenna element is located at (Rt, ψ n), where ψn = 2π(n−1)  
+
+> N
+
+, n = 1 , 2, . . . , N .Accordingly, the received signal at User k is expressed as 
+
+yk = hHk wksk +
+
+> K
+
+X 
+
+> v=1 ,v ̸=k
+
+hHk wv sv + nk, (1) where hk ∈ CN ×1 denotes the downlink channel vector between the BS and User k, wk ∈ CN ×1 denotes the transmit beamforming vector designed for User k, sk ∈ C is the data symbol intended for User k, and nk ∼ CN (0 , σ 2) represents the AWGN at User k. Every training codeword is normalized once to satisfy ∥wk∥2 = 1 . Following the amplitude-gain convention adopted in phase-mode UCA beamforming, we define 
+
+gabs (ϕ, r ; w) ≜ aH(ϕ, r )w , (2) where 0 ≤ gabs ≤ 1. Unless otherwise stated, beamforming gain refers to this amplitude quantity and is reported as 
+
+20 log 10 gabs in decibels. No distance-dependent or pointwise normalization is applied. Since hk = √N ρ ka(ϕk, r k), the corresponding coherent array-power gain in the link budget is N g 2abs . We assume an active fully digital array, or an equivalent architecture with per-element complex-gain control, so that nonconstant-modulus codewords can be implemented. The term hHk wksk represents the desired signal received by User k, while the second term in (1) denotes the multi-user interference caused by the signals intended for the other users. This interference becomes more pronounced when users are closely located and their channel orthogonality is weak. In contrast, when users are sufficiently separated in the spatial domain, the inter-user channel correlation becomes weak, and the interference impact is relatively small. Since mmWave links are often dominated by the LoS com-ponent because of the high path loss and limited diffraction and penetration effects [30], we focus on a LoS-dominant channel model to isolate the array-dependent spatial-resolution behavior. The resulting resolution analysis characterizes the dominant LoS component; additional multipath components introduce further angle–distance components and are beyond the scope of this work. Accordingly, the channel between the BS and User k is expressed as 
+
+hk = √N ρ ka(ϕk, r k), (3) where ρk denotes the complex path gain, which is modeled based on the Friis transmission formula as 
+
+ρk = λ
+
+4πr k
+
+pGtGr e−j 2πλ rk , (4) where Gt and Gr denote the transmit and receive antenna gains, respectively. The term a(ϕk, r k) represents the near-field array response vector, which is expressed as 
+
+a(ϕk, r k) = 1
+
+√N
+
+h
+
+e−j 2πλ (rk, 1−rk ), . . . , e −j 2πλ (rk,N −rk )iT
+
+,
+
+(5) where rk,n denotes the propagation distance between User k
+
+and the n-th antenna element of the UCA. Due to the spherical wavefront in the near-field region, the distances from different antenna elements to the same user are generally distinct. Based on the geometric relationship between User k and the array, rk,n is expressed as 
+
+rk,n =
+
+q
+
+r2 
+
+> k
+
++ R2 
+
+> t
+
+− 2rkRt cos( ϕk − ψn)= rk
+
+s
+
+1 + R2 
+
+> t
+
+− 2rkRt cos( ϕk − ψn)
+
+r2
+
+> k
+> (a)
+
+≈ rk − Rt cos( ϕk − ψn) + R2
+
+> t
+
+2rk
+
+sin 2(ϕk − ψn), (6) where step (a) is obtained by using the Taylor expansion 
+
+√1 + x = 1+ x 
+
+> 2
+
+− x2 
+
+> 8
+
++O(x3) with x = R2    
+
+> t−2rkRtcos( ϕk−ψn)
+> r2
+> k
+
+.
+
+This approximation is accurate when Rt ≪ rk, which is typically satisfied in the radiative near-field region of 6G millimeter-wave XL-MIMO systems, where the Rayleigh dis-tance may extend to tens of meters while the array radius remains much smaller than the user distance. In particular, the user distances considered in this paper satisfy Rt ≪
+
+rk ≤ RRay , where RRay denotes the Rayleigh distance used to distinguish the near-field region from the far-field region. For a UCA with aperture diameter D = 2 Rt, the Rayleigh distance is given by RRay = 2D2 
+
+> λ
+
+= 8R2 
+
+> t
+> λ
+
+. In the near-field region, wave propagation exhibits spherical characteristics, rendering the conventional far-field assumption underlying angle-based spatial multiplexing no longer valid. Accordingly, the multi-user near-field channel is jointly characterized by the angular directions and propagation distances of users [31]. This enables the antenna array to distinguish users in both angular and distance domains, even for users with similar angular directions [32]. To quantify this enhanced separability, we define the spatial resolution as the ability of the array to distinguish users in the joint angle–distance domain. To facilitate subsequent codebook design, we first investigate the spatial resolution of near-field UCA systems, which character-izes their spatial multiplexing capability and multi-user access potential. 4
+
+III. N EAR -F IELD SPATIAL RESOLUTION ANALYSIS OF 
+
+UCA To characterize the spatial resolution of the considered multi-user near-field UCA system, we analyze the pairwise spatial separability between two representative users selected from the user set K. Specifically, two users, denoted by User a and User b, are considered, where a, b ∈ K and a̸ = b. From the channel perspective, this separability depends on whether the near-field channel vectors of closely located users can become sufficiently orthogonal in the spatial domain. Thus, User b is assumed to be located in the vicinity of User a, and the spatial resolution is quantified by the minimum separation required for their channel vectors to achieve a prescribed level of orthogonality. User a is taken as the reference user. Since the UCA is rotationally symmetric, the analysis is invariant to the absolute azimuth of this reference user. For convenience, we place User a on the x-axis for analysis, as illustrated in Fig. 1. Its distance from the array center is denoted by ra = r, and its azimuth angle is set to ϕ = 0 . The distance between User a
+
+and the n-th UCA element can be approximated as 
+
+ra,n ≈r − Rt cos( ϕ − ψn) + R2
+
+> t
+
+2r (1 − cos 2(ϕ − ψn)) . (7) Based on this setup, we introduce another User b in the vicinity of User a. Let d denote the distance between User a
+
+and User b, and let φr denote the angle between the dis-placement direction from User a to User b and the radial direction of User a. Since User a is placed on the x-axis, this radial direction coincides with the x-axis. Let rb,n denote the distance from User b to the n-th UCA element. It can be approximated as follows. 
+
+rb,n ≈ ra,n + ∂r a,n 
+
+∂r ∆r + ∂r a,n 
+
+∂ϕ ∆ϕ
+
+≈ ra,n +
+
+
+
+1 − R2
+
+> t
+
+2r2 sin 2 ψn
+
+
+
+∆r
+
+−
+
+
+
+Rt sin ψn + R2
+
+> t
+
+r sin ψn cos ψn
+
+
+
+∆ϕ, (8) where ∆r = d cos φr and ∆ϕ = d sin φr 
+
+> r
+
+represent the cor-responding radial and angular displacements between the two users. The first approximation follows from a first-order Taylor expansion around the reference location of User a (r, ϕ ), while the second approximation is obtained by substituting ra,n with its expression in (7). After deriving the propagation distances for User a and User b, the corresponding channel matrix can be constructed. To quantify the spatial separability of two users in the near-field angle–distance domain, effective degrees of freedom (EDoF) is adopted as a key performance metric. Since the EDoF characterizes the number of effective parallel spatial channels [33], [34], the minimum resolvable distance between two users can be identified by examining the variation of the EDoF with the inter-user spacing. Specifically, the mul-tiuser channel from two users to the UCA is represented by 
+
+H ∈ C2×N . Under the assumption that the path gains across different antenna elements are approximately identical [35], the channel variation is mainly governed by the phase differ-ences induced by the propagation distances. Accordingly, H
+
+can be expressed as 
+
+H =
+
+e−j 2πλ ra, 1 · · · e−j 2πλ ra,N 
+
+e−j 2πλ rb, 1 · · · e−j 2πλ rb,N 
+
+
+
+. (9) The gain matrix is denoted by G. This matrix captures the energy coupling between the two users and antenna elements. Based on the singular value decomposition of H, G can be decomposed as 
+
+G = HH H
+
+= UΣV H VΣU H
+
+= UΣ 2UH , (10) where Σ = diag( σ1, σ 2) contains the singular values of H,and U and V are unitary matrices. Denote the two eigenvalues of G by {γj }2
+
+> j=1
+
+, ordered as γ1 ≥ γ2 ≥ 0. They are equal to the squared singular values of H, directly linking the channel’s energy distribution to its singular value decomposition. Based on the eigenvalues of G and following the method in [36], EDoF are defined as the minimum number of dominant components required to capture a prescribed fraction of the total eigenvalue energy, i.e., 
+
+PD(G) 
+
+> j=1
+
+γj
+
+P2 
+
+> j=1
+
+γj
+
+≥ τ, (11) where τ ∈ (0 , 1] is a prescribed threshold. This criterion effectively quantifies the number of spatially separable chan-nels, thereby reflecting the near-field spatial resolution and multiplexing capability of the UCA system. 
+
+Lemma 1. For the two-user channel matrix H ∈ C2×N , let 
+
+Gl,p denote the (l, p )-th entry of the gain matrix G ∈ C2×2,where l, p ∈ { 1, 2} Then, Gl,p can be approximated as 
+
+Gl,p ≈ N e jδdα J0(δdβ 1)J0(δdβ 2)J0(δdβ 3), (12) 
+
+where δ = l − p, α = − 2πλ (1 − R2 
+
+> t
+> 4r2
+
+) cos φr , β1 = 2πR t 
+
+> rλ
+
+sin φr ,
+
+β2 = πR 2 
+
+> t
+> 2r2λ
+
+cos φr , β3 = πR 2 
+
+> t
+> r2λ
+
+sin φr , and J0(·) denotes the 0-order bessel function of the first kind. Proof: The proof is provided in Appendix A. Based on Lemma 1, substituting the closed-form entries of G into its characteristic equation yields the following approximations for the ordered eigenvalues defined above: 
+
+γ1 ≈ N (1 + J0(dβ 1)J0(dβ 2)J0(dβ 3)) ,γ2 ≈ N (1 − J0(dβ 1)J0(dβ 2)J0(dβ 3)) . (13) Substituting γ1 and γ2 into (11) yields the condition for 
+
+EDoF = 2 , which defines the resolution limit at which the UCA can spatially resolve the two users and is expressed as 
+
+J0(dβ 1)J0(dβ 2)J0(dβ 3) = 2 τ − 1. (14) For a prescribed threshold τ , the minimum resolvable dis-tance dms (φr , r ) at relative azimuth φr and reference range r
+
+is the smallest positive separation satisfying (14), i.e., 
+
+dms (φr , r ) = min {d > 0 | J0(dβ 1)J0(dβ 2)J0(dβ 3) = 2 τ − 1} .
+
+(15) 5
+
+For analytical tractability, by applying the small-argument approximation of the zeroth-order Bessel function, i.e., 
+
+J0(x) ≈ 1 − x2 
+
+> 4
+
+for |x| ≪ 1, and retaining only the dominant 
+
+O(d2) term, we have 
+
+J0(dβ 1)J0(dβ 2)J0(dβ 3) ≈ 1 − d2
+
+4
+
+ β21 + β22 + β23
+
+ , (16) where the higher-order terms of d4 and above are neglected, since dβ 1, dβ 2, and dβ 3 are sufficiently small in the local res-olution region. Thus, an approximate closed-form expression for dms (φr , r ) is obtained by 
+
+dms (φr , r ) ≈
+
+s
+
+8(1 − τ )
+
+β21 + β22 + β23
+
+. (17) When the distance r from User a to the center of the UCA is fixed, the minimum resolvable distance can be determined for each relative azimuth angle φr . Therefore, dms (φr , r )
+
+characterizes the minimum spatial resolution of the UCA in the joint angle–distance domain. Equation (17) shows that 
+
+dms generally decreases with Rt, increases with r, and varies with φr through β1, β2, and β3. Although N does not appear explicitly in this phase-mode approximation, finite array sampling affects its accuracy. This interpretation applies to the LoS-dominant model. IV. P ROPOSED HIERARCHICAL CODEBOOK DESIGN 
+
+In this section, we develop a decoupled spatial-resolution-aware hierarchical codebook for near-field UCA systems. The proposed codebook exploits the phase-mode structure of the UCA to alleviate the near-field angle–distance coupling and reduce redundant beam search. Specifically, the first layer con-structs DRBF beams for efficient coarse angular localization, while the second layer performs resolution-aware refinement in the angle–distance domain according to the approximate closed-form expression of dms (φr , r ) derived in the previous section. 
+
+A. Layer-1 Power-Efficient DRBF Codebook 
+
+We propose a power-efficient distance-robust beamforming (DRBF) codebook that combines phase-mode truncation with regularized modal compensation to improve the worst-case absolute amplitude gain while retaining distance robustness under unit-norm transmission. Here, power efficiency refers to improving the coherent array-power gain N g 2abs under a fixed unit-norm transmit constraint, rather than to circuit-level energy efficiency. Specifically, following the established phase-mode represen-tation for UCA beamforming [28], [37] and using the Fresnel approximation in (6), the normalized UCA manifold can be decomposed as 
+
+[a(ϕ, r )] n ≈ 1
+
+√N bn(ϕ)ϱn(ϕ, r ), (18) where 
+
+bn(ϕ) = ejk 0Rt cos( ϕ−ψn),ϱn(ϕ, r ) = exp 
+
+
+
+−j k0R2
+
+> t
+
+2r sin 2(ϕ − ψn)
+
+
+
+, (19) where k0 = 2 π/λ . The factor bn(ϕ) captures the dominant an-gular phase, whereas ϱn(ϕ, r ) represents the residual distance-dependent wavefront curvature. Applying the Jacobi–Anger expansion to bn(ϕ) and retain-ing |m| ≤ M gives 
+
+bn(ϕ) ≈
+
+> M
+
+X
+
+> m=−M
+
+cm(ϕ)e−jmψ n ,cm(ϕ) = jmJm(k0Rt)ejmϕ . (20) Here, m is the circular-mode index, M is the maximum retained mode order, and Jm(·) is the m-th-order Bessel function of the first kind. Define the phase-mode matrix 
+
+UM ∈ CN ×(2 M +1) by 
+
+[UM ]n,m +M +1 = 1
+
+√N e−jmψ n , m = −M, . . . , M. 
+
+(21) For a uniformly sampled UCA, 2M < N ensures the alias-free orthogonality UH 
+
+> M
+
+UM = I2M +1 . For reference, define a strict inverse-modal baseline for target azimuth ϕs as 
+
+qinv  
+
+> s,m
+
+= 1
+
+c∗
+
+> m
+
+(ϕs) , winv  
+
+> s
+
+= UM qinv 
+
+> s
+
+∥UM qinv  
+
+> s
+
+∥2
+
+. (22) where qinv  
+
+> s
+
+= [qinv  
+
+> s, −M
+
+, . . . , q inv  
+
+> s,M
+
+]T . The equality 
+
+c∗
+
+> m
+
+(ϕs)qinv  
+
+> s,m
+
+= 1 shows that strict inversion equalizes the retained angular modal coefficients. However, since 
+
+ϱn(ϕ, r ) is not included in the phase-mode synthesis, its distance-dependent curvature is not explicitly compensated. It remains to determine whether truncation to |m| ≤ M
+
+limits the resulting intermodal phase dispersion and distance-dependent gain loss. The following lemma quantifies both effects. 
+
+Lemma 2. Let ginv (r) ≜ gabs (ϕs, r ; winv  
+
+> s
+
+). For r > Rt,
+
+k0Rt ≫ 1, M ≪ k0Rt, and 2M < N , the leading distance-dependent phase of the m-th retained mode, up to a common phase, satisfies 
+
+eδm(r) ≈ m2
+
+2k0r , |m| ≤ M. (23) 
+
+If M 2/(2 k0r) ≪ 1, the corresponding leading-order on-axis amplitude gain satisfies 
+
+ginv (r)
+
+ginv (∞) ≈ 1 − M (M + 1)[4 M (M + 1) − 3] 360( k0r)2 . (24) 
+
+Moreover, relative to the conventional far-field phase error 
+
+k0R2 
+
+> t
+
+/(2 r), the maximum retained-mode phase M 2/(2 k0r) is only a fraction (M/ (k0Rt)) 2 ≪ 1. Hence, modal truncation effectively suppresses the dominant distance-dependent phase variation. Proof: The proof is given in Appendix B. Lemma 2 establishes truncation-induced distance robust-ness, but strict inversion in (22) amplifies weak Bessel modes. Under unit-norm transmission, modal orthogonality gives 
+
+ginv (∞) = 2M + 1 
+
+vuut MX
+
+> m=−M
+
+|cm(ϕs)|−2
+
+. (25) A small |cm(ϕs)| thus enlarges the denominator and reduces 6
+
+the absolute gain, limiting strict inversion in practice. We therefore propose regularized modal compensation to suppress weak-mode amplification while retaining distance robustness: 
+
+eqs(ζ) = arg min 
+
+> q
+> M
+
+X
+
+> m=−M
+
+|c∗
+
+> m
+
+(ϕs)qm − 1|2 + ζ∥q∥22,
+
+eqs,m (ζ) = cm(ϕs)
+
+|cm(ϕs)|2 + ζ .
+
+(26) The proposed unit-norm DRBF codeword is 
+
+wDRBF  
+
+> s
+
+(ζ) = UM eqs(ζ)
+
+∥UM eqs(ζ)∥2
+
+(27) The normalized effective modal weights induced by 
+
+c∗
+
+> m
+
+(ϕs)eqs,m (ζ) satisfy 
+
+ωm(ζ) ∝ |cm(ϕs)|2
+
+|cm(ϕs)|2 + ζ ,
+
+> M
+
+X
+
+> m=−M
+
+ωm(ζ) = 1 . (28) Let gDRBF (r) ≜ gabs (ϕs, r ; wDRBF  
+
+> s
+
+). Using (23), its leading relative on-axis response satisfies 
+
+gDRBF (r)
+
+gDRBF (∞) ≈
+
+> M
+
+X
+
+> m=−M
+
+ωm(ζ)e−jeδm(r)
+
+≈ 1 − Var ω (m2)8( k0r)2 ,
+
+(29) where Var ω (m2) is the weighted variance under ωm(ζ). Thus, regularization suppresses weak modes while preserving the truncation-induced distance-robustness mechanism. We use the scale-independent parameterization 
+
+ζ = ζrel max  
+
+> |m|≤ M
+
+|cm(ϕs)|2. (30) Let L denote the prescribed number of uniformly rotated Layer-1 codewords, let R = [ rmin , r max ], and define SL =
+
+{(∆ ϕ, r ) : |∆ϕ| ≤ π/L, r ∈ R} . The candidate modal-order set M satisfies 2M < N and is selected according to the distance-sensitivity scale M 2/(2 k0rmin ) and the required angular coverage. For each M ∈ M, ζrel is swept over 
+
+Z, which comprises the strict-inversion point ζrel = 0 and a finite logarithmic grid of positive values terminated when the unit-norm beam response becomes insensitive to further regularization. Let gM,ζ rel (∆ ϕ, r ) denote the exact spherical-wave absolute gain. The best ζrel is first found for each M , after which the resulting candidates are compared according to 
+
+(M ⋆, ζ ⋆
+
+> rel
+
+) = arg max  
+
+> M∈M
+> ζrel ∈Z
+
+min 
+
+> (∆ ϕ,r )∈S L
+
+gM,ζ rel (∆ ϕ, r )s.t. 20 log 10 max  
+
+> r∈R
+
+gM,ζ rel (0 , r )
+
+− 20 log 10 min  
+
+> r∈R
+
+gM,ζ rel (0 , r ) ≤ ϵr .
+
+(31) By UCA rotational symmetry, this offline search is performed only for one reference sector, and the complete codebook 
+
+WDRBF = {wDRBF  
+
+> s
+
+}L−1 
+
+> s=0
+
+is obtained by rotation. 
+
+B. Layer-2: Full-Precision Codebook 
+
+In this subsection, we develop a high-resolution full-precision codebook by selecting the angular and radial sam-pling intervals according to the minimum resolvable distance 
+
+dms (φr , r ) derived in Section III. 
+
+Corollary 1. Consider a densely sampled UCA under the Fresnel condition Rt/r ≪ 1 and a local separation d/r ≪ 1,such that |dβ 1|, |dβ 2|, and |dβ 3| are sufficiently small. When the near-field beamforming vector a(ϕ + ∆ ϕ, r + ∆ r) is employed to serve a user located at (ϕ, r ), the corresponding near-field beamforming gain can be approximated as 
+
+gNF (ϕ, r, ϕ + ∆ ϕ, r + ∆ r) ≈ | J0(dβ 1)J0(dβ 2)J0(dβ 3)| ,
+
+(32) 
+
+where ∆r = d cos φr , ∆ϕ = d sin φr /r , and β1, β2, and β3
+
+are defined in Lemma 1. Proof: The gain equals the magnitude of the normalized manifold correlation aH (ϕ, r )a(ϕ + ∆ ϕ, r + ∆ r). Substitut-ing the local path-difference expansion in (8), removing the common phase, and applying the Jacobi–Anger expansion and UCA phase-mode orthogonality as in Appendix A yields the stated result. Under the conditions of the corollary, the higher-order cross-mode and finite-array aliasing terms are negligible, leaving the dominant zero-order Bessel contribution. The normalized manifold correlation in Corollary 1 is also the amplitude gain of a near-field matched beam steered to the displaced location. Moreover, the EDoF boundary in (14) corresponds to the amplitude-correlation level 2τ − 1.Therefore, the EDoF threshold can be mapped consistently to an amplitude-gain criterion for determining the sampling intervals of the FP codebook. Within the local regime of Corollary 1, choosing τ = 0 .75 gives 2τ − 1 = 0 .5, and hence |J0(dβ 1)J0(dβ 2)J0(dβ 3)| = 0 .5. Thus, the boundary induced by the EDoF threshold τ = 0 .75 is equivalent to the half-amplitude sampling rule adopted in existing codebook designs [27]. The resulting dms (φr , r ) is therefore used to determine the FP-codebook sampling intervals. This boundary corresponds to one-quarter of the peak power rather than a half-power threshold. Next, we discretize the near-field UCA beam space along the angular and radial dimensions [27], with sampling intervals determined by dms (φr , r ) under the prescribed resolution threshold. By leveraging the closed-form expression of dms (φr , r ) in (17), the sampling steps in the angular and radial domains are given by 
+
+
+
+∆ϕτ =
+
+p8(1 − τ )λπR t
+
+q
+
+4 + R2
+
+> t
+> r2
+
+≈
+
+p8(1 − τ )λ
+
+2πR t
+
+,
+
+∆rτ = 2p8(1 − τ )λr 2
+
+πR 2
+
+> t
+
+.
+
+(33) The angular and radial expressions in (33) follow by setting 
+
+φr = π/ 2 for pure angular separation and φr = 0 for pure radial separation, respectively. To obtain a uniform angular grid independent of distance, the codebook construction be-low adopts the distance-independent approximation of ∆ϕτ
+
+in (33). To examine joint coverage, substituting ∆r = d cos φr and 7
+
+∆ϕ = d sin φr /r into (17) yields 
+
+gNF (∆ ϕ, ∆r; r) ≈ 1 − π2R2
+
+> t
+
+4λ2
+
+×
+
+ 
+
+4 + R2
+
+> t
+
+r2
+
+
+
+(∆ ϕ)2 + R2
+
+> t
+
+4r4 (∆ r)2
+
+
+
+,g2D corner (r) ≈ 1 − (1 − τ )
+
+
+
+1 + R2
+
+> t
+
+8r2
+
+
+
+≥ 2τ − 1, r > R t.
+
+(34) For the distance-dependent angular interval in (33), half-cell offsets give g2D corner ≈ τ ; the displayed conservative bound applies to the adopted uniform grid. Hence, the Cartesian product has an explicit joint local guarantee. Let L1 and L2 denote the resulting numbers of angular and radial grid points, respectively, with index sets Ξϕ =
+
+{0, . . . , L 1 − 1} and Ξr = {0, . . . , L 2 − 1}. The resulting FP codebook is the Cartesian product 
+
+WFP = a(ϕiϕ , r ir ) | iϕ ∈ Ξϕ, i r ∈ Ξr , (35) and its size is Nc = L1L2. To validate coverage without the local approximation, define the exact-spherical worst-case gain over DFP = [0 , 2π) × [rmin , r max ] as 
+
+g2D min = min 
+
+> (ϕ,r )∈D FP
+
+max  
+
+> wFP
+> i∈WFP
+
+aH(ϕ, r )wFP  
+
+> i
+
+. (36) The exact criterion is g2D min ≥ 2τ − 1, i.e., g2D min ≥ 0.5
+
+for τ = 0.75 . Unlike the local bound, this metric evalu-ates angle–distance coupling and every cell interior without pointwise normalization. The construction is summarized in 
+
+Algorithm 1 . The construction has complexity O(N L 1L2)
+
+and can be performed offline or over a local candidate region; its resolution is controlled by τ .
+
+Algorithm 1 Construction of the FP codebook WFP  
+
+> 1:
+
+Input: Minimum distance rmin ; maximum distance rmax ;circular array radius Rt; wavelength λ; resolution thresh-old τ . 
+
+> 2:
+
+Set ∆ϕτ =
+
+√8(1 −τ )λ 
+
+> 2πR t
+
+. 
+
+> 3:
+
+Calculate the angular sampling size L1 =
+
+l 2π
+
+> ∆ϕτ
+
+m
+
+. 
+
+> 4:
+
+Set Ξϕ = {0, . . . , L 1 − 1} and ϕiϕ = 2 πi ϕ/L 1 for every 
+
+iϕ ∈ Ξϕ. 
+
+> 5:
+
+Initialize r0 ← rmin and ir ← 0. 
+
+> 6:
+
+while rir + 2√8(1 −τ )λr 2
+
+> ir
+> πR 2
+> t
+
+≤ rmax do  
+
+> 7:
+
+rir +1 ← rir + 2√8(1 −τ )λr 2
+
+> ir
+> πR 2
+> t
+
+. 
+
+> 8:
+
+ir ← ir + 1 . 
+
+> 9:
+
+end while  
+
+> 10:
+
+If rir < r max , append rmax and update ir ← ir + 1 . 
+
+> 11:
+
+Set L2 = ir + 1 and Ξr = {0, . . . , L 2 − 1}. 
+
+> 12:
+
+Construct the FP codebook as 
+
+WFP = a(ϕiϕ , r ir ) | iϕ ∈ Ξϕ, i r ∈ Ξr . 
+
+> 13:
+
+Output: FP codebook WFP .
+
+Fig. 2: Illustration of the proposed two-stage near-field HDA-BAR beam training scheme. 
+
+V. P ROPOSED NEAR -F IELD HDA-BAR B EAM TRAINING 
+
+This section introduces a 2D near-field HDA-BAR beam training scheme that builds upon the hierarchical codebook de-veloped above. Although the system model considers multiple users, the beam training procedure is described for an arbitrary User u ∈ K , and the same procedure can be independently applied to other users. For notational simplicity, the user index is omitted when no ambiguity arises. As illustrated in Fig. 2, the proposed scheme consists of two sequential stages. In the first stage, the azimuth angle of the considered user is rapidly estimated using the coarse DRBF codebook. In the second stage, the BAR method is employed over the reduced FP codebook to efficiently identify the optimal near-field beam with high accuracy. 
+
+A. Energy-Correlation-Based Fractional Angle Refinement 
+
+In Stage 1, the L codewords in WDRBF , indexed by 
+
+η = 0 , . . . , L −1, sweep all azimuth sectors with ϕη = 2 πη/L .Using an orthogonal training pilot of power Ptr , the observa-tion and measured energy for the η-th codeword are 
+
+yη = pPtr hHwDRBF  
+
+> η
+
++ nη ,zη = |yη |2, nη ∼ CN (0 , σ 2). (37) The maximum-energy codeword provides the sector-level es-timate 
+
+η⋆ = arg max  
+
+> 0≤η<L
+
+zη , ϕmax = 2πη ⋆
+
+L . (38) Owing to UCA rotational symmetry, the local energy re-sponses of different DRBF sectors are circular shifts of a com-mon reference template. Let Q denote the number of neighbor-ing codewords on either side of η⋆, let Q = {− Q, . . . , Q }, and let [·]L denote modulo-L indexing. The corresponding local energy vector is 
+
+[zloc ]q+Q+1 = z[η⋆+q]L , q ∈ Q . (39) Let E ⊆ [−π/L, π/L ] be a fractional-offset grid, and choose 
+
+Nr offline distance samples {rj }Nr 
+
+> j=1
+
+⊆ R . Using the exact spherical-wave manifold, define the distance-averaged refer-ence template as 
+
+[t(ϵ)] q+Q+1 = 1
+
+NrNrX
+
+> j=1
+
+g2abs 
+
+ ϵ, r j ; wDRBF [q]L
+
+, q ∈ Q . (40) Only one reference sector is required. With ¯z = 1Tzloc /(2 Q+1) and ¯t(ϵ) = 1Tt(ϵ)/(2 Q + 1) , define ˇzloc = zloc − ¯z1 and 8
+
+ˇt(ϵ) = t(ϵ) − ¯t(ϵ)1. Their normalized correlation is 
+
+C(ϵ) = ˇzTloc ˇt(ϵ)
+
+∥ˇzloc ∥2∥ˇt(ϵ)∥2
+
+. (41) The fractional offset and the refined azimuth estimate are obtained as 
+
+ˆϵϕ = arg max  
+
+> ϵ∈E
+
+C(ϵ), ˆϕ = wrap [0 ,2π)
+
+ ϕmax + ˆ ϵϕ
+
+. (42) Centering and normalization remove the common energy offset and overall scale. The template set TEC = {t(ϵ) : ϵ ∈ E} is generated offline; hence, the refinement requires no additional pilot and incurs O((2 Q + 1) |E| ) online operations. 
+
+B. BAR-Based Fine-Grained Beam Search 
+
+After obtaining the refined azimuth estimate ˆϕ, the second-layer FP codebook is pruned in the angular domain. Since exhaustive search over the remaining candidates may still incur considerable training overhead, the proposed BAR search exploits their correlation for efficient beam identification. Since adjacent Layer-1 DRBF codewords are separated by 2π/L , the pruning half-width is set to ∆ϕ = 2π/L ,thereby retaining one Layer-1 angular interval on either side of ˆϕ without introducing an additional tuning parameter. The reduced codebook is constructed as 
+
+WRed =
+
+h
+
+wFP  
+
+> i
+> wFP
+> i∈WFP ,
+
+|wrap [−π,π )(ϕi− ˆϕ)|≤∆ϕ
+
+i
+
+∈ CN ×Nred , (43) where ϕi and ri denote the angular and radial grid points of 
+
+wFP  
+
+> i
+
+, respectively, and Nred is the number of retained candi-date codewords. The circular angular difference in (43) ensures continuous pruning across the 0–2π boundary. The objective is to select the optimal beam from WRed by maximizing the received signal power, i.e., 
+
+w∗ = arg max  
+
+> wRed
+> i∈WRed
+
+hHwRed  
+
+> i
+> 2
+
+, (44) where wRed  
+
+> i
+
+denotes the i-th candidate codeword in WRed .Based on the reduced candidate codebook WRed , we propose a BAR-based beam training scheme to identify the optimal beam efficiently. By exploiting the strong correlation among the candidate codewords in WRed , the posterior distribution is iteratively updated with a limited number of observations. At each iteration, the next codeword is adaptively selected according to both the predictive mean and the associated uncertainty. For the candidate codewords wRed  
+
+> i
+
+, i = 1 , 2, . . . , N red , the noise-free received beam-energy sequence can be written as 
+
+pRed  
+
+> i
+
+= hHwRed  
+
+> i
+> 2
+
+, i = 1 , 2, . . . , N red . (45) Accordingly, the beam-energy vector over the reduced code-book is given by 
+
+pRed = pRed 1 , p Red 2 , . . . , p Red 
+
+> Nred
+
+T , (46) where pRed ∈ RNred ×1 and WRed ∈ CN ×Nred . The vector 
+
+pRed is modeled as a Gaussian process [38], [39], i.e., 
+
+pRed ∼ GP (0, K) , (47) where K ∈ RNred ×Nred is the covariance matrix. In Gaussian process modeling, K is constructed using a kernel function that characterizes the correlation between the received beam  
+
+> (a) Actual energy distribution (b) Proposed X-shaped DAC kernel
+
+Fig. 3: Near-field UCA codebook energy distribution with X-shaped main lobes and the proposed DAC kernel. 
+
+energies of different candidate codewords. To characterize the structured beam-energy distribution in near-field UCA systems, we propose a DAC kernel. Unlike conventional kernels, the DAC kernel captures the fact that the main-lobe energy does not follow a simple elliptical pattern, but instead exhibits an X-shaped main-lobe energy distribution over the angle–distance sampled codebook [40], [41], as illustrated in Fig. 3. The DAC kernel is defined as 
+
+KDAC 
+
+
+
+χ(i), χ(i′)
+
+= KX
+
+
+
+χ(i), χ(i′)
+
+KS
+
+
+
+χ(i), χ(i′)
+
+,
+
+(48) where χ(i) = ( χ(i) 
+
+> ϕ
+
+, χ (i) 
+
+> r
+
+) denotes the angular–distance grid index of the i-th candidate codeword, and i′ denotes another candidate codeword index in the reduced codebook. The func-tions KX and KS are covariance kernel functions. Specifically, 
+
+KX captures the X-shaped angular–range correlation induced by near-field propagation, while KS enforces local smoothness across the angular–range domain. They are expressed as 
+
+
+
+KX
+
+
+
+χ(i), χ(i′)
+
+
+
+= 12 exp 
+
+
+
+− (∆ χr − κ∆χϕ)2
+
+2σ2
+
+> x
+
+
+
++ 12 exp 
+
+
+
+− (∆ χr + κ∆χϕ)2
+
+2σ2
+
+> x
+
+
+
+,KS
+
+
+
+χ(i), χ(i′)
+
+
+
+= exp − (∆ χϕ)2
+
+2σ2
+
+> ϕ
+
+− (∆ χr )2
+
+2σ2
+
+> r
+
+!
+
+,
+
+(49) where ∆χϕ = χ(i) 
+
+> ϕ
+
+− χ(i′) 
+
+> ϕ
+
+and ∆χr = χ(i) 
+
+> r
+
+− χ(i′) 
+
+> r
+
+. The parameters κ, σ2
+
+> x
+
+, σ2
+
+> ϕ
+
+, and σ2 
+
+> r
+
+are tunable hyperparameters of the DAC kernel, where κ determines the opening angle of the X-shaped correlation pattern and σ2
+
+> x
+
+, σ2
+
+> ϕ
+
+, and σ2 
+
+> r
+
+control the corresponding correlation widths. Since kernel selection critically affects BAR performance [42], conventional kernels may be insufficient for near-field UCA MIMO scenarios. The proposed DAC kernel better matches the near-field beam-energy distribution and thus improves beam selection perfor-mance. Consequently, the covariance matrix is constructed as 
+
+K(i, i ′) = KDAC 
+
+
+
+χ(i), χ(i′)
+
+. (50) Let Ω denote the index set of the probed codewords. The corresponding real-valued beam-energy observation vector is denoted by eΩ ∈ R|Ω|, and can be expressed as 
+
+eΩ = pRed (Ω) + nΩ, nΩ ∼ N  0|Ω|, σ 2 
+
+> e
+
+I|Ω|
+
+ , (51) where nΩ denotes the equivalent real-valued observation noise in the beam-energy domain. Although the exact perturbation 9
+
+after energy measurement is generally non-Gaussian, it is approximated as Gaussian for tractable GP modeling, which is reasonable in large-scale antenna systems where the SNR after beamforming is relatively high. Then, the joint distribution of 
+
+pRed and eΩ is given by 
+
+pRed 
+
+eΩ
+
+
+
+∼ N 
+
+
+
+0,
+
+ K K(: , Ω) 
+
+K(Ω , :) K(Ω , Ω) + σ2 
+
+> e
+
+I|Ω|
+
+ 
+
+. (52) For the observed codeword index set Ω, the posterior mean 
+
+μΩ and the marginal posterior variance of the i-th candidate are computed as [23], [39] 
+
+μΩ = K(: , Ω)  K(Ω , Ω) + σ2 
+
+> e
+
+I|Ω|
+
+−1 eΩ, (53) 
+
+s2Ω,i = K(i, i ) − K(i, Ω)  K(Ω , Ω) + σ2 
+
+> e
+
+I|Ω|
+
+−1 K(Ω , i ).
+
+(54) An acquisition function Vt(i) is then defined to select the next codeword index based on the posterior mean μΩt and standard deviation sΩt,i . By jointly considering exploitation through the posterior mean and exploration through the pos-terior uncertainty, the acquisition function is expressed as 
+
+Vt(i) = μΩt,i + ξs Ωt,i , (55) where μΩt,i and sΩt,i denote the posterior mean and stan-dard deviation of the i-th candidate codeword at iteration 
+
+t, respectively, and ξ controls the exploitation–exploration tradeoff. Let Ired = {1, 2, . . . , N red } denote the index set of all candidate codewords in the reduced codebook WRed . The next codeword index to probe is selected by maximizing the acquisition function, i.e., 
+
+it+1 = arg max 
+
+> i∈I red \Ωt
+
+Vt(i), (56) where \ denotes the set difference. The observation index set is then updated iteratively as 
+
+Ωt+1 = Ω t ∪ { it+1 }. (57) Because Stage 1 provides an angular prior but no reliable range estimate, Stage 2 uses the codeword closest to ˆϕ on the outermost radial layer as a deterministic initial probe; the subsequent BAR updates explore both angle and range. The detailed procedure of the proposed HDA-BAR beam training scheme is summarized in Algorithm 2 .
+
+C. Complexity and Overhead Analysis 
+
+This subsection evaluates the online computational com-plexity and training overhead of the proposed HDA-BAR beam training scheme. In Algorithm 2, Tmax denotes the number of Stage 2 pilots, including the initial probe. Using incremental Cholesky updates, the online computational complexity is 
+
+O L + (2 Q + 1) |E| + T 3max 
+
++ Nred T 2max + Nred Tmax 
+
+. (58) Here, O(L + (2 Q + 1) |E| ) denotes the Stage 1 complexity, including DRBF beam sweeping and the energy-template correlation over E. In Stage 2, a rank-one Cholesky update and the evaluation of only the required marginal posterior variances cost O(t2 +Nred t) at iteration t, yielding O(T 3max +Nred T 2max )
+
+over the search, while acquisition maximization contributes 
+
+O(Nred Tmax ). The angularly indexed codebook makes can-didate pruning linear in Nred and hence dominated by the posterior updates. The codebooks, templates, and DAC-kernel entries, whose one-time kernel construction costs O(N 2red ), are precomputed offline and excluded from the online complexity. In addition, beam training overhead is measured by the number of required time slots. The proposed scheme requires 
+
+L + Tmax slots, substantially fewer than those required by conventional search-based schemes, as shown in Table I. 
+
+Algorithm 2 Two-Stage HDA-BAR Beam Training  
+
+> 1:
+
+Input: Coarse DRBF codebook WDRBF ; energy-template set TEC ; neighbor radius Q; offset grid E; near-field FP codebook WFP ; DAC-kernel covariance matrix K;maximum number of pilots Tmax . 
+
+> 2:
+
+Stage 1: Energy-Correlation-Based Coarse Azimuth Refinement  
+
+> 3:
+
+for η = 0 to |WDRBF | − 1 do  
+
+> 4:
+
+Transmit a pilot using the DRBF codeword wDRBF  
+
+> η
+
+. 
+
+> 5:
+
+Compute the received signal energy zη for the η-th codeword.  
+
+> 6:
+
+end for  
+
+> 7:
+
+Find the maximum-energy index 
+
+η⋆ = arg max 
+
+> 0≤η≤| WDRBF |− 1
+
+zη . 
+
+> 8:
+
+Obtain the corresponding azimuth angle ϕmax = ϕη⋆ . 
+
+> 9:
+
+Form zloc using (39), evaluate C(ϵ) using (41), and obtain 
+
+ˆϕ from (42).  
+
+> 10:
+
+Stage 2: BAR-Based Fine-Grained Beam Search  
+
+> 11:
+
+Prune WFP according to (43) using ˆϕ, and obtain the reduced codebook WRed . 
+
+> 12:
+
+Select the codeword on the outermost radial layer whose azimuth is closest to ˆϕ as the initial codeword wRed  
+
+> i1
+
+. 
+
+> 13:
+
+Probe wRed  
+
+> i1
+
+, obtain the beam-energy observation ei1 , and initialize Ω1 = {i1} and eΩ1 = [ ei1 ]. 
+
+> 14:
+
+for t = 1 to Tmax − 1 do  
+
+> 15:
+
+Update the posterior means and marginal standard de-viations via an incremental Cholesky factorization of (53)– (54).  
+
+> 16:
+
+Select the next codeword index it+1 according to (55) and (56).  
+
+> 17:
+
+Probe wRed  
+
+> it+1
+
+and obtain the beam-energy observation 
+
+eit+1 . 
+
+> 18:
+
+Update Ωt+1 ← Ωt ∪ { it+1 } and append eit+1 to 
+
+eΩt+1 . 
+
+> 19:
+
+end for  
+
+> 20:
+
+Update the final posterior mean μΩTmax with the last observation using the same factorization.  
+
+> 21:
+
+Select the optimal codeword index as 
+
+i⋆ = arg max 
+
+> i∈I red
+
+μΩTmax ,i . 
+
+> 22:
+
+Output: Optimal beamforming codeword w∗ = wRed  
+
+> i⋆
+
+.VI. S IMULATION RESULTS 
+
+This section validates the derived closed-form boundaries of the minimum resolvable region for the UCA configuration 10                   
+
+> TABLE I
+> COMPARISON OFBEAM TRAINING OVERHEAD
+> Schemes Overhead Value Far-field exhaustive searching scheme L13574 Near-field exhaustive searching scheme L1L2114368 Near-field TPBT scheme L1+L23606 Proposed HDA-BAR beam training scheme L+Tmax 384
+
+through simulations and compares them with those of the ULA. Numerical results are provided to assess the effective-ness of the hierarchical beam codebook and the HDA-BAR beam training scheme. We set the number of antennas at the BS as N = 1024 ,the carrier frequency as f = 40 GHz, and the array radius as 
+
+Rt = 0 .96 m. For Layer-1 codebook generation, we prescribe the power-of-two size L = 256 according to the hierarchical structure and training-overhead budget and set ϵr = 1 dB. We implement (31) as a two-dimensional exact-manifold grid search: for each candidate M , ζrel is optimized first, after which the feasible operating points are compared by their worst absolute amplitude gains over SL. The search yields 
+
+M ⋆ = 96 and ζ⋆ 
+
+> rel
+
+= 39 .81 within the tested grid. This operat-ing point retains 193 modes, satisfies 2M ⋆ < N , and achieves a worst absolute amplitude gain of −13 .71 dB over the assigned angle–distance sector. The corresponding modal-to-aperture phase-sensitivity ratio (M ⋆/(k0Rt)) 2 is 1.425 ×10 −2.Since the small-modal-phase approximation is not tight at the shortest distance, it is used only to explain the sensitivity scaling, whereas the design and coverage evaluation use the exact spherical-wave manifold. We set τ = 0.75 . For the Stage-1 energy-correlation refinement, we use Q = 4 , a 201-point fractional-offset grid over [−π/L, π/L ], and 41 offline distance samples over [5 , 400] m. For Layer 2, Algorithm 1 gives L1 = 3574 and L2 = 32 after including the service boundary rmax = 400 m, yielding Nc = L1L2 = 114368 
+
+unit-norm FP codewords. With L = 256 , the pruning half-width is ∆ϕ = 1 .40625 ◦, corresponding to a full angular span of 2.8125 ◦ and hence Nred ≈ 896 . For simplicity, a single-user scenario is considered, i.e., K = 1 . In each simulation trial, the user location is randomly generated in the near-field region, where ϕ ∈ [0 , 2π] and r ∈ [5 , 400] m. For the HDA-BAR beam training scheme, the maximum number of BAR iterations is set to Tmax = 128 , the DAC-kernel hyperparameters are set to κ = 0.46 , σ2 
+
+> x
+
+= 0.69 , σ2 
+
+> r
+
+= 9, and σ2 
+
+> ϕ
+
+= 2.25 , the equivalent energy-observation noise variance is σ2 
+
+> e
+
+= 0 .02 ,and the acquisition parameter is set to ξ = 0 .92 . The number of independent Monte Carlo trials is set to 5000 .To ensure a comparable array scale, the UCA and ULA are configured with the same number of elements and physical aperture, although their different geometries result in different element spacings. Figs. 4(a) and (b) show the minimum resolvable distance versus BS–user distance and antenna aper-ture, respectively, for different relative azimuths φr . Here, φr
+
+denotes the angle between the displacement from the reference user to the neighboring user and the outward radial direction from the array center to the reference user. For both arrays, dms 
+
+increases with BS–user distance and decreases with aperture. Over the considered angles, it is smaller for φr closer to   
+
+> (a) Minimum resolvable distance versus BS-user distance with the antenna aperture fixed at 1.92 m .
+> (b) Minimum resolvable distance versus antenna aperture with the BS-user distance fixed at 15 m .
+
+Fig. 4: Verification of the analytical minimum resolvable distance. 
+
+π/ 2, reflecting better tangential than radial spatial resolution. Under these matched-element and matched-aperture configu-rations, the UCA consistently achieves a smaller minimum resolvable distance than the ULA, indicating superior spatial resolution in near-field communications. This also implies stronger inherent interference suppression and higher spatial multiplexing capability for the UCA. Moreover, the UCA simulation results, shown by diamond markers, closely match the closed-form predictions in (17), shown by dashed curves, with only negligible discrepancies. The solid curves with star markers report the ULA simulation results. This agreement validates the accuracy of (17). Fig. 5 evaluates the selected operating point (M ⋆, ζ ⋆
+
+> rel
+
+) = (96 , 39 .81) using the exact spherical-wave manifold. In Fig. 5a, the strict inverse-modal baseline and the proposed regularized DRBF use the same selected order M ⋆ = 96 ,so their comparison isolates the effect of regularization. The strict inverse amplifies weak retained Bessel modes and can therefore suffer a substantial absolute-gain loss after unit-norm normalization. The proposed regularization suppresses this weak-mode amplification and improves the worst-case abso-lute amplitude gain while retaining a small distance variation. In contrast, the conventional far-field matched beam remains strongly affected by near-field range-dependent defocusing. The angular cuts in Fig. 5b confirm that the assigned sector 11 
+
+(a) Distance-domain amplitude gain. 
+
+(b) Angular-domain amplitude gain. 
+
+Fig. 5: Exact-spherical absolute amplitude gains for unit-norm beams at the selected modal order M ⋆ = 96 : (a) distance responses of the strict inverse-modal baseline, regularized DRBF, and far-field beam; and (b) angular DRBF responses at r = 5 , 50 , and 400 m, with the inverse-modal reference at 
+
+r = 50 m. The vertical dashed lines mark the L = 256 sector boundaries, and no curve is pointwise normalized. gmin 2D =0.781 (-2.15 dB)     
+
+> 55.5 66.5 7
+> Distance r (m)
+> 00.1 0.2 0.3 0.4 0.5 0.6 0.7
+> Angular offset  (deg)
+> 0.5 0.6 0.7 0.8 0.9 1Absolute amplitude gain
+
+Fig. 6: Exact-spherical 2D amplitude-gain coverage of the Layer-2 FP codebook. Black lines delineate the angular–radial cells, white circles mark codeword centers, and the red star marks the audited minimum. 
+
+boundaries remain within the DRBF main lobe over the con-sidered service region. The minimum full half-amplitude width over the evaluated distances is 2.26 ◦, approximately 10 .43 
+
+times as large as the 0.217 ◦ width of the far-field matched beam; this broadening corresponds to a beamwidth-based power-spreading reference loss of 10 .18 dB. The evaluated worst-case on-axis loss exceeds this reference by only 1.51 dB, while the 0.51 -dB range ripple indicates limited sensitivity to distance variations. 21 22 23 24 25 26   
+
+> SNR(dB)
+> 5.5 66.5 77.5 88.5 9
+> Achievable rate(bps/Hz)
+> Perfect CSI Proposed HDA-BAR Near-field exhaustive Far-field exhaustive Near-field TPBT
+> 23.8 24 24.2 7.7 7.8 7.9 8
+
+Fig. 7: Achievable rate versus the reference SNR over 21 –26 dB. 
+
+Fig. 6 directly evaluates the joint coverage metric in (36) for the proposed Layer-2 FP codebook using the exact spherical-wave manifold and unit-norm codewords; no pointwise nor-malization is applied. For readability, seven adjacent angular cells and nine near-range radial samples are displayed, whereas the numerical audit spans the complete region DFP . The maximum absolute amplitude gain remains continuous across all angular–radial cell boundaries, and the audited minimum is g2D min = 0 .781 (−2.15 dB), which exceeds the prescribed threshold 2τ − 1 = 0 .5 (−6.02 dB). This verifies joint 2D coverage without uncovered angle–distance gaps. The achievable rate under different beam training schemes is evaluated over the reference-SNR interval ηref ∈ [21 , 26] dB in Fig. 7. The reference SNR is defined as ηref =  
+
+> P N |ρ|2
+> σ2
+
+, where P is the transmit power and σ2 is the noise power. Given the near-field array response vector 
+
+a(ϕ, r ) and the selected beamforming vector w, satisfying 
+
+∥a(ϕ, r )∥2 = ∥w∥2 = 1 , the achievable rate is given by 
+
+R = log 2
+
+
+
+1 + ηref aH(ϕ, r )w 2
+
+. The perfect-CSI scheme serves as the performance upper bound, where the beamform-ing vector is assumed to be perfectly aligned with the user and is given by w = a(ϕ, r ). Under the updated M = 96 Layer-1 configuration, the proposed two-stage search approaches the near-field exhaustive-search benchmark as the reference SNR increases and consistently outperforms near-field TPBT and far-field exhaustive search. At the lower end of the considered interval, its moderate gap to near-field exhaustive search is caused by noise-induced errors in the Stage-1 energy-correlation refinement and their propagation through candi-date pruning; the gap rapidly narrows with increasing SNR. This behavior reflects the performance–overhead tradeoff of hierarchical wide-beam training rather than a loss of distance robustness. To evaluate the Stage-2 search strategy, Fig. 8 compares BAR using the proposed DAC kernel with BAR using the conventional SE kernel and sequential exhaustive search. All methods use the candidate set produced by the M = 96 
+
+Layer-1 estimator. The exhaustive-search curve reports the best result obtained after sequentially probing the same number of codewords as the displayed training overhead, rather than the final result after scanning the entire candidate set. Within the 12 
+
+Fig. 8: Achievable-rate comparison of the two kernels and sequential exhaustive search under limited Stage-2 training overhead. 100 200 300 400 500 600 700   
+
+> Beam training overhead
+> 12345678
+> Achievable rate(bps/Hz)
+> Proposed HDA-BAR Far-field exhaustive Near-field TPBT Near-field exhaustive
+> 448 449 450 2.01 2.02 2.03 2.04 2.05
+> Stage 2 Stage 1
+> (a)
+> (b)
+
+Fig. 9: Achievable rate performance vs. the beam training overhead. 
+
+displayed overhead range, DAC-based BAR converges faster and achieves a higher rate than SE-based BAR and sequential exhaustive search, confirming that exploiting the near-field angle–distance coupling improves the sample efficiency of Stage-2 beam training. The performance gap narrows as the overhead increases because the methods acquire increasingly informative observations. The achievable rate versus beam training overhead at a reference SNR of 24 dB is shown in Fig. 9. After L = 256 
+
+Stage-1 probes, the proposed HDA-BAR scheme rapidly re-solves the remaining angle–distance uncertainty using at most 
+
+Tmax = 128 additional Stage-2 probes and approaches the achievable rate of near-field exhaustive search. Consequently, HDA-BAR requires only 384 probing slots, corresponding to a 
+
+99 .66% overhead reduction relative to exhaustively scanning all Nc = 114368 FP codewords, while outperforming near-field TPBT and far-field exhaustive search. These results confirm the overall effectiveness of HDA-BAR in maintaining near-exhaustive beamforming performance with substantially reduced training overhead. VII. C ONCLUSION 
+
+In this paper, we exploited the geometric properties of the UCA to investigate its spatial resolution capability in the angular and distance domains under near-field propagation. The results showed that, with the same number of antenna elements and the same physical aperture, the UCA achieves a smaller minimum resolvable distance than the ULA, thereby providing superior near-field spatial resolution and higher spatial multiplexing potential. Based on this observation, a decoupled resolution-aware hierarchical codebook tailored for near-field UCA systems was proposed. Its Layer-1 DRBF design combines modal truncation with regularized compensa-tion to retain distance robustness while improving the absolute amplitude gain under unit-norm transmission. Furthermore, a low-overhead HDA-BAR beam training scheme was devel-oped based on the proposed hierarchical codebook. For the considered array configuration, the resulting two-stage training procedure requires 384 probing slots and therefore reduces the training overhead by approximately 99.66% relative to near-field exhaustive search. As a future research direction, efficient near-field beam training for UCA systems in three-dimensional space remains a critical challenge to be further investigated. APPENDIX ASubstituting the approximations of ra,n in (7) and rb,n in (8) into (9), the (l, p )-th entry of the gain matrix G can be written as 
+
+Gl,p = ejδdα NX
+
+> n=1
+
+ejδdβ 1 sin ψn
+
+× ejδdβ 2 cos(2 ψn)ejδdβ 3 sin(2 ψn), (59) where δ = l − p, α = − 2πλ (1 − R2 
+
+> t
+> 4r2
+
+) cos φr , β1 = 2πR t 
+
+> rλ
+
+sin φr ,
+
+β2 = πR 2 
+
+> t
+> 2r2λ
+
+cos φr , β3 = πR 2 
+
+> t
+> r2λ
+
+sin φr . To further simplify the above expression, we employ the Jacobi–Anger expan-sion [43], which can be expressed as follows 
+
+ejβ cos ϑ =
+
+> ∞
+
+X
+
+> m=−∞
+
+jmJm(β)ejmϑ , (60) where Jm(·) denotes the m-th order Bessel function of the first kind. Applying the Jacobi–Anger expansion, Gl,k can be further expressed as Applying the Jacobi–Anger expansion, 13 
+
+Gl,p can be further expressed as 
+
+Gl,p = ejδdα 
+
+> ∞
+
+X
+
+> m′=−∞
+
+Jm′ (δdβ 1)
+
+> ∞
+
+X
+
+> m=−∞
+
+jmJm(δdβ 2)
+
+×
+
+> ∞
+
+X
+
+> ν=−∞
+
+Jν (δdβ 3)
+
+> N
+
+X
+
+> n=1
+
+ej(m′+2 m+2 ν)ψn
+
+> (b)
+
+≈ N e jδdα 
+
+> ∞
+
+X
+
+> m=−∞ ∞
+
+X
+
+> ν=−∞
+
+jmJ2m+2 ν (δdβ 1)
+
+× Jm(δdβ 2) Jν (δdβ 3)
+
+> (c)
+
+≈ N e jδdα J0(δdβ 1) J0(δdβ 2) J0(δdβ 3) ,
+
+(61) where step (b) follows from the discrete orthogonality property of the UCA phase modes, i.e., 
+
+> N
+
+X
+
+> n=1
+
+ej(m′+2 m+2 ν)ψn =
+
+(
+
+N, m′ + 2 m + 2 ν = N q, q ∈ Z,
+
+0, m′ + 2 m + 2 ν̸ = N q, q ∈ Z.
+
+(62) This property indicates that the summation equals N only when m′ + 2 m + 2 ν is an integer multiple of the number of antennas N . Otherwise, the summation becomes zero and thus does not contribute to the result. For a sufficiently large UCA and the dominant low-order phase modes, the spatial aliasing terms corresponding to q̸ = 0 are negligible. Thus, the dominant contribution is obtained by taking q = 0 , which gives 
+
+m′ = −2m − 2ν, and we have J−2m−2ν (x) = J2m+2 ν (x),which leads to step (b). The approximation in step (c) follows from the small-argument approximation of the Bessel function. When x → 0, the Bessel function of the first kind can be approximated as 
+
+Jn(x) ≈ 1
+
+n!
+
+ x
+
+2
+
+n
+
+, n ≥ 0. (63) Under the assumptions of the adopted system model, the quantities δdβ 1, δdβ 2, and δdβ 3 are sufficiently small. Con-sequently, the product term satisfies 
+
+J2m+2 ν (δdβ 1)Jm(δdβ 2)Jν (δdβ 3) ≈ 0, (m, ν )̸ = (0 , 0) .
+
+(64) Retaining only the zeroth-order Bessel-function term, i.e., 
+
+m = 0 and ν = 0 , leads to the approximate expression in (12). This completes the proof. APPENDIX BWe first prove Lemma 2. By rotational symmetry, set the target azimuth to zero and define 
+
+d(θ, r ) = 
+
+q
+
+r2 + R2 
+
+> t
+
+− 2rR t cos θ. (65) In the dense-UCA limit, projecting the exact spherical-wave manifold onto the m-th phase-mode basis vector gives 
+
+hm(r) = 12π
+
+Z 2π
+
+> 0
+
+e−jk 0[d(θ,r )−r]e−jmθ dθ. (66) Its far-field limit is 
+
+hm(∞) = 12π
+
+Z 2π
+
+> 0
+
+ejk 0Rt cos θ e−jmθ dθ = jmJm(k0Rt).
+
+(67) We now compare (66) with this limit using the stationary-phase approximation. Around θ = 0 ,
+
+d(θ, r ) = r − Rt + rR t
+
+2( r − Rt) θ2 + O(θ4). (68) Let x = k0Rt and A− = xr/ (r − Rt). The phase of the integrand is locally 
+
+Φm(θ, r ) = −k0[d(θ, r ) − r] − mθ 
+
+≈ x + m2
+
+2A−
+
+− A−
+
+2
+
+
+
+θ + mA−
+
+2
+
+. (69) The corresponding far-field stationary phase contains 
+
+m2/(2 x); hence, the finite-range phase increment contributed by this stationary region is 
+
+∆Φ m, −(r) = m2
+
+2A−
+
+− m2
+
+2x = − m2
+
+2k0r . (70) Around the second stationary region, let θ = π + u. Since 
+
+d(π + u, r ) = r + Rt − rR t
+
+2( r + Rt) u2 + O(u4), (71) and A+ = xr/ (r + Rt), completing the square gives 
+
+Φm(π + u, r ) ≈ − x − mπ − m2
+
+2A+
+
++ A+
+
+2
+
+
+
+u − mA+
+
+2
+
+. (72) Relative to its far-field value −m2/(2 x), this region produces the same increment 
+
+∆Φ m, +(r) = − m2
+
+2A+
+
++ m2
+
+2x = − m2
+
+2k0r . (73) Because both dominant stationary regions acquire the same range-dependent phase, the finite-to-far-field modal ratio, after removal of a mode-independent phase, is 
+
+hm(r)
+
+hm(∞) = e−jeδm(r) [1 + εm(r, R t)] , eδm(r) ≈ m2
+
+2k0r .
+
+(74) Here, εm collects stationary-phase amplitude variation, higher-order path terms, and finite-array modal aliasing. Equation (74) applies to retained modes away from zeros of Jm(k0Rt); weak modes are subsequently controlled by regularization. Ignoring εm in the leading-order analysis, strict inverse-modal equalization gives the normalized on-axis response 
+
+AM (r) = 12M + 1 
+
+> M
+
+X
+
+> m=−M
+
+e−jeδm(r). (75) Its squared amplitude satisfies 
+
+|AM (r)|2 = 1(2 M + 1) 2
+
+> M
+
+X
+
+> m=−MM
+
+X
+
+> ℓ=−M
+
+cos 
+
+eδm − eδℓ
+
+
+
+≈ 1 − Var( eδm) = 1 − Var( m2)4( k0r)2 , (76) where cos z = 1 − z2/2 + O(z4) has been used. Therefore, 
+
+|AM (r)| ≈ 1 − Var( m2)8( k0r)2 . (77) For uniformly weighted modes m = −M, . . . , M ,
+
+E[m2] = M (M + 1) 3 , (78) 14 
+
+Var( m2) = M (M + 1)[4 M (M + 1) − 3] 45 . (79) Substitution gives (24). Finally, comparing eδM (r) with the maximum curvature phase k0R2 
+
+> t
+
+/(2 r) in (19) gives the factor 
+
+(M/ (k0Rt)) 2, completing the proof of Lemma 2. REFERENCES [1] L. Dong, N. Hu, W. Deng, X. Xu, H. Ding, and Y. Huang, “Quality of service evolution and enhancement for holographic video communica-tions toward 6G,” IEEE Wireless Commun. , vol. 32, no. 2, pp. 140–146, 2025. [2] Y. Huang, X. Gao, M. Shi, N. Ye, and K. Yang, “Energy-efficient power control in D2D networks: A distributed ADMM approach with dynamic penalty coefficient,” IEEE Trans. Veh. Technol. , vol. 74, no. 5, pp. 8238– 8250, 2025. [3] P. P. Ray, N. Kumar, and M. Guizani, “A vision on 6G-enabled NIB: Requirements, technologies, deployments, and prospects,” IEEE Wireless Commun. , vol. 28, no. 4, pp. 120–127, 2021. [4] C.-X. Wang, X. You, X. Gao, X. Zhu, Z. Li, C. Zhang, H. Wang, Y. Huang, Y. Chen, H. Haas, J. S. Thompson, E. G. Larsson, M. D. Renzo, W. Tong, P. Zhu, X. Shen, H. V. Poor, and L. Hanzo, “On the road to 6G: Visions, requirements, key technologies, and testbeds,” IEEE Commun. Surveys Tuts. , vol. 25, no. 2, pp. 905–974, 2023. [5] Y. Lu and L. Dai, “Near-field channel estimation in mixed LoS/NLoS environments for extremely large-scale MIMO systems,” IEEE Trans. Commun. , vol. 71, no. 6, pp. 3694–3707, 2023. [6] X. Hou, E. Bj¨ ornson, N. Lee, and R. W. Heath, “Guest editorial: Near-field MIMO technologies toward 6G,” IEEE Commun. Mag. , vol. 63, no. 1, pp. 20–21, 2025. [7] S. Sun, R. Li, C. Han, X. Liu, L. Xue, and M. Tao, “How to differentiate between near field and far field: Revisiting the rayleigh distance,” IEEE Commun. Mag. , vol. 63, no. 1, pp. 22–28, 2025. [8] M. Cui, Z. Wu, Y. Lu, X. Wei, and L. Dai, “Near-field MIMO communications for 6G: Fundamentals, challenges, potentials, and future directions,” IEEE Commun. Mag. , vol. 61, no. 1, pp. 40–46, 2023. [9] J. Shen, H. Yuan, X. Gao, N. Ye, D. Benevides da Costa, and K. Yang, “Fully-dynamic and hardware-efficient analog architecture for terahertz wideband hybrid beamforming with multi-channel low-resolution phase shifters,” Digit. Commun. Netw. , 2026. [10] J. Lee, G.-T. Gil, and Y. H. Lee, “Channel estimation via orthogonal matching pursuit for hybrid MIMO systems in millimeter wave com-munications,” IEEE Trans. Commun. , vol. 64, no. 6, pp. 2370–2386, 2016. [11] R. Zhang, Y. He, L. Yuan, Z. Li, C. He, and F. Tan, “Empowering 6G ambient intelligence with terahertz integrated sensing and communica-tions,” IEEE Wireless Commun. , vol. 31, no. 5, pp. 256–263, 2024. [12] C. Song, H. Yuan, Z. Zhang, X. Gao, M. Shi, N. Yang, and K. Yang, “Near-field terahertz covert communications with noise uncertainty,” 
+
+IEEE Trans. Wireless Commun. , vol. 25, pp. 7520–7534, 2026. [13] X. Wei and L. Dai, “Channel estimation for extremely large-scale massive MIMO: Far-field, near-field, or hybrid-field?” IEEE Commun. Lett. , vol. 26, no. 1, pp. 177–181, 2022. [14] H. Zhang, N. Shlezinger, F. Guidi, D. Dardari, M. F. Imani, and Y. C. Eldar, “Beam focusing for near-field multiuser MIMO communications,” 
+
+IEEE Trans. Wireless Commun. , vol. 21, no. 9, pp. 7476–7490, 2022. [15] Y. Zhao, Z. Li, C. Zhao, Y. Zhang, and D. Niyato, “Toward AI-empowered wireless position sensing: An integrated framework of perception, cognition, decision, and learning,” IEEE Wireless Commun. ,pp. 1–9, 2026. [16] M. Cui and L. Dai, “Channel estimation for extremely large-scale MIMO: Far-field or near-field?” IEEE Trans. Commun. , vol. 70, no. 4, pp. 2663–2677, 2022. [17] X. Wei, L. Dai, Y. Zhao, G. Yu, and X. Duan, “Codebook design and beam training for extremely large-scale RIS: Far-field or near-field?” 
+
+China Commun. , vol. 19, no. 6, pp. 193–204, 2022. [18] Y. Zhang, X. Wu, and C. You, “Fast near-field beam training for extremely large-scale array,” IEEE Wireless Commun. Lett. , vol. 11, no. 12, pp. 2625–2629, 2022. [19] C. Qi, K. Chen, O. A. Dobre, and G. Y. Li, “Hierarchical codebook-based multiuser beam training for millimeter wave massive MIMO,” 
+
+IEEE Trans. Wireless Commun. , vol. 19, no. 12, pp. 8142–8152, 2020. [20] Y. Lu, Z. Zhang, and L. Dai, “Hierarchical beam training for extremely large-scale MIMO: From far-field to near-field,” IEEE Trans. Commun. ,vol. 72, no. 4, pp. 2247–2259, 2024. [21] C. Wu, C. You, Y. Liu, L. Chen, and S. Shi, “Two-stage hierarchical beam training for near-field communications,” IEEE Trans. Veh. Tech-nol. , vol. 73, no. 2, pp. 2032–2044, 2024. [22] X. Shi, J. Wang, Z. Sun, and J. Song, “Spatial-chirp codebook-based hierarchical beam training for extremely large-scale massive MIMO,” 
+
+IEEE Trans. Wireless Commun. , vol. 23, no. 4, pp. 2824–2838, 2024. [23] Z. Xu, Z. Zhang, and L. Dai, “Near-optimal near-field beam training: From searching to inference,” IEEE Trans. Wireless Commun. , vol. 24, no. 11, pp. 9173–9185, 2025. [24] M. Cui and L. Dai, “Near-field wideband beamforming for extremely large antenna arrays,” IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 13 110–13 124, 2024. [25] Y. Xie, B. Ning, L. Li, and Z. Chen, “Near-field beam training in THz communications: The merits of uniform circular array,” IEEE Wireless Commun. Lett. , vol. 12, no. 4, pp. 575–579, 2023. [26] Y. Guo, Y. Zhang, Z. Wang, and Y. Liu, “Wideband beamforming for near-field communications with circular arrays,” IEEE Trans. Wireless Commun. , vol. 23, no. 12, pp. 19 065–19 082, 2024. [27] Z. Wu, M. Cui, and L. Dai, “Enabling more users to benefit from near-field communications: From linear to circular array,” IEEE Trans. Wireless Commun. , vol. 23, no. 4, pp. 3735–3748, 2024. [28] F. Zhang and W. Fan, “Near-field ultra-wideband mmWave channel char-acterization using successive cancellation beamspace UCA algorithm,” 
+
+IEEE Trans. Veh. Technol. , vol. 68, no. 8, pp. 7248–7259, 2019. [29] Z. Ding, J. Zhang, Z. Yuan, P. Tang, C. You, L. Tian, K. Chen, and G. Liu, “Low-dimensional near-field codebook design for extremely large-scale MIMO systems with uniform circular arrays,” IEEE Trans. Veh. Technol. , vol. 74, no. 10, pp. 16 511–16 515, 2025. [30] T. S. Rappaport, Y. Xing, O. Kanhere, S. Ju, A. Madanayake, S. Mandal, A. Alkhateeb, and G. C. Trichopoulos, “Wireless communications and applications above 100 GHz: Opportunities and challenges for 6G and beyond,” IEEE Access , vol. 7, pp. 78 729–78 757, 2019. [31] G. Bacci, L. Sanguinetti, and E. Bj¨ ornson, “Spherical wavefronts improve MU-MIMO spectral efficiency when using electrically large arrays,” IEEE Wireless Commun. Lett. , vol. 12, no. 7, pp. 1219–1223, 2023. [32] J. C. Ruiz-Sicilia, M. D. Renzo, P. Mursia, A. Kaushik, and V. Sciancale-pore, “Spatial multiplexing in near-field line-of-sight MIMO communi-cations: Paraxial and non-paraxial deployments,” IEEE Trans. Green Commun. Netw. , vol. 9, no. 1, pp. 338–353, 2025. [33] O. Roy and M. Vetterli, “The effective rank: A measure of effective dimensionality,” in Proc. 15th Eur. Signal Process. Conf. (EUSIPCO) ,2007, pp. 606–610. [34] R. Song, H. Yuan, C. Song, Z. Zhang, X. Gao, D. Niyato, and K. Yang, “Near-field LoS MIMO with dual continuous apertures (CAPs): Channel decomposition and EDoF-optimal beamforming,” IEEE Trans. Commun. , vol. 74, pp. 2251–2267, 2026. [35] Z. Xie, Y. Liu, J. Xu, X. Wu, and A. Nallanathan, “Performance analysis for near-field MIMO: Discrete and continuous aperture antennas,” IEEE Wireless Commun. Lett. , vol. 12, no. 12, pp. 2258–2262, 2023. [36] R. Song, J. Shen, H. Yuan, X. Gao, X. Ding, Y. Liu, and D. B. da Costa, “Line-of-sight MIMO systems: DoF analysis and hybrid beamforming design,” IEEE Internet Things J. , vol. 11, no. 19, pp. 31 791–31 804, 2024. [37] Z. Yuan, F. Zhang, Y. Zhang, J. Zhang, G. F. Pedersen, and W. Fan, “On phase mode selection in the frequency-invariant beamformer for near-field mmWave channel characterization,” IEEE Trans. Antennas Propag. ,vol. 71, no. 11, pp. 8975–8986, 2023. [38] Z. Zhang, J. Zhu, L. Dai, and R. W. Heath, “Successive bayesian recon-structor for fas channel estimation,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , 2024, pp. 1–5. [39] C. E. Rasmussen and C. Williams, Gaussian Processes for Machine Learning . MIT Press, 2006. [40] L. V. Nguyen, D. H. N. Nguyen, I. Atzeni, A. T¨ olli, and A. L. Swindlehurst, “Channel estimation in low-resolution near-field massive MIMO systems,” in Proc. IEEE Sensor Array Multichannel Signal Process. Workshop (SAM) , 2024, pp. 1–5. [41] M. Cui and L. Dai, “Near-field wideband channel estimation for extremely large-scale MIMO,” Science China Information Sciences ,vol. 66, no. 17, p. 172303, 2023. [42] C. M. Bishop, Pattern Recognition and Machine Learning . New York, NY, USA: Springer, 2006. [43] F. Bowman, Introduction to Bessel Functions . North Chelmsford, U.K.: Courier Corporation, 2012.

@@ -1,0 +1,1595 @@
+Title: Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM
+
+URL Source: https://arxiv.org/pdf/2609.04669v1
+
+Published Time: Mon, 07 Sep 2026 00:33:21 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM 
+
+Mingxuan Han, Weile Zhang, and Feifei Gao, Fellow, IEEE 
+
+Abstract —Communication systems can reuse their transmitted signals for sensing without dedicated radar transmissions. For an established DFT-preprocessed orthogonal chirp division mul-tiplexing (DFT-P-OCDM) waveform, this task becomes difficult when several physical paths in a doubly selective channel fall into the same co-delay-Doppler bin. In this case, the number of re-solvable delay classes inferred from the pilot may be smaller than the number of physical paths within the co-bin. This mismatch increases the difficulty of path number determination, fractional Doppler offset estimation, and channel reconstruction. We derive a pointwise relationship between the input and output in the DFT preprocessed Fresnel (DPF) domain for doubly selective channels with multiple paths within the co-delay-Doppler bin. Based on this input and output relation, we propose the two stage ultra high resolution (TSUR) framework. The first stage uses pilots of the phase progression to estimate delay, while the second stage uses the leakage samples to estimate the Doppler and the number of paths within each delay class. Furthermore, we derive CRLBs and analyze how the pilot configuration trades sensing resolution and communication recovery. Simulation results demonstrate that TSUR resolves same delay paths within a co-delay-Doppler bin, remains robust to exist delay offsets, and achieves lower fractional Doppler estimation errors than sequential extraction and off-grid baselines. 
+
+Index Terms —Communication-assisted sensing, co-delay-Doppler bin multipath resolution, DFT-P-OCDM, TSUR. 
+
+I. I NTRODUCTION 
+
+# THE upcoming sixth generation (6G) wireless networks are expected to support ubiquitous connectivity and large-scale sensing applications. Existing communication waveforms and distributed receiving infrastructure can be reused for environmental sensing without introducing a dedicated radar transmitter [1], [2]. The received signals contain propagation signatures associated with static scatterers and moving targets. Accordingly, a cooperative sensing receiver must determine the number of physical propagation paths and estimate their bistatic delays, Doppler shifts, and complex gains [3]. These propagation parameters serve as sensing observables at the front end for subsequent localization, velocity inference, target association, and tracking. In high mobility scenarios, multipath 
+
+Mingxuan Han, and Weile Zhang are with the MOE Key Laboratory for Intelligent Networks and Network Security, School of Information and Communication Engineering, Faculty of Electronic and Information En-gineering, Xi’an Jiaotong University, Xi’an 710049, China (e-mail: mx-han@stu.xjtu.edu.cn; wlzhang@mail.xjtu.edu.cn). Feifei Gao is with the Institute for Artificial Intelligence, Tsinghua Univer-sity, Beijing 100084, China, also with the State Key Laboratory of Intelligent Technologies and Systems, Tsinghua University, Beijing 100084, China, and also with the Beijing National Research Center for Information Science and Technology, Department of Automation, Tsinghua University, Beijing 100084, China (e-mail: feifeigao@ieee.org). 
+
+delay and rapid Doppler variation make the channel selec-tive in both frequency and time, thereby complicating the resolution of individual propagation paths [4]. Chirp based multicarrier waveforms have attracted considerable interest because of their inherent robustness to Doppler effects and their suitability for ISAC [5]. Orthogonal chirp division multiplexing (OCDM) and affine frequency division multiplexing (AFDM) are two representa-tive chirp-based multicarrier waveforms. OCDM multiplexes mutually orthogonal chirps through the discrete Fresnel trans-form [6], such that each modulated carrier extends over the entire time and frequency support of an entire symbol inter-val [7]. In communication-assisted sensing, Doppler shifts are both channel impairments and observables of the propagation geometry. The deterministic chirp structure of OCDM provides a fixed observation model, making it suitable for characterizing unknown multipath environments. By comparison, AFDM extends the chirp waveform through configurable affine param-eters that can be selected according to the delay and Doppler spreads. These parameters reshape the channel representation in the transform domain and improve path separability [8]. Across different multicarrier waveforms, existing delay-Doppler estimation methods can be grouped into on-grid and off-grid formulations. For OTFS, Reference [9] estimated on-grid delay and Doppler indices from embedded-pilot shifts and determined the path number by thresholding the detected delay-Doppler taps. For OCDM, Reference [10] exploited the sparse delay-Doppler domain representation and applied threshold detection to obtain the on-grid indices. However, Doppler shifts in high mobility channels generally do not fall exactly on the discrete grid [11]. The off-grid methods recover fractional delay-Doppler parameters through different signal models and inference mechanisms. Reference [12] developed parallel Doppler-first and delay-first Prony estimators and combined the detected delay and Doppler taps to determine the path number. Reference [13] proposed an algorithm with super resolution to estimate delay and Doppler parameters, which resolves off-grid issues through atomic norm minimization in two dimensions and optimization using ADMM, thereby en-abling fractional delay and Doppler estimation. Reference [14] estimated integer delays on a off-grid, while fractional Doppler offsets were treated as hyperparameters and estimated through an expectation maximization procedure for AFDM. Refer-ence [15] estimated fractional delays and Doppler shifts for AFDM and OCDM through Dirichlet kernel correlation aided by zero padding and sequential cancellation of the strongest path. These methods improve off-grid parameter recovery, but they usually treat paths resolution through sparse supports and arXiv:2609.04669v1 [cs.IT] 4 Sep 2026 2                                                                   
+
+> TABLE I COMPARISON WITH REPRESENTATIVE DELAY -D OPPLER ESTIMATION METHODS
+> Method Signal model Main computation Path number Fractional Doppler Co-bin order mismatch
+> [9] OTFS Embedded pilot DD grid detection thresholded DD taps Unmodeled Unmodeled [10] OCDM Embedded pilot DD grid detection thresholded DD taps Unmodeled Unmodeled [11] OTFS TCHTP sparse recovery thresholded DD taps Unmodeled Unmodeled [12] OTFS Parallel two stage Prony Prony model order Modeled Unmodeled [13] OTFS 2D atomic norm super resolution SIC Modeled Unmodeled [14] AFDM Off-grid SBL Effective sparse support Modeled Unmodeled [15] AFDM/OCDM ZP-PCTD correlation SIC Modeled Unmodeled
+> This work DFT-P-OCDM TSUR MDL+BIC Modeled Modeled
+> Fig. 1. DD domain channel visualization. (a) the high resolution channel magnitude and (b) the corresponding three dimensional representation after receiver side DD sampling. The paths P1,P2,P3, and P4are located at the normalized continuous delay-Doppler coordinates (di, ν i) = (5 .9,2.4) ,
+> (6 .2,1.9) ,(5 ,2) , and (4 ,2) , respectively. Although P1and P2have different fractional delay and Doppler offsets, both are mapped to the same discrete delay-Doppler bin, highlighted by the red box.
+
+sequential extraction. Table I summarizes representative delay-Doppler estimation methods and highlights whether the co-delay-Doppler bin path issue is explicitly addressed. The difficulty considered in this paper is different from off-grid parameters estimation. The wide bandwidths available at millimeter wave and terahertz frequencies provide fine delay resolution in OCDM systems [16]–[18], whereas Doppler resolution remains limited by the finite coherent observation interval. In conventional ISAC systems with fixed time and frequency resources, the difference between delay and Doppler resolutions can place several physical paths in the same integer delay and Doppler bin, as illustrated in Fig. 1. At the receiver, the pilot observations within a co-bin may reveal only one resolvable delay class even though multiple physical paths are present. These paths may have identical continuous delays or distinct delays whose separation is below the effective delay resolution, while having different fractional Doppler offsets. This paper refers to this situation as co-bin multipath. Resolving this case is important for practical ISAC receivers because treating one detected delay class as one physical path may cause resolvable targets within the same delay class to be missed, and degrading subsequent channel reconstruction and data recovery. Motivated by the above observations, we consider a co-bin multipath scenario and develop a TSUR framework. We first estimates the resolvable delay class. We then determines the number of physical paths represented by each resolved delay class. The main contributions are summarized as follows:  
+
+> •
+
+We derive a relationship in closed form between input and output in the DPF domain for DFT-P-OCDM over doubly selective channels with joint delay and Doppler bin. The derived expression connects the channel param-eters with the received pilot locations, phase progression, and local leakage structure. It shows that the delay is reflected in the pilot phase progression of the principal samples, whereas the fractional Doppler determines the local leakage pattern around the detected integer Doppler index.  
+
+> •
+
+We propose a TSUR framework based on the derived closed form relationship between the input and output. In the first stage, TSUR extracts the principal sample from each pilot block. Because the pilot blocks are uniformly spaced, the extracted samples form an inter-pilot phase sequence governed by the continuous delays. The MDL criterion is applied to the FBSS covariance matrix to estimate the number of distinct delay classes, after which FBSS-MUSIC provides the initial delay estimates and Newton refinement improves their accuracy. In the second stage, TSUR extracts local leakage samples around each detected integer Doppler position. Their leakage patterns depend on the fractional Doppler offsets and are used to separate paths within the same delay class. For each estimated delay class, the BIC determines the number of physical paths by comparing candidate concentrated fits, and near main lobe leakage maximum likelihood estima-tion (NMLL-MLE) jointly estimates the corresponding fractional Doppler offsets and complex gains.  
+
+> •
+
+We derive the CRLB for continuous delay and frac-tional Doppler estimation under the proposed observation model, providing theoretical benchmarks for the esti-mation accuracy. Simulations evaluate hierarchical path-number detection, delay and fractional Doppler estima-tion, co-bin multipath resolution, channel reconstruction, and BER under different SNRs, path separations, and pilot configurations. The results show that TSUR resolves representative co-bin multipath configurations, remains robust to delay mismatch within the same bin, and improves fractional Doppler estimation compared with sequential extraction and off-grid baselines. The pilot studies further show the sensing and communication tradeoff between co-bin parameter recovery, channel re-construction, and data detection. The remainder of this paper is organized as follows. Sec-3Data Pilot S/P IFFT IFFT    
+
+> 2Θ*1ΘCP insertion P/S D/A UP Amp
+> Fresnel domain DPF Domain Time Domain
+> S/P A/D Down Amp CP removal FFT FFT P/S y1Θ2Θ
+> Comm.BS
+> Sensing node
+> DoublySelective Channel With Co-bin
+> Fig. 2. DFT-P-OCDM transceiver structure and ISAC node processing chain.
+
+tion II introduces the DFT-P-OCDM system model and derives the DPF domain input output relationship for doubly selective channels within co delay Doppler bin. Section III presents the ULPA frame, integer Doppler index estimation, and the pilot phase and local leakage observation models. Section IV details the TSUR method for delay class estimation, physical path number determination, and fractional Doppler estimation. Section V derives the CRLBs for the estimated channel pa-rameters. Section VI reports the simulation results on detection reliability, parameter estimation, channel reconstruction, BER, and pilot design tradeoff. Section VII concludes the paper. II. SYSTEM MODEL This section introduces the DFT-P-OCDM transmitter and formulates the doubly selective channel within a co-delay-Doppler bin. It derives the DPF domain relationship between the input and output for the pilot observation models. 
+
+A. DFT-P-OCDM Transmitter 
+
+We consider an established DFT-P-OCDM transceiver with pilot and data symbols arranged in the DPF domain. The corresponding transceiver structure and processing procedure at each ISAC node are shown in Fig. 2. The transmitter employs N orthogonal chirp subcarriers, where N is typi-cally chosen as a power of two. The input information is divided into data and pilot modules. The data information is mapped from a bit stream to independent M-ary con-stellation symbols. The vector of pilot and data symbols 
+
+x = [ x[0] , x [1] , . . . , x [N − 1]] T is arranged in the DFT pre-processed Fresnel domain. It is converted into the time domain transmit vector s = [ s[0] , s [1] , . . . , s [N − 1]] T by successively applying the inverse discrete Fourier transform (IDFT) and the inverse discrete Fresnel transform (IDFnT). The transmit vector in the time domain can be expressed as 
+
+s = ΦHFHx, (1) where (·)H denotes the Hermitian transpose and F ∈ CN ×N is the normalized DFT matrix with [F]m,n = N −1/2e−j2 πmn/N 
+
+for m, n = 0 , . . . , N −1. The matrix Φ = [ φ0, φ1, . . . , φN −1]
+
+denotes the discrete Fresnel transform (DFnT) of size N ,where φm is the mth orthogonal chirp basis waveform. Its 
+
+nth sample is 
+
+φm[n] = 1
+
+√N e−jπ/ 4ej πN (m−n)2
+
+, m, n = 0 , . . . , N − 1. (2) The mutual orthogonality of these chirp basis waveforms makes the DFnT matrix unitary ΦHΦ = ΦΦ H = IN . The DFnT matrix can be factorized as 
+
+Φ = Θ2FΘ 1, (3) where Θ1 = diag( θ1) and Θ2 = diag( θ2) are diagonal chirp-phase matrices with [θ1]m = e−jπ/ 4ejπm 2/N and [θ2]m =
+
+ejπm 2/N , m = 0 , . . . , N − 1. According to (3), the IDFnT can be efficiently implemented using an IFFT together with two diagonal phase multiplications [19]. The obtained time domain symbol vector is transmitted through the antenna after D/A conversion, parallel to serial conversion, RF upconversion, and power amplification. 
+
+B. Doubly Selective Channels with Co-Delay-Doppler Bin 
+
+The doubly selective channel [20] with fractional delay and fractional Doppler is expressed as 
+
+H =
+
+> L−1
+
+X
+
+> i=0
+
+hiT(di)∆(νi), (4) where L is the number of propagation paths, and hi, di, and 
+
+νi denote the complex gain, normalized delay, and normalized Doppler shift of the ith path, respectively. The fractional delay operator is then given by 
+
+T(di) = FH∆(−di)F, (5) where ∆(−di) = diag 
+
+n
+
+e−j 2πN din
+
+oN −1
+
+> n=0
+
+define the diago-nal phase operator. Similarly, the Doppler modulation in-duced by the Doppler shift νi is represented by ∆(νi) = diag 
+
+n
+
+ej 2πN νin
+
+oN −1
+
+> n=0
+
+. Let τi and fD,i denote the physical delay and Doppler frequency of the ith path, respectively. Their normalized forms are 
+
+di = τi
+
+Ts
+
+= τiB = li + δi,νi = N T sfD,i = T f D,i = ki + κi,
+
+(6) where Ts = 1 /B is the sampling interval, B is the signal band-width, T = N T s is the block duration, li and ki are the integer delay and Doppler indices, and δi, κ i ∈ [−0.5, 0.5) are the cor-responding fractional offsets. Let DN (x) = 1
+
+> N
+
+PN −1 
+
+> n=0
+
+ej 2πN nx 
+
+denote the Dirichlet function. The channel response for each time domain sample can be written as 
+
+H(r, t ) = 
+
+> L−1
+
+X
+
+> i=0
+
+hiej 2πN (ki+κi)tDN (r − t − di), (7) 4
+
+The fractional delay Dirichlet function has the periodic impulse representation 
+
+DN (r − t − li − δi) =  
+
+> N−1
+
+X
+
+> p=0
+
+ΛN (p, δ i)δN [r − t − li − p], (8) and the modulation associated with the fractional Doppler admits the finite Fourier expansion ej 2πN κit =PN −1 
+
+> q=0
+
+ΓN (q, κ i)ej 2πN qt . Where ΛN (p, δ i) = DN (p − δi),
+
+ΓN (q, κ i) = DN (κi − q), and δN [·] denotes the Kronecker delta with period N . Substituting the impulse representation of the fractional delay Dirichlet function and the finite Fourier expansion of the fractional Doppler modulation into (7) gives 
+
+H(r, t ) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× ej 2πN (ki+q)tδN [r − t − li − p].
+
+(9) The fractional delay spreads each path over the delay samples indexed by p, whereas the fractional Doppler spreads it over the Doppler indexed by q. For a selected co-delay-Doppler bin with integer delay index lc and integer Doppler index kc, define the path set as Cc = {i : li = lc, k i = kc}.For each i ∈ C c, the continuous coordinates are (di, ν i) = (lc + δi, k c + κi). Paths in the co-bin share the same integer delay and Doppler indices. Let d1 < d 2 < · · · < d Kd denote the distinct continuous delays among the paths in Cc. The paths with identical or insufficiently separated continuous delays may not be resolved individually from the pilot observation. Such paths are represented by the same resolved delay class. Let dg denote the representative delay of the gth resolved delay class, and let Cc,g denote the set of physical paths represented by this class. Let Kg denote the number of physical paths in this group. The total number of physical paths in the selected co-bin is Kc = PKd 
+
+> g=1
+
+Kg . At the receiver, the closely spaced physical delay groups may be represented by the same resolvable delay class in the pilot observation. 
+
+C. Input-Output Relationship of DFT-P-OCDM 
+
+The matrix expression of the received time domain signal is r = Hs + w, where s = ΦHFHx and w is an AWGN with variance σ2. The receiver applies the DFnT and then the DFT to obtain the received vector in the DPF domain as 
+
+y = FΦr = FΦHΦ HFHx + FΦw = HDPF x + ew, (10) where HDPF = FΦHΦ HFH and ew = FΦw . Since F and Φ
+
+are unitary, ew is an AWGN with variance σ2 that has the same statistical properties as w. The expression of the channel in the Fresnel domain is HDFnT = ΦHΦ H. The channel matrix in the DPF domain and the channel matrix in the Fresnel domain satisfy the relationship HDPF = FH DFnT FH. The matrix entry of the Fresnel domain channel is given by 
+
+HDFnT (r, t ) =  
+
+> N−1
+
+X 
+
+> l=0
+> N−1
+
+X
+
+> k=0
+
+Φ( r, l )H(l, k )Φ H(k, t ). (11) Substituting (2) and (9) into (11) yields 
+
+HDFnT (r, t ) = 1
+
+N
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× ej πN (r2−t2) N −1X 
+
+> l=0
+> N−1
+
+X
+
+> k=0
+
+ej πN (l2−2rl )
+
+× e−j πN [k2−2k(t+ki+q)]δN [l − k − li − p].
+
+(12) The periodic impulse in (12) enforces l = [ k + li + p]N .Substituting this constraint into (12) gives 
+
+HDFnT (r, t ) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× ej 2πN r(ki+q)e−j 2πN (li+p)( ki+q)
+
+× e−j πN (ki+q)2
+
+δN [r − t − li − p − ki − q].
+
+(13) Each (p, q ) produces a periodic DFnT domain shift li + p +
+
+ki + q, weighted jointly by the fractional delay and fractional Doppler leakage coefficients. The (m, n ) matrix entry of the DPF domain channel is obtained from the Fresnel domain channel entries as 
+
+HDPF (m, n ) =  
+
+> N−1
+
+X 
+
+> r=0
+> N−1
+
+X
+
+> t=0
+
+F (m, r )HDFnT (r, t )F H(t, n ).
+
+(14) Substituting normalized DFT matrix entries F (m, r ) =
+
+N −1/2e−j2 πmr/N , conjugate transpose terms F H(t, n ) =
+
+N −1/2ej2 πtn/N , and (13) into (14) gives 
+
+HDPF (m, n )=
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)e−j 2πN si,p bi,q e−j πN b2
+
+> i,q
+
+× 1
+
+N 
+
+> N−1
+
+X 
+
+> r=0
+> N−1
+
+X
+
+> t=0
+
+e−j 2πN mr ej 2πN rb i,q ej 2πN tn δN [r − t − si,p − bi,q ].
+
+(15) where si,p = li + p combines the integer delay index li
+
+with the fractional delay leakage index p, and bi,q = ki + q
+
+combines the integer Doppler index ki with the fractional Doppler leakage index q. The periodic impulse in (15) enforces 
+
+r = [ t + si,p + bi,q ]N . Applying this constraint to the sum over 
+
+r and collecting the terms that depend on t give 
+
+HDPF (m, n ) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× e−j 2πN m(si,p +bi,q )ej πN b2
+
+> i,q
+
+× 1
+
+N 
+
+> N−1
+
+X
+
+> t=0
+
+e−j 2πN t(m−n−bi,q ).
+
+(16) To evaluate the finite sum in (16), define χi,q (m, n ) = 
+
+> 1
+> N
+
+PN −1 
+
+> t=0
+
+e−j 2πN t(m−n−bi,q ). Since m, n, and bi,q are integer-valued indices, the periodic orthogonality of the complex exponentials yields 
+
+χi,q (m, n ) = 
+
+(
+
+1, [m − n]N = [ bi,q ]N ,
+
+0, otherwise . (17) 5
+
+Substituting (17) into (16) gives the closed form expression for the (m, n ) entry of the channel matrix in DPF domain as 
+
+HDPF (m, n ) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× e−j 2πN m(si,p +bi,q )ej πN b2 
+
+> i,q
+
+δN [m − n − bi,q ].
+
+(18) Equation (18) separates the two leakage effects in the DPF domain. The bi,q determines the cyclic displacement between the input and output indices, whereas si,p contributes to the phase rotation of the corresponding displaced component. Substituting (18) into (10) and using the periodic impulse to evaluate the sum over n yields the relationship between the input and output in the DPF domain at sample m as 
+
+yDPF (m) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)ej πN b2
+
+> i,q
+
+× e−j 2πN m(si,p +bi,q )x([ m − bi,q ]N ) + ew(m).
+
+(19) For comparison, the matrix relation between the input and output of OCDM in the DFnT domain is yDFnT =
+
+HDFnT x + bw, where HDFnT = ΦHΦ H and bw = Φw . The corresponding relationship between the input and output is 
+
+yDFnT (r) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X 
+
+> p=0
+> N−1
+
+X
+
+> q=0
+
+hiΛN (p, δ i)Γ N (q, κ i)
+
+× e−j πN (2si,p bi,q +b2 
+
+> i,q
+
+)ej 2πN rb i,q 
+
+× x([ r − si,p − bi,q ]N ) + bw(r),
+
+(20) where bw(r) is the rth sample of bw. Comparing (19) with (20) shows a key difference in the OCDM system. Each input sample is shifted by si,p + bi,q , which equals the sum of the delay related index and the Doppler related index. In contrast, DFT-P-OCDM imposes only the bi,q shift on input symbols and retains si,p within the phase superposition. The DPF domain formulation translates delay into a phase offset and Doppler into a circular shift, which naturally disentangles the coupling between delay and Doppler. III. ULPA FRAME AND OBSERVATION MODEL This section develops the DPF domain pilot frame and the two observation models used by TSUR. The first model uses the phase variation across pilot for delay class estimation, while the second uses local fractional Doppler leakage for number of physical paths and fractional Doppler estimation within each delay class. 
+
+A. Pilot Arrangement and Integer Doppler Index Estimation 
+
+Let ζ protected pilot blocks be distributed uniformly over the DPF domain frame. The center of the ξth pilot block is 
+
+mpilot ,ξ = mpilot ,0 + ξD pilot , ξ = 0 , 1, . . . , ζ − 1, (21) where Dpilot is the interval between adjacent pilot centers. The pilot position and energy are known at the receiver. The embedded sequence of the ξth pilot is 
+
+xpilot ,ξ [n] = pEpilot ,ξ δN [n − mpilot ,ξ ], (22) where Epilot ,ξ denote its energy. The corresponding pilot SNR is SNR pilot ,ξ = Epilot ,ξ /σ 2. Define the protected block around the ξth pilot as Bpilot ,ξ = {mpilot ,ξ − G, . . . , m pilot ,ξ + G},where G is half the guard width. The transmitted DPF domain frame is arranged as 
+
+x[n] = 
+
+pEpilot ,ξ n = mpilot ,ξ ,
+
+0, n ∈ B pilot ,ξ \ { mpilot ,ξ },xd[n], n ∈ D ,
+
+(23) where D = ZN \ Sζ−1 
+
+> ξ=0
+
+Bpilot ,ξ is the data index, where 
+
+ZN = {0, 1, . . . , N − 1}. Each protected block contains one known pilot at its center and 2G zero guard positions [21]. The pilot placement must cover both positive and negative integer Doppler shifts and avoid overlap between adjacent guarded pilot blocks. The placement parameters should satisfy 
+
+G ≥ kmax , Dpilot ≥ 2G + 1 , mpilot ,0 − G ≥ 0, and 
+
+mpilot ,0 +( ζ −1) Dpilot +G ≤ N −1, where kmax = max i |ki|.The number of data positions is Nd = N − ζ(2 G + 1) , and the total transmitted pilot energy is Epilot = Pζ−1 
+
+> ξ=0
+
+Epilot ,ξ .Without prior information on the relative importance of dif-ferent pilot blocks, the pilot energy is uniformly allocated as 
+
+Epilot ,ξ = Epilot /ζ . Consequently, ζ, G, and Epilot determine the resource tradeoff between sensing and communication. 
+
+Estimation of the integer Doppler index: The transmitted pilot centers and energies defined in (21)-(23) are known at the receiver. According to (19), the main component associated with the ith path is displaced from a transmitted pilot center by the integer Doppler ki. The receiver performs cross correlation with the known transmitted pilot using a threshold [22]. The displacement of each retained correlation peak from mpilot ,0
+
+provides the corresponding integer Doppler estimate. 
+
+B. Pilot Phase Model for Delay 
+
+The fractional delay satisfies PN −1 
+
+> p=0
+
+ΛN (p, δ i)e−j2 πmp/N =
+
+e−j2 πmδ i/N . Applying this identity eliminates the leakage index p. The relationship between the input and output in the DPF domain is 
+
+yDPF (m) = 
+
+> L−1
+
+X 
+
+> i=0
+> N−1
+
+X
+
+> q=0
+
+hiΓN (q, κ i)ej πN (ki+q)2
+
+× e−j 2πN m(di+ki+q)x([ m − ki − q]N ) + ew(m).
+
+(24) Differences in their fractional Doppler offsets produce dis-tinct leakage patterns with period N around the common dis-placement. For the ξth received pilot block, let z ∈ ZN denote the sample offset from its response center. The corresponding DPF output index is mξ,z = [ mpilot ,ξ + kc + z]N . For the ith path and the υth transmitted pilot, define 
+
+qi,ξ,υ (z) = [ z + ( ξ − υ)Dpilot + kc − ki]N , υ = 0 , 1, . . . , ζ − 1,
+
+(25) where qi,ξ,υ (z) = q is the periodic leakage index asso-ciated with the ith path. The additional index υ denotes the transmitted pilot block whose contribution is observed in the ξth received pilot window. It follows from (21) that 
+
+[mξ,z − ki − qi,ξ,υ (z)] N = mpilot ,υ . The υ = ξ corresponds to the current pilot contribution, whereas υ̸ = ξ represents 6
+
+leakage between different pilots from other transmitted pilot blocks. For the current pilot contribution with υ = ξ and 
+
+ki = kc, qi,ξ,ξ (z) = [ z]N . The local coordinate z directly indexes the fractional Doppler leakage around the principal response. The local observation in the ξth received pilot block is denoted by yξ (z). Substituting the protected pilot sequence from (25) into (24) gives 
+
+yξ (z) = 
+
+> L−1
+
+X
+
+> i=0
+> ζ−1
+
+X
+
+> υ=0
+
+hi
+
+pEpilot ,υ ΓN (qi,ξ,υ (z), κ i) e−j 2πN mξ,z di
+
+× e−j πN [2 mξ,z −ki−qi,ξ,υ (z)][ ki+qi,ξ,υ (z)] + ew(z).
+
+(26) Equation (26) includes the pilot induced contributions of all 
+
+L paths and all ζ transmitted pilots. A path with ki̸ = kc is not discarded. Its response enters through the offset kc − ki
+
+in qi,ξ,υ (z). At the principal sample z = 0, the desired current pilot term satisfies υ = ξ and qi,ξ,ξ (0) = 0 for every i ∈ C c. Within the integer Doppler group ki = kc,the contribution from another pilot block is weighted by 
+
+ΓN ([( ξ − υ)Dpilot ]N , κ i). The pilot is selected to satisfy 
+
+max 
+
+> ξ, κ
+
+X 
+
+> υ̸=ξ
+
+Epilot ,υ |ΓN ([( ξ − υ)Dpilot ]N , κ )|2
+
+Epilot ,ξ |ΓN (0 , κ )|2 ≤ εpilot . (27) Where εpilot ≪ 1 is the prescribed upper bound on the leak-age between different pilots. Since kc is known after integer Doppler index, the only unknown parameter in this pilot phase progression is the continuous normalized delay di = li + δi.This structure forms the delay observation model used by the subsequent TSUR estimator. Following (27), the reduced delay observation keeps only the principal term of the current pilot with υ = ξ and z = 0 . The remaining terms are treated as residual components. For every i ∈ C c, the phase affected by delay in (26) is e−j2 πm ξ, 0di/N . The phase can therefore be written as e−j2 πm pilot ,0(di+kc)/N [e−j2 πD pilot (di+kc)/N ]ξ . Since 
+
+kc is known after integer Doppler index, the only unknown parameter in this pilot phase progression is the continuous normalized delay di = li + δi. This structure forms the delay observation model used by the subsequent TSUR estimator. 
+
+C. Local Leakage Model for Fractional Doppler 
+
+Fractional Doppler offsets are estimated from the leakage around the detected integer Doppler index. The local observa-tion window is centered at the detected integer Doppler index, with the same number of retained samples on its left and right. Based on (26), the samples within this local window define a reduced observation that contains the desired co-bin components and the dominant structured leakage entering the window. Using the pilot centers in (21) and the leakage index in (25), define the pilot component response of ith path induced by the υth transmitted pilot as 
+
+bi,ξ,υ (z) = pEpilot ,υ ΓN (qi,ξ,υ (z), κ i)
+
+× ej πN [ki+qi,ξ,υ (z)] 2
+
+e−j 2πN mξ,z [di+ki+qi,ξ,υ (z)] .
+
+(28) Substituting (28) into (26) and simplifying, we obtain 
+
+yξ (z) = 
+
+> L−1
+
+X
+
+> i=0
+
+hiζ−1X
+
+> υ=0
+
+bi,ξ,υ (z) + ew(z). (29) Equation (29) is the reference local model before any weak structured component is absorbed into the residual. We use a symmetric window with Q samples on each side of z = 0 .The index set of the local window is ZQ = {− Q, . . . , Q },and the window contains NQ = 2Q + 1 samples. The windowed observation is defined as y(Q) 
+
+> ξ
+
+= [yξ (z)] z∈Z Q .The corresponding component and noise vectors are b(Q) 
+
+> i,ξ,υ
+
+=[bi,ξ,υ (z)] z∈Z Q and ew(Q) 
+
+> ξ
+
+= [ ewξ (z)] z∈Z Q , respectively. The fraction of the current pilot leakage energy retained by this window is ηQ(κ) = PQz=−Q |ΓN ([ z]N , κ )|2 , 0 < η Q(κ) ≤ 1.
+
+The energy captured by a fixed Q depends on the fractional Doppler offset κ. A prescribed retention level η0 ∈ (0 , 1] can be enforced through 
+
+min   
+
+> κ∈[−1/2,1/2)
+
+ηQ(κ) ≥ η0. (30) The same window also determines how much leakage from other pilot blocks enters the local observation. For the component associated with path i and transmitted pilot υ,define its energy within the window as 
+
+P (Q) 
+
+> i,υ
+
+= |hi|2 Epilot ,υ QX
+
+> z=−Q
+
+|ΓN (qi,ξ,υ (z), κ i)|2 . (31) For the current pilot of a path in the detected integer Doppler group, P (Q) 
+
+> i,ξ
+
+= |hi|2 Epilot ,ξ ηQ(κi). The normalized leakage interaction metric is 
+
+ρ(Q) 
+
+> i,υ
+
+= P (Q)
+
+> i,υ
+
+|hi|2 Epilot ,ξ ηQ(κi) . (32) This ratio depends on Q, κi, Dpilot , and the integer Doppler separation kc − ki. It characterizes the relative strength of the leakage contribution from the υth transmitted pilot within the local observation window of the ξth received pilot. A larger value indicates a stronger contribution to the retained local observation. The (32) is used to analyze the relative importance of leakage between different pilots and to motivate the reduced neighboring pilot model. All paths in the selected co-bin are retained as target components. To control the complexity of modeling leak-age between different pilots, a prescribed pilot interaction radius R is used. For each received pilot window, the local response model includes the contributions from the current transmitted pilot and up to R neighboring pilots on each side. The remaining weaker interactions are absorbed into the residual. Suppose that the first step provides bKd delay estimates bd = [ bd1, . . . , bd bKd ]T. The observation in the second stage is formed from a prescribed set of received pilot windows 
+
+S = {ξ1, . . . , ξ Nw } ⊆ { 0, . . . , ζ −1}. The set S allows flexible pilot window selection for joint local leakage fitting, ranging from all received pilot windows to the windows retained by a reduced NMLL model. Define 
+
+y(Q) 
+
+> S
+
+= col {y(Q) 
+
+> ξ
+
+: ξ ∈ S} , N st = NwNQ, (33) 7
+
+where col {·} denotes vertical concatenation. For gth delay class, let K be a candidate physical path number and define 
+
+κg = [ κg, 1, . . . , κ g,K ]T. In the reduced second stage model, the paths assigned to gth class are represented by the refined delay bdg and are distinguished by their fractional Doppler leakage responses. This representation is exact when the phys-ical paths assigned to the same resolved delay class have an identical continuous delay. When several distinct continuous delays are too closely spaced to be resolved separately, ˆdg
+
+serves as a representative delay for the corresponding paths. Let b(Q) 
+
+> ξ
+
+( bdg , k c, κ ) denote the sum of the retained pilot component vectors associated with one candidate path, and define its stacked response as 
+
+b(Q) 
+
+> S
+
+( bdg , k c, κ ) = col {b(Q) 
+
+> ξ
+
+( bdg , k c, κ ) : ξ ∈ S} . (34) The class response dictionary associated with gth delay class and candidate order K is given by 
+
+B(Q) 
+
+> S,g,K
+
+(κg ) = b(Q) 
+
+> S
+
+( bdg , k c, κ g, 1), . . . , b(Q) 
+
+> S
+
+( bdg , k c, κ g,K ).
+
+(35) The local observation used for number of paths and frac-tional Doppler estimation is 
+
+y(Q) 
+
+> S
+
+= B(Q)
+
+> S,tar
+
+(κ)h + B(Q)
+
+> S,nui
+
+hnui + e(Q) 
+
+> S
+
++ w(Q) 
+
+> S
+
+, (36) where B(Q) 
+
+> S,tar
+
+contains the modeled local responses of the co-bin paths formed with the delay estimates obtained, and h
+
+collects the corresponding complex gains. These responses include the principal contribution and the retained leakage structure within the window of the candidate paths. The matrix 
+
+B(Q) 
+
+> S,nui
+
+contains the retained strong structured leakage terms that are not included in B(Q)
+
+> S,tar
+
+, such as the leakage between different pilots and strong out of bin path leakage. Their unknown gains are collected in hnui . The vector e(Q) 
+
+> S
+
+collects the weak structured terms omitted from the reduced model. These terms include weak leakage between different pilots, weak leakage from paths outside the considered bin, and residual leakage from data symbols entering the selected pilot windows. The effect of data symbol leakage is generally more pronounced for received pilot windows located closer to the data region. IV. TSUR F RAMEWORK 
+
+The TSUR framework is applied to each detected co-delay-Doppler bin and is developed from the two pilot observation models established in the preceding section. The first stage uses the principal pilot samples to estimate the delay classes. The second stage uses the local leakage samples to estimate Doppler and the number of paths. 
+
+A. The First Stage of the TSUR Framework 
+
+The first step estimates the delays from the phase of the pilot derived in the preceding section. Taking z = 0 in (26), retaining the current pilot window υ = ξ, and using qi,ξ,ξ (0) = 0 for the detected integer Doppler index in co-bin give 
+
+yξ (0) = 
+
+> Kd
+
+X
+
+> g=1
+> Kg
+
+X
+
+> r=1
+
+βce−j 2πN ξD pilot (dc+kc) + ew, (37) where r denotes the index of a physical path within a delay class. Stacking yξ (0) over ξ = 0 , . . . , ζ − 1 gives 
+
+yp = Ad(d)β + ew, (38) where Ad(d) = [ ad(d1), . . . , ad(dKd )] , d = [ d1, . . . , d Kd ]T,and β = [β1, . . . , β Kd ]T. The delay steering vector is 
+
+ad(d) = 1, e −j 2πD pilot  
+
+> N(d+kc)
+
+, . . . , e −j( ζ−1) 2πD pilot  
+
+> N(d+kc)
+
+T.
+
+The response dictionary associated with the g delay class and candidate path number K is given by 
+
+βc =
+
+s
+
+Epilot 
+
+ζ ej πN k2 
+
+> c
+
+e−j 2πN (mpi., 0+kc)( dc+kc) X
+
+> i∈C c
+
+hiΓN (0 , κ i).
+
+(39) Physical paths sharing the same continuous delay dr con-tribute to the same steering component in (37), with their complex gains and principal fractional Doppler coefficients combined in βr . Due to finite SNR and limited pilot obser-vations, closely spaced delays may be unresolved in the first step and represented by a single resolved delay class. 
+
+1) FBSS-MUSIC Initialization: The components in (38) may be coherent. Therefore, the forward and backward spatial smoothing is applied before the MUSIC decomposition. Let 
+
+Ms denote the subarray length used for smoothing, and let 
+
+Js = ζ − Ms + 1 denote the number of overlapping forward subarrays. If yj denotes the jth subarray of yp with length 
+
+Ms, the smoothed covariance matrix is 
+
+bRFB = 12
+
+ bRf + JMs
+
+bR∗ 
+
+> f
+
+JMs
+
+
+
+, (40) where bRf = J−1
+
+> s
+
+PJs−1 
+
+> j=0
+
+yj yH 
+
+> j
+
+is the forward-smoothed covariance matrix and JMs is the Ms × Ms exchange matrix. Let λ1 ≥ · · · ≥ λMs denote the eigenvalues of bRFB . For each candidate order k, the MDL [24] criterion and the selected order are 
+
+MDL d(k) = −Js(Ms − k) log 
+
+QMs 
+
+> m=k+1
+
+λm
+
+ 1
+
+> Ms −k
+> 1
+> Ms−k
+
+PMs 
+
+> m=k+1
+
+λm
+
+
+
++ k(2 Ms − k)2 log Js,
+
+bKd = arg min 
+
+> 0≤k≤Kd, max
+
+MDL d(k).
+
+(41) where Kd, max < Ms is the prescribed upper bound. The estimate bKd denotes the number of resolvable delay classes, rather than the physical path number. Several physical paths may share one delay class. To form the noise subspace and recover coherent components, the smoothing parameters must satisfy Ms > Kd and Js ≥ Kd. Let Un contain the eigenvectors associated with the Ms − bKd smallest eigenvalues of bRFB . The FBSS-MUSIC spectrum is 
+
+PFBSS (d) = 1
+
+aH 
+
+> s
+
+(d)UnUH 
+
+> n
+
+as(d) , (42) where as(d) contains the first Ms entries of ad(d). The 
+
+bKd dominant peaks form the coarse delay vector ed =[ ed1, . . . , ed bKd ]T. These coarse estimates provide the initial values for the subsequent likelihood based delay refinement. 8
+
+2) Likelihood-Based Delay Refinement: The FBSS-MUSIC estimates initialize the following concentrated like-lihood criterion [23]: 
+
+Ω( d) = tr 
+
+h
+
+Pd(d) bRFB 
+
+i
+
+, (43) where Pd(d) = As(d)A†
+
+> s
+
+(d), As(d) =[as(d1), . . . , as(d bKd )] and A† 
+
+> s
+
+= (AH 
+
+> s
+
+As)−1AH 
+
+> s
+
+. The criterion measures the covariance energy explained by the candidate delay subspace. A joint maximization of (43) provides a maximum-likelihood benchmark when amultidimensional search is feasible. Alternating optimization offers a lower complexity numerical alternative. It updates one delay at a time while fixing the remaining delays at their latest values. In the proposed implementation, the FBSS-MUSIC estimates are refined jointly by Newton’s method. The Newton update uses the local gradient and Hessian of the criterion to jointly refine all delay parameters without an exhaustive multidimensional search. 
+
+3) Newton refinement: The refinement is initialized with 
+
+d(0) = ed. At iteration t, the stationarity condition ∇dΩ( bd) = 
+
+0 is linearized around d(t) using a first order Taylor expansion 
+
+0 ≈ ∇ dΩ( d(t)) + ∇2
+
+> d
+
+Ω( d(t))
+
+
+
+d(t+1) − d(t)
+
+. (44) For g, r ∈ {1, . . . , bKd}, the gth gradient entry and the 
+
+(g, r )th Hessian entry are 
+
+∂Ω( d)
+
+∂d g
+
+= tr 
+
+ ∂Pd(d)
+
+∂d g
+
+bRFB 
+
+
+
+, ∂2Ω( d)
+
+∂d g ∂d r
+
+= tr 
+
+ ∂2Pd(d)
+
+∂d g ∂d r
+
+bRFB 
+
+
+
+.
+
+(45) The first derivative of the projection matrix is 
+
+∂Pd
+
+∂d g
+
+= ∂As
+
+∂d g
+
+A† 
+
+> s
+
++ As
+
+∂A†
+
+> s
+
+∂d g
+
+. (46) The mixed second derivative can be expressed as 
+
+∂2Pd
+
+∂d g ∂d r
+
+= Ξg,r + ΞH 
+
+> g,r
+
+, (47) where 
+
+Ξg,r = − Pd
+
+∂As
+
+∂d r
+
+A†
+
+> s
+
+∂As
+
+∂d g
+
+A† 
+
+> s
+
++ ( A†
+
+> s
+
+)H ∂AH
+
+> s
+
+∂d r
+
+Pd
+
+∂As
+
+∂d g
+
+AH
+
+> s
+
+− Pd
+
+∂2As
+
+∂d g ∂d r
+
+A† 
+
+> s
+
++ Pd
+
+∂As
+
+∂d g
+
+(AH 
+
+> s
+
+As)−1 ∂AH
+
+> s
+
+∂d r
+
+Pd
+
++ Pd
+
+∂As
+
+∂d g
+
+A†
+
+> s
+
+∂As
+
+∂d r
+
+A†
+
+> s
+
+.
+
+(48) All quantities in (45) and (47) are evaluated at the current delay vector. The Newton update follows as 
+
+d(t+1) = d(t) −
+
+h
+
+∇2
+
+> d
+
+Ω( d(t))
+
+i−1
+
+∇dΩ( d(t)). (49) When the full step decreases (43), the step length is reduced by backtracking. The iteration stops when 
+
+d(t+1) − d(t)
+
+> 2
+
+≤ ϵd or t = Tmax . (50) Both the converged Newton estimate and the FBSS-MUSIC initialization are evaluated using Ω( d). If the initialization yields a larger objective value, it is retained as the final delay estimate. The retained vector is denoted by bd =[ bd1, . . . , bd bKd ]T.
+
+B. The Second Stage of the TSUR Framework 
+
+The second step determines the physical paths by each delay class and estimates the corresponding fractional Doppler offsets. For class g, the refined delay bdg and the detected integer Doppler index kc are treated as known. The stacked local observation y(Q) 
+
+> S
+
+is constructed for fractional Doppler estimation. 
+
+1) selection of near principal values: For every ξ ∈S, the principal sample associated with kc is indexed by 
+
+z = 0, and the estimator retains the symmetric window 
+
+ZQ = {− Q, . . . , Q }. The retained window contains the principal contribution and its dominant fractional Doppler leakage around the principal sample. Leakage between differ-ent pilot blocks is incorporated according to the prescribed pilot interaction radius R defined in Section III. For each received pilot window, the local response model includes the contribution from the current transmitted pilot together with those from up to R neighboring transmitted pilots on each side. This fixed modeling extent retains the dominant pilot interactions while avoiding the need to model the complete N
+
+point response. 
+
+2) Path Number and Fractional Doppler Estimation: 
+
+Let M = ( K1, . . . , K bKd ) denote a candidate path number model, where Kg ≥ 1 is the assumed number of physical paths associated with the gth delay class. The total number of paths under model M is KM = P bKd 
+
+> g=1
+
+Kg , subject to 
+
+KM ≤ Kc, max .The admissible model set is denoted by M.The candidate fractional Doppler offsets in the gth resolved delay class are collected in κg = [ κg, 1, . . . , κ g,K g ]T, − 12 ≤
+
+κg, 1 < · · · < κ g,K g < 12 . The ordering constraint removes per-mutation ambiguity only among paths represented by the same delay class. Fractional Doppler offsets belonging to different delay classes are allowed to be equal. A candidate model M
+
+collects the fractional Doppler offsets in κ = [ κT1 , . . . , κT
+
+> bKd
+
+]T.The augmented model matrix is 
+
+A(Q)
+
+> S,M
+
+(κ) = B(Q) 
+
+> S,1,K 1
+
+(κ1), . . . , B(Q) 
+
+> S,bKd,K cKd
+
+(κ bKd ), B(Q)
+
+> S,nui
+
+.
+
+(51) The first bKd blocks are the candidate co-bin path blocks, which contain the principal samples and the fractional Doppler leakage retained within the local window for the paths repre-sented by the delay classes. The final block is the nuisance block. This block collects the retained structured leakage outside the candidate blocks. The retained leakage includes dominant leakage between different pilots and strong leakage from paths outside the candidate blocks. The orthogonal pro-jector onto the column space of the augmented model matrix is 
+
+P(Q)
+
+> S,M
+
+(κ) = A(Q)
+
+> S,M
+
+(κ)
+
+h
+
+A(Q)
+
+> S,M
+
+(κ)
+
+i†
+
+. (52) The fractional Doppler vector associated with each can-didate model is estimated by minimizing the concentrated residual energy 
+
+bκM = arg min 
+
+> κ∈K M
+
+h
+
+INst − P(Q)
+
+> S,M
+
+(κ)
+
+i
+
+y(Q)
+
+> S
+> 22
+
+,
+
+RSS M =
+
+h
+
+INst − P(Q)
+
+> S,M
+
+(bκM)
+
+i
+
+y(Q)
+
+> S
+> 22
+
+,
+
+(53) 9
+
+where KM denotes the ordered search space for κ. Candidate models that do not satisfy Nst > K M + Kext or whose model matrix does not have full rank are excluded. The residual 
+
+RSS M obtained in (53) is used to select the path number using by BIC 
+
+BIC( M) = Nst log 
+
+ RSS M
+
+Nst 
+
+
+
++ 3 KM log Nst ,
+
+cM = arg min 
+
+> M∈ M
+
+BIC( M).
+
+(54) The penalty counts only the candidate co-bin paths. Each path introduces one real fractional Doppler offset and one complex gain, corresponding to three real parameters. The nuisance columns are fixed for all candidate models and there-fore add only a common penalty. If cM = ( bK1, . . . , bK bKd ), the estimated physical path number in the selected co-bin is 
+
+bKc = K cM =
+
+> bKd
+
+X
+
+> g=1
+
+bKg , (55) where bKd counts the resolved delay class obtained from the first stage, whereas bKc counts the Doppler resolvable physical paths represented by these delay classes. The se-lected fractional Doppler estimate is the NMLL-MLE result corresponding to the model selected by BIC 
+
+bκ = bκ cM. (56) The path and retained nuisance gains are jointly recovered from the converged fractional Doppler estimates as 
+
+" bh
+
+bhnui 
+
+#
+
+=
+
+h
+
+A(Q) 
+
+> S,cM
+
+(bκ)
+
+i†
+
+y(Q) 
+
+> S
+
+. (57) The estimated parameter triplet of the jth path represented by the gth resolved delay class is ( bdg , k c + bκg,j , bhg,j ), with 
+
+g = 1, . . . , bKd and j = 1, . . . , bKg . The resulting path parameters are used as observations for subsequent target state estimation and as channel parameters for DPF domain channel reconstruction and data recovery. V. CRLB A NALYSIS 
+
+The CRLB is derived as a conditional benchmark for pa-rameter estimation within a co-delay-Doppler bin. It evaluates the estimation accuracy after the hierarchical model order determination has identified the resolved delay representation and the number of physical paths within each resolved delay class. For the detected integer Doppler index, the total nor-malized Doppler of path (g, r ) is νg,r = kc + κg,r . Since kc
+
+is fixed locally, the derivatives with respect to νg,r and κg,r 
+
+are identical. Substituting the uniformly spaced pilot sequence into the DPF domain input output relationship yields 
+
+yp(m) = 
+
+> Kd
+
+X
+
+> g=1
+> Kg
+
+X
+
+> r=1
+
+hg,r ζ−1X
+
+> υ=0
+
+Bυ,g,r (m) + ew(m). (58) The expectation of (58) is denoted by μ(m; θ) = E{yp(m) |
+
+θ}. Since the transformed AWGN has zero mean, the mean received signal is given by its noise free component. Hence, 
+
+yp(m) = μ(m; θ) + ew(m). The real parameter vector is defined as θ = [ dT, νT, hTR, hTI ]T, where d = [ d1, . . . , d Kd ]T,and ν, hR, and hI stack νg,r , ℜ{ hg,r }, and ℑ{ hg,r } over all physical paths. For y ∼ CN (μ, σ 2 
+
+> s
+
+INc ), the logarithm of the likelihood function, excluding constants independent of θ, is 
+
+−∥ y − μ∥22/σ 2 
+
+> s
+
+. The (a, b )th entry of the Fisher information matrix (FIM) is 
+
+[J]a,b = 2
+
+σ2
+
+> s
+
+ℜ
+
+X
+
+> ξ∈S
+
+X
+
+> z∈Z Q
+
+ ∂μ (m)
+
+∂θ a
+
+∗  ∂μ (m)
+
+∂θ b
+
+ . (59) To evaluate (59), define the leakage index associated with the υth pilot as qυ (m) = [ m − mpilot ,υ − kc]N . The corre-sponding path contribution is 
+
+Bυ,g,r (m) ≜ pEpilot ,υ ΓN (qυ (m), ν g,r − kc) eΦυ,g,r (m),
+
+Φυ,g,r (m) ≜ j πN [kc + qυ (m)] 2 − j 2πm N [dg + kc + qυ (m)] .
+
+(60) Thus, μ(m) = P
+
+> g
+
+P 
+
+> r
+
+hg,r 
+
+P 
+
+> υ
+
+Bυ,g,r (m). The derivatives with respect to the real and imaginary parts of the complex gain are 
+
+∂μ (m)
+
+∂h R,g,r 
+
+=
+
+> ζ−1
+
+X
+
+> υ=0
+
+Bυ,g,r (m), ∂μ (m)
+
+∂h I,g,r 
+
+= j 
+
+> ζ−1
+
+X
+
+> υ=0
+
+Bυ,g,r (m). (61) The paths represented by delay class g share the representa-tive delay parameter dg . Therefore, the derivative with respect to dg collects the contributions of paths assigned to this class: 
+
+∂μ (m)
+
+∂d g
+
+= −j 2πm N
+
+> Kg
+
+X
+
+> r=1
+
+hg,r ζ−1X
+
+> υ=0
+
+Bυ,g,r (m). (62) Conditioned on the detected kc, both m and qυ (m) are fixed discrete indices. Therefore, the Doppler derivative acts only on the Dirichlet leakage coefficient, and no derivative of a periodic impulse is introduced. The derivative with respect to the total normalized Doppler is 
+
+∂μ (m)
+
+∂ν g,r 
+
+= hg,r ζ−1X
+
+> υ=0
+
+˙Bυ,g,r (m), (63) where 
+
+˙Bυ,g,r (m) ≜ pEpilot ,υ Γ′ 
+
+> N
+
+(qυ (m), ν g,r − kc) eΦυ,g,r (m).
+
+(64) Using ΓN (q, κ ) = N −1 PN −1 
+
+> n=0
+
+exp[j2 πn (κ − q)/N ], its derivative is 
+
+Γ′ 
+
+> N
+
+(q, κ ) = j2 πN 2 
+
+> N−1
+
+X
+
+> n=0
+
+n exp 
+
+
+
+j 2πN n(κ − q)
+
+
+
+. (65) Substituting (61)-(65) into (59) yields the FIM. The covari-ance matrix of any unbiased estimator satisfies 
+
+CRLB( θa) = J−1(θ) 
+
+> a,a
+
+. (66) From (59)-(65), the Fisher information depends on the number of pilot blocks ζ and the number of retained leak-age samples NQ. For a valid coherent observation model, increasing ζ generally improves the delay and Doppler bounds by providing more pilot phase samples and stacked leakage observations. 10                          
+
+> TABLE II SIMULATION PARAMETERS
+> Parameter Value
+> DPF-domain frame size N= 1024
+> Reserved pilot index range n= 0 , . . . , 255
+> Number of protected pilot blocks ζ= 16
+> First pilot center index mpilot ,0= 8
+> Pilot center interval Dpilot = 16
+> Selected integer Doppler index kc= 1
+> Fractional Doppler vector κ= [ −0.1,0.2] T
+> Continuous normalized delay vector d= [9 .1,9.2] T
+> Normalized path-gain profile ∆P= 3 dB ,∥h∥22= 1
+
+VI. S IMULATION RESULTS AND ANALYSIS 
+
+In this section, we evaluate the reliability of the proposed TSUR framework, the root mean square errors (RMSEs) of delay and fractional Doppler estimation, the normalized mean square error (NMSE) of channel reconstruction, and the bit error rate (BER) performance under different pilot configura-tions. Unless otherwise specified, the simulation parameters are set according to Table II. 
+
+A. Hierarchical Detection Reliability 
+
+Before evaluating the co-bin resolution performance, we evaluate the success rate of accurately estimating the integer part of the Doppler. Accurate localization of the integer Doppler index determines the corresponding received pilot locations, which are then used to construct the principal delay observation and the local leakage observation. The tested paths share the same integer Doppler index and have different fractional offsets. The SNR ranges from −20 to 5 dB in 2 dB increments with 10000 Monte Carlo trials at each point. The experiment is considered successful if the cross-correlation method employed can correctly identify the interval containing the Doppler shift. Figure 3 shows that the closer the Doppler value is to the interval boundary, the greater the fractional Doppler leakage and the lower the success rate of accurately estimating the integer part of the Doppler under the single interval decision criterion. Fractional Doppler values located at interval boundaries can be searched for by examining the two adjacent boundaries separately. Accurate estimation of the integer Doppler index identifies the corresponding pilot locations at the receiver, which are used to construct the delay and local leakage observations. We examine how the Doppler separation within a co-bin and the leakage caused by fractional Doppler affect the success rate of BIC. The Doppler of the second path is varied within a co-bin, and the probability of correctly identifying the two physical paths is evaluated. Within the same delay class, the two paths have fractional Doppler offset κ1 = −0.4 and 
+
+κ2 = −0.4 + ∆ κ, where ∆κ varies from 0.1 to 0.8. A trial is successful when BIC estimates the true physical path number. Figure 4 shows that the detection probability improves as the SNR increases. As the paths become more distinguishable, the BIC can identify the path model at progressively lower SNRs. On the other hand, the positions of the fractional Doppler offset relative to the bin boundary determine the degree of overlap between the two leakage patterns. A stronger overlap SNR (dB)                         
+
+> -20 -17 -14 -11 -8 -5 -2 14
+> Success rate (%)
+> 020 40 60 80
+> 100
+> k7= 1.5, Interval 1/2
+> k6= 1.5, Interval 1
+> k5= 1.4
+> k4= 1.3
+> k3= 1.2
+> k2= 1.1
+> k1= 1
+> Fig. 3. Success rate of integer Doppler localization versus SNR. For k7=1.5, “Interval 1/2” means ˆkc∈ { 1,2}, while “Interval 1” means ˆkc= 1 .
+> Fig. 4. Success rate versus SNR for different fractional Doppler separations within the same delay class.
+
+makes the two paths more difficult to distinguish. The success rate versus SNR for different fractional Doppler separations provides the basis for subsequently estimating the fractional Doppler offsets. 
+
+B. Validation of Delay Class Estimation 
+
+This experiment isolates the delay class estimation module in the first stage of TSUR. Two well separated delay classes are considered with d = [9 .1, 23 .5] T and κ = [ −0.1, 0.2] T.Since the two delays are far apart, this experiment is not intended to demonstrate co-bin path resolution. Instead, it validates the ability of FBSS-MUSIC and Newton refinement to estimate resolvable delay classes from the principal pilot observations. MUSIC, FBSS-MUSIC, FBSS-MUSIC-Newton, and ZP-PCTD [15] are compared. The SNR ranges from 0
+
+to 40 dB in increments of 2 dB, and each point is averaged over 5000 Monte Carlo trials. FBSS-MUSIC-Newton uses the FBSS-MUSIC estimates to initialize the Newton refinement. ZP-PCTD uses zero padding factors of zp = 8 and zp = 16 
+
+to refine the delay grid. It uses the same number of pilots and pilot guard intervals as the proposed method. As shown in Fig. 5, the MUSIC exhibits a pronounced error floor due to the rank deficiency of the covariance matrix caused 11   
+
+> Fig. 5. Delay estimation performance for two resolvable delay classes.
+> Fig. 6. Doppler estimation RMSE of the compared methods versus SNR.
+
+by coherent observations. FBSS restores the effective rank of the signal subspace and substantially improves the delay esti-mation accuracy. At high SNR, the accuracy of FBSS-MUSIC is limited by the resolution of its delay search grid, which produces a residual error floor. Newton refinement improves the coarse delay estimates beyond the discrete search grid, thereby reducing grid induced quantization errors. A residual error floor remains at high SNR because of interference from the unknown data symbols. ZP-PCTD exhibits a similar floor because its accuracy is limited by the PCTD delay search discretization and the interference from the unknown data symbols. The latter arises because ZP-PCTD adopts the same block structure as the proposed method, in which the pilot symbols are placed in the leading part of each block and followed by data symbols. 
+
+C. Fractional Doppler Resolution within a Delay Class 
+
+The fractional Doppler estimation performance is evaluated for two physical paths that share the same delay class. The two paths share the delay d1 = d2 = 9 .2 and have fractional Doppler offsets κ = [ −0.4, 0.3] T. The SNR ranges from 0 to 
+
+40 dB in 2 dB increments, with 3000 Monte Carlo trials per point. ZP-PCTD and OMP [25] are included as representative sequential estimators. OMP uses the same Q = 7 local obser-vations as the MLE ( R = 0 ). For NMLL-MLE, Q ∈ { 0, 3, 7} 
+
+> Fig. 7. Effect of unknown data symbols on fractional Doppler estimation.
+
+at R = 2 and R ∈ { 0, 2, Full } at Q = 7 are considered to evaluate the accuracy and complexity tradeoff. As shown in Fig. 6, the configuration using only the principal sample with 
+
+Q = 0 exhibits a large error floor that is nearly insensitive to SNR. This result shows that the principal samples alone cannot provide accurate fractional Doppler estimates for the considered co-bin paths. Both OMP and ZP-PCTD saturate at approximately the same RMSE level, which is attributed to the combined effect of path extraction and the leakage of unknown data symbol energy into the pilot observations. The MLE with R = 0 reduces the estimation error but retains the high SNR floor because the cross pilot contributions are omitted. Modeling the neighboring pilot blocks with R = 2 
+
+further improves the fractional Doppler estimation accuracy. The comparable performance obtained with Q = 3 and Q = 7 
+
+indicates that most useful fractional Doppler information is concentrated around the principal sample. Fig. 7 shows the effect of unknown data symbols on fractional Doppler estimation. The results with only pilots are compared with those obtained from a frame containing both pilots and unknown QPSK data. For the pilot only case, the curve with R = Full closely follows the CRLB at high SNR, while R = 2 keeps a small residual because only the dominant interactions among pilots are retained. When unknown data symbols are present, both R = 2 and R = Full exhibit a nonzero high SNR floor. It shows that the residual floor in the data bearing frame is mainly caused by data symbol leakage into the selected pilot windows, rather than by the fractional Doppler search itself. The parameters Q and Rp
+
+influence the complexity of the fractional Doppler estimation. The overall computational complexity is approximated by 
+
+O Iκ, r
+
+KrNQSRp + Nst M 2 
+
+> r
+
++ M 3
+
+> r
+
+ , where Iκ, r denotes the number of iterations. Moreover, Nst = ζN Q is the stacked observation length, Kr is the candidate number of target paths, and Mr = Kr +Kext is the total number of target and retained nuisance columns. The quantity SRp denotes the number of transmitted pilot contributions retained across all ζ received pilot windows. The first term represents the construction of the target leakage matrix and is directly controlled by both Q and 
+
+Rp. The second term accounts for the matrix multiplications required in the concentrated least squares fit, while the third 12  
+
+> Fig. 8. Analysis of fractional Doppler estimation for different delay paths within the same delay class. (a) Success rate of resolving two delay paths using MDL. (b) Success rate of detecting two physical paths using BIC. (c) Fractional Doppler estimation performance under different delay separations.
+
+term corresponds to solving the resulting Mr × Mr linear system. For the two path case with ζ = 16 and Q = 7 , setting 
+
+Rp = 2 reduces the overall computational cost by approxi-mately 63% compared with full modeling of the interactions among pilots. Together with the small performance gap in Fig. 6, this confirms that the dominant cross pilot interactions can be captured with substantially lower complexity. The fractional Doppler estimation performance is evaluated for physical paths with different continuous delays within the same delay class. After integer Doppler index and delay refinement, NMLL-MLE in the second stage recovers the fractional Doppler offsets from the stacked local leakage sam-ples. For this experiment, the first path is fixed at (d1, ν 1) = (8 .6, 0.6) . The delay and Doppler coordinates of the second path are independently varied as d2 ∈ {8.7, 8.8, . . . , 9.4}
+
+and ν2 ∈ { 0.7, 0.8, . . . , 1.4}, respectively. Accordingly, the delay separation ∆d = d2 − d1 and the Doppler separation 
+
+∆ν = ν2 − ν1 both range from 0.1 to 0.8 with an interval of 0.1. TSUR is evaluated at SNR = 10 dB using 3000 
+
+Monte Carlo trials at each grid point. The black dashed contours mark the 95% success probability boundaries for MDL and BIC, respectively. Figure 8 evaluates the robustness of TSUR when two closely different delays are represented by one delay class. Fig. 8(a) shows that the MDL result depends on both the delay separation and the diversity of the leakage responses. Closely spaced paths may produce highly correlated covariance signatures across the pilot blocks when their Doppler offsets lie near the two boundaries of the same Doppler interval. Fig. 8(b) shows that the BIC path number decision is governed mainly by the fractional Doppler separation after the paths are represented by one resolved delay class. Fig. 8(c) shows the fractional Doppler estimation accuracy after the two paths have been resolved by BIC. The Doppler coordinates are fixed as ν = [0 .9, 1.2] , and the case with known true path delays is used as the oracle benchmark. The fractional Doppler estimation accuracy improves as the SNR increases for all curves. The oracle benchmark provides the best performance because the true path delays are known in advance. When the delay difference between the two paths 
+
+> Fig. 9. Effect of pilot count on sensing and communication performance under fixed total pilot energy. (a) BIC detection of the number of paths. (b) Fractional Doppler estimation performance. (c) Channel reconstruction performance. (d) BER of QPSK detection.
+
+ranges from 0.1 to 0.3, only one delay class is resolved in the first stage. Under this delay mismatch, the fractional Doppler estimation performance degrades by approximately 4
+
+dB compared with the oracle benchmark. 
+
+D. Pilot Effect on Sensing and Communication Performance 
+
+Fig. 9 evaluates the impact of the number of uniformly spaced pilot blocks on sensing and communication perfor-mance under a fixed total pilot energy. Changing ζ affects both the number of phase progression and local leakage observations and the energy assigned to each pilot. The sensing 13 
+
+receiver observes a frame containing both pilots and unknown QPSK data, while FBSS-MUSIC, BIC, and NMLL-MLE use only the known pilot model. Fig. 9(a) shows that using fewer pilot blocks gives a larger pilot amplitude and can slightly advance the BIC transition at low SNR. However, this advantage does not translate into better parameter or channel estimation. As shown in Fig. 9(b), increasing ζ
+
+reduces the high SNR fractional Doppler offsets RMSE floor because more pilot blocks provide a larger aperture and more stacked local leakage samples for NMLL-MLE. Fig. 9(c) shows that increasing the number of pilots ζ improves the channel estimation accuracy. The result indicates that channel reconstruction benefits not only from correct detection of the number of paths but also from more accurate Doppler and gain fitting over a richer pilot observation. Fig. 9(d) shows that the improved reconstructed CSI directly benefits QPSK data detection. Increasing ζ moves the BER curve closer to the perfect CSI reference. The pilot count does not bring a uniformly monotonic gain for all sensing tasks under fixed total pilot energy. A small number of high power pilots is more suitable for low SNR path number detection, while a larger number of pilots improves continuous parameter estimation, channel reconstruction, and data detection. VII. C ONCLUSION 
+
+This paper investigated co-delay-Doppler bin multipath resolution for communication assisted sensing with DFT-P-OCDM. A DPF domain relationship between the input and output was derived. Based on this relationship, the TSUR framework was developed to estimate the resolved delay classes, the number of physical paths in each class, their fractional Doppler offsets, and complex gains. CRLBs were derived to benchmark the attainable estimation accuracy, and the pilot configuration was analyzed to characterize the trade-off between sensing resolution and communication recovery. Simulation results demonstrated the superiority and robustness of TSUR for co-bin path resolution when the paths have identi-cal delays or small delay differences. These findings indicate that TSUR can serve as an effective front end estimator of path parameters for communication assisted sensing with DFT-P-OCDM.Since the leakage models are waveform specific, extending the co-bin analysis to AFDM requires deriving the corresponding relationship between the input and output, characterizing its leakage behavior, and developing a suitable resolution framework. These issues will be investigated in future work. REFERENCES [1] M. L. Rahman, J. A. Zhang, X. Huang, Y. J. Guo, and R. W. Heath, “Framework for a perceptive mobile network using joint communication and radar sensing,” IEEE Trans. Aerosp. Electron. Syst. , vol. 56, no. 3, pp. 1926–1941, Jun. 2020. [2] J. Zhu, Y. Tang, F. Liu, X. Zhang, H. Yin and Y. Zhou, “AFDM-Based Bistatic Integrated Sensing and Communication in Static Scatterer Environments,” IEEE Wireless Commun. Lett. , vol. 13, no. 8, pp. 2245– 2249, Aug. 2024. [3] Z. Ni, J. A. Zhang, K. Wu, and R. P. Liu, “Uplink sensing using CSI ratio in perceptive mobile networks,” IEEE Trans. Signal Process. , vol. 71, pp. 2699–2712, 2023. [4] A. Bemani, N. Ksairi, and M. Kountouris, “Affine frequency division multiplexing for next generation wireless communications,” IEEE Trans. Wireless Commun. , vol. 22, no. 11, pp. 8214–8229, Nov. 2023. [5] Y. Wang, R. Zhang, L. Yan, and X. Ma, “Pilot Chirp-Assisted OCDM Communications Over Time-Varying Channels,” IEEE Wireless Com-mun. Lett. ,vol. 12, no. 9, pp. 1578–1582, Sept. 2023. [6] X. Ouyang and J. Zhao, “Orthogonal chirp division multiplexing,” IEEE Trans. Commun. , vol. 64, no. 9, pp. 3946–3957, Sep. 2016. [7] M. S. Omar and X. Ma, “Spectrum design for orthogonal chirp division multiplexing transmissions,” IEEE Wireless Commun. Lett. , vol. 9, no. 11, pp. 1990–1994, Nov. 2020. [8] H. Bao, H. Zhuang, Z. Wang, and G. Pang, “Performance trade-off between communication and sensing based on AFDM parameter adjustment,” Proc. IEEE 35th Int. Symp. Pers., Indoor Mobile Radio Commun. (PIMRC) , Valencia, Spain, Sep. 2024, pp. 647–652. [9] H. B. Mishra, P. Singh, A. K. Prasad, and R. Budhiraja, “OTFS Channel Estimation and Data Detection Designs With Superimposed Pilots,” 
+
+IEEE Trans. Wireless Commun. , vol. 21, no. 4, pp. 2258–2272, Apr. 2022. [10] S. E. Zegrar and H. Arslan, “A Novel Delay-Doppler-Based Channel Es-timation Method in Doubly-Dispersive OCDM Systems”, IEEE Wireless Commun. Lett. ,vol. 13, no. 3, pp. 801–804, March 2024. [11] S. Kumari, M. K. Dikkala, S. Mukhopadhyay, and H. B. Mishra, “Two Choice Hard Thresholding Pursuit (TCHTP) for Delay-Doppler Channel Estimation in OTFS,” IEEE Wireless Commun. Lett. , vol. 12, no. 6, pp. 1032–1036, Jun. 2023. [12] Y. Jitsumatsu and L. Sun, “Parallel Delay-Doppler Estimation via Order-Reversed Two-Stage Prony Method,” arXiv preprint arXiv:2511.19866 ,Nov. 2025. [13] Z. Gong, S. Liu, L. Li, Y. Huang, and J. Yuan, “Super-Resolution Delay-Doppler Estimation for OTFS Radar,” in Proc. IEEE ICC Workshops (ISAC Workshop) , Rome, Italy, 2023, pp. 921–924. [14] F. Yang, S. Luo, L. Wu, D. Song, R. Lin, and S. Xie, “An AFDM Off-Grid Channel Estimation Based on Sparse Bayesian Learning,” in Proc. IEEE 24th Int. Conf. Commun. Technol. (ICCT) , Chengdu, China, Oct. 2024, pp. 1565–1569. [15] A. Arous, H. Haif, and H. Arslan, “A novel post-coded time-domain channel estimation for chirp-based multicarrier waveforms,” IEEE Trans. Veh. Technol. , vol. 75, no. 6, pp. 10933–10948, Jun. 2026. [16] C. Browning, X. Ouyang, D. Dass, G. Talli, and P. Townsend, “Orthogonal Chirp-Division Multiplexing for Performance Enhanced Optical/Millimeter-Wave 5G/6G Communications,” in Proc. Optical Fiber Commun. Conf. Exhib. (OFC) , San Francisco, CA, USA, Jun. 2021. [17] L. Li, L. Zhang, H. Zhang, et al. , “THz-Over-Fiber System With Orthogonal Chirp Division Multiplexing for Integrated Sensing and Communication,” J. Lightwave Technol. , vol. 42, no. 1, pp. 176–183, Jan. 2024. [18] Z. Wan, Z. Gao, F. H´ eliot, Y. Su, Z. Wu, L. Chen, Q. Luo, and P. Xiao, “Orthogonal Chirp Division Multiplexing Waveform Design for 6G mmWave UAV Integrated Sensing and Communication,” in Proc. IEEE Int. Wireless Commun. Mobile Comput. Conf. (IWCMC) , Ayia Napa, Cyprus, May 2024, pp. 622–627. [19] R. Zhang, Y. Wang and X. Ma, “Channel Estimation for OCDM Transmissions With Carrier Frequency Offset”, IEEE Wireless Commun. Lett. ,vol. 11, no. 3, pp. 483–487, March 2022. [20] W. Guo, W. Zhang, P. Mu, and F. Gao, “High-mobility OFDM downlink transmission with large-scale antenna array,” IEEE Trans. Veh. Technol. ,vol. 66, no. 9, pp. 8600–8604, Sep. 2017. [21] W. Zhang, F. Gao, H. Minn, and H.-M. Wang, “Scattered pilots-based frequency synchronization for multiuser OFDM systems with large number of receive antennas,” IEEE Trans. Commun. , vol. 65, no. 4, pp. 1733–1745, Apr. 2017. [22] O. Mahfoudia, F. Horlin, and X. Neyt, “Pilot-based detection for DVB-T passive coherent location radars,” IET Radar, Sonar & Navigation , vol. 14, no. 6, pp. 845–851, Jun. 2020. [23] W. Zhang, Q. Yin, and F. Gao, “Computationally efficient blind esti-mation of carrier frequency offset for MIMO-OFDM systems,” IEEE Trans. Wireless Commun. , vol. 15, no. 11, pp. 7644–7656, Nov. 2016. [24] M. Wax and T. Kailath, “Detection of signals by information theoretic criteria,” IEEE Trans. Acoust., Speech, Signal Process. , vol. ASSP-33, no. 2, pp. 387–392, Apr. 1985. [25] J. A. Tropp and A. C. Gilbert, “Signal recovery from random measure-ments via orthogonal matching pursuit,” IEEE Trans. Inf. Theory , vol. 53, no. 12, pp. 4655–4666, Dec. 2007.

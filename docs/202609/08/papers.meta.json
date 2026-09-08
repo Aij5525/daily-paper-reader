@@ -1,0 +1,39 @@
+{
+  "label": "2026-09-08",
+  "date": "2026-09-08",
+  "generated_at": "2026-09-08T22:00:49",
+  "count": 2,
+  "papers": [
+    {
+      "paper_id": "202609/08/2609.04669v1-ultra-high-resolution-method-for-multipath-within-a-co-delay-doppler-bin-in-dft-p-ocdm",
+      "section": "deep",
+      "title_en": "Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM",
+      "authors": "Mingxuan Han, Weile Zhang, Feifei Gao",
+      "date": "2026-09-04",
+      "pdf": "https://arxiv.org/pdf/2609.04669v1",
+      "score": "9.0",
+      "evidence": "复用DFT-P-OCDM通信信号进行感知，解决共时延-多普勒分格内多径的高分辨率估计与信道重构",
+      "tldr": "通信系统复用发射信号感知时，DFT-P-OCDM波形在双选信道中若多径落入同一共时延-多普勒仓，可分辨时延类数少于物理径数，导致路径数确定、分数多普勒估计和信道重建困难。本文推导了DPF域输入输出点式关系，提出两阶段超高分辨率框架：先由相位导频估计时延，再利用泄漏样本估计多普勒和每时延类路径数。推导CRLB并分析导频配置权衡。仿真表明该方法能分辨同仓时延路径，对时延偏移鲁棒，分数多普勒估计优于基线。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Communication systems can reuse their transmitted signals for sensing without dedicated radar transmissions. For an established DFT-preprocessed orthogonal chirp division multiplexing (DFT-P-OCDM) waveform, this task becomes difficult when several physical paths in a doubly selective channel fall into the same co-delay-Doppler bin. In this case, the number of resolvable delay classes inferred from the pilot may be smaller than the number of physical paths within the co-bin. This mismatch increases the difficulty of path number determination, fractional Doppler offset estimation, and channel reconstruction. We derive a pointwise relationship between the input and output in the DFT preprocessed Fresnel (DPF) domain for doubly selective channels with multiple paths within the co-delay-Doppler bin. Based on this input and output relation, we propose the two stage ultra high resolution (TSUR) framework. The first stage uses pilots of the phase progression to estimate delay, while the second stage uses the leakage samples to estimate the Doppler and the number of paths within each delay class. Furthermore, we derive CRLBs and analyze how the pilot configuration trades sensing resolution and communication recovery. Simulation results demonstrate that TSUR resolves same delay paths within a co-delay-Doppler bin, remains robust to exist delay offsets, and achieves lower fractional Doppler estimation errors than sequential extraction and off-grid baselines.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202609/08/2609.04836v1-hierarchical-codebook-design-and-low-overhead-beam-training-for-near-field-communications-with-uniform-circular-arrays",
+      "section": "quick",
+      "title_en": "Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays",
+      "authors": "Gen Luo, Hang Yuan, Xiaozheng Gao, Minwei Shi, Chong Han, Kai Yang",
+      "date": "2026-09-04",
+      "pdf": "https://arxiv.org/pdf/2609.04836v1",
+      "score": "6.0",
+      "evidence": "基于近场球面波传播模型刻画信道最小可分辨距离，服务无线信道特性分析",
+      "tldr": "针对采用均匀圆形阵列（UCA）的近场XL-MIMO系统，提出分辨率感知的层次码本设计。基于球面波传播模型刻画近场最小可分辨距离，揭示了UCA在角度-距离联合域的空间分辨能力；据此设计由距离鲁棒波束赋形码本和全精度码本构成的两级码本，并发展解耦架构贝叶斯回归训练方案。实验表明仅需384个探测时隙即可完成高精度波束训练，较传统穷举搜索降低约99.66%开销。",
+      "tags": "query:wireless-llm",
+      "abstract_en": "Extremely large-scale multiple-input multiple-output (XL-MIMO) enables near-field location-specific beam focusing for sixth-generation (6G) communications. Uniform circular arrays (UCAs), with rotational symmetry and uniform azimuth coverage, have emerged as a key enabling architecture for near-field XL-MIMO systems. In this paper, we propose a resolution-aware hierarchical codebook for near-field UCA systems, along with an efficient two-stage beam training scheme to significantly reduce the training overhead. Specifically, we characterize the minimum resolvable distance of UCA systems in the near-field region based on a geometric spherical-wave propagation model, revealing their spatial resolution capability in the joint angle--distance domain. Guided by this result, we design a UCA-specific hierarchical codebook, where a power-efficient distance-robust beamforming (DRBF) codebook provides coarse azimuth localization and a full-precision (FP) codebook sampled according to the minimum resolvable distance enables refined angle--distance beam search. The regularized modal compensation suppresses weak-mode amplification and provides a controllable tradeoff between absolute amplitude gain under unit-norm transmission and distance robustness. Based on this codebook, we develop a hierarchical decoupled-architecture Bayesian regression (HDA-BAR) scheme for fast and accurate near-field beam training. For the considered array configuration, the resulting HDA-BAR training procedure requires $384$ probing slots, corresponding to an approximately \\(99.66\\%\\) overhead reduction relative to the conventional near-field exhaustive-search benchmark.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
