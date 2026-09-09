@@ -1,0 +1,942 @@
+Title: Multimodal Large Language Model-guided Constrained Optimization for RAN Intelligent Control
+
+URL Source: https://arxiv.org/pdf/2609.06122v1
+
+Published Time: Wed, 09 Sep 2026 00:58:38 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Multimodal Large Language Model-guided Constrained Optimization for RAN Intelligent Control 
+
+Hyeonho Noh, Member, IEEE 
+
+Abstract —Artificial intelligence (AI)-based radio access net-work (RAN) controllers are commonly designed for predefined operating scenarios and optimization tasks, limiting their adapt-ability when network conditions and operator requirements change after deployment. This paper proposes multimodal large language model (MLLM)-guided constrained optimization for RAN intelligent control (MLLM-coRIC), a requirement-adaptive hierarchical Open RAN (O-RAN) framework for joint resource and power allocation. MLLM-coRIC jointly exploits the oper-ator’s natural-language specification and radio-frequency (RF)-derived network context as multimodal inputs, enabling a single deployed framework to address different optimization problems without redesigning task-specific algorithms or retraining control policies. At the Non-Real-Time RAN Intelligent Controller (Non-RT RIC), the MLLM performs holistic, longer-timescale reason-ing over the operator requirement, predicted network evolution, and measured optimization outcomes to design the numerical control loss. The relative constraint penalties are iteratively refined through a closed-loop process, allowing the optimization criterion to reflect both the intended network behavior and the expected operating context. At the Near-Real-Time RIC (Near-RT RIC), a loss-conditioned hybrid executor translates the synthesized criterion into fast radio actions by combining learned ramp-constrained resource allocation with model-based interference-aware power control. A multi-cell evaluation envi-ronment integrating the CARLA urban mobility simulator and the Sionna RT ray-tracing-based wireless propagation simula-tor is implemented for validation. Results show that MLLM-coRIC consistently outperforms conventional and learning-based baselines across varying user loads, objectives, constraints, and operating thresholds, while adapting to changing optimization problems without per-request retraining. 
+
+Index Terms —Open RAN, RAN intelligent controller, multi-modal large language model, multimodal fusion, resource alloca-tion. 
+
+I. I NTRODUCTION 
+
+The evolution toward sixth-generation (6G) networks is driving radio access networks (RANs) from task-specific automation toward artificial intelligence (AI)-native control, where network intelligence is expected to continuously in-terpret operating conditions and adapt control decisions ac-cordingly [1]–[4]. Open RAN (O-RAN) provides a natu-ral architectural foundation for this transition by combining disaggregated network functions with programmable control interfaces [5], [6]. Rather than embedding intelligence into a monolithic RAN stack, control functions can be exposed and 
+
+Hyeonho Noh is with the Department of Information and Communica-tion Engineering, Hanbat National University, Republic of Korea (e-mail: hhnoh@hanbat.ac.kr). 
+
+coordinated across open interfaces, allowing learning-based network operation to evolve together with changing traffic, service, and operator requirements [7], [8]. A key feature of O-RAN is the separation of control in-telligence across different timescales [9]. The Non-Real-Time RAN Intelligent Controller (Non-RT RIC) supports network-wide policy generation, enrichment, and orchestration at a slower timescale, whereas the Near-Real-Time RIC (Near-RT RIC) performs latency-sensitive radio control using live net-work measurements [10]. This timescale separation naturally leads to distinct roles for AI across the RIC hierarchy. At the Non-RT RIC, AI can exploit historical and network-wide observations to predict network evolution and configure high-level control policies or criteria accordingly [10]. At the Near-RT RIC, AI can use instantaneous network measurements to solve fast radio-control problems, such as resource allocation and power control. These complementary roles make the O-RAN control hierarchy a natural platform for adaptive AI-driven RAN operation. Despite the increasing use of AI in RAN control, most existing solutions remain specialized to a predefined operating scenario and optimization task [8], [11]–[15]. Learning-based controllers are commonly trained and evaluated under a pre-scribed range of user densities, traffic patterns, mobility con-ditions, and radio environments. Therefore, their performance can deteriorate when the deployed network departs from these conditions [16], [17]. In addition, as RANs support in-creasingly heterogeneous services, a single fixed optimization objective is no longer sufficient, since the objective and service constraints evolve with changing operational requirements [8], [18], [19]. Existing approaches, however, typically embed a particular objective and constraint configuration into the opti-mization formulation or training loss, making each controller closely tied to the problem for which it was designed. An AI-native RAN therefore requires a control framework that can adapt not only to changing network environments, but also to different optimization problems presented after deployment. 
+
+A. Related Works 
+
+O-RAN control. The O-RAN RIC serves as a programmable control layer, enabling closed-loop radio control across multi-ple timescales. Its practical feasibility has been demonstrated through operational O-RAN platforms for training, deploy-ing, and evaluating learning-based xApps [20], together with orchestration frameworks that coordinate control functions arXiv:2609.06122v1 [eess.SY] 5 Sep 2026 2
+
+across RIC timescales [7]. Building on this programmabil-ity, RIC-based solutions have been developed for a wide range of radio-control tasks [21], including traffic steering and handover management [22], resource scheduling in vir-tualized RANs [23], and network slicing under service-level agreements [11], [13]. Despite these advances, most exist-ing studies develop and evaluate their controllers under a prescribed operating environment characterized by a limited range of user densities, traffic patterns, mobility conditions, and radio configurations. As a result, the control logic is often closely coupled to the environment considered during design or training, and its performance can degrade when the deployed network deviates from these conditions [8], [17]. Thus, although O-RAN provides the programmability required to adapt network control after deployment, achieving robust operation across heterogeneous and evolving network environments remains an open challenge. 
+
+Environment-adaptive optimization. Learning-based opti-mization replaces repeated numerical optimization with map-pings from network observations to control actions, enabling adaptation to variations in channel, traffic, and topology [18]. Recent approaches improve generalization across operating conditions through graph-based parameterizations [16], [24], model-based deep unfolding [25], and reinforcement learning for temporally coupled control [26]–[28]. Constrained learning further incorporates service requirements and can adapt con-straint margins as the network conditions change [12], [29]. However, these methods generally keep the optimization cri-terion fixed during training: the objective, constrained metrics, and optimization directions remain predefined. Thus, a policy may generalize across network environments while still being specialized to a single optimization problem, and changes in the requested problem typically require transfer learning or retraining [30]. 
+
+LLM-based control. Large language models (LLMs) have recently been applied to telecom standards, configuration, and network management [31]–[34]. Intent-based approaches use natural language to express desired network behavior and translate it into executable configurations [35], [36], while agentic frameworks employ LLMs for planning and coordination of existing network functions [37], [38]. At the RAN level, LLM-hRIC provides high-level guidance to a reinforcement-learning controller across RIC timescales [10], LLM-based resource allocation adapts control decisions to changing wireless environments [17], and multimodal models incorporate non-textual network observations together with language instructions [4]. These studies demonstrate that language models can influence network control, but how to dynamically construct and adapt the numerical loss function according to changing operator requirements and network conditions remains unexplored. 
+
+B. Challenges 
+
+The existing studies reveal a fundamental gap: a unified O-RAN RIC architecture capable of adapting to both dynamic network conditions and changing operational requirements after deployment has yet to be established. Existing controllers are typically designed for either a prescribed operating envi-ronment or a fixed optimization criterion, limiting their ability to accommodate both types of change within a single deployed framework. This calls for a common RIC architecture that can adapt its control criterion and radio decisions to evolving network context and requirements without retraining a sep-arate policy for each case. These observations motivate the following research question: 
+
+How can an O-RAN controller adapt to evolving network conditions and changing operational goals without retraining? 
+
+C. Contributions 
+
+This paper proposes multimodal large language model (MLLM)-guided constrained optimization for RAN intelligent control (MLLM-coRIC), a requirement-adaptive O-RAN con-trol framework that treats the optimization problem itself as a runtime input rather than a fixed design-time specification. At the Non-RT RIC, an operator request is compiled into a nu-merical specification of the objective and constraints, and the corresponding control loss is constructed using the predicted network context. The MLLM then refines the loss coefficients from measured objective and constraint outcomes instead of directly generating radio actions. At the Near-RT RIC, the resulting loss conditions a common numerical executor for joint resource and power allocation. This separation enables the same deployed controller to accommodate changes in both network conditions and operator-specified optimization problems without per-request retraining. The main contributions are summarized as follows:  
+
+> •
+
+MLLM-coRIC is proposed as a requirement-adaptive hi-erarchical O-RAN control framework for joint resource and power allocation under changing network conditions and operator requirements. Unlike conventional task-specific controllers designed for a predefined objective and operat-ing scenario, MLLM-coRIC jointly exploits the operator’s natural-language specification and radio-frequency (RF)-derived network context as multimodal inputs. The hier-archical controller then solves the requested resource and power allocation problem under the observed network con-dition without requiring a dedicated optimization algorithm or task-specific policy to be redesigned or retrained for each request. Consequently, MLLM-coRIC extends RAN intelligence beyond solving a predefined task by enabling the optimization problem itself to be configured at runtime, allowing a single deployed framework to support hetero-geneous operator-defined requirements across changing net-work conditions.  
+
+> •
+
+At the Non-RT RIC, MLLM-coRIC exploits the reason-ing capability of the MLLM to design the control loss from a holistic network perspective. By jointly interpreting the operator requirement, predicted network evolution, and measured optimization outcomes, the MLLM evaluates the relative importance of the objectives and constraints. Their penalty weights are then iteratively refined through a closed-loop process. The MLLM therefore operates at the slow 3         
+
+> Ý`nȺ˃˓ʅʴ̺
+> Ö ˃
+> ㏙ÖÝ#㍚çv¤Ý㍚óÖ㍚)Ûv㍚㍙㍙㍙㏚
+> ʅǄȺɝȺ˓̺㍺nƠɶǗʅ̨ǩʴ óʴƠɍǩǍ˓ʅʴȺǩ˃
+> ±ʫǩʴƠ˓ʅʴvɶ˓ǩɶ˓
+> 㑃ȺɶȺɯȺ͆ǩǩɶǩʴș̺̭ ȫȺɝǩș˨ƠʴƠɶ˓ǩǩȺɶș 㚐㋎㚠ʅ˨˓Ơșǩ㍙
+> ˨ɝ˓ȺɯʅǗƠɝƠʴșǩƠɶș˨Ơșǩ ʅǗǩɝ㏙  ㏚
+> ʅ˃˃Ȕ˨ɶǍ˓Ⱥʅɶ
+> Ýǩ˃ʅ˨ʴǍǩƠɝɝʅǍƠ˓Ⱥʅɶ ̷ʫʫ
+> Öʅ̭ǩʴƠɝɝʅǍƠ˓Ⱥʅɶ ̷ʫʫ
+> ㋊ ÖʅɝȺǍ̺㍚ Ⱥɶ˓ǩɶ˓ ɶƠɝ̺˓ȺǍ˃ )ʅɶ˓ʴʅɝ vɶǗȺǍƠ˓Ⱥʅɶ 1vÛ ĀvÛ ±ʫǩɶ`n ±㋊ )ʅɶȔȺș Ö㍺` 1 ˓ʴƠɶ˃ɯȺ˃˃Ⱥʅɶ Ā ˓ʴƠɶ˃ɯȺ˃˃Ⱥʅɶ )ȫƠɶɶǩɝ @㋋ ¤ʅɶ㎿ÝóÝv) ¤ǩƠʴ㎿ÝóÝv) ±㏊1Ā ±㏊ÝĀ @ɶ̨Ⱥʴʅɶɯǩɶ˓
+> Fig. 1. Language-guided two-timescale O-RAN control. The Non-RT rApp compiles the operator’s objective into a verified loss and forecasts per-cell demand; the numeric Near-RT xApp sets per-cell resource and power targets.
+
+timescale as a loss designer, embedding both the predicted network evolution and operator requirements into the opti-mization criterion executed by the fast controller.  
+
+> •
+
+A loss-conditioned hybrid executor is developed for the Near-RT RIC to translate the synthesized optimization criterion into fast radio actions. The executor combines a learned resource allocation policy for ramp-constrained provisioning with a model-based interference-aware power controller, exploiting learning for sequential adaptation and analytical optimization for instantaneous power coordina-tion. This hybrid design preserves low-latency execution while maintaining consistent optimization behavior under the requirement-dependent loss.  
+
+> •
+
+A multi-cell O-RAN evaluation environment is implemented by integrating the CARLA urban mobility simulator with the Sionna RT ray-tracing-based wireless propagation simulator. Extensive evaluations under varying user loads and operator-specified objectives, constraints, and thresholds demonstrate that MLLM-coRIC can adapt a single deployed controller to different network conditions and optimization problems while satisfying the corresponding service requirements without retraining. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. Preliminary: O-RAN Control Hierarchy 
+
+The O-RAN control hierarchy exposes different informa-tion granularities and control timescales across the Non-RT RIC and Near-RT RIC, as shown in Fig. 1. This distinction determines which part of the end-to-end RAN control problem can be handled at each layer. 
+
+Non-RT RIC. The Non-RT RIC operates on a timescale of seconds or longer and has access to network-wide information aggregated over time rather than instantaneous per-physical resource block (PRB) scheduling states. It therefore provides slow-timescale orchestration by processing historical RF mea-surements and operator objectives and delivering policies or enrichment information to the Near-RT RIC through the A1 interface. 
+
+Near-RT RIC. The Near-RT RIC operates at a faster timescale and receives live cell- and user equipment (UE)-level measurements through the E2 interface. In this work, it performs cell-level resource and power control by determining the provisioned PRB budget Bc(t) and the common per-PRB transmit power Pc(t) for each cell, while leaving instantaneous UE-level PRB scheduling to the O-RAN distributed unit (O-DU). 
+
+B. Communication Model 
+
+Consider a network of C co-channel cells indexed by 
+
+C = {1, . . . , C }, where each cell provides NPRB PRBs of bandwidth WPRB . At control epoch t, the network serves a time-varying set of UEs Ut.
+
+Channel, traffic, and load. Let hu,c (t) denote the channel from cell c to UE u, whose power gain |hu,c (t)|2 com-prises distance-dependent path loss and log-normal shadowing and is observed through the UE’s reference-signal received power/quality (RSRP/RSRQ) measurements. UE u ∈ U t has demand du(t), fixed at the nominal rate of the service it draws upon attachment. Let au,c (t) ∈ { 0, 1} denote the association indicator, where au,c (t) = 1 if UE u is associated with cell c at epoch t, and ∑ 
+
+> c∈C
+
+au,c (t) = 1 for all u and 
+
+t. Strongest-channel association is assumed, i.e., au,c (t) = 
+
+1{c = arg max j∈C |hu,j (t)|2}. The offered load at cell c is represented by 
+
+λc(t) = ∑
+
+> u∈U t
+
+au,c (t)du(t). (1) 
+
+Resource and power allocation variables. At each control epoch t, the Near-RT RIC determines the provisioned PRB budget Bc(t) ∈ { Bmin , . . . , N PRB } and the per-PRB transmit power Pc(t) ∈ [Pmin , P max ] for each cell c ∈ C . The variable 
+
+Bc(t) specifies the number of PRBs provisioned at cell c,4
+
+whereas Pc(t) specifies the transmit power applied to each utilized PRB. Increasing Bc(t) increases the available radio capacity and the associated provisioning power consumption, while changing Pc(t) affects both the desired received signal power and the inter-cell interference. The joint selection of 
+
+(Bc(t), P c(t)) is referred to as resource and power allocation. 
+
+Communication metric. Let qu,c (t) ∈ Z≥0 denote the number of PRBs allocated by cell c to UE u at epoch t. A UE can receive resources only from its associated cell, i.e., 
+
+qu,c (t) ≤ au,c (t)Bc(t), and the aggregate allocation at each cell satisfies ∑ 
+
+> u∈U t
+
+qu,c (t) ≤ Bc(t). The PRB utilization ratio of cell c is defined as 
+
+ωc(t) = 1
+
+NPRB 
+
+∑
+
+> u∈U t
+
+qu,c (t). (2) Under universal frequency reuse, the effective signal-to-interference-plus-noise ratio (SINR) of UE u when served by cell c is 
+
+γu,c (t) = Pc(t)|hu,c (t)|2
+
+N0WPRB + ∑
+
+> j∈C\{ c}
+
+ωj (t)Pj (t)|hu,j (t)|2 , (3) where N0 is the receiver noise power spectral density. The utilization factor ωj (t) captures the fraction of the PRB pool over which cell j contributes inter-cell interference. The spectral efficiency of UE u when served by cell c is 
+
+SE u,c (t) = min {log 2(1 + γu,c (t)) , SE max }. Accordingly, the delivered rate of UE u is 
+
+ru(t) = WPRB 
+
+∑
+
+> c∈C
+
+qu,c (t)SE u,c (t). (4) The O-DU determines {qu,c (t)} for its associated UEs subject to the provisioned PRB budget Bc(t). We assume a fixed demand-aware round-robin scheduler at the O-DU, such that UE-level scheduling is treated as an underlying network op-eration rather than a control variable of the RIC. 
+
+Power model. Each cell is modeled as operating in one of three states: DEEP, LIGHT, or ACT. Sleeping cells consume only state-dependent idle power, whereas an active cell incurs a fixed baseline cost, a bandwidth-provisioning cost propor-tional to Bc(t), and an RF cost determined by the actually utilized PRBs Lc(t) and transmit power Pc(t). Following the EARTH short-sleep model and 3GPP cell discontinuous transmission (DTX) [39], the power consumption can be represented by 
+
+Pnet (t) = ∑
+
+> c∈C
+
+Pc(t), (5) 
+
+Pc(t) = Etr 
+
+∆t 1[sc(t) 6 = sc(t − 1)] +
+
+
+
+PDEEP , sc(t) = DEEP ,PLIGHT , sc(t) = LIGHT ,Pbase + αb Bc (t) 
+
+> NPRB
+
++ Prf Lc(t) 
+
+> NPRB
+> pc(t)
+> Pmax
+
+, sc(t) = ACT .
+
+(6) Thus, increasing Bc(t) can keep a cell prewarmed at the cost of additional provisioning power, whereas the RF cost is incurred only by PRBs that actually carry traffic. The time-averaged network power is defined as Ptot = Et[Pnet (t)] . The cell state 
+
+sc(t) is decided by its traffic and provisioning level:  
+
+> •
+
+ACT – the cell serves traffic or remains sufficiently provi-sioned as an active or prewarmed cell;  
+
+> •
+
+LIGHT – the cell serves no traffic but remains partially provisioned;  
+
+> •
+
+DEEP – the cell serves no traffic and is not maintained in a provisioned state. 
+
+Ramp constraint. The provisioned PRB budget cannot change arbitrarily between consecutive control epochs because increasing the available bandwidth from a low-power state incurs a finite wake-up delay. Accordingly, the realized PRB budget is subject to 
+
+−δB 
+
+> dn
+
+≤ Bc(t) − Bc(t − 1) ≤ δB
+
+> up
+
+, (7) where δB 
+
+> up
+
+and δB 
+
+> dn
+
+denote the maximum per-epoch increase and decrease in the PRB budget, respectively. In contrast, transmit power can be adjusted within each control epoch. This difference in actuation timescale motivates forecast-aided resource allocation (RA), whereas power allocation (PA) responds to the current channel and interference conditions. 
+
+C. Problem Formulation 
+
+This paper investigates joint resource and power allocation under operator-defined requirements. Specifically, the operator specifies the desired network objective and service constraints, which jointly define the optimization problem to be solved. Accordingly, the objective J(t) and the constraints {gj (t) ⊲⊳ j
+
+bj } are determined by the operator requirement and may vary across control episodes. Given these requirements, the RIC determines the per-cell provisioned PRB budgets B(t) = 
+
+{Bc(t)}c∈C and per-PRB transmit powers P(t) = {Pc(t)}c∈C .The resulting operator-defined resource and power allocation problem is formulated as 
+
+P1 : min  
+
+> {B(t),P(t)}Tep
+> t=1
+
+E
+
+
+
+> Tep
+
+∑
+
+> t=1
+
+J(t)
+
+ (P1a) 
+
+s.t.
+
+∑Tep  
+
+> t=1
+
+wj (t) E[gj (t)] 
+
+∑Tep  
+
+> t=1
+
+wj (t) ⊲⊳ j bj , ∀j, 
+
+(P1b) 
+
+Bc(t) ∈ { Bmin , . . . , N PRB }, ∀c, t, 
+
+(P1c) 
+
+Pc(t) ∈ [Pmin , P max ], ∀c, t, (P1d) 
+
+− δB 
+
+> dn
+
+≤ Bc(t) − Bc(t − 1) ≤ δB
+
+> up
+
+, ∀c, t. 
+
+(P1e) Constraint ( P1b) specifies the operator-defined time-averaged service requirements, where wj (t) denotes the population over which metric gj (t) is averaged: wj (t) = 1 for a per-cell metric such as network power, and wj (t) = |U t| for a per-UE metric such as the quality-of-service (QoS) violation rate, whose averaging population varies with the number of active UEs. Constraints ( P1c) and ( P1d) define the feasible ranges of the provisioned PRB budget and transmit power, respectively, while ( P1e) limits the per-epoch variation of the provisioned PRB budget. 5
+
+Problem P1 is, in general, a mixed-integer, non-convex, and temporally coupled stochastic control problem. The discrete PRB budgets introduce integer-valued decisions, while the transmit powers across neighboring cells are coupled through inter-cell interference in the effective SINRs. Moreover, the provisioned PRB budgets constrain the O-DU scheduling results, which in turn affect the achievable rates and PRB utilization, leading to a non-smooth dependence of the net-work performance on the control variables. The ramp con-straint further couples the resource allocation decisions across consecutive epochs, while the traffic, mobility, and channel conditions evolve stochastically over time. Sec. III develops a hierarchical O-RAN solution to address these coupled decision processes across the Non-RT and Near-RT control timescales. III. P ROPOSED LANGUAGE -G UIDED HIERARCHICAL 
+
+RESOURCE AND POWER ALLOCATION 
+
+A. Overview: Hierarchical Decomposition of P1
+
+The objective J(t) and service constraints {gj (t) ⊲⊳ j bj }
+
+in P1 are not fixed a priori, but are specified by the operator through a natural-language request. At each Non-RT interval, the Non-RT RIC compiles the request into a typed numerical problem specification, forecasts the future cell loads, and constructs a requirement-dependent control loss by adapting the relative penalties of the objective and constraints to the pre-dicted network context and measured optimization outcomes. The detailed flowchart of the Non-RT RIC is illustrated in Fig. 2. The resulting loss specification and load forecast are delivered to the Near-RT RIC through the A1 interface. At each Near-RT epoch, the Near-RT RIC combines this A1 enrichment with live E2 measurements to determine the per-cell PRB budgets B(t) and transmit powers P(t).
+
+B. Non-RT rApp: Requirement Compilation, Forecasting, and Measured Loss Synthesis 
+
+Traffic-load forecasting. Before each control episode, the Non-RT RIC predicts the future offered load of each cell from a recent history of network-wide RF measurements. Let 
+
+t = 0 denote the beginning of the control episode, with 
+
+t = 1 , . . . , T ep denoting the subsequent control epochs, and let 
+
+τ ∈ {− L + 1 , . . . , 0} index the preceding L RF observations. At each observation τ , the RF measurements associated with cell c are summarized as 
+
+kc,τ =
+
+[
+
+λc(τ ), n c(τ ), ¯γc(τ ), γ 5%  
+
+> c
+
+(τ ), ¯pc,τ , ¯vc,τ , ¯gc,τ 
+
+]
+
+,
+
+(8) where λc(τ ) and nc(τ ) denote the offered load and the number of associated UEs, respectively, ¯γc(τ ) and γ5%  
+
+> c
+
+(τ ) denote the average and 5th-percentile serving-link SINRs of the associ-ated UEs, ¯pc,τ and ¯vc,τ denote their average position and velocity relative to cell c, and ¯gc,τ ∈ RC contains their average channel gains toward all cells in C. The SINR statistics capture the overall and cell-edge link quality, while the mobility and cross-cell channel measurements provide early indications of traffic migration before the associated traffic is transferred to a neighboring cell. The per-cell features are concatenated as ˆkτ = [ k1,τ , . . . , kC,τ ], and the RF history preceding the control episode is denoted by K−L+1:0 = {ˆkτ }0 
+
+> τ=−L+1
+
+.A standard gated recurrent unit (GRU)-based forecaster [40] maps the recent RF history to the mean and uncertainty of the expected loads: [ ˆΦ, ˆΣ
+
+]
+
+= gθf (K−L+1:0 ) , (9) where K−L+1:0 denotes the RF history observed before the control episode, ˆΦ = [ ˆφc,t ]c∈C , t =1: Tep contains the predicted offered loads, and ˆΣ = [ˆ σc,t ]c∈C , t =1: Tep contains the corre-sponding predictive uncertainties. Specifically, ˆφc,t predicts the offered load λc(t) of cell c at future control epoch t.The model parameters θf are trained using a heteroscedastic Gaussian negative log-likelihood. 
+
+Requirement. The natural-language request, including the objective and constraints, is denoted by oT . The MLLM interprets oT and compiles the explicitly stated optimization objective and service constraints into the typed requirement 
+
+ΘT =
+
+ g0, ς 
+
+︸︷︷︸ 
+
+> objective
+
+, {(gj , ⊲⊳ j , b j )}j∈A 
+
+︸ ︷︷ ︸
+
+> constraints
+
+ , (10) where g0 denotes the requested objective metric, ς ∈ {− 1, +1 }
+
+its optimization direction, and each (gj , ⊲⊳ j , b j ) specifies the metric, inequality direction, and threshold of an operator-stated constraint. This MLLM-based compilation determines the structure of the requested optimization problem, while the relative weighting between the objective and constraints is adapted to the network condition through the loss-synthesis process described next. 
+
+Loss construction. To translate the operator requirement ΘT
+
+into a form executable by the Near-RT RIC, the requested objective and active constraints are expressed through the loss function 
+
+LT = ς g ⋆
+
+︸︷︷︸ 
+
+> objective
+
++ ∑
+
+> j∈A
+
+αj
+
+[ςj (gj − bj )]
+
+> +
+
+︸ ︷︷ ︸ 
+
+> constraint j
+
+, (11) where ςj ∈ {− 1, +1 } sets the direction of constraint j such that a positive value of ςj (gj − bj ) indicates a constraint violation. The requirement ΘT determines the objective, active constraint set A, and corresponding thresholds, while 
+
+α = {αj }j∈A (12) determines the relative penalty assigned to each active con-straint. A fixed α may not provide consistent constraint satisfaction across different network conditions, since the required penalty strengths vary with the expected traffic and radio states. The Non-RT RIC therefore adapts α to the current network context. A multilayer perceptron (MLP) first initializes the coefficients from ΘT , the current RF state k0, and the fore-cast ( ˆΦ, ˆΣ), after which the MLLM refines them using the measured objective and constraint outcomes from the external network-evaluation loop. The refined α, together with the floor Bc,t , is delivered to the Near-RT RIC to condition the resource allocation policy and parameterize the power allocation objective. 6            
+
+> ¤ǩ˓̭ʅʴɔǍʅɶ˓ǩ̷˓
+>  ㎿ș˨ȺǗǩǗʴǩȔȺɶǩɯǩɶ˓
+> ±ʫǩʴƠ˓ʅʴʴǩʱ˨Ⱥʴǩɯǩɶ˓˃ 㑃ȺɶȺɯȺ͆ǩǩɶǩʴș̺̭ȫȺɝǩ ș˨ƠʴƠɶ˓ǩǩȺɶș㚐㋊㚠ʅ˨˓Ơșǩ㍙ ó̺ʫǩǗʴǩʱ˨Ⱥʴǩɯǩɶ˓ Ý`ȫȺ˃˓ʅʴ̺
+> cÝĀ
+> @̷ʫǩǍ˓ǩǗɝʅƠǗ
+> Ö )ʅǩȔȔȺǍȺǩɶ˓ ǗȺ˃˓ʴȺǄ˨˓Ⱥʅɶ çƠɯʫɝǩǗǍʅǩȔȔȺǍȺǩɶ˓˃ @̷˓ǩʴɶƠɝ˓ʅʅɝɔȺ˓
+> įʅ˨ƠʴǩʴǩȔȺɶȺɶș˓ȫǩǍʅǩȔȔȺǍȺǩɶ˓˃ʅȔƠ¤ǩƠʴ㎿Ýóɝʅ˃˃㍙#ǩɝʅ̭ƠʴǩǍƠɶǗȺǗƠ˓ǩ˃ƠɝʴǩƠǗ̺ @çĀÝ@1ʅɶ˓ȫǩǩ̷˓ǩ ʴɶƠɝ˓ʅʅɝɔȺ˓㍛ ˓ȫǩȺʴǍʅǩȔȔȺǍȺǩɶ˓˃㍚˓ȫǩʅǄɍǩǍ˓Ⱥ̨ǩ˓ȫǩ̺Ơ˓˓ƠȺɶǩǗ㍚Ơɶ Ǘȫʅ̭ȔƠʴǩƠǍȫ˃˓Ơ˓ǩǗɝȺɯȺ˓Ⱥ˃ȔʴʅɯȺ˓˃˓ȫʴǩ˃ȫʅɝǗ㏙ ɶǩșƠ˓Ⱥ̨ǩ˃ɝƠǍɔ㚍̨ȺʅɝƠ˓ǩǗ㏚㍙ ÝǩƠ˃ʅɶǄʴȺǩȔɝ̺㍚˓ȫǩɶƠɶ˃̭ǩʴƠ˃ç±¤㍛ ʫʅ˃Ⱥ˓Ⱥ̨ǩɯ˨ɝ˓Ⱥʫ ɝȺǩʴ˃ȔʅʴǩƠǍȫƠǍ˓Ⱥ̨ǩǍʅǩȔȔȺǍȺǩɶ˓ƠɶǗ ÝȔɝʅʅʴ㍙ Ýǩʱ˨ǩ˃˓㍛ɯȺɶȺɯȺ͆ǩǩɶǩʴș̺̭ȫȺɝǩș˨ƠʴƠɶ˓ǩǩȺɶș㚐㋊㚠ʅ˨ ˓Ơșǩ㍙ @̨Ơɝ˨Ơ˓ȺʅɶȫȺ˃˓ʅʴ̺㍛ ƽ㚍㋋㍙㋌㋊㍚ǩɶǩʴș̺㚍㋋㋊㋊㍙㋍ĥ㍚Ǎʅɶ˃˓ʴƠȺɶ˓˃ɝƠǍɔ㚍㚉㋉㍙㋌㋋ ƽ㚍㋉㍙㋐㋐㍚ǩɶǩʴș̺㚍㋋㋉㋎㍙㋋ĥ㍚Ǎʅɶ˃˓ʴƠȺɶ˓˃ɝƠǍɔ㚍㎿㋉㍙㋍㋍ ƽ㚍㋊㍙㋍㋍㍚ǩɶǩʴș̺㚍㋋㋉㋐㍙㋒ĥ㍚Ǎʅɶ˃˓ʴƠȺɶ˓˃ɝƠǍɔ㚍㚉㋉㍙㋉㋑ ɶ˃̭ǩʴ㍛Ԥ㣜Ͳ㉗㍚ͱ㚬㋉㍙㋏㋋㍚Ԥ㣞㉕㚍㋉㍙㋎㋎ ɯǩƠɶ㍚̨ƠʴȺƠɶǍǩ ĀʫǗƠ˓ǩǗɯǩƠɶ @̨Ơɝ˨Ơ˓Ⱥʅɶʅ˨˓Ǎʅɯǩ˃
+> ¤ǩƠʴ㎿ÝóÝv)
+> #ǩ˃˓ɝʅ˃˃Ȕ˨ɶǍ˓Ⱥʅɶ㍚ÝȔɝʅʅʴ
+> 
+
+Fig. 2. The Non-RT rApp’s refinement loop, with the prompt the MLLM receives and the answer it returns. A trained head turns the requirement and the radio state into a distribution over the loss coefficients; candidates drawn from it are scored by the network-evaluation toolkit; the MLLM reads the measured table and answers one relative multiplier per term, which recenters the distribution for the next round. Only the finalized α(Nref ) and B(Nref ) 
+
+> c,t
+
+leave the loop. 
+
+Initial coefficients from an MLP. The Non-RT RIC first constructs a context-dependent distribution over the constraint coefficients using a trained MLP hθinit :
+
+(m, log σ) = hθinit 
+
+(
+
+ΘT , k0, ˆΦ, ˆΣ
+
+)
+
+, (13) where m, σ ∈ R|A| parameterize the mean and standard deviation in the log-coefficient domain. Candidate coefficient vectors are then sampled as 
+
+log ˆ α(0) 
+
+i = m(0) + σ ⊙ ǫi, ǫi ∼ N (0, I), (14) where i indexes the sampled candidates. From (14), Ns sam-ples are generated. 
+
+MLLM-guided refinement. The MLP provides a context-dependent initialization of the loss-coefficient distribution, from which candidate coefficient vectors are sampled and eval-uated using the external network-evaluation toolkit. The toolkit returns the achieved objective and constraint outcomes for each candidate, and the MLLM uses these measured results to deter-mine relative coefficient updates for the next refinement round. The updated coefficients recenter the sampling distribution, and this evaluation–refinement process is repeated iteratively. In parallel, the MLLM adjusts the forecast-guided floor Bc,t 
+
+to tighten or relax the minimum resource provisioning passed to the Near-RT RIC. The refinement starts from the MLP’s proposal ˆα(0) 
+
+i in (14). At round n, the coefficients ˆα(n)
+
+i are applied to (11) and the toolkit returns 
+
+y(n)
+
+i =
+
+(
+
+g(n)0,i ,
+
+{
+
+ςj
+
+(g(n)
+
+j,i − bj
+
+)}
+
+j∈A 
+
+)
+
+, (15) where g(n)0,i and g(n)
+
+j,i denote the measured objective value and the value of constrained metric j returned by the toolkit, respectively. The coefficient–feedback pairs accumulate into the evaluation history H(n) = {{ ( ˆ α(m)
+
+i , y(m)
+
+i )}Ns−1
+
+i=0 }nm=0 .The MLLM reads this history and returns the next coefficients, 
+
+α(n+1) = Rψ
+
+(H(n); Θ T , k0, ˆΦ, ˆΣ), (16) where Rψ denotes the MLLM-based refinement mapping, realized by the forward pass detailed below. 
+
+1) Tokenization and embedding: The requirement, the network context, and the measured outcomes of the cur-rent round are serialized into a token sequence u =
+
+T (Θ T , k0, ˆΦ, ˆΣ, H(n)) ∈ V Ntok over the vocabulary V, where 
+
+T denotes the prompt template. Each token is embedded through E ∈ R|V|× d and stacked into the latent representation matrix 
+
+Y = [Eu1 Eu2 · · · EuNtok 
+
+]T ∈ RNtok ×d. (17) 
+
+2) Backbone: Y is processed by L sequential transformer blocks. In each block, H attention heads operate in parallel. Let fln (·) denote layer normalization. With ¯Y = fln (Y), the 
+
+hth head forms the query, key, and value matrices 
+
+Qh = ¯YW q,h , (18) 
+
+Kh = ¯YW k,h , (19) 
+
+Vh = ¯YW v,h , (20) where Wq,h , Wk,h , Wv,h ∈ Rd×dh are trainable projection matrices and dh = d/H . The output of the hth attention head is represented by 
+
+Yatt ,h = fsmax 
+
+( QhKT
+
+h
+
+√dh
+
++ M
+
+)
+
+Vh, (21) where fsmax (·) denotes the row-wise softmax and M ∈
+
+RNtok ×Ntok is the causal mask, with [M]i,j = 0 for j ≤ i
+
+and −∞ otherwise. The head outputs are concatenated and projected as 
+
+Yatt = [Yatt ,1 Yatt ,2 · · · Yatt ,H 
+
+]Wo, (22) where Wo ∈ Rd×d is the output projection matrix. The output of the first transformer block is given by 
+
+Z1 = Y + Yatt + fffn (fln (Y + Yatt )) , (23) where fffn (·) denotes the position-wise feed-forward network. Repeating the same block operation yields the final hidden representation Z = ZL ∈ RNtok ×d.7
+
+3) Autoregressive decoding: The final transformer repre-sentation is decoded autoregressively through the pretrained language-modeling (LM) head. At decoding step ℓ, let zℓ ∈ Rd
+
+denote the final-layer hidden representation at the current decoding position, conditioned on the input sequence and the previously generated tokens. Under greedy decoding, the next token is selected as 
+
+xℓ+1 = arg max  
+
+> v∈V
+
+[Wlm zℓ + blm ]v , (24) where Wlm ∈ R|V|× d and blm ∈ R|V| are the pretrained LM-head parameters. Repeated application of (24) produces the output token sequence xT = ( xNtok +1 , . . . , x Ntok +Ngen ).Since the output follows a fixed format, the generated sequence specifies the multiplicative factors applied to the coefficients in (11), which are defined as 
+
+ρ(n) = {ρ(n)con ,j }j∈A ∪ { ρ(n)fl }, ρ ∈ R+. (25) Each ρ(n)con ,j is a multiplicative factor applied to the correspond-ing constraint coefficient, while ρ(n)fl scales the forecast-guided floor Bc,t . Thus, the MLLM does not directly generate loss coefficients or Near-RT control actions, but only determines how the current coefficients and provisioning floor should be adjusted based on the measured outcomes. The MLLM output ρ(n) is applied multiplicatively to the best-performing candidate ˆα(n) 
+
+> i⋆
+
+, where i⋆ denotes the candi-date with the best score according to y(n) 
+
+> i
+
+. For each constraint 
+
+j ∈ A , the coefficient is updated as 
+
+α(n+1)  
+
+> j
+
+= ˆ α(n)  
+
+> i⋆,j
+
+ρ(n)con ,j . (26) In parallel, the forecast-guided floor is also updated as 
+
+B(n+1)  
+
+> c,t
+
+= B(n) 
+
+> c,t
+
+ρ(n)fl . (27) The updated coefficient vector α(n+1) then recenters the log-domain sampling distribution for the next refinement round according to 
+
+m(n+1) = log α(n+1) . (28) The candidate sampling, MLLM-guided refinement, and mean update are repeated for Nref rounds, after which α(Nref ) and 
+
+B(Nref ) 
+
+> c,t
+
+are delivered to the Near-RT RIC. 
+
+C. Near-RT xApp: Loss-Conditioned Hybrid Executor and Training 
+
+At each control epoch t, the Near-RT RIC translates the Non-RT guidance into resource and power allocation decisions using the current E2 measurements. The PRB budget is first determined based on the load forecast and requirement-dependent loss subject to the ramp constraint. Given the selected PRB budget, the transmit power is then optimized using the current channel and interference conditions. For cell 
+
+c, the local state is defined as 
+
+xc,t = [λc(t), n c(t), ¯γc(t), B c(t − 1) , P c(t − 1) ]. (29) 
+
+Resource allocation. A compact MLP fθRA maps the current network state, load forecast, and requirement specification to cell-wise latent representations, 
+
+[h1,t , . . . , hC,t ] = fθRA 
+
+(
+
+{xc,t }c∈C , ˆΦ, ˆΣ, ΘT , α
+
+)
+
+. (30) The budget head first determines a cell-specific provisioning range by producing 
+
+¯Bc,t = Bmin + ( NPRB − Bmin )fsig 
+
+(wT 
+
+> B
+
+hc,t + bB
+
+) , (31) where ¯Bc,t ∈ [Bmin , N PRB ] represents the upper provisioning level suggested by the RA network. The forecast-guided floor Bc,t provides the corresponding minimum provisioning level. Within this range, a small set of candidate budgets is constructed from the PRB demand observed at the preceding epoch. Let ˜Bc,t denote the measured PRB demand and let 
+
+K ⊂ R+ be a finite set of scaling factors. For each κ ∈ K ,the candidate budget is given by 
+
+B(κ) 
+
+> c,t
+
+= max 
+
+(
+
+Bc,t , min 
+
+( ¯Bc,t , κ ˜Bc,t 
+
+)) 
+
+. (32) For each κ ∈ K , the RA module constructs a candidate PRB budget B(κ) 
+
+> t
+
+. Each candidate is passed to the PA module and evaluated under the requirement-dependent loss. The final resource and power allocation is determined jointly after evaluating all candidate budgets. 
+
+Power allocation. For each candidate budget B(κ) 
+
+> t
+
+, the corresponding transmit-power vector is obtained by solving 
+
+P(κ) 
+
+> t
+
+= arg min  
+
+> P∈[Pmin ,P max ]C
+
+LPA 
+
+> T
+
+(
+
+B(κ) 
+
+> t
+
+, P
+
+)
+
+. (33) For each active constraint j ∈ A , the normalized violation under candidate κ is defined as 
+
+vj
+
+(
+
+B(κ) 
+
+> t
+
+, P
+
+)
+
+=
+
+[
+
+ςj
+
+(gj (B(κ) 
+
+> t
+
+, P) − bj
+
+)]
+
+> +
+
+. (34) The violation is evaluated through the Huber penalty 
+
+ξδ (v) = 
+
+{ 12 v2, v ≤ δ, δ (v − 12 δ) , v > δ, (35) yielding the requirement-dependent PA loss 
+
+LPA 
+
+> T
+
+(
+
+B(κ) 
+
+> t
+
+, P
+
+)
+
+= ς g 0
+
+(
+
+B(κ) 
+
+> t
+
+, P
+
+)
+
++ ∑
+
+> j∈A
+
+αj ξδ
+
+(
+
+vj
+
+(
+
+B(κ) 
+
+> t
+
+, P
+
+)) 
+
+.
+
+(36) For each κ, (33) is solved to obtain P(κ) 
+
+> t
+
+, and the resulting resource–power pair is evaluated using (36). The best candi-date is then selected as 
+
+κ⋆t = arg min 
+
+> κ∈K
+
+LPA 
+
+> T
+
+(
+
+B(κ) 
+
+> t
+
+, P(κ)
+
+> t
+
+)
+
+, (37) and the final control decisions are given by 
+
+Bt = B(κ⋆t ) 
+
+> t
+
+, Pt = P(κ⋆t ) 
+
+> t
+
+. (38) The PA problem in (33) is solved approximately by block-coordinate descent over the cell transmit powers. Each block update minimizes (36) with respect to one Pc while keeping the remaining cell powers fixed, and the iterations terminate when the power allocation converges. 8
+
+Fig. 3. The served corridor in CARLA Town05, seen from above. Triangles are the three cell sites and dots the recorded UE positions of one episode. 
+
+Training. The RA network is trained offline using episodic rollouts over the admissible requirement space. At each epoch, the RA network determines the PRB budget Bt(θRA ), while the corresponding transmit-power vector Pt is obtained from the model-based PA solver. The RA parameters are trained to minimize the requirement-dependent loss together with a regularization term on inter-epoch budget variations: 
+
+min 
+
+> θRA
+
+E
+
+[ Tep 
+
+∑
+
+> t=1
+
+{ ˜LT (Bt(θRA ), Pt; Θ T , α)+ αslew ‖Bt(θRA ) − Bt−1‖22}
+
+]
+
+, (39) where ˜LT is a differentiable surrogate of the loss in (36), and αslew controls the temporal variation of the PRB budget. During training, (Θ T , α) is sampled over its admissible range, and the rollout follows the ramp-constrained budget dynamics in (7). The PA solution Pt is treated as fixed when updating 
+
+θRA . This enables a single RA network to learn requirement-aware resource provisioning while accounting for future de-mand under the ramp constraint. IV. P ERFORMANCE EVALUATION 
+
+A. Evaluation Setup 
+
+Deployment and mobility. The evaluation considers a three-cell deployment in CARLA Town05, where the cells are spaced 100 m apart along a straight urban road, as shown in Fig. 3. In each episode, a vehicle convoy moves from C1 to C3 at approximately 30 km/h, creating a migrating traffic hotspot across the cells. In addition, 10 pedestrians remain locally distributed around the cells and provide stationary background traffic. Each episode lasts 30 s. 
+
+Traffic. Each UE is assigned a service-dependent traf-fic demand upon attachment. Pedestrians generate voice, web/social, or video traffic, whereas vehicles generate vehicle-to-everything (V2X) safety, cooperative-driving, or sensor-sharing traffic following the 3GPP eV2X requirements [41]. The network load is varied by changing the convoy size from 
+
+5 to 25 vehicles, resulting in heterogeneous and time-varying offered traffic across the cells. 
+
+Radio and power. The wireless channel follows the 3GPP urban micro (UMi) model at 3.5 GHz with log-normal shadow                 
+
+> 12345QoS violation-rate constraint [%] 200 225 250 275 300 Network power [W]  MLLM-coRIC Lyapunov DPP Greedy End-to-end DRL constraint not satisfied
+> 12345QoS violation-rate constraint [%] 012345QoS violation rate [%]  Constraint boundary
+> (a) 25 users
+> 12345QoS violation-rate constraint [%] 250 300 350 Network power [W] 12345QoS violation-rate constraint [%] 12345QoS violation rate [%]
+> (b) 35 users
+
+Fig. 4. Network power and QoS violation rate under the violation-rate constraint V (P2): (a) 25 users, (b) 35 users. Dashed line: the constraint boundary V = V . Hollow markers mean that the method fails to satisfy the constraint. 
+
+fading. Each cell operates over NPRB = 133 PRBs corre-sponding to an approximately 50 MHz n78 channel, with a maximum transmit power of 40 dBm per cell and a 256 -QAM spectral-efficiency cap. The cell power consumption follows the EARTH micro base station (BS) model [39] with the deep-, light-, and active-state power model in (6). The Non-RT MLLM uses only the network-wide RF history as its radio-side input. 
+
+Baselines. Three baseline methods are considered:  
+
+> •
+
+Lyapunov drift-plus-penalty (DPP): PRB sizing via virtual-queue DPP control.  
+
+> •
+
+Greedy: PRB provisioning based on the current UE de-mands.  
+
+> •
+
+End-to-end deep reinforcement learning (DRL): model-free joint PRB and power control from the RF state. 
+
+B. Problem-Solving Capability 
+
+This subsection first examines whether a single deployed MLLM-coRIC controller can accommodate different operator-defined constrained optimization problems without task-specific retraining. Let V denote the time-averaged QoS vi-olation rate and Ptot the time-averaged network power, i.e., 
+
+V = 
+
+∑Tep 
+
+> t=1
+
+∑ 
+
+> u∈U t
+
+1 [ru(t) < d u(t)] 
+
+∑Tep  
+
+> t=1
+
+|U t| , (40) 
+
+Ptot = 1
+
+Tep 
+
+> Tep
+
+∑
+
+> t=1
+
+∑
+
+> c∈C
+
+Pc(t). (41) Then, two instances of P1 are considered: 
+
+P2 : min 
+
+> {B(t),P(t)}Tep
+> t=1
+
+Ptot s.t. V ≤ V , (42) 9                   
+
+> MLLM-coRIC Lyapunov DPP Greedy End-to-end DRL constraint not satisfied Constraint boundary
+> 200 201 202 203 204 Network-power constraint [W] 010 20 30 QoS violation rate [%] 200 201 202 203 204 Network-power constraint [W] 185 190 195 200 205 Network power [W]
+> (a) 25 users
+> 236 240 244 248 252 Network-power constraint [W] 010 20 30 QoS violation rate [%] 236 240 244 248 252 Network-power constraint [W] 230 240 250 Network power [W]
+> (b) 35 users
+
+Fig. 5. QoS violation rate and network power under the network-power constraint P (P3): (a) 25 users, (b) 35 users. Dashed line: the constraint boundary Ptot = P . Hollow markers miss the constraint. 
+
+P3 : min 
+
+> {B(t),P(t)}Tep
+> t=1
+
+V s.t. Ptot ≤ P , (43) subject to ( P1c)–( P1e). The two requests exchange the objec-tive and constraint, and therefore require different power–QoS operating points from the same radio-control framework. Under P2, MLLM-coRIC consistently operates near the stated QoS boundary while achieving the lowest network power, as shown in Fig. 4. This behavior results from the requirement-conditioned loss synthesis: the Non-RT RIC adapts the coefficient associated with the QoS constraint based on the specified requirement, network context, and measured outcomes, preventing the controller from maintaining an un-necessarily conservative QoS margin when the constraint is relaxed. The resulting loss conditions the Near-RT executor, where forecast-guided resource allocation anticipates future demand and interference-aware power control coordinates transmit powers across cells. Together with the loss-aware bud-get search, this enables the controller to place radio resources where they are needed and approach the requested QoS bound-ary without unnecessary overprovisioning. Consequently, at 35 
+
+users, the QoS violation rate of MLLM-coRIC increases from 
+
+0.79% to 4.99% as V is relaxed from 1% to 5% , while MLLM-coRIC consistently achieves the lowest network power. It is also the only method that satisfies the stringent 1% constraint, with the same trend observed at 25 users. The results for P3 further demonstrate the problem-solving capability of MLLM-coRIC when V is minimized subject to the network-power constraint. As shown in Fig. 5, MLLM-coRIC consistently achieves the lowest QoS violation rate while operating close to the prescribed power limit. Although all methods are configured to solve the same constrained problem, the baselines generally yield operating points with larger power slack and correspondingly higher QoS violation         
+
+> 15 20 25 30 35 Number of users 200 250 300 350 Network power [W]
+> MLLM-coRIC Lyapunov DPP Greedy End-to-end DRL constraint not satisfied
+> 15 20 25 30 35 Number of users 0.00 0.25 0.50 0.75 1.00 1.25 QoS violation rate [%]  Constraint boundary
+
+Fig. 6. Network power and QoS violation rate with respect to the number of users under P2 with V = 1% . Hollow markers miss the constraint. 
+
+rates. In contrast, MLLM-coRIC explicitly evaluates candidate resource–power pairs under the requirement-dependent loss, allowing additional power to be used whenever it further reduces V without violating the prescribed constraint. Thus, MLLM-coRIC makes more effective use of the feasible power budget, remaining within 1.5 W and 1.2 W of the prescribed limits at 35 and 25 users, respectively, while attaining the lowest QoS violation rate across the tested power budgets. The simulation environment is fixed to P2 with V = 1% ,while the number of users is changed to evaluate the problem-solving capability of MLLM-coRIC under various network loads. In Fig. 6, MLLM-coRIC consistently achieves the lowest network power across the entire load range and remains feasible even under the most demanding scenario with 35 
+
+users, whereas all three baselines violate the QoS constraint. As the user load increases, satisfying the same QoS constraint becomes more challenging because more radio resources and transmit power are required to serve the increased traffic. Nev-ertheless, MLLM-coRIC consistently finds feasible resource– power allocations while maintaining the lowest network power. In contrast, the baselines violate the QoS constraint under the challenging 35 -user load scenario, indicating that their solutions become less effective as the constrained optimization problem becomes more demanding. 
+
+C. Adaptation to Dynamic Environment and Operator Re-quirements 
+
+The next question is whether a single deployed controller can adapt when the network load and operator requirement change during operation. As shown in Fig. 7, a single de-ployment is executed through four consecutive phases without policy retraining or manual retuning: Phase I: min Ptot s.t. V ≤ 2% , |U t| = 25 ,
+
+Phase II: min Ptot s.t. V ≤ 2% , |U t| = 35 ,
+
+Phase III: min V s.t. Ptot ≤ 240 W , |U t| = 35 ,
+
+Phase IV: min Ptot s.t. V ≤ 5% , |U t| = 35 .
+
+Phase II therefore isolates adaptation to an increased network load under the same requirement, whereas Phase III changes the optimization goal by exchanging the roles of the objective and constraint. Phase IV restores power minimization while relaxing the QoS requirement. The trajectory, channel model, interference coupling, A1 cadence, and power model remain fixed throughout the sequence, so the observed changes are induced only by the network load and operator requirement. 10  
+
+> ȺɶȺɯȺ͆ǩɶǩ˓̭ʅʴɔʫʅ̭ǩʴȔʅʴ ㋋㋎˨˃ǩʴ˃㍙nʅɝǗ˓ȫǩÛʅç̨ ȺʅɝƠ˓ȺʅɶʴƠ˓ǩ˨ɶǗǩʴ㋋㚠㍙ ㋊㋉ɯʅʴǩ̨ǩȫȺǍɝǩ˃ƠʴǩʅɶƠȺʴ㍙ çƠɯǩɝȺɯȺ˓㍛Ûʅç̨ȺʅɝƠ˓Ⱥʅɶ ˨ɶǗǩʴ㋋㚠㍙ Öʅ̭ǩʴȺ˃ǍƠʫʫǩǗƠ˓㋋㋍㋉ĥ㍙ ĥȺ˓ȫȺɶȺ˓㍚ɯƠɔǩ˓ȫǩÛʅç̨ȺʅɝƠ㎿ ˓ȺʅɶƠ˃˃ɯƠɝɝƠ˃ʫʅ˃˃ȺǄɝǩ㍙ #ƠǍɔ˓ʅɯȺɶȺɯȺ͆Ⱥɶșʫʅ̭ǩʴ㍙ vǍƠɶƠǍǍǩʫ˓˨ʫ˓ʅ㋎㚠Ûʅç̨ ȺʅɝƠ˓Ⱥʅɶɶʅ̭㍙
+> Fig. 7. One deployment across four phases on a global time step, with the operator’s request for each phase above the axes. Curves are running averages within a phase; the red line is the stated level and steps with the request.
+
+For the end-to-end DRL baseline, the model is retrained for each requirement to report its best achievable performance, although such retraining is impractical for online operation. MLLM-coRIC adapts to changes in both the network load and the operator requirement across all four phases without retraining or manual retuning. From Phase I to Phase II, the in-creased user load requires higher network power, yet MLLM-coRIC continues to satisfy the QoS constraint on average while operating close to the stated boundary. Phase III presents a substantially more challenging operating condition due to the stringent power constraint. Even under this limited power budget, MLLM-coRIC maintains a very low QoS violation rate, whereas all baselines suffer pronounced QoS degradation, with substantially higher violation rates. In Phase IV, MLLM-coRIC again shifts its operating point toward the relaxed QoS boundary and reduces network power, while the baselines retain larger QoS margins at higher power consumption. It is noteworthy that the end-to-end DRL controller is retrained whenever the operator request changes, which is impractical for online RAN operation. Moreover, despite this retraining, the DRL controller still yields a worse operating point with respect to the stated objective than MLLM-coRIC. In contrast, MLLM-coRIC accommodates all phase transitions simply by updating the operator-request input to the MLLM agent, with-out retraining or manual retuning of the deployed controller. 
+
+D. Forecast-Aided Proactive Provisioning 
+
+Fig. 8 further illustrates how prediction contributes to the re-sulting control performance. For a fair comparison, the power constraint of each baseline is configured such that its resulting network power is as close as possible to that of MLLM-coRIC. Under these comparable power-consumption levels, MLLM-coRIC tracks the requested traffic rates more closely as the users migrate across cells, resulting in substantially fewer QoS violations than the baselines. In particular, the reactive scheme begins provisioning resources only after the UE de-mand becomes locally observable. Because the PRB budget is subject to the ramp constraint, its resource allocation cannot increase quickly enough to follow a rapid rise in demand, which leads to temporary service deficits. In contrast, MLLM-coRIC exploits the predicted network evolution before the demand materializes. At the Non-RT RIC, the network-wide RF context, predicted future load, and operator requirement are jointly considered to synthesize a requirement-dependent loss from a holistic network perspective. The resulting future-aware criterion enables the Near-RT executor to provision resources in advance and coordinate transmit power as the hotspot moves across the network. 
+
+E. Ablation Study 
+
+The ablation in Fig. 9 clarifies the complementary roles of the Non-RT loss synthesis and the Near-RT executor under P2
+
+at V = 1% . Without adaptive loss synthesis, fixed coefficients fail to maintain a consistent power–QoS tradeoff as the net-work load changes: they are overly conservative under lighter loads but become insufficient when the network is heavily loaded. In contrast, removing the Near-RT executor leads to severe QoS degradation even when a comparable amount of 11 
+
+Fig. 8. Qualitative comparison in the CARLA Town05 traveling-hotspot scenario under matched network power. Top: snapshots as the vehicle convoy traverses the three cells, with vehicles colored by requested rate. Bottom: delivered and requested rates for each method over one representative 30 s episode.         
+
+> 15 20 25 30 35 Number of users 180 200 220 240 260 Network power [W]
+> constraint not satisfied
+> 15 20 25 30 35 Number of users 00.1 110 QoS violation rate [%]
+> MLLM-coRIC w/o Non-RT loss synthesis w/o Near-RT executor w/o both Constraint boundary
+
+Fig. 9. Component ablation under P2 at V = 1% . Left: average network power consumption. Right: empirical QoS violation rate against the constraint boundary. Hollow markers indicate constraint violations. 
+
+network power is consumed, showing that an appropriately synthesized loss alone does not guarantee effective radio control. MLLM-coRIC avoids both limitations by adapting the loss to the current requirement and network context at the Non-RT timescale and then translating that loss into state-dependent resource and power allocation at the Near-RT timescale. This result indicates that the performance gain of MLLM-coRIC arises from the coordinated operation of context-aware loss construction, feedback-driven refinement, and loss-conditioned radio control rather than from any single component in isolation. The Near-RT ablation study in Fig. 10 compares MLLM-coRIC with a fully learning-based end-to-end DRL scheme and non-learning alternatives: joint gradient descent, which jointly optimizes the PRB budget and transmit power using the differentiable surrogate; greedy sizing; and analytic guidance, which applies forecast-guided PRB provisioning with full transmit power. MLLM-coRIC consistently operates near the requested QoS boundary while consuming the lowest network power across the constraint sweep. This result supports the proposed hybrid design: learning handles resource allocation, which must anticipate future load under the ramp constraint, 12         
+
+> 12345QoS violation-rate constraint [%] 200 220 240 260 Network power [W] 12345QoS violation-rate constraint [%] 12345QoS violation rate [%]
+> MLLM-coRIC End-to-end DRL Joint gradient descent Greedy sizing Analytic guidance constraint not satisfied Constraint boundary
+
+Fig. 10. Near-RT executor comparison under P2 at 25 users. Left: average network power consumption. Right: empirical QoS violation rate against the constraint boundary. Hollow markers indicate constraint violations.               
+
+> 01234567Number of MLLM calls 210 220 230 240 250 Network power [W] 01234567Number of MLLM calls 00.1 110 QoS violation rate [%]
+> QoS violation rate Constraint boundary
+> 01234Execution time [s]
+
+Fig. 11. MLLM-guided refinement for P2 with V = 1% . Left: network power and cumulative MLLM execution time versus the number of MLLM calls. Right: QoS violation rate against the constraint boundary. 
+
+whereas transmit power is directly optimized from the synthe-sized loss using the current channel and interference state. By assigning learning and model-based optimization to the deci-sions for which they are best suited, MLLM-coRIC achieves a more efficient power–QoS operating point than either approach alone. 
+
+F. Computational Complexity 
+
+Fig. 11 evaluates the computational overhead of the MLLM-guided refinement for P2 with V = 1% . With zero MLLM calls, the MLP initialization alone yields a highly infea-sible operating point, whereas a single MLLM refinement reduces the QoS violation rate below the stated constraint while substantially lowering network power. Additional calls further improve the operating point, although the marginal gain becomes smaller as refinement proceeds. Meanwhile, the cumulative MLLM execution time increases approximately linearly and remains below 5 s even after seven calls. These results indicate that only a small number of MLLM refinement calls is sufficient to obtain a feasible and efficient control criterion with modest computational overhead. V. C ONCLUSION 
+
+This paper proposed MLLM-coRIC, a hierarchical O-RAN control framework that treats the operator-defined optimization problem as a runtime input rather than a fixed design-time specification. The key advantage of MLLM-coRIC lies in sep-arating problem interpretation from fast radio execution. At the Non-RT RIC, the MLLM interprets the operator requirement together with the predicted network evolution and measured optimization outcomes to construct the numerical control loss, rather than directly generating radio actions. At the Near-RT RIC, the resulting loss is executed through a hybrid controller that uses learning for ramp-constrained resource provisioning and model-based optimization for interference-aware power control. This separation allows each component to address the decision structure for which it is best suited, while enabling different objectives, constraints, and operating conditions to be handled within a common control framework without redesigning a task-specific controller. The evaluation confirms that this design yields effective constrained solutions across different optimization problems and network loads, while requiring only a small number of MLLM-guided refinement rounds. Future work will investigate the proposed framework in larger-scale and real O-RAN deployments, where imperfect measurements, forecasting errors, and interface delays may affect the loss-synthesis and control processes. It will also be of interest to extend the framework to a broader set of RAN control variables and operator-defined objectives, while further reducing the computational overhead of the Non-RT refinement procedure. REFERENCES [1] K. B. Letaief, W. Chen, Y. Shi, J. Zhang, and Y.-J. A. Zhang, “The roadmap to 6G: AI empowered wireless networks,” IEEE Commun. Mag. , vol. 57, no. 8, pp. 84–90, 2019. [2] Y. Shi et al. , “Machine learning for large-scale optimization in 6G wireless networks,” IEEE Commun. Surveys Tuts. , vol. 25, no. 4, pp. 2088–2132, 2023. [3] R. Shafin et al. , “Artificial intelligence-enabled cellular networks: A critical path to beyond-5G and 6G,” IEEE Wireless Commun. , vol. 27, no. 2, pp. 212–217, 2020. [4] H. J. Yang, H. Kim, H. Noh, S. Kim, and B. Shim, “Large multimodal model-empowered task-oriented autonomous communications: Design methodology and implementation challenges,” IEEE Veh. Technol. Mag. ,pp. 2–13, 2025. [5] M. Polese, L. Bonati, S. D´ oro, S. Basagni, and T. Melodia, “Understand-ing O-RAN: Architecture, interfaces, algorithms, security, and research challenges,” IEEE Commun. Surveys Tuts. , vol. 25, no. 2, pp. 1376– 1411, 2023. [6] L. Bonati, S. D´ oro, M. Polese, S. Basagni, and T. Melodia, “Intelligence and learning in O-RAN for data-driven nextg cellular networks,” IEEE Commun. Mag. , vol. 59, no. 10, pp. 21–27, 2021. [7] S. D´ oro, L. Bonati, M. Polese, and T. Melodia, “OrchestRAN: Orches-trating network intelligence in the open RAN,” IEEE Trans. Mobile Comput. , vol. 23, no. 7, pp. 7952–7968, 2024. [8] M. Tsampazi et al. , “PandORA: Automated design and comprehensive evaluation of deep reinforcement learning agents for open RAN,” IEEE Trans. Mobile Comput. , vol. 24, no. 4, pp. 3223–3240, 2025. [9] M. Polese, L. Bonati, S. D’Oro, S. Basagni, and T. Melodia, “Un-derstanding O-RAN: Architecture, interfaces, algorithms, security, and research challenges,” IEEE Commun. Surveys Tuts. , vol. 25, no. 2, pp. 1376–1411, 2023. [10] L. Bao, S. Yun, J. Lee, and T. Q. Quek, “LLM-hRIC: LLM-empowered hierarchical RAN intelligent control for O-RAN,” IEEE Commun. Mag. ,pp. 1–7, 2026. [11] J. Dai et al. , “O-RAN-Enabled intelligent network slicing to meet service-level agreement (SLA),” IEEE Trans. Mobile Comput. , vol. 24, no. 2, pp. 890–906, 2025. [12] W. Wu et al. , “Dynamic RAN slicing for service-oriented vehicular networks via constrained learning,” IEEE J. Sel. Areas Commun. , vol. 39, no. 7, pp. 2076–2089, 2021. [13] S. F. Abedin, A. Mahmood, N. H. Tran, Z. Han, and M. Gidlund, “Elastic O-RAN slicing for industrial monitoring and control: A distributed matching game and deep reinforcement learning approach,” IEEE Trans. Veh. Technol. , vol. 71, no. 10, pp. 10 808–10 822, 2022. [14] H. Ju, S. Kim, Y. Kim, and B. Shim, “Energy-efficient ultra-dense net-work with deep reinforcement learning,” IEEE Trans. Wireless Commun. ,vol. 21, no. 8, pp. 6539–6552, 2022. 13 
+
+[15] H. Noh, H. Lee, and H. J. Yang, “Joint optimization on uplink OFDMA and MU-MIMO for ieee 802.11ax: Deep hierarchical reinforcement learning approach,” IEEE Commun. Lett. , vol. 28, no. 8, pp. 1800–1804, 2024. [16] Y. Shen, Y. Shi, J. Zhang, and K. B. Letaief, “Graph neural networks for scalable radio resource management: Architecture design and theoretical analysis,” IEEE J. Sel. Areas Commun. , vol. 39, no. 1, pp. 101–115, 2021. [17] H. Noh, B. Shim, and H. J. Yang, “Adaptive resource allocation optimization using large language models in dynamic wireless environ-ments,” IEEE Trans. Veh. Technol. , vol. 74, no. 10, pp. 16 630–16 635, 2025. [18] A. Zappone, M. Di Renzo, and M. Debbah, “Wireless networks design in the era of deep learning: Model-based, AI-based, or both?” IEEE Trans. Commun. , vol. 67, no. 10, pp. 7331–7376, 2019. [19] Y. Wu, H.-N. Dai, H. Wang, Z. Xiong, and S. Guo, “A survey of intelligent network slicing management for industrial IoT: Integrated approaches for smart transportation, smart energy, and smart factory,” 
+
+IEEE Commun. Surveys Tuts. , vol. 24, no. 2, pp. 1175–1211, 2022. [20] M. Polese, L. Bonati, S. D’Oro, S. Basagni, and T. Melodia, “ColO-RAN: Developing machine learning-based xApps for open RAN closed-loop control on programmable experimental platforms,” IEEE Trans. Mobile Comput. , vol. 22, no. 10, pp. 5787–5800, 2023. [21] M. Polese et al. , “Empowering the 6G cellular architecture with open RAN,” IEEE J. Sel. Areas Commun. , vol. 42, no. 2, pp. 245–262, 2024. [22] A. Lacava et al. , “Programmable and customized intelligence for traffic steering in 5G networks using open RAN architectures,” IEEE Trans. Mobile Comput. , vol. 23, no. 4, pp. 2882–2897, 2024. [23] N. Apostolakis et al. , “ATHENA: Machine learning and reasoning for radio resources scheduling in vRAN systems,” IEEE J. Sel. Areas Commun. , vol. 42, no. 2, pp. 263–279, 2024. [24] M. Eisen and A. Ribeiro, “Optimal wireless resource allocation with random edge graph neural networks,” IEEE Trans. Signal Process. ,vol. 68, pp. 2977–2991, 2020. [25] A. Chowdhury, G. Verma, C. Rao, A. Swami, and S. Segarra, “Unfolding WMMSE using graph neural networks for efficient power allocation,” 
+
+IEEE Trans. Wireless Commun. , vol. 20, no. 9, pp. 6004–6017, 2021. [26] N. Naderializadeh, J. J. Sydir, M. Simsek, and H. Nikopour, “Resource management in wireless networks via multi-agent deep reinforcement learning,” IEEE Trans. Wireless Commun. , vol. 20, no. 6, pp. 3507– 3523, 2021. [27] J. Mei et al. , “Intelligent radio access network slicing for service pro-visioning in 6G: A hierarchical deep reinforcement learning approach,” 
+
+IEEE Trans. Commun. , vol. 69, no. 9, pp. 6063–6078, 2021. [28] J. A. Ayala-Romero et al. , “vrAIn: Deep learning based orchestration for computing and radio resources in vRANs,” IEEE Trans. Mobile Comput. ,vol. 21, no. 7, pp. 2652–2670, 2022. [29] N. NaderiAlizadeh, M. Eisen, and A. Ribeiro, “Learning resilient radio resource management policies with graph neural networks,” IEEE Trans. Signal Process. , vol. 71, pp. 995–1009, 2023. [30] C. T. Nguyen et al. , “Transfer learning for wireless networks: Acomprehensive survey,” Proc. IEEE , vol. 110, no. 8, pp. 1073–1115, 2022. [31] H. Zhou et al. , “Large language model (LLM) for telecommunications: A comprehensive survey on principles, key techniques, and opportu-nities,” IEEE Commun. Surveys Tuts. , vol. 27, no. 3, pp. 1955–2005, 2025. [32] A. Maatouk, N. Piovesan, F. Ayed, A. De Domenico, and M. Debbah, “Large language models for telecom: Forthcoming impact on the indus-try,” IEEE Commun. Mag. , vol. 63, no. 1, pp. 62–68, 2025. [33] Z. Chen, Z. Zhang, and Z. Yang, “Big AI models for 6G wireless networks: Opportunities, challenges, and research directions,” IEEE Wireless Commun. , vol. 31, no. 5, pp. 164–172, 2024. [34] S. Park, H. Noh, and H. J. Yang, “Robust transmission of punctured text with large language model-based recovery,” IEEE Trans. Veh. Technol. ,vol. 75, no. 1, pp. 1737–1742, 2026. [35] H. Zhou et al. , “Large language models for wireless networks: An overview from the prompt engineering perspective,” IEEE Wireless Commun. , vol. 32, no. 4, pp. 98–106, 2025. [36] A. Leivadeas and M. Falkner, “A survey on intent-based networking,” 
+
+IEEE Commun. Surveys Tuts. , vol. 25, no. 1, pp. 625–655, 2023. [37] M. Xu et al. , “When large language model agents meet 6g networks: Perception, grounding, and alignment,” IEEE Wireless Commun. , vol. 31, no. 6, pp. 63–71, 2024. [38] F. Jiang et al. , “Large language model enhanced multi-agent systems for 6g communications,” IEEE Wireless Commun. , vol. 31, no. 6, pp. 48–55, 2024. [39] G. Auer, V. Giannini, C. Desset, I. G´ odor, P. Skillermark, M. Olsson, M. A. Imran, D. Sabella, M. J. Gonzalez, O. Blume, and A. Fehske, “How much energy is needed to run a wireless network?” IEEE Wireless Commun. , vol. 18, no. 5, pp. 40–49, 2011. [40] K. Cho et al. , “Learning phrase representations using RNN encoder– decoder for statistical machine translation,” in Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 2014, pp. 1724–1734. [41] 3GPP, “Service requirements for enhanced V2X scenarios,” 3rd Gener-ation Partnership Project (3GPP), Tech. Rep. TS 22.186, V15.4.0, 2018.

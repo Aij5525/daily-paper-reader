@@ -1,0 +1,581 @@
+Title: Rethinking Channel Charting: A Graph Perspective
+
+URL Source: https://arxiv.org/pdf/2609.06204v1
+
+Published Time: Wed, 09 Sep 2026 00:52:06 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Rethinking Channel Charting: A Graph Perspective 
+
+Yifei Jin 
+
+Ericsson Research 
+
+Stockholm, Sweden yifei.jin@ericsson.com 
+
+Yuxin Zhao 
+
+Ericsson Research 
+
+Linköping, Sweden yuxin.zhao@ericsson.com 
+
+Dandan Hao 
+
+Ericsson AB 
+
+Stockholm, Sweden dandan.hao@ericsson.com 
+
+Gábor Fodor 1
+
+Ericsson Research KTH Royal Institute of Technology 
+
+Stockholm, Sweden gabor.fodor@ericsson.com | gaborf@kth.se 
+
+Abstract —Channel charting is a self-supervised framework that learns low-dimensional spatial representations from high-dimensional channel state information. We revisit channel charting from a graph-theoretic perspective, and show that the position-diffusion objective is equivalent to a graph Laplacian smoothness functional. We propose a Graph Neural Network (GNN) formulation that replaces the Siamese network’s global geodesic dissimilarity objective with a graph smoothness objective. We consider the reformulated objective to be the position diffusion objective. Without diverging from the original optimization objective, the GNN replaces the quadratic-cost self-correlation encoding with linear-cost message passing over an Angle-Delay Profile (ADP)-similarity graph, achieving comparable positioning accuracy with 512 × fewer parameters. Using Laplacian spectral analysis, we demonstrate that obstacles compress the ADP graph spectrum, while the GNN acts as a spectral decompressor against obstacles and other environmental semantics, but as a compressor against excessive ADP embedding space. Beyond this, the second eigenvector of the learned embedding encodes the line-of-sight/non-line-of-sight boundary rather than spatial coordinates. 
+
+Index Terms —channel charting, graph Laplacian, graph neural networks, position diffusion, self-supervised learning. 
+
+I. I NTRODUCTION 
+
+Recently, machine learning (ML)-assisted positioning for 5G New Radio (NR) systems has attracted considerable attention from both the research and standardization communities [1–5]. The 3 rd Generation Partnership Project (3GPP), for example, has developed Radio Frequency (RF) fingerprinting-based positioning approaches and control plane support for fingerprinting-assisted positioning [6]. Although RF fingerprinting is a promising approach for accurate localization in both indoor and outdoor scenarios, collecting sufficient amount of ground-truth (labeled) data in the training phase is costly. The amount of required labeled data limits the scalability across devices and renders practical applicability problematic [7, 8]. Channel charting is a self-supervised technique that maps high-dimensional channel measurements to a low-dimensional chart, preserving the local spatial geometry of the radio environment [9]. In contrast to RF fingerprinting approaches, which typically rely on large labeled datasets and face scalability challenges as the number of devices and environments grows, channel charting learns spatial representations directly from unlabeled channel measurements through self-supervision [10, 11]. Channel charts are structured by the geometry of the propaga-tion environment: users that are close in physical space typically observe similar channel characteristics, whereas distant users experience increasingly distinct channels. Consequently, channel 
+
+> 1G. Fodor was supported by the Swedish Strategic Research (SSF) grant for the FUS21-0004 SAICOM project.
+
+charting can be viewed as the problem of recovering a latent spa-tial manifold from local channel similarities. Such neighborhood relationships can be naturally represented as a graph, where nodes correspond to channel observations and edges encode local similarity. This perspective suggests that graph-based learning methods may provide a more suitable inductive bias than architectures operating on individual channel samples [12, 13]. To recover this latent geometry, channel charting methods rely on similarity measures derived directly from channel state information (CSI) [13, 14]. Among these, the Angle-Delay Profile (ADP) dissimilarity has emerged as a particularly effective representation, as it captures propagation characteristics while exhibiting a strong correspondence with physical proximity under locally dominant line-of-sight (LoS) or quasi-LoS conditions [15]. By evaluating channel similarity across neighboring measurements, ADP induces a weighted graph in which nodes correspond to CSI observations and edges encode local spatial relationships. Existing embedding approaches [9, 16, 17] typically process channel measurements independently and recover spatial structure through pairwise objectives. In contrast, Graph Neural Networks (GNNs) [18] operate directly on the induced neighborhood graph, iteratively aggregating information from adjacent nodes through message passing. This inductive bias aligns naturally with the underlying assumptions of channel charting, where spatial information is encoded not only in individual channel measurements but also in their local relationships [13, 19]. In this paper, we revisit channel charting from a graph-theoretic perspective. We reformulate the global geodesic dissimilarity objective formulated by Shaikh et al. [14] into a graph-centric 
+
+position-diffusion objective . We show that the position-diffusion objective is equivalent to a graph Laplacian smoothness func-tional whose gradient flow corresponds to a graph heat equation .Building on this interpretation, we propose a GNN-based formulation that replaces explicit self-correlation encoding with message passing over an ADP-similarity graph, reducing parameter complexity from quadratic to linear scaling with respect to the antenna dimensions. Finally, through Laplacian spectral analysis, we show that obstacles compress the ADP graph spectrum while the proposed GNN reveals the CSI-related spatial features, which outperforms the baseline method. This perspective leads naturally to the formulation of channel charting as learning a low-dimensional embedding that preserves the local geometry encoded by channel similarities. The remainder of this paper is organized as follows: Section II reviews channel charting and ADP-based similarity metrics. Section III introduces the proposed graph formulation and arXiv:2609.06204v1 [cs.NI] 5 Sep 2026 GNN architecture. Section V presents experimental results and spectral analyses, while Section VI concludes the paper. II. B ACKGROUND 
+
+A. Channel Charting 
+
+Channel charting [9] learns a low-dimensional spatial representation from unlabeled CSI by exploiting the manifold assumption: in a static environment, CSI is primarily afunction of user equipment (UE) position. The key enabler is a dissimilarity metric between measurements that correlates with physical distance. The ADP metric [15] computes per-tap cosine similarity across antennas and exhibits strong correspondence with Euclidean distance. State-of-the-art methods [15, 16, 20, 21] embed CSI via Siamese networks trained on geodesic ADP distances over a k-Nearest Neighbor (NN) graph, processing each sample independently. However, jointly learning ADP as a relational feature that associates each CSI measurement has never been addressed in previous studies. Given channel charting is a manifold, which can be discretized into a graph representation , it is natural to revisit the channel charting in a graph perspective and study it through the GNN method. 
+
+B. Graph Neural Network 
+
+GNNs [18, 22, 23] learn node representations through message passing : iteratively aggregates features from graph neighbors, with trainable weights shared across all nodes. This inductive bias lies in the fact that a node’s representation depends on its local neighborhood , which naturally suits the channel charting’s smoothness objective [15], where spatial proximity implies CSI similarity. Unlike Siamese networks that process samples independently, GNNs exploit both node features (i.e, CSI measurement) and graph topology (i.e, ADP or other inter-CSI similarity metric) simultaneously. By accessing pairwise spatial information through edge structure rather than through explicit feature expansion, the proposed GNN method achieved better performance with fewer parameters than the Siamese network. 
+
+C. Graph Laplacian Analysis 
+
+Graph Spectral Analysis [24] has been a long-studied area in graph theory. One major contribution of Graph Spectral Analysis is the graph Laplacian, which builds the foundation of Graph Con-volution Network (GCN) [22] and many other GNNs [18, 23], by giving a theoretical foundation on how the graph pattern evolves. Besides, the graph Laplacian also inspired graph cut, community detection, and a vast majority of the graph representation learning community. Among them, one research question is to leverage the graph Laplacian to reverse engineer the learnt embedding, to acquire a deep insight into what has been learnt through GNN models [25, 26]. Only Chaaya, Girgis, and Bennis [16] denote that there exists a latent space for channel charting manifold, without further revealing what domain knowledge is encoded in such latent space. In this paper, we found through graph Laplacian analysis that the proposed GNN method is more informative on domain knowledge than the baseline method. 
+
+TABLE I: Notation used in the paper.                                                                                 
+
+> Symbol Description
+> hi∈
+> CB×M×Nsub
+> CSI for sample iB,M,Nsub Number of arrays, antennas per array, subcarriers
+> b,m,τArray index, antenna index, delay-tap index
+> pi∈RDPhysical position of sample iNDataset size
+> S={(hi,pi)}Dataset of paired samples
+> ˜hi,b,m,τ Time-domain Channel Impulse Response (CIR) (via Inverse Discrete Fourier Transform (IDFT) of hi)
+> τmin ,τ max Informative tap range
+> dADP (·,·)ADP dissimilarity (3)
+> g(·),f(·)Feature extraction and embedding stages
+> CθParameterized forward charting function
+> G(V,E,X,Y )k-NN graph: nodes V(CSI), edges E(ADP), attributes
+> X, weights Y
+> N(i)Neighbourhood of node viin graph G
+> Pij Shortest path between viand vjin Gai,j Geodesic distance between nodes vi,v j
+> ˜ARow-normalized adjacency ( ˜aij =aij /P
+> kaik )
+> ˜L0=I−˜ANormalized graph Laplacian
+> P∈RN×DPosition matrix (stacked pi)
+> X(ℓ)Node feature matrix at GNN layer ℓ
+> W(ℓ)GNN learnable weights at layer ℓdiDegree of node viin graph G
+> zi∈RdChart coordinates (embedding output)
+> vi,λiith-Laplacian eigenvector/eigenvalue
+
+III. P ROBLEM FORMULATION AND SYSTEM MODEL 
+
+A. Problem Formulation 
+
+Problem formulation. Formally, let S = {(hi,pi)}Ni=1 denote a collection of channel observations and their associated physical locations, where the positions are unavailable during training. Specifically, S denotes N paired samples, where hi ∈
+
+CB×M ×Nsub is the CSI ( B arrays, M antennas, Nsub OFDM subcarriers) and pi ∈ RD is the position (see Table I). The goal is to learn a projection Cθ , where θ is the parameter, such that: 
+
+Cθ : hi 7 −→ zi, s.t. |zi −zj |2 ∝ | pi −pj |2. (1) 
+
+Two-stage decomposition. Most methods [9, 15, 17, 20, 21] decompose C into a feature extraction stage g(·) and embedding stage f (·):
+
+hi
+
+> g(·)
+
+7−−−→ xi ∈ Rn f (·)
+
+7−−→ zi ∈ Rd, d ≪ n ≪ dim( hi). (2) Note by Studer et al. [9], f (·) should be convex and smooth .The design of g(·) determines what feature representation space is available to f (·): geometric parameters [21], pairwise dissimilarities [15, 20], or graph-aggregated features (this paper). 
+
+B. System Model 
+
+Channel Charting via ADP Dissimilarity. In the feature extrac-tion stage g(·), ADP has been one of the major feature spaces to leverage CSI measurement (dis-)similarity. Applying the IDFT to CSI yields the CIR ˜hi,b,m,τ , where b ∈ { 1,...,B } indexes antenna arrays, m ∈ { 1,...,M } indexes antennas within each array, and 
+
+τ ∈ [τmin ,τ max ] is the delay-tap index covering the dominant Multi-path Components (MPCs). The ADP dissimilarity [15] computes per-tap cosine similarity across antennas: 
+
+dADP (hi,hj ) ≜ X
+
+> b,τ
+
+1− |P
+
+> m
+
+˜h∗ 
+
+> i,b,m,τ
+
+˜hj,b,m,τ |2
+
+P
+
+> m
+
+|˜hi,b,m,τ |2 ·P
+
+> m
+
+|˜hj,b,m,τ |2
+
+!
+
+.
+
+(3) A k-NN graph built from dADP with geodesic shortest-path distances approximates Euclidean distances when a LoS or strong quasi-LoS component dominates locally [21]. 
+
+Siamese Network Embedding. The state-of-the-art embedding 
+
+f (·) for channel charting uses a Siamese network [15, 20]: two weight-sharing branches process CSI pairs (hi,hj ), trained to match predicted embedding distance to geodesic ADP distance. Each branch applies a FeatureEngineering layer that computes the full antenna sample covariance: 
+
+ac[ t,a,b,m,n ] = ˜hi[a,m,t ]·˜h∗ 
+
+> i
+
+[b,n,t ]; a,b ∈ [B],m,n ∈ [M ], (4) producing a tensor of shape (τmax − τmin ) × B2 × M 2 × 2
+
+(real/imaginary). This is flattened and compressed via dense layers to chart coordinates zi ∈ R2. The outer product (4) is necessary because the Siamese processes each sample 
+
+independently as it must extract all angular/spatial information from a single measurement. 
+
+Graph Neural Network. In contrast to previous papers, we introduce a novel implementation of embedding f (·) through GNN. GNNs learn node representations by iteratively aggre-gating features from graph neighbors, which is the same ADP matrix, but just considered as an adjacency matrix connecting nodes that represent different locations’ CSI measurements. Formally, we reformulate the S = {(hi,pi)}Ni=1 as a weighted, attributed graph G(V,E,X,Y ). Each node vi ∈ V denotes a CSI measurement, with node attribute x(vi) → xi ∈ X denotes its value hi. Each edge ei,j ∈ E denotes a ADP dissimilarity relation 
+
+dADP (hi,hj ), with edge weight y(ei,j ) → ai,j ∈ Y denotes its value. The learning objective is to learn an embedding for each node, given an N -node graph G(V, E, X, Y ). Naturally, we consider a GCN architecture to replace the Siamese architecture, a GCN layer updates node vi’s embedding x(ℓ) 
+
+> i
+
+→ x(ℓ+1)  
+
+> i
+
+as: 
+
+x(ℓ+1)  
+
+> i
+
+= σ
+
+W(ℓ)x(ℓ) 
+
+> i
+
++W(ℓ) X 
+
+> j∈N (i)
+
+ai,j 
+
+pdidj
+
+x(ℓ)
+
+> j
+
+, (5) where di,d j are the degree of node vi,v j and trainable weight 
+
+W(ℓ) is shared across all nodes. Eq. 5 brings an inductive bias: 
+
+a node’s representation depends on its local neighborhood, is naturally suited to channel charting (i.e, spatial proximity implies CSI similarity). IV. M ETHODOLOGY : GNN-B ASED CHANNEL CHARTING 
+
+A. Graph Construction 
+
+Given the graph G(V,E,X,Y ) defined in Section III-B, we sparsify E by retaining only the k=20 nearest neighbors per node in dADP space. The GCN message passing in equation (5) operates on these local ADP weights. Similar to the geodesic distance definition in [15], we rewrite it in a graph form: 
+
+ai,j = min 
+
+> Pij
+
+X
+
+> em,n ∈P ij
+
+dADP (hm,hn), (6) which chains local ADP along shortest paths Pij between vi
+
+and vj to approximate Euclidean distance globally. Note that 
+
+ai,j in (6) gives a scalar distance for each node pair (vi,v j ).Eq. 6 relies on the following Lemma 1, by Studer et al. [9] and Stephan, Euchner, and Brink [15], but reformulated in differential geometry form: 
+
+Lemma 1 (Local distance-dissimilarity correspondence): 
+
+If the dissimilarity function dADP (·,·) is smooth in physical distance [9], and the graph G is constructed with sufficiently dense sampling such that connected nodes em,n ∈ E satisfy 
+
+∥pm − pn∥2 = ε → 0, then on a Riemannian manifold with sectional curvature κ [27]: 
+
+am,n = c∥pm −pn∥2 +O(κε 3), (7) i.e., the geodesic hop approximates Euclidean distance up to a curvature-dependent residual that vanishes for locally flat manifolds ( κ ≈ 0) or dense sampling ( ε → 0). For the training objective , derived from the geodesic distance formulation in Eq. 6, we also rewrite in graph form: 
+
+min 
+
+> θ
+
+X 
+
+> vi,v j∈V
+
+(ai,j −∥C θ (hi)−C θ (hj )∥2)2 (8) 
+
+B. Position Diffusion as Graph Heat Equation 
+
+Global to Local Smoothness. Different from previous work that optimizes a geodesic dissimilarity objective as per Eq. 8, we reformulate this into a position diffusion objective . Substituting Eq. 1 and 6 into Eq. 8, the objective becomes: 
+
+min 
+
+> θ
+
+X 
+
+> vi,v j∈V
+
+[(min 
+
+> Pij
+
+X
+
+> em,n ∈P ij
+
+am,n )−c∥pi −pj ∥2]2 (9) where c is a constant. By Lemma 1, each hop satisfies 
+
+am,n = c∥pm − pn∥2 + O(κε 3). For a path of L hops on a locally flat manifold ( κ ≈ 0): X
+
+> em,n ∈P ij
+
+am,n = c X
+
+> em,n ∈P ij
+
+∥pm −pn∥2 +L·O (κε 3). (10) On a flat manifold, when the shortest graph path follows the Euclidean geodesic (straight line), the sum of hop lengths equals the total displacement: P∥pm − pn∥2 = ∥pi − pj ∥2.Thus, Eq. 9 is satisfied (up to O(Lκε 3)) whenever positions are harmonic , expressed as: 
+
+˜L0P = 0 ⇐⇒ pi = X 
+
+> j∈N (i)
+
+˜aij pj , ∀vi ∈ V, (11) where ˜L0 := I− ˜A denote as the normalized graph Laplacian, ˜A
+
+is the row-normalized adjacency ( ˜aij = aij /P
+
+> k
+
+aik ). Stacking p//ositions into P ∈ RN ×D , deviation from harmonicity is: 
+
+min  
+
+> P
+
+∥ ˜AP −P∥2 
+
+> F
+
+, (12) which we define as the position diffusion objective .
+
+Smoothness to Graph Heat Equation. The position diffusion objective (12) has an equivalent spectral form: 
+
+min  
+
+> P
+
+∥ ˜AP −P∥2 
+
+> F
+
+= min  
+
+> P
+
+tr( PT ˜L20P) ˜L0⪰0
+
+−−−→ min  
+
+> P
+
+tr( PT ˜L0P),
+
+(13) where the shared minimizer is ˜L0P = 0 (since ˜L0 is positive semi-definite). The first-order form has gradient flow equal to the graph heat equation [28]: 
+
+−∇ Ptr 
+
+
+
+PT ˜L0P
+
+
+
+= −˜L0P(ℓ) = P(ℓ+1) −P(ℓ). (14) The GNN (Eq. 5) matrix form X(ℓ+1) = σ( ˜AX (ℓ)W(ℓ))
+
+reveals that each GNN layer is a learnable one-step diffusion :the heat equation propagates with fixed dynamics, while the GNN applies parametric diffusion through W(ℓ) at each step. 
+
+C. GNN vs. Siamese: Architectural Comparison 
+
+Both methods map CSI to 2D chart coordinates but differ fundamentally in how spatial information is extracted: 
+
+Siamese (self-correlation): 
+
+hi ∈ CB×M ×τ hh ∗
+
+−−→ R2B2M 2τ W1
+
+−−→ R512 Dense 
+
+−−−−→ zi ∈ R2 (15) B=2, M=16                 
+
+> max -min =4
+> B=4, M=16
+> max -min =4
+> B=8, M=32
+> max -min =4
+> B=16, M=32
+> max -min =4 (ours)
+> B=16, M=64
+> max -min =8
+> Antenna configuration 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> Trainable params in 1st layer [M]
+> 32× 64× 256× 512× 1024×
+> First-layer parameter scaling
+> Siamese ( (B2M2(max min )))
+> GNN ( (BM (max min )))
+
+Fig. 1: First-layer parameter scaling. The Siamese outer product causes 
+
+O(B2M 2) growth; the GNN scales linearly as O(BM ).
+
+TABLE II: Positioning accuracy (Mean Absolute Error (MAE) [m]). 
+
+Environment Siamese GNN Params. Empty room spec. 0.562 0.541 
+
+2.45M (GNN) vs. ∼1B (Siam.) Empty room diff. 0.570 0.538 
+
+Cube center spec. 0.847 0.833 
+
+Cube center diff. 0.811 0.813 Wall mid spec. 0.607 0.582 
+
+Wall mid diff. 0.608 0.560 
+
+GNN (message passing): 
+
+hi ∈ CB×M ×τ Flatten 
+
+−−−−→ R2BM τ W1
+
+−−→ R512 GCN ×L
+
+−−−−−→ zi ∈ R2
+
+(16) The bottleneck layer W1 scales as O(B2M 2τ · d) for the Siamese versus O(BM τ · d) for the GNN (Fig. 1). The GNN avoids the outer product because graph message passing implicitly encodes pairwise spatial information. Referring Eq. (5), the first term is a learnt projection of the node’s own CSI (subsuming self-correlation), while the second is a learnt cross-correlation with the neighborhood-averaged CSI. The ADP edge weights ensure this cross-correlation is spatially meaningful. V. E XPERIMENTS AND SPECTRAL ANALYSIS 
+
+A. Setup 
+
+We evaluate on ray-traced indoor scenes using NVIDIA SIONNA [29]: one empty room, one 1m metallic cube at room centre, and a 3m metallic wall at mid-position towards room centre. Each scene has 25600 UE positions on an 8×8m grid, with a single base station. For each scene, we consider pure specular reflection or with diffraction ray setup. For neural architecture: GNN: 3-layer GCNC ONV [22], k=30. Siamese: FEATURE ENGINEERING layer + D ENSE layer, with neuron size 
+
+[512 ,256 ,128] . Both use 80 /20 train/test split. 
+
+B. Positioning Accuracy 
+
+Table II shows the GNN matches or outperforms the Siamese across all environments with 512 × fewer parameters. The improvement is largest in obstacle scenes, where the graph structure provides context that independent sample processing cannot. Fig. 2a visualizes the learnt charts, and Fig. 2b shows the per-environment error Cumulative Distribution Function (CDF). 
+
+TABLE III: |r| between v2 and spatial features ( N =7000). 
+
+Scenario Feature GNN v2 Siam. v2 ADP v2
+
+Cube center spec. Shadow 0.93 0.14 0.13 AoA 0.71 0.53 0.30 Cube center diff. Shadow 0.92 0.13 0.31 AoA 0.47 0.34 0.25 Wall mid spec. Shadow 0.77 0.92 0.58 AoA 0.56 0.67 0.32 Wall mid diff. Shadow 0.80 0.74 0.52 AoA 0.53 0.50 0.41 
+
+C. Spectral Analysis 
+
+Given that we learn an updated charting space from 
+
+G(V,E,X,Y ), we applied Laplacian analysis to each learnt embedding graph, to compare the learning outcome against the raw ADP input formed graph. We construct four k-NN graphs (k=30) on the same nodes: GGT (positions), GADP (ADP), 
+
+GSiam (Siamese chart), GGNN (GNN chart), with edge weight 
+
+1/|zi − zj|2 or dADP (hi,hj ) (only for GADP ), and compute normalized Laplacian spectra. Fig. 3(a): Within each environment, GADP exhibits alarger-valued Laplacian spectrum than GGNN , which in turn is closer to GGT . This indicates the GNN acts as a spectral compressor that maps the inflated ADP dissimilarity space toward the ground-truth spatial geometry. Across environments, obstacles compress the GADP mid-spectrum relative to the empty room; the GNN decompresses these obstacle-affected eigenvalues back toward GGT , restoring spatial information corrupted by introducing the obstruction. Fig. 3(b): A notable eigengap between λ2 and λ3 in Fig. 3a suggests that v2 captures the dominant non-trivial structure of the embedding graph. The second eigenvector v2 of GGNN 
+
+correlates with the obstacle’s shadow direction ( |r| > 0.77 ,Table III), while GADP ’s v2 does not and GSiam ’s is not consistent or less informative. The GNN devotes its leading non-trivial axis to encoding the LoS/NLoS boundary. VI. C ONCLUSION 
+
+We revisited channel charting from a graph perspective, establishing that position diffusion is a Laplacian smoothness functional whose gradient flow equals the graph heat equation. The GNN replaces the Siamese’s O(B2M 2) self-correlation with O(BM ) message passing, achieving a 512 × parameter reduction. Spectral analysis reveals the GNN acts as a spectral decompressor and that obstacle-induced boundaries dominate the learnt embedding structure. More generally, our work suggests that channel charting should be viewed as graph representation learning rather than metric learning. REFERENCES 
+
+[1] M. M. Butt, A. Pantelidou, and I. Z. Kovács. “ML-Assisted UE Positioning: Performance Analysis and 5G Architecture Enhancements”. In: IEEE OJVT 2 (2021), pp. 377–388. [2] Y. Ruan et al. “iPos-5G: Indoor Positioning via Commercial 5G NR CSI”. In: IEEE IoTJ 10.10 (2023), pp. 8718–8733. [3] Q. Xue et al. “High-Precision Indoor Positioning via 5G NR: An Interpretable GNN-based Method”. In: MetaCom . 2024, pp. 265–272. [4] L. Kang et al. “Indoor Fingerprint Localization Using 5G NR Multi-SSB Beam Features with GAN-Based Interpolation”. In: 
+
+ICMMT . 2025, pp. 1–3. [5] H. Zha et al. “Enhancing Security in 5G NR With Channel-Robust RF Fingerprinting Leveraging SRS for Cross-Domain 4 3 2 1 0 1 2 3 44
+
+> 3
+> 2
+> 1
+> 01234
+> Empty room
+
+Ground Truth     
+
+> 420244
+> 2
+> 024
+
+Siamese     
+
+> 420244
+> 2
+> 024
+
+GNN                                    
+
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> Cube center
+> 432101234
+> 3
+> 2
+> 1
+> 01234
+> 420244
+> 2
+> 024
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> Wall mid
+> 420244
+> 2
+> 024
+> 420244
+> 2
+> 024
+
+(a) Channel charts projected to physical coordinates, colored by x-position. Rows: Empty room, Cube center, Wall mid. Columns: ground truth, Siamese, GNN. 0.0 0.5 1.0 1.5 2.0 2.5 3.0 Positioning error [m] 0.0 0.2 0.4 0.6 0.8 1.0 CDF 
+
+Empty room        
+
+> Siamese (MAE=0.56m) GNN (MAE=0.54m)
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 Positioning error [m] 0.0 0.2 0.4 0.6 0.8 1.0
+
+Cube center        
+
+> Siamese (MAE=0.85m) GNN (MAE=0.83m)
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 Positioning error [m] 0.0 0.2 0.4 0.6 0.8 1.0
+
+Wall mid 
+
+> Siamese (MAE=0.61m) GNN (MAE=0.58m)
+
+(b) Error CDF per environment. Siamese (dashed red) vs. GNN (solid blue). MAE values in legend. 
+
+Fig. 2: Positioning results (Specular reflection only; diffraction is similar.). (a) Learnt channel charts. (b) Error CDF. Stability”. In: IEEE TIFS 20 (2025), pp. 3429–3444. [6] 3GPP. Study on Artificial Intelligence (AI) /Machine Learning (ML) for NR air interface . Technical Report (TR) 38.843. 3GPP, Sept. 2025. [7] W. Wang et al. “Semisupervised RF Fingerprinting With Consistency-Based Regularization”. In: IEEE IoTJ 11.5 (2024), pp. 8624–8636. [8] T. Zhao, X. Wang, and S. Mao. “Cross-domain, Scalable, and Interpretable RF Device Fingerprinting”. In: IEEE INFOCOM .2024, pp. 2099–2108. [9] C. Studer et al. “Channel Charting: Locating Users within the Radio Environment Using Channel State Information”. In: IEEE Access 6 (2018), pp. 47682–47698. [10] J. Tang et al. “Massive MIMO-OFDM Statistical CSI Acquisition with Physical Channel Charting”. In: 2025 WCSP . 2025, pp. 1–6. [11] J. Jiao et al. “Deep Manifold Learning for 5G Positioning: Fusing Spatiotemporal Features via Channel Charting”. In: IEEE TCE 
+
+(2026), pp. 1–1. [12] J. Deng et al. “Network-side Localization via Semi-Supervised Multi-point Channel Charting”. In: 2021 IWCMC . 2021, pp. 1654–1660. [13] B. Shaikh et al. “Pilot Allocation in Multi-Cell MIMO Systems Based on Missing Data Imputation”. In: IEEE Access 13 (2025), pp. 123764–123782. 5 10 15 Eigenvalue index i      
+
+> 0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40
+> i
+> Empty room
+> GGT
+> GADP
+> GSiam
+> GGNN
+> 510 15 Eigenvalue index i
+> 0.00 0.05 0.10 0.15 0.20
+> Cube center
+> GGT
+> GADP
+> GSiam
+> GGNN
+> 510 15 Eigenvalue index i
+> 0.00 0.05 0.10 0.15 0.20 0.25
+> Wall mid
+> GGT
+> GADP
+> GSiam
+> GGNN
+
+(a) Laplacian spectrum across three environments: GGT (black), GADP (blue), GSiam (green), GGNN (red). 4 3 2 1 0 1 2 3 44                                                
+
+> 3
+> 2
+> 1
+> 01234
+> Cube center
+> GNN v2(| r|=0.93)
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> ADP v2(| r|=0.13)
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> Shadow projection
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> Wall mid
+> GNN v2(| r|=0.77)
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> ADP v2(| r|=0.58)
+> 4321012344
+> 3
+> 2
+> 1
+> 01234
+> Shadow projection
+> 0.02
+> 0.01
+> 0.00 0.01 0.02
+> 0.02
+> 0.01
+> 0.00 0.01 0.02 0.03 0.04
+> 4
+> 2
+> 024
+> 0.02
+> 0.01
+> 0.00 0.01 0.02
+> 0.04
+> 0.03
+> 0.02
+> 0.01
+> 0.00 0.01 0.02 0.03
+> 4
+> 2
+> 024
+
+(b) Second eigenvector: GGNN v2 vs GADP v2 vs shadow projection (signed distance along TX →obstacle axis). 
+
+Fig. 3: Spectral analysis. (a) GNN decompresses the ADP spectrum toward GT. (b) GNN v2 encodes the LoS/NLoS boundary.(Only the spectral reflection plotting, with the diffraction plotting is similar.) [14] B. Shaikh et al. “Pilot Assignment based on AoA Information using Channel Charting in Massive MIMO Systems”. In: IEEE SPAWC . 2024, pp. 166–170. [15] P. Stephan, F. Euchner, and S. t. Brink. “Angle-Delay Profile-Based and Timestamp-Aided Dissimilarity Metrics for Channel Charting”. In: IEEE TCOMM 72.9 (2024), pp. 5611–5625. [16] C. B. Chaaya, A. M. Girgis, and M. Bennis. “Learning latent wireless dynamics from channel state information”. In: IEEE Wireless Communications Letters 14.2 (2024), pp. 489–493. [17] S. Taner, V. Palhares, and C. Studer. “Channel charting in real-world coordinates”. In: GLOBECOM . IEEE. 2023, pp. 3940– 3946. [18] J. Zhou et al. “Graph neural networks: A review of methods and applications”. In: AI open 1 (2020), pp. 57–81. [19] C. K. Thomas et al. “Causal Reasoning: Charting a Revolutionary Course for Next-Generation AI-Native Wireless Networks”. In: 
+
+IEEE MVT 19.1 (2024), pp. 16–31. [20] P. Ferrand et al. “Triplet-based wireless channel charting”. In: 
+
+GLOBECOM . IEEE. 2020, pp. 1–6. [21] F. Euchner, P. Stephan, and S. ten Brink. “Augmenting channel charting with classical wireless source localization techniques”. In: 2023 57th Asilomar Conference on Signals, Systems, and Computers . IEEE. 2023, pp. 1641–1647. [22] T. N. Kipf and M. Welling. “Semi-Supervised Classification with Graph Convolutional Networks”. In: ICLR . 2017. [23] K. Xu et al. “How Powerful are Graph Neural Networks?” In: 
+
+ICLR . 2019. [24] B. Nica. A brief introduction to spectral graph theory . Vol. 3. European Mathematical Society Zürich, 2018. [25] A. Vasileiou et al. “Position: Message-passing and spectral GNNs are two sides of the same coin”. In: arXiv preprint arXiv:2602.10031 (2026). [26] W. Hu et al. “Graph signal processing for geometric data and beyond: Theory and applications”. In: IEEE Transactions on Multimedia 24 (2021), pp. 3961–3977. [27] Y. Ollivier. “Ricci curvature of Markov chains on metric spaces”. In: Journal of Functional Analysis 256.3 (2009), pp. 810–864. [28] B. CHEN. THE HEAT EQUATION AND HARMONIC FUNC-TIONS OVER GRAPHS .[29] J. Hoydis et al. “Sionna: An open-source library for next-generation physical layer research”. In: arXiv preprint arXiv:2203.11854 (2022).

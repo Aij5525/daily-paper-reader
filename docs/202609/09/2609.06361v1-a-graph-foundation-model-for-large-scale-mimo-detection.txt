@@ -1,0 +1,801 @@
+Title: A Graph Foundation Model for Large-Scale MIMO Detection
+
+URL Source: https://arxiv.org/pdf/2609.06361v1
+
+Published Time: Wed, 09 Sep 2026 01:04:45 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# A Graph Foundation Model for Large-Scale MIMO Detection 
+
+Xingyu Zhou, Le Liang, Member, IEEE, Hao Ye, Member, IEEE, Jing Zhang, Member, IEEE, 
+
+Chao-Kai Wen, Fellow, IEEE, Xiao Li, Member, IEEE, Shi Jin, Fellow, IEEE, and Wei Zhang, Fellow, IEEE 
+
+Abstract —Large-scale multiple-input multiple-output (MIMO) detection is fundamental to modern wireless networks but con-strained by performance-complexity trade-offs. Existing detec-tors, whether classical or learning-based, often fall short in either scalability or generalizability across heterogeneous scenarios. To overcome these limitations, we introduce a wireless-native graph foundation model (GFM) tailored for large-scale MIMO detection. The proposed GFM employs a physics-informed hy-brid architecture, integrating the local correlation extraction of message passing neural networks with the global attention of graph Transformers, encoding the physical interference patterns from the expectation propagation algorithm. Via extensive pre-training, this synergy enables the learning of a general-purpose detection mapping scalable across antenna dimensions and chan-nel conditions. For rapid downstream deployment, parameter-efficient fine-tuning is leveraged to adapt the GFM to specific non-ideal system regimes with minimal overhead. To enhance inference efficiency, a mixture-of-experts mechanism is embedded at downstream deployment to dynamically activate only the necessary sub-modules. Evaluations show that the proposed GFM consistently outperforms classical detectors and advanced data-driven baselines in accuracy, configuration generality, and cross-scenario transferability across various challenging zero-shot and few-shot conditions. 
+
+Index Terms —Deep learning, foundation model, graph Trans-former, MIMO detection. 
+
+I. I NTRODUCTION 
+
+# MULTIPLE-input multiple-output (MIMO) technology is fundamental to modern wireless communications, facil-itating terabit-per-second (Tbps) data rates and ubiquitous con-nectivity [1]. These requirements of the sixth-generation (6G) wireless networks and beyond have driven the development of extremely large-scale MIMO (XL-MIMO), which scales the antenna count from 16–128 to 512 or more [2]. However, the antenna increase further intensifies the complexity of signal processing tasks that are already challenging under significant computational constraints, such as high-dimensional channel state information (CSI) acquisition [3] and large-scale MIMO detection [4]. 
+
+X. Zhou, L. Liang, J. Zhang, X. Li, and S. Jin are with the Na-tional Mobile Communications Research Laboratory, Southeast University, Nanjing 210096, China (e-mail: xy_zhou@seu.edu.cn; lliang@seu.edu.cn; jingzhang@seu.edu.cn; li_xiao@seu.edu.cn; jinshi@seu.edu.cn). H. Ye is with the Department of Electrical and Computer Engineering, Uni-versity of California, Santa Cruz, CA 95064, USA (e-mail: hye30@ucsc.edu). C.-K. Wen is with the Institute of Communications Engineering, National Sun Yat-sen University, Kaohsiung 80424, Taiwan (e-mail: chaokai.wen@mail.nsysu.edu.tw). W. Zhang is with the School of Electrical Engineering and Telecommunica-tions, University of New South Wales, Sydney, NSW 2052, Australia (e-mail: w.zhang@unsw.edu.au). 
+
+In particular, MIMO detection is a fundamental problem in MIMO communications, aiming to recover the transmitted symbol vector from the received signal and CSI [4]. Optimal MIMO detection is known to be non-deterministic polynomial-time hard (NP-hard) due to the combinatorial nature of the search space. Although sphere decoders can reduce the average complexity compared to the exhaustive search of the optimal detector while maintaining near-optimal performance, they are still computationally prohibitive in large-scale MIMO systems [5]. Therefore, a plethora of suboptimal algorithms have been proposed to strike a balance between complexity and performance, including linear minimum mean squared error (LMMSE), successive interference cancellation, and message-passing-based detectors [4]. However, these algorithms often rely on idealized assumptions that may not hold in practical scenarios, leading to severe performance degradation. Recent standardization studies [6] mark a clear trend toward embedding artificial intelligence (AI) into the physical layer of wireless networks [7]. Instead of applying AI as an af-terthought, this trend anticipates an AI-native architecture [8] that shifts the physical-layer design from rigid mathematical algorithms to data-driven neural networks (NNs) capable of scenario-aware adaptation. For high-dimensional processing tasks like large-scale MIMO detection, such adaptive intel-ligence can help address conventional challenges, including computational bottlenecks, non-ideal hardware conditions, and cross-scenario generalization. Consequently, learning-based approaches have been increas-ingly explored to tackle the critical performance-complexity trade-off in MIMO detection. For example, deep unfolding architectures integrate learnable parameters into classical iter-ative detection processes to expedite convergence with limited training overhead [9]–[11]. In parallel, neural augmentation approaches utilize architectures such as graph NNs (GNNs) to enhance the intermediate computations of traditional detectors, relying heavily on data to learn complex interference pat-terns without rigid statistical assumptions [12], [13]. However, these existing approaches often struggle to generalize across different system configurations and out-of-distribution (OOD) channel environments, violating the intrinsic adaptive and au-tonomous ambitions of AI-native communications and limiting their practical applicability in dynamic wireless environments. In recent years, research has begun to explore the potential of large-scale AI models, also known as foundation models 
+
+[14], in wireless communications inspired by their unprece-dented generalization capabilities in vision and language pro-cessing. Early investigations resort to adapting general-purpose arXiv:2609.06361v1 [cs.IT] 6 Sep 2026 2
+
+foundation models, such as large language models (LLMs) and large vision models (LVMs), to physical-layer tasks [15], including channel prediction [16], beam management [17], and multi-task joint processing [18]. Despite their promising performance, there remains a significant modality gap between language/vision tokens and wireless data, along with the strict latency requirements of physical-layer processing that these pre-trained foundation models struggle to satisfy. To address these mismatches, there is a growing interest in developing wireless-native foundation models that are pre-trained from scratch on massive wireless data to learn compact and gen-eralizable representations for physical-layer tasks [19]–[22], potentially leading to efficient and adaptable intelligence that is anticipated by AI-native communications. Nonetheless, the application of foundation models in the physical layer is still in its infancy, particularly for MIMO detection, where the construction of a foundation model that captures complex interference patterns and generalizes across diverse scenarios remains an open problem [23]. Due to the inherent graphical structure of MIMO systems [12], [24], where the transmitted symbols, received signals, and channel coefficients can be naturally represented as nodes and edges in a graph, graph learning-based foundation models [25] have emerged as a promising paradigm for MIMO signal processing, with strong representational ability and scalability for modeling complex interactions and dependencies in MIMO systems. The development of this paradigm requires a metic-ulous design of the backbone architecture. Although classical GNNs, also referred to as message passing NNs (MPNNs), dominate current applications in wireless communications, their representational limits are quickly reached due to the over-smoothing bottleneck [25], hindering the performance in large-scale graph pre-training. To overcome this capac-ity barrier, Transformer-based architectures offer an effec-tive alternative via the global self-attention mechanism. By explicitly incorporating graph topologies as learnable spatial biases within the attention score calculation [26], [27], graph Transformers (GTs) close the gap left by standard Trans-formers in graph information encoding. This endows them with the capability to capture complex, long-range interference topology in wireless networks more effectively than MPNNs [28]. Despite these structural advancements, current literature mostly focuses on task-specific GNN/GT detectors, leaving the potential of large-scale pre-trained GTs for signal recovery tasks unexplored. This naturally raises a research question: 
+
+How can we construct a wireless-native graph foundation model capable of scalable and generalized MIMO detection across complex, heterogeneous scenarios? 
+
+In response to this question, this work develops a GFM tailored for large-scale MIMO detection. To construct an ex-pressive and scalable backbone, inspired by [29], we propose a physics-informed hybrid backbone architecture that com-bines MPNN and GT blocks and explicitly encodes physical interference (graph edge features) into the message passing and attention mechanisms, so that the GFM can capture both local correlations and global dependencies between MIMO data streams. By infusing the statistical principles of expec-tation propagation (EP)-based MIMO detection [30] into the edge features and structural design, the GFM inherits the expert knowledge from EP and facilitates accurate interference representation and symbol detection. The GFM undergoes extensive pre-training on a large-scale dataset that encom-passes a wide range of system configurations and channel conditions. For specific downstream deployment, we introduce parameter-efficient fine-tuning (PEFT) techniques, facilitating rapid and low-overhead adaptation to heterogeneous system regimes widespread in practical large-scale MIMO systems. To alleviate the computational overhead of foundation models, a mixture-of-experts (MoE) structure is embedded to enable input-dependent conditional routing, selectively activating sub-networks to improve inference efficiency. Numerical results demonstrate that the proposed GFM detector consistently outperforms both conventional detectors and advanced deep learning baselines across various challenging zero-shot and few-shot conditions. Our evaluations also verify the efficacy of the overall framework, spanning pre-training, rapid adaptation, and efficient inference. The contributions of this paper are summarized as follows.  
+
+> •
+
+Physics-Informed GFM Architecture for Large-Scale MIMO Detection: We develop a novel GFM architecture that integrates MPNNs for local correlation extraction and GT layers for physically grounded global information aggregation via explicit injection of graph edge features as attention biases, mitigating the over-smoothing bot-tleneck. The proposed design also embeds EP detection statistics into the edge features, regularizing the data-driven learning process with domain knowledge.  
+
+> •
+
+Extensive Pre-Training and Parameter-Efficient Fine-Tuning: We establish a two-stage learning workflow to endow the proposed detector with both robust general-ization and scenario-aware adaptability. The GFM is first pre-trained on massive datasets of MIMO transmission to learn generalized representations for MIMO detection that support diverse modulation schemes, antenna con-figurations, and channel conditions. Subsequently, PEFT is leveraged to rapidly adapt the pre-trained model to unseen, non-ideal system regimes, e.g., few-bit analog-to-digital converters (ADCs), nonlinear power amplifiers (PAs), or inter-cell interference, with minimal overhead.  
+
+> •
+
+Mixture-of-Experts Learning for Efficient Inference: 
+
+We embed an MoE mechanism into the GFM to improve inference efficiency. This mechanism selectively acti-vates a specialized sub-network (MPNN or GT) within the GFM based on the characteristics of instantaneous channel realizations, reducing computational cost while maintaining detection accuracy. 
+
+Notations: For any matrix A, A⊤ and A−1 denote the transpose and inverse of A, respectively. diag (A) returns the diagonal vector of a matrix A, Diag (a) denotes a diagonal ma-trix with the elements of a on its main diagonal, and λmax (A)
+
+is the largest eigenvalue of A. 0 and 1 are the all-zero and all-one vectors, respectively, and I is an identity matrix. Also, 
+
+∥ · ∥ 1, ∥ · ∥ 2, ∥ · ∥ ∞, and ∥ · ∥ F denote the ℓ1, ℓ2, infinity, and Frobenius norms, respectively. E[·] is the expectation operator, and ⊙ and ⊘ are the componentwise vector multiplication and 3
+
+division operators, respectively. Moreover, R and C represent the set of real and complex numbers, respectively. N (x; μ, Σ)
+
+represents the Gaussian distribution of a random vector x with mean μ and covariance Σ.II. P ROBLEM FORMULATION AND PRELIMINARIES 
+
+A. System Model 
+
+We consider an uplink multi-user MIMO system, where a base station (BS) equipped with Nr antennas serves Nt single-antenna user equipments (UEs). The equivalent real-valued model of this MIMO transmission can be expressed as 
+
+y = Hx + n, (1) where y ∈ RM ×1 denotes the received signal at the BS with 
+
+M = 2 Nr, x ∈ RN ×1 denotes the transmitted symbol vector with N = 2 Nt, H ∈ RM ×N is the channel matrix, and 
+
+n ∈ RM ×1 is the additive white Gaussian noise (AWGN) vector with zero mean and covariance σ2I. Each transmitted symbol is drawn from a quadrature amplitude modulation (QAM) constellation S = {a1, a 2, . . . , a S } with a cardinality of |S| = S and a constant average energy Es = 1/2.The transmission signal-to-noise ratio (SNR) is defined as SNR = E[∥Hx ∥22]/E[∥n∥22].The objective of MIMO detection is to recover the trans-mitted symbol vector x given y and the knowledge of H.Assuming a uniform prior, the optimal maximum likelihood (ML) detection criterion is given by 
+
+ˆxML = arg min  
+
+> x∈S N×1
+
+∥y − Hx ∥22, (2) which is an NP-hard problem involving prohibitive complexity when N or S is large. This computational bottleneck necessi-tates a judicious performance-complexity trade-off, while prac-tical deployment further demands adaptability across diverse system configurations and channel conditions, which existing detectors often fail to meet. To address this gap, this work constructs a highly scalable GFM to serve as a general-purpose backbone for MIMO detection. To characterize the MIMO interference, we formulate (1) over a fully connected graph G = (V, E). Here, V =
+
+{1, . . . , N } corresponds to the N unknown symbols in x.Meanwhile, the edge set E encapsulates the pairwise inter-actions between these streams, which are primarily governed by the inter-stream channel correlations h⊤ 
+
+> k
+
+hj , where hk is the k-th column of H. By casting the physical transmission into this topological view, the intricate MIMO interference is translated into graph signals, allowing the GFM to extract robust representations. 
+
+B. Downstream System Regimes 
+
+In practice, the ideal transmission model in (1) is inevitably distorted by various hardware imperfections and environ-mental non-idealities, leading to significant mismatches that can severely degrade performance. Therefore, the pre-trained GFM is expected to be swiftly adaptable to heterogeneous downstream system regimes that encompass such model mis-matches via few-shot learning. Typical examples of these                                           
+
+> TABLE I TYPICAL DOWNSTREAM SYSTEM REGIMES CAUSING MODEL
+> MISMATCHES
+> Variable System Regime Mismatch Description
+> yFew-bit ADCs [31] ¯y=Q(y),where Q(·)is an ADC quantization function.
+> HOscillator phase ¯H=ΘBS HΘ UE , where Θdenotes the noise [32] rotation matrix induced by phase drifts.
+> xNonlinear PAs [33] ¯x=PA (˜ x), where ˜x∈Cis the complex transmitted symbol.
+> nInter-cell ¯n∼ N (0, ρ CC ⊤+σ2I)with power interference [34] ρand channel Cof non-target UEs.
+
+system regimes and their corresponding mismatch descriptions are summarized in Table I. In particular, we categorize these examples based on the mismatches and impairments on the four variables within (1), guiding the subsequent physical feature design for the MoE router and the evaluations of the proposed PEFT modules against all dimensions of distortion. The specific mismatches are detailed as follows: 
+
+Few-Bit ADCs ( y): To reduce the power consumption and hardware cost of massive antenna arrays, low-resolution ADCs are increasingly employed at the BS [31], yielding a quantized received signal ¯y = Q(y), where the nonlinear quantization function Q(·) maps the continuous signal to a discrete set. This regime requires the detector to recover signals from severely distorted observations under low-resolution config-urations, such as 3-bit quantization. 
+
+Oscillator Phase Noise (H): In large-scale multi-user MIMO systems, maintaining a globally synchronized carrier and mitigating phase drifts are challenging. Independent oscil-lators at the BS and UEs introduce multiplicative phase noise, perturbing the effective channel to ¯H = ΘBS HΘ UE [32]. To align with the real-valued model, both rotation matrices take the form Θ = [ Cθ , −Sθ ; Sθ , Cθ ] with Cθ = Diag (cos θ) and 
+
+Sθ = Diag (sin θ). The phase drift vectors θ at both ends comprise independent elements following N (0 , σ 2 
+
+> θ
+
+). Relying on the static H ignores this unmodeled drift, causing a severe mismatch that compromises conventional detection [35]. 
+
+Nonlinear PAs (x): To maximize power efficiency in the uplink transmission, PAs at UEs often operate near the saturation region [33]. For modern solid-state PAs, this pre-dominantly manifests as a nonlinear amplitude distortion of the transmitted symbols ˜x ∈ C without significant phase shift, which follows the Rapp model [36]. The distorted symbol 
+
+¯x = PA (˜ x) = A(|˜x|)ej∠(˜ x) maintains its original phase ∠(˜ x),while its amplitude is compressed as 
+
+A(|˜x|) = |˜x|
+
+(1 + ( |˜x|/A sat )2p) 12p
+
+, (3) where Asat is the saturation level, and p is the smoothness factor. Consequently, the decision boundaries of the detector should be effectively calibrated to account for this distortion. 
+
+Inter-Cell Interference ( n): In multi-cell dense deploy-ments, the target signal is often corrupted by inter-cell interfer-ence from non-target UEs. Instead of being white, interference from Nint non-target UEs plus AWGN becomes colored. Specifically, the colored noise follows a Gaussian distribution, 4
+
+denoted as N (0, ρ CC ⊤ + σ2I) [34], where C ∈ RM ×2Nint 
+
+denotes the channel matrix of Nint non-target UEs, and ρ
+
+signifies their power. The detector should therefore adapt to handle the non-trivial noise covariance, enhancing robustness in interference-limited scenarios. 
+
+C. Expectation Propagation-Based Detection 
+
+According to Bayes’ theorem, the exact posterior distribu-tion of the transmitted signal x is given by 
+
+p(x|y) ∝ N (y; Hx , σ 2I)
+
+> N
+
+∏
+
+> i=1
+
+p(xi), (4) where p(xi) denotes the discrete prior over the constellation 
+
+S. Since recovering x from this exact posterior requires a prohibitively exhaustive search, the EP algorithm [30], [37] is used to iteratively approximate the joint posterior by modeling the discrete priors as independent Gaussian distributions. Specifically, at the l-th iteration ( l = 1 , 2, . . . , L ), the ap-proximated posterior is formulated as a Gaussian distribution 
+
+ql(x) = N (x; μl, Σl
+
+). Its covariance matrix and mean vector are obtained using an LMMSE estimation step as follows: 
+
+Σl = (σ−2H⊤H + Λl−1
+
+)−1, (5a) 
+
+μl = Σl
+
+(σ−2H⊤y + γl−1
+
+), (5b) where γl−1 and Λl−1 = Diag (λl−1) represent the infor-mation vector and precision matrix, respectively, provided by the (l − 1) -th iteration ( γ0 = 0 and λ0 = 1 
+
+> Es
+
+1). To progressively refine these parameters, EP computes a cavity distribution N (xi; xe,l,i , v e,l,i ) for each variable xi, which effectively isolates the self-feedback information of the current node to avoid loop accumulation [30], [38]. Specifically, the cavity mean, xe,l = [ xe,l, 1, . . . , x e,l,N ]⊤, and variance, 
+
+ve,l = [ ve,l, 1, . . . , v e,l,N ]⊤, can be computed as 
+
+ve,l = diag (Σl) ⊘ (1 − diag (Σl) ⊙ λl−1) , (6a) 
+
+xe,l = ve,l ⊙ (μl ⊘ diag (Σl) − γl−1
+
+) . (6b) Then, the approximated posterior distribution of xi is com-puted by incorporating the true prior p(xi) as ˆpl(xi|y) ∝N (xi; xe,l,i , v e,l,i ) · p(xi), whose mean ˆxl,i and variance ˆvl,i 
+
+are given by 
+
+ˆxl,i = ∑
+
+> as∈S
+
+as · ˆpl(xi = as|y), (7a) 
+
+ˆvl,i = ∑
+
+> as∈S
+
+(as − ˆxl,i )2 · ˆpl(xi = as|y). (7b) These posterior means and variances constitute the vectors 
+
+ˆxl = [ˆ xl, 1, . . . , ˆxl,N ]⊤ and ˆvl = [ˆ vl, 1, . . . , ˆvl,N ]⊤. Finally, the parameters λl and γl are updated by matching the first two moments of the independent Gaussian distributions with the approximated posterior distributions as follows: 
+
+λl = β (1 ⊘ ˆvl − 1 ⊘ ve,l ) + (1 − β)λl−1, (8a) 
+
+γl = β (ˆ xl ⊘ ˆvl − xe,l ⊘ ve,l ) + (1 − β)γl−1, (8b) where β ∈ [0 , 1] is a damping factor to smooth the updates, and the non-negativity of λl is enforced by setting λl,i =
+
+λl−1,i and γl,i = γl−1,i when 1/ˆvl,i − 1/v e,l,i < 0. After L
+
+iterations, the final detection output is given by ˆxL, on which a hard decision is applied. While EP provides a rigorous inference framework, its independent Gaussian approximation fails to capture complex interference relationships, particularly when multi-stream in-terference is severe [12]. To overcome this bottleneck while preserving its domain insights, our proposed method explicitly embeds intermediate EP statistics as physics-informed graph edge features, regularizing the data-driven mechanisms within the GFM for robust symbol recovery. III. P ROPOSED APPROACHES 
+
+In this section, we first present the detailed model archi-tecture of the proposed GFM for MIMO detection. We then elaborate on the learning workflow, which encompasses a pre-training procedure to establish a general detection model, followed by PEFT strategies for rapid adaptation to diverse downstream regimes. Finally, we introduce the MoE scheme designed to reduce computational cost during inference. 
+
+A. Model Architecture 
+
+The overall architecture of the proposed GFM is illustrated in Fig. 1. The GFM cascades L processing layers, each integrating an LMMSE module inherited from EP to explicitly compute physical statistics, together with data-driven MPNN and GT blocks to capture interference representations, fol-lowed by the decoder heads to produce the detection results. To clarify the structure, we first formulate the layer-wise operation flow, and subsequently delve into the detailed designs of each constituent module. 
+
+1) Overall Operational Flow: To map MIMO detection into a graph learning paradigm, the GFM is established upon carefully designed node features, edge representations, and detection statistics. Specifically, the initial node feature 
+
+F ∈ RN ×2 is constructed based on the graph convolution approximation of x [39, Eq. (23)] as 
+
+F = [ηH⊤y, ησ H⊤1] , η ≜ 1/λ max (H⊤H), (9) representing the initial knowledge of the nodes, where σH⊤1
+
+is an approximation of H⊤n, and η is a normalization factor. Subsequently, F is linearly projected to generate the initial embeddings for the MPNN and GT branches: 
+
+U0 = Linear U (F) ∈ RN ×dU , (10) 
+
+Z0 = Linear Z (F) ∈ RN ×dZ , (11) where dU and dZ denote the respective latent feature dimen-sions. Moreover, the prior detection statistics are initialized as X0 ≜ [ˆ x0, ˆv0, γ0, λ0] ∈ RN ×4, where γ0 = ˆ x0 = 0,
+
+ˆv0 = Es1, and λ0 = 1 ⊘ ˆv0. Together, they form the initial state tuple {U0, Z0, X0} of the GFM. At each layer l = 1 , . . . , L , the state tuple of the GFM, 
+
+{Ul−1, Zl−1, Xl−1}, is iteratively updated by exchanging in-formation across the graph edges. Following the relationships characterized by the graphical model’s pair potential [40, Eq. (6)], the physics-informed edge feature tensor at layer l,denoted as El = {el,jk }Nj,k =1 ∈ RN ×N ×6, is constructed as 
+
+el,jk = [h⊤ 
+
+> k
+
+hj , σ 2, x e,l,j , x e,l,k , v e,l,j , v e,l,k 
+
+] . (12) 5MPNN   
+
+> GT block (1)
+> Input proj. 2
+> Decoder Decoder Decoder Input proj. 1 2
+> ,,
+
+
+
+> y H 0X0U0Z
+> Concat
+
+Layer 11U1Z1X MPNN  
+
+> GT block (l)
+> Decoder Decoder Decoder Concat
+
+Layer l1l −X1l −U1l −ZlUlZlX
+
+Share  
+
+> Share 2
+> ,,
+
+ 
+
+> y H
+> LMMSE
+> (Cholesky) LMMSE
+> (Cholesky)
+
+GFM for MIMO detection 
+
+MPNN  
+
+> GT block (L)
+> Decoder Decoder Decoder Concat
+
+Layer L2 
+
+> ,,
+
+
+
+> y H
+> LMMSE
+> (Cholesky) LULZ1L−U1L−X1L−ZLX
+
+Fig. 1. Overall architecture of the proposed GFM for MIMO detection. The MPNN and decoder heads share parameters across layers, while the GT blocks are layer-specific. 
+
+This feature encapsulates both the static inter-stream correla-tions and the dynamic node-specific extrinsic statistics itera-tively inferred by the EP principle. Specifically, the LMMSE module first uses the prior statistics in Xl−1, along with the global state {y, H, σ 2}, to extract the essential extrinsic infor-mation xe,l and ve,l , thereby assembling El. This feature is then injected into both the MPNN and GT blocks, guiding the MPNN to update the local representation Ul, while acting as attention biases for the GT to refine the global representation 
+
+Zl. Finally, the decoder heads map the concatenated latent features into the updated detection statistics Xl. The layer-wise update process can be summarized as: 
+
+Ul, Zl, Xl = GFM l(Ul−1, Zl−1, Xl−1), (13) computed as El = LMMSE (Xl−1, y, H, σ 2), (14) 
+
+Ul = MPNN (Ul−1, El), (15) 
+
+Zl = GT l(Zl−1, El), (16) 
+
+Xl = Decoder (Concat [Ul, Zl]) . (17) To balance training stability and representation expressivity, the MPNN and decoder heads are shared across all layers, whereas the GT blocks are layer-specific to increase expressive power. Guided by this overall workflow, the designs of the LMMSE module, MPNN, GT, and the decoder heads are elaborated in the following parts. 
+
+2) LMMSE Module: Serving as the physics-driven core inherited from EP, the LMMSE module extracts essential statistics of the interference. Specifically, it utilizes the ap-proximated prior parameters λl−1 and γl−1 from Xl−1 to compute (5), obtaining the mean μl and covariance Σl of the Gaussian approximation. Instead of explicit matrix inversion in (5a), Cholesky decomposition [41], [42] is first calculated as 
+
+σ−2H⊤H+Λl−1 = LlL⊤ 
+
+> l
+
+, where Ll is a lower triangular ma-trix. Then, Σl can be solved via forward and backward substi-tutions [43]. 1 While still exhibiting an O(N 3) complexity, this hardware-friendly approach guarantees numerical stability and reduces implementation overhead for practical deployments. Subsequently, the EP cavity computations in (6) are conducted to produce the extrinsic information Xe,l = [ xe,l , ve,l ], which is aggregated to construct the physics-informed feature El to guide the subsequent data-driven modules. 
+
+> 1
+
+This approach avoids the computationally intensive matrix multiplication involved in computing (L⊤ 
+
+> l
+
+)−1L−1 
+
+> l
+
+.Linear Linear Linear          
+
+> Q
+> K
+> V
+> Node feature Matmul Scale Softmax Matmul Bias
+> projector
+> ×HMHA
+> Edge feature Linear Concat
+> FFN
+> (b) GT block
+> LMMSE 1l−X
+> Message MLP lU1l−U2
+> ,,
+> y H 2
+> ,,
+> 
+> y H  Graph conv. for MP MIMO 0()
+> Mlmmmw T =
+> 
+
+ L U    
+
+> GRU l Ue, lX
+> Linear lU
+> (a) MPNN
+> Decoder MLP
+> Posterior update & Moment matching
+> (c) Decoder
+> 13421342
+> LMMSE lG1l−G1l−ZlZ1l−X,ljk elPlX
+
+Fig. 2. Details of the components within the GFM. (a) Spectral convolution-enhanced MPNN. (b) GT with a bias projector. (c) Decoder head for posterior distribution approximation. 
+
+3) Spectral Convolution-Enhanced MPNN: To capture lo-cal interference patterns within the MIMO graph, we employ an MPNN inspired by [39], as illustrated in Fig. 2(a). Tradi-tional message passing often struggles with the dense connec-tivity in large-scale MIMO scenarios. In contrast, our approach utilizes Chebyshev polynomial-based spectral graph filters operating on the normalized MIMO Laplacian, LMIMO ≜
+
+I − ηH⊤H, explicitly characterizing the spatial correlations and circumventing the bottleneck in densely connected graphs with N (N − 1) message computations. To improve the generalizability of the spectral graph filters across dynamic wireless environments, we use an instance-adaptive attention mechanism, denoted as ATT (·). This mech-anism generates dynamic, channel-aware filter coefficients 
+
+[ATT (F)] c based on the initial node feature F, tailoring the Chebyshev polynomials Tc(LMIMO ) with order c =1, 2, . . . , C to the current interference geometry. 2 The update rule combines this adaptive spectral filtering with a gated recurrent unit (GRU), given by: 
+
+˜Ul =
+
+> C
+
+∑
+
+> c=1
+
+[ATT (F)] cTc(LMIMO )MLP M(Ul−1), (18) 
+
+Gl = GRU 
+
+(
+
+Concat [ ˜Ul, Xe,l ], Gl−1
+
+)
+
+, (19) 
+
+Ul = Linear G(Gl). (20) 
+
+> 2
+
+The Chebyshev polynomials are given by Tc(x) = 2 xT c−1(x)−Tc−2(x)
+
+with T0(x) = 1 and T1(x) = x.6
+
+Here, the message multi-layer perceptron (MLP), MLP M(·),acts as a local feature projector, while the GRU’s hidden state 
+
+Gl encodes the physics-informed extrinsic statistics Xe,l from the LMMSE module. This integration enables the MPNN to effectively learn expressive local representations tailored to the underlying interference structures. 
+
+4) Graph Transformer: Complementary to the local feature extraction of MPNN, the GT provides global modeling capac-ity to capture long-range dependencies. While vanilla multi-head attention (MHA) [44] relies heavily on latent semantic similarities among node queries and keys, we explicitly inject the aforementioned edge feature El into the attention mecha-nism [26], [27] to align with the MIMO interference topology, as shown in Fig. 2(b). Specifically, each feature vector el,jk 
+
+constructed in (12) is fed into a shallow projector ϕB,l (·) to yield an H-dimensional bias vector, where H denotes the number of parallel attention heads. For the h-th head at layer 
+
+l, the pre-Softmax attention score is formulated as 
+
+A(h) 
+
+> l,jk
+
+=
+
+(zl−1,j W(h)Q
+
+)( zl−1,k W(h)K
+
+)⊤
+
+√d +[ ϕB,l (el,jk )] h, (21) where zl−1,j ∈ R1×dZ is the j-th row of Zl−1, W(h)Q ∈ RdZ×d
+
+and W(h)K ∈ RdZ×d are learnable query and key projection matrices, respectively, and d = dZ/H represents the feature dimension per head. By integrating the head-specific bias term 
+
+[ϕB,l (el,jk )] h, certain heads are encouraged to concentrate on strong interference streams, while others capture global correlations. Subsequently, the attention-weighted representations from all H heads are concatenated, linearly transformed using the value and output projection matrices ( W(h)V ∈ RdZ×d and 
+
+WO ∈ RdZ×dZ ), and passed through a feed-forward network (FFN) with residual connections as follows: 
+
+ol,j = Concat Hh=1 
+
+[ N∑
+
+> k=1
+
+Softmax k
+
+(A(h)
+
+> l,jk
+
+)
+
+× (zl−1,k W(h)V
+
+)]
+
+WO, (22) 
+
+zl,j = FFN (ol,j ) + zl−1,j . (23) This process produces the updated global feature Zl =[z⊤
+
+> l, 1
+
+, . . . , z⊤ 
+
+> l,N
+
+]⊤, which is then passed to the decoder heads. 
+
+5) Decoder Heads: The decoder heads project the concate-nated local and global features into the symbol space, deriving the updated detection statistics Xl. Considering the structural diversity of different modulation schemes, we employ a bank of modulation-specific decoder heads. Specifically, a three-layer MLP dedicated to the target modulation, MLP D,S (·), is applied to the unified representations to produce an enhanced posterior probability estimation Pl ∈ RN ×S as 
+
+Pl = MLP D,S (Concat [Ul, Zl]) , (24) where the i-th row of Pl represents the estimated probabilities of xi over each constellation point. This architecture allows the GFM to maintain a shared backbone for high-level interference modeling while utilizing specialized heads for precise symbol-level decisions. This enhanced posterior estimation improves over the standard EP’s independent Gaussian approximation introduced in Section II-C. Given Pl, the posterior mean ˆxl
+
+and variance ˆvl can be computed following (7). Subsequently, moment matching with the damping factor empirically set to 
+
+β = 0 .2 [38] is performed to update λl and γl per (8), which are then concatenated with the posterior moments to assemble 
+
+Xl for the next layer. 
+
+B. Model Pre-Training 
+
+To endow the GFM with generalizability across different system configurations, we adopt a pre-training strategy that encompasses a wide range of system parameters and channel conditions. The pre-training dataset, Dpre , can be synthesized to cover a broad spectrum of these configurations, which can be categorized into the following three dimensions:  
+
+> •
+
+Geometric and Array Configurations: To ensure scal-ability across different BS and UE scales, the training phase includes various antenna counts ( Nr, Nt) and array geometries, e.g., uniform linear array (ULA) and uniform planar array (UPA). This enables the GFM to learn universal spatial correlation patterns that are independent of specific array dimensions.  
+
+> •
+
+Channel Environments and Propagation: The pre-training encompasses diverse carrier frequencies and channel scenarios, e.g., 3rd generation partnership project (3GPP) technical report (TR) 38.901 urban macrocell (UMa) and urban microcell (UMi) [45]. Moreover, by varying the BS-UE distances and scattering environments, the model captures diverse propagation characteristics.  
+
+> •
+
+Signal and Modulation Diversity: The GFM is exposed to diverse signal configurations, including varied modula-tion schemes (16-, 64-, and 256-QAM), and SNR levels. During pre-training, the modulation-specific decoder head is activated for each sample, enabling the model to map shared representations to modulation-specific posteriors. Each training sample is characterized by a tuple 
+
+{H, x, y, σ }. Here, H is randomly drawn from the pre-training channel dataset and normalized for unit average power as 
+
+∥H∥2 
+
+> F
+
+= NrNt. The transmitted symbol vector x is generated by randomly selecting symbols from the constellation set assigned to the current sample, while the received signal y
+
+is computed using (1) with AWGN. The noise variance σ2 is determined by the SNR level that varies across samples. To ensure robustness against practical impairments, imper-fect CSI is simulated during pre-training by introducing esti-mation errors to the channel matrix, modeled as ˆH = H + E,where E is a random error matrix with independent Gaussian entries of zero mean and variance σ2CSI . Varying CSI error levels are incorporated into the training data to ensure the GFM can handle different degrees of channel uncertainty in real-world deployments. To accommodate varying real-valued stream dimensions 
+
+N and constellation sets S, the overall pre-training loss is formulated as the expectation of the empirical cross-entropy 7Linear 1 Linear 2 Linear 3 ReLU ReLU ReLU Norm. down Wup W      
+
+> ReLU Adapter Frozen Tunable Non-parametric Self-attention
+> QKVLoRA LoRA down Wup W
+> GT block
+> MPNN
+> MHA
+> Message MLP
+> Decoder
+> MLP
+> Decoder
+> Fig. 3. PEFT structures of different components within the GFM.
+
+over the training data distribution: 
+
+Lpre = E{H,x,y,σ,N, S}∼D pre 
+
+[
+
+− 1
+
+N
+
+> N
+
+∑
+
+> i=1
+
+∑
+
+> as∈S
+
+Ixi=as log PL,is 
+
+]
+
+,
+
+(25) where I(·) is the indicator function representing the true symbol label, and PL,is is the (i, s )-th element of the predicted posterior PL produced by the activated decoder head MLP D,S ,denoting the GFM’s predicted probability of xi = as.
+
+C. Parameter-Efficient Fine-Tuning 
+
+To address the inevitable model mismatches in downstream system regimes described in Section II-B, we adapt the pre-trained GFM via lightweight fine-tuning to construct scenario-specific detectors. To ensure rapid adaptation with minimal overhead, we employ PEFT techniques, keeping the majority of the model parameters frozen. Next, we introduce the PEFT strategies tailored to each component within the GFM, as depicted in Fig. 3. For the MPNN and the decoder heads, we insert Adapter blocks [46] into their respective MLPs, i.e., MLP M and 
+
+MLP D,S .3 From a signal processing perspective, these adapters serve as learnable “local compensators” that calibrate the message-passing kernels and decision boundaries to accom-modate scenario-specific interference geometries and nonlinear distortions. Specifically, for an input feature R, the Adapter computation is formulated as: 
+
+R′ = R + ReLU 
+
+(
+
+LN (R)W(A) down W(A) up 
+
+)
+
+, (26) where LN (·) denotes layer normalization, while W(A) down and 
+
+W(A) up are the trainable down- and up-projection matrices constructing a bottleneck structure with dimension rA.Complementary to local adjustment, we utilize a low-rank adaptation (LoRA) approach [47] for each GT block to recalibrate the global interference modeling. Since the MHA mechanism relies on learnable query and value projection matrices to capture dependencies across different user streams, LoRA injects trainable low-rank decomposition matrices in parallel to these pre-trained weights: 
+
+Z′ = Z
+
+(
+
+W∗ + αrL
+
+W(L) down W(L) up 
+
+)
+
+, W∗ ∈ { WQ, WV}, (27)                  
+
+> 3Similar to the MPNN and decoder heads, the inserted Adapter blocks are also shared across layers. Router MPNN
+> GT block Concat Sample
+> feature
+> Expert 1
+> Expert 2 Top-1
+> gating
+> Adapter
+> LoRA 0Update Ul
+> Decoder
+> Adapter
+> Xl
+> Layer l
+> Fig. 4. Illustration of the MoE structure in each layer of the GFM. TABLE II ROUTER ARCHITECTURE
+> Input : The physical feature g=ψ(y,H, σ 2)
+> FC layers Input dim./Output dim. Activation
+> 1dim (g)/32 BN+ReLU 232/16 BN+ReLU 316/2 BN+Softmax
+> Output : A binary expert-selection signal FC: Fully connected. BN: Batch normalization.
+
+where W∗ denotes the frozen pre-trained projection matrix, 
+
+W(L) down ∈ Rd×rL and W(L) up ∈ RrL×d are the trainable low-rank matrices with rL ≪ d, and α ≥ rL is a scaling factor controlling the adaptation strength. This approach allows the GFM to adapt its attention focus to specific interference conditions with minimal fine-tuning samples. By updating only these lightweight parameters, the GFM effectively learns the necessary shift and scale of the latent representations to address downstream mismatches, while pre-venting catastrophic forgetting of the general detection priors. The fine-tuning stage utilizes a limited number of samples, 
+
+DFT , to align the pre-trained GFM with the downstream regime. The loss function for this stage can be expressed as: 
+
+LFT = E
+
+[
+
+− 1
+
+NFT 
+
+> NFT
+
+∑
+
+> i=1
+
+∑
+
+> as∈S FT
+
+Ixi=as log PL,is (ΘFT |ΘBase )
+
+]
+
+,
+
+(28) where the expectation is taken over DFT , and NFT and 
+
+SFT denote the stream dimension and constellation set for the target downstream regime, respectively, while ΘFT and 
+
+ΘBase represent the trainable adaptation parameters and the frozen pre-trained backbone. Unlike the pre-training phase, the gradient flow here is restricted to the PEFT modules. This PEFT design enables rapid adaptation with minimal computational and data requirements, facilitating deployment in dynamic wireless environments. 
+
+D. Mixture-of-Experts Learning for Inference Efficiency 
+
+To balance performance and efficiency, we integrate an MoE mechanism [48] into the GFM architecture. The primary motivation is to mitigate the inference overhead of foundation models, which typically activate their entire parameter set regardless of the task difficulty. Since each GFM layer consists of parallel MPNN and GT branches, these two components can be treated as specialized experts with complementary receptive fields. Although using both experts concurrently improves generalization, activating a specific expert is often sufficient to handle certain instances. Therefore, we integrate an MoE 8
+
+structure with top-1 gating within each layer of the model to dynamically select the most relevant expert for each input, reducing computational overhead and energy consumption during inference while maintaining detection performance. As illustrated in Fig. 4, this MoE mechanism is lever-aged during the fine-tuning stage. By combining it with PEFT techniques, we develop a mixture-of-adaptations ap-proach [49], [50] to facilitate efficient deployment across downstream regimes. To achieve this, a lightweight router is designed to evaluate the physical features of the current input, g = ψ(y, H, σ 2), and output a binary selection signal. As detailed in Table II, the router consists of three fully connected layers followed by a Softmax activation, where the resulting probabilities are converted into a binary decision via an argmax operation. Based on this signal, the MoE gates the entire computation of the experts, allowing only the selected branch (MPNN or GT) to process the input. To preserve the pre-trained dual-branch template for the subsequent decoder projection, zero tensors are padded in place of the bypassed expert’s output. This dynamic routing policy adapts to varying channel conditions. In regimes with minimal interference, the router tends to prioritize the simple MPNN expert. Conversely, under severe nonlinear distortions or dense interference environ-ments, it can route the signal to the more expressive GT expert. During fine-tuning, the router is jointly learned with the PEFT parameters to establish an appropriate expert selection strat-egy for different input characteristics. During inference, this input-dependent selection reduces the average computational complexity with minimal performance degradation. To empower the router to accurately perceive diverse trans-mission conditions, we empirically choose a set of features that are indicative of essential channel and interference char-acteristics to construct vector g. Specifically, it is defined as 
+
+g = [ gint , g dis , g peak , g SNR ]⊤. (29) Here, gint = ∥H⊤H∥2 
+
+> F−∥ diag (H⊤H)∥22
+> ∥diag (H⊤H)∥22
+
+denotes the inter-stream interference ratio, quantifying the orthogonality of the channel matrix; gdis = ∥y∥1/(√M ∥y∥2) captures the nonlinear distor-tion induced by few-bit ADCs; gpeak = √M ∥y∥∞/∥y∥2 mea-sures the normalized peak magnitude, reflecting the amplitude compression caused by PA saturation; gSNR = ∥y∥2/(√M σ )
+
+reflects the empirical SNR, which is further coupled with phase noise drifts. These features provide multifaceted insights into the characteristics of each detection instance, enabling the router to make informed expert selections. IV. N UMERICAL RESULTS 
+
+A. Experimental Details 1) Simulation Settings: The detailed settings regarding the channel scenarios, foundation datasets construction, and down-stream system regimes are described as follows. 
+
+Channel Scenarios and Foundation Datasets: To simulate practical massive MIMO uplink transmissions, we generate diverse channel datasets using the QuaDRiGa toolbox [51] compliant with the 3GPP TR 38.901 standard [45]. As out-lined in Section III-B, a variety of system configurations and scenarios are included to learn a general GFM for massive MIMO detection. Specifically, we simulate non-line-of-sight (NLoS) environments where a BS, placed at a height of 25 m, utilizes various antenna array geometries, including ULA and 3GPP-3D planar configurations. The BS serves single-antenna UEs with a height of 1.5 m uniformly distributed within a distance of 50 m to 300 m, dispersed across either a 120 ◦
+
+sector or a 100 m radius circle. The detailed configurations for the pre-training and general testing channel datasets are summarized in Table III. For pre-training, channel sampling is executed at center frequencies 
+
+fc ∈ {2.6, 5.9} GHz. Frequency-domain transformation is conducted over 128 effective subcarriers within a 10 MHz bandwidth. Each pre-training dataset from D1 to D5 encom-passes six representative MIMO dimensions, i.e., Nr × Nt ∈{512 ×128 , 256 ×128 , 128 ×64 , 128 ×32 , 64 ×32 , 64 ×16 }. This yields 38,400 channel samples (6 setups × 50 user drops ×
+
+128 subcarriers) per dataset, which are partitioned for training and validation at a 24:1 ratio. During testing, the robustness of the GFM is examined over three subsets with different configurations and spatially non-overlapping user drops com-pared to pre-training datasets, preventing data leakage. The in-distribution (ID) set D6 comprises 12,800 samples under the 512 × 128 and 256 × 128 MIMO setups, featuring an unseen combination of system parameters compared to the pre-training datasets. Zero-shot generalization is examined via two OOD sets of 6,400 samples each: D7 introduces a rural macrocell (RMa) environment under a 96 × 32 MIMO setup, and D8 further shifts to an upper-6 GHz (U6G) band with a 1024 × 128 XL-MIMO configuration. 
+
+Signal and Error Configurations: To enrich signal diver-sity during training data generation, we randomly apply modu-lation schemes ranging from 16-QAM to 256-QAM alongside SNRs varied across [4, 36] dB. To emulate practical channel acquisition imperfections, random CSI estimation errors are injected into 50% of the training samples. The error variance 
+
+σ2CSI is selected to maintain a CSI normalized mean squared error (NMSE) between [ −27, −10] dB, encouraging the GFM to learn robust detection mappings under channel uncertainties. 
+
+Downstream Regime Configurations: Beyond the foun-dation datasets, we specialize the pre-trained GFM for the representative downstream regimes discussed in Section II-B to further assess adaptability. Specifically, for the few-bit ADCs regime, a standard mid-rise uniform quantizer [31] is employed with a 3-bit resolution to emulate significant quantization errors. For oscillator phase noise , the standard deviations of the phase drifts for the UEs and the BS antennas are set to σθ, UE = σθ, BS = 4 ◦ (≈ 0.07 rad) to reflect a typical impairment level [35]. For nonlinear PAs , UE-side distortion is characterized via the Rapp model with a saturation level Asat = 1 and a smoothness factor p = 2 according to [33], alongside 16-QAM to trigger amplitude-dependent compression. Finally, regarding inter-cell interference , inter-ference intensity is quantified by the interference-plus-noise-to-thermal ratio, fixed at 10 log 10 (( ρ + σ2)/σ 2) = 10 dB to emulate practical scenarios [34]. For each regime, a dataset of 11,520 samples is constructed (5,120 for fine-tuning, 6,400 for testing), facilitating few-shot performance validation under 9
+
+TABLE III OVERVIEW OF THE FOUNDATION CHANNEL DATASETS 
+
+Set Type Index fc (GHz) Antenna Array Channel Scenario UE Distribution Num. of Samples Pre-training Set D1 2.6, 5.9 3GPP-3D UMa Sector 38,400 D2 2.6, 5.9 ULA UMa Sector 38,400 D3 2.6, 5.9 ULA UMa Circle 38,400 D4 2.6, 5.9 3GPP-3D UMi Sector 38,400 D5 2.6, 5.9 ULA UMi Sector 38,400 General Testing Set D6 (ID) 2.6, 5.9 ULA UMi Circle 12,800 D7 (OOD) 5.9 3GPP-3D RMa Sector 6,400 D8 (OOD) 6.8 (U6G) 3GPP-3D RMa Sector 6,400 
+
+fine-tuning sample sizes ranging from 128 to 5,120. 
+
+2) Model Hyperparameters and Training Details: Next, we introduce the GFM hyperparameters and training details during the pre-training and fine-tuning phases. 
+
+Implementation and Pre-training Setup : All models were implemented in PyTorch and trained on an NVIDIA H100 GPU. The GFM’s backbone cascades L = 5 layers, where each GT block has a hidden dimension of dZ = 256 and 
+
+H = 16 attention heads. Within the MPNN and the decoder heads, the three-layer MLPs’ hidden dimensions are set to 
+
+dh1 = 128 and dh2 = 64 , with a message size of dU = 16 .The spectral convolution order of the MPNN is fixed at C = 3 .These hyperparameter selections result in a compact model with 2.19M parameters, striking a balance between model expressiveness, memory cost, and computational efficiency. The GFM is pre-trained for 200 epochs using the Adam optimizer with an initial learning rate of 7 × 10 −4 and a batch size of 64. To ensure stability, the learning rate is halved if the validation loss plateaus for 10 consecutive epochs, and the minimum learning rate is set to 1 × 10 −6.
+
+Fine-tuning Details : The fine-tuning phase for each down-stream regime is conducted for 50 epochs unless noted otherwise. For the PEFT structures, the Adapter bottleneck dimension is set to rA = 4 , and the LoRA employs a rank of rL = 4 with a scaling factor of α = 8. Given the limited number of trainable parameters, the learning rates for the LoRA and Adapter blocks are elevated to 1 × 10 −3 and 
+
+5 × 10 −3, respectively. Furthermore, early stopping with a patience of 10 epochs is enforced to mitigate overfitting. 
+
+3) Baselines: We benchmark the GFM against a represen-tative series of traditional and learning-based MIMO detectors. Although the NN baselines have smaller parameter scales, they represent highly competitive state-of-the-art references:  
+
+> •
+
+LMMSE [4]: The standard linear estimator implemented via the low-complexity Cholesky decomposition-based inverse described in Section III-A2, without iterative refinement.  
+
+> •
+
+EP [30]: The standard EP-based MIMO detector detailed in Section II-C, with L = 5 , also adopts the Cholesky decomposition-based inverse.  
+
+> •
+
+GEPNet [12]: A state-of-the-art learning-based MIMO detector that enhances EP using a fully connected MPNN. We adopt its publicly available implementation 4 and train 
+
+> 4
+
+Available at https://github.com/GNN-based-MIMO-Detection/GNN-base d-MIMO-Detection. 0 4 8 12 16 20 24 SNR (dB)         
+
+> (a) 256 128 MIMO with 16-QAM
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> LMMSE EP GEPNet EP-GT GFM 04812 16 20 24 SNR (dB)
+> (b) 512 128 MIMO with 64-QAM
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+
+Fig. 5. BER performance on the ID testing dataset D6. -19 -17 -15 -13 -11 -9 CSI NMSE (dB)        
+
+> (a) 256 128 MIMO with 16-QAM
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> LMMSE EP GEPNet EP-GT GFM -29 -27 -25 -23 -21 -19 CSI NMSE (dB)
+> (b) 512 128 MIMO with 256-QAM
+> 10 -3
+> 10 -2
+> 10 -1
+
+Fig. 6. BER performance under imperfect CSI on the ID testing dataset D6, where (a) is at an SNR of 24 dB, and (b) is at an SNR of 28 dB. 
+
+it under the same settings as the GFM.  
+
+> •
+
+EP-GT: A strong attention-based baseline that takes the EP’s estimation as input and refines it using a GT [26]. For a fair comparison, the GT incorporates L = 5 layers with identical architecture, hyperparameters, and training strategies as the proposed GFM. 
+
+B. In-Distribution Performance 
+
+We first evaluate the GFM’s performance on the ID testing dataset D6. The performance is measured in terms of bit error rate (BER) across varying SNR levels and presented in Fig. 5. Throughout our evaluations, the BER is accumulated until a maximum of 10 7 bits are transmitted. The results demonstrate that the GFM achieves improved BER performance across all 10 16 20 24 28 32 36 
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> LMMSE EP GEPNet EP-GT GFM
+
+Fig. 7. BER performance on the OOD testing dataset D7 featuring the RMa scenario with 96 × 32 MIMO and 64-QAM modulation. 
+
+SNR levels, outperforming traditional methods and learning-based detectors. Specifically, as shown in Fig. 5(a), the GFM achieves an approximate 0.5 dB gain over the best baseline, EP-GT, at a BER of 10 −4 for the 256 × 128 MIMO with 16-QAM modulation. Under the 512 × 128 MIMO with the more challenging 64-QAM modulation depicted in Fig. 5(b), the GFM maintains its performance advantage compared to all baselines. This indicates that the GFM has effectively learned robust detection mappings during pre-training. We next investigate the GFM’s robustness under imperfect CSI in Fig. 6, where the test NMSE ranges (extending down to 
+
+−29 dB and up to −9 dB) are set wider than the pre-training interval of [ −27, −10] dB to evaluate the extrapolation ability. Specifically, Fig. 6(a) evaluates the 256 × 128 MIMO setup with 16-QAM, while Fig. 6(b) considers the 512 × 128 MIMO setup with 256-QAM. As observed, the GFM sustains a clear performance edge over both conventional and learning-based baselines in both scenarios. For instance, to achieve a target BER of 10 −2, the GFM tolerates CSI NMSE levels 0.5 dB to 4 dB higher than those required by the baselines. In Fig. 6(a), the LMMSE and EP comparison reveals a CSI-error-limited bottleneck, where EP’s performance degrades with inaccurate CSI, whereas Fig. 6(b) is predominantly noise-limited. Despite these distinct challenging conditions, the GFM consistently demonstrates resilience in mitigating the impact of channel uncertainty and noise contamination. 
+
+C. Out-of-Distribution Robustness Study 
+
+In this subsection, we evaluate the zero-shot performance of the pre-trained GFM on two OOD datasets, D7 and D8, featur-ing unseen configurations of propagation scenarios, frequency bands, and antenna scales. We first consider dataset D7, oper-ating under an RMa propagation environment with an antenna ratio of Nt/N r = 1 /3, which is strictly excluded from the pre-training datasets. As illustrated in Fig. 7, despite the harsh channel conditioning typical of rural environments, the GFM yields even more pronounced gains over the baselines without any adaptation. This suggests that the model learns transferable interference representations robust to severe distribution shifts. We further investigate the GFM’s scalability under the U6G XL-MIMO setup, i.e., dataset D8, which involves a shift to 0 2 4 6 8 10 12 14 16 18  
+
+> SNR (dB)
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> LMMSE EP GEPNet EP-GT GFM 16 10 -3
+> 10 -3
+
+Fig. 8. BER performance on the OOD testing dataset D8 featuring the U6G XL-MIMO RMa system with 1024 × 128 MIMO and 64-QAM modulation. 128 256 512 1024 2048 Number of Fine-tuning Samples 10 -3 
+
+> 10 -2
+> 10 -1
+> BER GFM FullFT FromScratch GFM FullFT Pre-trained GFM PEFT GFM MoE PEFT EP EP Revised GEPNet Full-shot EP-GT Full-shot
+
+(a) BER versus fine-tuning sample size at SNR = 28 dB 12 16 20 24 28 SNR (dB) 10 -3 
+
+> 10 -2
+> 10 -1
+> BER
+> GFM FullFT FromScratch (128 samples) GFM FullFT FromScratch (1280 samples) GFM FullFT Pre-trained (128 samples) GFM FullFT Pre-trained (1280 samples) GFM PEFT (128 samples) GFM PEFT (1280 samples) GFM MoE PEFT (128 samples) GFM MoE PEFT (1280 samples)
+
+(b) BER versus SNR Fig. 9. Few-shot adaptation BER performance under the phase noise regime. 
+
+a 6.8 GHz band, an expanded 1024 ×128 array, and the RMa propagation model. Given its stark deviation from pre-training, this joint domain shift challenges the model’s resilience. As shown in Fig. 8, the GFM accommodates the larger array configuration and the variations in high-frequency propagation, maintaining a consistent performance edge over all base-lines. These results confirm the proposed GFM’s potential to generalize across the tested shifts in propagation scenarios, frequency bands, and array scales. 11 0 4 8 12 16 20 SNR (dB)                        
+
+> (a) Few-bit ADCs, 512 128 MIMO
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> BER
+> 12 14 16 18 20 22 24 26 28 SNR (dB)
+> (b) Nonlinear PAs, 256 128 MIMO
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> 12 16 20 24 28 32 SNR (dB)
+> (c) Inter-cell interference, 256 128 MIMO
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> EP EP Revised GEPNet Full-shot EP-GT Full-shot GFM PEFT (128 samples) GFM PEFT (1280 samples) GFM MoE PEFT (128 samples) GFM MoE PEFT (1280 samples)
+> Fig. 10. Few-shot adaptation BER performance across different downstream system regimes with 16-QAM modulation.
+
+D. Few-Shot Performance across Downstream Regimes 
+
+Beyond evaluating the pre-trained GFM and its zero-shot generalization capabilities, we further investigate the few-shot adaptation performance of the GFM across the representative downstream regimes introduced in Section II-B. The compar-ative analysis involves four distinct adaptation schemes under varying few-shot sample sizes (e.g., 128 and 1280 samples) to evaluate the efficacy of the pre-training and fine-tuning strategies: 1) “GFM FullFT FromScratch” initializes the model with random weights and optimizes it via full-parameter fine-tuning; 2) “GFM FullFT Pre-trained” inherits weights pre-trained on foundation datasets D1–D5 and performs full-parameter fine-tuning; 3) “GFM PEFT” also utilizes the pre-trained weights but only fine-tunes the lightweight adaptation modules while freezing the backbone; and 4) “GFM MoE PEFT” integrates the condition-aware expert routing mecha-nism with the PEFT strategy. This experimental setup aims to quantify the value of pre-trained foundation knowledge in accelerating transfer to distinct regimes under few-shot conditions, and to validate whether the proposed PEFT and MoE can approximate the performance of full-parameter adap-tation. Moreover, to provide a model-based baseline against mismatches, we introduce an impairment-aware EP (denoted as “EP Revised”). Assuming knowledge of the impairment parameters, it compensates amplitude non-linearities via Buss-gang decomposition, while mitigating multiplicative phase drifts and inter-cell interference through pre-whitening. The few-shot adaptation BER performance under the phase noise regime is presented in Fig. 9. Specifically, Fig. 9(a) shows the BER against fine-tuning sample size at a fixed SNR of 28 dB. The figure demonstrates that the proposed PEFT approach converges rapidly with merely 128 fine-tuning sam-ples. This strategy minimizes adaptation overhead by updating only 1.10% of parameters while approaching full fine-tuning accuracy within approximately 12%. Furthermore, the perfor-mance gap between the “GFM FullFT FromScratch” model and the pre-trained GFM illustrates the benefit of foundation pre-training, as the from-scratch model struggles to learn meaningful interference representations under such data-scarce conditions. Notably, the adapted GFM with PEFT outperforms both the statistical “EP Revised” and the full-shot learning baselines (GEPNet and EP-GT) trained on all 5,120 fine-tuning samples, proving the superiority of our method in handling phase drifts. The MoE-based scheme also preserves the rapid convergence of the base GFM while incurring only a slight performance gap relative to the full-activation architecture. These findings are further corroborated by Fig. 9(b), where the “GFM PEFT” achieves the most competitive performance across all SNRs using limited fine-tuning samples, while the MoE-based variants exhibit comparable BERs. Similar trends are observed for the other regimes in Fig. 10. Whether combating few-bit ADCs, nonlinear PA distortions, or colored inter-cell interference, the “GFM PEFT” con-sistently outperforms classical and learning-based baselines using merely 128 training samples (2.5% of the full dataset), demonstrating its adaptability to diverse distortions without requiring prior knowledge of impairment parameters. Finally, the MoE routing dynamically activates experts to reduce in-ference overhead, as detailed in Section IV-F, while sustaining high accuracy given 1280 samples (25% of the full dataset). 
+
+E. Ablation Study 
+
+To evaluate the individual contributions of the components within the GFM in pre-training, we conduct an ablation study by comparing the full GFM with two variants: 1) GFM w/o MPNN , which removes the MPNN branch, and 2) GFM w/o GT , which excludes the GT blocks. The BERs of these variants on both the ID dataset D6 with varying CSI uncertainty and the OOD dataset D7 with varying SNRs are summarized in Table IV. As observed, the full GFM achieves the lowest BER across all scenarios, while the removal of each component leads to a noticeable performance degradation, confirming the necessity of integrating local and global feature extraction. To evaluate the impact of the PEFT strategies for each com-ponent within the GFM (Fig. 3), we investigate the BER per-formance of various PEFT combinations across representative downstream regimes. The ablation results for the phase noise and nonlinear PA regimes at SNR = 28 dB are summarized in Table V. The comparison reveals that the joint adaptation of all modular components, i.e., GT LoRA, MPNN Adapter, and De-coder Adapter, is essential for achieving the best performance, as the removal of any component leads to a performance drop. 12                                                                                                     
+
+> TABLE IV ABLATION STUDY OF GFM C OMPONENTS UNDER ID (D6) AND OOD (D7) S CENARIOS (BER P ERFORMANCE )Methods ID: D6, 512 ×128 MIMO, 256-QAM OOD: D7, 96 ×32 MIMO, 64-QAM imperfect CSI, SNR =28 dB RMa-NLoS NMSE (dB) SNR (dB)
+> −29 −25 −21 28 32 36 GFM (2.19M) 2.04e-3 7.69e-3 2.86e-2 2.58e-2 2.82e-3 1.94e-4
+> GFM w/o MPNN (2.03M) 7.03e-3 1.44e-2 3.25e-2 7.51e-2 2.76e-2 8.58e-3 GFM w/o GT (0.11M) 5.76e-3 1.46e-2 3.16e-2 7.00e-2 2.78e-2 8.65e-3 Note: (~) denotes the number of parameters, and bold text indicates the best results. The parameter counts do not sum up linearly (0.11 +2.03 ̸=2.19) because the input dimension of the decoder heads shrinks when either the GT or MPNN branch is removed (bypassing concatenation). TABLE V ABLATION STUDY OF PEFT C OMPONENTS ACROSS DOWNSTREAM REGIMES (BER AT SNR = 28 dB )Scenario Full FT GT LoRA MPNN Ada. Dec. Ada. GT LoRA MPNN Ada. GT LoRA Dec. Ada. MPNN Ada. Dec. Ada. GT LoRA MPNN Ada. Dec. Ada. (100%) (0.96%) (0.07%) (0.07%) (1.03%) (1.03%) (0.14%) (1.10%) Phase noise 6.52e-4 7.70e-4 4.60e-3 9.22e-4 8.14e-4 7.40e-4 8.51e-2 7.04e-4 Nonlinear PAs 3.00e-4 5.04e-4 7.22e-2 6.92e-4 3.45e-4 5.25e-4 5.79e-4 3.36e-4 Note: (~%) denotes the ratio of trainable parameters within the GFM. “Dec.” denotes the decoder heads, while “Ada.” stands for the Adapter module. Bold text indicates the top results, whereas the second-best results are underlined. TABLE VI AVERAGE INFERENCE COMPLEXITY (FLOP S)PER SYMBOL
+> VECTOR DETECTION
+> Methods Nonlinear PAs Few-bit ADCs 256 ×128 MIMO 512 ×128 MIMO EP 0.069G 0.138G GEPNet (0.11M) 9.102G 9.171G EP-GT (2.03M) 2.252G 2.404G GFM (2.19M) 2.665G 2.734G GFM w MoE (2.19M) 0.450G 0.550G Note: (~) denotes the number of parameters.
+
+This “Full PEFT” configuration (the last column) outperforms all other PEFT combinations and approaches the performance of full fine-tuning within approximately 12% while updating only 1.10% of the total parameters, indicating the efficiency of the proposed PEFT design. 
+
+F. Computational Complexity Analysis 
+
+In this subsection, we investigate the computational com-plexity of the proposed detectors compared to the baselines in terms of the floating-point operations (FLOPs) required per symbol vector detection, averaged over 200 channel uses. This metric is recorded using the PyTorch profiler under two representative regimes with distinct MIMO sizes, as shown in Table VI. While the base GFM exhibits lower complexity com-pared to the GEPNet, activating all model parameters for every instance remains computationally intensive. In contrast, the integration of the dynamic MoE routing mechanism addresses this by conditionally activating only the most relevant expert module (MPNN or GT) based on the perceived task difficulty. As quantified in Table VI, the GFM with MoE approach yields an 80–83% reduction in FLOPs relative to its full-activation counterpart. Specifically, for the 256 × 128 (512 × 128) sys-tem, the standalone MPNN and GT experts require 0.388G (0.457G) and 2.452G (2.517G) FLOPs, respectively; the router adaptively activates the lightweight MPNN expert in 97.0% (95.5%) of the instances, with the remaining routed to the GT expert. Although a gap remains when compared to EP (roughly 4 × to 6.5 × FLOPs), the MoE mechanism effectively bridges the efficiency divide. These results, combined with the performance gains observed in previous subsections, confirm that the proposed framework achieves a desirable trade-off between detection accuracy and computational efficiency. V. C ONCLUSION 
+
+In this paper, we introduced a wireless-native GFM for large-scale MIMO detection, using a hybrid architecture that unifies localized message passing with global Transformer attention. By iteratively infusing physical interference infor-mation derived from the EP algorithm, this physics-informed architecture achieves universal interference representations and precise symbol detection via large-scale pre-training. Addi-tionally, PEFT strategies were designed to resolve the general-ization bottleneck through adaptability, enabling rapid transfer to heterogeneous deployment regimes with minimal overhead, while an embedded MoE mechanism dynamically activates only the necessary modules to reduce inference cost. Numer-ical results demonstrated that the proposed GFM consistently outperforms both classical and data-driven baselines across diverse zero-shot and few-shot conditions. REFERENCES [1] Z. Wang et al. , “A tutorial on extremely large-scale MIMO for 6G: Fundamentals, signal processing, and applications,” IEEE Commun. Surveys Tuts. , vol. 26, no. 3, pp. 1560–1605, 3rd Quart. 2024. 13 
+
+[2] M. Shafi et al. , “Industrial viewpoints on RAN technologies for 6G,” 
+
+arXiv preprint arXiv:2508.08225 , 2025. [3] X. Zhou, L. Liang, J. Zhang, P. Jiang, Y. Li, and S. Jin, “Generative diffusion models for high dimensional channel estimation,” IEEE Trans. Wireless Commun. , vol. 24, no. 7, pp. 5840–5854, Jul. 2025. [4] S. Yang and L. Hanzo, “Fifty years of MIMO detection: The road to large-scale MIMOs,” IEEE Commun. Surveys Tuts. , vol. 17, no. 4, pp. 1941–1988, 4th Quart. 2015. [5] E. Agrell, T. Eriksson, A. Vardy, and K. Zeger, “Closest point search in lattices,” IEEE Trans. Inf. Theory , vol. 48, no. 8, pp. 2201–2214, Aug. 2002. [6] 3GPP TR 38.843, “Study on artificial intelligence (AI)/machine learning (ML) for NR air interface (Release 18),” Tech. Rep., Tech. Rep., Dec. 2023. [Online]. Available: https://www.3gpp.org/ftp/Specs/archive/38_ series/38.843/38843-200.zip [7] X. Lin, “Toward AI-native 6G air interface: A 3GPP perspective on protocol framework,” arXiv preprint arXiv:2606.27466 , 2026. [8] J. Hoydis, F. A. Aoudia, A. Valcarce, and H. Viswanathan, “Toward a 6G AI-native air interface,” IEEE Commun. Mag. , vol. 59, no. 5, pp. 76–81, 2021. [9] N. Samuel, T. Diskin, and A. Wiesel, “Learning to detect,” IEEE Trans. Signal Process. , vol. 67, no. 10, pp. 2554–2564, May 2019. [10] M. Khani, M. Alizadeh, J. Hoydis, and P. Fleming, “Adaptive neural signal detection for massive MIMO,” IEEE Trans. Wireless Commun. ,vol. 19, no. 8, pp. 5635–5648, Aug. 2020. [11] N. Shlezinger, J. Whang, Y. C. Eldar, and A. G. Dimakis, “Model-based deep learning,” Proc. IEEE , vol. 111, no. 5, pp. 465–499, 2023. [12] A. Kosasih, V. Onasis, V. Miloslavskaya, W. Hardjawana, V. Andrean, and B. Vucetic, “Graph neural network aided MU-MIMO detectors,” 
+
+IEEE J. Sel. Areas Commun. , vol. 40, no. 9, pp. 2540–2555, Sep. 2022. [13] K. Pratik, B. D. Rao, and M. Welling, “RE-MIMO: Recurrent and permutation equivariant neural MIMO detection,” IEEE Trans. Signal Process. , vol. 69, pp. 459–473, 2021. [14] R. Bommasani et al. , “On the opportunities and risks of foundation models,” arXiv preprint arXiv:2108.07258 , 2021. [15] L. Liang et al. , “Large language models for wireless communications: From adaptation to autonomy,” IEEE Commun. Mag. , vol. 64, no. 5, pp. 140–147, May 2026. [16] B. Liu, X. Liu, S. Gao, X. Cheng, and L. Yang, “LLM4CP: Adapting large language models for channel prediction,” J. Commun. Inf. Netw. ,vol. 9, no. 2, pp. 113–125, Jun. 2024. [17] Y. Sheng, K. Huang, L. Liang, P. Liu, S. Jin, and G. Y. Li, “Beam prediction based on large language models,” IEEE Wireless Commun. Lett. , vol. 14, no. 5, pp. 1406–1410, May 2025. [18] T. Zheng and L. Dai, “Large language model enabled multi-task physical layer network,” IEEE Trans. Commun. , vol. 74, pp. 307–321, 2026. [19] S. Alikhani, G. Charan, and A. Alkhateeb, “Large wireless model (LWM): A foundation model for wireless channels,” arXiv preprint arXiv:2411.08872 , 2024. [20] B. Liu, S. Gao, X. Liu, X. Cheng, and L. Yang, “WiFo: Wireless foundation model for channel prediction,” Sci. China Inf. Sci. , vol. 68, no. 6, p. 162302, Jun. 2025. [21] T. Yang et al. , “WirelessGPT: A generative pre-trained multi-task learn-ing framework for wireless communication,” IEEE Network , vol. 39, no. 5, pp. 58–65, Sep. 2025. [22] Y. Sheng et al. , “A wireless foundation model for multi-task prediction,” 
+
+arXiv preprint arXiv:2507.05938 , 2025. [23] Z. Yang, S. Gao, X. Cai, X. Cheng, and L. Yang, “WiFo-MUD: Wireless foundation model for heterogeneous multi-user demodulator,” arXiv preprint arXiv:2601.00612 , 2026. [24] Y. Shen, J. Zhang, S. H. Song, and K. B. Letaief, “Graph neural networks for wireless communications: From theory to practice,” IEEE Trans. Wireless Commun. , vol. 22, no. 5, pp. 3554–3569, May 2023. [25] J. Liu et al. , “Graph foundation models: Concepts, opportunities and challenges,” IEEE Trans. Pattern Anal. Mach. Intell. , vol. 47, no. 6, pp. 5023–5044, Jun. 2025. [26] C. Ying et al. , “Do transformers really perform badly for graph repre-sentation?” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , 2021, pp. 28 877–28 888. [27] J. Jumper et al. , “Highly accurate protein structure prediction with AlphaFold,” Nature , vol. 596, no. 7873, pp. 583–589, Aug. 2021. [28] Y. Sheng, J. Wang, L. Liang, H. Ye, and S. Jin, “A graph foundation model for wireless resource allocation,” arXiv preprint arXiv:2604.07390 , 2026. [29] L. Rampášek, M. Galkin, V. P. Dwivedi, A. T. Luu, G. Wolf, and D. Beaini, “Recipe for a general, powerful, scalable graph transformer,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , 2022, pp. 14 501– 14 515. [30] J. Céspedes, P. M. Olmos, M. Sánchez-Fernández, and F. Perez-Cruz, “Expectation propagation detection for high-order high-dimensional MIMO systems,” IEEE Trans. Commun. , vol. 62, no. 8, pp. 2840–2849, Aug. 2014. [31] C.-K. Wen, C.-J. Wang, S. Jin, K.-K. Wong, and P. Ting, “Bayes-optimal joint channel-and-data estimation for massive MIMO with low-precision ADCs,” IEEE Trans. Signal Process. , vol. 64, no. 10, pp. 2541–2556, May 2016. [32] E. Björnson, J. Hoydis, M. Kountouris, and M. Debbah, “Massive MIMO systems with non-ideal hardware: Energy efficiency, estimation, and capacity limits,” IEEE Trans. Inf. Theory , vol. 60, no. 11, pp. 7112– 7139, Nov. 2014. [33] J. Gonçalves, M. Teresa Nogueira, D. Dinis, J. Guerreiro, and R. Dinis, “On the optimum detection of MIMO-SVD signals with strong nonlinear distortion effects at the transmitter,” IEEE Access , vol. 13, pp. 3230– 3241, 2025. [34] X. Zhao, M. Li, B. Wang, E. Song, T.-H. Chang, and Q. Shi, “Efficient LMMSE equalization for massive MIMO systems under decentralized baseband processing architecture,” IEEE J. Sel. Areas Commun. , vol. 43, no. 3, pp. 736–751, Mar. 2025. [35] A. Pitarokoilis, S. K. Mohammed, and E. G. Larsson, “Uplink perfor-mance of time-reversal MRC in massive MIMO systems subject to phase noise,” IEEE Trans. Wireless Commun. , vol. 14, no. 2, pp. 711–723, Feb. 2015. [36] C. Rapp, “Effects of HPA-nonlinearity on a 4-DPSK/OFDM-signal for a digital sound broadcasting system,” in Proc. ESA Eur. Conf. Satell. Commun. (ECSC) , Oct. 1991, pp. 179–184. [37] M. W. Seeger, “Expectation propagation for exponential families,” Univ. Calif., Berkeley, CA, USA, Tech. Rep., 2005. [Online]. Available: https://infoscience.epfl.ch/record/161464 [38] X. Zhou, J. Zhang, C.-K. Wen, S. Jin, and S. Han, “Graph neural network-enhanced expectation propagation algorithm for MIMO turbo receivers,” IEEE Trans. Signal Process. , vol. 71, pp. 3458–3473, 2023. [39] Q. Lu, S. Luan, and X.-W. Chang, “GCEPNet: Graph convolution-enhanced expectation propagation for massive MIMO detection,” in 
+
+Proc. IEEE Global Commun. Conf. (GLOBECOM) , 2024, pp. 444–449. [40] A. Scotti, N. N. Moghadam, D. Liu, K. Gafvert, and J. Huang, “Graph neural networks for massive MIMO detection,” arXiv preprint arXiv:2007.05703 , Jul. 2020. [41] G. H. Golub and C. F. Van Loan, Matrix Computations , 4th ed. Baltimore, MD, USA: Johns Hopkins Univ. Press, 2013. [42] M. Wu, B. Yin, G. Wang, C. Dick, J. R. Cavallaro, and C. Studer, “Large-scale MIMO detection for 3GPP LTE: Algorithms and FPGA implementations,” IEEE J. Sel. Topics Signal Process. , vol. 8, no. 5, pp. 916–929, Oct. 2014. [43] C. Studer, S. Fateh, and D. Seethaler, “ASIC implementation of soft-input soft-output MIMO detection using MMSE parallel interference cancellation,” IEEE J. Solid-State Circuits , vol. 46, no. 7, pp. 1754– 1765, Jul. 2011. [44] A. Vaswani et al. , “Attention is all you need,” in Proc. Adv. Neural Inf. Process. Syst. (NeurIPS) , 2017. [45] 3GPP TR 38.901, “Study on channel model for frequencies from 0.5 to 100 GHz (Release 17),” Tech. Rep., Tech. Rep., Apr. 2022. [Online]. Available: https://www.etsi.org/deliver/etsi_tr/138900_138999 /138901/17.00.00_60/tr_138901v170000p.pdf [46] A. Gui, J. Ye, and H. Xiao, “G-adapter: Towards structure-aware parameter-efficient transfer learning for graph transformer networks,” in Proc. AAAI , vol. 38, no. 11, 2024, pp. 12 226–12 234. [47] E. J. Hu et al. , “LoRA: Low-rank adaptation of large language models,” 
+
+arXiv preprint arXiv:2106.09685 , 2021. [48] W. Fedus, B. Zoph, and N. Shazeer, “Switch transformers: Scaling to trillion parameter models with simple and efficient sparsity,” J. Mach. Learn Res. , vol. 23, no. 120, pp. 1–39, Apr. 2022. [49] Y. Wang et al. , “Adamix: Mixture-of-adaptations for parameter-efficient model tuning,” in Proc. Empir. Methods Natural Lang. Process. (EMNLP) , 2022, pp. 5744–5760. [50] Q. Liu et al. , “When MoE meets LLMs: Parameter efficient fine-tuning for multi-task medical applications,” in Proc. ACM SIGIR Conf. Res. Develop. Inf. Retr. , 2024, pp. 1104–1114. [51] S. Jaeckel, L. Raschkowski, K. Börner, and L. Thiele, “QuaDRiGa: A 3-d multi-cell channel model with time evolution for enabling virtual field trials,” IEEE Trans. Antennas Propag. , vol. 62, no. 6, pp. 3242–3256, Jun. 2014.

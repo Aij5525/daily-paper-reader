@@ -1,0 +1,322 @@
+Title: Foundation Models for Generalizable Semantic and Goal-Oriented Communication
+
+URL Source: https://arxiv.org/pdf/2609.07853v1
+
+Published Time: Wed, 09 Sep 2026 03:10:13 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Foundation Models for Generalizable Semantic and Goal-Oriented Communication 
+
+Boliang Liu ∗† , Wint Yi Poe †, Riccardo Trivisonno †, and Giuseppe Caire ∗∗Technical University of Berlin, Berlin, Germany 
+
+> †
+
+Huawei Technologies Düsseldorf GmbH, Munich Research Center, Munich, Germany Emails: {boliang.liu, caire}@tu-berlin.de; {wint.yi.poe, riccardo.trivisonno}@huawei.com 
+
+Abstract —Semantic and goal-oriented communication is in-creasingly studied for 6G, but generalization beyond seen data remains a key weakness under tight rate budgets. Many existing systems overfit their training data and degrade sharply at very low bit rates because they attempt to compress the entire signal. We introduce Foundation Model-Guided Semantic and Goal-Oriented Communication (FMSGOC), a framework that uses broad visual–linguistic Foundation Model priors to mitigate overfitting. It further improves rate efficiency by concentrating bits on sparse, goal-aligned anchors and relying on generative foundation-model priors to reconstruct the masked regions. By de-coupling what to send from how to reconstruct, a vision–language foundation model selects and transmits a sparse set of semantic anchors, while a pretrained diffusion model, fine-tuned for masked completion, reconstructs the image at the receiver. In our experiments, FMSGOC reaches 0.039 bits per pixel (BPP), maintains high semantic fidelity (cosine similarity 0.87–0.90 on CIFAR-10), remains robust on previously unseen inputs (0.83–0.86 on ImageNet), and shows good perceptual similarity (0.1278/0.1558, CIFAR-10/ImageNet), outperforming strong end-to-end baselines at lower bit rates. 
+
+Index Terms —Semantic communication, goal-oriented commu-nication, 6G networks, foundation models, diffusion model 
+
+I. Introduction The transition towards 6G is accompanied by a growing interest in semantic and goal-oriented communication [1], aiming to transmit task-relevant meaning efficiently rather than redundant data. The current dominant paradigm for this task relies on end-to-end (E2E) trained neural systems, such as Deep Joint Source-Channel Coding (DeepJSCC) [2] and its variants [3], [4], which learn to compress an entire input into learned channel symbols for transmission. However, the dominant E2E paradigm has structural limits: a monolithic model couples semantic feature extraction with compression and reconstruction. As a result, the learned representation is required to encapsulate all information, in-cluding fundamental semantics and unimportant data, leading to inefficiency when constrained by strict rate budgets. This limitation results in two issues: (1) the learned features are narrowly tuned to the training data and generalize poorly to unseen content or new objectives [1]; (2) at ultra-low bitrates, the information bottleneck becomes too restrictive, and performance degrades sharply because critical semantics cannot be retained. These shortcomings reveal that the coupled architecture lacks two key capabilities: (i) the ability to explicitly select task-relevant semantics based on open-world, large-scale knowledge, and (ii) the ability to robustly reconstruct the entire scene from minimal semantic information. Prior work has failed to provide an architecture that overcomes both challenges simultaneously. In this paper, we propose FMSGOC, a new architecture that breaks from this coupled paradigm. We leverage complementary foundation models (FMs) to independently address semantic selection and generative reconstruction. Our insight is to shift from the lossy compression of the whole scene to the precise transmission of a sparse semantic anchor. This new framework is implemented as follows: (a) A discriminative FM (a Vision-Language Model (VLM)) performs goal-driven selection to explicitly identify a sparse set of "semantic anchors" based on open-world priors. (b) A generative FM (a Low-Rank Adaptation (LoRA) fine-tuned diffusion model) then leverages its priors for robust reconstruction from these sparse anchors. This decoupled approach addresses the limitations of E2E systems. By leveraging the FMs’ broad pre-trained knowledge, it generalizes zero-shot to unseen data. It also achieves high semantic and perception fidelity at ultra-low bitrates by aiming to preserve core semantics. The results suggest that FM-guided select-and-generate achieves robust performance at ultra-low BPP. Key Technical Contributions:  
+
+> •
+
+A novel semantic communication architecture that de-couples goal-driven semantic selection from generative reconstruction, enabling efficient latent-space operations that achieve robust generalization.  
+
+> •
+
+A VLM-guided semantic encoder that uses a pretrained VLM to identify a sparse set of latent semantic anchors, enabling goal-oriented rate allocation.  
+
+> •
+
+A LoRA fine-tuned diffusion decoder using hard reinjec-tion that performs anchor-preserving masked completion, robustly reconstructing scenes from sparse inputs.  
+
+> •
+
+Results on the CIFAR-10 and ImageNet datasets demon-strate that FMSGOC achieves competitive rate-distortion-semantic (R-D-S) performance at ultra-low bitrates, out-performing conventional E2E systems and generalizing to unseen data. II. Related Work Recent work on E2E neural codecs (e.g., DeepJSCC [2]) jointly optimizes source-channel mappings. These models unify source and channel coding within a pair of encoders and arXiv:2609.07853v1 [cs.LG] 7 Sep 2026 Fig. 1. The FMSGOC pipeline. At Tx, a VLM-guided Top-K selector extracts sparse semantic anchors ( 𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 ) and indices ( 𝐼 ) from a VAE latent grid (𝑍 𝑒𝑛𝑐 ). Over the channel, only this ultra-sparse payload ( 𝐼, 𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 ) is transmitted. At Rx, a LoRA fine-tuned diffusion model performs generative masked completion conditioned on the anchors. Hard Reinjection is used during denoising to preserve anchor values, and a VAE decoder renders the final image. 
+
+decoders, achieving effective transmission for text [5] and image [6]. Parallel progress in goal-oriented communication emphasizes transmitting only task-relevant representations to improve the downstream task success rate (e.g., classification or control) rather than pixel fidelity [7]; others use a semantic mask for task-aware selective encoding [8]. Prior work emphasizes task-relevant features, but most systems remain task-specific E2E models and adapt poorly to unseen data. Large-scale FMs provide transferable priors across tasks and modalities [9]. This has inspired their use in commu-nication, both as discriminative FMs for semantic guidance and generative FMs for content restoration [10]. Others have leveraged generative models like variational autoencoder (VAE) [11] or diffusion models to counter severe compression and channel noise at the receiver [12]. While this work validates the capabilities of FMs, they are often used to refine a signal that is already heavily degraded. III. System Design We decouple the system into three modules in Fig. 1: a VLM-guided Semantic Extractor, a VAE Latent Encoder, and a LoRA-adapted generative decoder that performs masked completion from sparse anchors. 
+
+Transmitter (Tx): Given a source image 𝑋 , the transmitter runs two parallel processes: Latent Encoding (First-Stage Compression): A standard VAE Encoder 𝐸 VAE performs the first compression by mapping the image 𝑋 from the pixel space to a compact initial latent grid 
+
+𝑍 𝑒𝑛𝑐 .Goal-Driven Selection (Second-Stage Compression): A VLM functions as a Semantic Extractor, generating a goal-aligned importance map 𝐻 align (Section IV-A) to select the top-𝐾 
+
+semantic anchors (I , 𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 ) from 𝑍 𝑒𝑛𝑐 .
+
+Channel (Payload C): The payload C transmitted over the physical channel consists of two distinct components: (1) the sparse latent anchors 𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 and (2) their corresponding 𝐾 
+
+grid indices I.
+
+Receiver (Rx): Upon receiving the payload, the receiver (Rx) initiates a step-wise generative reconstruction process. First, during anchor placement, the received indices I are used to populate the sparse anchors 𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 onto an otherwise empty (masked) latent grid. Next, for generative completion, a LoRA-adapted diffusion model 𝐹 𝜃 executes its reverse denoising process to fill the unknown (masked) regions. To ensure the output respects the transmitted semantics and prevents "semantic drift," we employ an anchor preservation mechanism that reinjects the received anchor values at each denoising step (detailed in Section IV-B). Finally, in the final decoding stage, the completed and refined latent grid 𝑍 𝑜𝑢𝑡 is passed to the standard VAE Decoder 𝐷 VAE to render the final reconstructed image ˆ𝑋 .IV. Methodology: Foundation Models for Semantic Encoding and Decoding 
+
+A. Goal-Driven Semantic Encoder 
+
+The transmitter extracts the minimal set of semantic anchors (𝑍 𝑠 𝑝𝑎𝑟 𝑠𝑒 ) that satisfy the communication goal. This involves two steps: 
+
+a) VAE Latent Encoding: A pretrained VAE encoder 
+
+𝐸 VAE maps the input image 𝑋 to a compact latent grid: 
+
+𝑍 enc = 𝐸 VAE (𝑋 ), 𝑍 enc ∈ R𝐻 𝑧 ×𝑊 𝑧 ×𝐶 𝑧 (1) 
+
+b) Goal-Driven Anchor Selection: In parallel, our Seman-tic Extractor module (Fig. 1) uses a frozen VLM (Contrastive Language-Image Pre-Training (CLIP) model [13]) to generate a spatial semantic importance map 𝐻 vlm . This map quantifies the importance of information based on the communication goal. Unlike conventional systems with an implicit goal (i.e., pixel reconstruction), our framework allows this goal to be explicitly defined. Unsupervised Mode: For general semantic importance (when no specific goal is provided), 𝐻 vlm is generated by aggregating the last-layer self-attention maps from the VLM’s vision transformer, as this captures the model’s intrinsic focus. Goal-Driven Mode: When a specific goal is provided, 𝐻 vlm 
+
+is generated by computing the spatial relevance of the goal and the image. We compute the per-patch cosine similarity between the patch representations from the visual encoder and the goal embedding from the text encoder. This leverages CLIP’s pre-trained vision-language alignment to estimate the text-conditioned spatial relevance. The subsequent experiments in this paper are based on the goal-driven mode, using the image’s category as the prompt. We then spatially align the importance map 𝐻 vlm to the VAE latent grid’s resolution ( 𝐻 𝑧 × 𝑊 𝑧 ) via interpolation to produce 𝐻 align . Finally, we apply a Top-K selection based on the scores in 𝐻 align , identifying the indices I of the 𝐾 
+
+highest-scoring cells(we use lowercase 𝑘 as a percentage, hence 
+
+𝐾 = ⌈( 𝑘 /100 ) 𝑁 ⌉ with 𝑁 = 𝐻 𝑧 𝑊 𝑧 ). The corresponding full latent feature vectors, which span all 𝐶 𝑧 channels at each selected (𝑖, 𝑗 ) position, are gathered from the VAE grid as the semantic anchors: 
+
+𝑍 sparse = {𝑍 enc [𝑖, 𝑗, :] | ( 𝑖, 𝑗 ) ∈ I} . (2) The selection algorithm is detailed in Algorithm 1, and the final encoder output pair (I , 𝑍 sparse ).
+
+B. Generative Decoder 
+
+The receiver’s task is to reconstruct the full, coherent image ˆ𝑋 given only the sparse set of constraints (I , 𝑍 sparse ). This is a latent-space image reconstruction task that relies on an Anchor Preservation Triad to address semantic drift. 1) LoRA Adaptation: A pretrained generative FM (the diffusion backbone 𝑊 0) cannot be used directly for this masked-completion task. Standard diffusion models are trained to denoise a full grid from pure noise. When presented with our masked input, they tend to overwrite the known anchor cells, causing severe semantic drift. Therefore, we must adapt the FM to this new "masked-latent completion" task. We use the lightweight fine-tuning method LoRA for this task. As shown in Fig.                                                                                  
+
+> Algorithm 1: Goal-Driven Semantic Anchor Selection
+> Require: Image 𝑋 ; pretrained VAE encoder 𝐸 VAE ; frozen VLM 𝐹 vlm
+> (e.g., CLIP); selection ratio 𝑘 ; optional text prompt 𝑇 prompt
+> Ensure: Index set Iof Top-K anchors; sparse latents 𝑍 sparse
+> 1𝑍 enc ←𝐸 VAE (𝑋 )// latent grid (𝐻 𝑧 , 𝑊 𝑧 , 𝐶 𝑧 )
+> 2𝑁 ←𝐻 𝑧 ·𝑊 𝑧
+> 3if 𝑇 prompt is null then
+> 4𝐻 vlm ←AggregateSelfAttention (𝐹 vlm , 𝑋 )
+> // unsupervised mode
+> 5else
+> 6𝐻 vlm ←CosineSimilarity (𝐹 vlm , 𝑋, 𝑇 prompt )
+> // goal-driven mode
+> 7𝐻 align ←BilinearInterpolation (𝐻 vlm ,(𝐻 𝑧 , 𝑊 𝑧 ) )
+> 8𝐾 ← ⌈ ( 𝑘 /100 )𝑁 ⌉
+> 9I ← TopKIndices (𝐻 align , 𝐾 )// get (𝑖, 𝑗 )coords
+> 10 𝑍 sparse ←∅
+> 11 foreach (𝑖, 𝑗 ) ∈ I do
+> 12 𝑍 sparse ←𝑍 sparse ∪ { 𝑍 enc [𝑖, 𝑗, :] }
+> 13 return ( I , 𝑍 sparse )
+
+2, LoRA augments the frozen backbone 𝑊 0 with small, trainable low-rank matrices ( 𝐴, 𝐵 ): 
+
+𝑊 = 𝑊 0 + 𝛼 𝑟 𝐵𝐴. (3) 2) Anchor Consistency: To prevent semantic drift in known cells, the decoder output is required to be consistent with the transmitted anchors in the masked locations. Let 
+
+𝑀 ∈ { 0, 1}𝐻 𝑧 ×𝑊 𝑧 denote the anchor mask and 𝑍 enc the input latent grid. We enforce the constraint 
+
+𝑀 ⊙ 𝑍 out = 𝑀 ⊙ 𝑍 sparse , (4) where 𝑍 sparse denotes the received anchor values on the la-tent grid, and ⊙ is the element-wise (Hadamard) product with channel-wise broadcasting, i.e., (𝑀 ⊙ 𝑍 ) [ 𝑖, 𝑗, :] =
+
+𝑀 [𝑖, 𝑗 ] 𝑍 [𝑖, 𝑗, :]. Unmasked cells (1−𝑀 ) are completed by the fine-tuned diffusion model. 3) Hard Reinjection: We use a per-step projection during inference (Algorithm 2) to enforce semantic fidelity. After the LoRA-adapted model 𝐹 𝜃 proposes a denoised latent state ˜ 𝑍 𝑡 −1, we manually reinjection the received anchors 
+
+𝑍 sparse :
+
+𝑍 𝑡 −1 = (1 − 𝑀 ) ⊙ ˜𝑍 𝑡 −1 + 𝑀 ⊙ 𝑍 sparse . (5) This hard reinjection (Eq. 5) ensures that even if the model momentarily deviates, the transmitted anchors are perfectly preserved in the final 𝑍 0, preventing any semantic drift. Each component serves a distinct purpose: LoRA provides the capability for masked completion, L𝑎𝑛𝑐ℎ𝑜𝑟 enforces this                                                                         
+
+> Fig. 2. LoRA Adaptation: The frozen diffusion backbone 𝑊 0is augmented with lightweight LoRA modules ( 𝐴 ,𝐵 ).
+> Algorithm 2: Generative Reconstruction with Hard Reinjection
+> Require: Sparse anchor grid 𝑍 sparse ; anchor mask 𝑀 ; LoRA-adapted diffusion model 𝐹 𝜃 ; timesteps 𝑇
+> Ensure: Refined latent grid 𝑍 out
+> // Initialize 𝑍 𝑇 (noise +anchors)
+> 1𝜖 ∼ N ( 0,I )
+> 2𝑍 𝑇 ← ( 1−𝑀 ) ⊙ 𝜖 +𝑀 ⊙𝑍 sparse
+> // Denoising with hard reinjection
+> 3for 𝑡 ←𝑇 down to 1do
+> 4˜𝑍 𝑡 −1←𝐹 𝜃 (𝑍 𝑡 , 𝑡 , 𝑀 )// propose denoised latent
+> 5𝑍 𝑡 −1← ( 1−𝑀 ) ⊙ ˜𝑍 𝑡 −1+𝑀 ⊙𝑍 sparse
+> // reinsert anchor
+> 6𝑍 out ←𝑍 0
+> 7return 𝑍 out
+
+capability during training, and hard reinjection guarantees it during inference. The final refined latent grid 𝑍 𝑜𝑢𝑡 (which is 𝑍 0 from the diffusion process) is passed to the pretrained VAE decoder 
+
+𝐷 VAE to render the reconstructed image ˆ𝑋 :ˆ𝑋 = 𝐷 VAE (𝑍 out ) (6) 
+
+C. R-D-S Metrics: Rate, Distortion, and Semantics 
+
+Given FMSGOC’s goal-driven selection and generative reconstruction, conventional pixel-wise metrics (e.g., PSNR) are incomplete. Our semantic communication system should instead be judged by its bit budget, the fidelity of the reconstruction, and the preservation of semantic meaning. We therefore report three axes: Rate (𝑅 ), Distortion (𝐷 ), and Semantics (𝑆 ). Let 𝑋 
+
+be the source image, ˆ𝑋 the reconstruction, and 𝐻 𝑋 × 𝑊 𝑋 the image size. 
+
+Rate ( 𝑅 ): We first define the Source Bits per Pixel (BPP) (𝑅 𝑆 ) as the total payload bits normalized by image size: 
+
+𝑅 𝑆 = 𝑅 idx + 𝑅 latent + 𝐿 CRC 
+
+𝐻 𝑋 𝑊 𝑋 
+
+. (7) We then report BPP, which accounts for Low-Density Parity-Check (LDPC) ( 𝑟 𝑐 =2/3), unless otherwise noted, BPP in this paper refers to this coded BPP: 
+
+𝑅 = BPP (C) = 𝑅 idx + 𝑅 latent + 𝐿 CRC 
+
+𝑟 𝑐 𝐻 𝑋 𝑊 𝑋 
+
+. (8) The source payload C contains anchor indices and selected latents. On a latent grid 𝐻 𝑧 ×𝑊 𝑧 with 𝑁 =𝐻 𝑧 𝑊 𝑧 cells, the encoder selects 𝐾 anchors (Top-𝐾 ). The index cost is 
+
+𝑅 idx = 𝐾  log 2 𝑁 . (9) We adopt independent addressing over the combinatorial lower bound ⌈log 2
+
+ 𝑁 𝐾 
+
+⌉ to prioritize robustness and simplicity at the 
+
+𝐾 positions; the overall BPP remains ultra-low because only the 𝐾 selected latent cells are transmitted and this conservative index cost 𝑅 idx is non-dominant relative to the latent payload 
+
+𝑅 latent .For the 𝐾 latent vectors (channel dimension 𝐶 𝑧 ), we use 8-bit adaptive uniform quantization and a discretized Gaussian likelihood to estimate 
+
+𝑅 latent =
+
+> 𝐾
+
+∑︁ 
+
+> 𝑖 =1
+> 𝐶 𝑧
+
+∑︁ 
+
+> 𝑑 =1
+
+− log 2 𝑝 ( ˆ𝑧 𝑖,𝑑 ). (10) A 24-bit frame-level cyclic redundancy check (CRC) is included as 𝐿 CRC .
+
+Distortion ( 𝐷 ): We use Learned Perceptual Image Patch Similarity (LPIPS) [14] with the standard pretrained AlexNet backbone. Per-image distortion is 
+
+𝐷 = LPIPS (𝑋, ˆ𝑋 ) =∑︁ 
+
+> 𝑙
+
+𝛼 𝑙 ˆ𝜙 𝑙 (𝑋 ) − ˆ𝜙 𝑙 ( ˆ𝑋 ) 22, (11) where ˆ𝜙 𝑙 (·) denotes the feature maps at layer 𝑙 (channel-wise normalized) and 𝛼 𝑙 are the default LPIPS weights. 
+
+Semantics ( 𝑆 ): Let 𝑓 CLIP (·) denote the frozen CLIP image 
+
+encoder. Semantic alignment is the cosine similarity in the CLIP embedding space. 
+
+𝑆 = 𝑓 CLIP (𝑋 ), 𝑓 CLIP ( ˆ𝑋 )
+
+∥ 𝑓 CLIP (𝑋 )∥ 2 ∥ 𝑓 CLIP ( ˆ𝑋 )∥ 2
+
+, (12) 
+
+D. Training Objective: Composite Loss for Masked Completion 
+
+We fine-tuned the LoRA modules using a composite loss, 
+
+Ltotal . This objective is primarily driven by the R-D-S (Rate-Distortion-Semantic) objective. To enforce the LoRA modules to learn to respect our transmitted constraints in Eq. (4), we penalize deviations on masked cells: 
+
+Lanchor = 1
+
+𝐾 ∑︁ 𝑖, 𝑗 
+
+𝑀 [𝑖, 𝑗 ] 𝑍 out [𝑖, 𝑗, :] − 𝑍 sparse [𝑖, 𝑗, :] 22, (13) Combining this regularizer with the R–D–S terms yields the final objective: 
+
+Total Loss: The final objective (Eq. 14) combines the three primary R-D-S terms with this anchor-consistency stabilizer: 
+
+Ltotal = 𝜆 rate BPP (C) + 𝜆 LPIPS LPIPS (𝑋, ˆ𝑋 )+ 𝜆 sem 
+
+1 − CosineSim   𝑓 CLIP (𝑋 ), 𝑓 CLIP ( ˆ𝑋 ) 
+
++ 𝜆 anchor Lanchor .
+
+(14) The loss weights were determined empirically based on validation performance. The main R-D-S trade-off is set by 
+
+𝜆 LPIPS = 0.6, 𝜆 sem = 0.2, and 𝜆 rate = 0.2. The auxiliary anchor term 𝜆 anchor = 0.1 is set high enough to enforce constraint-awareness in the LoRA modules without overpowering the primary generative optimization. V. Performance Evaluation 
+
+A. Experimental Setup 
+
+Experiments are conducted on the CIFAR-10 dataset for training and are evaluated on both CIFAR-10 and ImageNet to assess generalization. All experiments (training and evaluation) were performed on H100 GPU with bfloat16. Note that the computing latency is mainly determined by the computing power of the deployed hardware. The core of FMSGOC relies on two Foundation Models: 
+
+Goal-Driven Selector (CLIP [13]): Semantic guidance is derived from the pretrained CLIP ViT-B/32 model. 
+
+Generative Backbone (Stable Cascade [15]): Our genera-tive pipeline uses the two stages of Stable Cascade. We use the frozen Stage-A VAE ( 𝐸 VAE and 𝐷 VAE ). Stage-B U-Net as the diffusion backbone ( 𝐹 𝜃 ), adapting it for masked completion using LoRA (see Table I). 
+
+B. Baselines 
+
+We compare FMSGOC with a classical image compression algorithm and two representative end-to-end (E2E) neural systems. JPEG is implemented using the Pillow encoder as a classical separation baseline. DeepJSCC [2] and WITT [6] use the authors’ official pretrained models on CIFAR-10; all baselines use public checkpoints and author-reported configura-tions without additional fine-tuning. All methods are evaluated at signal-to-noise ratio (SNR ) = 10 dB in an additive white Gaussian noise (AWGN) channel. For separation methods (FMSGOC, JPEG) we report coded BPP under the same LDPC accounting with LDPC rate 𝑟 𝑐 = 2/3, while DeepJSCC and WITT are placed on the same coded-BPP axis by matching channel uses. Operating points are produced by using each method’s native rate-control mechanism: FMSGOC varies the retained fraction 𝑘 of top-𝐾 anchors; JPEG varies the discrete cosine transform (DCT) quantization tables; DeepJSCC varies the bottleneck channels (4, 8, 16); and WITT varies the latent channels (8, 16, 24, 32, 48). Markers in the figures denote test-set means at coded BPP. 
+
+C. R-D-S Performance and Generalization 
+
+This section evaluates FMSGOC against the baselines on both the in-distribution training dataset (CIFAR-10) and an out-of-distribution dataset (ImageNet) to assess generalization. 
+
+1) Rate-Semantic (R-S) Performance and Generalization: 
+
+We first analyze the rate-semantic trade-off using CLIP Cosine Similarity (higher is better)(Fig. 3 & Fig. 4). 
+
+FMSGOC maintains high, stable semantic fidelity and generalizes well. On CIFAR-10 (in-distribution), FMSGOC’s similarity (orange line) remains stable ( ≈0.87-0.90) even at 0.039 BPP. This preservation of semantics, despite extreme sparsity, is achieved because the VLM selects the most semanti-cally informative anchors, and the generative decoder leverages its pre-trained priors to reconstruct the scene consistent with these anchors. On ImageNet (out-of-distribution), it maintains high similarity ( ≈0.83-0.86) across all tested rates, confirming zero-shot generalization attributable to the prior knowledge of its FM components. 
+
+Baselines show poor generalization and are not shown at low rates on CIFAR-10. On CIFAR-10, the E2E baselines (DeepJSCC, WITT) are plotted only at higher bitrates, where they achieve high similarity. However, their poor generalization is evident on ImageNet. Having been trained only on CIFAR-10, their results show low semantic similarity ( ≈0.60-0.75) when faced with out-of-distribution data. JPEG is non-semantic and exhibits a sharp degradation in semantic similarity as bitrate decreases on both CIFAR-10 and ImageNet. 
+
+2) Rate-Distortion (R-D) Performance and Efficiency: We next analyze perceptual quality (LPIPS, lower is better) vs. BPP (Table II). 
+
+FMSGOC achieves efficient perceptual quality and generalization. FMSGOC achieves its minimum LPIPS (0.1278 on CIFAR-10, 0.1558 on ImageNet) at an ultra-low rate of 0.039 BPP. 
+
+TABLE I LoRA Configuration for Stage-B U-Net 
+
+Parameter Value Notes 
+
+LoRA Rank ( 𝑟 ) 32 Capacity for semantic adaptation LoRA Alpha ( 𝛼 ) 32 𝛼 /𝑟 = 1.0 scaling LoRA Dropout 0.01 Mild regularization LoRA Clamp 0.25 Stabilizes update magnitude Target Layers Conv2d, Linear Main U-Net compute paths 0.0 0.1 0.2 0.3 0.4 0.5        
+
+> BPP
+> 0.70 0.75 0.80 0.85 0.90 0.95 1.00
+> CLIP Cosine Similarity
+> CIFAR-10: CLIP Similarity vs. Bitrate
+> FMSGOC+LDPC JPEG+LDPC WITT DeepJSCC
+> 0.50 0.55 0.60
+> BPP
+> 0.84 0.85 0.86 0.87 0.88
+> CLIP Cosine Similarity  JPEG+LDPC
+> 0.5 1.0 1.5 2.0 2.5 3.0
+> BPP
+> 0.90 0.92 0.94 0.96 0.98
+> CLIP Cosine Similarity  WITT
+
+Fig. 3. CLIP cosine similarity vs. BPP on CIFAR-10. 0.0 0.1 0.2 0.3 0.4 0.5         
+
+> BPP
+> 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00
+> CLIP Cosine Similarity
+> ImageNet: CLIP Similarity vs. Bitrate
+> FMSGOC+LDPC JPEG+LDPC DeepJSCC WITT
+> 0.50 0.75 1.00 1.25
+> BPP
+> 0.85 0.90 0.95
+> CLIP Cosine Similarity  JPEG+LDPC
+> 0.5 1.0 1.5 2.0 2.5 3.0
+> BPP
+> 0.65 0.70 0.75
+> CLIP Cosine Similarity  WITT
+
+Fig. 4. CLIP cosine similarity vs. BPP on ImageNet, illustrating semantic generalization under domain shift. TABLE II Minimum LPIPS and corresponding bitrate (BPP) on CIFAR-10 and ImageNet for each method. 
+
+CIFAR-10 ImageNet Method LPIPS (min) BPP@min LPIPS (min) BPP@min 
+
+FMSGOC 0.1278 0.0390 0.1558 0.0390 JPEG 0.0667 0.6117 0.0413 1.3272 WITT 0.0435 3.0000 0.6217 3.0000 DeepJSCC 0.1019 0.2177 0.7234 0.2177 
+
+Baselines trade efficiency for quality and fail to generalize. 
+
+On the in-distribution CIFAR-10 dataset, all baselines achieve a lower (better) minimum LPIPS than FMSGOC. However, this comes at a significantly higher cost. Crucially, the E2E baselines’ (WITT, DeepJSCC) perceptual quality collapses on the out-of-distribution ImageNet dataset, with LPIPS scores (≥0.6217) confirming their lower generalization performance. By contrast, FMSGOC maintains its perceptual quality (0.1558 LPIPS), demonstrating generalization. 
+
+D. Ablation Study 
+
+To validate our "Anchor Preservation Triad" (Sec. IV-B), we present a quantitative, inference-only ablation study (Fig. 5) comparing our full model against two ablated variants: FMSGOC (w/o LoRA): The original frozen U-Net without fine-tuning (Eq. 3) is applied. This tests whether task-specific adaptation is necessary. FMSGOC (w/o Reinjection): The full model, but without Hard Reinjection (Eq. 5) during inference. This tests whether the model, once trained, preserves anchors on its own. 0.0 0.1 0.2 0.3 0.4 0.5 
+
+> BPP
+> 0.80 0.82 0.84 0.86 0.88 0.90
+> CLIP Cosine Similarity
+> Ablation Study
+> Full Model (LoRA + Reinjection) w/o LoRA w/o Reinjection
+
+Fig. 5. Ablation results: CLIP cosine similarity vs. BPP. 
+
+Results (Fig. 5): The ablation study confirms that both LoRA adaptation and hard reinjection are essential to the design. The Full Model (CLIP similarity ≈0.87-0.90) significantly outper-forms both ablated variants, validating that both components are critical, synergistic components:  
+
+> •
+
+Without LoRA : Semantic similarity drops significantly (red line, ≈0.84). This proves that LoRA adaptation is essential for teaching the model the new masked completion task.  
+
+> •
+
+Without Reinjection : Semantic similarity also drops (blue line, ≈0.81). This indicates that Hard Reinjection is crucial during inference to prevent the model from "drifting" away from the transmitted anchors. 
+
+Summary of Results: The results provide empirical support for our proposed approach: (i) Conventional E2E systems exhibit limitations, showing poor semantic fidelity at low rates on in-distribution data (CIFAR-10) and a sharp degra-dation in both semantic and perceptual metrics on unseen data (ImageNet). (ii) In contrast, FMSGOC addresses these limitations, demonstrating generalization at an ultra-low 0.039 BPP. (iii) Our ablation study further validates this design, proving that both LoRA fine-tuning and hard reinjection are critical complementary components that respectively enable the masked completion task and prevent semantic drift. VI. Conclusion We have proposed FMSGOC, a decoupled "select-and-generate" architecture built on Foundation Models. This ap-proach targets the key limitations of monolithic E2E systems: poor generalization and performance degradation at low bitrates. Our approach breaks the coupling of feature extraction and reconstruction: a VLM selects sparse semantic anchors, and a LoRA-tuned diffusion model performs generative reconstruc-tion. The results demonstrate robust semantic fidelity and zero-shot generalization at an ultra-low 0.039 BPP, a rate at which E2E baselines show poor semantic fidelity. FMSGOC’s ability to address this generalization challenge demonstrates the potential of FM-driven architectures for future 6G networks. Furthermore, the proposed architecture is inherently con-trollable and interpretable. Controllability is achieved via explicit Top-K rate selection, while interpretability stems from the goal-driven VLM prompting mechanism. FMSGOC’s blend of generalization, controllability, and interpretability is particularly promising for applications such as robotics and autonomous driving, where robust semantic understanding under extreme bandwidth constraints is critical. Future work will explore goal prompt sensitivity and the deployment of distilled, lightweight models or multimodal models. Another direction is the evaluation of FMSCOC performance on fading channels and channel-aware UEP References 
+
+[1] P. Zhang, W. Xu, Y. Liu, X. Qin, K. Niu, S. Cui, G. Shi, Z. Qin, X. Xu, F. Wang, Y. Meng, C. Dong, J. Dai, Q. Yang, Y. Sun, D. Gao, H. Gao, S. Han, and X. Song, “Intellicise wireless networks from semantic communications: A survey, research issues, and challenges,” 
+
+IEEE Communications Surveys & Tutorials , vol. 27, no. 3, pp. 2051–2084, 2025. [2] E. Bourtsoulatze, D. Burth Kurka, and D. Gündüz, “Deep joint source-channel coding for wireless image transmission,” IEEE Transactions on Cognitive Communications and Networking , vol. 5, no. 3, pp. 567–579, 2019. [3] M. Yang, B. Liu, B. Wang, and H.-S. Kim, “Diffusion-aided joint source channel coding for high realism wireless image transmission,” ArXiv ,vol. abs/2404.17736, 2024. [4] E. Erdemir, T.-Y. Tung, P. L. Dragotti, and D. Gündüz, “Generative joint source-channel coding for semantic image transmission,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 8, pp. 2645–2657, 2023. [5] H. Xie, Z. Qin, G. Y. Li, and B.-H. Juang, “Deep learning enabled seman-tic communication systems,” IEEE Transactions on Signal Processing ,vol. 69, pp. 2663–2675, 2021. [6] K. Yang, S. Wang, J. Dai, K. Tan, K. Niu, and P. Zhang, “Witt: A wireless image transmission transformer for semantic communications,” in ICASSP 2023 - 2023 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) , 2023, pp. 1–5. [7] S. H. Wanasekara, V.-D. Nguyen, K.-S. Wong, M.-D. Nguyen, S. Chatzinotas, and O. A. Dobre, “Sc-gir: Goal-oriented semantic com-munication via invariant representation learning for image transmission,” 
+
+IEEE Transactions on Mobile Computing , pp. 1–15, 2025. [8] F. Pezone, S. Barbarossa, and G. Caire, “Sq-gan: Semantic image communications using masked vector quantization,” IEEE Transactions on Cognitive Communications and Networking , vol. 12, pp. 3363–3377, 2026. [9] R. Bommasani, D. A. Hudson, E. Adeli, and et al., “On the opportunities and risks of foundation models,” arXiv preprint arXiv:2108.07258 , 2021. [10] C. Xu, M. B. Mashhadi, Y. Ma, R. Tafazolli, and J. Wang, “Generative semantic communications with foundation models: Perception-error analysis and semantic-aware power allocation,” IEEE Journal on Selected Areas in Communications , vol. 43, no. 7, pp. 2493–2505, 2025. [11] D. P. Kingma and M. Welling, “Auto-encoding variational bayes,” CoRR ,vol. abs/1312.6114, 2013. [12] M. Letafati, S. Ali, and M. Latva-aho, “Conditional denoising diffusion probabilistic models for data reconstruction enhancement in wireless communications,” IEEE Transactions on Machine Learning in Commu-nications and Networking , vol. 3, pp. 133–146, 2023. [13] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G. Krueger, and I. Sutskever, “Learning transferable visual models from natural language supervision,” in Proceedings of the 38th International Conference on Machine Learning (ICML) , vol. 139. PMLR, 2021, pp. 8748–8763. [14] R. Zhang, P. Isola, A. A. Efros, E. Shechtman, and O. Wang, “The unreasonable effectiveness of deep features as a perceptual metric,” in 
+
+2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition ,2018, pp. 586–595. [15] P. Pernias, D. Rampas, M. L. Richter, C. Pal, and M. Aubreville, “Würstchen: An efficient architecture for large-scale text-to-image dif-fusion models,” in The Twelfth International Conference on Learning Representations , 2024.

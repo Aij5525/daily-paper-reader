@@ -1,0 +1,1266 @@
+Title: How Much Training is Needed with a Digital Twin?
+
+URL Source: https://arxiv.org/pdf/2609.01220v1
+
+Published Time: Wed, 02 Sep 2026 01:22:17 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 1
+
+# How Much Training is Needed with a Digital Twin? 
+
+Ahmad Bazzi, Marwa Chafii 
+
+Abstract —The following paper addresses how much pilot training is needed when a digital twin (DT) of the wireless radio channel is available to aid a wireless communication system with a channel estimation task. The DT of a wireless channel is widely expected to reduce the pilot overhead of channel estimation, following the informal rule that “the more accurate the twin, the fewer pilots are needed.” This trade-off, however, has only ever been demonstrated empirically and never quantified. We close this gap by treating the DT as a complementary measurement of the channel that the receiver fuses with its pilot observations in the physical world. Consequently, fusing the physical and digital worlds through the best linear unbiased estimator, we derive a DT-aided Cram´ er-Rao bound, and from it a pilot-equivalence law 
+
+that converts DT fidelity into an equivalent number of training symbols. For a biased twin unknown to the estimator, we obtain the exact mismatch threshold beyond which trusting the DT is worse than ignoring it. We quantify how much training is needed with the DT to attain a desired mean square error on channel estimation. Particular cases are discussed to tell when training in the physical world can be completely bypassed. We finally translate these results into a block-fading achievable rate whose optimal training length is the unique root of a single equation, and identify the DT fidelity above which pilot training can be dispensed with altogether. Extensive numerical results corroborate closed-form expression and reveal that the value of a DT is largest at finite signal-to-noise ratio and vanishes in both the low- and high-SNR limits. 
+
+Index Terms —Digital twin, channel estimation, pilot overhead, channel state information, 6G. 
+
+I. I NTRODUCTION 
+
+# ORIGINATING in the manufacturing and aerospace com-munities two decades ago [1], and in particular within the United States Air Force Research Laboratory, a digital twin (DT) is a virtual replica of a physical entity [2]– [4] that is kept synchronized with it through a continuous exchange of measurements and predictions [5], [6]. In wireless communications, the DT has become a pillar of the 6Gvision, which contributes in maintaining a live model of the radio environment, traffic, and hardware, and serving as a risk free sandbox in which the network can be designed and optimized without experimenting on the live system [7]– [9]. The DT can help 6G wireless technologies enable new applications such as autonomous driving, indoor localization [10], and environmental monitoring and imaging [11]–[15], in addition to integrated sensing and communications (ISAC) [16]. Moreover, a DT can also be used as a simulation environment that goes beyond ISAC and can be extended for more complex tasks with different multimodal wireless networks [17], where communications and radio-frequency are 
+
+> Ahmad Bazzi and Marwa Chafii are with Engineering Division, New York University (NYU) Abu Dhabi, 129188, UAE and NYU WIRELESS, NYU Tandon School of Engineering, Brooklyn, 11201, NY, USA (email: ahmad.bazzi@nyu.edu, marwa.chafii@nyu.edu). Manuscript received xxx
+
+complemented with additional modalities, such as cameras [18]. However, the usefulness of any given DT is governed by a single quantity, which is the DT’s fidelity , namely how faithfully the virtual model tracks the physical one. This has been formalized both as model uncertainty induced by limited data [5], [19] and, information theoretically, as a joint function of model quality and the information exchanged between the physical and digital worlds [6]. At the network level, DTs support zero touch 6G manage-ment and resource orchestration [20] across edge, aerial, en-able security [21], [22], vehicular, and industrial systems [23]– [30], integrated sensing and communications [1], [31]–[33] and edge computing links [1], [34]–[37], and are increasingly driven by generative artificial intelligence [7]–[9], with recent analysis bounding the deployed performance of a DT trained policy by a formal twin to reality discrepancy [38], [39]. Our interest, however, lies one layer down, which is within the DT of the wireless radio channel. 
+
+The DT of a wireless radio channel can be built by importing a 3 dimensional model of some site-specific en-vironment, assigning electromagnetic materials to its surfaces, and possibly synthesize the channel through possible ray tracing approaches [40]–[42]. On this basis, the DTs can fuse ray tracing with learning for multi-spectrum propagation modeling [40], map user positions to statistical channel state information (CSI) via some diffusion model [43], counter channel aging by generative data augmentation [44], track reconfigurable intelligent surfaces (RIS) channels [45], [46] with physics informed neural networks [47], [48], and place ray tracing directly in the vehicular simulation process [49]. 
+
+Since the rendered channel rests on an imperfect geometry and material description, however, a DT never matches reality exactly; this residual sim-to-real gap, embedded in geometry and material mismatch, is one fundamental challenge in what caps fidelity [5], [6]. But even with this gap, the DT has proven to be a powerful tool for lowering overhead of pilot based channel acquisition, where the overhead reduction will be most useful in the large antenna array regime and millimeter wave bands envisioned for 6G, because pilots are expensive due to a multitude of reasons: (i) pilots will create overhead in learning the channel, and training too much will eventually lower the achievable rate when communicating within a fixed coherence interval, 
+
+(ii ) reusing pilots across cells introduces the so-called pilot contamination, and (iii ) and the cost of beam sweeping grows with the number of antenna elements [41], which becomes more dramatic in 6G as massive multiple-input and multiple-output (MIMO) is expected to be used [50]. A first body of work exploits the fact that a site-specific DT can generate its own channel data. Such synthetic CSI has been used to train feedback and beam management networks, which then arXiv:2609.01220v1 [eess.SP] 1 Sep 2026 IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 2
+
+require far less real world data than models trained from measurements alone [42], [51]–[53]. A second body of work uses the DT rendered channel directly, which is more optimistic as more confidence is placed on the DT itself. Here, the channel produced by the DT drives the precoder through some over-the-air channel impulse response inference [41], and so statistical CSI can be obtained from the user positions without transmitting any pilots at all [43]. Across the literature, an informal statement reads as follows: 
+
+“the more accurate the DT, the fewer pilots/training are needed.” [41]–[43], [54], [55]. It is, however, only ever demonstrated empirically for a particular system. It has never been quantified, to the best of the author’s knowl-edge. For instance, the DT approach in [42] contains the relevant site-specific information, which was stated to require less feedback overhead to achieve the same or even better performance than a generic dataset. Furthermore, [43] does not require any pilots so that their framework can generate statistical CSIs from a large number of positions, however achieving satisfactory results. Also, [55] argues that if the digital replica is adequately accurate, the real world channel acquisition can even be bypassed. Moreover, [54] infers that a DT can predict the information about the wireless channel in the real environment even by eliminating the channel acquisition overhead. Also, [41] provides numerical results showing the accuracy of the proposed channel DT without CSI acquisition. Meanwhile, [56] highlighted that a key challenge in the application of DT technology is the channel simulators requirements on the accuracy of the 3D DT. In retrospect, one may even wonder, how many pilots is a DT worth? how does that worth scale with some DT’s uncertainty about the environment, and when does trusting a DT become worse than using no DT at all? or even more broadly, how much training is needed with a digital twin ? 
+
+Classical training theory quantifies pilots against signal to noise ratio (SNR) and/or number of antennas in the MIMO case [57], while existing notions of DT fidelity [6], [38] do not translate into pilots. We intend to close this gap by modeling the DT as supplemental information on top of the training observations in the physical world, which serves an additional measurement of the wireless channel. In the following, we highlight the novel contributions and shed light on some important insights appearing in this manuscript. In the following, we highlight the novel contributions and shed light on some important insights appearing in this manuscript. To this end, we summarize our contributions as follows.  
+
+> •
+
+DT measurement model. We treat the DT as a com-plementary measurement of the wireless channel, avail-able to the receiver on top of the training observations acquired in the physical world (PW). We then establish the conditions under which this measurement admits a Gaussian model, by invoking the Lindeberg-Feller central limit theorem (CLT) over the path errors of the DT. We further show that both moments of the Gaussian model are dictated by the electromagnetic properties the DT assigns to the surfaces. In particular, we simulate the DT error from the Fresnel coefficients and the full polari-metric path gain over a deployment ensemble, and we demonstrate that a wrong material assumption increases the variance, whereas a slowly varying path phase turns into a bias that turns out to be frequency-dependent.  
+
+> •
+
+Pilot equivalence of a DT and its mismatch threshold. 
+
+We fuse the PW and the digital world through the best linear unbiased estimator (BLUE) estimator and derive a DT aided Cram´ er–Rao bound (CRB) that interpolates continuously between pilot only estimation, obtained for an uninformative DT, and genie aided CSI, obtained for a perfect DT. Thanks to this expression, we derive a pilot equivalence law that converts the precision of the DT into an equivalent number of training symbols, thereby giving a measure for DT fidelity, together with the training length needed to reach a target mean square error (MSE). For the case of a biased DT that is unknown to the estimator, we obtain the exact mismatch threshold beyond which trusting the DT is worse than ignoring it. Beyond that threshold, the DT is worth a negative number of pilots, an effect we refer to as unlearning of the PW.  
+
+> •
+
+Achievable rate and optimal training length. We translate the above estimation results into an achievable rate over a block fading channel, for both an unbiased and a biased DT, and we derive the training length that maximizes this rate as the unique root of a single equation. Thanks to these expressions, we recover the pilot-only and the genie-aided rates as limiting cases, and we identify the DT fidelity above which training can be dispensed with altogether. Finally, we present extensive numerical results that corrob-orate every closed form expression and unveil some important insights, i.e.  
+
+> •
+
+An incorrect material assumption within the DT can increase the DT uncertainty (or the DT variance) by a factor of 3.8 when the surfaces are rendered as a light dielectric instead of a near metal, while the very same error turns into a bias at lower frequencies.  
+
+> •
+
+The number of pilots a DT replaces decays inversely with the operating SNR in the PW for the unbiased case and is further reduced through a factor that depends on the bias as well as the amount of training used for the biased case, according to the pilot-equivalence law.  
+
+> •
+
+Training in the PW shrinks as the DT becomes more accurate, to the point where no training is needed at all, and it increases once the DT is biased or less accurate. For a coherence block of 30 symbols and a DT variance of 0.05 , an unbiased DT attains 3 bits /s/Hz with a single training symbol, whereas a bias of 0.3 needs 3 training symbols to deliver 2.75 bits /s/Hz , which is exactly the best rate attained with no DT at all, and a bias of 
+
+0.55 needs about 4 training symbols while delivering only 2.5 bits /s/Hz . An unbiased DT operating at 10dB 
+
+requires no training at all to achieve a channel MSE error of 10 −2 as long as the DT variance does not exceed 10 −3. 
+
+> •
+
+The value of a DT in terms of achievable rate is maxi-mized (when compared to the achievable rate of no DT) at a moderate SNR and vanishes in both the low and the high SNR limits. For instance, when the variance of the IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 3
+
+DT is 0.05 , the optimal SNR for maximum value of a DT in terms of achievable rate occurs at 2.5, and that SNR decreases with increasing bias. For a highly biased DT, e.g. 0.35 , there exists SNR regions where the DT is more harmful over a mid SNR range. 
+
+Organization : The remainder of this paper is organized as follows. Section II introduces the system model, casting the DT as a complementary Gaussian measurement of the channel. Section III fuses this measurement with the physical-world pilots through the best linear unbiased estimator and derives the DT-aided CRB, the pilot-equivalence law, and, for a biased twin, the mismatch threshold and the associated unlearning regime. Section IV translates these estimation results into a block-fading achievable rate and obtains the optimal training length in closed form. Section V presents numerical results that corroborate the closed-form expressions and quantify the value of a DT across signal-to-noise ratio, DTvariance, as well as the DT bias. Finally, Section VI concludes the paper. 
+
+Notation : Lowercase letters denote scalars and E{·} is the statistical expectation. For a complex number z ∈ C, |z| is its magnitude. CN (μ, σ 2) denotes the circularly symmetric complex Gaussian distribution with mean μ and variance σ2.The operator (x)+ ≜ max( x, 0) .II. S YSTEM MODEL 
+
+We analyze downlink transmission over a narrowband sub-carrier within a multiple input single output (MISO) and orthogonal frequency division multiplexing (OFDM) system. The receiver intends to estimate the channel coefficient h0 ∈ C
+
+that exists between the BS and UE. Within the subcarrier of interest, this channel is represented as the superposition of L
+
+multipath components, 
+
+h0 = XLℓ=1 αℓ e−j2πf τ ℓ , (1) where path ℓ has complex gain αℓ and delay τℓ set by the physical world geometry and the electromagnetic properties of the scatterers within the physical environment, and f repre-sents frequency. Following the block fading training model of [57], within a channel coherence interval of T symbols the BS transmits Tτ ≤ T unit power training symbols (pilots), leaving 
+
+T − Tτ symbols for data. For simplicity’s sake, we assume an all-ones pilot frame. The UE observes noisy samples of the channel h0,
+
+yi = h0 + ni, (2) where ni ∼ CN (0 , σ 2
+
+> n
+
+) is additive white Gaussian noise over all the subcarriers, which is considered to be white and independent over the subcarriers, whose noise power is σ2
+
+> n
+
+.The SNR is defined as ρ ≜ 1/σ 2
+
+> n
+
+.Now let us assume a DT intends to approximate the PW geometry, including the material models. Moreover, a DT attempts to reconstruct the superposition (1) from its model 
+
+of the environment, where it generates a gain ˆαℓ and delay ˆτℓ
+
+for each path it resolves over a path set ˆL. For instance, the DT can be a ray tracer which generates 
+
+ˆhDT = X  
+
+> ℓ∈ˆL
+
+ˆαℓ e−j2πf ˆτℓ . (3) For a single specular reflection off a planar surface of complex relative permittivity εr at incidence angle θ, the reflected field depends on the incident field and the Fresnel coefficient [58], which in turn fundamentally depend on the transverse electric and magnetic fields, defined respectively as 
+
+ΓTE (εr , θ ) = cos θ − pεr − sin 2 θ
+
+cos θ + pεr − sin 2 θ ,
+
+ΓTM (εr , θ ) = εr cos θ − pεr − sin 2 θεr cos θ + pεr − sin 2 θ .
+
+(4) Generally speaking, a path is a chain of Nℓ specular reflec-tions, where each path hits a surface of material i defined by complex relative permittivity ε(i) at an incidence angle of θ(i).Following [59], the specular field spreads as a spherical wave from the image source, hence, the path carries the free space path loss set by its total length, 
+
+gℓ = 1
+
+dℓ
+
+, dℓ = XNℓ+1  
+
+> i=1
+
+d(i) 
+
+> ℓ
+
+, (5) where d(i) 
+
+> ℓ
+
+is the length of the ith straight segment of path 
+
+ℓ, hence the Nℓ + 1 segments run from the BS to the first reflection point, between consecutive reflection points, and from the last reflection point to the UE. At each reflection 
+
+i, the field is transformed by the diagonal Fresnel matrix 
+
+Γ(ε(i), θ (i) 
+
+> ℓ
+
+) = diag  ΓTE , ΓTM 
+
+, whose components are given in (4). This transformation is applied in the local incidence frame of the surface, which is reached through the change of basis W(i) 
+
+> ℓ
+
+. The outgoing field therefore obeys 
+
+W(i) 
+
+> ℓ
+
+e(i) 
+
+> ℓ, OUT
+
+= Γ ε(i), θ (i)
+
+> ℓ
+
+ W(i) 
+
+> ℓ
+
+e(i)
+
+> ℓ, IN
+
+. (6) After the Nℓ interactions the field arriving at the receiver is e(Nℓ+1)  
+
+> ℓ, IN
+
+, and the complex path gain is its co-polarized projection onto the launched field e(0)  
+
+> ℓ, OUT
+
+[59], 
+
+αℓ = gℓ
+
+ e(0) 
+
+> ℓ, OUT
+
+T e(Nℓ+1) 
+
+> ℓ, IN
+
+e(0)  
+
+> ℓ, OUT 2
+
+, τℓ = 1
+
+c
+
+XNℓ+1  
+
+> i=1
+
+d(i) 
+
+> ℓ
+
+. (7) Equation (7) bundles the path loss (5) and the reflections (6) into one scalar; for a single polarization with no cross coupling it collapses to αℓ = gℓ
+
+Q 
+
+> i
+
+Γ( ε(i), θ (i) 
+
+> ℓ
+
+) = gℓRℓ, with gℓ the free space path loss and Rℓ the surface response, recovering 
+
+αℓ = gℓΓ for a single reflection. In general, the W(i) 
+
+> ℓ
+
+contains the two polarizations. When the DT (or equivalently, the ray tracer it uses) assigns a wrong material, for example a glass material ( εA) when the truth is concrete ( εB), the geometry, delays τℓ and change of basis W(i) 
+
+> ℓ
+
+are unchanged but the reflection matrix Γ
+
+is impacted, so the overall error of a single path ℓ that experiences multiple bounces can be written as 
+
+ϵℓ = αℓ({ε(i)A }) − αℓ({ε(i)B }) e−j2πf τ ℓ , (8) which can be expressed as gℓ[Γ( εA, θ ℓ) − Γ( εB, θ ℓ)] e−j2πf τ ℓ
+
+for the single reflection case. As a consequence, the error a DT commits is the deviation between the true model in (1) from the assumed DT model in (3), i.e. the DT output differs from the true channel as 
+
+∆ ≜ ˆhDT − h0 = X 
+
+> ℓ
+
+ϵℓ, (9) IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 4
+
+BS UE 
+
+car 
+
+LoS NLoS 1
+
+NLoS 2
+
+## Physical world 
+
+BS UE 
+
+LoS 
+
+## Digital world 
+
+material mismatch ⇒ (b, σ 2DT )
+
+ray tracing 
+
+Fig. 1. The PW propagation and its ray traced replica in the digital world, where a LoS path and two NLoS paths, off a building and off a passing car, link the BS to the UE. The DT reproduces the dynamic scene only approximately and assigns the surfaces materials that differ from the true ones, which perturbs the path gains, and gives rise to the bias b and the variance σ2DT in (12). −6 −4 −2 0 2 4 6
+
+Re ∆ (normalized) 
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0      
+
+> density (log)
+> εDT =1 −10 3j(near metal): σDT =0.28
+> εDT =5 .3−0.3j(concrete): σDT =1.00
+> εDT =1 .6−0.01 j(light diel.): σDT =1.07
+
+1
+
+(a) Error impact over different assumed materials. −4 −2 0 2 4
+
+Re ∆ (normalized) 
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0 28 GHz: b ≈ 0 ( |b|/σ DT =0.0) 3.5 GHz: b̸ = 0 ( |b|/σ DT =3.1) 
+
+1 (b) Error impact over carrier frequencies. 
+
+Fig. 2. Histogram of the DT error ∆ in a metal-walled room modelled by the DT as the wrong material: (a) its variance σ2DT grows as the assumed material moves further from metal while staying zero mean, and (b) with the material fixed at concrete the same error stays zero mean at a high carrier ( 28 GHz ) but adds coherently into a bias b at a low carrier ( 3.5 GHz ), realizing the model in (12). 
+
+The randomness in (9) is taken over a deployment ensemble 
+
+D, i.e. over all possible user positions, frequency and delays within the assumed environment, taken conditionally on the macroscopic channel h0. For sake of compact representation, all expectations ED {·} below are over D, even when omit-ted. The errors are assumed to behave under the following assumption 
+
+Assumption 1 (Lindeberg-Feller central limit theorem) . Over the deployment ensemble D the channel errors committed by the DT {ϵℓ}ℓ in (9) are independent across ℓ, circularly symmetric with finite variances σ2 
+
+> ℓ
+
+≜ Var D (ϵℓ). Writing 
+
+s2 
+
+> L
+
+≜ P 
+
+> ℓ
+
+σ2 
+
+> ℓ
+
+= σ2DT for the total error power, they satisfy 
+
+Lindeberg’s condition : for every ε > 0,
+
+1
+
+s2
+
+> L
+
+X
+
+> ℓ
+
+ED
+
+h
+
+ϵℓ − ED ϵℓ 
+
+> 2
+
+1{ | ϵℓ−ED ϵℓ|>ε s L }
+
+i
+
+−→  
+
+> L→∞
+
+0. (10) Condition (10) relates to how the DT modeling error is distributed across the paths over the deployment ensemble D.It holds when the total error power σ2DT is shared among many paths in the sense of (10), each carrying an error variance portion σ2 
+
+> ℓ
+
+/s 2
+
+> L
+
+, so that the DT is comparably and mildly wrong on many paths at once. On the other hand, it fails when a single path holds most of the error variance, which then leads to heavy tails in the underlying distribution, hence the Gaussian model becomes no longer valid. Under Assumption 1 , the Lindeberg-Feller central limit theorem applies to (9), where the normalized centered error (∆ −b)/s L converges in distribution, as L → ∞ , to a zero-mean circularly symmetric standard Gaussian, in essence ∆ ∼ CN  b, σ 2DT 
+
+ where the bias term is b ≜ ED {∆} = P 
+
+> ℓ
+
+ED {ϵℓ} and the variance is given as 
+
+σ2DT ≜ ED {| ∆ − b|2} = X 
+
+> ℓ
+
+Var D (ϵℓ). (11) Writing the centered fluctuation eDT ≜ ∆ − b ∼ CN (0 , σ 2DT ),the DT output is a noisy measurement of the true channel, 
+
+ˆhDT = h0 + b + eDT , eDT ∼ CN (0 , σ 2DT ), (12) IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 5
+
+which is a Gaussian observation of h0 contributing Fisher information 1/σ 2DT as opposed to the pilots that contribute 
+
+Tτ ρ. The variance σ2DT can be regarded as the amount of uncertainty the DT holds, due to the mismatch between the DT and the PW. In short, the Gaussian model in (12) follows from the central limit theorem over the many reflected paths under Assumption 1. We now confirm on a ray traced environment that a DT with wrong material can be captured by the two moments 
+
+(b, σ 2DT ). Figure 2 depicts the histogram of the DT error ∆
+
+in (9) over the deployment ensemble D when the ray tracer assigns a wrong material to the surfaces, where its variance 
+
+σ2DT depends on how wrong the assumed material is, and the bias b appears when the path phases stay correlated across the deployment. In particular, we simulate the DT measurement model (12) from the Fresnel coefficients in (4) and the full polarimetric gain (7). We consider a 4 m × 4 m × 3 m room with metal walls, where the BS is fixed and the UE is swept over the room to average the entire deployment ensemble D.The propagation paths are the specular reflection paths of the room, enumerated by the method of images, where each mirror image of the BS across the walls is one reflected ray to the UE traced through the reflection transformation (6) and projected by the gain (7). The true surfaces are all metal (with εtrue =1 − 10 7j), however the DT assigns a wrong material, so that each reflection reflects with the incorrect Fresnel coefficients, hence (6) is perturbed. In particular, in Figure 2a, we simulate cases where the DT assigns near metal, which is close to the true material ( εDT = 1 − 10 3j), concrete ( εDT = 5 .3 − 0.3j), and a light dielectric material which is farthest from metal (εDT = 1 .6 − 0.01 j). When the DT assumes the wrong wall material, every reflected path picks up a small error in how strongly it reflects, and as these errors are independent across the many paths they add up constructively as powers, which contributes in widening the distribution of the total error. The further the assumed material deviates from the true metal (in terms of complex relative permittivity), the larger each path error becomes, so the variance σDT grows from 0.28 for a near-metal assumption to 1 for concrete to 1.07 for a light dielectric, that is by a factor of about 3.8 between the closest and the farthest material assumption. In Figure 2b we fix the true material to metal (as is the case in Figure 2a), however the DT assumes concrete material. The deployment ensemble here is considered to be a 2 cm patch. We study the effect of the carrier frequency on the DT error ∆,namely at a high carrier ( 28 GHz ) the path phases decorrelate across the deployment ensemble and the same material error averages to a zero-mean spread with b ≈ 0, whereas at a low carrier ( 3.5 GHz ) the phases stay correlated so the error adds coherently and a nonzero bias b emerges. When the wavelength is short relative to the region over which we average, e.g. at 
+
+28 GHz , the phases of the reflected paths scramble from point to point, so the error cancels on average and the DT error stays zero mean. On the other hand, when the wavelength is long compared to that region, e.g. at 3.5 GHz , the phases slightly change relative to the wavelength, the same error adds up in the same direction, and it turns into a non-negligible bias. III. C HANNEL ESTIMATION VIA DT-AIDED WIRELESS 
+
+SYSTEM 
+
+We consider three estimators of the deterministic h0, dis-tinguished by the information each uses. 
+
+(i) Physical world : We refer to the channel estimation proce-dure using pilots-only as the physical world as it entails conducting a channel estimate solely using the pilots on a physical channel. It is well known that the maximum likelihood (ML) estimator from the pilots alone using the model in (2) is given as follows 
+
+ˆhPW = arg max 
+
+> h
+
+p {yi} | h0
+
+ = ¯ y. (13) Here p({yi} | h) is the likelihood of the channel h0 given the pilot observations {yi}, that is, the joint density of the pilots evaluated as a function of h0. Under the Gaussian pilot model in (2), the maximizer is the sample mean 
+
+¯y, so ˆhPW is the maximum likelihood estimator (MLE) formed from the physical world measurements alone. The MLE estimator for h0 is nothing other than the mean 
+
+¯y ≜ 1
+
+Tτ
+
+XTτ 
+
+> i=1
+
+yi ∼ CN 
+
+
+
+h0, 1
+
+Tτ ρ
+
+
+
+, (14) The MSE of the estimation procedure can be shown to be [60] 
+
+EPW ≜ E{| ˆhPW − h0|2} = 1
+
+Tτ ρ , (15) so that Tτ pilots contribute Fisher information Tτ ρ about 
+
+h0, which indicates that the MSE on the channel esti-mation in the PW improves only when more overhead is required on training the channel via increasing Tτ or when the system operates at a higher SNR ρ.
+
+(ii) Digital world : Given a DT whose measurement model 
+
+ˆhDT follows equation (3) and whose errors follow As-sumption 1, one can assert the equivalent Gaussian model in equation (12). It immediately follows that the error on the DT measurement is given as 
+
+EDT ≜ E{| ˆhDT − h0|2} = |b|2 + σ2DT . (16) Equation (16) tells us that the error depends naturally on the bias and the error variance of the DT. 
+
+(iii) Physical and digital worlds : The first two optimal esti-mators could be seen as two extremes, namely, the PW channel estimator in (13) is a typical channel estimator based on MLE when no additional information about the channel is available. In other words, it relies on physical world observations only utilizing a known pilot sequence for channel estimation purposes. On the other hand, the second estimator using a DT measurement following (12) relies on prior knowledge of the channel and accuracy of the DT generator captured through b and σ2DT . In order to study the efficacy of having both PW and DT measurements, we can treat the DT output (12) as a second independent measurement of h0 that can aid the PW channel estimation procedure. In essence, under the IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 6
+
+Physical world Digital world                                          
+
+> BS real propagation
+> geometry +materials UE pilots ¯y
+> ∼ CN  h0,1/T τρ
+> ray tracing replica
+> 3D model +RT engine
+> DT ˆhDT
+> ∼ CN  h0+b, σ 2DT
+> 
+> renders (mismatch b,σ2DT )
+> h0=P
+> ℓαℓe−j2πf τ ℓ(true channel) BLUE combiner
+> ˆhP+D = (1 −w)¯ y+wˆhDT
+> channel estimate ˆhP+D
+> 1−ww
+> data transmission & rate Fig. 3. The receiver estimates the channel h0from two measurements: a physical one (pilots ¯y, giving ˆhPW ) and a digital one (the ray tracing DT ˆhDT ), fused by the BLUE estimator.
+
+unbiased DT case (i.e. b = 0 ), the following weighted least squares problem can be considered 
+
+ˆhP+D = arg min 
+
+> h
+
+Tτ ρ ¯y − h 2 + 1
+
+> σ2DT
+
+ˆhDT − h 2, (17) whose minimizer is the inverse variance combination as 
+
+ˆhP+D = (1 − w) ¯ y + w ˆhDT , w ≜ 1/σ 2DT 
+
+Tτ ρ + 1 /σ 2DT 
+
+.
+
+(18) We consider the above estimator because under the Gauss-Markov theorem, the estimator in (18) is also the BLUE estimator, which achieves the lowest sampling variance among all linear unbiased estimators. Here, 
+
+w ∈ [0 , 1] is the weight on the DT, and ˆhP+D interpolates between the other two estimators, namely ˆhP+D = ˆhPW 
+
+at w = 0 , which is the case of an uninformative DT and 
+
+ˆhP+D = ˆhDT at w = 1 , which is the case of a perfectly confident DT. For a given DT-aided system, one may be interested in the smallest channel estimation error achievable, i.e. how much can the DT plus pilots enhance the MSE. For that, we have the following proposition 
+
+Proposition 1 (DT-aided CRB) . For an unbiased DT, the minimum variance of any unbiased estimator of h0, attained by the BLUE estimator in (18) attains the CRB of the joint model observing (2) and (12) as 
+
+EP+D (Tτ ) ≜ E|ˆhP+D − h0|2 = 1
+
+Tτ ρ + 1 /σ 2DT 
+
+, (19) 
+
+with ˆhP+D by the BLUE estimator in (18) and the expectation taken over the thermal noise ni and the DT error variance 
+
+eDT .Proof: For an unbiased DT, the pilots and the DT are two 
+
+independent unbiased Gaussian measurements of the same de-terministic scalar h0: the pilot average ¯y ∼ CN  h0, 1/(Tτ ρ)
+
+from (14), carrying Fisher information Tτ ρ, and the DT 
+
+ˆhDT ∼ CN (h0, σ 2DT ) from (12) with b = 0 , carrying Fisher information 1/σ 2DT . For independent observations Fisher infor-mation adds, so the information about h0 is J = Tτ ρ+1 /σ 2DT 
+
+and the CRB is 1/J . The CRB is met by the BLUE in (18) with error J−1 = ( Tτ ρ + 1 /σ 2DT )−1, which is (19). An alternative proof follows by using the expression of the BLUE estimator in (18), where one can replace ¯y with h0 + ¯ n where 
+
+¯n ∼ CN (0 , 1  
+
+> Tτρ
+
+) and ˆhDT with h0 + eDT .In the context of DTs with pilots, equation (19), hereby referred to as DT-aided bound, reveals two extremes, i.e. 
+
+lim 
+
+> σ2DT →∞
+
+EP+D = 1
+
+Tτ ρ = EPW (pilot-only ),
+
+lim 
+
+> σ2DT →0
+
+EP+D = 0 (genie DT ). (20) The first limit tells us that, for the case of unbiased DT, when the DT becomes highly uninformative, one would have to rely on the physical world through pilot training only, and hence the performance is dictated by either the SNR or training time. On the other hand, and for the case of unbiased DT, the more informative the DT becomes, the less one can rely on the PW, i.e. one would rely less on the SNR or the training time. The extreme case is a genie DT which is capable of generating the true channel, on average. Next, we target a question of how much training in the PW a DT-aided system requires to reach a desired MSE on the channel estimate. 
+
+Corollary 1 (Pilots for a target accuracy) . The training length required to reach a target MSE ϵ of a DT-aided system observing measurements from (2) and (12) is given as 
+
+T ⋆τ (ϵ, σ 2DT ) = 1
+
+ρ
+
+ 1
+
+ϵ − 1
+
+σ2DT 
+
++
+
+. (21) 
+
+Proof: By (19), EP+D (Tτ ) is strictly decreasing in Tτ ≥
+
+0. Setting (19) equal to the target MSE, ones gets EP+D (Tτ ) = 
+
+ϵ, which in turn reads Tτ ρ + 1 /σ 2DT = 1 /ϵ , hence Tτ =(1 /ϵ − 1/σ 2DT )/ρ . As Tτ ≥ 0, we get (21). Indeed, a direct consequence of Corollary 1 is that when the DT alone already meets the target MSE ϵ, i.e. σ2DT ≤
+
+ϵ, the right hand side becomes zero, which indicates that no training is needed. In retrospect, if the DT does not contain enough information, arising from modeling inaccuracies, i.e. 
+
+1/ϵ > 1/σ 2DT , then one would require T ⋆τ (ϵ, σ 2DT ) to reach the desired MSE, i.e. ϵ. From Corollary 1 , one can get a sense of how much training could be bypassed , as a function of the accuracy of the DT in question. Next, one may wonder how much pilots does a DT replace. Said differently, how many IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 7
+
+pilots in a PW does a DT replace. For that, we introduce the following pilot equivalence law for an unbiased DT, 
+
+Lemma 1 (Pilot-equivalence law of an unbiased DT) . An unbiased DT of variance σ2DT is worth 
+
+Teq = 1
+
+ρ σ 2DT 
+
+(22) 
+
+training symbols, in the sense that EP+D (Tτ ) = 1 / (Tτ +
+
+Teq )ρ, i.e. estimating with the DT and Tτ training symbols equals estimating with Tτ + Teq training symbols and no DT at our disposal. Proof: By the DT-aided bound in (19) at Tτ pilots, we simply equate the two errors in equations (19) and (15) 
+
+EP+D (Tτ ) = 1(Tτ + Teq )ρ = EPW (Tτ + Teq ),
+
+With some straightforward manipulations, the proof is done. In other words, if the SNR is high enough, then the DT may turn out to be less useful in a sense it replaces less pilots. That is to say that the number of pilots a DT replaces depends not only on the information contained in the DT, i.e. 1
+
+> σ2DT
+
+, but also on the operating SNR in the PW. We now let the DT be biased, i.e. E{ˆhDT } = h0 + b with 
+
+b̸ = 0 in (12), while the BLUE in (18) still trusts the DT with weight w, i.e. the BLUE estimator still thinks the DT is unbiased. Therefore, we analyze the error in terms of channel estimation on using a biased DT. 
+
+Proposition 2 (Biased DT) . The MSE of the DT-aided estima-tor given in (18) under an unknown b is the unbiased bound plus a bias penalty, 
+
+Eb
+
+> P+D
+
+(Tτ , b ) ≜ E|ˆhP+D − h0|2
+
+= EP+D (Tτ ) + w2 |b|2. (23) 
+
+Proof: Notice that the BLUE estimator in (18) can be expressed as 
+
+|ˆhP+D − h0|2 = |(1 − w)¯ y + w ˆhDT − h0|2
+
+= |(1 − w)( h0 + ¯ n) + w(h0 + b + eDT ) − h0|2
+
+= |w b + (1 − w)¯ n + w e DT |2,
+
+where ¯n ≜ 1
+
+> Tτ
+
+PTτ 
+
+> i=1
+
+ni ∼ CN (0 , σ 2
+
+> n
+
+/T τ ), then applying the expectation, we get 
+
+E|ˆhP+D − h0|2 = w2|b|2 + (1 − w)2 E|¯n|2 + w2 E|eDT |2
+
+= w2|b|2 + (1 − w)2 1
+
+Tτ ρ + w2σ2DT .
+
+Using w = 1/σ 2DT  
+
+> Tτρ+1 /σ 2DT
+
+in the above expression gives us (23). The biased DT reveals several insights. First, an uninforma-tive DT ( σ2DT → ∞ ) behaves as an asymptotically unbiased DT in a sense that Eb
+
+> P+D
+
+(Tτ , b ) → E P+D (Tτ ) as σ2DT → ∞ .In other words, the bias can be overshadowed by high error variance of the DT. Second, a biased DT can drive the MSE error Eb
+
+> P+D
+
+(Tτ , b ) high enough if more weight w is placed on trusting the DT. The next proposition gives us the exact bias threshold that, if trespassed, would yield a destructive DT in the MSE sense. 
+
+Proposition 3 (Negative value of a DT) . For the case of a biased DT with unknown bias b, we have that Eb 
+
+> P+D
+
+> EPW ,if and only if the bias exceeds 
+
+|b⋆| =
+
+r 1
+
+Tτ ρ + σ2DT . (24) 
+
+Proof: By (23) and (15), EP+D > EPW reads w2|b|2 >
+
+1
+
+Tτ ρ − 1
+
+Tτ ρ + 1 /σ 2DT 
+
+= 1/σ 2DT 
+
+Tτ ρ (Tτ ρ + 1 /σ 2DT ) . Using w in (18) rearranges to |b|2 > Tτ ρ + 1 /σ 2DT 
+
+Tτ ρ (1 /σ 2DT ) = 1
+
+Tτ ρ + σ2DT = |b⋆|2, i.e. (24). It is worth noting that Proposition 3 in other words gives us the bias threshold b⋆ in which trusting a biased DT is strictly worse than ignoring it , which happens when the unknown bias exceed b⋆. In particular, the proposition describes three regimes: for |b| < |b⋆| the DT helps ; as σ2DT grows the gain 
+
+saturates at the pilot only error (13); and for |b| > |b⋆| the DT hurts . By (24), the bias tolerance shrinks with more pilots or high SNR, namely |b⋆|2 = 1 /(Tτ ρ) + σ2DT → σ2DT . On the other hand, with few pilots, or even low SNR, a strongly biased DT can still help with channel estimation tasks. However, the above proposition only quantifies the biased DT from a channel estimation perspective and does not tell us anything about the required number of pilots needed to attain a desired MSE. Note that Corollary 1 answers that question for the case of an unbiased DT. For the case of a biased DT with unknown bias, we have the following generalized corollary 
+
+Corollary 2 (Training for a target with a biased DT) . For a biased DT of unknown bias b and variance σ2DT , the training length to reach a attain an MSE requirement ϵ is given as 
+
+T ⋆τ (ϵ, b ) = 1
+
+ρ
+
+"
+
+1 + p 1 + 4 ϵ |b|2/σ 4DT 
+
+2ϵ − 1
+
+σ2DT 
+
+#+
+
+. (25) 
+
+The pilot length above recovers Corollary 1 at b = 0 and requires no training, T ⋆τ = 0 , exactly when σ2DT + |b|2 ≤ ϵ,i.e. the DT alone already meets the target. Proof: First, we set Eb
+
+> P+D
+
+(Tτ , b ) = ϵ. Using (23), we have that 1
+
+Tτ ρ + 1 /σ 2DT 
+
++ w2|b|2 = ϵ, (26) where w = 1/σ 2DT  
+
+> Tτρ+1 /σ 2DT
+
+. Denoting x ≜ Tτ ρ + 1 /σ 2DT > 0
+
+gives w = (1 /σ 2DT )/x and w2|b|2 = |b|2/(σ4DT x2), so that the condition in equation (26) becomes 1 
+
+> x
+
++ |b|2 
+
+> σ4DT x2
+
+= ϵ, i.e. quadratic in x, namely 
+
+ϵ x 2 − x − |b|2
+
+σ4DT 
+
+= 0 .
+
+The unique positive root is easily verified to be x+ =  1 + p1 + 4 ϵ|b|2/σ 4DT 
+
+/(2 ϵ). Since Tτ = (x − 1/σ 2DT )/ρ and the training length is nonnegative, then replacing x+ in the expression of Tτ gives us (25). We apply the [·]+ operator so that the training length is non-negative. Moreover, it is easy IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 8
+
+to see that at σ2DT + |b|2 = ϵ, the expression in (25) is exactly zero. Furthermore, since (25) is decreasing in ϵ (for fixed b
+
+and σ2DT ), then any σ2DT + |b|2 ≤ ϵ drives the bracketed term to negative, which then attains T ⋆τ (ϵ, b ) = 0 .More specifically, Corollary 2 indicates that when the biased DT alone already meets the target MSE ϵ, i.e. σ2DT +
+
+|b|2 ≤ ϵ, the right hand side becomes zero, hence zero training is required. It is important to see that the training required as a function of MSE requirement ϵ is dictated not only by the variance σ2DT but also by the unknown bias b. Also, notice how the bias and variance are treated symmetrically only at the boundary required for PW training. Another insight worth highlighting is the behavior of (25) with σ2DT . Indeed, differentiating (25) with respect to σ2DT 
+
+gives 
+
+ρ ∂T ⋆τ
+
+∂σ 2DT 
+
+= 1
+
+σ4DT 
+
+− 2|b|2/σ 6DT 
+
+p1 + 4 ϵ|b|2/σ 4DT 
+
+. (27) and setting it to zero gives us 
+
+1
+
+σ4DT 
+
+= 2|b|2/σ 6DT 
+
+p1 + 4 ϵ|b|2/σ 4DT 
+
+=⇒
+
+s
+
+1 + 4ϵ|b|2
+
+σ4DT 
+
+= 2|b|2
+
+σ2DT 
+
+,
+
+(28) so the optimal DT uncertainty is 
+
+σ2⋆ 
+
+> DT
+
+= 2 |b|p|b|2 − ϵ, |b|2 > ϵ, (29) and for |b|2 ≤ ϵ, the radicand is negative and no interior optimum exists, which means that the minimum is obtained at σ2⋆ 
+
+> DT
+
+= 0 . Now, we can introduce the pilot equivalence law for the case of a biased DT 
+
+Corollary 3 (Pilot-equivalence law of a biased DT) . A biased DT with unknown bias b and variance σ2DT is worth 
+
+T b
+
+> eq
+
+(Tτ , b ) = Teq · 1 + Tτ ρ (σ2DT − | b|2)1 + Tτ ρ σ 2DT + |b|2/σ 2DT 
+
+(30) 
+
+training symbols when the PW is trained on Tτ training symbols, in the sense that EP+D (Tτ , b ) = 1 / (Tτ + T b
+
+> eq
+
+)ρ.The expression in (30) coincides with Lemma 1 at b = 0 ,vanishes at |b|2 = σ2DT + 1 /(Tτ ρ) = |b⋆|2 of (24) , and is 
+
+negative beyond it: a strongly biased twin is worth a negative number of pilots. Proof: By definition, and according to the above pilot-equivalence law, T b 
+
+> eq
+
+satisfies EPW (Tτ + T b
+
+> eq
+
+) = EP+D (Tτ , b ),hence by (13) T b 
+
+> eq
+
+= 1 / ρ EP+D (Tτ , b ) − Tτ . Substituting 
+
+EP+D (Tτ , b ) from (23) and clearing denominators, the numer-ator collapses to 1 + Tτ ρ(σ2DT − | b|2) and the denominator to 
+
+ρσ 2DT 
+
+ 1 + Tτ ρσ 2DT + |b|2/σ 2DT 
+
+, which is (30). The numerator vanishes exactly at |b|2 = σ2DT + 1 /(Tτ ρ), i.e. (24), and is negative for larger |b|.Unlike Lemma 1 , the biased DT contains a factor, which multiplies Teq that depends on the bias itself, as well as the amount of training used in the PW via Tτ .However, an important regime to note is the high SNR regime, where the biased DT is asymptotically worth 
+
+T b
+
+> eq
+
+(Tτ , b ) ∝ Teq ·
+
+
+
+1 − |b|2
+
+σ2DT 
+
+
+
+, (31) which indicates that even when operating with high SNR in the PW, the bias can penalize part of the pilot equivalent number of pilots. Generally speaking, Corollary 3 tells us that when 
+
+|b|2 < |b⋆|2, the equivalent amount of pilots the DT is worth (i.e. the DT replaces), namely T b
+
+> eq
+
+(Tτ , b ), is positive. At the limit, |b|2 = |b⋆|2, we have that T b
+
+> eq
+
+(Tτ , b ⋆) = 0 indicating that the DT is worth zero pilots. On the other hand, once the bias exceeds |b|2 > |b⋆|2, the equivalent amount of pilots the DT replaces becomes negative, i.e. T b
+
+> eq
+
+(Tτ , b ) < 0 indicating that the DT starts removing the amount of actual pilots, i.e. 
+
+Tτ + T b
+
+> eq
+
+(Tτ , b ) < T τ , namely an unlearning phenomenon of the PW .IV. C APACITY ANALYSIS OF A DT-AIDED WIRELESS 
+
+SYSTEM 
+
+We now translate the estimation results into achievable rate via the training based capacity lower bound of [57]. Herein, we adopt the standard block fading model, namely the unit variance channel h0 ∼ CN (0 , 1) is constant over a coherence interval of T symbols, of which Tτ carry training and T − Tτ
+
+carry data, at common SNR ρ. The receiver uses the pilots 
+
+¯y and the DT output ˆhDT into a single channel estimate and decodes the data with it. We now introduce analyze the achievable rate a DT-aided wireless system delivers. For that, we have the following result 
+
+Lemma 2 (DT-aided achievable rate) . For the block fading model above with a unbiased DT of precision 1/σ 2DT , the achievable rate is lower bounded by 
+
+C(Tτ ; ρ) = T − Tτ
+
+T log 2
+
+
+
+1 + 1
+
+> σ2DT
+
++ ρT τ
+
+
+
+(1 + ρ)1 + 1
+
+> σ2DT
+
++ ρT τ + ρ . (32) 
+
+For the biased case, we have 
+
+Cb(Tτ ; ρ) = T − Tτ
+
+T log 2
+
+1 + ρ
+
+1 + ρ  11+ ρT τ +1 /σ 2DT 
+
++ w2 
+
+> b
+
+|b|2 ,
+
+(33) 
+
+where wb ≜ 1/σ 2DT  
+
+> 1+ ρT τ+1 /σ 2DT
+
+.Proof: We assume that the data phase is conducted after the system acquires a channel estimate using both the PW observation of h0 via the pilot average ¯y = h0 + n,
+
+n ∼ CN (0 , (ρT τ )−1) from (14), and the unbiased DT from (12) and that n, e and the prior h0 ∼ CN (0 , 1) are mutually independent. Furthermore, we stack them as r =[ ¯ y, ˆhDT ]⊤ = 1 h0 + v, with 1 = [1 , 1] ⊤ and v ∼ CN (0, R),
+
+R = diag  (ρT τ )−1, σ 2DT 
+
+, the minimum mean square error (MMSE) estimate of h0 is the conditional mean 
+
+ˆh = E{h0 | ¯y, ˆhDT } = ρT τ ¯y + (1 /σ 2DT ) ˆhDT 
+
+1 + ρT τ + 1 /σ 2DT 
+
+, (34) Since h0 and v are jointly Gaussian, the posterior p(h0 | r)
+
+is Gaussian, and gathering the quadratic in h0 from the product of the likelihood exp[ −(r−1h0)H R−1(r−1h0)] and the prior 
+
+exp[ −| h0|2] yields 
+
+p(h0 | r) ∝ exp  − u |h0 − ˆh|2, (35) IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 9
+
+so the posterior is CN (ˆh, (1 + 1H R−11)−1) with ˆh the conditional mean of (34). The inverse of the variance 1 + 
+
+1H R−11 is the so-called posterior precision in information form, namely the prior precision added to the measurement precision 1H R−11 that the two observations carry about 
+
+h0. The MMSE equals this posterior variance, and it is independent of the realization r, so the error ˜h = h0 − ˆh
+
+has variance 
+
+σ2 
+
+> e
+
+=  1 + 1H R−11−1 = 11 + ρT τ + 1 /σ 2DT 
+
+, (36) and, by the orthogonality principle of the MMSE between its estimate and error, namely ˆh ⊥ ˜h with E|ˆh|2 = 1 − σ2 
+
+> e
+
+.Conditioning the data phase on ˆh (a sufficient statistic for h0)is thus conditioning on both ¯y and ˆhDT . Furthermore, with a unit power data symbol x, the receiver UE reads 
+
+y = √ρ h 0 x + w = √ρ ˆh x +  √ρ ˜h x + w,
+
+where the noise behaves as w ∼ CN (0 , 1) . Denote z ≜
+
+√ρ ˜h x + w, then the effective noise z is uncorrelated from 
+
+x because E{z x ∗} = √ρ E{˜h} E|x|2 + E{w x ∗} = 0 (˜h
+
+is zero mean and independent of x, and w is independent), with power E|z|2 = 1 + ρσ 2 
+
+> e
+
+, while the useful signal power is 
+
+ρ E|ˆh|2 = ρ(1 −σ2 
+
+> e
+
+). Conditioned on ˆh, the input sees a known gain and additive noise uncorrelated with it at fixed variance; by the worst case uncorrelated noise theorem [57, Thm. 1] a Gaussian z minimizes the mutual information, hence 
+
+I(x; y | ˆh) ≥ log 2
+
+ 1 + ρeff 
+
+, (37) where 
+
+ρeff = ρ (1 − σ2 
+
+> e
+
+)1 + ρ σ 2
+
+> e
+
+. (38) Note that only T − Tτ of every T symbols carry data, hence 
+
+C(Tτ ) = T −Tτ 
+
+> T
+
+log 2(1 + ρeff ). (39) Using (36) in (38) followed by (39) gives (32). For the biased case in (12), the same MMSE estimator in (34) gives, 
+
+h0 − ˆh = h0 − ρT τ ¯n − (1 /σ 2DT )eDT 
+
+1 + ρT τ + 1 /σ 2DT 
+
+− 1/σ 2DT 
+
+1 + ρT τ + 1 /σ 2DT 
+
+b, 
+
+Hence, we can show for the biased case that 
+
+σ2 
+
+> e,b
+
+= E|h0 − ˆh|2 = σ2 
+
+> e
+
++ w2 
+
+> b
+
+|b|2, (40) where wb ≜ 1/σ 2DT  
+
+> 1+ ρT τ+1 /σ 2DT
+
+. Substituting (40) for σ2 
+
+> e
+
+in (38)-(39) yields the biased rate in (33). The uninformative DT ( 1/σ 2DT → 0) recovers the pure training rate of [57]. On the other hand, a perfect DT (1/σ 2DT → ∞ ) drives the estimation error as σ2 
+
+> e
+
+→ 0, which in turn drives the effective SNR towards the true one, namely 
+
+ρeff → ρ, and with Tτ → 0, C → log 2(1 + ρ) gives the genie rate. Next, we aim at answering the fundamental question of 
+
+how much training is needed with a DT ?
+
+Theorem 1 (Optimal training length) . For a biased DT with unknown bias b, the rate (33) is maximized at T ⋆τ = ( u⋆−a)/ρ ,where u⋆ ∈ [a, a + ρT ] is the unique root of 
+
+ln (1 + ρ) u2
+
+D(u) = ( ρT + a − u)
+
+ 2
+
+u − 2u + ρD(u)
+
+
+
+, (41) 
+
+with a ≜ 1 + 1
+
+> σ2DT
+
+and D(u) ≜ u2 + ρu + ρ |b|2/σ 4DT .Proof: Let u ≜ a + ρT τ , a monotone reparametrization of Tτ on [ a, a + ρT ], so that Tτ = ( u − a)/ρ and T −Tτ 
+
+> T
+
+=  
+
+> ρT +a−uρT
+
+. With the biased error (40), one has 1 + ρσ 2 
+
+> e,b
+
+=
+
+D(u)/u 2, hence 1 + ρeff = (1 + ρ) u2
+
+D(u) and 
+
+Cb(Tτ ) = 1
+
+ρT ln 2 (ρT + a − u) ln (1 + ρ) u2
+
+D(u) . (42) The factor 1/(ρT ln 2) is a positive constant in u, so maxi-mizing Cb is equivalent to maximizing g(u) ≜ (ρT + a −
+
+u) ln (1+ ρ)u2 
+
+> D(u)
+
+. Using ddu ln (1+ ρ)u2 
+
+> D(u)
+
+= 2 
+
+> u
+
+− 2u+ρD(u) , i.e. 
+
+g′(u) = − ln (1 + ρ) u2
+
+D(u) +( ρT +a−u)
+
+ 2
+
+u − 2u + ρD(u)
+
+
+
+, (43) and setting g′(u) = 0 yields (41). The objective is unimodal on [ a, a +ρT ], so the root u⋆ is unique and T ⋆τ = ( u⋆ −a)/ρ .Even though Lemma 2 quantifies the rate for a DT-aided wireless system, one can also be interested in the relative gain the DT-aided system can give in terms of rate when compared to a pilots-only case, where no DT is available. In essence, the advantage a DT brings in terms of rate can be expressed as 
+
+∆C(ρ, σ 2DT , b ) ≜ max   
+
+> 0≤Tτ≤T
+
+Cb Tτ ; ρ| {z }
+
+> DT-aided
+
+− max   
+
+> 0≤Tτ≤T
+
+C Tτ ; ρ| {z }
+
+> pilots only
+
+,
+
+(44) where Cb is the biased DT-conditioned rate (33) and the second term is (32) with σ2DT → ∞ . Indeed, (44) measures a DT rate advantage relative to having no DT. It is worth noting that ∆C(ρ) → 0 as ρ → ∞ , which means that the advantage is maximized at a finite SNR, where a DT is most valuable when training is expensive, and is redundant as SNR becomes higher and higher. V. S IMULATION RESULTS 
+
+We now validate the analysis and illustrate the corresponding operating regimes for the DT-aided wireless system. The results are organized in two parts. We first study the channel estimation MSE, i.e. the DT-aided bound, the training length required to reach a target accuracy (21), the pilot equivalence of a DT, and the mismatch thresholds beyond which a biased DT is detrimental. The simulations depict quantitatively how much training is expected in aDT-aided system as opposed to a no-DT aided system. We then translate DT-aided MSE gains whenever suitable into achievable rate through the DT-aided achievable rate of Lemma 2 and plot the optimal training length of Theorem 1 together with the regimes in which a DT provides gains and IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 10 10 −4 10 −3 10 −2 10 −1 10 0
+
+DT uncertainty σ2
+
+> DT
+
+020 40 60 80 100    
+
+> Training needed  Tτ (target  ϵ=0.001)
+> σ2⋆
+> DT
+> unbiased DT
+> ⇒0 training
+> Tτ→ ∞ |b|=0
+> |b|=0.031
+> |b|=0.035
+> |b|=0.500 pilot-only bound
+
+1
+
+Fig. 4. Training length required in the PW to reach a target MSE versus the DT uncertainty σ2DT , for an unbiased and for several biased DTs. 10 −4 10 −3 10 −2 10 −1
+
+DT variance σ2
+
+> DT
+
+0.05 0.10 0.15 0.20 0.25 0.30 0.35    
+
+> DT bias  |b|
+> worse than pilot-only optimal DT uncertainty σ2⋆DT
+> free-twin ( T⋆τ=0)
+
+012345678910 
+
+> pilots  T ⋆τ
+
+1
+
+Fig. 5. Training length required in the PW to reach a target MSE, over the plane of DT uncertainty and DT bias. 0 2 4 6 8 10 
+
+Training length Tτ (symbols) 
+
+0.00.51.01.52.02.53.03.5   
+
+> Achievable rate  Cb(Tτ ; ρ) (bits/s/Hz)
+> perfect-CSI ceiling (genie) no DT (Hassibi-Hochwald)
+> σ2
+> DT =1
+> σ2
+> DT =0.25
+> σ2
+> DT =0.05
+
+1
+
+Fig. 6. Achievable rate of a DT-aided system against the training length Tτ
+
+for several DT variances, where the markers give the rate optimal training length. 
+
+decreases the achievable rate. In Fig. 4, we plot the required number of pilots needed to attain a given channel estimation MSE. In this plot, we set 
+
+(ϵ, ρ ) = (10 −2, 10 dB) . The ”pilot-only” bound represents a 0 2 4 6 8 10 
+
+Training length Tτ (symbols) 
+
+0.00.51.01.52.02.53.03.5
+
+> Achievable rate  Cb(Tτ ; ρ) (bits/s/Hz)
+> perfect CSI bound (genie-aided) best no DT (Hassibi-Hochwald)
+> |b|=0
+> |b|=0.15
+> |b|=0.3
+> |b|=0.55
+
+1
+
+Fig. 7. Achievable rate of a DT-aided system against the training length Tτ
+
+for several DT biases at a fixed DT variance of σ2DT = 0 .05 .0 5 10 15 20 25 
+
+Training length Tτ
+
+0.00.10.20.30.40.50.6   
+
+> DT bias  |b|
+> optimal training T⋆τ(|b|)DT = no-DT frontier
+
+0.00 0.45 0.90 1.35 1.80 2.25 2.70 
+
+> achievable rate  C (bits/s/Hz)
+
+1
+
+Fig. 8. Achievable rate of a DT-aided system over the plane of training length and DT bias. 10 −1 10 0 10 1 10 2
+
+SNR ρ
+
+−0.4
+
+−0.3
+
+−0.2
+
+−0.10.00.10.20.30.4
+
+> DT rate advantage ∆ C (bits/s/Hz)
+> twin hurts
+> |b|=0
+> |b|=0.1
+> |b|=0.2
+> |b|=0.35
+> |b|=0.6
+
+1
+
+Fig. 9. Rate advantage of an optimally trained DT-aided system over the optimally trained pilot-only system, against the operating SNR ρ for several DT bias levels, with the markers giving the peak of each curve. 
+
+case whereby no DT is available, hence training only happens in the PW without being aided by a DT, and therefore one would need to satisfy ϵ = EPW . In the high uncertainty regime, namely as σ2DT grows large, we see that regardless of the bias, that all regimes converge towards the pilot-only IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 11 
+
+bound, which indicates that the number of pilots required to attain a given channel estimation MSE is dictated by the PW. When the DT is highly biased, e.g. |b| = 0 .5, we see that the DT always requires more pilots than the case of pilot-only. In addition, as the DT becomes more descriptive (more certain) of the PW, we see that the DT would require more and more pilots to attain the required target channel estimation MSE. For instance, if the σ2DT = 10 −2, the DT requires double the amount of pilots compared to the no-pilot case, when the bias is |b| = 0 .5 and increases rapidly as the DT becomes more certain. Another biased case worth noting is when |b| = 0 .035 
+
+(case where |b|2 > ϵ ) where the minimum number of pilots required to attain a given channel estimation MSE is anon-trivial point around σ2⋆ 
+
+> DT
+
+= 1 .05 × 10 −3 (obtained by (29)) of (29) suggesting when the DT error decreases beyond 
+
+σ2DT ≤ σ2⋆
+
+> DT
+
+, more weight w is being placed on the DT which would require more training is required to learn and undo such bias. When the bias goes below |b|2 ≤ ϵ, then the optimal DT uncertainty minimizing the required number of pilots is zero as explained below (29). In that case, the bias is small enough that the required number of training needed simply increases with uncertainty to reach the pilot-only bound. Indeed, in such case, the DT still bring benefits. For instance, at σ2DT = 10 −3, the training time required is about 
+
+30 slots, as opposed to 50 in the pilots-only bound. For the unbiased DT, as long as the target channel estimation MSE is attained, namely σ2DT ≤ ϵ, no training is required, otherwise, as the DT becomes more uncertain the required number of pilots increases steadily to attain the number of pilots required for the pilot-only case. We see that an accurate unbiased DT requires no training and a biased one admits a best uncertainty beyond which more training is needed to due to its bias. In Fig. 5, we plot an operating-region map on the number of pilots required to attain a required target channel estimation MSE ϵ at an operating SNR for different values of bias and DT uncertainty. In this plot, we set (ϵ, ρ ) = (10 −3, 20dB) . The boundary labeled as free-twin is the boundary characterized by σ2DT + |b|2 ≤ ϵ. Under this condition, the DT already meets the required target channel estimation MSE ϵ = 10 −3
+
+and hence no training in the PW is required. Another boundary worth noting is the optimal DT uncertainty which arises when |b| > σ 2DT . It is the boundary upon which the number of pilots required for a given bias, dictated by (29), is minimum. In addition, the worse than pilot-only boundary is dictated by Proposition 3 and tells us that any (b, σ 2DT )
+
+above that boundary means that incorporating the DT with the PW will give a worse MSE, in the sense of Eb 
+
+> P+D
+
+> EPW .In essence, we conclude that no training is needed below the free-twin boundary, whereas above the ”worse than pilot-only” boundary the DT costs more training than using no DT at all, and the dash dotted locus gives the best DT uncertainty for any given bias. In Fig. 6, we plot the achievable rate obtained for different training lengths, averaged over channel realizations for a fixed 
+
+T = 30 and fixed SNR set to ρ = 10 dB . The figure depicts the fundamental tradeoff in wireless communications, where transmitting more pilots improves the channel estimate but cannibalizes the time available to actually send data, hence creating an optimal operation point for training length for maximum achievable rate. For a traditional system operating without a DT (labeled as Hassibi-Hochwald bound [57]), we observe that a significant chunk of the coherence block must be wasted on training just to reach optimal capacity. In particular, the optimal training length is Tτ ≃ 3 symbols to maximize the achievable rate, which in this case attains about 2.75 bits /s/Hz . However, as the DT’s information becomes more precise (smaller σ2DT ), not only reduces the optimal training length, but also increases the achievable rate. For instance, when σ2DT = 0 .05 , the optimal training length is about Tτ ≃ 1 symbols, and achieves a capacity of 3 bits /s/Hz . This means that an accurate DT inherently reduces the physical overhead required for channel estimation, freeing up more symbols for data payload, which then leaves positive reverberation effects on the achievable rate. In other words, a more accurate DT shortens the optimal training and increases the achievable rate towards the perfect-CSI case, whereas an uninformative DT coincides with the pilot only rate of Hassibi and Hochwald [57]. In Fig. 7, similar to Fig. 6, we plot again the achievable rate vs training lengths for the same simulation parameters, but we fix the uncertainty to σ2DT = 0 .05 . The purpose is to illustrate the destructive impact of a biased DT on both system capacity and training overhead. In particular, Unlike an unbiased DT, a DT that is confident but biased actively misleads the channel estimator, which then forces the system to transmit significantly more pilots just to ”out-vote” the bad prior. In fact, if the bias becomes very high, e.g. |b| = 0 .55 
+
+the DT becomes harmful to the system, not only from training length required (about 4 symbols in this case), but also the achievable rate is reduced to 2.5 bits /s/Hz , as opposed to the case of |b| = 0 .3, which achieves about 2.75 bits /s/Hz with 
+
+3 training symbols, which attains the best Hassibi-Hochwald bound (best in a sense of obtaining the maximum of that bound over Tτ , namely the peak of the bound in Fig. 6) of no DT. One the bias reduces even more, the system goes beyond the no DT bound, and starts to become closer to the genie-aided perfect CSI bound. For instance, the unbiased DT attains 3 bits /s/Hz with only 1 training symbol. However, to understand the joint impact of training length and the biased introduced by the DT, we plot a heatmap to provide a bird’s-eye view of system capacity, as a function of training length Tτ and DT bias in Fig. 8. The red ”ridge” (obtained by solving (41)) representing optimal training bends towards the right as bias increases, which shows that a DT-aided system must actively sacrifice more data symbols for physical pilots just to combat the DT’s misleading prior. The solid white contour line represents a cliff in performance, i.e. the threshold where the rate drops so low that the DT-aided system would be better off ignoring the DT entirely. In Fig. 9, we fix as before T = 30 symbols and σ2DT = 0 .05 ,IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 12 
+
+where we plot the DT rate gain ∆C(ρ) of (44), namely the difference between the optimally trained DT-aided rate and the optimally trained pilot-only rate, as a function of the operating SNR ρ for several bias levels. The zero line represents the case whereby the DT brings no benefit, i.e. the DT-aided system attains exactly the pilot-only rate. For an unbiased DT, we see that ∆C is positive throughout but decays monotonically towards zero as ρ grows large, which indicates that at high SNR the pilots become inexpensive enough that near-perfect CSI is acquired by training alone, leaving little for the DT to contribute. At the other extreme, as ρ → 0, both rates vanish and so does ∆C, so that the advantage is maximized at a finite SNR of about ρ ≃ 2.5,indicating that a DT is most valuable where training is expensive at that SNR. On the other hand, when the DT is biased, e.g. |b| = 0 .35 , the advantage still rises at low SNR but then crosses below zero over a mid-SNR band, where the bias floor of (40) dominates the estimation error before the pilots become cheap, which indicates that trusting the DT is worse than ignoring it. As the bias grows further, e.g. |b| = 0 .6, this harmful band widens. For very large ρ,all curves converge towards zero, since sufficient training ”washes out” the bias. VI. C ONCLUSION 
+
+In this paper, we addressed the question of how much training is needed with a DT by modeling the DT as a complementary Gaussian measurement of the wireless chan-nel, whose bias and variance follow from a Lindeberg-Feller central limit theorem over the DT’s errors and are governed by the electromagnetic materials assigned to the environment. Moreover, using the DT measurement along with physical world pilots via the best linear unbiased estimator, we derived a DT-aided Cram´ er-Rao bound, a pilot-equivalence law that converts DT fidelity into an equivalent number of pilots, and a bias mismatch threshold beyond which the DT becomes de-structive and unlearns the physical world. Casting the analysis as a block-fading achievable rate, we obtained the optimal training length in closed form and characterized when pilot training can be dispensed with altogether. These results quantify the common claim that a more accu-rate DT requires fewer pilots. We have shown that an incorrect material assumption within the DT inflates its variance σ2DT by a factor of about 3.8 through a ray tracing example, whereas the same error turns into a frequency-dependent bias once the path phases stay correlated across the deployment. Moreover, the number of pilots a DT replaces decays inversely with the operating SNR, hence the value of a DT, in terms of achievable rate, is largest at a moderate SNR and vanishes in both the low and high SNR limits. Future directions include extending the framework to DTs whose bias is partially known to the estimator, to massive MIMO and wideband millimeter wave channels, and to online DT calibration that keeps the fidelity, and hence the pilot savings, high as the environment evolves. Future work can also include ISAC tasks where the DT can aid with. REFERENCES [1] Y. Cui, W. Yuan, Z. Zhang, J. Mu, and X. Li, “On the physical layer of digital twin: An integrated sensing and communications perspective,” 
+
+IEEE Journal on Selected Areas in Communications , vol. 41, no. 11, pp. 3474–3490, Nov 2023. [2] L. U. Khan, Z. Han, W. Saad, E. Hossain, M. Guizani, and C. S. Hong, “Digital Twin of Wireless Systems: Overview, Taxonomy, Challenges, and Opportunities,” IEEE Communications Surveys & Tutorials , vol. 24, no. 4, pp. 2230–2254, 2022. [3] A. Alkhateeb, S. Jiang, and G. Charan, “Real-Time Digital Twins: Vision and Research Directions for 6G and Beyond,” IEEE Communications Magazine , vol. 61, no. 11, pp. 128–134, 2023. [4] A. Saeizadeh, M. Tehrani-Moayyed, D. Villa, J. G. Beattie, P. Johari, S. Basagni, and T. Melodia, “AIRMap: AI-Generated Radio Maps for Wireless Digital Twins,” IEEE Transactions on Wireless Communica-tions , vol. 25, pp. 18 871–18 884, 2026. [5] C. Ruah, O. Simeone, and B. M. Al-Hashimi, “A bayesian framework for digital twin-based control, monitoring, and data collection in wireless systems,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 10, pp. 3146–3160, Oct 2023. [6] O. Ercetin, “Computational and communication aspects of digital twin: An information theoretical perspective,” IEEE Communications Letters ,vol. 27, no. 2, pp. 492–496, Feb 2023. [7] Z. Tao, W. Xu, Y. Huang, X. Wang, and X. You, “Wireless network digital twin for 6g: Generative ai as a key enabler,” IEEE Wireless Communications , vol. 31, no. 4, pp. 24–31, August 2024. [8] Q. Guo, F. Tang, T. K. Rodrigues, and N. Kato, “Five disruptive technologies in 6g to support digital twin networks,” IEEE Wireless Communications , vol. 31, no. 1, pp. 149–155, February 2024. [9] L. Bariah and M. Debbah, “The interplay of ai and digital twin: Bridging the gap between data-driven and model-driven approaches,” 
+
+IEEE Wireless Communications , vol. 31, no. 3, pp. 219–225, June 2024. [10] M. Li, Y. Han, H. Xu, Y. Zhu, C.-K. Wen, and S. Jin, “XL-ChannelDiff: An Efficient Diffusion-Based Multi-Domain Near-Field Channel Extrapolation Framework for XL-MIMO Systems,” arXiv preprint arXiv:2606.16628 , 2026. [11] G. A. Baduge, M. Vaezi, J. K. Dassanayake, M. Z. Hameed, E. Ollila, and S. A. Vorobyov, “Frequency Range 3 for ISAC in 6G: Potentials and Challenges,” IEEE Communications Magazine , pp. 1–7, 2026. [12] J. Zhang, H. Miao, P. Tang, L. Tian, and G. Liu, “New mid-band for 6G: Several considerations from the channel propagation characteristics perspective,” IEEE Communications Magazine , vol. 63, no. 1, pp. 175– 180, 2024. [13] Y. Huang, J. Yang, C.-K. Wen, and S. Jin, “Physics-Informed Implicit Neural Representation for Wireless Imaging in RIS-Aided ISAC Sys-tem,” IEEE Transactions on Wireless Communications , vol. 25, pp. 12 341–12 357, 2026. [14] A. Bazzi, M. Ying, O. Kanhere, T. S. Rappaport, and M. Chafii, “ISAC Imaging by Channel State Information Using Ray Tracing for Next Generation 6G,” IEEE Journal of Selected Topics in Electromagnetics, Antennas and Propagation , vol. 1, no. 1, pp. 135–149, 2025. [15] Y. Huang, J. Yang, C.-K. Wen, and S. Jin, “RIS-Aided Single-Frequency 3D Imaging by Exploiting Multi-View Image Correlations,” IEEE Trans-actions on Communications , vol. 72, no. 8, pp. 5003–5018, 2024. [16] Z. Wei, H. Liu, X. Yang, W. Jiang, H. Wu, X. Li, and Z. Feng, “Carrier Aggregation Enabled Integrated Sensing and Communication Signal Design and Processing,” IEEE Transactions on Vehicular Technology ,vol. 73, no. 3, pp. 3580–3596, 2024. [17] K. Zhang, W. Yu, H. He, S. Song, J. Zhang, and K. B. Letaief, “Multimodal Mixture-of-Experts for ISAC in Low-Altitude Wireless Networks,” IEEE Journal of Selected Topics in Signal Processing , pp. 1–17, 2026. [18] W. Fan, N. Wei, R. Xi, A. Bazzi, Y. Xiu, C. Assi, J. Dong, and J. Jin, “Heterogeneous mixture-of-experts for energy-efficient multimodal ISAC in highly mobile networks,” arXiv preprint arXiv:2604.06697 ,2026. [19] W. Njima, A. Bazzi, and M. Chafii, “DNN-Based Indoor Localization Under Limited Dataset Using GANs and Semi-Supervised Learning,” 
+
+IEEE Access , vol. 10, pp. 69 896–69 909, 2022. [20] H. X. Nguyen, K. Sun, D. To, Q.-T. Vien, and T. A. Le, “Digital Twin for O-RAN Toward 6G,” IEEE Communications Magazine , vol. 63, no. 3, pp. 174–181, 2025. [21] Y. Zhang, Y. Bai, R. Jantti, Z. Han, and C. Masouros, “AmbSentry: Mitigating Sensing Eavesdropping in ISAC Systems by Harnessing Ambient IoT Devices,” arXiv preprint arXiv:2608.11799 , 2026. IEEE TRANSACTIONS ON WIRELESS COMMUNICATIONS 13 
+
+[22] H. Lei, J. Geng, K.-H. Park, J. Ye, L. Yang, X. Miao, and G. Pan, “Resource Allocation for Secure Dual-UAV-Assisted ISAC System,” 2026. [Online]. Available: https://arxiv.org/abs/2608.24398 [23] J. Zheng, T. H. Luan, Y. Zhang, G. Li, Z. Su, and W. Wu, “Digital twin in 6g: Embracing comprehensive network intelligence,” IEEE Wireless Communications , vol. 31, no. 6, pp. 94–101, December 2024. [24] P. Jia, X. Wang, and X. Shen, “Hierarchical digital twin for efficient 6g network orchestration via adaptive attribute selection and scalable network modeling,” IEEE Transactions on Communications , vol. 73, no. 9, pp. 7724–7739, Sep. 2025. [25] Q. Guo, F. Tang, and N. Kato, “Resource allocation for aerial assisted digital twin edge mobile network,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 10, pp. 3070–3079, Oct 2023. [26] L. Zhao, Z. Zhao, E. Zhang, A. Hawbani, A. Y. Al-Dubai, Z. Tan, and A. Hussain, “A digital twin-assisted intelligent partial offloading approach for vehicular edge computing,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 11, pp. 3386–3400, Nov 2023. [27] J. Zheng, T. H. Luan, Y. Zhang, R. Li, Y. Hui, L. Gao, and M. Dong, “Data synchronization in vehicular digital twin network: A game theoretic approach,” IEEE Transactions on Wireless Communications ,vol. 22, no. 11, pp. 7635–7647, Nov 2023. [28] L. U. Khan, E. Mustafa, J. Shuja, F. Rehman, K. Bilal, Z. Han, and C. S. Hong, “Federated learning for digital twin-based vehicular networks: Architecture and challenges,” IEEE Wireless Communications , vol. 31, no. 2, pp. 156–162, April 2024. [29] Q. Li, Q. Ye, N. Zhang, W. Zhang, and F. Hu, “Digital-twin-enabled industrial iot: Vision, framework, and future directions,” IEEE Wireless Communications , vol. 32, no. 6, pp. 173–181, Dec 2025. [30] K. Qu and W. Zhuang, “Digital twin assisted intelligent network man-agement for vehicular applications,” IEEE Wireless Communications ,vol. 31, no. 4, pp. 208–214, August 2024. [31] V.-P. Bui, P. M. de Sant Ana, S. Gherekhloo, S. R. Pandey, and P. Popovski, “Digital Twin for Autonomous Guided Vehicles Based on Integrated Sensing and Communications,” IEEE Transactions on Vehicular Technology , vol. 74, no. 5, pp. 8413–8418, 2025. [32] P. Mollahosseini, R. Shen, T. A. Khan, and Y. Ghasempour, “Integrated sensing and communication: Research advances and industry outlook,” 
+
+IEEE Journal of Selected Topics in Electromagnetics, Antennas and Propagation , 2025. [33] H. Zhang, Z. Zhang, X. Liu, W. Li, H. Li, and C. Sun, “Integrated sensing and communication for 6G holographic digital twins,” IEEE Wireless Communications , vol. 32, no. 2, pp. 104–112, 2025. [34] Y. Cui, T. Lv, W. Ni, and A. Jamalipour, “Digital twin-aided learning for managing reconfigurable intelligent surface-assisted, uplink, user-centric cell-free systems,” IEEE Journal on Selected Areas in Communications ,vol. 41, no. 10, pp. 3175–3190, Oct 2023. [35] S. Kurma, M. Katwe, K. Singh, C. Pan, S. Mumtaz, and C.-P. Li, “Ris-empowered mec for urllc systems with digital-twin-driven architecture,” 
+
+IEEE Transactions on Communications , vol. 72, no. 4, pp. 1983–1997, April 2024. [36] M. Wu, Y. Xiao, Y. Gao, and M. Xiao, “Digital twin for uav-ris assisted vehicular communication systems,” IEEE Transactions on Wireless Communications , vol. 23, no. 7, pp. 7638–7651, July 2024. [37] H. Zhang, Z. Zhang, X. Liu, W. Li, H. Li, and C. Sun, “Integrated sensing and communication for 6g holographic digital twins,” IEEE Wireless Communications , vol. 32, no. 2, pp. 104–112, April 2025. [38] Z. Tao, W. Xu, and X. You, “Provable performance bounds for digital twin-driven reinforcement learning in wireless networks: A novel digital-twin bisimulation metric,” IEEE Transactions on Signal Processing ,vol. 73, pp. 4430–4445, 2025. [39] H. Zhang, X. Ma, X. Liu, L. Li, and K. Sun, “Gnn-based power allocation and user association in digital twin network for the terahertz band,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 10, pp. 3111–3121, Oct 2023. [40] D. He, K. Guan, D. Yan, H. Yi, Z. Zhang, X. Wang, Z. Zhong, and N. Zorba, “Physics and ai-based digital twin of multi-spectrum propagation characteristics for communication and sensing in 6g and beyond,” IEEE Journal on Selected Areas in Communications , vol. 41, no. 11, pp. 3461–3473, Nov 2023. [41] M. Haider, I. Ahmed, Z. Hassan, T. J. O’Shea, L. Liu, and D. B. Rawat, “Digital twin enabled site specific channel precoding: Over the air cir inference,” IEEE Communications Letters , vol. 29, no. 7, pp. 1559–1563, July 2025. [42] H. Luo, S. Jiang, S. R. Khosravirad, and A. Alkhateeb, “Digital twin aided massive mimo csi feedback: Exploring the impact of twinning fidelity,” IEEE Transactions on Communications , vol. 73, no. 12, pp. 15 909–15 925, Dec 2025. [43] X. Gong, X. Liu, A.-A. Lu, X. Gao, X.-G. Xia, C.-X. Wang, and X. You, “Digital twin of channel: Diffusion model for sensing-assisted statistical channel state information generation,” IEEE Transactions on Wireless Communications , vol. 24, no. 5, pp. 3805–3821, May 2025. [44] G. Liang, J. Hu, K. Yang, S. Song, T. Liu, N. Xie, and Y. Yu, “Data augmentation for predictive digital twin channel: Learning multi-domain correlations by convolutional timegan,” IEEE Journal of Selected Topics in Signal Processing , vol. 18, no. 1, pp. 18–33, Jan 2024. [45] A. Bazzi and M. Chafii, “Towards ISAC RIS-Enabled Passive Radar Target Localization,” in ICC 2025 - IEEE International Conference on Communications , 2025, pp. 2290–2295. [46] ——, “Low Dynamic Range for RIS-Aided Bistatic Integrated Sensing and Communication,” IEEE Journal on Selected Areas in Communica-tions , vol. 43, no. 3, pp. 912–927, 2025. [47] Q. Han, H. Zhang, Y. Li, D. Yuan, and X. Ma, “Physics informed digital twin for ris-assisted wireless communication system,” IEEE Wireless Communications , vol. 32, no. 3, pp. 106–112, June 2025. [48] Y. Fang, S. Xu, C. Fang, S. He, C. Li, Y. Huang, and L. Yang, “High-fidelity digital twin channel modeling for ris-assisted wireless commu-nication systems,” IEEE Transactions on Communications , vol. 74, pp. 6904–6921, 2026. [49] R. Pegurri, D. Gasco, F. Linsalata, M. Rapelli, E. Moro, F. Raviglione, and C. Casetti, “Van3twin: The multi-technology v2x digital twin with ray tracing in the loop,” IEEE Transactions on Wireless Communica-tions , vol. 25, pp. 16 812–16 827, 2026. [50] A. Bazzi, F. Gast, F. Liu, S. Jin, G. Fettweis, and M. Chafii, “From Cov-erage to Sensing: ISAC Meets FR3,” IEEE Communications Magazine ,pp. 1–7, 2026. [51] T.-H. Huang, C.-K. Wen, S.-H. Tsai, and T. Q. Duong, “Ai-based csi feedback with digital twins: Real-world validation and insights,” IEEE Wireless Communications Letters , vol. 14, no. 8, pp. 2396–2400, Aug 2025. [52] N. Khan, A. Abdallah, A. Celik, A. M. Eltawil, and S. Coleri, “Digital twin-assisted explainable ai for robust beam prediction in mmwave mimo systems,” IEEE Transactions on Wireless Communications , vol. 25, pp. 2435–2451, 2026. [53] J. Zhang, S. Xu, C. Li, Y. Huang, and L. Yang, “Efficient beam selection for isac in cell-free massive mimo via digital twin-assisted deep rein-forcement learning,” IEEE Transactions on Wireless Communications ,vol. 25, pp. 9875–9890, 2026. [54] S. Jiang and A. Alkhateeb, “Digital Twin Assisted Beamforming Design for Integrated Sensing and Communication Systems,” in 2024 58th Asilomar Conference on Signals, Systems, and Computers , 2024, pp. 401–406. [55] ——, “Digital twin based beam prediction: Can we train in the digital world and deploy in reality?” in 2023 IEEE International Conference on Communications Workshops (ICC Workshops) . IEEE, 2023, pp. 36–41. [56] M. Arnold, B. Major, F. V. Massoli, J. B. Soriaga, and A. Behboodi, “Vision-assisted digital twin creation for mmwave beam manage-ment,” in ICC 2024-IEEE International Conference on Communications .IEEE, 2024, pp. 1–6. [57] B. Hassibi and B. M. Hochwald, “How much training is needed in multiple-antenna wireless links?” IEEE Transactions on Information Theory , vol. 49, no. 4, pp. 951–963, 2003. [58] S. J. Orfanidis, Electromagnetic Waves and Antennas . Rutgers Univer-sity, 2016. [59] J. Hoydis, F. A. Aoudia, S. Cammerer, F. Euchner, M. Nimier-David, S. T. Brink, and A. Keller, “Learning Radio Environments by Dif-ferentiable Ray Tracing,” IEEE Transactions on Machine Learning in Communications and Networking , vol. 2, pp. 1527–1539, 2024. [60] S. M. Kay, Fundamentals of statistical processing, Volume 2: Detection theory . Pearson Education India, 2009.

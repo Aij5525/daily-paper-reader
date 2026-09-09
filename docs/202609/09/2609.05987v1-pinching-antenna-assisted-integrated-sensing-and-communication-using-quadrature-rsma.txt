@@ -1,0 +1,2966 @@
+Title: Pinching Antenna Assisted Integrated Sensing and Communication Using Quadrature RSMA
+
+URL Source: https://arxiv.org/pdf/2609.05987v1
+
+Published Time: Wed, 09 Sep 2026 00:34:58 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+> 1
+
+# Pinching Antenna Assisted Integrated Sensing and Communication Using Quadrature RSMA 
+
+Sagnik Bhattacharyya, Member, IEEE , Shiv Kumar, Member, IEEE ,Keshav Singh, Senior Member, IEEE , and Chih-Peng Li, Fellow, IEEE 
+
+Abstract —This paper proposes a pinching antenna system (PASS)-assisted downlink quadrature rate-splitting multiple access (Q-RSMA)-based integrated sensing and communication (PASS-QRSMA-ISAC) framework for simultaneously supporting multi-user communication and target sensing. In the proposed frame-work, multiple pinching antennas (PAs) deployed along a dielectric waveguide serve communication users (CUs) distributed across a dual-room indoor environment, where line-of-sight (LoS) and non-line-of-sight (NLoS) propagation conditions coexist. By integrating PASS with Q-RSMA, the proposed framework improves interfer-ence management while reducing the dependence on successive interference cancellation. The communication and sensing signal models are developed, followed by the corresponding SNR/SINR expressions. To obtain tractable analytical insights, a two-user single-PA case under ideal waveguide conditions is first analysed, where the per-user communication outage probability (COP), system COP, sensing outage probability (SOP), and ergodic sum-rate are formulated using distance statistics, CDF/CCDF characterisations, and numerical integration methods. The analysis is then extended to the generalised multi-user multi-PA scenario by developing statistical characterisations for the LoS communication, NLoS communication, and sensing channels. Based on these characterisations, the per-user COP, system COP, SOP, and ergodic sum-rate are formulated and evaluated for the generalised framework. Monte Carlo simulations validate the analytical results and demonstrate the performance gains of the proposed PASS-QRSMA-ISAC framework over the considered benchmark schemes, including PASS-RSMA-ISAC, PASS-NOMA-ISAC, and PASS-SDMA-ISAC. The results further highlight the effects of various system parameters on the proposed framework. 
+
+Index Terms —Pinching Antenna, Rate Splitting Multiple Access (RSMA), Quadrature Rate Splitting Multiple Access (Q-RSMA), Integrated Sensing and Communication (ISAC). 
+
+I. I NTRODUCTION 
+
+# THE growing demand for ultra-high data rates is driving wireless communication systems toward the millimeter-wave (mmWave) and terahertz (THz) bands, which offer significantly larger bandwidths. Notably, these high-frequency spectra increas-ingly overlap with those traditionally allocated for radar sensing, while emerging applications such as autonomous driving, collision avoidance, surveillance, robotics, virtual reality (VR), and massive Internet-of-Things (IoT) deployments require both reliable infor-mation exchange and high-resolution environmental perception [1]. This motivates the integration of communication and sens-ing functionalities within a unified platform. However, although mmWave and THz frequencies provide abundant bandwidth re-sources, integrating sensing and communication within the same platform introduces several challenges, including co-channel in-terference, increased feedback and computational complexity, and additional hardware overhead when separate transmitters and processing chains are employed [2]. To address these limitations, integrated sensing and communication (ISAC) has emerged as a 
+
+Sagnik Bhattacharyya, Keshav Singh, and Chih-Peng Li are with the Institute of Communications Engineering, National Sun Yat-sen University, Kaohsiung 80424, Taiwan (e-mail: sagnikbhattacharyya95@gmail.com, ke-shav.singh@mail.nsysu.edu.tw, cpli@faculty.nsysu.edu.tw). Shiv Kumar is with the Department of Electrical Engineering, Indian Institute of Technology Delhi (e-mail: shiv.iitrpr@gmail.com). 
+
+promising paradigm that enables both functionalities to share the same spectral, hardware, and signal-processing resources, thereby improving spectrum efficiency, reducing system complexity, and mitigating interference [3]. Moreover, ISAC has recently attracted significant attention as a key enabling technology for future sixth-generation (6G) wireless networks, supporting advanced applica-tions such as smart cities, autonomous driving, and intelligent transportation [4]. Despite these advantages, ISAC operation in the mmWave/THz bands remains challenging due to severe path loss, line-of-sight (LoS) blockage, and deep shadowing, which can significantly degrade reliability even over short or moderate transmission distances [5]. 
+
+To address these issues, recent studies have explored the con-cept of actively reconfiguring the wireless propagation environ-ment using flexible antenna technologies, including reconfigurable intelligent surfaces (RISs) [6], fluid antennas (FAs) [7], and movable antennas (MAs) [8]. RISs consist of programmable reflecting elements capable of imposing controllable phase shifts on incident electromagnetic waves, thereby reshaping the wire-less channel to extend coverage, bypass obstacles, and mitigate interference [9], [10]. Meanwhile, FAs employ conductive liquids enclosed within dielectric media to dynamically modify antenna positions and radiation characteristics, enabling beam steering and diversity gains [7]. Similarly, MAs mechanically reposition antenna elements to adapt to varying channel conditions [8]. Consequently, these technologies have also found applications in ISAC systems [6], [11], [12]. Nevertheless, both FAs and MAs are typically constrained to movements within only a few wavelengths, which results in negligible influence on large-scale path loss [4]. Furthermore, once deployed, the number of active antennas in such systems cannot be easily reconfigured. 
+
+To overcome the aforementioned limitations, pinching-antenna systems (PASS) have recently emerged as a promising architecture for flexible antenna deployment [13]. In PASS, electromagnetic signals propagate through a dielectric waveguide, where small discrete pinching elements can be selectively activated to radiate the guided signal into free space. This architecture enables flexible and on-demand antenna deployment without physically relocating the antenna elements. By controlling the positions of the pinching elements, PASS can establish favourable LoS links with the intended users, thereby improving propagation conditions and mitigating the impact of large-scale path loss. Owing to these ad-vantages, several recent studies have investigated the performance and design aspects of PASS [14]–[17]. The study in [15] focused on the influence of antenna positioning on key channel character-istics such as channel gain, path loss, and phase variations, and proposed placement strategies aimed at enhancing downlink trans-mission efficiency and improving signal quality at the receiver. In [16], analytical expressions for the outage probability and ergodic rate were developed for PASS-based systems, revealing that attenuation within the waveguide can have a noticeable impact on system performance, particularly for longer waveguide arXiv:2609.05987v1 [eess.SP] 5 Sep 2026 2
+
+structures. In another work, authors in [17] examined the array gain properties of PASS and showed that careful optimization of both the number of antennas and their spatial spacing can lead to significant improvements in overall system performance. Furthermore, beyond conventional communication applications, PASS has also recently attracted attention for its potential use in ISAC systems [18]–[22]. In this context, [18] derived closed-form Cramér–Rao lower bounds (CRLBs) for PASS-assisted ISAC (PASS-ISAC) systems and demonstrated a significant reduction in the CRLB compared to conventional architectures. In [19], a maximum-entropy reinforcement learning strategy was proposed to maximize the sum communication rate while satisfying radar signal-to-noise ratio (SNR) requirements. Furthermore, authors in [20] investigated a PASS-ISAC system employing separate transmit and receive waveguides and optimized the illumination power for sensing while maintaining communication constraints. On the other hand, advanced multiple access (MA) schemes such as space division multiple access (SDMA), non-orthogonal multiple access (NOMA), and rate-splitting multiple access (RSMA) have been developed to efficiently share radio resources among multiple users and manage multi-user interference. Among these, RSMA has recently emerged as a generalized MA frame-work that bridges the gap between SDMA and NOMA by en-abling partial interference decoding while treating the remaining interference as noise [23]–[25]. The concept of 1-layer RSMA for downlink multi-user MIMO was introduced in [23], while [24] further investigated its information- and communication-theoretic performance with emphasis on precoder optimization and practical PHY-layer design. In RSMA, each user message is divided into a common stream decoded by all users and private streams intended for individual users, which provides flexible interference management and has been shown to achieve superior performance compared to SDMA and NOMA across various network conditions [25]. Owing to these advantages, RSMA has attracted significant research attention in recent years [26]– [30]. Motivated by its strong interference management capability, the integration of RSMA with ISAC systems has also gained increasing interest [31]–[33]. Furthermore, by leveraging the complementary advantages of RSMA and PASS, recent studies have investigated PASS-assisted RSMA frameworks to exploit the flexible antenna deployment offered by PASS for improving communication performance [34]. In addition, motivated by the growing interest in PASS-assisted ISAC systems [18]–[22], the authors in [4] recently proposed a PASS-RSMA-ISAC framework to enhance both communication reliability and sensing capability. In that work, PASS was employed to flexibly control the wireless propagation environment, while the ISAC framework enabled the simultaneous execution of communication and sensing function-alities. Moreover, RSMA was utilized to efficiently manage inter-user interference during communication. However, [4] primarily focused on outage analysis for a two-user single-PA scenario, while the outage and sum-rate performance of the multi-user multi-PA scenario remains unexplored. Extending the analysis to the multi-PA case is non-trivial, since the effective PASS channel depends on the superposition of multiple PA-level links, including in-waveguide attenuation, phase variation, PA-user geometry, and heterogeneous LoS/NLoS wireless propagation. Furthermore, most existing RSMA-based systems adopt the conventional one-layer RSMA structure, which relies on successive interference cancellation (SIC) to separate the common and private streams. As a result, their performance becomes susceptible to error prop-agation caused by imperfect SIC (ipSIC), which can significantly degrade system reliability in practical scenarios where perfect interference cancellation cannot be guaranteed. 
+
+Motivated by this limitation, the authors in [35] recently proposed a zero-SIC-based rate-splitting framework referred to as quadrature rate-splitting multiple access (Q-RSMA). Similar to conventional 1-layer RSMA, the user messages in Q-RSMA are first split to form common and private streams. However, unlike conventional RSMA where both streams are transmitted over the same signal dimension and separated using SIC, Q-RSMA maps the common stream onto the in-phase component of the signal, while the combined private streams are mapped onto the quadrature component [35]. Consequently, the common stream becomes inherently free from interference caused by the private streams, enabling more reliable decoding. Thus, this signal-domain separation enhances the reliability of common-stream decoding and reduces the reliance on SIC. This property is particularly relevant in ISAC systems, where the communica-tion streams are already affected by sensing-signal interference. Therefore, avoiding SIC-based stream separation helps prevent an additional residual-interference component from degrading the communication decoding process. However, this benefit is achieved at the cost of reduced degrees of freedom (DoF) for each stream, since Q-RSMA maps the common and private streams onto separate real-valued signal components. This trade-off is reflected later through a rate-scaling factor in the achievable-rate expressions. Despite this trade-off, Q-RSMA remains attractive due to its reduced reliance on SIC and improved robustness against SIC-induced error propagation, which have motivated several recent investigations on Q-RSMA-based communication systems [36]–[38]. Nevertheless, although these properties make Q-RSMA promising for ISAC scenarios, its application to ISAC frameworks remains largely unexplored. Furthermore, to the best of the authors’ knowledge, the joint integration of Q-RSMA with PASS in ISAC-enabled wireless networks has not been investigated in the existing literature. 
+
+Summarising the above discussion, existing works have mainly analysed two-user single-PA based PASS-ISAC systems, while, to the best of the authors’ knowledge, the performance analysis of multi-user multi-PA networks remains unexplored. Moreover, Q-RSMA is particularly relevant for future QoS-demanding ISAC networks, as its signal-domain separation reduces the dependence on SIC and improves communication reliability under sensing-signal interference. Motivated by this, we propose a PASS-assisted downlink Q-RSMA-based ISAC (PASS-QRSMA-ISAC) network, where multiple PAs deployed along a waveguide simultaneously support multi-user communication and target sensing. The main contributions of this paper can be listed as follows:  
+
+> •
+
+Proposed PASS-QRSMA-ISAC framework: We propose a generalised PASS-assisted downlink Q-RSMA-based ISAC framework, where multiple PAs deployed along a dielectric waveguide are used to simultaneously serve multiple commu-nication users (CUs) and perform target sensing. The CUs are flexibly distributed across two adjacent rooms, thereby capturing heterogeneous indoor propagation conditions with both line-of-sight (LoS) and non-line-of-sight (NLoS) links. Based on the proposed architecture, the generalised received signal models for communication and sensing are developed, followed by the corresponding signal-to-noise ratio (SNR)/ 3
+
+signal-to-interference-plus-noise ratio (SINR) expressions.  
+
+> •
+
+Two-User Single-PA Performance Analysis: To obtain tractable analytical insights, we first consider a two-user single-PA special case under an ideal waveguide scenario and derive the corresponding outage and sum-rate expressions. (a) Outage Analysis: The communication outage probability (COP) expressions are derived using the distance statistics of the LoS and NLoS users. For the LoS user, a piecewise closed-form CDF of the squared PA-to-user distance is used, whereas for the NLoS user, a piecewise PDF-based formulation is evaluated using Gaussian-Chebyshev quadrature. The system COP is obtained from the individ-ual user outage events. The mean-squared error (MSE)-based sensing outage probability (SOP) is derived by mapping the CRLB-based sensing accuracy requirement to an equivalent sensing-SINR threshold and applying the piecewise closed-form CDF of the squared PA-to-sensing-target distance. (b) Ergodic Sum Rate Analysis: The ergodic sum-rate is formulated using the derived CDF/CCDF characterisations for the LoS and NLoS CUs, while accounting for the common-rate and private-rate components of Q-RSMA. The final expression is evaluated using numerical integra-tion methods.  
+
+> •
+
+Multi-User Multi-PA Performance Analysis: The proposed model is generalised to a multi-user multi-PA setting, where multiple CUs are distributed across the two rooms and jointly served by multiple PAs. Since the resulting effective channel involves the superposition of multiple PA-level contributions with in-waveguide attenuation, phase variation, and user-dependent wireless propagation, we develop tractable sta-tistical characterisations for the communication and sensing channels, which are then used for outage and sum-rate analyses. (a) Statistical Channel Characterisation: The effective com-munication and sensing channels are statistically charac-terised as follows: 1) LoS Communication Channels: For CUs in Room-1, the effective channel is approximated as a moment-matched complex Gaussian random variable with non-zero mean. Hence, the channel envelope follows a Rician distribution, and the channel power gain follows a non-central chi-square distribution. 2) NLoS Communication Channels: For CUs in Room 2, a PA-conditioned semi-analytical characterisation is developed. Conditioned on the CU and PA locations, the effective channel power gain follows an exponen-tial distribution. The Rayleigh fading is averaged in closed form, while the remaining spatial expectation is evaluated numerically. 3) Sensing Channels: For the sensing link, the transmit-side channel is approximated using moment matching, while the echo-return path is characterised by con-ditioning on the ST location and selected receiving PA. The resulting SOP accounts for multi-PA sensing transmission and nearest-PA echo reception, and is evaluated using numerical integration. (b) Outage and Sum-Rate Analysis: Based on the above statistical characterisations, the per-user COP, system COP,                                                                                                        
+
+> TABLE I: List of Notations and Mathematical Operators.
+> Symbols Description General System Parameters
+> K,M,K−MTotal number of CUs, number of CUs in Room 1 and number of CUs in Room 2, respectively
+> LTotal number of PAs
+> PtTotal transmit power
+> α,(1−
+> α)Power allocation coefficient between the commu-nication signal and sensing signal, respectively
+> h
+> ω,l,h
+> ωIn-waveguide channel between lth PA and feed point, and In-waveguide channel vector, respec-tively
+> D,dLength/ width of a room and the height at which waveguide is deployed, respectively
+> ηeff Effective refractive index
+> κIn-waveguide attenuation coefficient
+> c,fCSpeed of light and carrier frequency, respectively
+> ΦF= [ xF,0,d]Coordinate of the feed point
+> ΦPl=[xPl,0,d]Coordinate of lth PA
+> Communication Task Parameters
+> Ukkth CU
+> hk,l,hkWireless channel between Ukand lth PA, and wireless channel vector between Ukand all PAs, respectively
+> zkBackground AWGN at Uk
+> νPath loss exponent for user in Room 2
+> βC,
+> βPiPower allocation coefficients of the common and
+> ith private stream, respectively
+> Λk,Com ,Pin ,
+> Λk,Pvt ,Pin SNR/ SINR of the common stream and private stream at Uk, respectively
+> τCk ,
+> τPk Thresholds of the common stream and private stream at Uk, respectively
+> YkSignal received at Uk
+> Φk= [ xk,yk,0]Coordinate of Uk
+> Sensing Task Parameters
+> USSensing target
+> hS,l,hSWireless sensing channel between USand lth PA, and wireless sensing channel vector between US
+> and all PAs, respectively
+> zSBackground AWGN at BS
+> σRCS Radar Cross-Sectional Area
+> ΛSensing ,Pin SINR of the sensing signal
+> τSSensing threshold
+> YSSensing echo signal received at BS
+> ∆SResidual interference caused by imperfect cancel-lation of the communication component during sensing-signal recovery at the BS
+> ΦS= [ xS,yS,0]Coordinate of US
+> Mathematical Operators/ Symbols
+> j,(.)∗,‖.‖,|.|,
+> E{.}Imaginary unit (√−1), Complex conjugate, Eu-clidean norm, absolute value and mean operators, respectively
+> ℜ{.},ℑ{.}Real and imaginary part of acomplex signal/ stream, respectively
+> fRV (.),FRV (.),FRV (.)PDF, CDF, and CCDF of random variable RV
+
+SOP, and ergodic sum-rate are formulated for the gener-alised multi-user multi-PA framework. The final expres-sions are evaluated using numerical integration methods.  
+
+> •
+
+Performance Validation and Insights: Extensive numerical results are presented to validate the analytical expressions and evaluate the proposed PASS-QRSMA-ISAC framework across per-user COP, system COP, SOP, and ergodic sum-rate. The validation and insights are presented for the fol-lowing cases: (a) Two-User Single-PA Scenario: The analytical expressions are validated through Monte Carlo simulations under the ideal waveguide scenario. The proposed framework is compared with conventional PASS-RSMA-ISAC, PASS-NOMA-ISAC, and PASS-SDMA-ISAC schemes. (b) Generalised Multi-User Multi-PA Scenario: The ana-lytical expressions are validated for the multi-user multi-4                  
+
+> BS XYZ.........
+> US
+> ROOM-1 ROOM-2
+> DD
+> U1
+> U2
+> UM
+> ...
+> UM+1
+> UM+2
+> ...UK
+> Feed
+> Point
+> ...
+> P1P2P3PL
+> Fig. 1: An illustration of multi-user multi-PA PASS-QRSMA-ISAC system.
+
+PA setting, and the proposed framework is compared with PASS-RSMA-ISAC. The results investigate the impact of user distribution, power allocation, waveguide attenuation, and sensing-related parameters on the communication and sensing performance. The results confirm the accuracy of the analytical derivations and highlight the performance gains over the considered benchmark schemes. 
+
+Notations Used: The notation and mathematical operators used in the work are listed in Table I. 
+
+Organization of the paper: The remainder of the paper is organised as follows. Section II presents the system model and SINR formulations. Sections III and IV provide the outage and sum-rate analyses for the two-user, single-PA and multi-user, multi-PA scenarios, respectively. Section V presents the analytical and simulation results, and Section VI concludes the paper. II. S YSTEM MODEL 
+
+Let us consider a PASS-assisted Q-RSMA-based downlink ISAC network comprising two adjacent rooms, each with di-mensions D × D, as illustrated in Fig. 1. A total of K CUs are distributed across the two rooms, where M CUs are located in Room 1 and the remaining K − M CUs are located in Room 2. Any CU is denoted by Uk, where k ∈ { 1, . . . , K}. Without loss of generality, users U1, . . . , UM are located in Room 1, whereas the remaining K − M CUs are located in Room 2. The coordinate of any CU Uk is represented as Φk = [ xk, yk, 0]. Accordingly, for users in Room 1, xk ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+] and yk ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+], where k ≤ M. Simi-larly, for users in Room 2, xk ∈ [ D 
+
+> 2
+
+, 3D
+
+> 2
+
+] and yk ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+], where 
+
+M + 1 ≤ k ≤ K. Furthermore, a sensing target (ST), denoted by US,is located in Room 1. The coordinate of the ST is represented as 
+
+ΦS = [ xS, yS, 0], where xS ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+] and yS ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+]. The users in the network are served by a waveguide deployed along the X-axis at a height d. The waveguide is equipped with L PAs, denoted by Pl ∀l ∈ { 1, . . . , L}, where the coordinate of the Pl is given by 
+
+ΦPl = [ xPl , 0, d] where xPl ∈ [− D 
+
+> 2
+
+, D
+
+> 2
+
+]. The waveguide is connected to the BS through a dedicated RF chain, which injects the RF signal into the waveguide via a feed point located at its front end. The coordinate of this feed point is denoted by ΦF = [ xF , 0, d].Throughout this work, the distance between any two points is calculated using the Euclidean norm. This setup establishes the basic network scenario, including the user and PA locations. Based on this, the next sub-section describes the channel modelling for the network. 
+
+A. Channel Model 
+
+The signal in the network propagates through both the waveg-uide and wireless medium, leading to the following channel categorisation:  
+
+> •
+
+Inside Waveguide: The in-waveguide component represents the portion of the signal that propagates along the waveguide from the feed point to the PAs. During this propagation, the signal experiences both attenuation and phase variation. The attenuation is caused by propagation loss inside the dielectric waveguide and is characterized by the attenuation coefficient 
+
+κ, measured in dB/m. On the other hand, the phase variation occurs because the signal propagates inside the waveguide with a guided wavelength, which differs from the free-space wavelength due to the material and structural properties of the waveguide. This effect is characterized by the effective refractive index, 
+
+ηeff , which determines the guided wavelength as 
+
+λG = 
+
+> ληeff
+
+, where 
+
+λ = cfC is the free-space wavelength, c is the speed of light, and fC is the carrier frequency. Thus, the corresponding in-waveguide channel between the feed point and lth PA can be given as: 
+
+h 
+
+> ω,l
+
+= 10 −
+
+> κ
+
+‖ΦPl −ΦF ‖ 
+
+> 20
+
+e− j 2 
+
+> πλ
+
+(
+
+> ηeff
+
+‖ΦPl −ΦF ‖), (1) where ‖ΦPl − ΦF ‖ represents the Euclidean distance between 
+
+Pl and the feed point. Now, since multiple PAs are deployed along the same waveguide, the signal experiences different propagation phases and attenuation before reaching each PA, depending on its distance from the feed point. Thus, the in-waveguide channel vector can be given as: 
+
+h 
+
+> ω
+
+= [ h
+
+> ω,1
+
+, h
+
+> ω,2
+
+, . . . , h
+
+> ω,L
+
+] ∈ C1×L. (2) The in-waveguide channel vector in (2) is common to both the communication and sensing functionalities, since the transmitted signal first propagates from the feed point to the PAs before being radiated into the wireless medium. However, the sensing functionality involves an additional echo-return path. In this work, we consider a single receiving PA, denoted by ̂ Pl for collecting the echo reflected from the ST. The collected echo is then guided back to the BS through the waveguide. Accordingly, the corresponding receive-side in-waveguide channel is denoted by ̂
+
+h 
+
+> ω,l
+
+= 10 −  
+
+> κ
+> ∥∥∥∥Φ̂
+> Pl−ΦF
+> ∥∥∥∥
+> 20
+
+e− j 2  
+
+> πλ
+> (
+> ηeff
+> ∥∥∥Φ̂Pl−ΦF
+> ∥∥∥)
+
+. (3)  
+
+> •
+
+Wireless Channel: Once radiated from the waveguide through the PAs, the signal propagates through the wireless medium towards the CUs and ST. Thus, the wireless propa-gation channel can be classified into the following cases: 
+
+– Communication Links (Towards CUs): This represents the channels between the PAs and the CUs. Since the waveguide is deployed in Room 1, the CUs in Room 1 experience strong LoS connections. In contrast, the CUs in Room 2 do not have direct visibility with the PAs and therefore experience a non-line-of-sight (NLoS) propagation condition. Accordingly, the channel between 
+
+lth PA and any user Uk can be given as: 
+
+hk,l =
+
+    
+
+> ξe−j2
+> πλ
+
+(‖ΦPl −Φk‖)
+
+‖ΦPl −Φk‖ , k ∈ { 1, . . . , M}
+
+> gk,l√
+
+‖ΦPl −Φk‖ 
+
+> ν
+
+, k ∈ { M + 1, . . ., K}
+
+(4) where gk,l ∈ CN {0, 1} is the small scale fading between the lth PA and Uk, for M + 1 ≤ k ≤ K, and 
+
+ξ = 
+
+> λ
+> 4
+> π
+
+is the free space path loss at a reference distance of 1m. Here, 
+
+‖ΦPl − Φk‖ represents the Euclidean distance between lth 
+
+PA and Uk and 
+
+ν is the path loss exponent. Now, since there are multiple PAs, the channel vector between all the PAs and Uk can be represented as: 5
+
+hk = [ hk,1, hk,2, . . . , hk,L]T ∈ CL×1. (5) Thus, using (2) and (5), the effective channel between PAs and any CU Uk can be given as: 
+
+hΣ,k = h 
+
+> ω
+
+hk = ∑Ll=1 h 
+
+> ω,l
+
+hk,l . (6) 
+
+– Sensing Links (PA-to-ST and ST-to-PA Paths): Unlike the communication links, the sensing link involves both the propagation of the transmitted signal from the PAs to the ST and the return propagation of the reflected echo from the ST to the receiving PA. Therefore, the sensing channel is modelled through two distinct propagation paths which are further discussed as follows: 
+
+∗ PA-to-ST Path: This path represents the propagation of the sensing signal from the transmit PAs to the ST. Since the ST is located in Room 1 and has direct visibility with the waveguide-mounted PAs, the PA-to-ST path is modelled as a dominant LoS link. Accordingly, the channel between Pl and ST can be expressed as: 
+
+hS,l = e− j 2 
+
+> πλ
+
+(‖ΦPl −ΦS‖)
+
+∥∥ΦPl − ΦS
+
+∥∥ , (7) where ∥∥ΦPl − ΦS
+
+∥∥ represents the distance between Pl
+
+and the ST. Since multiple PAs are deployed, the PA-to-ST channel vector can be given as: 
+
+hS = [ hS,1, hS,2, . . . , hS,L]T ∈ CL×1. (8) Thus, using (2) and (8), the effective transmit sensing channel between the PAs and ST can be expressed as: 
+
+hΣ,S = h 
+
+> ω
+
+hS = ∑Ll=1 h 
+
+> ω,l
+
+hS,l . (9) 
+
+∗ ST-to-PA Path: This path represents the echo-return propagation from the ST to the receiving PA, ̂ Pl after the sensing signal is reflected by the target. The PA closest to the ST is selected and activated for echo reception. Similar to monostatic PASS-assisted ISAC sensing models, the sensing receiver is assumed to be co-located with the selected receiving PA, ̂ Pl which collects the echo reflected from the ST before the received signal is guided back to the BS through the waveguide [4]. Therefore, the echo-return link is modelled through the ST-to ̂ Pl wireless path followed by the receive-side in-waveguide propagation. Accord-ingly, the selected receiving PA, ̂ Pl can be expressed as ̂
+
+Pl = Parg min l∈{ 1,..., L}‖ΦPl −ΦS‖. Thus, the corresponding coordinate of the selected PA can be given as Φ̂Pl =
+
+ΦParg min l∈{ 1,..., L}‖ΦPl −ΦS‖ . Now, since the ST is located in Room 1 and has direct visibility with the waveguide-mounted PAs, the ST-to-PA path is also modelled as a dominant LoS link. Accordingly, the wireless channel between the ST and ̂ Pl can be expressed as: ̂
+
+hS,l = e− j 2  
+
+> πλ
+> (∥ ∥∥ΦS−Φ̂Pl
+> ∥∥∥)
+
+∥∥∥ΦS − Φ̂Pl
+
+∥∥∥
+
+. (10) Thus, the effective channel while receiving echo signal can be given as: ̂
+
+hΣ,S =̂ h
+
+> ω,l
+
+̂ hS,l . (11) Using (9) and (11), the effective sensing channel can be given as: hsen = √
+
+ξShΣ,Ŝ hΣ,S, (12) where 
+
+ξS =  
+
+> λ2
+> σRCS
+> (4
+> π)3
+
+. Here, 
+
+σRCS is the radar cross-sectional area. In the following sub-section, we present the signal modelling of the proposed multi-PA assisted ISAC framework based on Q-RSMA. Before proceeding, the key assumptions considered in this work are summarized as follows: (i) the BS is assumed to have perfect knowledge of the channel state information (CSI) for both communication and sensing links, and (ii) the PA configuration is assumed to remain fixed within each transmission block. Conse-quently, the wireless channel can be treated as quasi-static over the duration of data transmission and sensing. This assumption is also consistent with existing PASS-assisted ISAC studies such as [4]. The detailed method for channel estimation of PASS can be found in [39]. 
+
+B. Signal Model 
+
+In this sub-section, we present the signal model of the pro-posed PASS–QRSMA–ISAC framework. For the communication functionality of the ISAC system, Q-RSMA is adopted. For each user Uk, the corresponding data, 
+
+ζk, is split into two components, namely a common part, 
+
+ζCk and a private part, 
+
+ζPk. All the common parts are then concatenated to form a combined common data stream, 
+
+ζC = [ 
+
+ζC1 , . . . , 
+
+ζCK ]. This is then encoded into a real-valued common stream, ΨC, by using a code-book available at all the users [35]. On the other hand, each private part is encoded into a real-valued private stream, ΨPk. Let 
+
+α ∈ [0, 1]
+
+denote the fraction of the total transmit power allocated to the communication signal, while 1 −
+
+α denotes the fraction allocated to the sensing signal. Furthermore, within the communication signal, the power allocation coefficients for the common stream and the K private streams are denoted by 
+
+βC and 
+
+βPk, respectively, such that 
+
+βC + ∑Kk=1
+
+βPk = 1. Following the procedure outlined in [35], the private streams are combined and mapped onto the quadrature component, while the common stream is mapped onto the in-phase component. Thus, the transmit signal by the BS for the proposed PASS-QRSMA-ISAC framework can be given as: 
+
+Ψ(t) = √
+
+α
+
+(√
+
+βCΨC(t)
+
+︸ ︷︷ ︸
+
+> In-Phase
+
++ j
+
+> K
+
+# ∑
+
+> k=1
+
+√
+
+βPkΨPk(t)
+
+︸ ︷︷ ︸
+
+> Quadrature
+
+)︸ ︷︷ ︸
+
+> Communication Signal
+
++ √(1 −
+
+α)ΨS
+
+︸ ︷︷ ︸
+
+> Sensing Signal
+
+.
+
+(13) This composite signal propagates along the waveguide, and dif-ferent portions of it are radiated into the wireless medium through the L PAs deployed on the waveguide in Room 1. It should be noted that, in this work, the total transmit power is assumed to be equally distributed among the L PAs [14]. Since the transmitted signal supports both communication and sensing functionalities, this sub-section is further divided into two parts to discuss each task separately. 
+
+1) Communication Task : For the communication task, the CUs are distributed across the two rooms as described earlier and therefore experience the corresponding LoS or NLoS propagation conditions. Based on this, the received signal at Uk in any room, can be expressed as: 
+
+Yk(t) = 
+
+√ Pt
+
+L hΣ,kΨ(t) + zk(t), (14) where zk(t) ∼ CN {0,
+
+σ 2} represents the additive white Gaussian noise (AWGN) at Uk. At Uk, the received signal is first multiplied 6
+
+with h∗ 
+
+> Σ,k
+> |hΣ,k|
+
+to obtain an intermediate signal which can be given as: ̂
+
+Yk(t) = 
+
+√ Pt
+
+L |hΣ,k|Ψ(t) + ̂ zk(t), (15) where ̂ zk(t) ∼ CN {0,
+
+σ 2} is the modified noise term and has the same statistics as zk(t). The phase compensated signal ̂ Yk(t)
+
+is then separated into its in-phase and quadrature components. The in-phase component is used to recover the common stream, whereas the quadrature component contains the superposition of the private streams. Accordingly, these two components can be written as: 
+
+ℜ
+
+{̂ 
+
+Yk(t)
+
+}
+
+=
+
+√ αβ CPt
+
+L |hΣ,k|ΨC(t)+
+
+√ (1 −
+
+α)Pt
+
+L |hΣ,k|ℜ {ΨS} + ℜ {̂zk(t)} ,
+
+(16) 
+
+ℑ
+
+{̂ 
+
+Yk(t)
+
+}
+
+=
+
+√ αPt
+
+L |hΣ,k|
+
+> K
+
+# ∑
+
+> i=1
+
+√
+
+βPiΨPi(t)+
+
+√ (1 −
+
+α)Pt
+
+L |hΣ,k|ℑ {ΨS} + ℑ {̂zk(t)} ,
+
+(17) where ℜ {̂zk(t)} and ℑ {̂ zk(t)} ∼ N
+
+{
+
+0, 
+
+> σ2
+> 2
+
+}
+
+. Thus, using (16) and (17), the corresponding SNR/ SINR of the common and the private streams can be respectively given as: 
+
+Λk,Com ,Pin = 
+
+> αβ CPt
+> L
+
+|hΣ,k|212
+
+( (1− 
+
+> α)Pt
+> L
+
+|hΣ,k|2 +
+
+σ 2
+
+) , (18) 
+
+Λk,Pvt ,Pin = 
+
+> αPt
+> βPk
+> L
+
+|hΣ,k|2αPt 
+
+> L
+
+|hΣ,k|2 ∑Ki=1
+
+> i6=k
+
+βPi + 12
+
+( (1− 
+
+> α)Pt
+> L
+
+|hΣ,k|2 +
+
+σ 2
+
+) . (19) 
+
+a) Rate Calculation : Using (18) and (19), the corresponding instantaneous rate of the common and private streams of any Uk
+
+can be respectively given as: 
+
+RCk = 12 log 2
+
+(1 + Λk,Com ,Pin 
+
+) ; RPk = 12 log 2
+
+(1 + Λk,Pvt ,Pin 
+
+) ,
+
+(20) where the factor 12 is multiplied to account for the use of real-valued symbols for the common and private streams. Since a real symbol carries half the DoF of a complex symbol, the corresponding scaling is required [35]. Now, since the common stream is to be decoded at both the users, the achievable rate of the common stream can be given as: 
+
+RC = min (RC1 , RC2 , . . . , RCK ), (21) where rk is the rate allocated for Uk such that ∑Kk=1 rk ≤ RC.Thus, the achievable rate of Uk can be given as Rk = rk + RPk.Subsequently, the sum rate of the system can be given as: 
+
+RΣ = ∑Kk=1 rk + RPk = RC + ∑Kk=1 RPk. (22) 
+
+2) Sensing Task : The sensing signal is transmitted through the L PAs simultaneously with the communication signal, and its reflected echo from the target is subsequently received at the sensing receiver. It can be done so by activating the closest PA to the ST which has been denoted using ̂ Pl . Accordingly, the received sensing echo signal, which is used for target range estimation, can be expressed as follows: 
+
+YS(t) = 
+
+√ Pt
+
+L hsen Ψ(t − TS) + zS(t)=
+
+√ Pt
+
+ξS
+
+L hΣ,Ŝ hΣ,SΨ(t − TS) + zS(t),
+
+(23) where TS is the round trip propagation delay, and zS(t) ∼
+
+CN {0,
+
+σ 2 
+
+> S
+
+}. Practically, the signals radiated from different PAs may experience slightly different round-trip propagation delays due to their distinct propagation paths. However, a common round-trip delay TS is adopted following the common-delay assump-tion in [40]. For the considered single-PA echo reception, this approximation is valid when the maximum PA deployment length satisfies D ≤ c 
+
+> B
+
+, where B is the bandwidth. Here, Ψ(t − TS)
+
+contains both the communication and sensing components. Since, the communication component of Ψ(t − TS) is known at the BS, it can be effectively removed using analog and digital interference cancellation techniques. However, owing to hardware constraints, this removal might not be perfect. Thus, the SINR of the received echo sensing signal can be given as: 
+
+ΛSensing ,Pin = 
+
+> Pt
+> ξS
+> L
+
+|hΣ,S|2
+
+∣∣∣̂ hΣ,S
+
+∣∣∣2
+
+(1 −
+
+α)
+
+σ 2 
+
+> S
+
++ ∆S Pt 
+
+> ξS
+> α
+> L
+
+|hΣ,S|2
+
+∣∣∣̂ hΣ,S
+
+∣∣∣2 , (24) where ∆S ∈ [0, 1] denotes the residual interference coefficient caused by imperfect cancellation of the communication compo-nent during sensing-signal recovery. In this work, we consider hardware induced imperfect cancellation. III. T WO -U SER SINGLE -PA P ERFORMANCE ANALYSIS 
+
+In this section, we analyse the outage probability and er-godic sum-rate performance of the considered system. To obtain tractable baseline analytical insights, we first focus on the two-user single-PA case under an ideal waveguide scenario, which is consistent with existing two-user single-PA PASS-RSMA-ISAC analytical studies where ideal waveguide propagation is consid-ered to simplify the analysis [4]. Accordingly, we consider L = 1, 
+
+ΦP , ΦP1 , K = 2, M = 1, and 
+
+κ = 0, with the PA aligned with US
+
+along the x-axis such that ΦP = [ xS, 0, d] to shorten the propagation distance and enhance the echo signal. 
+
+A. Outage Analysis 
+
+In this sub-section, we provide the user COP, system COP and SOP analysis, respectively for the proposed single PA framework. 
+
+1) COP Analysis : In a Q-RSMA-based communication sys-tem, an outage event occurs when either the common stream or the corresponding private stream cannot be successfully decoded. Since the channel statistics differ for users located in different rooms, we first derive the outage probability on a user-wise basis which is then followed by the system outage probability.  
+
+> •
+
+User 1: The COP of U1 can be expressed as: PO1 = 1 − Pr {Λ1,Com ,Pin >
+
+τC1, Λ1,Pvt ,Pin >
+
+τP1}
+
+= 1 − Pr {X−11 >
+
+δ1
+
+} = 1 − FX1
+
+( 1
+
+δ1
+
+)
+
+, (26) where X1 = ‖ΦP − Φ1‖2 and 
+
+δ1=max (
+
+δC1,
+
+δP1) with 
+
+δC1(
+
+τC1) = 
+
+τC1
+
+σ 2
+
+Pt
+
+ξ 2 (2
+
+αβ C −
+
+τC1(1 −
+
+α)) , (27a) 
+
+δP1(
+
+τP1) = 
+
+τP1
+
+σ 2
+
+Pt
+
+ξ 2 (2
+
+αβ P1 −
+
+τP1(2
+
+αβ P2 + 1 −
+
+α)) , (27b) where 
+
+τC1 = 22RC1,T h − 1 and 
+
+τP1 = 22RP1,T h − 1. Here, RC1,T h 
+
+and RP1,T h are the target data rates of the common and private streams of U1, respectively. Thus, the CDF of X1 can be expressed from [4] as shown in (25) where R=√x1 − d2,
+
+Ω=
+
+√
+
+max 
+
+(
+
+0, x1 − d2 − D2
+
+> 4
+
+)
+
+, and U=√max (0, x1 − d2 − D2).7
+
+FX1 (x1) = 
+
+
+
+0, x1 < d2, 
+
+> πR2
+> D2
+
+− 4R3 
+
+> 3D3
+
+, d2 ≤ x1 < d2 + D2 
+
+> 4
+
+,
+
+> 1
+> D2
+
+[ D2 
+
+> 12
+
++ DΩ − 2R2arcsin ( Ω 
+
+> R
+
+− R2 +
+
+πR2)]
+
+, d2 + D2 
+
+> 4
+
+≤ x1 < d2 + D2, 
+
+> Ω
+> D
+
+− Ω2 
+
+> D2
+
++ 2R2
+
+> D2
+
+[
+
+arcsin ( DR
+
+) − arcsin ( Ω
+
+> R
+
+) ]
+
++ 2UD + 4U3 
+
+> 3D3
+
+− 16 , d2 + D2 ≤ x1 ≤ d2 + 5D2 
+
+> 4
+
+,
+
+1, x1 > d2 + 5D2 
+
+> 4
+
+.
+
+(25) 
+
+fX2 (x2) = 
+
+
+
+0, x2 < d2,
+
+√x2−d2 
+
+> D3
+
+, d2 ≤ x2 < d2 + D2 
+
+> 4
+
+, 
+
+> 12D2
+
+, d2 + D2 
+
+> 4
+
+≤ x2 < d2 + D2, 
+
+> 12D2
+
+− 2√x2 −d2−D2 
+
+> D3
+
++ 2
+
+> D2
+
+[
+
+arctan 
+
+( √x2−d2−D2
+
+> D
+
+)
+
+−√x2−d2−D2 
+
+> D
+
++ D√x2−d2−D2
+
+√x2 −d2
+
+]
+
+, d2 + D2 ≤ x2 < d2 + 5D2 
+
+> 4
+
+, 
+
+> 2
+> π−12D2
+
+− 2 
+
+> D2
+
+arctan 
+
+( √4(x2−d2)−D2
+
+> D
+
+)
+
+, d2 + 5D2 
+
+> 4
+
+≤ x2 < d2 + 4D2,
+
+> 2
+> D
+> √
+> 4
+
+(x2−d2)−D2 − 12D2 +
+
+√x2 −d2−4D2 
+
+> D3
+
++ 2
+
+> D2
+
+[
+
+arctan 
+
+(
+
+> D
+
+√4(x2−d2)−D2
+
+)
+
+− arctan 
+
+( √x2−d2−4D2
+
+> 2D
+
+)
+
+− D
+
+> √
+> 4
+
+(x2 −d2)−D2
+
+> 4
+
+√x2−d2
+
+]
+
+, d2 + 4D2 ≤ x2 < d2 + 17 D2 
+
+> 4
+
+,
+
+0, x2 ≥ d2 + 17 D2 
+
+> 4
+
+.
+
+(28)  
+
+> •
+
+User 2: The COP of U2 can be expressed as: PO2 = 1 − Pr {Λ2,Com ,Pin >
+
+τC2, Λ2,Pvt ,Pin >
+
+τP2}
+
+= 1 − Pr 
+
+{
+
+X − 
+
+> ν
+> 2
+> 2
+
+|g2|2 >
+
+δ2
+
+}
+
+, (29) where X2 = ‖ΦP − Φ2‖2 and 
+
+δ2=max (
+
+δC2,
+
+δP2) with 
+
+δC2(
+
+τC2) = 
+
+τC2 
+
+σ 2
+
+Pt (2
+
+αβ C −
+
+τC2 (1 −
+
+α)) , (30a) 
+
+δP2(
+
+τP2) = 
+
+τP2
+
+σ 2
+
+Pt (2
+
+αβ P2 −
+
+τP2 (2
+
+αβ P1 + 1 −
+
+α)) , (30b) where 
+
+τC2 = 22RC2,T h − 1 and 
+
+τP2 = 22RP2,T h − 1. Here, RC2,T h 
+
+and RP2,T h are the target data rates of the common and private streams of U2, respectively and the PDF of X2 can be expressed from [41] and is shown in (28). Thus, on solving (29), the COP of U2 can be approximated as: PO2 = 1 − ∑5 
+
+> n=1
+
+P2n(
+
+δ2), (31) where P21 , P22 , P23 , P24 , and P25 can be found in (32a)-(32e), respectively with tm = cos ( 2m−12M
+
+π) and M is the num-ber of Chebyshev quadrature points. The derivation of (31) from (29) is provided in Lemma 1. It should be noted that the above COP expressions are valid for 2 
+
+αβ C −
+
+τCk(1 −
+
+α) > 0and 2 
+
+αβ Pk −
+
+τPk(2
+
+α ∑2
+
+> i=1,i6=k
+
+βPi + 1 −
+
+α) > 0. Otherwise, the corresponding decoding event becomes infeasible and POk = 1. 
+
+Lemma 1. The COP of U 2 as shown in (29) , can be approximated as follows: PO2 = 1 − { P21 + P22 + P23 + P24 + P25 },
+
+where we condition on X − 
+
+> ν
+> 2
+> 2
+
+.Proof. Considering |g2|2 to be exponentially distributed with parameter 1 and conditioning on X2 = x2, (29) can be expressed as: PO2 = 1 − Pr 
+
+{
+
+X − 
+
+> ν
+> 2
+> 2
+
+|g2|2 >
+
+δ2
+
+}
+
+= Pr 
+
+{
+
+|g2|2 ≤
+
+δ2X
+
+> ν
+> 2
+> 2
+
+}
+
+=
+
+∫ ∞
+
+> 0
+
+(
+
+1 − e−
+
+> δ2x
+> ν
+> 22
+
+)
+
+fX2 (x2)dx 2
+
+= 1 −
+
+∫ ∞
+
+> 0
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2.
+
+(33) Now, using (28), (33) can be solved as: PO2 = 1 −
+
+{∫ d2+ D24 
+
+> d2
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2
+
+︸ ︷︷ ︸
+
+> P21
+
++
+
+∫ d2+D2 
+
+> d2+D24
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2
+
+︸ ︷︷ ︸
+
+> P22
+
++
+
+∫ d2+ 5D24 
+
+> d2+D2
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2
+
+︸ ︷︷ ︸
+
+> P23
+
++
+
+∫ d2+4D2 
+
+> d2+5D24
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2
+
+︸ ︷︷ ︸
+
+> P24
+
++
+
+∫ d2+ 17 D24 
+
+> d2+4D2
+
+e− 
+
+> δ2x
+> ν
+> 22
+
+fX2 (x2)dx 2
+
+︸ ︷︷ ︸
+
+> P25
+
+}
+
+.
+
+(34) To solve the above piecewise integrals, the Gaussian Cheby-shev Quadrature method of the first kind (GCQ-I) is em-ployed [4]. To do so, a variable transformation needs to be performed to map the range onto the interval [-1,1]. Now, to approximate a standard integral of the form ∫ 1 
+
+> −1
+
+b(t)dt with GCQ-I, the following can be used: 
+
+∫ 1
+
+> −1
+
+b(t)dt ≈ ∑M
+
+> m=1
+
+π
+
+M b(tm)
+
+√
+
+1 − t2
+
+> m
+
+. (35) Considering x2 = D2tm+8d2+D2 
+
+> 8
+
+, we have 
+
+P21 =
+
+∫ 1
+
+> −1
+
+D2
+
+8 e−  
+
+> δ2
+> (D2tm +8d2+D28
+> )
+> ν
+> 2
+
+√1 + tm
+
+2√2D2 dt m
+
+=
+
+π
+
+8M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+( √1 + tm
+
+2√2
+
+)
+
+e− 
+
+> δ2
+> (D2tm +8d2+D28
+> )
+> ν
+> 2
+
+.
+
+(36) 8
+
+P21 (
+
+δ2) = 
+
+π
+
+8M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+( √1 + tm
+
+2√2
+
+)
+
+e− 
+
+> δ2
+> (D2tm +8d2+D28
+> )
+> ν
+> 2
+
+, (32a) 
+
+P22 (
+
+δ2) = 3
+
+π
+
+16 M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+e− 
+
+> δ2
+> (3D2tm +8d2+5D28
+> )
+> ν
+> 2
+
+, (32b) 
+
+P23 (
+
+δ2) = 
+
+π
+
+8M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+[
+
+12 −
+
+√ 1 + tm
+
+2 + 2arctan 
+
+( √1 + tm
+
+2√2
+
+)]
+
+e− 
+
+> δ2
+> (D2tm +8d2+9D28
+> )
+> ν
+> 2
+
+, (32c) 
+
+P24 (
+
+δ2) = 11 
+
+π
+
+8M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+[
+
+2
+
+π − 12 − 2arctan 
+
+(√ 11 tm + 19 2
+
+)] 
+
+e− 
+
+> δ2
+> (11 D2tm +8d2+21 D28
+> )
+> ν
+> 2
+
+, (32d) 
+
+P25 (
+
+δ2) = 
+
+π
+
+8M
+
+> M
+
+# ∑
+
+> m=1
+
+√
+
+1 − t2
+
+> m
+
+[
+
+− 12 +
+
+√1 + tm
+
+2√2 + 2
+
+(
+
+arctan 
+
+(√ 2
+
+tm + 31 
+
+)
+
+− arctan 
+
+(√ 
+
+1 + tm
+
+4√2
+
+))] 
+
+e− 
+
+> δ2
+> (D2tm +8d2+33 D28
+> )
+> ν
+> 2
+
+. (32e) Similarly, P22 , P23 , P24 , and P25 can be derived.  
+
+> •
+
+System Outage: The system is said to be in outage if either of the users are in an outage. Thus, using the inclusion-exclusion principle, and considering the events to be inde-pendent, the system COP can be given as: PSys = PO1 + PO2 − PO1PO2 = 1 − (1 − PO1)( 1 − PO2). (37) 
+
+2) SOP Analysis : As discussed earlier, the COP is a fun-damental information-theoretic metric used to quantify commu-nication reliability. However, it is not directly applicable to wireless sensing tasks, since sensing performance is governed by estimation accuracy rather than achievable rate. To enable a unified performance evaluation framework for the proposed PASS-QRSMA-ISAC system, we adopt a modified outage definition based on the MSE, in line with the methodology of [4], [42], [43]. Specifically, the sensing MSE in this work corresponds to the target-range estimation error, where the received sensing echo is used to estimate the round-trip propagation delay TS, which is directly related to the target range. A detailed Fisher-information-based derivation for the corresponding CRLB in PASS-assisted ISAC range estimation can be found in [4]. Accordingly, the MSE-based SOP is defined as the probability that the sensing MSE exceeds a prescribed threshold which is given as P OS = Pr (
+
+ρS >
+
+ρT h ), where 
+
+ρS denotes the sensing MSE and 
+
+ρT h is the target MSE threshold. For a sensing signal with a flat spectral density, the CRLB for the range-estimation MSE can be expressed as 
+
+ρS ≥ ρCRLB S = c2  
+
+> kSΛSensing ,Pin (
+> ϖB)2
+
+, where kS = 64  
+
+> π2
+> 12
+
+, and 
+
+ϖ is the spectrum allocation factor for the sensing task. Therefore, the CRLB-based MSE outage condition can be equivalently mapped to the sensing-SINR threshold condition ΛSensing ,Pin ≤
+
+τS, where 
+
+τS = c2
+
+> kS(
+> ϖB)2
+> ρT h
+
+. Thus, the SOP can be evaluated using the distribution of ΛSensing ,Pin as follows: POS = Pr (ΛSensing ,Pin ≤
+
+τS)= Pr 
+
+( ξS(1 −
+
+α)Pt ‖ΦP − ΦS‖−4σ 2 
+
+> S
+
++ ∆S
+
+ξS
+
+αPt ‖ΦP − ΦS‖−4 ≤
+
+τS
+
+)
+
+= Pr 
+
+(
+
+‖ΦP − ΦS‖−4 ≤
+
+τS
+
+σ 2
+
+> S
+
+ξSPt [( 1 −
+
+α) −
+
+ατ S∆S]
+
+)
+
+= 1 − Pr 
+
+(
+
+XS ≤
+
+√
+
+ξSPt [( 1 −
+
+α) −
+
+ατ S∆S]
+
+τS
+
+σ 2
+
+> S
+
+)
+
+= 1 − FXS
+
+(√ 
+
+ξSPt [( 1 −
+
+α) −
+
+ατ S∆S]
+
+τS
+
+σ 2
+
+> S
+
+)
+
+,
+
+(38) where XS = ‖ΦP − ΦS‖2,
+
+τS = c2 
+
+> kS
+> ρT h (
+> ϖB)2
+
+is the sensing SINR threshold expression, and FXS is the CDF corresponding to XS
+
+which can be given as: 
+
+FXS (xS) = 
+
+
+
+0, xS < d2,
+
+> 2
+
+√xS −d2 
+
+> D
+
+, d2 ≤ xS < d2 + D2 
+
+> 4
+
+,
+
+1, xS ≥ d2 + D2 
+
+> 4
+
+.
+
+(39) It should be noted that the SOP expression is valid when (1 −
+
+α) −
+
+ατ S∆S > 0. If the condition is not satisfied, then P OS = 1. 
+
+B. Ergodic Sum Rate Analysis 
+
+The ergodic sum-rate represents the average achievable sum-rate over fading/channel realisations. Accordingly, for the pro-posed framework, it is given as: 
+
+RΣ,Ana = E
+
+{
+
+min (RC1 , RC2 ) + 
+
+> 2
+
+# ∑
+
+> i=1
+
+RPi
+
+}
+
+= E {min (RC1 , RC2 )}
+
+︸ ︷︷ ︸
+
+> ACRA
+
++
+
+> 2
+
+# ∑
+
+> i=1
+
+E {RPi}
+
+︸ ︷︷ ︸
+
+> APRA
+
+,
+
+(40) where ACRA stands for achievable common rate analysis and APRA stands for achievable private rate analysis.  
+
+> •
+
+Achievable Common Rate Analysis: Now, we derive the achievable common rate average by taking the ergodic ex-pectation of the instantaneous common rate, which is limited by the weaker common decoding capability among the two users. Thus, the ACRA can be given as: 
+
+E {RC} = 12 E {log 2(1 + min (Λ1,Com ,Pin , Λ2,Com ,Pin )) }
+
+= 12 ln 2 
+
+∫ ∞
+
+> 0
+
+Pr (Λ1,Com ,Pin > x, Λ2,Com ,Pin > x)
+
+1 + x dx 
+
+= 12 ln 2 
+
+∫ ∞
+
+> 0
+
+FΛC1 (x) + FΛC2 (x) − 1 + FΛC1,ΛC2 (x)
+
+1 + x dx ,
+
+(41) where FΛC1 and FΛC2 denote the complementary cumulative distribution functions (CCDFs) of Λ1,Com ,Pin and Λ2,Com ,Pin ,respectively, and FΛC1 ,ΛC2 (x) denotes their joint CDF which can be expressed as shown below: 
+
+FΛC1 (x) , Pr (Λ1,Com ,Pin > x) = FX1
+
+( 1
+
+δC1(x)
+
+)
+
+, (42) 
+
+FΛC2 (x) , Pr (Λ2,Com ,Pin > x) = 
+
+> 5
+
+# ∑
+
+> n=1
+
+P2n(
+
+δC2(x)) , (43) 9
+
+FΛC1 ,ΛC2 (x) = C
+
+(
+
+1 − FΛC1 (x), 1 − FΛC2 (x);
+
+θ2
+
+)
+
+, (44) where C(u, v) denotes a bivariate copula function, which characterizes the joint cumulative distribution function (CDF) by linking the marginal CDFs of the involved random vari-ables [29], 
+
+δC1(x) can be obtained from (27a), 
+
+δC2(x) can be obtained from (30a) and 
+
+θ2 ∈ [−1, 1]. Now, as explained earlier in Section III-A1, the dependency is observed to be negligible which has been verified through the close agreement between the simulated and analytical results under the independence assumption in Section V. Thus, (41) can also be expressed as follows: 
+
+E {RC} = 12 ln 2 
+
+∫ ∞
+
+> 0
+
+FΛC1 (x)FΛC2 (x)
+
+1 + x dx . (45) 
+
+Lemma 2. The ACRA term shown in (41) , can be approxi-mated as follows: 
+
+E {RC} = 12 ln 2 
+
+∫ ∞
+
+> 0
+
+FΛC1 (x)FΛC2 (x)
+
+1 + x dx ,
+
+where the variables Λ1,Com ,Pin and Λ2,Com ,Pin are considered to be independent. Proof. From (42) and (43), we can also have the equations as shown below: 1 − FΛC1 (x) , Pr (Λ1,Com ,Pin ≤ x), (46a) 1 − FΛC2 (x) , Pr (Λ2,Com ,Pin ≤ x) (46b) Now, the inclusion-exclusion principle can be applied on Pr ({Λ1,Com ,Pin ≤ x} ∪ { Λ2,Com ,Pin ≤ x}) to obtain: Pr ({Λ1,Com ,Pin ≤ x} ∪ { Λ2,Com ,Pin ≤ x})= Pr (Λ1,Com ,Pin ≤ x) + Pr (Λ2,Com ,Pin ≤ x) −
+
+Pr ({Λ1,Com ,Pin ≤ x} ∩ { Λ2,Com ,Pin ≤ x})= ( 1 − FΛC1 (x)) + ( 1 − FΛC2 (x)) − FΛC1 ,ΛC2 (x).
+
+(47) Thus, applying complement rule to (47), we obtain Pr (Λ1,Com ,Pin > x, Λ2,Com ,Pin > x) which can be given as: Pr (Λ1,Com ,Pin > x, Λ2,Com ,Pin > x)= 1 − Pr ({Λ1,Com ,Pin ≤ x} ∪ { Λ2,Com ,Pin ≤ x})= 1 −
+
+[
+
+(1 − FΛC1 (x)) + ( 1 − FΛC2 (x)) − FΛC1 ,ΛC2 (x)
+
+]
+
+= FΛC1 (x) + FΛC2 (x) − 1 + FΛC1 ,ΛC2 (x).
+
+(48) Now, considering Λ1,Com ,Pin and Λ2,Com ,Pin as independent, we obtain FΛC1 ,ΛC2 (x) = ( 1 − FΛC1 (x))( 1 − FΛC2 (x)) . Now, on substituting this in (48) and solving it, we obtain: Pr (Λ1,Com ,Pin > x, Λ2,Com ,Pin > x) = FΛC1 (x)FΛC2 (x). (49) This can be substituted in (41) to obtain (45).  
+
+> •
+
+Achievable Private Rate Analysis: In contrast to the com-mon rate, the private rate is determined by each user’s own decoding capability without being limited by the weaker user. Thus, the APRA of any user, Ui can be given as: 
+
+E {RPi} = 12 E {log 2 (1 + Λi,Pvt ,Pin )}
+
+= 12 ln 2 
+
+∫ ∞
+
+> 0
+
+Pr (Λi,Pvt ,Pin > x)
+
+1 + x dx 
+
+=
+
+
+
+> 12 ln 2
+
+∫ ∞  
+
+> 0
+> FX1
+> (1
+> δP1(x)
+> )
+> 1+x
+
+dx , i = 1,
+
+> 12 ln 2
+
+∫ ∞  
+
+> 0
+> ∑5
+> n=1P2n(
+> δP2(x))
+> 1+x
+
+dx , i = 2,
+
+(50) where 
+
+δP1(x) and 
+
+δP2(x) can be obtained from (27b) and (30b), respectively. Thus, using the above ACRA and APRA equations, (40) can be given as: 
+
+RΣ,Ana = 12 ln 2 
+
+{ ∫ ∞
+
+> 0
+
+FΛC1 (x)FΛC2 (x)
+
+1 + x dx +
+
+∫ ∞
+
+> 0
+
+FX1
+
+( 1 
+
+> δP1(x)
+
+)
+
+1 + x dx +
+
+∫ ∞
+
+> 0
+
+∑5 
+
+> n=1
+
+P2n(
+
+δP2(x)) 
+
+1 + x dx 
+
+}
+
+.
+
+(51) Due to the intractable nature of (51), the corresponding integrals are evaluated numerically using the trapezoidal rule. 
+
+Remark 1. The derived expressions for the ergodic rates are valid within the feasible SINR region where the denominators of the cor-responding 
+
+δ -based terms obtained from (27a) , (30a) , (27b) , and 
+
+(30b) remain positive. For values of x that violate this condition, the events Λi,Com ,Pin > x and Λi,Pvt ,Pin > x become infeasible, and hence the associated SINR complementary cumulative distribution function (CCDF) terms evaluate to zero. 
+
+IV. M ULTI -U SER MULTI -PA P ERFORMANCE ANALYSIS 
+
+In this section, we extend the performance analysis to the generalised multi-user, multi-PA scenario. Since the effective channel is formed by the superposition of multiple PA-level contributions with different in-waveguide attenuation, phase vari-ations, and wireless propagation distances, its exact distribution becomes analytically intractable. To enable tractable analysis, the PA locations are modelled as independently distributed along the waveguide, and the corresponding PA-level channel contributions are treated as independent. Based on this approximation, the LoS communication and sensing channels are characterised using a moment-matching approach, whereas the NLoS communication channels are characterised using a PA-conditioned semi-analytical approach. Subsequently, the outage probability and ergodic sum-rate analyses of the proposed multi-PA PASS-QRSMA-ISAC framework are presented. 
+
+A. Statistical Characterization of Effective Channels 
+
+1) Channel Characterization of CUs : The outage and ergodic sum-rate analyses in the multi-PA scenario require the statistical characterisation of the effective channels. From (6), the effective channel is obtained by summing the contributions from multiple PAs. Since the PA-level terms depend on the PA locations through the in-waveguide attenuation, phase variation, and wireless prop-agation distance, the exact distribution of the resulting effective channel is difficult to obtain in closed form. Therefore, we first condition on the location of the considered CU and characterise the randomness induced by the PA locations 1. For the CUs in Room 1, a moment-matching approach is used to approximate the effective channel as a complex Gaussian random variable. For the CUs in Room 2, the channel is characterised by conditioning on the CU and PA locations, after which the Rayleigh fading can be averaged. The corresponding spatially averaged performance is then obtained by integrating over the node locations.  
+
+> 1For analytical tractability, the PA locations are modelled as independently distributed without explicitly imposing a hard minimum-spacing constraint. In practical scenarios, a minimum inter-PA spacing can be imposed to mitigate coupling, and a separation of
+> λ
+> 2is commonly considered [17]. For the considered system parameters, imposing this spacing constraint only removes a limited subset of closely spaced PA configurations and does not materially alter the overall PA-to-node distance distribution or the resulting channel statistics. Hence, its impact on the evaluated performance is negligible. 10
+
+The statistical characterization of the CU effective channel is performed by conditioning on a fixed CU location Φk. However, obtaining the exact distribution of the resulting sum in closed form is analytically intractable due to the coupled dependence of ampli-tude and phase on the propagation distances. To enable tractable analysis, the effective summed channel of any user in Room 1 con-ditioned on Φk can be expressed as hΣ,k ∼ CN {
+
+μk(Φk),
+
+ς2 
+
+> k
+
+(Φk)}
+
+where the conditional mean and conditional variance for k ≤ M
+
+can be respectively expressed as: 
+
+μk(Φk) = LE{h 
+
+> ω,l
+
+hk,l |Φk} = LD
+
+∫ D/2
+
+> −D/2
+
+h 
+
+> ω,l
+
+(r)hk,l (r)dr , (52) 
+
+ς2 
+
+> k
+
+(Φk) = 
+
+L
+
+[
+
+1
+
+D
+
+∫ D/2
+
+> −D/2
+
+∣∣h 
+
+> ω,l
+
+(r)hk,l (r)∣∣2 dr −
+
+∣∣∣∣
+
+1
+
+D
+
+∫ D/2
+
+> −D/2
+
+h 
+
+> ω,l
+
+(r)hk,l (r)dr 
+
+∣∣∣∣
+
+> 2
+
+]
+
+,
+
+(53) where r denotes the generic PA position along the waveguide evaluated at ΦPl = [ r, 0, d]. Now, let us consider the effective channel gain as Hk = |hΣ,k|2. For k ≤ M, Hk follows a non-central chi-square distribution with two degrees of freedom. Thus, the conditional PDF and CDF of Hk can be respectively given as: 
+
+fHk (x|Φk) = 1ςk(Φk)2 e− x+|  
+
+> μk(Φk)|2
+> ςk(Φk)2
+
+I0
+
+( 2|
+
+μk(Φk)|√x
+
+ςk(Φk)2
+
+)
+
+, (54) 
+
+FHk (x|Φk) = 1 − Q1
+
+( √2|
+
+μk(Φk)|
+
+ςk(Φk) ,
+
+√2x
+
+ςk(Φk)
+
+)
+
+, (55) where I0(.) is the modified Bessel function of first kind of order zero, and Q1(., . ) denotes the first order Marcum-Q function. Now, for the CUs located in Room 2, i.e. M + 1 ≤ k ≤ K,the effective channel contains both the PA-location-dependent in-waveguide channel and the Rayleigh small-scale fading and can be expressed as hΣ,k = ∑Ll=1 h 
+
+> ω,l
+
+gk,l
+
+∥∥ΦPl − Φk
+
+∥∥−
+
+> ν/2
+
+. Now, conditioned on the CU location Φk and the PA locations {ΦPl }Ll=1,the terms h
+
+> ω,l
+
+∥∥ΦPl − Φk
+
+∥∥− 
+
+> ν/2
+
+become deterministic, while gk,l
+
+remains random. Therefore, the conditioned effective channel is a zero-mean complex Gaussian random variable, given by 
+
+hΣ,k
+
+∣∣∣Φk, {ΦPl }Ll=1 ∼ CN {0,̂
+
+ς2 (Φk, {ΦPl }Ll=1
+
+)} , (56) where ̂
+
+ς2 (Φk, {ΦPl }Ll=1
+
+) =
+
+> L
+
+# ∑
+
+> l=1
+
+|h 
+
+> ω,l
+
+|2 ∥∥ΦPl − Φk
+
+∥∥− 
+
+> ν
+
+, M + 1 ≤ k ≤ K.
+
+(57) Consequently, defining Hk = |hΣ,k|2, the conditional CDF of Hk
+
+for the CUs in Room 2 can be expressed as: 
+
+FHk
+
+(x|Φk, {ΦPl }Ll=1
+
+) = 1 − e
+
+> −x̂
+> ς2
+
+(Φk,{ΦPl }Ll=1) . (58) This expression is used for the PA-conditioned semi-analytical evaluation of the NLoS CU outage probability, where the Rayleigh fading is averaged in closed form after conditioning on the CU and PA locations. The remaining expectation over the CU and PA locations is evaluated numerically in the subsequent outage analysis. 
+
+Remark 2. For the CUs in Room 1, the effective channel is mainly governed by deterministic LoS propagation phases and PA locations. Hence, the moment-matched Rician approximation captures both the mean and variance of the summed channel. In contrast, for the CUs in Room 2, the effective channel contains both PA-location randomness and Rayleigh small-scale fading. If the PA-location-dependent channel power is first replaced by its spatial average, the outage probability is evaluated using an averaged channel power rather than the actual PA-conditioned channel power. This may introduce a mismatch for finite values of L. To avoid this, we use a PA-conditioned semi-analytical evaluation, where the Rayleigh fading is averaged in closed form after conditioning on the PA locations, and the remaining spatial expectation is evaluated numerically. 2) Channel Characterization for Sensing : Similar to Room 1 CU channels, the transmit side sensing channel as shown in (9) is characterised by conditioning on a fixed ST location ΦS.Accordingly, using moment matching, hΣ,S can be approximated as hΣ,S ∼ CN {
+
+μS(ΦS),
+
+ς2 
+
+> S
+
+(ΦS)} where the conditional mean and variance can be respectively given as: 
+
+μS(ΦS) = LE{h 
+
+> ω,l
+
+hS,l |ΦS} = LD
+
+∫ D/2
+
+> −D/2
+
+h 
+
+> ω,l
+
+(r)hS,l (r)dr , (59) 
+
+ς2 
+
+> S
+
+(ΦS)= L
+
+[
+
+1
+
+D
+
+∫ D/2
+
+> −D/2
+
+∣∣h 
+
+> ω,l
+
+(r)hS,l (r)∣∣2 dr −
+
+∣∣∣∣
+
+1
+
+D
+
+∫ D/2
+
+> −D/2
+
+h 
+
+> ω,l
+
+(r)hS,l (r)dr 
+
+∣∣∣∣
+
+> 2
+
+]
+
+.
+
+(60) Defining HΣ,S = |hΣ,S|2, the conditional CDF can be given by 
+
+FHΣ,S (x|ΦS) = 1 − Q1
+
+( √2|
+
+μS(ΦS)|
+
+ςS(ΦS) ,
+
+√2x
+
+ςS(ΦS)
+
+)
+
+. (61) The echo return channel as shown in (11) is characterised sepa-rately since the echo is collected only through the selected receiv-ing PA which is closest to the ST. Thus, defining ̂ HΣ,S =
+
+∣∣∣̂ hΣ,S
+
+∣∣∣2
+
+,we have ̂ HΣ,S =
+
+∣∣∣̂ hΣ,S
+
+∣∣∣2
+
+= 10 − 
+
+> κ
+> ∥∥∥∥Φ̂
+> Pl−ΦF
+> ∥∥∥∥
+> 10
+
+∥∥∥ΦS − Φ̂Pl
+
+∥∥∥−2
+
+. From (12), the effective sensing channel power gain is Hsen = |hsen |2 =
+
+ξSHΣ,Ŝ HΣ,S. Now, for a fixed ΦS and a selected receiving PA coordinate Φ̂Pl , the return-side channel gain ̂ HΣ,S is deterministic. Hence, using (61), the conditional CDF of Hsen can be written as: 
+
+FHsen 
+
+(
+
+x|ΦS, Φ̂Pl
+
+)
+
+= Pr 
+
+(
+
+Hsen ≤ x|ΦS, Φ̂Pl
+
+)
+
+= Pr 
+
+(
+
+ξSHΣ,Ŝ HΣ,S ≤ x|ΦS, Φ̂Pl
+
+)
+
+= Pr 
+
+(
+
+HΣ,S ≤ x
+
+ξŜ HΣ,S
+
+∣∣∣∣∣ΦS, Φ̂Pl
+
+)
+
+= FHΣ,S
+
+(
+
+x
+
+ξŜ HΣ,S
+
+∣∣∣∣∣ΦS
+
+)
+
+.
+
+(62) Since ̂ Pl is selected as the PA closest to the ST, the distribution of x̂ Pl is induced by the nearest PA selection rule. Let us consider ˆr = x̂ Pl . Since the PAs are deployed only along the x-axis, the closest-PA selection depends only on the horizontal separation 
+
+|ˆr − xS|, while yS affects only the return-side channel gain. Thus, for a given xS, the conditional PDF of the selected PA location can be expressed as: 
+
+fx̂
+
+> Pl
+
+(ˆr|xS) = LD
+
+(
+
+1 − W(ˆr, xS)
+
+D
+
+)L−1
+
+, (63) where W(ˆr, xS) = min ( D 
+
+> 2
+
+, xS + |ˆr − xS|) − max ( −D 
+
+> 2
+
+, xS − | ˆr − xS|)
+
+represents the length of the interval around the ST within which another PA would be closer than the PA located at ˆ r. Hence, the 11 
+
+spatially averaged CDF of Hsen is given by: 
+
+FHsen (x) = 
+
+1
+
+D2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+FHΣ,S
+
+(
+
+x
+
+ξŜ HΣ,S(ˆr, ΦS)
+
+∣∣∣∣∣ΦS
+
+)
+
+fx̂
+
+> Pl
+
+(ˆr|xS)d̂ rdy Sdx S,
+
+(64) where ̂ HΣ,S = 10 − 
+
+> κ|ˆr−xF|
+> 10
+
+((ˆr − xS)2 + y2 
+
+> S
+
++ d2)−1 .
+
+B. Outage Analysis 
+
+In this sub-section, we provide the user COP, system COP and SOP analysis, respectively for the proposed multi-user multi-PA framework. 
+
+1) COP Analysis : Due to the Q-RSMA-based transmission, each CU decodes the common stream from the in-phase compo-nent and its intended private stream from the quadrature com-ponent. Any CU is said to be in outage if either its common or private stream is in an outage. Thus, using Hk = |hΣ,k|2 and equations (18) and (19), the COP of Uk can be expressed as: POk = 1 − Pr {Λk,Com ,Pin >
+
+τCk , Λk,Pvt ,Pin >
+
+τPk 
+
+} = Pr {Hk ≤
+
+δk} ,
+
+(65) where 
+
+δk = max (
+
+δCk ,
+
+δPk ) and 
+
+δCk (
+
+τCk ) = L
+
+τCk 
+
+σ 2
+
+Pt (2
+
+αβ C −
+
+τCk (1 −
+
+α)) , (66a) 
+
+δPk (
+
+τPk ) = L
+
+τPk 
+
+σ 2
+
+Pt
+
+(
+
+2
+
+αβ Pk −
+
+τPk (2
+
+α ∑Ki=1,i6=k
+
+βPi + 1 −
+
+α)
+
+). (66b) Here, 
+
+τCk = 22RCk ,T h − 1 and 
+
+τPk = 22RPk ,T h − 1. Here, RCk ,T h and 
+
+RPk ,T h are the target data rates of the common and private streams of Uk, respectively. Furthermore, if (2
+
+αβ C −
+
+τCk (1 −
+
+α)) ≤ 0 or (
+
+2αβ Pk −
+
+τPk (2
+
+α ∑Ki=1,i6=k
+
+βPi + 1 −
+
+α)
+
+)
+
+≤ 0, then P Ok = 1. Using the statistical characterization developed in Section IV-A, the conditional COP at a given user location Φk can be given as: POk (Φk ) = 
+
+
+
+1 − Q1
+
+( √2| 
+
+> μk(Φk)|
+> ςk(Φk)
+
+,
+
+√2 
+
+> δk
+> ςk(Φk)
+
+)
+
+, k ≤ M
+
+E{ΦPl }Ll=1
+
+[
+
+1 − e 
+
+> −
+> δk̂
+> ς2
+> k
+
+(Φk ,{ΦPl }Ll=1)
+
+]
+
+, M < k ≤ K.
+
+(67) Now, since the CUs are uniformly distributed inside their respec-tive rooms, the unconditional per-user COP is obtained by aver-aging the conditional outage probability over the corresponding user-location region which can be expressed as: POk = FHk (
+
+δk)=
+
+
+
+> 1
+> D2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+1 − Q1
+
+( √2|   
+
+> μk(xk,yk)|
+> ςk(xk,yk)
+
+,
+
+√2
+
+> δk
+> ςk(xk,yk)
+
+)
+
+dx kdy k, k ≤ M
+
+> 1
+> D2
+
+∫ 3D
+
+> 2
+> D
+> 2
+
+∫ D
+
+> 2
+> −D
+> 2
+
+E{ΦPl }Ll=1
+
+[
+
+1 − e 
+
+> −
+> δk̂
+> ς2
+> k
+
+(Φk,{ΦPl }Ll=1)
+
+]
+
+dy kdx k, k > M
+
+(68) where E{ΦPl }Ll=1 denotes the spatial averaging over the PA loca-tions, where xPl ∈ [ −D 
+
+> 2
+
+, D
+
+> 2
+
+].
+
+• System Outage: Based on the discussion in Section III, the system outage as presented in (37), can be extended to the multi-PA analysis and can be given as: PSys ≈ 1 −
+
+> K
+
+# ∏
+
+> k=1
+
+(1 − POk ). (69) Since the CUs located in the same room are assumed to follow the same spatial distribution, channel model, target-rate require-ments, and power allocation rule, their outage probabilities are statistically identical after averaging over the user locations and channel fading. Let the spatially averaged outage probabilities of representative CUs in Room 1 and Room 2 be denoted by ¯ PO,R1
+
+and ¯ PO,R2, respectively. Accordingly, for M CUs in Room 1 and 
+
+K − M CUs in Room 2, the system outage probability can be approximated as: PSys ≈ 1 − ((1 − ¯PO,R1)M (1 − ¯PO,R2)K−M ) . (70) 
+
+2) SOP Analysis : Similar to the single-PA case, the CRLB is considered for target-range estimation, and hence the same sensing-SINR threshold 
+
+τS is used. Thus, following the MSE-based SOP definition in Section III-A2, the multi-PA SOP can be given as: POS = Pr (ΛSensing ,Pin ≤
+
+τS)= Pr 
+
+(
+
+Hsen ≤ L
+
+τS
+
+σ 2
+
+> S
+
+Pt [( 1 −
+
+α) −
+
+ατ S∆S]
+
+)
+
+= FHsen 
+
+( L
+
+τS
+
+σ 2
+
+> S
+
+Pt [( 1 −
+
+α) −
+
+ατ S∆S]
+
+)
+
+,
+
+(71) where FHsen (.) can be found in (64). Owing to the nearest-PA selection and the spatial averaging over the ST location, the final SOP expression is evaluated using the trapezoidal rule. It should be noted that if [( 1 −
+
+α) −
+
+ατ S∆S] ≤ 0, then P OS = 1. 
+
+C. Ergodic Sum Rate Analysis 
+
+In this sub-section, the ergodic sum-rate of the considered multi-PA framework is evaluated using the channel-gain distri-butions derived in Section IV-A. 
+
+RΣ,Ana = E {min (RC1 , . . . , RCK )} +
+
+> K
+
+# ∑
+
+> k=1
+
+E {RPk} . (72) Using the CCDF-based identity discussed in Section III, the average common-rate component can be approximated as: 
+
+E {RC} ≈ 12 ln 2 
+
+∫ ∞
+
+> 0
+
+∏Kk=1
+
+[1 − FHk (
+
+δCk (x)) ]
+
+1 + x dx , (73) and the average private rate component can be approximated as: 
+
+E {RPk } ≈ 12 ln 2 
+
+∫ ∞
+
+> 0
+
+[1 − FHk (
+
+δPk (x)) ]
+
+1 + x dx , (74) where 
+
+δCk (x) and 
+
+δPk (x) are obtained from (66a) and (66b), by replacing 
+
+τCk and 
+
+τPk with x. The integrals in (73) and (74) are evaluated numerically using the trapezoidal rule. V. R ESULTS AND DISCUSSION 
+
+In this section, the performance of the proposed PASS-QRSMA-ISAC framework is evaluated to demonstrate its op-erational behaviour and effectiveness. The simulation results are presented and compared with the corresponding analytical results to validate the accuracy of the developed analysis. It can be observed that the simulation results closely match the analytical results in all the presented figures, thereby verifying the accuracy of the derived analytical expressions for the per-user COP, system COP, sum rate, and SOP. In addition, the proposed framework is compared with traditional frameworks like PASS-RSMA-ISAC, PASS-NOMA-ISAC, and PASS-SDMA-ISAC to highlight its performance advantages. Specifically, the PASS-RSMA-ISAC benchmark follows the model in [4], whereas the PASS-NOMA-ISAC benchmark follows the model in [41]. 12                                                    
+
+> TABLE II: Simulation Parameters [4], [41].
+> Parameters Values General System Parameters
+> Transmit Power, Pt−20 to 30 dBm Carrier Frequency, fC10 GHz Length of each room, D10 −20 m Height at which waveguide is placed, d5−20 m ISAC power splitting factor,
+> α0.7 Background Noise Power,
+> σ2=
+> σ2
+> S10 −12 WNumber of PAs, L1-10 Effective refractive index of waveguide,
+> ηe f f 1.4 In-waveguide attenuation coefficient,
+> κ0-0.2 dB/m Number of Monte Carlo Simulations 10 6
+> Communication Parameters
+> Total number of CUs, K2-10 Number of CUs in Room 1, MK
+> 2
+> Number of CUs in Room 2 K−M
+> Path loss exponent,
+> ν6Quadrature points, M75 Q-RSMA Power allocation factor, {
+> βC,
+> βPk}
+> {
+> 0.6,1−
+> βC
+> K
+> }
+> Target data rates, {RCk ,T h ,RPk ,T h }{0.7,0.2}
+> Sensing Parameters
+> Radar Cross-Sectional Area,
+> σRCS ∼0−20 m 2
+> Residual interference coefficient, ∆S0-0.05 CRLB parameter, kS64
+> π2
+> 12
+> Target MSE Threshold,
+> ρT h 0.2, 0.5, 0.8 Bandwidth Fraction ratio,
+> ϖ[0,1] Bandwidth, B15 MHz
+
+It should be noted that these existing benchmark models were originally developed for the single-PA, two-user scenario. Hence, they are first adopted in their original form for the single-PA, two-user comparison. For the generalised multi-PA and multi-user case, the benchmark schemes are extended following the same PASS-assisted channel modelling and signal construction principles discussed in [14], so that all the schemes are evaluated under a consistent system setting. Furthermore, the PASS-SDMA-ISAC benchmark is obtained from the PASS-RSMA-ISAC model by setting the power allocated to the common stream to zero, such that only the private streams are transmitted. In the figures, the simulation results are denoted by “Sim”, while the analytical results are represented by “Ana”. The system parameters used throughout the evaluation are summarized in Table II. 
+
+A. Communication Task Performance 
+
+In this subsection, the communication performance of the proposed PASS-QRSMA-ISAC framework is evaluated. The pro-posed framework is compared with PASS-RSMA-ISAC, PASS-NOMA-ISAC, and PASS-SDMA-ISAC. Since only the com-munication components of these frameworks are evaluated in this subsection, they are hereafter referred to as QRSMA-PASS, RSMA-PASS, NOMA-PASS, and SDMA-PASS, respectively. Fig. 2(a) illustrates the per-user COP of the proposed frame-work and benchmark schemes with respect to the transmit power, 
+
+Pt . It can be observed that the COP of both users decreases as 
+
+Pt increases, since higher transmit power improves the received SINR and enhances the decoding reliability. However, U2 which is located in Room 2, exhibits a higher per-user COP than U1.This is because U2 experiences NLoS propagation and fading, whereas U1 benefits from a stronger LoS link with the PA. Among the considered schemes, the proposed QRSMA-PASS framework            
+
+> (a) Ptv/s per-user COP performance for two-user single-PA scenario. (b) Ptv/s system COP performance for two-user single-PA scenario. Fig. 2: (a) Per-user COP performance comparison of the proposed framework with other traditional frameworks wrt Pt, and (b) system COP performance evaluation for varying target thresholds wrt common stream power allocation factor,
+> βC.(RC,T h =RCk ,T h and R C,T h =RCk ,T h
+> )
+
+achieves the best per-user COP performance for both users. This improvement arises from the interference-free transmission of the common stream along with the inherent rate-splitting gains, which enhance decoding reliability. PASS-RSMA provides the second-best performance and outperforms both PASS-NOMA and PASS-SDMA due to the benefits of rate-splitting, which enable more efficient interference management. In contrast, PASS-SDMA exhibits the worst performance, even inferior to PASS-NOMA. This behaviour occurs because the considered system is overloaded, i.e., the number of transmit pinching antennas is smaller than the number of users. In such scenarios, spatial multiplexing alone cannot effectively separate the users, which leads to significant residual inter-user interference. Since PASS-SDMA treats this interference purely as noise without employing interference management or successive interference cancellation mechanisms, it results in a higher outage probability compared with the other considered schemes. Fig. 2(b) illustrates the system COP wrt the common-stream power allocation factor, 
+
+βC, for different target thresholds at Pt =15 dBm. It can be observed that the system COP first decreases with 
+
+βC, reaches a minimum, and then increases again. When 
+
+βC is small, insufficient power is allocated to the common stream, and hence the common-stream decoding reliability at both users becomes poor. As 
+
+βC increases, the common-stream SINR improves, which reduces the system COP. However, after a certain point, further increasing 
+
+βC reduces the power available for the private streams. Consequently, the private-stream decoding reliability deteriorates, and the system COP starts increasing again. Therefore, an optimal 
+
+βC exists that balances the decoding requirements of the common and private streams. The effect of the target thresholds can also be observed from the figure. When the common-stream threshold is reduced while keeping the private-stream threshold fixed, reliable common-stream decoding can be achieved with a smaller value of 
+
+βC. As a result, the optimal operating point shifts leftward. In contrast, when the private-stream threshold is reduced while keeping the common-stream threshold fixed, the private streams require less power for successful decoding. Hence, a larger fraction of power can be allocated to the common stream, which shifts the optimal point rightward. Furthermore, reducing the room dimension and waveguide deployment height from D=20 m and d=10 m to D=15 m and d=5 m improves the overall outage performance due to shorter propagation distances and stronger LoS links. However, for a given set of target thresholds, the optimal 
+
+βC remains almost 13          
+
+> (a) Per-user COP performance compari-son wrt Ptfor different values of K.(b) System COP performance evaluation wrt
+> βC.(RCk ,T h =0.5,RPk ,T h =0.12 )
+> Fig. 3: COP performance comparison of the multi-user multi-PA scenario for L=5.
+
+unchanged, since the relative trade-off between the common and the private stream power allocations is mainly governed by the decoding thresholds rather than the absolute channel strength. Fig. 3(a) illustrates the per-user COP performance of the proposed QRSMA-PASS framework and the RSMA-PASS frame-work wrt Pt , for different values of K in the multi-user multi-PA scenario. Since the users located in the same room follow the same spatial distribution, channel model, target-rate requirements, and power-allocation rule, their outage behaviour is statistically identical after averaging over user locations and channel fading. Therefore, one representative user from each room is selected to illustrate the per-user COP behaviour. It can be observed that the per-user COP decreases with increasing Pt for all considered cases, since higher transmit power improves the received SINR and enhances decoding reliability. Moreover, users located in Room 1 achieve better COP performance than those located in Room 2. This is because Room 1 users experience stronger LoS links with the PAs, whereas Room 2 users are affected by NLoS propagation and fading, resulting in weaker channel conditions. It can also be observed that QRSMA-PASS outperforms RSMA-PASS across all values of K. This improvement is due to the signal-domain separation in QRSMA, where the common stream and private streams are transmitted over orthogonal signal compo-nents, thereby reducing the interference affecting common-stream decoding. In contrast, RSMA-PASS relies on SIC-based stream separation, which makes its decoding reliability more sensitive to residual interference. Furthermore, increasing K degrades the COP performance for both frameworks, since a larger number of users increases the number of interfering private streams and reduces the power available for each private stream. Consequently, the decoding conditions become more restrictive, leading to higher COP. Fig. 3(b) illustrates the system COP wrt 
+
+βC, for different values of K, M, and 
+
+κ in the multi-user multi-PA scenario, where Pt =20 dBm, D=10 m, and d=5 m. Since the users located in the same room follow the same spatial distribution, channel model, target-rate requirements, and power-allocation rule, their outage behaviour is statistically identical after averaging over user locations and channel fading. Hence, the spatially averaged COP of one representative user from each room is used to obtain the system COP according to (70). It can be observed that the system COP initially decreases with 
+
+βC, reaches a favourable operating point, and then increases again. This behaviour is due to the trade-off between the common and the private stream decoding requirements. When 
+
+βC is small, insufficient power is allocated to the common stream, resulting in poor common-stream decoding                      
+
+> (a) Ptv/s sum rate.
+> 00.2 0.4 0.6 0.8 10.5 0.6 0.7 0.8 0.9 11.1 1.2 1.3 1.4 1.5
+> (b)
+> βCv/s sum rate. Fig. 4: (a) Sum rate performance of the proposed QRSMA-PASS framework with benchmark RSMA-PASS and NOMA-PASS frameworks wrt Ptfor different values of K,
+> κand ∆. ( ∆: ipSIC parameter), and (b)
+> βCv/s sum rate for different values of Pt,M,Dand d.
+
+reliability. As 
+
+βC increases, the common-stream SINR improves, thereby reducing the system COP. However, beyond a certain point, the power available for the private streams decreases, which degrades private-stream decoding and causes the system COP to increase. It can also be observed that increasing the value of 
+
+K degrades the system COP and shifts the favourable operating region towards smaller values of 
+
+βC. This is because a larger number of users reduces the power allocated to each private stream and also increases the number of interfering private streams. Consequently, the private-stream decoding condition becomes more restrictive, and the system cannot allocate a large fraction of power to the common stream without significantly degrading the private-stream reliability. Hence, the favourable 
+
+βC region shifts leftward for larger K. Furthermore, the value of M has a noticeable impact on the system COP. For a fixed value of K, increasing M
+
+implies that more users are located in Room 1 and fewer users are located in Room 2. Since Room 1 users experience LoS links with the PAs, whereas Room 2 users experience NLoS propagation, a larger M generally improves the system COP performance. In contrast, smaller M leads to a larger number of NLoS users, which weakens the overall system reliability and increases the system COP. Finally, increasing 
+
+κ worsens the system COP performance because a larger in-waveguide attenuation coefficient affects the received SINR of both the common and private streams decreases, leading to a higher probability of outage. Fig. 4(a) illustrates the sum-rate performance of the proposed QRSMA-PASS framework wrt Pt , in comparison with the RSMA-PASS and NOMA-PASS benchmark schemes. To evaluate practi-cal decoding conditions, the impact of imperfect SIC is considered for RSMA-PASS and NOMA-PASS, where the ipSIC parameter is denoted using ∆. Here, we have considered ipSIC due to hardware constraints. The simulation results for the sum rate have been generated using (72) while the analytical results have been obtained using the equations as discussed in Section IV-C. It can be observed that the sum rate increases with Pt for all the considered cases. This is because a higher transmit power improves the received SINR of the decoded streams, thereby increasing the achievable rate. However, at higher transmit power, the curves tend to saturate. This occurs because both the desired communication signal and the sensing-signal interference increase with Pt , which makes the SINR interference-limited rather than noise-limited. Moreover, when 
+
+α is increased from 0.7 to 0.8, the overall sum rate increases, and the near-linear growth region extends over a wider transmit power range before the curves approach saturation. This is because, a larger 
+
+α allocates more 14 
+
+power to the communication signal while reducing the power assigned to the sensing signal. Consequently, the desired com-munication signal strength increases, whereas the sensing-signal interference decreases, thereby delaying the transition towards the interference-limited region. For QRSMA-PASS, the use of real-valued signalling over the in-phase and quadrature components introduces a scaling factor of 12 in the achievable rate expressions. Therefore, this signal-domain separation reduces the available DoF and can affect the sum-rate performance, especially when the interference level is not dominant. This is observed in the figure as QRSMA-PASS exhibits a lower sum-rate performance compared to RSMA-PASS under perfect SIC conditions. Now, when com-pared to NOMA-PASS, QRSMA-PASS exhibits a higher sum-rate performance at higher transmit power owing to the rate-splitting gain and improved interference management although the effects of reduced DoF is still visible at lower transmit power where NOMA-PASS exhibits better sum rate than QRSMA-PASS. Under practical conditions with ∆ > 0, the advantage of QRSMA-PASS becomes evident, particularly at higher transmit power. This is because RSMA-PASS and NOMA-PASS rely on SIC-based decoding and therefore suffer from residual interference under imperfect SIC. In contrast, QRSMA-PASS separates the common and private streams over orthogonal signal components and does not require SIC between these streams. Hence, it is more robust to SIC imperfections and achieves better sum-rate performance in the practical high-power region. Furthermore, increasing K reduces the sum-rate performance under fixed total transmit power. This is because a larger number of users reduces the power available for each private stream and increases the number of interfering private streams, thereby degrading the private-stream SINRs. In addition, increasing 
+
+κ reduces the sum rate, since the signal experiences stronger in-waveguide attenuation before being radiated through the PAs, which weakens the effective channel gain and reduces the received SINR. Fig. 4(b) illustrates the sum-rate performance of the proposed QRSMA-PASS framework wrt 
+
+βC, for different values of Pt , M, D
+
+and d. It can be observed that the sum rate initially increases with 
+
+βC, reaches a maximum, and then decreases. This behaviour is due to the power-allocation trade-off between the common and private streams. When 
+
+βC is small, the common stream receives limited power and its rate contribution is restricted. As 
+
+βC increases, the common-stream SINR improves, and the gain in the common-rate contribution dominates the loss caused by the reduced private-stream power. However, beyond the optimal region, the reduction in private-stream power becomes dominant, which decreases the private-stream SINRs and their corresponding rate contributions. Consequently, the overall sum rate starts to decrease. Now, for a fixed value of K=4, increasing M from 2 to 4 improves the sum rate, since more users are located in Room 1 and experience LoS-dominant links with the PAs. In contrast, when M=2, two users are located in Room 2 and experience NLoS propagation, which weakens the effective channel gains and reduces the achievable rate. Furthermore, the performance gap between the M=2 and 
+
+M=4 cases is larger for D=20 m and d=10 m than for D=15 m and d=5 m. This is because larger room dimensions and PA height increase the propagation distances, making the Room 2 NLoS users more severely affected by path loss and fading. Hence, replacing Room 2 users with Room 1 users provides a more significant rate gain under the larger D and d setting. Finally, this gap reduces at higher transmit power. At lower Pt , the weaker              
+
+> (a) Ptv/s SOP with varying
+> ρT h and ∆S
+> for L=1,
+> κ=0, and D=10 m. (b) Ptv/s SOP for varying
+> κand ∆Sfor
+> L=5 and
+> ρT h =0.8. Fig. 5: Performance of sensing outage probability wrt Pt.
+
+NLoS users are more power-limited, so the benefit of having more LoS users is more visible. As Pt increases, the received signal strength improves for both Room 1 and Room 2 users. However, the rate improvement becomes progressively limited because the interference terms also increase with transmit power, causing the system to move towards a saturation region. As a result, the additional gain obtained by replacing NLoS users with LoS users becomes less pronounced at higher transmit power. Consequently, the sum-rate gap between the M = 2 and M = 4 cases becomes smaller at higher transmit power. 
+
+B. Sensing Task Performance 
+
+In this sub-section, we present the SOP results for the two-user single-PA and multi-user multi-PA scenarios to evaluate the sensing performance of the proposed framework under different system parameters. The obtained results illustrate the sensing behaviour of the considered system and demonstrate the effec-tiveness of the proposed scheme in supporting reliable sensing functionality. For the two-user single-PA scenario, the simulated SOP results are obtained from (24) by setting L = 1, whereas the corresponding analytical results are derived using (38) and (39). For the multi-user multi-PA scenario, the analytical SOP results are obtained using (62) and (71). It can be observed that the simulated and analytical results closely match under both perfect and imperfect interference cancellation conditions, thereby validating the accuracy of the derived analytical expressions. Fig. 5 illustrates the SOP performance of the proposed PASS-QRSMA-ISAC framework wrt Pt . It can be observed from both the single-PA and multi-PA results that the SOP decreases as the transmit power increases. This is because a higher transmit power improves the received sensing SINR, thereby reducing the probability that the sensing SINR falls below the required threshold. In particular, Fig. 5(a) presents the SOP of the sensing target, US, for the two-user single-PA scenario under different target MSE thresholds i.e. 
+
+ρT h =0.2, 0.5, and 0.8, considering both perfect and imperfect interference cancellation. The results show that a larger 
+
+ρT h leads to better SOP performance. This follows from the sensing threshold 
+
+τS = c2 
+
+> kS
+> ρT h (
+> ϖB)2
+
+which shows that the required sensing SINR is inversely proportional to 
+
+ρT h . Hence, increasing 
+
+ρT h relaxes the sensing accuracy requirement, while a smaller 
+
+ρT h imposes a stricter sensing constraint. This confirms the trade-off between sensing accuracy and sensing reliability. Moreover, under imperfect interference cancellation, the SOP be-comes higher than that under perfect cancellation because residual communication interference increases the effective interference level during sensing-signal recovery. This degradation is more 15     
+
+> Fig. 6:
+> σRCS v/s SOP for L=10, D=10 m, and
+> ρT h =0.8 under different system configurations. Fig. 7: System COP ( Y1) and SOP ( Y2) wrt ISAC power splitting factor,
+> α.
+
+pronounced for smaller 
+
+ρT h , since the stricter sensing requirement makes the system more sensitive to residual interference. On the other hand, Fig. 5(b) presents the SOP performance for the generalised multi-PA scenario under ideal and practical waveguide conditions, corresponding to 
+
+κ = 0 and 
+
+κ = 0.1, respectively. It can be observed that an increase in the value of 
+
+κ worsens the SOP, since the signal experiences additional attenuation while propagating through the waveguide before being radiated by the PAs. The degradation further worsens when imperfect interference cancellation is considered, as both waveguide attenuation and residual interference jointly reduce the effective sensing SINR. Moreover, increasing the room dimension D also worsens the SOP because the average propagation distance between the PAs and the sensing target increases, thereby weakening the round-trip sensing channel and reducing the received echo strength. This also explains why the impact of 
+
+κ becomes more pronounced for larger D, since a larger deployment region generally increases the effective in-waveguide propagation distance, causing the attenua-tion accumulated inside the waveguide to have a stronger effect on the received sensing echo. Fig. 6 illustrates the SOP performance with respect to the radar cross-sectional area, 
+
+σRCS for different values of Pt ,
+
+κ, and ∆S. As expected, the SOP decreases with increasing 
+
+σRCS , since a larger radar cross-section strengthens the reflected echo and improves the sensing SINR. Now, it can be observed that the SOP is worse for 
+
+κ=0.1 when compared to the ideal waveguide case in which 
+
+κ=0. This is because a non-zero 
+
+κ introduces additional in-waveguide attenuation, which reduces the effective sensing channel gain and weakens the received echo signal. Moreover, the SOP further deteriorates when ∆S > 0, since imperfect interference cancellation leaves residual communication interference during sensing-signal recovery. Therefore, the combined effect of waveguide attenuation and residual interference results in the worst SOP performance. Furthermore, the effects of both 
+
+κ and ∆S become more visible at higher transmit power. At lower transmit power, the SOP curves remain closer to the high-outage region, limiting the visible separation among different practical impairment cases. However, at higher transmit power, the ideal case benefits more significantly from the stronger received echo, whereas the practical cases remain constrained by accumulated in-waveguide attenuation and residual interference. Hence, the SOP gaps caused by both 
+
+κ and 
+
+∆S become more pronounced. 
+
+C. ISAC Performance 
+
+In this sub-section, we present the ISAC performance by jointly illustrating the system COP (shown on the Y1 axis) and the SOP (shown on the Y2 axis) wrt the power allocation factor, 
+
+α, as depicted in Fig. 7. The parameter 
+
+α determines the fraction of the total transmit power allocated to the communication task, while the remaining portion (1-
+
+α) is allocated to the sensing task. Now, when the value of 
+
+α is small, most of the transmit power is assigned to sensing, leaving limited power for communication. As a result, the SINR of the communication streams (i.e the common and the private streams) become insufficient to satisfy the decoding thresholds, leading to a higher system COP. As 
+
+α increases, the power allocated to communication gradually increases. Initially, the system COP does not change significantly since the communication SINR is still insufficient to meet the re-quired thresholds. However, beyond a certain value of 
+
+α, the SINR corresponding to the common and the private streams becomes adequate to support successful decoding, causing the system COP to decrease. In contrast, the SOP exhibits an opposite trend. As 
+
+α increases, the power allocated to the sensing task decreases since it depends on (1 −
+
+α)Pt . Consequently, the received sensing SINR reduces, resulting in an increase in the SOP. Furthermore, when imperfect interference cancellation is considered, the SOP performance degrades compared to the perfect cancellation case. This degradation becomes more pronounced at higher values of 
+
+α because the residual interference component increases with the communication power, which is proportional to 
+
+αPt . Therefore, the impact of imperfect interference cancellation becomes more significant at larger 
+
+α values, which results in a wider gap between the perfect and imperfect cancellations plots. VI. C ONCLUSION 
+
+This paper proposed a PASS-QRSMA-ISAC framework for downlink communication and sensing, where multiple PAs de-ployed on a waveguide simultaneously serve multiple CUs and perform target sensing. The dual-room setup captured heteroge-neous LoS/NLoS propagation conditions, and the corresponding communication and sensing signal models were developed along with the SNR/SINR expressions. A two-user single-PA case under ideal waveguide conditions was first analysed, where the per-user COP, system COP, SOP, and ergodic sum-rate were formulated using distance statistics, CDF/CCDF characterisations, and numer-ical integration methods. The analysis was then extended to the generalised multi-user multi-PA scenario by developing tractable statistical characterisations for the communication and sensing channels. Based on these characterisations, the per-user COP, system COP, SOP, and ergodic sum-rate were formulated and evaluated using numerical integration methods. Monte Carlo sim-16 
+
+ulations validated the analysis and demonstrated the gains of Q-RSMA over the considered benchmark schemes within the PASS framework. The results further revealed that the communication-sensing trade-off is strongly governed by user distribution, power allocation, waveguide attenuation, and sensing-related parameters, since these factors determine the effective channel strength, inter-ference level, and sensing recovery performance. As part of our future work, we plan to extend the pro-posed framework by incorporating imperfect CSI and mobility-induced channel variations. Furthermore, an optimization-based design framework will be developed to improve the commu-nication–sensing trade-off, including PA-position-based sum-rate maximization, adaptive power allocation, and dynamic PA acti-vation. More advanced sensing tasks, such as joint range–angle estimation, target tracking, and multi-target sensing, may also be considered to enhance the practicality of PASS-QRSMA-ISAC systems. REFERENCES [1] C.-X. Wang et al. , “On the road to 6G: Visions, requirements, key technolo-gies, and testbeds,” IEEE Commun. Surv. Tutor. , vol. 25, no. 2, pp. 905–974, 2023. [2] L. Zheng, M. Lops, Y. C. Eldar, and X. Wang, “Radar and communication coexistence: An overview: A review of recent methods,” IEEE Signal Process. Mag. , vol. 36, no. 5, pp. 85–99, 2019. [3] F. Liu, Y. Cui, C. Masouros, J. Xu, T. X. Han, Y. C. Eldar, and S. Buzzi, “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728–1767, 2022. [4] S. Kumar, K. Singh, and C.-P. Li, “Performance analysis for rate splitting multiple access enhanced pinching-antenna assisted integrated sensing and communication systems,” IEEE Trans. Wireless Commun. , vol. 25, pp. 18 023–18 038, 2026. [5] S. Rangan, T. S. Rappaport, and E. Erkip, “Millimeter-wave cellular wireless networks: Potentials and challenges,” Proc. IEEE , vol. 102, no. 3, pp. 366– 385, 2014. [6] S. N. Sur, A. K. Singh, H. Q. Tran, P. Vishwakarma, A. L. Imoize, and C.-T. Li, “A state-of-the-art survey on IRS-NOMA for integrated sensing and communication,” IEEE Access , vol. 12, pp. 186 087–186 123, 2024. [7] K.-K. Wong, A. Shojaeifard, K.-F. Tong, and Y. Zhang, “Fluid antenna systems,” IEEE Trans. Wireless Commun. , vol. 20, no. 3, pp. 1950–1962, 2021. [8] L. Zhu, W. Ma, and R. Zhang, “Modeling and performance analysis for movable antenna enabled wireless communications,” IEEE Trans. Wireless Commun. , vol. 23, no. 6, pp. 6234–6250, 2024. [9] Q. Wu, S. Zhang, B. Zheng, C. You, and R. Zhang, “Intelligent reflecting surface-aided wireless communications: A tutorial,” IEEE Trans. Commun. ,vol. 69, no. 5, pp. 3313–3351, 2021. [10] S. Kumar, B. Kumbhani, and G. Kaddoum, “Finite blocklength analysis of active RIS-assisted FDTW communication with hardware impairments,” 
+
+IEEE Wireless Commun. Lett. , vol. 14, no. 9, pp. 2992–2996, 2025. [11] Y. Xiu, S. Yang, W. Lyu, P. Lep Yeoh, Y. Li, and Y. Ai, “Movable antenna enabled ISAC beamforming design for low-altitude airborne vehicles,” IEEE Wireless Commun. Lett. , vol. 14, no. 5, pp. 1311–1315, 2025. [12] L. Zhou, J. Yao, M. Jin, T. Wu, and K.-K. Wong, “Fluid antenna-assisted ISAC systems,” IEEE Wireless Commun. Lett. , vol. 13, no. 12, pp. 3533– 3537, 2024. [13] H. O. Y. Suzuki and K. Kawai, “Pinching antenna: Using a dielectric waveguide as an antenna,” NTT DOCOMO Technical J , vol. 23, no. 3, pp. 5–12, 2022. [14] Z. Ding, R. Schober, and H. Vincent Poor, “Flexible-antenna systems: A pinching-antenna perspective,” IEEE Trans. Commun. , vol. 73, no. 10, pp. 9236–9253, 2025. [15] Y. Xu, Z. Ding, and G. K. Karagiannidis, “Rate maximization for downlink pinching-antenna systems,” IEEE Wireless Commun. Lett. , vol. 14, no. 5, pp. 1431–1435, 2025. [16] D. Tyrovolas, S. A. Tegos, P. D. Diamantoulakis, S. Ioannidis, C. K. Liaskos, and G. K. Karagiannidis, “Performance analysis of pinching-antenna systems,” IEEE Trans. Cogn. Commun. Netw. , vol. 12, pp. 590–601, 2026. [17] C. Ouyang, Z. Wang, Y. Liu, and Z. Ding, “Array gain for pinching-antenna systems (PASS),” IEEE Commun. Lett. , vol. 29, no. 6, pp. 1471–1475, 2025. [18] Z. Ding, “Pinching-antenna assisted isac: A CRLB perspective,” npj Wireless Technol. , vol. 1, no. 1, p. 4, 2025. [19] Y. Qin, Y. Fu, and H. Zhang, “Joint antenna position and transmit power optimization for pinching antenna-assisted isac systems,” IEEE Wireless Commun. Lett. , vol. 14, no. 11, pp. 3535–3539, 2025. [20] Z. Zhang, Z. Wang, X. Mu, B. He, J. Chen, and Y. Liu, “Integrated sensing and communications for pinching-antenna systems (PASS),” IEEE Commun. Lett. , vol. 29, no. 12, pp. 2929–2933, 2025. [21] C. Ouyang, Z. Wang, Y. Liu, and Z. Ding, “Rate region of ISAC for pinching-antenna systems,” IEEE Trans. Commun. , pp. 1–1, 2026. [22] W. Mao, Y. Lu, Y. Xu, B. Ai, O. A. Dobre, and D. Niyato, “Multi-waveguide pinching antennas for ISAC,” IEEE Trans. Wireless Commun. , vol. 25, pp. 5846–5858, 2026. [23] B. Clerckx, H. Joudeh, C. Hao, M. Dai, and B. Rassouli, “Rate splitting for MIMO wireless networks: a promising PHY-layer strategy for LTE evolution,” IEEE Commun. Mag. , vol. 54, no. 5, pp. 98–105, 2016. [24] A. Mishra, Y. Mao, O. Dizdar, and B. Clerckx, “Rate-splitting multiple access for downlink multiuser MIMO: Precoder optimization and PHY-layer design,” IEEE Trans. Commun. , vol. 70, no. 2, pp. 874–890, 2022. [25] Y. Mao, B. Clerckx, and V. O. Li, “Rate-splitting multiple access for downlink communication systems: Bridging, generalizing, and outperform-ing SDMA and NOMA,” EURASIP J. Wireless Commun. Netw. , vol. 2018, no. 1, p. 133, 2018. [26] A. Bansal, N. Agrawal, and K. Singh, “Rate-splitting multiple access for UAV-based RIS-enabled interference-limited vehicular communication system,” IEEE Trans. Intell. Veh. , vol. 8, no. 1, pp. 936–948, 2023. [27] S. Rauniyar, S. Bhattacharyya, P. Orten, S. Petersen, and S. Darshi, “Capacity enhancement of near-shore communication using rate splitting multiple access,” in 2025 IEEE Int. Black Sea Conf. Commun. Netw. (BlackSeaCom) ,2025, pp. 1–6. [28] S. Bhattacharyya, S. Darshi, and Z. Lin, “Outage analysis of downlink RSMA in vehicular cluster: A copula-based approach,” IEEE Wireless Commun. Lett. , vol. 14, no. 5, pp. 1486–1490, 2025. [29] S. Bhattacharyya, S. Darshi, and D. Thai Hoang, “Rate-splitting-aided multi-user cooperation for next-generation vehicular clusters,” IEEE Trans. Wireless Commun. , vol. 25, pp. 11 207–11 222, 2026. [30] S. Bhattacharyya, S. Darshi, B. Kumbhani, J.-Y. Pan, and A. A. Almo-hammedi, “RSMUC: An alternative to coded cooperation for qos enhance-ments in next generation vehicular networks,” in 2024 IEEE Middle East Conf. Commun. Netw. (MECOM) , 2024, pp. 392–397. [31] B. Zhao, T. Qiu, G. Ren, Z. Jin, and Z. Liu, “RSMA-enhanced physical layer security for ISAC systems,” IEEE Wireless Commun. Lett. , vol. 14, no. 4, pp. 1064–1068, 2025. [32] S. Ma et al. , “Energy-efficient transmission in STAR-RIS assisted secure ISAC networks with RSMA: An MoE-RBPPO approach,” IEEE Trans. Veh. Technol. , pp. 1–15, 2026. [33] S. Lai, X. Peng, P.-W. Wu, J. Ye, X. Li, P. Zhang, and L. Huang, “Precoding and rate-splitting design for beyond-diagonal RIS-aided ISAC systems with RSMA,” IEEE Trans. Veh. Technol. , pp. 1–14, 2026. [34] P. Wang, X. He, H. Wang, and R. Song, “Sum rate maximization for pinching antennas assisted RSMA system with multiple waveguides,” IEEE Trans. Veh. Technol. , pp. 1–6, 2025. [35] G. Arora and A. Jaiswal, “Zero SIC based rate splitting multiple access technique,” IEEE Commun. Lett. , vol. 26, no. 10, pp. 2430–2434, 2022. [36] G. Arora, O. Bhokre, and A. Jaiswal, “Sum-rate maximization under unequal rate allocation in downlink Q-RSMA,” in IEEE Int. Conf. Adv. Netw. Telecommun. Syst. (ANTS) , 2024, pp. 1–6. [37] A.-T. Tran et al. , “A DRL framework to optimize energy efficiency for quadrature rate-splitting multiple access,” in 2025 Int. Conf. Artif. Intell. Inf. Commun. (ICAIIC) , 2025, pp. 0018–0021. [38] S. Bhattacharyya, S. Kumar, P. Kumar, S. Darshi, and B. Kumbhani, “Q-RSMA based UAV-assisted vehicular cooperation: A finite blocklength perspective,” IEEE Trans. Veh. Technol. , pp. 1–6, 2026. [39] J. Xiao, J. Wang, and Y. Liu, “Channel estimation for pinching-antenna systems (PASS),” IEEE Commun. Lett. , vol. 29, no. 8, pp. 1789–1793, 2025. [40] D. Bozanis, V. K. Papanikolaou, S. A. Tegos, and G. K. Karagiannidis, “Cramér-rao bounds for integrated sensing and communications in pinching-antenna systems,” in 2025 IEEE 36th Int. Symp. Pers., Indoor Mobile Radio Commun. (PIMRC) , 2025, pp. 1–6. [41] Y. Cheng, C. Ouyang, Y. Liu, and G. K. Karagiannidis, “On the performance of pinching-antenna systems (PASS) with orthogonal and non-orthogonal multiple access,” arXiv preprint arXiv:2506.02420 , 2025. [42] P. Kumari, D. H. N. Nguyen, and R. W. Heath, “Performance trade-off in an adaptive IEEE 802.11AD waveform design for a joint automotive radar and communication system,” in Proc. 2017 IEEE Int. Conf. Acoust., Speech and Signal Process. (ICASSP) , 2017, pp. 4281–4285. [43] L. Sun, Z. Zhao, S. Wang, Z. Ding, and M. Peng, “On the study of non-orthogonal multiple access (NOMA)-assisted integrated sensing and communication (ISAC),” IEEE Trans. Commun. , vol. 72, no. 11, pp. 7278– 7293, 2024.

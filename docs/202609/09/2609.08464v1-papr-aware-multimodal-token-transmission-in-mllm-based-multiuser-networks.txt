@@ -1,0 +1,326 @@
+Title: PAPR-Aware Multimodal Token Transmission in MLLM-Based Multiuser Networks
+
+URL Source: https://arxiv.org/pdf/2609.08464v1
+
+Published Time: Wed, 09 Sep 2026 02:58:16 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# PAPR-Aware Multimodal Token Transmission in MLLM-Based Multiuser Networks 
+
+Molka Trabelsi, Rafik Zayani 
+
+Univ Rennes, CNRS, IETR, UMR 6164, F-35000 Rennes, France 
+
+{molka.trabelsi, rafik.zayani }@univ-rennes.fr 
+
+Abstract —Task-oriented semantic communication (SemCom) empowered by multimodal large language models (MLLMs) has recently emerged as a promising paradigm for efficiently transmitting multimodal information, yet transmitting token embeddings over OFDM channels faces critical challenges due to hardware impairments, particularly the high peak-to-average power ratio (PAPR) that severely degrades energy efficiency under nonlinear power amplifiers. In this paper, we propose a novel PAPR-aware task-oriented multimodal token transmission framework. Specifically, we propose MAPS (Multimodal AI-driven PAPR-aware Token Transmission) scheme for energy-efficient multiuser wireless communications. The key challenge is to jointly ensure inter-modal consistency, task-relevant token transmission, and PAPR reduction. To address this, we adopt a two-stage training strategy that integrates joint cross-modal alignment and PAPR reduction, followed by task-oriented fine-tuning. MAPS transmits multimodal token embeddings over an OFDM channel under a realistic Modified Rapp power amplifier. Specifically, we incorporate a trainable linear projection in the text branch for effective gradient propagation, design a balanced multimodal PAPR loss with variance-based equalization across users, and anchor the reconstruction loss to a fixed semantic target to preserve cross-modal alignment. Simulation results show that MAPS achieves balanced PAPR reduction across all modalities while maintaining strong inter-modal consistency. Under power amplifier nonlinearity, MAPS outperforms baseline schemes in both audio-visual question answering (AVQA) accuracy ( 64 .5% 
+
+gain) and task-oriented energy efficiency ( 64 .4% gain) at an input back-off (IBO) of 3 dB, highlighting its effectiveness for energy-efficient multimodal semantic communication. 
+
+Index Terms —semantic communication, PAPR reduction, multimodal task-oriented communication, MLLMs, power amplifier, OFDM, 6G 
+
+I. I NTRODUCTION 
+
+Semantic communication has emerged as a key paradigm for 6G networks, shifting the transmission objective from bit-level fidelity to task-oriented meaning delivery [1]. Token-based communication (TokCom) is an emerging paradigm inspired by recent advances in generative foundation models and Multimodal Large Language Models (MLLMs), in which tokens serve as the fundamental communication units carrying rich multimodal semantic information, enabling efficient transformer-based processing at both the transmitter and the receiver. Several works have explored this direction: TokCom-MLMs [2] proposes a multimodal token transmission framework combining cross-modal alignment and task-oriented fine-tuning; GenSemCom [3] develops semantic-aware power allocation for generative MLMs; and VQ-VAE [4] explores discrete token representations with importance-aware OFDM transmission. Critically, to the best of our knowledge, no existing work in the open literature accounts for hardware impairments, and particularly PA nonlinearity, in the context of multimodal token-based semantic communication systems. In this paper, we propose MAPS, a new PAPR-aware task-oriented multimodal token transmission framework for energy-efficient multiuser wireless communications over OFDM channels under a practical Modified Rapp power amplifier [5]. The contributions of this paper are summarized as follows:  
+
+> •
+
+To enhance the energy efficiency of task-oriented token transmission while preserving effective multimodal information exploitation, we propose a PAPR-aware two-stage training algorithm consisting of a joint PAPR reduction and cross-modal alignment stage, followed by task-oriented fine-tuning. A joint PAPR reduction and contrastive split fine-tuning strategy is first employed to project heterogeneous modalities into a unified feature space while simultaneously reducing the PAPR of OFDM signals across users.  
+
+> •
+
+Ensuring cross-modal alignment while simultaneously reducing the PAPR of the associated OFDM transmitted signals is highly non-trivial. In particular, introducing a PAPR reduction objective, especially in the presence of a trainable text projection, creates a moving reconstruction target that can destabilize cross-modal alignment. To address this challenge, we propose anchoring the reconstruction loss to a frozen embedding output, thereby decoupling PAPR optimization from the alignment process.  
+
+> •
+
+Na¨ ıvely combining cross-modal alignment with PAPR reduction leads to uneven optimization across modalities, as stronger alignment gradients, particularly in the image branch, tend to resist PAPR reduction. To address this imbalance, we propose a balanced multimodal PAPR reduction strategy that incorporates an inter-modality variance regularization term that automatically equalizes gradient contributions across all modalities, ensuring uniform PAPR reduction while preserving effective cross-modal alignment.  
+
+> •
+
+We introduce a task-oriented energy efficiency metric tailored to PAPR-aware multimodal token arXiv:2609.08464v1 [eess.SP] 8 Sep 2026 Text Encoder Vision Encoder Audio Encoder .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. Sliding Window 
+
+> and Projection .. PAPR Loss Reconstruction
+> Loss Tx Module Tx Module Pooling Pooling Pooling Contrastive Loss Foundation
+> Model lora fine tuning Trainable Frozen Sliding Window
+> and Projection Tx Module Rx Module Text Projection Device T Device 1 Device M-1 concatenate Token Receiver Foundation model Data of modality T Data of modality 1 Data of modality
+> M-1 Task Loss Stage 1: Cross-Modal Alignment and PAPR Reduction Stage 2: Task-Oriented Fine-Tuning
+
+Fig. 1. MAPS system architecture. Stage 1: joint PAPR reduction and cross-modal alignment. Stage 2: task-oriented fine-tuning via LoRA. Left: multiuser transmitter side with per-modality encoders, projections, and Tx modules. Right: BS receiver side with Rx modules, token receivers, and foundation model on the edge server. 
+
+transmission. Numerical results show up to 65 .5% gain in task-oriented energy efficiency under PA nonlinearity and AWGN at low IBO, highlighting its effectiveness for energy-efficient multimodal semantic communication. The rest of this paper is organized as follows: Section II presents the system model, Section III describes the proposed method, Section IV reports the results, and Section Vconcludes the paper. 
+
+Notation. Scalars x, vectors x, matrices X.II. S YSTEM MODEL 
+
+As shown in Fig. 1, we consider a multiuser wireless network consisting of M user devices and a base station (BS) equipped with an edge server. The network handles M
+
+data modalities, and each device processes one modality. For notational simplicity, we define the set M = M′ ∪ { T }
+
+to index devices and their corresponding modalities, where 
+
+M′ = {1, 2, . . . , M − 1} denotes the non-text modalities and T denotes the text modality. Token transmitters at the devices extract token embeddings from raw data, modulate and transmit them over the wireless channels. The received signal is processed at the BS by a token receiver to recover token embeddings, which are then concatenated and forwarded to the foundation model deployed on the edge server for multimodal fusion and downstream task execution. 
+
+A. Transmitter 1) Token Transmitter 
+
+For text data XT , the text encoder ET (·) produces a token embedding sequence as 
+
+ET = ET (XT ), ET ∈ RsT ×dT , (1) where sT is the sequence length and dT is the token dimension. For data Xm of non-text modality m ∈ M ′, the corresponding encoder produces 
+
+Em = Em(Xm), Em ∈ Rˆsm×dm , (2) where ˆsm and dm are the raw sequence length and feature dimension. Non-textual encoders typically produce sequences of excessively long length ˆsm, which would incur substantial bandwidth and latency overhead if transmitted directly. To reduce the sequence length while retaining essential temporal patterns, we apply a sliding-window pooling approach: Em is divided into sm consecutive token sets and a pooling operation compresses each set into a single token. Specifically, Sm(·)
+
+applies a non-overlapping sliding window of size ⌈ˆsm/s m⌉
+
+with mean pooling per window to produce a compressed sequence of length sm. The compressed sequence is then mapped to dimension dT via a fully connected layer Fm(·)
+
+giving 
+
+Ym = Fm(Sm(Em)) , ∀m ∈ M ′, (3) where Sm(·) is the sliding-window pooling module and Ym ∈
+
+Rsm×dT .All encoders Em(·) are pretrained and kept frozen throughout training. For the text branch, this freezing blocks gradient propagation from the PAPR loss back to the text embeddings. To address this, we introduce a trainable linear projection PT (·) between the frozen encoder output and the OFDM modulator as 
+
+YT = PT (ET ), (4) where YT ∈ RsT ×dT are the projected text token embeddings fed to the Tx module. The design and training of this projection are detailed in Section III. 
+
+2) Tx Module : OFDM modulator and PA 
+
+Fig. 2. Per-modality Tx Module: token embeddings are converted to complex symbols (R2C), OFDM-modulated (IFFT), augmented with a cyclic prefix (Add CP), and passed through the power amplifier (PA) to produce the transmitted signal sm(n).
+
+As shown in Fig. 2, all token embeddings Ym (∀m ∈ M ′)are reshaped and modulated to complex-valued signals, giving 
+
+ym = Cm(Ym), ∀m ∈ M , (5) where Cm(·) performs R2C conversion, IFFT of size 
+
+NFFT , reshape and CP insertion of length Ncp . To avoid inter-modal interference, the NFFT subcarriers are partitioned into |M| dedicated frequency bands as illustrated in Fig. 3, each of size Nm subcarriers, separated by guard bands of Ng null subcarriers. This orthogonal allocation ensures interference-free transmission across modalities.               
+
+> NTN1· · · NM−1GB GB GB
+> NFFT subcarriers
+> f
+> Fig. 3. Subcarrier allocation: NFFT subcarriers partitioned into modality-specific bands separated by guard bands.
+
+3) Power Amplifier 
+
+The PA implements AM/AM (amplitude-to-amplitude) and AM/PM (amplitude-to-phase) distortions according to the Modified Rapp model [5]. For input ym(n) = a0(n) ejθ (n),where a0(n) is the instantaneous amplitude and θ(n) is the phase and n = 0 , ..., N F F T − 1. The PA output per modality is 
+
+sm(n) = PA( ym(n)) = A(αa 0(n)) ej(θ(n)+ ϕ(αa 0(n))) . (6) The factor α is a multiplicative scaling coefficient applied at the PA input to operate at a specified IBO level. In this work, all IBO values are expressed in dB relative to the back-off from the saturation point, defined as the operating point where the output power reaches saturation in an equivalent linear amplifier. To ensure that the transmitted signal ym(n) meets a target IBO level, the scaling factor is given by: 
+
+α =
+
+s
+
+Psat 
+
+10 IBO /10 Pt
+
+, (7) where Psat is the input saturation power and Pt is the average input power. The IBO is defined as IBO =10 log 10 (Psat /P in ) dB and is swept at evaluation. The AM/AM and AM/PM [5] responses are 
+
+A(a0(n)) = G a 0(n)
+
+
+
+1 + G a 0(n)
+
+> Asat
+> 2p
+
+1/(2 p) , (8) 
+
+ϕ(a0(n)) = Aϕ a0(n)q
+
+1 + ( a0(n)/B ϕ)q . (9) where G is the small-signal gain, Asat is the saturation amplitude, p is the AM/AM smoothness parameter, and Aϕ,
+
+Bϕ, q are the AM/PM parameters. During training, the PA is disabled, and the composite received signal at the BS via the wireless channel is given by 
+
+r(n) = X
+
+> m∈M
+
+hmsm(n) + w(n), ∀n = 0 , ..., N F F T − 1, (10) where hm is the channel coefficient and w(n) is the additive noise sample at time index n, which follows a circularly symmetric complex Gaussian distribution CN (0 , σ 2), with zero mean and variance σ2.
+
+B. Receiver 1) Rx module: OFDM Demodulation      
+
+> Fig. 4. Rx Module: the received signal ris processed by CP removal, FFT, C2R and reshaped to recover the modality-specific received signals ˜Ym∀m∈M.
+
+At the BS (Fig. 4), the received signal r is demodulated and reshaped back into token space giving each modality-specific tokens as ˜Ym = C−1 
+
+> m
+
+(r), ∀m ∈ M , (11) where ˜Ym ∈ Rsm×dT and C−1 
+
+> m
+
+(·) performs CP removal, FFT, C2R and reshape as shown in Fig. 4. 
+
+2) Token Receiver 
+
+A two-layer MLP token receiver Gm(·) with ReLU activation refines the demodulated embeddings 
+
+Y′ 
+
+> m
+
+= Gm( ˜Ym), ∀m ∈ M , (12) where Y′ 
+
+> m
+
+∈ Rsm×dT .The recovered embeddings from all modalities are concatenated and forwarded to the foundation model, which gives the task output as 
+
+O = W U (Y′1, . . . , Y′M −1, Y′T ), (13) where U (·) is the concatenation module, W(·) is the foundation model on the edge server, and O is the task output. 
+
+C. Performance Evaluation Metrics 
+
+We evaluate system performance using three complementary metrics. The PAPR of modality m is defined as 
+
+PAPR m = max n |ym(n)|2
+
+E[|ym(n)|2] , (14) expressed in dB as 10 log 10 (PAPR m) where ym(n) denotes the n-th entry of ym in (5), ∀m ∈ M . The complementary cumulative distribution function (CCDF) of the PAPR, defined as Pr(PAPR m > γ 0), characterizes the probability that the instantaneous PAPR exceeds a given threshold γ0, and is used to evaluate PAPR reduction across modalities. Task performance is assessed via audio-visual question answering (AVQA) accuracy A(IBO) , measured on the test set under PA nonlinearity at a given IBO level. For a predicted word ˆoi and the corresponding ground-truth word oi, the accuracy is computed as 
+
+A(IBO) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+1{ˆoi = oi}, (15) where N denotes the total number of test samples and 1{·} 
+
+be the indicator function. The task-oriented energy efficiency is defined as 
+
+EE TO = Davg · A(IBO) 
+
+Ptot (IBO) , (16) where Davg is the average query throughput in queries per second and Ptot is the total power consumed, which can be defined as 
+
+Ptot = A2sat 
+
+√10 IBO /10 
+
+ηmax 
+
++ P0 + εR, (17) where ηmax is the maximum PA efficiency, so that 
+
+A2sat 
+
+√10 IBO /10 /η max represents the PA power consumption at a given IBO level, P0 is the baseband and RF circuit power, 
+
+ε is the processing cost per bit, and R is the sum data rate, so that εR accounts for the digital processing power. III. T WO -STAGE TRAINING BASED PAPR-AWARE MULTIMODAL TASK -ORIENTED TOKEN TRANSMISSION 
+
+A. Training Overview 
+
+MAPS follows the two-stage training protocol of [2], extended to incorporate hardware impairment awareness through PAPR-aware optimization. In Stage 1 , the system jointly learns cross-modal alignment and waveform shaping under physical constraints. The goal is to map all modalities into a shared semantic space while simultaneously reducing the PAPR of the OFDM modulated signals. In Stage 2 , the aligned representations are fine-tuned for the downstream AVQA task. The two stages are decoupled to preserve semantic consistency while enabling efficient task adaptation. The PA is disabled during training and applied only at inference time. 
+
+B. Stage 1: Joint PAPR Reduction and Cross-Modal Alignment 
+
+Stage 1 optimizes semantic alignment and PAPR reduction jointly. Cross-modal alignment ensures that token embeddings from different modalities lie in a shared feature space, while PAPR reduction shapes the modulated signals to be hardware friendly. Alignment is enforced through a combination of reconstruction and contrastive objectives. For each modality 
+
+m ∈ M ′, a pooled representation am is extracted and aligned with the text representation aT using 
+
+Lm 
+
+> CON
+
+= − log exp(sim( am, a T )/τ )
+
+PKk=1 exp(sim( ak, a T )/τ ) , ∀m ∈ M ′,
+
+(18) where sim( ·, ·) denotes cosine similarity, τ is a temperature parameter, and K is the batch size. To enable PAPR optimization on the text modality, we introduce a trainable projection between the frozen text encoder output and the OFDM modulator. This projection provides a gradient path while preserving the semantic structure of the embeddings. To ensure consistent PAPR reduction across modalities, we define a balanced multimodal PAPR loss 
+
+LPAPR = α1 ¯ρ + α2 ρmax + α3 Var( ρm) + α4 ρimg , (19) where α1, α 2, α 3, α 4 ≥ 0 are non-negative weighting coefficients controlling the relative importance of the mean PAPR, worst-case PAPR, inter-modality variance, and image-branch pressure terms, respectively, ρm =max n |ym(n)|2/E[|ym(n)|2] denotes the PAPR of modality 
+
+m in linear scale, ¯ρ = 1
+
+> |M|
+
+P 
+
+> m∈M
+
+ρm is the mean PAPR across modalities driving global reduction, ρmax =max m∈M ρm targets the worst-case modality at each step, 
+
+Var( ρm) = E[( ρm − ¯ρ)2] penalizes inter-modality imbalance by automatically increasing gradient pressure on lagging branches, and ρimg applies dedicated constant pressure on the image branch to compensate for its strong alignment gradients that would otherwise resist PAPR reduction. Therefore, the overall Stage-1 loss is 
+
+L = LMSE + LCON + λ LPAPR , (20) where normalization ensures stable joint optimization. Finally, to stabilize alignment, the reconstruction loss is anchored to the text encoder output: 
+
+LMSE = Eraw  
+
+> text
+
+− ˆEtext,rx  
+
+> 2
+
+(21) where Eraw  
+
+> text
+
+remains fixed during training. This prevents the alignment target from drifting and ensures stable optimization despite the presence of trainable projection layers. During this stage, only the projection layers are trained, while the modality encoders and the foundation model remain frozen. 
+
+C. Stage 2: Task-Oriented Fine-Tuning 
+
+After cross-modal alignment, the system is fine-tuned for the downstream AVQA task. The received token embeddings are concatenated and forwarded to the foundation model deployed at the edge server, as given in (13). We adopt parameter-efficient fine-tuning using LoRA [9]. Given a pretrained model W0, we introduce a low-rank adaptation 
+
+∆W = BA ⊤, (22) yielding the adapted model 
+
+W = W0 + ∆ W. (23) The system is optimized using a task-specific loss 
+
+LTSK = ℓ( ˆY; W0, ∆W), (24) where ℓ(·) denotes the cross-entropy loss. During Stage 2, all Stage-1 components are frozen, and only the LoRA parameters are updated, preserving the learned semantic alignment while enabling efficient task adaptation. IV. S IMULATIONS RESULTS 
+
+A. Scenario Setup 
+
+In the simulations, we consider a multimodal task-oriented token transmission framework for MLLM-based multiuser communication involving textual, audio, and visual modalities. All user devices transmit with power Pt, which is directly related to the modality-specific IBO. The foundation model used is Qwen2.5-1.5B [6] equipped with a low-rank adaptation (LoRA) module of rank r = 4 , deployed at the edge server. For modality-specific encoding, we adopt the Qwen2.5 text encoder for textual data, ViViT-B/16 ×2 [8] for visual inputs, and the Audio Spectrogram Transformer (AST) [7] fine-tuned on AudioSet for audio. All encoders are frozen throughout training. The trainable components are the MAPS-Text projection, the image and audio transmitter projections, and the token receivers. It is worth noting that our focus is on the joint design of PAPR reduction and cross-modal alignment. Therefore, we adopt the power allocation strategy from [2], which ensures efficient token transmission while allowing us to isolate and evaluate the impact of the proposed framework. Stage 1 is trained on the VALOR dataset [10] for joint cross-modal alignment and PAPR reduction. Stage 2 is fine-tuned on the MUSIC-AVQA dataset [11] for the AVQA task, and evaluation is performed on the MUSIC-AVQA test set. All results are reported under PA nonlinearity at SNR = 12 dB and AWGN channel unless otherwise stated. The baseline is a Stage-2 fine-tuned model without PAPR-aware training, using the same channel and PA configuration. System parameters are listed in Table I.                               
+
+> TABLE I SYSTEM PARAMETERS AND TRAINING CONFIGURATIONS
+> Parameter Symbol Value
+> OFDM modulation
+> FFT size / BW NFFT /B m2448 /N m×15 kHz Guard band / CP Ng/ρ 3/7%
+> Training SNR γ12 dB
+> PA Model (Modified Rapp) [5]
+> Asat /G/p/q —1.9/16 /1.1/4.0
+> Max PA efficiency ηmax 0.785
+> Model & Training
+> Token dim / Text / Image&Audio dT/s T/s m1536 /32 /128
+> Stage-1 / Stage-2 iter —1000 /300
+> Batch / LR —32 /10 −4
+> Temp. / PAPR weight τ /λ 0.07 /5
+
+B. Stage-1 Training Convergence   
+
+> Fig. 5. Stage-1 training curves. Left: alignment loss components — MSE (21), audio and image contrastive losses from (20). Right: mean PAPR evolution and cumulative reduction of LPAPR (19).
+
+Fig. 5 shows the Stage-1 training dynamics. The alignment losses converge smoothly throughout training: the audio contrastive loss decreases from 3.47 to 2.22 and the image contrastive loss from 3.47 to 2.83 , while the MSE loss remains near zero, confirming that the fixed anchor (21) keeps the reconstruction target stable. Simultaneously, the mean PAPR across modalities drops from 9.09 dB to approximately 
+
+6.0 dB, with the cumulative reduction reaching 3.1 dB by iteration 1,000. These curves confirm that PAPR reduction and cross-modal alignment converge simultaneously without interfering with each other. 
+
+C. PAPR Reduction  
+
+> Fig. 6. Stage 2 PAPR reduction across modalities (Image and Audio).
+
+Fig. 6 presents the PAPR complementary cumulative distribution function (CCDF) measured on the test set after Stage-2 training. MAPS achieves a mean PAPR reduction of 2.62 dB and 1.80 dB for, respectively, audio and image-related OFDM signals, at CCDF of 10 −2.
+
+D. Accuracy under PA Nonlinearity  
+
+> Fig. 7. AVQA accuracy vs. IBO (SNR = 12 dB, measured after Stage-2).
+
+Fig. 7 presents AVQA accuracy as a function of IBO from 1 to 16 dB. MAPS outperforms the baseline at every tested IBO value. The gain reaches 64 .5% at IBO = 3 dB, where the PA operates near the saturation, leading to high power efficiency and then high global system energy efficiency. The gain decreases as IBO increases and the MAPS performance approaches the baseline with ideal PA, but remains positive across the full range, confirming that PAPR-aware Stage-1 training translates directly into improved task accuracy under realistic PA operating conditions. 
+
+E. SNR Robustness  
+
+> Fig. 8. AVQA accuracy vs. SNR.
+
+Fig. 8 reports accuracy versus SNR at fixed IBO = 3 dB and IBO = 6 dB. MAPS consistently outperforms the baseline across the full SNR range from 0 to 15 dB at both operating points. At the training SNR of 12 dB, MAPS achieves 31 .7% 
+
+at IBO = 3 dB versus 18 .8% for the baseline, a gain of 68.31%. The consistent advantage across all SNR values confirms that the benefits of PAPR-aware training are not limited to a specific channel condition. 
+
+F. Task-Oriented Energy Efficiency         
+
+> Fig. 9. Task-oriented energy efficiency EE TO vs. IBO (SNR = 12 dB, measured after Stage-2).
+
+Fig. 9 reports the task-oriented energy efficiency EE TO 
+
+defined in (16). MAPS achieves higher energy efficiency than the baseline at every tested IBO value. The gain is largest at low IBO, where both accuracy improvement and power savings combine: at IBO = 3 dB, MAPS achieves 
+
+5.46 q/J versus 3.32 q/J for the baseline, a gain of 64 .4% .As IBO increases and the PA becomes more linear, the gap narrows but remains consistently positive, reaching 37 .5% at IBO = 16 dB. Simulation results demonstrate that PAPR-aware training improves task-oriented energy efficiency across the full range of PA operating points, making MAPS well-suited for deployment in energy-constrained wireless systems. V. C ONCLUSION 
+
+This paper presented MAPS, a PAPR-aware multimodal token transmission framework that extends TokCom-MLMs to account for per-modality power amplifier nonlinearity. The proposed two-stage training strategy jointly optimizes PAPR reduction and cross-modal alignment: (1) an inter-modality variance regularization term automatically equalizes gradient contributions across modalities, while anchoring the reconstruction loss to a frozen embedding output decouples waveform shaping from semantic alignment. (2) Simulation results on MUSIC-AVQA demonstrate PAPR reductions of 2 dB and 1.8 dB for audio- and image-related OFDM signals at a CCDF of 10 −2, a 64 .5% accuracy gain, and about 64 .4% improvement in task-oriented energy efficiency at IBO = 3 dB. By shifting PAPR control from circuit design to the learned embedding space, MAPS opens a path toward practical wireless transmission of semantic representations where energy efficiency and semantic fidelity are jointly optimized. Future works will explore advanced resource allocation strategies associated with multi-path and multiple-input multiple-output (MIMO) fading channels, asynchronism between users, and distributed edge AI servers orchestration. ACKNOWLEDGMENT 
+
+This work was supported by the French State via the French National Research Agency (ANR) under the France 2030 program: RIS3 (ANR-23-CMAS-0023) and NEXCOM (ANR-25-PEFT-0004). REFERENCES [1] H. Xie, Z. Qin, G. Y. Li, and B.-H. Juang, “Deep learning enabled semantic communication systems,” IEEE Trans. Signal Process. , vol. 69, pp. 2663–2675, 2021. [2] J. Zhang, W. Ni, P. Wang, and D. Wang, “Task-oriented multimodal token transmission in resource-constrained multiuser networks,” arXiv preprint arXiv:2505.07841 , 2025. [3] C. Xu, M. Boloursaz Mashhadi, Y. Ma, R. Tafazolli, and J. Wang, “Generative semantic communications with foundation models: Perception-error analysis and semantic-aware power allocation,” IEEE J. Sel. Areas Commun. , vol. 43, no. 7, pp. 2493–2505, Jul. 2025. [4] M. Lyu et al. , “VQ-VAE based digital semantic communication with importance-aware OFDM transmission,” arXiv preprint arXiv:2508.08686 , 2025. [5] Nokia, “Realistic power amplifier model for the new radio evaluation,” 3GPP TSG-RAN WG4 Meeting 79, Doc. R4-163314, 2016. [6] A. Yang, B. Yang, B. Zhang et al. , “Qwen2.5 technical report,” arXiv preprint arXiv:2412.15115 , 2025. [7] Y. Gong, Y.-A. Chung, and J. Glass, “AST: Audio Spectrogram Transformer,” arXiv preprint arXiv:2104.01778 , 2021. [8] A. Arnab, M. Dehghani, G. Heigold et al. , “ViViT: A Video Vision Transformer,” in Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV) , 2021. [9] E. J. Hu, Y. Shen, P. Wallis et al. , “LoRA: Low-Rank Adaptation of Large Language Models,” in Proc. Int. Conf. Learn. Representations (ICLR) , 2022. [10] J. Liu, S. Chen, X. He et al. , “VALOR: Vision-Audio-Language Omni-Perception Pretraining Model and Dataset,” IEEE Trans. Pattern Anal. Mach. Intell. , vol. 47, no. 2, pp. 708–724, 2025. [11] G. Li, Y. Wei, Y. Tian, C. Xu, J.-R. Wen, and D. Hu, “Learning to Answer Questions in Dynamic Audio-Visual Scenarios,” in Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR) , 2022, pp. 19108–19118.

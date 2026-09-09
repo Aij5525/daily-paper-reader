@@ -1,12 +1,172 @@
 {
-  "generated_at": "2026-09-08T21:57:56.422657+00:00",
-  "updated_date": "20260908",
+  "generated_at": "2026-09-09T21:22:21.853918+00:00",
+  "updated_date": "20260909",
   "carryover_days": 9,
   "tag_states": {
     "wireless-llm": {
-      "updated_date": "20260908",
+      "updated_date": "20260909",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2609.08859v1",
+          "source": "arxiv",
+          "title": "A Material-Aware Channel Model for Efficient CKM Generation via Environment Reconstruction",
+          "abstract": "Channel knowledge map (CKM) is a promising technology for environment-aware wireless communication, sensing, and localization in 6G networks. Accurate CKM generation requires precise reconstruction of the environment, including 3D geometries and scatterer materials, typically from multi-modal sensory observations such as LiDAR point clouds and sparse channel measurements. While the former is relatively easy to acquire, materials remain difficult to obtain directly from sparse channel measurements due to the lack of an explicit channel model linking them. To fill this gap, this paper proposes a material-aware channel model that explicitly characterizes the influence of scatterer materials on the wireless channel. Based on this model, an iterative gradient descent based material reconstruction algorithm is proposed. Full wave simulation results validate the developed model and the proposed algorithm, demonstrating their potentials for efficient CKM generation via environment reconstruction.",
+          "authors": [
+            "Xuancheng Zhu",
+            "Zhenjun Dong",
+            "Yong Zeng",
+            "Cheng-Xiang Wang"
+          ],
+          "primary_category": "eess.SP",
+          "categories": [
+            "eess.SP"
+          ],
+          "published": "2026-09-08T15:07:36+00:00",
+          "link": "https://arxiv.org/pdf/2609.08859v1",
+          "tags": [
+            "keyword:wireless-llm",
+            "query:wireless-llm"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "material-aware channel model linking scatterer materials to wireless channel for CKM generation",
+          "llm_evidence_cn": "用材质感知信道模型建立散射材质与无线信道关系以生成信道知识图",
+          "llm_evidence": "用材质感知信道模型建立散射材质与无线信道关系以生成信道知识图",
+          "canonical_evidence": "用材质感知信道模型建立散射材质与无线信道关系以生成信道知识图",
+          "llm_tldr_en": "Channel knowledge map generation requires 3D geometries and scatterer material information that are hard to obtain from sparse channel measurements. The paper proposes a material-aware channel model explicitly linking scatterer materials to wireless propagation, enabling efficient CKM generation via environment reconstruction.",
+          "llm_tldr_cn": "信道知识图（CKM）生成需要三维几何与散射体材质信息，但现有信道模型难以直接从稀疏信道测量推断材质。本文提出一种材质感知信道模型，显式刻画散射体材质对无线信道的影响，并将其用于环境重建驱动的CKM生成。该模型弥补了稀疏测量与材质估计之间缺乏显式映射的空白，有助于提升6G环境感知通信、感知与定位的效率。",
+          "llm_tldr": "信道知识图（CKM）生成需要三维几何与散射体材质信息，但现有信道模型难以直接从稀疏信道测量推断材质。本文提出一种材质感知信道模型，显式刻画散射体材质对无线信道的影响，并将其用于环境重建驱动的CKM生成。该模型弥补了稀疏测量与材质估计之间缺乏显式映射的空白，有助于提升6G环境感知通信、感知与定位的效率。",
+          "llm_tags": [
+            "query:wireless-llm"
+          ],
+          "matched_query_tag": "query:wireless-llm",
+          "matched_query_text": "wireless channel characteristics and modeling",
+          "matched_requirement_id": "req-3",
+          "selection_source": "carryover_cache",
+          "paper_id": "2609.08859v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2609.08593v1",
+          "source": "arxiv",
+          "title": "FedGenSC: Federated Generative Semantic Communication with Channel-Aware Adaptation",
+          "abstract": "Integrating generative adversarial networks (GANs) into federated semantic communication (SemCom) is a natural progression, as generative priors can recover semantic fidelity under channel distortion that discriminative decoders cannot. However, naive GAN federation introduces three failure modes that prior work has, to the best of our knowledge, neither identified nor resolved: discriminator aggregation instability under non-independent and identically distributed (non-IID) data, semantic drift caused by divergent local embedding spaces, and channel-agnostic generation that cannot adapt to heterogeneous link conditions. We propose federated generative semantic communication (FedGenSC), which mitigates all three by employing a global generator with local-only discriminators, providing cross-client semantic information through a semantic prototype bank, and conditioning generation on the instantaneous signal-to-noise ratio (SNR). Experiments on the Europarl dataset over Rayleigh fading channels (K=10 clients, Dirichlet α=0.5) show that FedGenSC under non-IID data outperforms the FedDeepSC baseline across the tested SNR range, achieving up to a 58.2% relative improvement in bilingual evaluation understudy (BLEU)-1 at 18 dB. Ablation studies confirm the independent contribution of each component.",
+          "authors": [
+            "Rita Abou Fares",
+            "Razan Al Kakoun",
+            "Maher Nouiehed",
+            "Hadi Sarieddeen"
+          ],
+          "primary_category": "eess.SP",
+          "categories": [
+            "eess.SP",
+            "cs.LG"
+          ],
+          "published": "2026-09-08T11:30:06+00:00",
+          "link": "https://arxiv.org/pdf/2609.08593v1",
+          "tags": [
+            "keyword:wireless-llm",
+            "query:wireless-llm"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "federated generative semantic communication with channel-aware machine learning adaptation",
+          "llm_evidence_cn": "基于信道自适应与机器学习生成先验的联邦语义通信设计",
+          "llm_evidence": "基于信道自适应与机器学习生成先验的联邦语义通信设计",
+          "canonical_evidence": "基于信道自适应与机器学习生成先验的联邦语义通信设计",
+          "llm_tldr_en": "Naive GAN federation in semantic communication suffers from discriminator aggregation instability, semantic drift, and channel-agnostic generation. FedGenSC mitigates these with a global generator and channel-aware adaptation, improving semantic delivery under non-IID data and heterogeneous link conditions.",
+          "llm_tldr_cn": "将生成对抗网络引入联邦语义通信后会产生判别器聚合不稳定、语义漂移与无法适配信道三个问题。本文提出FedGenSC框架，依靠全局生成器统一各客户端的语义空间，并结合信道感知机制使生成过程随链路条件自适应。该设计可缓解非独立同分布数据与信道失真造成的语义偏差，提升异构链路下的语义通信鲁棒性，为联邦生成式语义通信提供了系统化解决方案。",
+          "llm_tldr": "将生成对抗网络引入联邦语义通信后会产生判别器聚合不稳定、语义漂移与无法适配信道三个问题。本文提出FedGenSC框架，依靠全局生成器统一各客户端的语义空间，并结合信道感知机制使生成过程随链路条件自适应。该设计可缓解非独立同分布数据与信道失真造成的语义偏差，提升异构链路下的语义通信鲁棒性，为联邦生成式语义通信提供了系统化解决方案。",
+          "llm_tags": [
+            "query:wireless-llm"
+          ],
+          "matched_query_tag": "query:wireless-llm",
+          "matched_query_text": "wireless communication system design with machine learning",
+          "matched_requirement_id": "req-2",
+          "selection_source": "carryover_cache",
+          "paper_id": "2609.08593v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2609.07955v1",
+          "source": "arxiv",
+          "title": "Second-Order Fade Statistics in Underwater Optical Wireless Communications in Air-Bubble and Turbidity-Impaired Environments",
+          "abstract": "The propagation of underwater optical signals through air-bubble-impaired channels induces irradiance fluctuations and partial line-of-sight blockages that degrade the performance of underwater optical wireless communication (UOWC) systems. Although the first-order fading statistics of such channels have been extensively investigated, their second-order statistics, namely the level crossing rate (LCR) and average fade duration (AFD), remain rather unexplored. This paper presents a theoretical and experimental characterization of the LCR and AFD in bubble-impaired UOWC channels under different bubble sizes and water turbidity conditions. Two analytical approaches are developed based on Rice's formula and on the cumulative distribution function (CDF) together with the bivariate CDF of the sampled irradiance, and are validated experimentally. The results show that water turbidity has a negligible effect on fade statistics under small-bubble conditions. In contrast, for large bubbles, turbid water leads to shorter but more frequent fades than tap water, as particle-induced beam spreading reduces the likelihood of deep fades and prolonged blockage events. Finally, the derived second-order statistics are applied to evaluate the packet outage probability (POP) performance using a two-state Markov channel model, demonstrating that the higher fade rate in the turbid water case results in a larger POP despite the shorter fade durations.",
+          "authors": [
+            "Pedro Salcedo-Serrano",
+            "Mohammad-Ali Khalighi",
+            "Rubén Boluda-Ruiz",
+            "José María Garrido-Balsells",
+            "Antonio García-Zambrana"
+          ],
+          "primary_category": "eess.SP",
+          "categories": [
+            "eess.SP"
+          ],
+          "published": "2026-09-07T20:19:06+00:00",
+          "link": "https://arxiv.org/pdf/2609.07955v1",
+          "tags": [
+            "keyword:wireless-llm",
+            "query:wireless-llm"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "theoretical and experimental characterization of second-order fading statistics in underwater optical wireless channels",
+          "llm_evidence_cn": "针对水下光无线通信气泡和浊度信道，建立并实验验证二阶衰落统计特性",
+          "llm_evidence": "针对水下光无线通信气泡和浊度信道，建立并实验验证二阶衰落统计特性",
+          "canonical_evidence": "针对水下光无线通信气泡和浊度信道，建立并实验验证二阶衰落统计特性",
+          "llm_tldr_en": "For bubble- and turbidity-impaired underwater optical wireless channels, this paper develops theoretical and experimental characterization of second-order fade statistics, namely level crossing rate and average fade duration, using Rice-based analytical approaches under varying bubble sizes and turbidity.",
+          "llm_tldr_cn": "水下光信号在气泡和浊度信道中传播会产生闪烁与部分遮挡，但以往研究主要关注一阶衰落，对电平通过率和平均衰落时长等二阶统计知之甚少。该文对气泡受损的水下光无线信道开展理论研究与实验测试，建立基于Rice公式的两类解析方法，并针对不同气泡大小与浑浊度进行表征。实验与理论结果共同刻画了电平通过率和平均衰落时长随信道条件的变化，可用于设计抗衰落机制和评估系统中断特性。这项研究扩展了水下光无线信道建模基础，对链路性能分析有实际价值。",
+          "llm_tldr": "水下光信号在气泡和浊度信道中传播会产生闪烁与部分遮挡，但以往研究主要关注一阶衰落，对电平通过率和平均衰落时长等二阶统计知之甚少。该文对气泡受损的水下光无线信道开展理论研究与实验测试，建立基于Rice公式的两类解析方法，并针对不同气泡大小与浑浊度进行表征。实验与理论结果共同刻画了电平通过率和平均衰落时长随信道条件的变化，可用于设计抗衰落机制和评估系统中断特性。这项研究扩展了水下光无线信道建模基础，对链路性能分析有实际价值。",
+          "llm_tags": [
+            "query:wireless-llm"
+          ],
+          "matched_query_tag": "query:wireless-llm",
+          "matched_query_text": "wireless channel characteristics and modeling",
+          "matched_requirement_id": "req-3",
+          "selection_source": "carryover_cache",
+          "paper_id": "2609.07955v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2609.07838v1",
+          "source": "arxiv",
+          "title": "ComVLA: Communication-Aware Split Inference for VLA Models in 6G-Connected Robotics",
+          "abstract": "Connected robotics is an emerging 6G application where mobile robots follow natural-language instructions to manipulate physical objects. The Vision-Language-Action (VLA) models that enable this are too large to run on the robot; a common trend is to offload inference to the cloud. The wireless link, however, limits how much sensing data the edge can transmit per control step. Two recent lines address this constraint: semantic communication codecs compress sensor data but require channel-specific retraining, and VLA token pruners select tokens from image but ignore the channel. Our insight is that the dense semantic information contained in the language already indicates which visual tokens matter. We propose ComVLA, a framework that uses this language guidance to adapt the VLA token budget to the channel capacity. Transmitting 32 tokens instead of 512 on the LIBERO benchmark, ComVLA cuts inference compute by 74% and inference latency by 22% versus the original OpenVLA-OFT baseline, at a cost of 1.5 pp in average task success (95.4% vs. 96.9%), and it stays within the capacity budget under Rayleigh and Rician fading. These results demonstrate that co-designing VLA inference and wireless communication is a practical direction for 6G-connected robotics.",
+          "authors": [
+            "Boliang Liu",
+            "Wint Yi Poe",
+            "Jingyun Di",
+            "Riccardo Trivisonno",
+            "Giuseppe Caire"
+          ],
+          "primary_category": "cs.RO",
+          "categories": [
+            "cs.RO"
+          ],
+          "published": "2026-09-07T18:00:14+00:00",
+          "link": "https://arxiv.org/pdf/2609.07838v1",
+          "tags": [
+            "keyword:wireless-llm",
+            "query:wireless-llm"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "Communication-aware split inference of VLA models over 6G wireless links using language semantics",
+          "llm_evidence_cn": "面向6G无线链路的VLA模型通信感知拆分推理，融合语言语义与无线传输",
+          "llm_evidence": "面向6G无线链路的VLA模型通信感知拆分推理，融合语言语义与无线传输",
+          "canonical_evidence": "面向6G无线链路的VLA模型通信感知拆分推理，融合语言语义与无线传输",
+          "llm_tldr_en": "Presents ComVLA, a communication-aware split inference framework for VLA models in 6G robotics that uses language semantics to select informative visual tokens before transmission under wireless bandwidth limits.",
+          "llm_tldr_cn": "针对6G连接机器人中视觉-语言-动作(VLA)模型过大、无线链路传输能力受限的问题，提出ComVLA通信感知式拆分推理框架。核心洞见是语言指令中蕴含的密集语义能指示哪些视觉令牌对任务重要，因此利用该语义在发送端选择关键视觉内容，避免对每个信道重新训练编解码器或盲目裁剪图像令牌。实验表明框架能显著降低无线传输负担并保持VLA操作精度。该工作为无线通信系统与大型多模态基础模型的协同设计提供了新思路。",
+          "llm_tldr": "针对6G连接机器人中视觉-语言-动作(VLA)模型过大、无线链路传输能力受限的问题，提出ComVLA通信感知式拆分推理框架。核心洞见是语言指令中蕴含的密集语义能指示哪些视觉令牌对任务重要，因此利用该语义在发送端选择关键视觉内容，避免对每个信道重新训练编解码器或盲目裁剪图像令牌。实验表明框架能显著降低无线传输负担并保持VLA操作精度。该工作为无线通信系统与大型多模态基础模型的协同设计提供了新思路。",
+          "llm_tags": [
+            "query:wireless-llm"
+          ],
+          "matched_query_tag": "query:wireless-llm",
+          "matched_query_text": "wireless communication system design with machine learning",
+          "matched_requirement_id": "req-2",
+          "selection_source": "carryover_cache",
+          "paper_id": "2609.07838v1",
+          "carry_days": 1
+        }
+      ]
     }
   }
 }

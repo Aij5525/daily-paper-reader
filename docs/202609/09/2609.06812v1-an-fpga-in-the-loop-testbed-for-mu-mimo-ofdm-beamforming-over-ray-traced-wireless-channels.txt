@@ -1,0 +1,320 @@
+Title: An FPGA-in-the-Loop Testbed for MU-MIMO OFDM Beamforming over Ray-Traced Wireless Channels
+
+URL Source: https://arxiv.org/pdf/2609.06812v1
+
+Published Time: Wed, 09 Sep 2026 01:33:53 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# An FPGA-in-the-Loop Testbed for MU-MIMO OFDM Beamforming over Ray-Traced Wireless Channels 
+
+Drew Schlesener, Tolunay Seyfi, Fatemeh Afghah 
+
+Holcombe Department of Electrical and Computer Engineering, Clemson University, Clemson SC USA 
+
+{schlese, tseyfi, fafghah }@clemson.edu, 
+
+Abstract —Wireless networks face ever expanding throughput demands from heterogeneous, high-density user populations, re-quiring beamforming algorithms that adapt to channel conditions with low latency. Validating such algorithms requires either costly over-the-air testbeds or simulation environments that lack the timing and resource constraints of real hardware, leaving a gap between algorithm design and hardware-realizable deployment. This work presents a hardware-in-the-loop (HIL) testbed that closes that gap by coupling an FPGA-based implementation of OFDM Waveforms with MU-MIMO beamforming to NVIDIA Sionna’s ray-tracing channel simulator, enabling a physical base-station architecture to transmit and receive against a Sionna-rendered digital-twin propagation environment in real time. Unlike prior work that validates beamforming algorithms either purely in simulation or on full RF testbeds, this architecture allows beamforming logic running on actual FPGA fabric to be evaluated under realistic, controllable, and repeatable channel conditions, including UE mobility and site-specific multi-path, without requiring an anechoic chamber or live RF front end. We detail the FPGA OFDM transmit/receive pipeline, the synchro-nization and data interface between the FPGA and the Sionna environment, and validation of signal quality under AWGN and ray-traced channel conditions, establishing this testbed as aplatform for hardware-validated beamforming research. 
+
+Index Terms —FPGA, 5G testbed, OFDM, Beamforming, Sionna. 
+
+I. I NTRODUCTION 
+
+As wireless connectivity continues to scale in device density, traffic volume, and service heterogeneity, wireless networks are under increasing pressure to deliver higher throughput while maintaining stringent energy and latency constraints. This trend is particularly pronounced in modern 5G and emerging 6G systems, where flexible waveform processing, beamforming, and adaptive link control must be executed under tight real-time requirements [1], [2]. Multiple-user multiple-input multiple-output (MU-MIMO) beamforming is a fundamental physical-layer mechanism for modern wire-less systems, enabling multiple users to be served over the same time-frequency resources through spatial precoding [3]. In orthogonal frequency-division multiplexing (OFDM)-based systems, MU-MIMO beamforming requires complex weights to be applied across multiple antenna branches while pre-serving symbol timing, subcarrier structure, and modulation accuracy. Although beamforming algorithms are commonly evaluated in software using idealized floating-point models, their hardware realization introduces practical effects that can change system behavior, including fixed-point quantization, pipeline latency, finite logic resources, synchronization con-straints, and implementation-dependent error floors. These effects are especially important for MU-MIMO OFDM, where          
+
+> This work is supported by National Science Foundation under Grant Numbers CNS-2202972, CNS- 2318726, and CNS-2232048.
+
+fast Fourier transform/inverse fast Fourier transform process-ing, complex weight multiplication, and per-antenna signal generation must operate as a deterministic streaming data-path. This motivates a field-programmable gate array (FPGA)-based validation platform in which the beamforming logic itself is implemented in reconfigurable hardware rather than evaluated only as a software model [4], [5]. The key advantage of FPGAs lies in the combina-tion of hardware-level parallelism, deterministic low-latency execution, and post-deployment reconfigurability [5]. Un-like general-purpose processors or graphics processing units (GPUs), which are optimized primarily for throughput-oriented computation and often rely on batched execution, memory hierarchies, and software scheduling, FPGAs can implement deeply pipe-lined and fully customized data-paths that operate with cycle-level determinism. This makes them especially well matched to low-PHY wireless tasks such as FFT/iFFT, channel estimation, beamforming, filtering, cod-ing, and symbol-level processing, where strict timing closure and predictable latency are essential. In comparison with GPUs, FPGAs often provide superior real-time responsiveness and lower data-movement overhead for streaming signal-processing workloads, since the computation can be mapped directly into dedicated hardware pipelines rather than repeat-edly transferred through software-managed execution layers [6]. Relative to ASICs, FPGAs sacrifice some ultimate effi-ciency and peak optimization, but they offer a far more prac-tical solution for prototyping, standards evolution, field up-dates, and algorithm-hardware co-design in rapidly changing 5G and beyond-5G environments [7], [8]. Implementing the beamforming data-path on an FPGA addresses the hardware-realism side of the problem, but it does not by itself provide a realistic and repeatable wireless channel for validation. Full over-the-air testbeds expose the design to real propagation effects, but they require radio-frequency front ends, antenna arrays, calibration, controlled measurement environments, and repeated physical experiments that can be costly and difficult to reproduce [9], [10]. Pure ray-tracing or link-level simulation provides configurable and repeatable channel conditions, but it does not exercise the actual fixed-point FPGA data-path used for MU-MIMO OFDM signal generation and beamforming [11]. This creates a gap between software-only beamforming evaluation and full RF experimentation. The testbed developed in this work addresses this gap by coupling an FPGA imple-mentation of MU-MIMO OFDM beamforming with NVIDIA Sionna ray-traced wireless channels in a hardware-in-the-loop (HIL) workflow. The goal is not to replace a full radio-frequency testbed, but to provide an accessible intermediate platform for evaluating hardware-realistic beamforming behav-ior under controllable and repeatable propagation conditions. arXiv:2609.06812v1 [cs.NI] 6 Sep 2026 Motivated by these considerations, this work develops a HIL testbed in which an FPGA implementing OFDM and MIMO beamforming operates as a physical base station and interfaces over USB JTAG with a host PC running NVIDIA Sionna’s ray-tracing channel simulator. The Digilent Arty A7-100T was selected as the target platform because it provides a practical balance of reconfigurability, hardware accessibility, and suitability for FPGA-based Low-PHY SDR experimenta-tion. Building on this platform, the contributions of this work are as follows:  
+
+> •
+
+Digital-Twin Sionna Channel Modeling: The Sionna en-vironment is able to parse the latest OFDM MIMO out-put from FPGA and use Sionna’s Monte-Carlo ray-tracing PathSolver() to realize the hardware output in a complex simulation. This allows for rigorous testing of the FPGA and test its validity in a realistic environment.  
+
+> •
+
+Accessible FPGA HIL Testbed: The resulting architecture closes the loop between FPGA hardware and the Sionna-rendered digital-twin propagation environment described above, allowing beamforming logic running on actual FPGA fabric to be evaluated under controllable, repeatable, and site-specific channel conditions, including UE mobility, without an anechoic chamber or live RF front end.  
+
+> •
+
+Hardware Performance and Signal-Integrity Validation: 
+
+The implemented FPGA design is benchmarked against an equivalent CPU baseline, achieving a 13.1 × throughput improvement and a 571 × reduction in energy per symbol, with post-route timing closure confirmed at 100 MHz. The design is further validated through systematic BER/EVM characterization across three modulation schemes (QPSK, 16-QAM, 64-QAM), four SNR levels, and up to four con-current UEs across two distinct Sionna-rendered propagation scenes. II. R ELATED WORK 
+
+A. Hardware Acceleration for Low-PHY Functions 
+
+FPGAs are highly effective for latency-critical low physical-layer (Low-PHY) wireless functions, such as OFDM signal processing, due to their high-throughput parallelism and recon-figurability. For instance, FPGA-based OpenCL kernels sig-nificantly outperform sequential processors in time-sensitive OpenAirInterface (OAI) gNB processing [12], while matching GPU performance with superior energy efficiency [13]. Be-cause FPGAs excel in deterministic, streaming computation with low power demands, this research builds upon these advantages to develop an FPGA-centric platform supporting both Low-PHY operations and beamforming. 
+
+B. Modern FPGA Frameworks and RFSoC 
+
+Meeting the stringent real-time and architectural demands of massive MIMO systems increasingly relies on advanced FPGA and RFSoC frameworks. Recent work illustrates a shift toward unified hardware capable of end-to-end wireless functionality, such as 3GPP-compliant integrated 5G base stations [14]. Furthermore, modern implementations are mov-ing beyond conventional signal processing by incorporating hardware-aware optimizations like fixed-point arithmetic to reduce MIMO transceiver complexity and power consumption [15]. Building on this progression, the present work targets a scalable, integrated FPGA-based OFDM and beamforming platform. III. M ETHODOLOGY 
+
+The FPGA is envisioned as a base-station platform with a 4×4 MU-MIMO antenna array for adaptive beamforming. In our HIL testbed iteration, the FPGA transmits beamformed OFDM symbols to NVIDIA Sionna, which uses trajectory prediction and real-time environmental feedback to update beamforming weights. These weights are returned to the FPGA to continuously steer beams toward mobile UEs, improving link reliability, data rates, and energy efficiency compared with omnidirectional transmission. 
+
+A. Fixed-Point MU-MIMO OFDM Data-path 
+
+The FPGA-oriented base-band design was developed in MATLAB Simulink 2024b using Vitis Model Composer and synthesized in Vivado 2025.1. The data-path implements a configurable OFDM transmitter with antenna-domain beam-forming for a 4 ×4 planar array. The implemented design supports quadrature phase-shift keying (QPSK), 16-quadrature amplitude modulation (16-QAM), and 64-QAM. A determin-istic 8-bit counter is used as the input payload source during validation, allowing the transmitted bit sequence to be repro-duced exactly at the receiver for bit-error-rate measurements. Let M ∈ { 4, 16 , 64 } denote the modulation order and let 
+
+q = log 2(M ) be the number of bits per complex symbol. Groups of q input bits are first mapped to an unnormalized Gray-coded constellation point 
+
+x⋆M = aI + ja Q, (1) where aI , a Q ∈ AM are the unnormalized in-phase and quadrature amplitude levels. The transmitted hardware symbol is then obtained by applying a modulation-dependent scaling factor, 
+
+xM = KHW  
+
+> M
+
+x⋆M = KHW  
+
+> M
+
+(aI + ja Q), (2) where KHW  
+
+> M
+
+denotes the scaling factor implemented in the FPGA datapath. For square QAM constellations, the amplitude alphabet is 
+
+AM = {± 1, ±3, . . . , ±(√M − 1) }. For QPSK, viewed as square 4-QAM, this reduces to A4 = {± 1}. The scaling factor is selected to normalize the average symbol energy while satisfying the fixed-point dynamic range of the AMD Xilinx FFT intellectual property core. The unnormalized average symbol energy is 
+
+E⋆s,M = E|aI + ja Q|2 . (3) which gives E⋆s, 4 = 2 , E⋆s, 16 = 10 , and E⋆s, 64 = 42 for the supported constellations. The corresponding theoretical unit-energy normalization factor is 
+
+Kth  
+
+> M
+
+= 1
+
+q
+
+E⋆s,M 
+
+. (4) This yields the theoretical values 
+
+Kth 4 = 1
+
+√2 , Kth 16 = 1
+
+√10 , Kth 64 = 1
+
+√42 .
+
+For QPSK and 16-QAM, the implemented hardware scaling matches the theoretical normalization, i.e., KHW 4 = Kth 4 and 
+
+KHW 16 = Kth 16 . For the implemented 64-QAM datapath, a slightly smaller hardware scaling value of KHW 64 = 0 .13 is used instead of the theoretical value Kth 64 = 0 .1543 to provide additional guard margin against bit growth and overflow in the fixed-point IFFT and beamforming stages. The modulated symbols are represented using the Vitis fixed-point Fix 16 ,15 format, corresponding to a signed 16-bit word with 15 fractional bits. After constellation mapping and scaling, the active subcarrier symbols are passed to the IFFT core to generate the time-domain OFDM symbol. The resulting complex OFDM samples are then distributed across sixteen parallel antenna branches corresponding to the 4 ×4 planar array. Each branch applies a complex beamforming coeffi-cient through a fixed-point complex multiplier, producing the antenna-domain signal xp[n] = wps[n], p = 0 , . . . , 15 , where 
+
+s[n] is the time-domain OFDM sample and wp is the com-plex beamforming weight assigned to antenna branch p. This structure allows the same OFDM waveform to be weighted independently across antenna elements, enabling hardware-level evaluation of the MU-MIMO beamforming data-path. At the receiver side of the validation model, the captured or simulated antenna-domain samples are combined, transformed back to the frequency domain using a FFT, and de-mapped according to the selected modulation order. The recovered bits are compared with the deterministic input payload to compute bit error rate, while the recovered constellation points are used to compute error vector magnitude. This modular design allows the same fixed-point OFDM and beamforming pipeline to be evaluated across different modulation orders, FFT sizes, beamforming weights, and channel conditions. 
+
+B. FPGA Implementation and Host Interface 
+
+After verification in the Simulink/Vitis Model Composer environment, the fixed-point OFDM and beamforming data-path was exported as synthesizable hardware and integrated into a Vivado block design targeting the Digilent Arty A7-100T FPGA. The top-level hardware design includes the exported Vitis Model Composer intellectual property block, a clocking wizard, reset logic, a JTAG-to-AXI Master, an AXI interconnect, and an Integrated Logic Analyzer (ILA) for internal signal capture. The design is driven by a 100 MHz clock generated from the board reference clock, corresponding to a 10 ns clock period for the implemented base-band pipeline. The beamforming coefficients are exposed to the host through an AXI-mapped control interface. For each hardware-in-the-loop frame, the host-side Sionna workflow computes updated complex beamforming weights from the current user-equipment geometry. These weights are quantized to the Q1.15 fixed-point format and written to the FPGA through the JTAG-to-AXI Master using Vivado TCL commands. Inside the FPGA, the updated coefficients are applied by the sixteen complex multiplier branches corresponding to the 4 ×4 antenna array. The output of the beamforming data-path is routed to the ILA, which captures the generated antenna-domain in-phase/quadrature samples. These captured samples are ex-ported to the host and used as the hardware-generated input to the Sionna ray-traced channel model. This interface provides a practical frame-based hardware-in-the-loop workflow: Sionna updates the channel geometry and beamforming weights, the FPGA applies the corresponding fixed-point beamforming operation, and the resulting hardware-generated samples are returned to the host for channel application and signal-quality evaluation. The current interface is intended for controlled hardware validation rather than real-time radio operation. Because weight updates and sample extraction are performed through JTAG, TCL scripting, and ILA capture, the loop does not represent a standards-compliant 5G New Radio front-haul or over-the-air implementation. Instead, it provides an acces-sible mechanism for validating the FPGA beamforming data-path under repeatable channel conditions before transitioning to higher-throughput interfaces, radio-frequency front ends, or radio-frequency system-on-chip platforms. 
+
+C. Timing Closure 
+
+In Vivado, the Post-route static timing analysis confirms that all user-specified timing constraints are met for the implemented design. The primary design clock operates at 100 MHz (10 ns period), generated via an Mixed-Mode Clock Manager (MMCM) clocking primitive from the board’s 100 MHz reference oscillator. Table I summarizes the worst-case setup and hold margins.              
+
+> TABLE I POST -R OUTE TIMING SUMMARY (W ORST NEGATIVE SLACK )
+> Check Slack (ns) Status
+> Setup (WNS) 0.199 Met Hold (WHS) 0.016 Met Pulse Width (WPWS) 3.000 Met
+
+The critical setup path traverses 65 logic levels, dominated by a 64-stage CARRY4 ripple-carry chain consistent with a wide fixed-point accumulation structure in the beamforming weight summation or FFT butterfly data-path. With only 0.199 ns of setup slack at 100 MHz, this carry chain rep-resents the limiting factor for any future increase in oper-ating frequency; pipelining this accumulator with interme-diate register stages is the primary candidate for improving maximum achievable throughput. Hold margin is similarly tight at 0.016 ns, indicating limited robustness to placement perturbation or re-implementation and warranting attention in any future design iteration. 
+
+D. FPGA Design Interfacing with Sionna 
+
+The final stage of the framework focuses on interfacing the deployed FPGA design with NVIDIA Sionna in order to evalu-ate the system under more realistic RF propagation conditions. While the FPGA is passively generating OFDM symbols, a Vivado TCL script is run to write new Beam-formed weights from Sionna generated .txt file into AXI interface memory and also write the latest generated OFDM symbol to a .csv file as seen in Figure 1. The Sionna script’s main utility is to generate a quality dataset based on beamforming weights tied to current UE coordinates. Episodes are defined as N frames, and each episode tests the HIL with adjustments to number of UEs and SNR. The script is executed such that a frame updates every 1000ms and adjusts the UE position, applies latest OFDM symbol within the channel simulation environment and logs all of the calculated data. The new weights are calculated by first finding the displacement vector from the Base Station to the UE: ⃗v =⃗p U E −⃗p BS which is then decomposed into global azimuth and elevation angles, αaz = arctan 2( vy , v x),
+
+αel = arcsin 
+
+ vz
+
+> ∥⃗v∥
+
+
+
+. The antenna array’s local coordinate frame is then updated by subtracting the mechanically defined yaw and pitch of the Base Station, supplying the array with relative steering angles: ˜αaz = αaz −ψyaw , ˜αel = αel −ψpitch .For a 4 × 4 planar array, each element (m, n ) requires a phase shift based on its own row and column index and the sine of the relative steering angles, φm,n = π n sin(˜ αaz ) + 
+
+m sin(˜ αel ). This produces a per-element steering vector for UE i, wi = ejφ = ejφ 0,0 , e jφ 0,1 , . . . , e jφ 3,3
+
+T . All active UE steering vectors are then superimposed and normalized, defin-ing the analog beamforming approximation of MU-MIMO, 
+
+wtx =
+
+PNU E −1 
+
+> i=0
+
+wi
+
+PNU E −1 
+
+> i=0
+
+wi
+
+. (5) Fig. 1. FPGA Hardware-in-Loop Block Diagram. 
+
+where NU E is the number of active User Equipment nodes, m
+
+and n are the row and column indices of each antenna element, and ψyaw , ψpitch are the mechanically defined orientation angles of the Base Station array. The latest I/Q capture is read from the Vivado ILA CSV file. File modification time is checked to avoid reprocessing stale data. The strongest antenna is selected as the phase reference k∗ = arg max k ∥X∥col k .A co-phasing correction is applied to remove unknown hardware phase offsets, aligning all antenna phases to the reference, δ = w∗  
+
+> k∗
+> |wk∗|
+
+, wrx = wδ 
+
+> ∥wδ∥
+
+The azimuthal beam pattern is then computed by sweeping test angles ϕ ∈ [0 , 2π]
+
+and evaluating the array factor against the measured receive weights, s(ϕ) = ejπ (n sin( ϕ−ψyaw )+ m sin(0)) ,
+
+AF (ϕ) = s(ϕ)H wrx . (6) Sionna’s PathSolver ray-traces the scene deterministically to produce a channel impulse response (CIR) for each UE. After the scene is populated with the digital-twin transmitter, subsequent UEs and physical geometry, it computes propaga-tion paths. The propagation paths are described by complex channel coefficient ai, a propagation delay τi, and angles of departure/arrival. The solver returns a Paths object, from which channel impulse responses can be used for link-level simulations. The PathSolver serves to bridge the gap between the physical mobility model and the digital-twin channel. It synthesizes what the channel would look like if the UE were really standing at that ray-traced position, including realistic reflections off the defined concrete wall and ground plane, while letting hardware noise, quantization, and timing imperfections come from the genuine ILA capture. Paths = {(ai, τ i, θ T,i , φ T,i , θ R,i , φ R,i )}Npaths  
+
+> i=1
+
+(7) Because antenna arrays are explicitly modeled rather than approximated synthetically, the solver finds independent paths between every transmit-receive antenna pair, yielding a per-antenna channel response. The resulting path coefficients are extracted via paths.cir() and collapsed over the path and delay dimensions to form a single channel vector per UE 
+
+hU E = P 
+
+> ℓ, τ
+
+aU E, ℓ, τ ∈ CNant .The hardware I/Q matrix X ∈ CT ×Nant is mixed with the simulated channel, forming the digital twin received signal 
+
+yclean = X h U E .Additive White Gaussian Noise (AWGN) is injected at the SNR level specified for the current episode and both signals are transformed to the frequency domain via FFT, and the active subcarriers Sactive are extracted, 
+
+Y[k] =  
+
+> NF F T −1
+
+X
+
+> n=0
+
+y(n) e−j2πkn/N F F T , k ∈ S active 
+
+The active subcarrier vectors are normalized and compared against the ideal constellation corresponding to the selected modulation order. Let QM (·) denote the nearest-neighbor con-stellation decision operator for an M -ary modulation scheme. The ideal reference symbols are therefore 
+
+d = QM ( ˜Yclean ),
+
+which reduces to the familiar sign-based detector for QPSK and to nearest-neighbor decisions for 16-QAM and 64-QAM. The Error Vector Magnitude (EVM) and Bit Error Rate (BER) are then computed for the selected modulation order and used as performance metrics for each active UE, 
+
+EV M dB = 10 log 10 
+
+1
+
+N
+
+> N
+
+X
+
+> k=1
+
+˜Ynoisy,k − dk
+
+> 2
+
+!
+
+BER = 1
+
+NbNbX
+
+> i=1
+
+1
+
+hˆbi̸ = bi
+
+i
+
+, (8) Upon completion of the signal processing pipeline, all Matplotlib figures are refreshed to reflect the current frame state. The top-down radar view is updated with each ac-tive UE’s position and the normalized azimuthal beam pat-tern overlay, xbeam (ϕ) = AF norm (ϕ)ρ cos( ϕ), y beam (ϕ) = 
+
+AF norm (ϕ)ρ sin( ϕ). Where ρ is a visual scaling factor matched to the scene bounds. The constellation diagram displays the active subcarrier I/Q points for UE 0, the time-domain plot shows the real and imaginary components of the received waveform, and the rolling EVM history is updated with the current system average. The per-UE metrics table is refreshed with live EVM and BER. Inactive UEs are marked as 
+
+OFF . The figure title is updated to reflect the current episode index, active UE count, and SNR level, providing at-a-glance tracking of the test matrix sweep progression. IV. E VALUATION 
+
+A. Experimental Setup 
+
+The experimental platform was hosted on a Dell Precision 3650 Tower equipped with an Intel i9-10900 CPU, an NVIDIA Quadro P6000 GPU, and 16 GB of RAM, running Ubuntu 24.04 LTS. The OFDM hardware subsystem was developed in MATLAB Simulink 2024b using Vitis Model Composer, while the FPGA block design was implemented in Vivado 2025.1. The final hardware implementation targeted the dis-crete Digilent Arty A7-100T FPGA platform. 
+
+B. Metrics 
+
+System performance for the FPGA implementation was measured using the deterministic amount of cycles per MU-MIMO OFDM symbol completion. The Sionna environment channel properties utilize a 3.5GHz carrier frequency with 30kHz sub-carrier spacing. FPGA symbol completion time is compared against CPU OFDM symbol completion time in nano-seconds. Next, the FPGA EVM will be compared against an EVM from OFDM symbol generation entirely within Sionna. Lastly, the FPGA will be run for 16 Episodes, each episode is 50 frames. This test will be repeated six times for each modulation coding scheme: QPSK, 16-QAM and 64-QAM and testing a custom empty plane scene with a wall and simple street canyon. The test can be split into 4 chunks of 4 episodes, each chunk is represented by a 10 dB difference in Signal-to-Noise Ratio. Each episode within each chunk the number of UEs increase from 1-4. The EVM and BER will be compared based upon different SNR and number of UEs. V. E XPERIMENTAL RESULTS 
+
+A. Performance and Benchmarking Results                            
+
+> TABLE II CPU VS . FPGA P ERFORMANCE METRICS FOR 16-P OINT CP-OFDM
+> Metric CPU (Intel i9-10900) FPGA (Artix-7 Core) Advantage Clock Frequency 2.8 GHz (up to 5.2 GHz) 100 MHz CPU ( ∼52 ×)
+> Processing Type Sequential (Time-Domain) Unrolled Parallel FPGA
+> Throughput (16-Ant) 131.82 ns 10.00 ns FPGA (13.1 ×)Pipeline Latency N/A (Jittered) 1,090.00 ns FPGA
+> Operating Power ∼65 W (TDP) ∼1.5 W FPGA ( ∼43.3 ×)
+> Energy/Symbol 8.56 μJ0.015 μJFPGA (571 ×)
+
+The FPGA consistently outputs a new 16-Antenna MU-MIMO OFDM symbol every clock cycle. The entire pipeline latency from pilot payload generation to MU-MIMO output is 109 clock cycles. The FPGA clock frequency is 100 MHz. The latency of the FPGA per symbol is measured as 109 cycles × 10 ns (100 MHz ) = 1.09 μs. The CPU OFDM generation, written in C++, was measured per sym-bol using the chrono library. This allowed for precise CPU timing measurements. To broadcast to a 16-antenna array, an optimized software implementation requires only a sin-gle IFFT, followed by a vectorized complex multiplication (outer product) across the 16 spatial weights. To establish the absolute theoretical maximum performance of the CPU, we assume this 16-antenna vectorized multiplication executes instantaneously with zero clock-cycle overhead. Therefore, the absolute software processing bottleneck remains fixed at the IFFT boundary TCPU ≥ 131 .82 ns. This calculation ignores additional software overheads, such as operating system in-terrupts, cache misses, thread scheduling, and bus latency, which further degrade real-time performance. As shown in Table II, the FPGA implementation achieves a deterministic (13 .1×) speedup over the theoretical best-case CPU baseline by exploiting fully parallel MU-MIMO OFDM processing. Although SIMD vectorization can accelerate software-based beamforming multiplications, the CPU remains constrained by sequential iFFT execution and software-managed data movement. The FPGA, by contrast, realizes the spatial beam-forming operations as unrolled hardware datapaths, enabling predictable latency and higher throughput. Throughput 
+
+10 1
+
+10 2
+
+4.88 2.3
+
+> Execution Time (ns) [Log Scale]
+
+Throughput Comparison  
+
+> Intel i9-10900 Artix-7 FPGA
+
+Energy/Symbol 
+
+10 −2
+
+10 0
+
+2.15 
+
+−4.2
+
+> Energy ( μJ) [Log Scale]
+
+Energy Efficiency   
+
+> Intel i9-10900 Artix-7 FPGA
+> Fig. 2. Logarithmic scale comparison of overall block throughput time (left) and computational energy consumed per block (right). Lower values represent superior performance.
+
+To compare metrics spanning several orders of magnitude, Figure 2 reports execution time and energy per symbol on a base-10 logarithmic scale, preserving quantitative contrast between the CPU and FPGA implementations without com-pressing the smaller values. Even under optimistic best-case CPU assumptions, the FPGA implementation displays an advantage in both throughput and energy efficiency. 
+
+B. Data Rate and Interface Bandwidth 
+
+The base-band generator uses a 16-point IFFT ( Nactive = 16 
+
+active subcarriers); with QPSK ( Qm = 2 bits/subcarrier), each spatial stream carries Bsym = Nactive × Qm = 32 
+
+bits/symbol, giving a maximum information rate Rmax =
+
+Bsym /T proc . For the best-case CPU (Tproc = 131 .82 ns), 
+
+RCPU ≈ 242 .7 Mbps; the FPGA’s fully unrolled pipeline, producing a symbol every 10 ns, reaches RFPGA = 3.2 Gbps. Scaled to 4 UEs via independent precoding, CPU capacity fragments to ∼60 .6 Mbps/user, while the FPGA’s parallel user pipelines scale cleanly to 12 .8 Gbps aggregate, validating its necessity for dense MU-MIMO deployments. This payload-level rate excludes the raw I/Q volume moved internally: the beamforming stage drives 16 antennas, each fed a 32-bit complex sample (16-bit I, 16-bit Q), for 512 bits of I/Q data per symbol. At one symbol per 10 ns, this yields a physical interface bandwidth of 51 .2 Gbps. Sustaining this rate through a general-purpose processor would require re-peated movement through software-managed memory, cache, and I/O, introducing scheduling overhead and jitter; the FPGA instead keeps this bandwidth local to the fabric, generating all sixteen antenna branches in parallel with deterministic clock-cycle timing, illustrating its architectural advantage for MU-MIMO OFDM beamforming without host-side data movement per symbol. 
+
+C. Episodic Testing 
+
+As the testing script progresses through each four-episode SNR block, Figure 3 shows the expected reduction in EVM as SNR increases. Within the current measurement pipeline, BER and EVM are evaluated independently for each UE using that UE’s corresponding channel realization. Under this evaluation methodology, the measured BER and EVM exhibit limited dependence on the number of active UEs over the tested range of one to four users. BER also shows limited variation across the two evaluated scene geometries. While different Modulation have minimal effect on EVM, there are noticeable differences in BER; this distinction is expected, since EVM is a continuous error-distance metric, Fig. 3. FPGA Sionna EVM Comparisons with different SNR and UE count TABLE III MEAN BER ( WITH ±1 STD . ACROSS THE TWO TEST SCENES , n = 2 ) BY 
+
+MODULATION AND ACTIVE UE COUNT (UE1-UE4), FACETED BY SNR. EACH CELL ’S MANTISSA IS SCALED BY THE ROW ’S LISTED POWER OF TEN . E ACH ENTRY IS THE MEAN OF THE PER -EPISODE .                                                                                                        
+
+> SNR Modulation ×U1 U2 U3 U4 0QPSK 10 −11.5a1.6±<0.11.6±<0.11.6±<0.1
+> 16Q 10 −12.9±0.12.8±0.12.9±<0.12.8±<0.1
+> 64Q 10 −13.6±<0.13.6±0.13.6±<0.13.6±<0.1
+> 10 QPSK 10 −31.5±0.80.64 ±0.10.89 ±<0.10.99 ±0.1
+> 16Q 10 −26.4±0.56±0.15.9±0.16±<0.1
+> 64Q 10 −11.7±<0.1 1 .6±<0.11.6±<0.11.6±<0.1
+> 20 QPSK –0000
+> 16Q 10 −6006.3±8.95.2±7.3
+> 64Q 10 −25.9±<0.15.9±0.16±0.15.9±<0.1
+> 30 QPSK –0000
+> 16Q –0000
+> 64Q 10 −22.9±<0.12.9±0.12.9±<0.12.8±0.1
+
+whereas BER depends on the decision-region geometry of each constellation, so a denser constellation can exhibit com-parable EVM yet markedly worse BER due to its tighter decision boundaries. The trend in Table III shows that BER de-creases monotonically with SNR for every modulation scheme, exactly as expected from theory: QPSK drops from 0.15-0.16 at 0 dB to exactly 0 (floor-limited) by 20 dB. 16-QAM falls from 0.28-0.29 at 0 dB to a near-zero floor by 20 dB, with UE1-UE2 reaching exactly 0 and UE3-UE4 showing isolated single-bit-error events on the order of 10 −6. 64-QAM is the slowest to fall, still sitting at 0.029 even at 30 dB, where QPSK and 16-QAM are both effectively error-free. This persistent, SNR-independent residual suggests that 64-QAM performance on the current hardware path is limited by a factor other than additive noise, such as residual phase error from the coarse-to-fine phase-lock sweep, quantization in the I/Q datapath, or other RF impairments, and is a candidate for further characterization in future work. Higher-order modulation also requires higher SNR for equivalent BER: at any fixed SNR, BER ranks QPSK < 16-QAM < 64-QAM, as shown by the 10 dB row, where QPSK is already near 10 −3 while 64-QAM remains at 0.16-0.17. This ordering holds cleanly across all four SNR levels. VI. C ONCLUSION 
+
+This paper presents a hardware-in-the-loop testbed that closes the loop between an FPGA-based implementation of OFDM with MU-MIMO beamforming and NVIDIA Sionna’s ray-tracing channel simulator, allowing beamforming logic running on physical FPGA fabric to be evaluated against a controllable, repeatable digital-twin propagation environment without requiring an anechoic chamber or live RF front end. Signal-quality characterization across QPSK, 16-QAM, and 64-QAM confirmed the expected SNR- and modulation-order-dependent BER behavior, validating the correctness of the FPGA’s OFDM transmit/receive and demodulation pipeline, and showed no significant BER or EVM dependence on active UE count, indicating that the current measurement pipeline scales cleanly with additional users. The results also surfaced a persistent, SNR-independent BER floor for 64-QAM that is not present for QPSK or 16-QAM, pointing to a hardware-level limitation, such as residual phase-lock error or I/Q quantization, worth isolating in future characterization work. Together, these results establish the testbed as a validated platform for hardware-realistic beamforming research. Future work will extend the testbed toward a fully real-time FPGA implementation and explore optimizing beamforming control. REFERENCES [1] R. Barker and F. Afghah, “Six times to spare: Ldpc acceleration on dgx spark for ai-native open ran,” 2026. [2] A. E. Dorcheh, T. Seyfi, and F. Afghah, “DORA: Dynamic o-ran resource allocation for multi-slice 5g networks,” 2025. [3] H. Tataria, M. Shafi, A. F. Molisch, M. Dohler, H. Sj¨ oland, and F. Tufvesson, “6g wireless systems: Vision, requirements, challenges, insights, and opportunities,” Proceedings of the IEEE , vol. 109, no. 7, pp. 1166–1199, 2021. [4] V. Chamola, S. Patra, N. Kumar, and M. Guizani, “Fpga for 5g: Re-configurable hardware for next generation communication,” IEEE Wireless Communications , vol. 27, no. 3, pp. 140–147, 2020. [5] M. Vaithianathan, S. Udkar, D. Roy, M. Reddy, and S. Rajasekaran, “Fpga prototyping of dsp algorithms for wireless communication sys-tems,” in 2024 International Conference on Sustainable Communication Networks and Application (ICSCNA) , pp. 231–236, 2024. [6] R. Barker, T. Seyfi, A. E. Dorcheh, J. Boone, F. Afghah, and J. Boccuzzi, “Atlasran: Modeling and performance evaluation of open 5g platforms for ubiquitous wireless networks,” 2026. [7] E. A. Papatheofanous, D. Reisis, and K. Nikitopoulos, “Ldpc hardware acceleration in 5g open radio access network platforms,” IEEE Access ,vol. 9, pp. 152960–152971, 2021. [8] C. Lin, M. F. Azmine, and Y. Yi, “Invited paper: Accelerating next-g wireless communications with fpga-based ai accelerators,” in 2023 IEEE/ACM International Conference on Computer Aided Design (IC-CAD) , pp. 1–8, 2023. [9] L. Duarte, R. Gomes, C. Ribeiro, and R. F. S. Caldeirinha, “A software-defined radio for future wireless communication systems at 60 ghz,” 
+
+Electronics , vol. 8, no. 12, 2019. [10] D. Thompson, M. Yeary, and C. Fulton, “Rf array system equalization and true time delay with fpga hardware-in-the-loop,” in 2016 IEEE International Symposium on Phased Array Systems and Technology (PAST) , pp. 1–5, 2016. [11] S. Ryu and H. J. Yang, “Standards-compliant dm-rs allocation via tem-poral channel prediction for massive mimo systems,” IEEE Transactions on Vehicular Technology , pp. 1–5, 2026. [12] A. Bhattacharyya, A. Fumagalli, and K. Kondepu, “Demo: Fpga-accelerated 5g low-phy functions and an integration with openairin-terface,” in 2025 IEEE 26th International Symposium on a World of Wireless, Mobile and Multimedia Networks (WoWMoM) , pp. 160–162, 2025. [13] N. A. Shah, Heterogeneous Acceleration for 5G New Radio Channel Modelling Using FPGAs and GPUs . PhD thesis, Politecnico di Torino, 2023. [14] K. S. Praneeth, J. K. Sattianarayanin, S. P. Kotturi, R. Singh, A. Gund-lapalle, S. Singh, and R. K. Ganti, “Design of a 32 channel 5g nr mimo base station,” in Proceedings of the 2nd ACM Workshop on Open and AI RAN , OpenRan ’25, (New York, NY, USA), p. 43–49, Association for Computing Machinery, 2025. [15] A. M. V. Pathi, D. Prasad, M. Mukhesh, M. Nandan, M. Kumar, and K. M. V. S. Subrahmanyam, “Efficient vlsi architecture for otfs-mimo transceiver in multipath fading channels,” in 2025 6th International Conference on Intelligent Communication Technologies and Virtual Mobile Networks (ICICV) , pp. 1338–1343, 2025.

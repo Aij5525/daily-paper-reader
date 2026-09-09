@@ -1,0 +1,359 @@
+Title: Semantic Communication for Distributed Spectrum Monitoring over Unreliable Links
+
+URL Source: https://arxiv.org/pdf/2609.05791v1
+
+Published Time: Wed, 09 Sep 2026 00:20:49 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Semantic Communication for Distributed Spectrum Monitoring over Unreliable Links 
+
+Samer Lahoud 
+
+Faculty of Computer Science Dalhousie University 
+
+Halifax, NS, B3H 4R2 Canada sml@dal.ca 
+
+Kinda Khawam 
+
+ROCS, LISN Paris-Saclay University 
+
+91190 Gif-sur-Yvette, France kinda.khawam@universite-paris-saclay.fr 
+
+Abstract —Distributed spectrum monitoring relies on spatially separated receivers to infer the state of the radio environment. A central task is to determine how many emitters are active and where they are located. Sensors typically report over shared unreliable links, where contention, fading, or energy limits erase whole reports, so forwarding raw I/Q samples from all receivers to a fusion node becomes impractical. This paper formulates distributed emitter counting and localization as a semantic communication problem over unreliable reporting links. Each receiver maps its local time-frequency observation to a compact latent representation and transmits it. The fusion node pairs each surviving latent with the corresponding receiver position and operates on the resulting unordered set, which keeps the fusion rule compatible with variable membership and receiver-count changes. The encoder and decoder are trained end-to-end with report erasure, and optionally finite-rate quantization, inside the task objective. Experiments on synthetic multi-emitter scenes show that channel-aware training improves robustness under erasure, that set fusion is more robust than fixed-order concatenation, and that one trained model operates across receiver counts without retraining. The rate study shows that a few bits per latent component suffice in the tested setting, and that the rate knee remains roughly stable across erasure levels. These results support the feasibility of low-rate semantic reporting for distributed spectrum monitoring over unreliable links. 
+
+Index Terms —Semantic communication, task-oriented commu-nication, spectrum monitoring, emitter localization, distributed inference, permutation-invariant fusion, erasure channel. 
+
+I. I NTRODUCTION 
+
+Semantic and task-oriented communication shift the design objective from reproducing data to delivering the information needed for a downstream task [1]–[3]. Distributed spectrum monitoring is a natural setting for this shift. A monitoring system must infer the state of the radio environment, including how many emitters are active and where they are located. This information supports dynamic spectrum access, interference management, anomaly detection, and security in beyond-5G and 6G networks. In many deployments, monitoring is per-formed by low-cost spatially distributed receivers. Forwarding raw in-phase/quadrature (I/Q) streams from all receivers to a fusion node then costs bandwidth, energy, and access-channel resources, so each receiver should transmit a compact task-relevant report instead. The communication link that carries these reports is also part of the problem. Monitoring receivers often report over shared, contention-based, or grant-free links rather than over dedicated scheduled channels. In such settings, a collision, a deep fade, or an energy limitation erases a whole report [4], [5], so the impairment is packet-level as well as bit-level. A model trained on complete report sets can therefore degrade sharply when the fusion node receives only a subset of the receivers. The reporting set also changes across deployments, and from one observation window to the next. A practical semantic communication scheme for spectrum monitoring must handle both whole-report erasure and variable receiver membership. This paper studies emitter counting and localization as a concrete distributed spectrum-monitoring task. The objective is to estimate the emitter count and locations from the reports that survive the unreliable links. Our approach is to align the learning architecture with the reporting channel. Each receiver applies a shared encoder to its local time-frequency observation and sends the resulting compact latent. The fusion node pairs each survivor with its known receiver position and processes the reports as an unordered set. This makes the decoder invariant to the order of the received reports and compatible with different report memberships. We also make the training channel-aware by inserting whole-report erasure, and optionally finite-rate quantization, inside the end-to-end task objective. The main contributions are as follows:  
+
+> •
+
+We cast distributed emitter counting and localization over unreliable reporting links as a channel-aware semantic communication problem. The learned representation is optimized for task distortion under whole-report erasure and finite-rate constraints.  
+
+> •
+
+We introduce a permutation-invariant fusion architecture that operates on the surviving set of position-tagged re-ceiver reports. This makes the decoder tolerant of variable report membership and enables cross-count deployment without retraining.  
+
+> •
+
+We evaluate the effects of channel-aware training, fusion architecture, receiver-count variation, and latent quantiza-tion. The results show improved robustness under erasure, stronger performance than fixed-order concatenation, and arXiv:2609.05791v1 [cs.NI] 5 Sep 2026 accurate operation with only a few bits per latent com-ponent. The remainder of the paper is organized as follows. Sec-tion II reviews related work. Section III presents the system model and channel-aware objective. Section IV describes the encoder, set-fusion decoder, loss function, and training procedure. Section V presents the experimental results, and Section VI concludes the paper. II. R ELATED WORK 
+
+a) Task-oriented and semantic communication: Task-oriented and semantic communication replace bit-level recon-struction by task utility as the design objective [1], [2], [6]. The information bottleneck principle provides a useful way to trade representation rate against task relevance [7]. This idea has been applied to edge inference with a single device [3] and to cooperative inference across multiple devices through the distributed information bottleneck [8]. Related rate-distortion formulations also make the goal-oriented trade-off explicit [9]. Our work follows this task-oriented view and focuses on a distributed monitoring setting in which the reporting links are unreliable and the set of received reports is variable. The channel is therefore part of the learning problem, rather than a rate constraint imposed after the representation has been designed. 
+
+b) Deep joint source-channel coding: Deep joint source-channel coding maps a source directly to channel symbols through a learned autoencoder and can provide graceful degra-dation as channel quality changes [10]. Nonlinear-transform variants further connect source-channel coding with semantic objectives [11]. These works are closest to learned end-to-end communication. The setting considered here differs in one respect. Multiple receivers send separate task-oriented reports over unreliable reporting links, where the main impairment is the erasure of whole reports. We therefore keep a digital reporting interface and model report loss directly. 
+
+c) Learned RF sensing and distributed compression: 
+
+Deep learning has been used for spectrum sensing, wire-less signal classification, and transmitter localization from distributed measurements [12], [13]. Most of these systems assume that the measurements or learned features reach the fusion point reliably. A closely related recent work studies task-oriented compression for multi-emitter localization and characterization with spectral overlap [14]. We build on this direction and move from a clean link, fixed-array setting to unreliable reporting links and variable receiver member-ship. Classical cooperative spectrum sensing also studies the effect of quantization, bandwidth constraints, and reporting errors on fusion [15], [16]. Compressive sensing reduces the acquisition cost for wideband monitoring [17], while in-network aggregation reduces the amount of data sent by sensor networks [18]. In contrast, our approach learns the semantic representation under the same erasure and rate constraints that affect deployment. 
+
+d) Permutation-invariant set models: The proposed fu-sion rule draws on permutation-invariant neural architectures such as Deep Sets [19] and attention-based set pooling [20]. In our setting, the reporting channel dictates this architectural choice. The fusion node receives whichever subset of reports survives contention, fading, or energy limitations. Treating the inputs as a set therefore makes the decoder invariant to report ordering, tolerant of missing reports, and compatible with receiver counts different from the one used during training. III. S YSTEM MODEL 
+
+A. Monitoring Scenario and Task 
+
+A two-dimensional monitoring region A ⊂ R2 is observed by M sensing nodes. Node i has known position ri ∈ A , i ∈{1, . . . , M }, which reaches the decoder as side information. In a deployment this is slow-varying metadata, registered once when a node joins rather than repeated in every observation window. Positions are redrawn for every scene, so the model handles an arbitrary receiver layout. The region contains an unknown number K of simultane-ously active emitters, with 1 ≤ K ≤ Kmax . Emitter k has location pk ∈ A and physical signal parameters 
+
+ξk = ( νk, B k, P k, g k), (1) where νk is the center-frequency offset, Bk is the occupied bandwidth, Pk is the transmit power, and gk denotes the waveform family. These parameters shape the received signals and often create spectral overlap between emitters. They remain nuisance variables in this work. The monitoring output is the emitter set 
+
+Θ = {pk}Kk=1 , (2) together with its cardinality K.This choice focuses the study on counting and localization, which are central tasks in distributed spectrum monitoring. Both draw on spatial diversity, so every lost report removes one spatial view of the same emitter scene. The task therefore probes reporting-link reliability directly. Since Θ is an un-ordered set with unknown cardinality, a permutation-invariant set distortion Dset (Θ , ˆΘ) scores the estimate ˆΘ. This distortion charges both cardinality errors and localization errors after the best assignment between predicted and true emitters, as described in Section IV-C. Fig. 1 illustrates the monitoring geometry. Receivers have known but scene-dependent positions, while the emitter loca-tions and signal parameters remain unknown. Each receiver observes a different noisy superposition of the active emitters and reports a compact representation to the fusion node. 
+
+B. Distributed Semantic Encoding 
+
+The fusion node recovers just enough information to esti-mate the emitter count and locations, which frees the reports from reconstructing the raw receiver observations. This makes distributed spectrum monitoring a task-oriented, or semantic, communication problem [1]–[3]. r1            
+
+> r2
+> r3
+> r4
+> p1
+> p2
+> p3
+> receiver ri(position known) emitter pk
+> Fig. 1. Monitoring geometry. A top-down 1000 ×1000 m region Acontains several active emitters at unknown locations, shown as stars, and Mreceivers with known but scene-dependent positions, shown as triangles. Dashed lines denote emitter-to-receiver propagation. Each receiver observes a different noisy superposition of the active emitters, producing a local window xi. The task is to estimate the number of emitters and their locations.
+
+Each receiver observes a window of N complex baseband samples xi ∈ CN . It first computes a time-frequency feature 
+
+Xi = T (xi), (3) and then maps this feature to a compact latent representation 
+
+zi = Enc ϕ(Xi) ∈ Rd. (4) The same encoder Enc ϕ is shared by all receivers. This choice reflects the fact that receiver positions vary across scenes and deployments. Every receiver plays the same role, so a shared extractor keeps the model applicable to any node, while specialization by receiver index would tie it to one geometry. Only the latent zi crosses the reporting link. At the fusion node it is paired with the known position of its originating receiver, forming the report token 
+
+ui = ( zi, r i). (5) The position tag is essential because the same latent has a dif-ferent geometric meaning depending on where the observation was taken. The fusion node therefore assembles task-oriented reports rather than raw signals. The encoder and decoder are trained end-to-end using the set distortion Dset , so the latent zi
+
+is optimized for emitter counting and localization rather than for reconstructing xi.Fig. 2 summarizes the reporting pipeline. Each receiver applies the shared encoder locally and sends its latent over an unreliable reporting link. The next subsection describes how the fusion node combines the reports that survive this link. 
+
+C. Permutation-Invariant Fusion over Surviving Reports 
+
+The reporting link described in Section III-E delivers a random subset S ⊆ { 1, . . . , M }. The fusion node therefore receives a variable-size collection whose membership the channel determines, in place of a fixed-length ordered vector. We model this collection as a set and write 
+
+ˆΘ = Dec ψ
+
+ {ui : i ∈ S} . (6) The decoder is permutation-invariant, so its output stays the same under any reordering of the surviving reports [19], [20]. This is the central architectural choice. The unordered set sits on the reporting side as well as the output side, so a lost report simply leaves the input set instead of occupying a placeholder in a fixed vector. This matches the behavior of contention-based and unreliable reporting links, where the channel determines which receivers are observed by the fusion node. The same decoder is therefore well defined for any surviving subset S. It can process different report memberships from one window to the next, and it can also be evaluated with receiver counts different from the one used during training. A fixed-order concatenation decoder ties its input dimension to a prescribed receiver count and index ordering, so it applies at its own training count alone. Section IV-B gives the implementation of Dec ψ using a shared per-report embedding followed by masked attention pooling. 
+
+D. Finite-Rate Semantic Reporting 
+
+The latent vector zi is the semantic message sent by receiver 
+
+i. To model a finite-rate reporting link, each component of 
+
+zi is quantized to b bits. We use per-dimension affine min– max calibration: each latent component is mapped to the unit interval, uniformly quantized, and then mapped back to the latent scale. As b → ∞ , this operation approaches the full-precision latent. The per-receiver semantic rate and the offered reporting load per observation window are 
+
+Ri = bd, Rtot =
+
+> M
+
+X
+
+> i=1
+
+Ri = M bd [bits/window] . (7) The rate is therefore controlled by the latent dimension d
+
+and the bit depth b. Receiver positions arrive as side in-formation, so Ri counts the semantic payload alone. In the experiments that isolate erasure and fusion architecture, we use full-precision latents, which keeps quantization out of the comparison. In the rate study of Section V-G, b is treated as a design variable and sampled during training, so that the same model can be evaluated across several reporting rates. 
+
+E. Contention-Based Access and Report Erasure 
+
+Reports are sent to the fusion node over shared unreliable reporting links. In many low-cost sensing deployments, re-ceivers access the medium through contention-based or grant-free transmission rather than through dedicated scheduled resources [4], [5]. In this regime, an important impairment is the loss of a whole report. A report may be missing because of a collision, a deep fade, or a missed transmission due to duty-cycle or energy constraints. Emitter scene                 
+
+> Θ = {pk}
+> Rx 1:T+ Enc ϕ
+> Rx 2:T+ Enc ϕ
+> ...Rx M:T+ Enc ϕ
+> z1
+> z2
+> zM
+> Erasure reporting link
+> ϵ
+> Permutation-invariant set fusion
+> Dec ψ({(zi, r i)}i∈S )ˆΘ:count ˆK
+> locations
+> {ˆpk}
+> x1
+> x2
+> xM
+
+## ×              
+
+> {zi}i∈S ˆΘ
+> Fig. 2. Distributed semantic reporting and set fusion. The emitter scene Θis observed by Mreceivers at scene-dependent positions. Each receiver applies the same encoder to its time-frequency feature and transmits the resulting compact latent ziover an unreliable reporting link, which may erase whole reports with probability ϵ; one erased report is shown by ×. At the fusion node, each surviving latent is paired with its known receiver position rito form ui= ( zi, r i),and a permutation-invariant decoder maps the surviving set to the emitter count and locations.
+
+We model this impairment as whole-report erasure. Receiver 
+
+i is delivered to the fusion node with probability 1 − ϵi and is otherwise dropped: 
+
+i ∈ S with probability 1 − ϵi, i / ∈ S with probability ϵi.
+
+(8) The erasure pattern is resampled for each observation window. In the experiments, we use a common erasure probability ϵ
+
+unless otherwise stated. This model preserves the packet-level nature of the reporting link. If a report is erased, its latent never arrives, so the fusion node forms no token for that receiver. The decoder in (6) must therefore estimate the full emitter set from the surviving reports {ui : i ∈ S} . This directly connects the access-channel impairment to the set-fusion architecture. 
+
+F. Access-Regime Interpretation 
+
+The erasure probability ϵ summarizes the reliability of the reporting link. It can represent several mechanisms that remove a whole report before it reaches the fusion node, including contention, fading, duty-cycle limits, or energy constraints. As a simple access-level interpretation, consider receivers reporting over a shared grant-free or slotted-ALOHA link with aggregate offered load G report attempts per slot [5]. Under the standard Poisson approximation, a report is delivered if no competing transmission occupies the same slot, giving 
+
+ϵ = 1 − e−G, T = Ge −G, (9) where T is the aggregate throughput in successful reports per slot. Equation (9) provides a marginal delivery-probability interpretation of ϵ. The experiments retain independent per-receiver erasures and do not reproduce the correlated collision pattern of a specific random-access protocol. Thus ϵ = 0 .3
+
+corresponds to G ≈ 0.36 , while ϵ = 0.5 corresponds to 
+
+G ≈ 0.69 , inside the high-throughput region below the ALOHA peak at G = 1 . This gives a concrete interpretation to the channel-aware training range ϵ ∈ [0 , 0.5] . Larger values, such as ϵ = 0 .9, represent overloaded reporting conditions and serve as stress tests. 
+
+G. Channel-Aware Task Objective 
+
+The encoder and decoder are trained to minimize the expected set distortion over random emitter scenes, receiver geometries, and channel realizations. For a target reporting rate, this can be written as 
+
+min  
+
+> ϕ, ψ
+
+EΘ, H
+
+h
+
+Dset (Θ , ˆΘ) 
+
+i
+
+s.t. Rtot ≤ Rbudget , (10) where H denotes the reporting-link realization. In the erasure experiments, H is the surviving receiver set S. In the rate study, it also includes the sampled bit depth used for latent quantization. Placing H inside the training expectation is what makes the system channel-aware. The model is trained on incomplete report sets, so the encoder learns latents that stay useful when the other reports are missing. The channel-naive baseline occupies the clean-link corner of this objective, with all reports delivered and full-precision latents. IV. M ETHOD 
+
+This section describes the learned reporting architecture, the permutation-invariant set loss, and the channel-aware training procedure. The model has three stages. Each receiver extracts a local time-frequency feature and encodes it into a compact latent. The fusion node aggregates the surviving position-tagged reports as an unordered set. The predicted emitter slots are then matched to the true emitter set through a permutation-invariant distortion. 
+
+A. Receiver Feature and Shared Encoder 
+
+Receiver i maps its complex baseband window xi ∈ CN to a time-frequency feature 
+
+Xi = T (xi). (11) In our implementation, T is a short-time Fourier transform, and the real and imaginary parts are stacked as two input channels. This representation keeps both phase and spectral-envelope information, which are affected by the emitters’ nuisance parameters and by propagation. The feature Xi is passed through a shared convolutional encoder, 
+
+zi = Enc ϕ(Xi) ∈ Rd. (12) The same parameters ϕ are used for all receivers. This matters because receiver positions vary from scene to scene, and every receiver plays the same role in the geometry. Sharing the encoder lets the same local feature extractor be applied to any receiver, while the set decoder handles the varying number and membership of reports. The encoder is implemented as a residual convolutional network followed by global average pooling and a linear projection. Group normalization is used instead of batch normalization, which keeps the encoder independent of batch statistics while erasures are sampled during training. The numerical architecture parameters are reported in the exper-imental setup. 
+
+B. Permutation-Invariant Set-Fusion Decoder 
+
+The decoder implements the set map in (6). Each surviving latent is paired with the position of its originating receiver, and the resulting report ui = ( zi, r i) is embedded by a shared multilayer perceptron, 
+
+hi = ρ(ui) = ρ([ zi, r i]) , i ∈ S , (13) where ri is the normalized receiver position. The embeddings are then aggregated by attention pooling over the surviving set. With a learned query q and keys ki computed from hi,the pooled summary is 
+
+s = X
+
+> i∈S
+
+αihi, αi = exp( q⊤ki/√dh)
+
+P 
+
+> j∈S
+
+exp( q⊤kj /√dh) . (14) Multi-head attention pooling is used in practice, following the Set Transformer pooling block [20]. The aggregation in (14) is permutation-invariant because the sum and softmax are taken only over the set S. When 
+
+S̸ = ∅, erased latents are zeroed and excluded from the attention weights, so an erased report contributes nothing to the summary. For S = ∅, the implementation assigns uniform weights to the M inputs with zi = 0. Since the receiver positions remain available, s then depends on receiver geometry alone. This event has probability ϵM . For M = 4 
+
+it stays rare over most of the training range, at 6.25% for 
+
+ϵ = 0 .5 and 1.25% averaged over ϵ ∼ U [0 , 0.5] , and becomes dominant at the ϵ = 0 .9 stress point, where it reaches 65 .6% .The normalized survivor count |S| /M is appended to s, so that the decoder can use the amount of available spatial evidence. A final multilayer perceptron maps the resulting representation to Kmax candidate emitter slots, 
+
+ˆyj = (ˆ ej , ˆpx,j , ˆpy,j ), j = 1 , . . . , K max , (15) where ˆej is an existence logit and (ˆ px,j , ˆpy,j ) is the predicted location. Locations are normalized by the region size during training and converted back to meters for reporting. 
+
+C. Permutation-Invariant Set Distortion 
+
+The true emitter set is unordered and has variable cardi-nality. We therefore match predicted and true slots before computing the loss. Ground truth is padded to Kmax slots with existence labels ek ∈ { 0, 1}. The assignment cost between predicted slot j and target slot k is 
+
+C(j, k ) = ℓBCE (ˆ ej , e k) + ek
+
+X
+
+> c∈{ x,y }
+
+ℓreg (ˆ pc,j , p c,k ), (16) where ℓBCE is binary cross-entropy and ℓreg is the smooth-
+
+L1 loss. The gate ek activates the localization term for real emitters, so padded targets carry an existence cost alone. The optimal assignment is 
+
+π⋆ = arg min 
+
+> πKmax
+
+X
+
+> k=1
+
+C(π(k), k ), (17) where π ranges over all permutations of the Kmax slots. Since 
+
+Kmax = 3 in the experiments, exhaustive search is sufficient. The training distortion is then 
+
+Dset (Θ , ˆΘ) = 
+
+> Kmax
+
+X
+
+> k=1
+
+C(π⋆(k), k ). (18) The same matching is used to compute the reported metrics: cardinality accuracy and localization RMSE over matched active emitters. 
+
+D. Channel-Aware Training and Baselines 
+
+Report erasure is inserted between the receiver encoder and the fusion decoder. For each training minibatch, a surviving set 
+
+S is sampled according to the erasure model in Section III-E. The decoder then receives only {ui : i ∈ S} . This Monte Carlo sampling realizes the expectation over H in (10) and trains the model under incomplete report sets. For channel-aware training, the erasure probability is sam-pled as 
+
+ϵ ∼ U [0 , ϵ max ], (19) with ϵmax = 0 .5 in the experiments. This trains one model over a range of reporting-link conditions. For the rate study, the bit depth b is also sampled during training, and a straight-through estimator is used through the quantizer. Experiments that isolate erasure and fusion architecture use full-precision latents. We evaluate three configurations. The channel-aware model uses the set-fusion decoder and is trained with report erasure. The channel-naive model uses the same set-fusion architecture and trains only on clean links, with all reports delivered. The fixed-order baseline shares the receiver encoder and also receives the receiver positions, yet it consumes the M reports in a fixed order in place of set fusion. This baseline is also trained with erasure, and its input dimension stays tied to the receiver count and index ordering used during training. An erased latent becomes a zero vector at the corresponding receiver position, which holds the input dimension fixed. Both decoders are told which reports arrived: the set decoder through the surviving set S, and the fixed-order baseline through an explicit per-node presence bit appended to its input. The encoder, the available inputs, the training channel, and the reporting budget are therefore held fixed, and the compared models differ in the fusion architecture. The two decoders are not parameter-matched: with M = 4 and d = 16 , the set-fusion decoder holds 1.9×10 5 parameters against 1.2×10 5 for the fixed-order decoder. The relevant evidence is accordingly the way the gap widens with ϵ in Section V, rather than an offset at a single operating point. V. E XPERIMENTS AND RESULTS 
+
+A. Experimental Setup 
+
+We evaluate the proposed reporting scheme on synthetic multi-emitter scenes generated according to the model in Sec-tion III. Unless otherwise stated, each scene contains M = 4 
+
+receivers with positions drawn uniformly at random in an 
+
+1000 × 1000 m region. The cross-count experiment in Sec-tion V-F uses the same trained model and varies this number only at evaluation time. Each scene contains K ∈ { 1, 2, 3}
+
+active emitters, drawn uniformly, with random locations and random nuisance parameters. The occupied bandwidth Bk is drawn uniformly from 1 to 16 MHz, and the center-frequency offset νk is drawn uniformly subject to the occupied band 
+
+[νk − Bk/2, ν k + Bk/2] lying within the ±20 MHz baseband (sampling rate 40 MHz); spectral overlap between emitters is therefore common. The transmit power Pk is drawn uniformly from −10 to 10 dBm, and the waveform family is either OFDM or single-carrier. Propagation follows a power-law path loss with exponent η = 2 .7, and all receivers share the same noise power of −90 dBm. Each receiver observes a 1 ms complex baseband window sampled at 40 MHz, giving N = 4 × 10 4 samples. The short-time Fourier feature uses a Hann window of length 
+
+256 and hop 160 , which gives Nt = 249 time frames. The real and imaginary parts are stacked as two channels. The shared encoder produces a d = 16 dimensional latent for each receiver, and the fusion node estimates the emitter set from the surviving position-tagged reports. Predictions are scored after the set matching of Section IV-C. We report two task-level metrics: cardinality accuracy, defined as the probability that the predicted count equals K, and localization RMSE over the matched active emitters. 
+
+B. Signal Generation and Quantizer 
+
+The synthetic scenes are generated as follows, so that the dataset can be reproduced from the description alone. 
+
+Waveforms. Both families use a QPSK alphabet with unit average symbol power, drawn uniformly and independently. An OFDM emitter uses symbols of L = 256 samples with no cyclic prefix. The number of active subcarriers is 
+
+round( Bk/f s·L), placed symmetrically about DC with the DC carrier nulled, and each symbol is formed by an inverse DFT scaled by √L. A single-carrier emitter uses root-raised-cosine pulse shaping with roll-off β = 0 .25 and a span of 8 symbols, at symbol rate Rs = Bk/(1 + β) and round( fs/R s) samples per symbol, with the filter transient discarded. Each waveform is normalized to unit average power before transmission. 
+
+Propagation and mixing. A waveform is generated once per emitter and shifted to its center-frequency offset by eȷ2πν k n/f s .It reaches receiver i with amplitude 
+
+q
+
+P lin  
+
+> k
+
+αi,k , where P lin  
+
+> k
+
+=10 Pk /10 converts the transmit power from dBm to linear units of mW, and αi,k = (max( di,k , d 0)/d 0)−η/ 2 is the power-law path loss with η = 2 .7 and reference distance d0 = 1 m. The receiver observation is the sum over emitters plus circularly-symmetric complex Gaussian noise, drawn independently per receiver and per sample, whose power 10 −90 /10 mW follows the same linear-unit convention. Only the ratio of these two quantities enters the problem, so the choice of reference unit leaves the signal-to-noise ratio unchanged. This model carries no per-emitter random phase and no propagation delay, so the same complex waveform reaches every receiver up to a real scale factor. The spatial information available for localization is therefore the received-power variation across the M known receiver positions, and time-difference or phase-difference cues are absent by construction. 
+
+Quantizer. Each latent component is quantized uniformly to 2b levels between per-dimension bounds zmin and zmax , by rounding the normalized value (z−zmin )/(zmax −zmin ) to one of the indices {0, . . . , 2b−1}. These bounds are estimated once from clean full-precision latents over 16 training batches, and values outside them are clipped. Gradients pass through the quantizer with a straight-through estimator. In the rate study the bit depth is sampled from b ∈ { 2, 3, 4, 6, 8} during training, and the trained model is evaluated at b ∈ { 2, 3, 4, 6, 8, 16 },giving Rtot = M bd between 128 and 1024 bits per window at M = 4 and d = 16 .
+
+C. Architecture and Training 
+
+The encoder is a residual convolutional network with a strided 5 × 5 stem followed by four residual blocks. The block strides are (2 , 2) , (2 , 2) , (2 , 2) , and (1 , 2) along the frequency and time axes, with channel widths (32 , 32 , 64 , 128 , 128) .Group normalization is used throughout. The set decoder embeds each surviving report, applies attention pooling, ap-pends the normalized survivor count |S| /M , and uses a final multilayer perceptron with hidden widths (256 , 256 , 128) to output Kmax = 3 candidate emitter slots. The dataset contains 
+
+40 ,000 training scenes, 4,000 validation scenes, and 4,000 test scenes. The evaluation is designed to isolate four factors: channel-aware training, fusion architecture, receiver-count generaliza-tion, and semantic rate. The channel-aware and channel-naive models use the same set-fusion architecture. The fixed-order baseline uses the same receiver encoder and receives receiver positions for fairness, but replaces the set decoder with a fixed-order concatenation decoder. All models are trained for 50 
+
+epochs with AdamW, learning rate 10 −3, weight decay 10 −4,batch size 64 , and gradient-norm clipping at 1.0. The learning rate follows a cosine schedule with a five-epoch linear warmup and is annealed to zero by the final epoch. The checkpoint with the lowest validation loss is used for testing. At evaluation, each operating point is averaged over 30 stochastic channel realizations with fixed seeds. The setup is deliberately scoped: the number of emitters is limited to K ≤ 3, the waveform set contains two families, the receiver noise power is identical across nodes, and the propa-0.0 0.2 0.4 0.6 0.8 Erasure probability ε      
+
+> 40 60 80 100 Cardinality acc (%)
+> channel-aware channel-naive
+> 0.0 0.2 0.4 0.6 0.8 Erasure probability ε
+> 100 150 200 250 300 Localization RMSE (m) Fig. 3. Channel-aware versus channel-naive set-fusion models under re-port erasure: cardinality accuracy (left) and localization RMSE (right). The channel-naive model performs well on clean links but degrades rapidly as reports are erased. Channel-aware training preserves counting accuracy over a wider erasure range and gives lower localization error once loss is appreciable.
+
+gation model is synthetic. These choices keep the comparison focused on the reporting channel and the fusion rule. More realistic propagation, denser scenes, and geometry-dependent receiver reliability are left for future work. 
+
+D. Channel-Aware Co-Design 
+
+We first evaluate the effect of exposing the semantic encoder and fusion decoder to report erasures during training. The channel-aware and channel-naive models use the same shared encoder and permutation-invariant decoder; they differ only in the training channel. The former samples erasures during training, with ϵ ∼ U[0 , 0.5] , whereas the latter is trained only on clean links. Both models are then evaluated under increasing erasure probability ϵ.Fig. 3 shows that channel-aware training is essential once report loss becomes appreciable. On clean links, both models perform well, and the channel-naive model holds a slight localization advantage because it is optimized for the full-report regime. As ϵ increases, the channel-naive model de-grades rapidly. Its cardinality accuracy drops sharply, which reveals a decoder that relies on the joint availability of several receiver reports. The channel-aware model instead maintains high counting accuracy over a much wider erasure range and degrades gracefully at high loss. The same trend appears in localization. The channel-naive model has the lowest RMSE only in the near-clean regime, but its localization error increases quickly as reports are erased. The channel-aware model crosses over at low-to-moderate era-sure and remains consistently better thereafter. This confirms that placing the erasure channel inside the training expectation reshapes the learned representation: each report becomes use-ful on its own, rather than only in the simultaneous presence of the other receivers. The gain therefore appears as robustness in the unreliable reporting-link regime considered in this paper, which is where it matters. 
+
+E. Set Fusion versus Fixed-Order Concatenation 
+
+We next isolate the effect of the fusion rule. The proposed decoder treats the surviving reports as an unordered set, whereas the fixed-order baseline concatenates the receiver latents in a prescribed order. Both models use the same shared receiver encoder, both receive the receiver positions and an 0.0 0.2 0.4 0.6 0.8 Erasure probability ε      
+
+> 40 60 80 100 Cardinality acc (%)
+> set fusion fixed-order concat
+> 0.0 0.2 0.4 0.6 0.8 Erasure probability ε
+> 175 200 225 250 275 Localization RMSE (m)
+> Fig. 4. Permutation-invariant set fusion versus fixed-order concatenation under report erasure. Both models are trained with channel-aware erasure and both receive receiver-position information. Set fusion is more robust for cardinality estimation and gives lower localization RMSE across the erasure sweep. The observed advantage is consistent with treating erased reports as absent set elements rather than as missing entries in a fixed-order representation.
+
+explicit indication of which reports arrived, and both are trained with channel-aware erasure under the same reporting budget. The encoder, the available inputs, the training channel, and the budget are therefore held fixed, and the models differ in how the fusion node represents the collection of reports. Fig. 4 shows that the permutation-invariant decoder is substantially more robust to report loss. On clean links, both models achieve high counting accuracy, but the set decoder already gives lower localization error. As erasure increases, the difference becomes more pronounced for cardinality esti-mation: the fixed-order decoder degrades rapidly, while the set decoder preserves high counting accuracy over a much wider range of erasure probabilities. This behavior is consistent with the structure of the problem. In the set decoder, an erased report is simply absent from the input set, and the pooling operation is performed over the reports that actually arrive. The fixed-order decoder instead retains a fixed-dimensional, ordered input, so missing reports perturb a representation built for constant membership. For localization, set fusion also remains better across the sweep. The gap is largest in the clean and moderate-erasure regimes, where the decoder can exploit the spatial diversity of several surviving receivers. At very high erasure, the two localization curves approach each other because both models are limited by the small number of reports that remain. The main conclusion is therefore twofold: set fusion improves robustness under report loss, and, more importantly, it matches the reporting-link structure by making the decoder operate on the surviving receiver set in place of a fixed concatenation. 
+
+F. Deployment Across Receiver Counts 
+
+We now test whether the proposed set-fusion model can operate beyond the receiver count used during training. The channel-aware model is trained only with M = 4 deployed receivers and is then evaluated, without retraining, at M ∈{2, 3, 4, 6}. This sweep suits the permutation-invariant for-mulation: a fixed-order concatenation decoder fixes its input dimension at the training count and index ordering, so it accepts M = 4 alone. Fig. 5 shows that the same model remains effective across receiver counts. Localization improves as more receivers are 2 3 4 6Number of deployed receivers M              
+
+> 90 92 94 96 98 100 Cardinality acc (%)
+> ε= 0
+> ε= 0.3
+> 2346Number of deployed receivers M
+> 160 180 200 220 240 Localization RMSE (m) Fig. 5. Cross-count deployment of one channel-aware set-fusion model trained at M= 4 deployed receivers (dotted line) and evaluated without retraining at M∈ { 2,3,4,6}. Localization improves as more receivers are deployed, both on clean links and under erasure. Cardinality accuracy remains high but is best near the training configuration. A fixed-order concatenation decoder cannot be evaluated here because its input dimension is tied to the training receiver count.
+
+deployed, both on clean links and under erasure. This trend is expected: additional receivers provide more spatial diversity and make the inverse localization problem better constrained. The improvement is especially clear when moving from two to four receivers. Increasing the count beyond the training value still improves localization, although with diminishing returns. Cardinality estimation also remains strong across receiver counts, and peaks near the training configuration. The drop at M = 2 reflects the limited spatial evidence available from a few receivers, especially when erasure is present. The mild drop at M = 6 shows that extrapolating beyond the training count remains possible at a small cost. The distinction matters: performance tracks the receiver count rather than staying identical across it, while one architecture and one checkpoint cover the whole range. The practical implication is that the proposed decoder sup-ports deployment flexibility. Receivers can be added, removed, or temporarily lost, and the fusion node still processes the surviving set of reports. Performance then follows the amount of spatial information actually available, in place of a fixed input format. 
+
+G. Rate–Reliability 
+
+We finally study how the semantic reporting rate interacts with report loss. The previous experiments used full-precision latents in order to isolate the effects of erasure and fusion architecture. Here, each latent component is quantized to b bits, and the total reporting load is Rtot = M bd bits per observation window. With M = 4 and d = 16 , this corresponds to 64 b
+
+bits across all receivers. Fig. 6 shows cardinality accuracy and localization RMSE as a function of the total offered reporting load Rtot for several erasure probabilities. The main observation is that only a few bits per latent component are needed. Performance improves rapidly at low rates and then saturates around a few hundred bits per window, with little additional gain beyond approximately b = 4 bits per component, i.e., Rtot ≈ 256 bits for four receivers. Erasure mainly changes the performance level while the rate at which saturation occurs holds. Higher erasure probabilities reduce the achievable cardinality accuracy and increase the 128 256 512 1024 Offered load Rtot (bits/window) 94 96 98 100 Cardinality acc (%)                         
+
+> ε= 0
+> ε= 0.3
+> ε= 0.5
+> 128 256 512 1024 Offered load Rtot (bits/window) 180 200 220 240 Localization RMSE (m)
+> Fig. 6. Rate–reliability behavior of the semantic reporting scheme. Cardinality accuracy (left) and localization RMSE (right) are shown versus total reporting load Rtot =M bd for erasure probabilities ϵ∈ { 0,0.3,0.5}. Performance saturates after a few bits per latent component, around Rtot ≈256 bits for
+> M= 4 and d= 16 . Erasure shifts the achievable performance level but does not substantially move the rate knee in the tested range.
+
+localization error, as expected, because fewer receiver reports reach the fusion node. The saturation knee nevertheless re-mains in roughly the same rate range across the tested erasure levels. This suggests that, in this operating regime, quanti-zation and report loss act as partly separable impairments: increasing the bit depth beyond the knee leaves the missing spatial observations unrecovered. The resulting reporting load is small compared with raw forwarding. At b = 4 , each receiver sends a 64-bit semantic report, or 256 bits in total for M = 4 . Forwarding the raw complex window would require N × 32 ≈ 1.28 Mbit per receiver with 16-bit I/Q samples, or 5.12 Mbit in total across four receivers. Comparing the two aggregates, the seman-tic representation reduces the reporting payload by roughly 
+
+2 × 10 4. Fig. 6 shows little additional task benefit from raising the latent precision beyond this point, which is the operating claim made here; the comparison quantifies payload, and it does not establish equivalence with a centralized raw-I/Q receiver. 
+
+H. Discussion 
+
+The results indicate that semantic reporting is useful be-cause it addresses two constraints at once: limited reporting capacity and unreliable links. A few hundred task-relevant bits per observation window suffice in the tested setting, a payload several orders of magnitude below forwarding raw I/Q samples. Report erasure also has to enter the design a priori. A channel-naive model degrades quickly when reports are lost, while channel-aware training makes the learned reports more useful under partial observation. The fusion rule is equally important. Since the link de-termines which reports arrive, the decoder should operate on the surviving set in place of a fixed-order vector. This explains both the robustness of set fusion under erasure and its ability to operate at receiver counts different from the one used during training. The rate results further show that quantization and erasure play different roles: quantization limits the information carried by each surviving report, while erasure limits the amount of spatial evidence available to the fusion node. Beyond the rate knee, increasing the bit depth leaves the missing receiver observations unrecovered. VI. C ONCLUSION 
+
+We presented a semantic communication scheme for dis-tributed spectrum monitoring over unreliable links. Receivers send compact latent reports, and a permutation-invariant de-coder pairs each survivor with its receiver position to estimate the emitter count and locations from whatever crosses the channel. Training with report erasure inside the task objective improves robustness, while set fusion outperforms fixed-order concatenation and supports deployment across receiver counts. The rate study shows that four bits per latent component suffice in the setting considered here, or 256 bits per observation window at M = 4 .The present evaluation covers synthetic propagation, at most three emitters, two waveform families, identical receiver noise, and independent per-node erasures. Future work will extend it to denser scenes, more realistic propagation, correlated and geometry-dependent erasures, and secondary estimation of spectral nuisance parameters. REFERENCES [1] D. G¨ und¨ uz, Z. Qin, I. E. Aguerri, H. S. Dhillon, Z. Yang, A. Yener, K. K. Wong, and C.-B. Chae, “Beyond transmitting bits: Context, seman-tics, and task-oriented communications,” IEEE J. Sel. Areas Commun. ,vol. 41, no. 1, pp. 5–41, 2023. [2] E. Calvanese Strinati and S. Barbarossa, “6G networks: Beyond Shannon towards semantic and goal-oriented communications,” Comput. Netw. ,vol. 190, p. 107930, 2021. [3] J. Shao, Y. Mao, and J. Zhang, “Learning task-oriented communication for edge inference: An information bottleneck approach,” IEEE J. Sel. Areas Commun. , vol. 40, no. 1, pp. 197–211, 2022. [4] N. Abramson, “The ALOHA system—another alternative for computer communications,” in Proc. Fall Joint Computer Conf. (AFIPS) , 1970, pp. 281–285. [5] M. B. Shahab, R. Abbas, M. Shirvanimoghaddam, and S. J. Johnson, “Grant-free non-orthogonal multiple access for IoT: A survey,” IEEE Commun. Surveys Tuts. , vol. 22, no. 3, pp. 1805–1838, 2020. [6] H. Xie, Z. Qin, G. Y. Li, and B.-H. Juang, “Deep learning enabled semantic communication systems,” IEEE Trans. Signal Process. , vol. 69, pp. 2663–2675, 2021. [7] N. Tishby, F. C. Pereira, and W. Bialek, “The information bottleneck method,” arXiv preprint physics/0004057 , 2000. [8] J. Shao, Y. Mao, and J. Zhang, “Task-oriented communication for multi-device cooperative edge inference,” IEEE Trans. Wireless Commun. ,vol. 22, no. 1, pp. 73–87, 2023. [9] P. A. Stavrou and M. Kountouris, “A rate distortion approach to goal-oriented communication,” in Proc. IEEE Int. Symp. Inf. Theory (ISIT) ,2022, pp. 590–595. [10] E. Bourtsoulatze, D. B. Kurka, and D. G¨ und¨ uz, “Deep joint source-channel coding for wireless image transmission,” IEEE Trans. Cogn. Commun. Netw. , vol. 5, no. 3, pp. 567–579, 2019. [11] J. Dai, S. Wang, K. Tan, Z. Si, X. Qin, K. Niu, and P. Zhang, “Nonlinear transform source-channel coding for semantic communications,” IEEE J. Sel. Areas Commun. , vol. 40, no. 8, pp. 2300–2316, 2022. [12] S. Rajendran, W. Meert, D. Giustiniano, V. Lenders, and S. Pollin, “Deep learning models for wireless signal classification with distributed low-cost spectrum sensors,” IEEE Trans. Cogn. Commun. Netw. , vol. 4, no. 3, pp. 433–445, 2018. [13] C. Zhan, M. Ghaderibaneh, P. Sahu, and H. Gupta, “DeepMTL: Deep learning based multiple transmitter localization,” in Proc. IEEE Int. Symp. World of Wireless, Mobile and Multimedia Networks (WoWMoM) ,2021. [14] H. N. Bicer and J. N. Laneman, “Spatially distributed task-oriented compression for multi-emitter localization and characterization with spectral overlap,” arXiv:2606.01446 [eess.SP], 2026. [15] I. F. Akyildiz, B. F. Lo, and R. Balakrishnan, “Cooperative spectrum sensing in cognitive radio networks: A survey,” Physical Communica-tion , vol. 4, no. 1, pp. 40–62, 2011. [16] C. Sun, W. Zhang, and K. B. Letaief, “Cooperative spectrum sensing for cognitive radios under bandwidth constraints,” in Proc. IEEE Wireless Commun. Netw. Conf. (WCNC) , 2007, pp. 1–5. [17] Z. Tian and G. B. Giannakis, “Compressed sensing for wideband cognitive radios,” in Proc. IEEE Int. Conf. Acoust., Speech, Signal Process. (ICASSP) , 2007, pp. 1357–1360. [18] S. Madden, M. J. Franklin, J. M. Hellerstein, and W. Hong, “TAG: A Tiny AGgregation service for ad-hoc sensor networks,” in Proc. USENIX Symp. Operating Systems Design and Implementation (OSDI) , 2002, pp. 131–146. [19] M. Zaheer, S. Kottur, S. Ravanbakhsh, B. P´ oczos, R. Salakhutdinov, and A. J. Smola, “Deep sets,” in Advances in Neural Information Processing Systems (NeurIPS) , 2017, pp. 3391–3401. [20] J. Lee, Y. Lee, J. Kim, A. R. Kosiorek, S. Choi, and Y. W. Teh, “Set transformer: A framework for attention-based permutation-invariant neural networks,” in Proc. Int. Conf. Machine Learning (ICML) , 2019, pp. 3744–3753.

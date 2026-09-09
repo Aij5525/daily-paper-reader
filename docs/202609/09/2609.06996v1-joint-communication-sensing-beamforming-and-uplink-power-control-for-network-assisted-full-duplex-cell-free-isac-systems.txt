@@ -1,0 +1,3128 @@
+Title: Joint Communication Sensing Beamforming and Uplink Power Control for Network-Assisted Full-Duplex Cell-Free ISAC Systems
+
+URL Source: https://arxiv.org/pdf/2609.06996v1
+
+Published Time: Wed, 09 Sep 2026 01:47:26 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+> 1
+
+# Joint Communication–Sensing Beamforming and Uplink Power Control for Network-Assisted Full-Duplex Cell-Free ISAC Systems 
+
+Reza Roshanghias, Seyed Mohammad Karbasi and Reza Saadat 
+
+Abstract —In this paper, we investigate the problem of design-ing joint downlink (DL) communication beamformer and uplink (UL) power as well as sensing beamformer in a multi static integrated sensing and communication (ISAC) enabled cell free massive multiple input multiple output (CF-mMIMO) system. To this goal, we first consider two priority-based beamforming strategies. In the communication-prioritized sensing design, we first design the communication beamformers and then the sensing beamformer is projected onto the nullspace of the effective communication channels to suppress its additional interference to both the DL UEs and UL receivers. In the sensing-prioritized communication design, we select the sensing beamformer first according to the target direction, while the communication beamformers are subsequently optimized using a max–min SINR formulation. In addition to these priority-based designs, we for-mulate a sensing-centric joint optimization problem to determine the optimal DL communication beamformers, sensing beam-former, and UL UE transmit powers. Our objective is to maximize the sensing SINR while guaranteeing individual DL and UL SINR requirements and satisfying the per-AP and per-UE transmit-power constraints. Since the resulting problem is non-convex because of the coupled beamforming and UL power variables, the beamforming vectors are lifted into positive-semidefinite transmit covariance matrices and semidefinite relaxation (SDR) is applied. Numerical results demonstrate that the considered framework can simultaneously maintain communication QoS and reliable target sensing under NAFD cross-link interference. The MAPRT detector achieves a detection probability of approximately 0.97 
+
+at τs = 10 , with an empirical false-alarm probability close to 0.05 , while the optimized communication links satisfy their prescribed SINR requirements using the available AP and UE power budgets. 
+
+Index Terms —Cell-free massive MIMO, integrated sensing and communication (ISAC), network-assisted full-duplex (NAFD), interference management, target detection, MAPRT, channel es-timation, beamforming, power allocation, semidefinite relaxation (SDR), alternating optimization (AO). 
+
+I. I NTRODUCTION 
+
+The evolution toward sixth-generation (6G) wireless net-works is expected to transform wireless infrastructure from a conventional communication-only platform into a distributed intelligent network capable of simultaneously communicating with users and perceiving the surrounding environment. Inte-grated sensing and communication (ISAC) has consequently emerged as an important candidate technology for future 
+
+R.Roshanghias and SM.Karbasi are with the Department of Electri-cal Engineering, Sharif University of Technology, Tehran, Iran (e-mail: reza.roshanghias@researcher.sharif.edu,SM.Karbasi@sharif.edu ). R.Saadat is with the Department of Electrical Engineering Yazd University, Yazd, Iran (e-mail: rsaadat@yazd.ac.ir). 
+
+wireless systems because communication and radar sensing can share spectrum, radio-frequency hardware, antenna arrays, and signal-processing resources [1]–[6]. Comprehensive tutorials and surveys have established the fundamental principles of ISAC, including waveform de-sign, transmit and receive beamforming, sensing-assisted com-munications, communication-assisted sensing, information-theoretic limits, and radar–communication performance trade-offs [1], [2], [4], [5]. In particular, dual-functional radar– communication systems exploit a common transmitted wave-form for both data transmission and environmental sensing, thereby improving spectral and hardware efficiency [2], [7]. Nevertheless, the sensing performance of a conventional cen-tralized ISAC base station may deteriorate because of block-age, unfavorable target geometry, severe path loss, and limited spatial diversity. A complementary architecture for future wireless networks is cell-free massive MIMO (CF-mMIMO). In contrast to con-ventional cellular systems, a large number of geographically distributed APs cooperatively serve users without relying on fixed cell boundaries [8], [9], [11]. The distributed architecture provides macro-diversity and can reduce the large service-quality variations associated with cell-edge users. The seminal work in [8] demonstrated the substantial performance advan-tages of cell-free massive MIMO over conventional small-cell deployments. Subsequent studies investigated power control, precoding, channel estimation, centralized and distributed pro-cessing, energy efficiency, and scalable implementations [9]– [12]. The theoretical and practical foundations of user-centric cell-free massive MIMO have been systematically developed in [13], while comprehensive surveys such as [14], [15] discuss channel estimation, pilot assignment, user association, power allocation, fronthaul requirements, and scalable cooperation. These studies establish CF-mMIMO as a flexible distributed architecture in which each UE can be jointly served by a suitable subset of geographically distributed APs. The distributed nature of cell-free networks is particularly attractive for sensing. Instead of observing a target from a single location, spatially separated APs can illuminate and observe the environment from different directions, creating a multi-static sensing architecture with improved spatial di-versity. This observation has motivated the emerging concept of cell-free ISAC (CF-ISAC) [23]–[25], [32]. A recent com-prehensive treatment of CF-ISAC [32] discusses cooperative transmission, multi-static sensing, target-centric architectures, arXiv:2609.06996v1 [eess.SP] 7 Sep 2026 2
+
+sensing metrics, resource allocation, synchronization, interfer-ence management, and fronthaul limitations. Several recent works have investigated different aspects of CF-ISAC. For example, capacity-constrained fronthaul and hy-brid precoding were studied in [23], while hybrid beamforming for distributed ISAC was considered in [24]. Multi-static CF-mMIMO ISAC performance and power allocation were investigated in [25]. Dynamic AP operation mode selection for mmWave CF-ISAC was considered in [26], highlighting the importance of deciding whether individual APs should communicate, sense, or remain inactive. Resource allocation and beamforming have also received increasing attention. Joint communication and sensing beam-forming under security requirements was studied in [27], while joint secrecy rate and sensing-SNR optimization was investigated in [28]. Learning-based distributed beamforming approaches have been proposed to reduce the computational and fronthaul requirements of centralized optimization [29], [36]. More recently, joint space-time adaptive processing and beamforming has been considered for cooperative CF-ISAC target detection [35], and graph-learning approaches have been developed to bridge system-level CF-ISAC optimization and target-parameter estimation [37]. Target detection constitutes another important aspect of practical CF-ISAC operation. Many resource-allocation studies implicitly assume that the target exists and that its relevant parameters are known. In practice, however, the network must first determine whether a target is present before allocat-ing communication and sensing resources based on target-dependent channels. Recent work has therefore begun explic-itly incorporating target detection into cell-free ISAC. In [33], an OTFS-aided cell-free MIMO ISAC system was investigated and a maximum a posteriori ratio test was developed for target detection. Multiple-target detection in CF-mMIMO-assisted ISAC was studied in [34], demonstrating the importance of distributed AP cooperation for sensing. In parallel with these developments, full-duplex communi-cation has long been recognized as a means of improving spectral efficiency by supporting simultaneous transmission and reception in the same frequency band [16]–[18]. Its practical performance, however, is strongly affected by self-interference and cross-link interference. These challenges be-come even more significant in ISAC systems because strong communication signals can mask weak target echoes [30], [31]. Network-assisted full-duplex (NAFD) provides an alterna-tive approach to conventional full-duplex radios. Instead of requiring each AP to transmit and receive simultaneously, geographically distributed half-duplex APs are divided into DL and UL groups. The DL APs and UL APs simultaneously serve DL and UL users over the same time-frequency resources, thereby realizing full-duplex operation at the network level [19]–[22]. This architecture avoids strong self-interference at each individual AP but introduces inter-AP interference from DL APs to UL APs and UL-to-DL cross-link interference between users. The performance of NAFD CF-mMIMO under imperfect CSI was investigated in [19]. Joint AP-mode assignment, power control, and large-scale fading decoding for spectral-and energy-efficiency optimization were subsequently devel-oped in [20]. Limited fronthaul and quantized implementations were investigated in [21], [22]. These studies demonstrate the potential of NAFD cell-free networks for simultaneous UL and DL communications, but they primarily focus on communication performance rather than the coexistence of communication, sensing, target detection, and target-dependent inter-AP interference. The combination of NAFD and CF-ISAC creates a par-ticularly challenging interference environment. During simul-taneous transmission, a UL AP receives the desired UL signals together with interference generated by the DL APs. When a sensing target is present, the DL waveform also produces target-reflected components that are observed at the UL APs. At the same time, UL UE transmissions interfere with DL reception, while communication and sensing beams compete for the limited transmit-power budgets of the DL APs. Hence, communication beamforming, sensing beamforming, UL power allocation, channel estimation, and target detection become strongly coupled. Although SDR, successive convex approximation, alternat-ing optimization, and related optimization techniques have been widely used for non-convex beamforming and resource-allocation problems [7], [25], [30], [38], the joint treatment of these mechanisms in an NAFD cell-free ISAC architecture remains comparatively unexplored. In particular, assuming perfect knowledge of target-dependent channels before estab-lishing target existence may result in an optimistic system model. Motivated by these observations, this work considers an NAFD cell-free ISAC network in which distributed APs are partitioned into DL and UL operating sets. The DL APs jointly transmit communication and sensing signals, while the UL APs simultaneously receive UL communication signals and target-related sensing components. Channel estimation and tar-get detection are explicitly incorporated into the transmission protocol, and a MAPRT detector is employed before target-dependent optimization is performed. 
+
+A. Main Contributions 
+
+The main contributions of this paper are summarized as follows.  
+
+> •
+
+We develop an interference-aware NAFD cell-free ISAC framework that jointly supports DL communication, UL communication, and distributed target sensing. The con-sidered model explicitly incorporates imperfect channel estimation, residual DL-to-UL cross-link interference, UL-to-DL interference, and target-induced sensing links. A four-stage transmission protocol is adopted, consisting of channel estimation, MAPRT-based target detection, target-assisted inter-AP channel estimation, and simulta-neous communication–sensing transmission.  
+
+> •
+
+We formulate a sensing-centric joint optimization prob-lem for the DL communication beamformers, sensing beamformer, and UL UE transmit powers. The objective is to maximize the sensing SINR while satisfying the 3
+
+prescribed DL and UL communication SINR require-ments, per-AP transmit-power constraints, and UL UE power limits. This formulation explicitly captures the coupling between sensing illumination, communication beamforming, UL power control, and NAFD cross-link interference.  
+
+> •
+
+To address the resulting non-convex optimization prob-lem, we transform the beamforming vectors into positive-semidefinite covariance matrices and employ semidefi-nite relaxation (SDR). An alternating-optimization (AO) algorithm is developed to alternately optimize the DL communication/sensing covariance matrices and the UL transmit powers. For fixed UL powers, the beamforming subproblem is handled through SDR and bisection over the achievable sensing SINR, whereas the UL power variables are subsequently updated for the obtained beam-forming solution. This procedure is repeated until conver-gence.  
+
+> •
+
+In addition to the joint optimization framework, we develop two complementary priority-based beam-forming strategies to characterize the fundamental communication–sensing tradeoff. In the communication-prioritized sensing (CPS) strategy, the communication beamformers are designed first, while the sensing beam-former is projected onto the nullspace of the effective communication channels. Unlike conventional nullspace sensing designs, the proposed construction accounts for both the DL UE channels and the effective DL-to-UL cross-link channels after UL receive combining, thereby protecting both DL and UL communication from addi-tional sensing-induced interference.  
+
+> •
+
+In the sensing-prioritized communication (SPC) strategy, the sensing beamformer is designed first according to the dominant target sensing direction and is subsequently kept fixed. The communication beamformers are then optimized through a max–min SINR formulation subject to the NAFD interference structure and per-AP power constraints. Hence, the CPS and SPC schemes represent two opposite operating points: the former prioritizes com-munication protection and uses the remaining spatial de-grees of freedom for sensing, whereas the latter prioritizes target illumination and utilizes the remaining degrees of freedom to improve communication performance.  
+
+> •
+
+Target detection is explicitly incorporated through amaximum-a-posteriori ratio test (MAPRT), allowing the sensing performance to be evaluated in terms of detection, false-alarm, and misdetection probabilities rather than relying solely on sensing SINR. The numerical results demonstrate the interaction among target detection per-formance, sensing SINR, communication QoS, UL power allocation, and NAFD cross-link interference, and enable a direct comparison between the proposed joint design and the two priority-based beamforming strategies. 
+
+To the best of our knowledge, the main novelty of this work is the unified treatment of MAPRT-based target detection, imperfect channel knowledge, NAFD cross-link interference, distributed communication/sensing beamforming, and UL power control within a single SDR– AO optimization framework for cell-free ISAC. In contrast to conventional CF-ISAC formulations that assume the sensing target is already known to exist, the proposed framework explicitly connects the target-detection stage to the subsequent target-aware interference-management and resource-allocation stage. The remainder of this paper is organized as follows. Sec-tion II presents the NAFD cell-free ISAC system model, channel models, channel-estimation procedure, and the DL, UL, and sensing signal models. Section III describes the target-detection stage and the MAPRT detector and formulates the joint communication–sensing optimization problem in vector form. Section IV transforms the problem into its matrix SDR representation and develops the proposed AO solution. Section V presents the numerical results, and Section VI concludes the paper. II. S YSTEM CONFIGURATION AND NOTATION 
+
+Consider an integrated sensing and communication (ISAC)-enabled cell-free massive MIMO (CF-mMIMO) system oper-ating over a region traversed by a mobile target. A central pro-cessing unit (CPU) coordinates M geographically distributed half-duplex (HD) access points (APs), each equipped with N
+
+antennas, to simultaneously provide communication services to K single-antenna user equipments (UEs) and sense a point-like device-free target over the same time-frequency resources. Under CPU-based scheduling, the APs are partitioned into two disjoint groups. Specifically, MUL APs operate in the uplink (UL) reception mode, whereas the remaining MDL APs operate in the downlink (DL) transmission mode, where 
+
+MUL + MDL = M. (1) The corresponding AP index sets are denoted by MUL and 
+
+MDL , respectively, such that 
+
+MUL ∩ M DL = ∅, MUL ∪ M DL = M. (2) Similarly, among the K UEs, KUL UEs request UL trans-mission and the remaining KDL UEs request DL service, with 
+
+KUL + KDL = K. (3) Their corresponding index sets are denoted by KUL and KDL ,respectively, where 
+
+KUL ∩ K DL = ∅, KUL ∪ K DL = K. (4) Figure 1 illustrates the considered NAFD cell-free ISAC architecture and its transmission protocol. The distributed APs are divided into DL and UL sets, where the DL APs simultaneously serve DL UEs and illuminate the sensing target, while the UL APs receive UL transmissions and target echoes. The system operates over four stages comprising channel estimation, MAPRT-based target detection, target-aware inter-AP channel estimation, and joint communication– sensing transmission. The figure also highlights the major propagation channels and cross-link interference, particularly DL-AP-to-UL-AP and UL-UE-to-DL-UE interference, which 4
+
+Fig. 1: Our Proposed System Model motivate the proposed joint beamforming and power-control design. The effective inter-AP channel consists of a target-free propagation component and, when the target is present, a target-reflected component. Consequently, the target presence must be determined before estimating the inter-AP channels. To this end, a dedicated target-detection stage is performed, during which all DL APs transmit sensing signals over τs
+
+symbols, while all UL APs cooperatively process the received echoes to determine the estimated target-presence indicator bδT .We define the actual target indicator as 
+
+δT ∈ { 0, 1}, (5) where δT = 1 indicates target presence and δT = 0 indicates target absence. A quasi-static block-fading model is adopted, where each coherence interval comprises τc symbols. Exploiting the tem-poral continuity of the target motion, the CPU uses the sensing result obtained in the preceding coherence interval to acquire prior information about the target position, denoted by 
+
+(¯ xT , ¯yT ), (6) . A hotspot region centered at (¯ xT , ¯yT ) is subsequently defined to represent the region in which the target is most likely to appear during the current coherence interval. When δT = 1 , the target is assumed to lie within this hotspot region, and the system performs target sensing, including the estimation of its motion characteristics such as velocity and direction, concurrently with UL and DL communications. In contrast, when δT = 0 , no target is present within the consid-ered sensing region and the available resources are devoted solely to communication. This assumption is motivated by the continuity of target motion over consecutive coherence intervals. 
+
+A. Stage Arrangement of the Proposed Interference Manage-ment Mechanism 
+
+The proposed interference management mechanism incor-porates both direct and indirect interference suppression tech-niques. Each coherence interval, consisting of τc symbols, is divided into four consecutive stages, as illustrated in Fig. 1. 
+
+1) Uplink Pilot Training Stage: During the first stage, all UEs transmit uplink pilot sequences of length τ UL  
+
+> p
+
+. Based on the received pilot signals, the CPU estimates the channel state information (CSI) between the UEs and the APs. The resulting channel estimates are subsequently employed for UL signal reception and DL transmission. 
+
+2) Target Detection Stage: The inter-AP channel between a DL AP and a UL AP depends on the presence of the target. When the target is absent, i.e., δT = 0 , the inter-AP channel contains only the target-free propagation component. In con-trast, when the target is present, i.e., δT = 1 , the effective inter-AP channel consists of both the target-free component and the target-reflected component. Therefore, determining the target presence prior to inter-AP channel estimation is essential. During this stage, all DL APs transmit sensing signals of length τs, while the UL APs cooperatively process the received signals to detect the target. The resulting target-presence estimate is denoted by bδT .
+
+3) Downlink Pilot Training Stage: During the third stage, all DL APs transmit downlink pilot sequences of length τ DL  
+
+> p
+
+,which are jointly received by the UL APs. Using these received pilot signals together with the estimated target indicator bδT ,the CPU estimates the effective inter-AP CSI. In particular, the target-detection result enables the CPU to account for the target-reflected propagation component when the target is detected. 
+
+4) Data Transmission and Target Sensing Stage: The re-maining symbols of each coherence interval are allocated to simultaneous UL/DL data transmission and, when required, target sensing. Accordingly, the duration of the fourth stage is 
+
+τd = τc − τ UL  
+
+> p
+
+− τs − τ DL  
+
+> p
+
+. (7) The sensing operation is activated according to the estimated target-presence indicator bδT . When bδT = 1, communica-tion and target sensing are performed concurrently over the same time-frequency resources. In this case, the CPU jointly coordinates the DL APs and UL APs to support UL/DL communications while sensing the target and suppressing the associated communication, sensing, and cross-link interfer-ence. In contrast, when bδT = 0 , no target is detected and the system operates in a communication-only mode. Therefore, the operation of the fourth stage can be summa-rized as 
+
+bδT =
+
+(
+
+1, UL/DL communication and target sensing ,
+
+0, UL/DL communication only . (8) 
+
+B. Channel Model 
+
+We consider a quasi-static block-fading model in which all wireless channels remain approximately constant within each coherence interval and vary independently between different coherence intervals. Moreover, the channels are assumed to be frequency-flat over the considered bandwidth. Let hUA  
+
+> m,k
+
+∈ CN ×1 denote the channel between UE k and AP m. In contrast to explicitly decomposing the channel into large-scale and small-scale fading components, we incorporate the effects of propagation loss, shadowing, and small-scale 5
+
+Fig. 2: Our Proposed System Model fading directly into hUA 
+
+> m,k
+
+. Accordingly, the channel is modeled as 
+
+hUA  
+
+> m,k
+
+∼ CN  0, RUA 
+
+> m,k
+
+ , (9) where RUA  
+
+> m,k
+
+∈ CN ×N denotes the spatial channel covariance matrix and implicitly accounts for the average channel power and the corresponding large-scale propagation effects. For spatially uncorrelated Rayleigh fading, this model reduces to 
+
+RUA  
+
+> m,k
+
+= βUA 
+
+> m,k
+
+IN , (10) where βUA  
+
+> m,k
+
+represents the average channel power. Similarly, the cross-link interference channel from UL UE 
+
+j to DL UE l is denoted by 
+
+hUU  
+
+> j,l
+
+∼ CN  0, β UU 
+
+> j,l
+
+ , (11) where βUU  
+
+> j,l
+
+implicitly captures the corresponding large-scale propagation effects. The target-free channel between DL AP i and UL AP m is denoted by HAA  
+
+> m,i
+
+∈ CN ×N and modeled as 
+
+HAA  
+
+> m,i
+
+∼ CN  0, RAA 
+
+> m,i
+
+ , (12) where RAA  
+
+> m,i
+
+incorporates the average propagation gain as well as the spatial characteristics of the inter-AP channel. Hence, no separate path-loss coefficient or AP-to-AP distance variable is required in the subsequent formulation. 
+
+1) Target-Reflected Channel: Since the considered device-free target is a mobile outdoor object, such as a vehicle or an unmanned aerial vehicle (UAV), the propagation links between the APs and the target are assumed to be dominated by line-of-sight (LoS) components. Furthermore, all APs are equipped with uniform linear arrays (ULAs) with half-wavelength an-tenna spacing. Let 
+
+a(θ) ≜ 1
+
+√N
+
+h
+
+1, e jπ sin( θ), . . . , e jπ (N −1) sin( θ)iT
+
+(13) denote the normalized ULA steering vector, where θ represents the corresponding angular direction. Let θdl,i denote the direction from DL AP i toward the target, and let θul,m denote the direction from the target toward UL AP m. Following the bistatic sensing model, the target-reflected channel from DL AP i to UL AP m through the target is expressed as 
+
+HATA  
+
+> m,i
+
+= ϑRCS  
+
+> m,i
+
+λATA  
+
+> m,i
+
+a(θul,m )aH (θdl,i ) (14) where ϑRCS  
+
+> m,i
+
+denotes the bistatic radar cross-section (RCS) of the target associated with the reflection path from DL AP i to UL AP m.Following the Swerling-I target model, the target is assumed to move slowly relative to the sensing duration. Therefore, 
+
+ϑRCS  
+
+> m,i
+
+remains approximately constant over the sensing sym-bols collected within consecutive coherence intervals. Since the RCS depends on the physical characteristics of the target, including its shape, material composition, and the incidence angle of the illuminating waveform, the CPU is assumed to possess an estimate bϑRCS  
+
+> m,i
+
+obtained from prior sensing observations. Following the target-reflected propagation model, the coef-ficient in (14) is given by 
+
+λATA  
+
+> m,i
+
+= λc
+
+q
+
+(4 π)3d 2TA ,dl,i d 2TA ,ul,m 
+
+, (15) where λc denotes the carrier wavelength, dTA ,dl,i is the distance between DL AP i and the target, and dTA ,ul,m is the distance between the target and UL AP m.Using the prior target-position estimate (¯ xT , ¯yT ), the CPU evaluates the nominal propagation geometry of the reflected path. The uncertainty associated with the target location and RCS estimation is incorporated into the statistical model of 
+
+HATA  
+
+> m,i
+
+.Finally, the effective channel between DL AP i and UL AP 
+
+m can be compactly represented as 
+
+Heff  
+
+> m,i
+
+= HAA  
+
+> m,i
+
++ δT HATA  
+
+> m,i
+
+(16) where δT ∈ { 0, 1} is the target-presence indicator. Therefore, when δT = 0 , the effective inter-AP channel contains only the target-free component, whereas for δT = 1 , it consists of both the target-free and target-reflected propagation components. III. C HANNEL ESTIMATION IN THE UPLINK PILOT 
+
+TRAINING STAGE 
+
+During the uplink pilot training stage, the K UEs transmit pilot sequences for channel estimation. Let 
+
+ϕp1 , . . . , ϕp 
+
+> τp
+
+∈ Cτp
+
+denote a set of mutually orthogonal pilot sequences satisfying 
+
+(ϕp 
+
+> t
+
+)H ϕp 
+
+> t′
+
+=
+
+(
+
+τp, t = t′,
+
+0, t̸ = t′. (17) Let tk ∈ { 1, . . . , τ p} denote the pilot assigned to UE k. The set of UEs sharing the same pilot as UE k is defined as 
+
+Ptk = { i | ti = tk }. (18) The received pilot signal at AP m is given by 6
+
+Yp 
+
+> m
+
+=
+
+> K
+
+X
+
+> k=1
+
+√τpρp hUA 
+
+> m,k
+
+ ϕp
+
+> tk
+
+H + Np
+
+> m
+
+, (19) where ρp denotes the pilot transmit power and 
+
+Np 
+
+> m
+
+∈ CN ×τp
+
+contains independent complex Gaussian noise samples with variance σ2ul .To estimate the channel between UE k and AP m, the received pilot matrix is correlated with the corresponding pilot sequence, 
+
+yp 
+
+> m,k
+
+= Yp
+
+> m
+
+ϕp 
+
+> tk
+
+= √τpρphUA 
+
+> m,k
+
++ X 
+
+> i∈P tk\{ k}
+
+√τpρphUA 
+
+> m,i
+
++Np
+
+> m
+
+ϕp 
+
+> tk
+
+.
+
+(20) Following the MMSE channel estimation framework, the channel hUA  
+
+> m,k
+
+is modeled as 
+
+hUA  
+
+> m,k
+
+∼ CN  0, RUA 
+
+> m,k
+
+ , (21) where RUA  
+
+> m,k
+
+denotes the channel covariance matrix. The MMSE estimate of hUA  
+
+> m,k
+
+is 
+
+bhUA  
+
+> m,k
+
+= √τpρpRUA 
+
+> m,k
+
+Ψ−1 
+
+> tk,m
+
+yp
+
+> m,k
+
+, (22) where 
+
+Ψtk ,m = X
+
+> i∈P tk
+
+τpρpRUA  
+
+> m,i
+
++ σ2ul IN . (23) The estimated channel is distributed as 
+
+bhUA  
+
+> m,k
+
+∼ CN (0, Φm,k ) , (24) with covariance matrix 
+
+Φm,k = τpρpRUA 
+
+> m,k
+
+Ψ−1 
+
+> tk,m
+
+RUA 
+
+> m,k
+
+. (25) By the orthogonality property of MMSE estimation, the true channel can be decomposed as 
+
+hUA  
+
+> m,k
+
+= bhUA  
+
+> m,k
+
++ ehUA 
+
+> m,k
+
+, (26) where the estimation error ehUA  
+
+> m,k
+
+is statistically independent of bhUA  
+
+> m,k
+
+and follows 
+
+ehUA  
+
+> m,k
+
+∼ CN (0, Cm,k ) , (27) with error covariance matrix 
+
+Cm,k = RUA  
+
+> m,k
+
+− Φm,k . (28) IV. T ARGET DETECTION STAGE 
+
+During the target detection stage, all DL APs transmit dedicated and mutually independent sensing waveforms, while the UL APs cooperatively process the received sensing signals to determine whether the target is present within the hotspot region. Since the primary objective of this stage is target-presence detection, the transmitted waveforms are designed to enhance the sensing performance. For DL AP i ∈ M DL , the transmitted sensing signal over 
+
+τs sensing symbols is expressed as 
+
+xsi [t] = wsi ssi [t], t = 1 , . . . , τ s, (29) where ssi [t] denotes the t-th symbol of the dedicated sensing sequence ssi ∈ Cτs , which is normalized to unit power, and 
+
+wsi ∈ CN ×1 denotes the sensing precoding vector. Under the single-target sensing model, conjugate beamform-ing toward the predicted target location provides an effective sensing precoder since it coherently concentrates the transmit-ted power toward the target. Accordingly, the sensing precoder at DL AP i is selected as 
+
+wsi = pPAP wcp  
+
+> i
+
+, (30) where 
+
+wcp  
+
+> i
+
+= a(¯θdl,i )
+
+a(¯θdl,i ) , (31) 
+
+¯θdl,i denotes the predicted direction from DL AP i toward the target hotspot, and PAP is the maximum transmit power available at each AP. The received signal at UL AP m ∈ M UL during the t-th sensing symbol is 
+
+ysm[t] = X
+
+> i∈M DL
+
+HAA 
+
+> m,i
+
+xsi [t] + δT
+
+X
+
+> i∈M DL
+
+HATA  
+
+> m,i
+
+xsi [t] + nsm[t],
+
+(32) where HAA  
+
+> m,i
+
+is the target-free channel between DL AP i and UL AP m, HATA  
+
+> m,i
+
+is the corresponding target-reflected channel defined in (14), and 
+
+nsm[t] ∼ CN  0, σ 2ul IN
+
+ (33) denotes the receiver noise at UL AP m.
+
+A. Vectorized Cooperative Sensing Model 
+
+To obtain a compact representation of the received sensing signals, we vectorize the inter-AP channel matrices as 
+
+ηAA  
+
+> m,i
+
+≜ vec HAA  
+
+> m,i
+
+, (34) and 
+
+ηATA  
+
+> m,i
+
+≜ vec HATA  
+
+> m,i
+
+. (35) The target-free vectorized channel is modeled as 
+
+ηAA  
+
+> m,i
+
+∼ CN  0, RAA 
+
+> m,i
+
+ , (36) where RAA  
+
+> m,i
+
+denotes its covariance matrix. Similarly, owing to uncertainty in the predicted target lo-cation and target reflection characteristics, the target-reflected channel is modeled as 
+
+ηATA  
+
+> m,i
+
+∼ CN  ηATA  
+
+> m,i
+
+, RATA 
+
+> m,i
+
+ , (37) 7
+
+where 
+
+ηATA  
+
+> m,i
+
+≜ vec 
+
+n
+
+HATA 
+
+> m,i
+
+o
+
+(38) is the vectorized mean target-reflected channel, and RATA 
+
+> m,i
+
+characterizes the uncertainty associated with the target-reflected channel. The mean target-reflected channel follows the physical channel model introduced in Section II-B, i.e., 
+
+HATA  
+
+> m,i
+
+= bϑRCS  
+
+> m,i
+
+λATA  
+
+> m,i
+
+a(¯θul,m )aH (¯θdl,i ), (39) where bϑRCS  
+
+> m,i
+
+denotes the estimated bistatic RCS and the remaining quantities follow the definitions given in the target-reflected channel model. The received signals collected by all MUL UL APs during symbol t are forwarded to the CPU and stacked as 
+
+ys[t] = (ys
+
+> 1
+
+[t]) T · · · (ysMUL [t]) T T . (40) Using the vectorization identity vec( ABC ) = (CT ⊗
+
+A) vec( B), the aggregate received sensing signal can be expressed as 
+
+ys[t] = Xs[t]ηAA + δT Xs[t]ηATA + ns[t] (41) where 
+
+Xs[t] = IMUL ⊗  (xs
+
+> 1
+
+[t]) T · · · (xsMDL [t]) T  ⊗ IN
+
+ . (42) The aggregate target-free channel vector is defined as 
+
+ηAA = (ηAA 1,1 )T · · · (ηAA 1,M DL )T · · · (ηAA  
+
+> MUL ,M DL
+
+)T T ,
+
+(43) with 
+
+ηAA ∼ CN  0, RAA 
+
+> η
+
+ . (44) Likewise, 
+
+ηATA = (ηATA 1,1 )T · · · (ηATA 1,M DL )T · · · (ηATA  
+
+> MUL ,M DL
+
+)T T ,
+
+(45) and 
+
+ηATA ∼ CN  ηATA , RATA 
+
+> η
+
+ . (46) Assuming statistically independent AP-to-AP links, the cor-responding aggregate covariance matrices can be represented in block-diagonal form as 
+
+RAA  
+
+> η
+
+= blkdiag RAA 1,1 , . . . , RAA  
+
+> MUL ,M DL
+
+, (47) 
+
+RATA  
+
+> η
+
+= blkdiag RATA 1,1 , . . . , RATA  
+
+> MUL ,M DL
+
+. (48) The mean vector of the aggregate target-reflected channel is 
+
+ηATA = (ηATA 1,1 )T · · · (ηATA  
+
+> MUL ,M DL
+
+)T T . (49) 
+
+B. MAPRT-Based Target Detection 
+
+To determine the target-presence indicator, the CPU em-ploys a maximum-a-posteriori ratio test (MAPRT). The re-ceived sensing signals over the τs sensing symbols are stacked as 
+
+yτ = (ys[1]) T · · · (ys[τs]) T T . (50) Similarly, define 
+
+gAA  
+
+> τ
+
+= (Xs[1] ηAA )T · · · (Xs[τs]ηAA )T T , (51) 
+
+gATA  
+
+> τ
+
+= (Xs[1] ηATA )T · · · (Xs[τs]ηATA )T T , (52) and let nτ denote the correspondingly stacked receiver noise vector. The binary target-detection problem is then formulated as 
+
+H0 : yτ = gAA  
+
+> τ
+
++ nτ ,
+
+H1 : yτ = gAA  
+
+> τ
+
++ gATA  
+
+> τ
+
++ nτ , (53) where H0 represents target absence and H1 represents target presence. The joint MAP estimation problem can therefore be ex-pressed as 
+
+bηAA , bηATA , bH
+
+
+
+= arg max 
+
+> ηAA ,ηATA ,H
+
+p  ηAA , ηATA , H | yτ
+
+ .
+
+(54) Assuming that the target-free and target-reflected channel components are statistically independent, the MAPRT decision rule is written as 
+
+Λ = Λnum 
+
+Λden 
+
+> H1
+
+≷
+
+> H0
+
+Λdet ,Th (55) where Λdet ,Th denotes the detection threshold. The numerator and denominator of the likelihood ratio are respectively given by 
+
+Λnum = max 
+
+> ηAA ,ηATA
+
+p  yτ | ηAA , ηATA , H1
+
+ p  ηAA | H 1
+
+ p  ηATA | H 1
+
+ ,
+
+(56) 
+
+Λden = max 
+
+> ηAA
+
+p  yτ | ηAA , H0
+
+ p  ηAA | H 0
+
+ . (57) The threshold Λdet ,Th can be selected according to a pre-scribed false-alarm probability or other desired target-detection criterion. Finally, the estimated target-presence indicator is obtained as 
+
+bδT =
+
+(1, Λ > Λdet ,Th ,
+
+0, Λ ≤ Λdet ,Th . (58) V. C HANNEL ESTIMATION IN THE DOWNLINK PILOT 
+
+TRAINING STAGE 
+
+During the downlink pilot training stage, all antennas of the 
+
+MDL DL APs transmit mutually orthogonal pilot sequences, while the MUL UL APs jointly receive these pilots and estimate the inter-AP channels with the aid of the target-presence estimate bδT obtained in the preceding target detection stage. Let 
+
+τdp = MDL N
+
+denote the number of mutually orthogonal downlink pilot sequences. The pilot sequence assigned to the n-th antenna of DL AP i ∈ M DL is denoted by ϕdp  
+
+> i(n)
+
+∈ Cτdp , where the pilot sequences satisfy 
+
+
+
+ϕdp 
+
+> i(n)
+
+H
+
+ϕdp  
+
+> j(q)
+
+=
+
+(
+
+τdp , i = j, n = q, 
+
+0, otherwise . (59) 8
+
+For DL AP i and UL AP m, the effective inter-AP channel during the current coherence interval is defined as 
+
+HJ 
+
+> m,i
+
+≜ HAA  
+
+> m,i
+
++ δT HATA  
+
+> m,i
+
+(60) where HAA  
+
+> m,i
+
+∈ CN ×N denotes the target-free inter-AP channel and HATA  
+
+> m,i
+
+∈ CN ×N denotes the target-reflected channel introduced in the preceding section. Equivalently, 
+
+HJ 
+
+> m,i
+
+=
+
+h
+
+hJ 
+
+> m,i (1)
+
+· · · hJ 
+
+> m,i (N)
+
+i
+
+∈ CN ×N , (61) where 
+
+hJ 
+
+> m,i (n)
+
+= hAA  
+
+> m,i (n)
+
++ δT hATA  
+
+> m,i (n)
+
+∈ CN ×1 (62) denotes the effective channel from the n-th antenna of DL AP 
+
+i to UL AP m.
+
+A. Received Downlink Pilot Signal 
+
+The pilot signal received at UL AP m ∈ M UL is expressed as 
+
+Ydp  
+
+> m
+
+= √τdp ρdp 
+
+X
+
+> i∈M DL
+> N
+
+X
+
+> n=1
+
+hJ
+
+> m,i (n)
+
+
+
+ϕdp 
+
+> i(n)
+
+H
+
++ Ndp  
+
+> m
+
+, (63) where ρdp denotes the downlink pilot transmit power and 
+
+Ndp  
+
+> m
+
+is the receiver-noise matrix whose entries are independent complex Gaussian random variables with variance σ2ul .To estimate the effective channel hJ
+
+> m,i (n)
+
+, UL AP m corre-lates the received pilot matrix with the pilot assigned to the 
+
+n-th antenna of DL AP i. Accordingly, the sufficient statistic is 
+
+ydp  
+
+> m,i (n)
+
+≜ Ydp  
+
+> m
+
+ϕdp 
+
+> i(n)
+
+. (64) Owing to the orthogonality of the downlink pilot sequences, 
+
+ydp  
+
+> m,i (n)
+
+provides the observation required for estimating the corresponding inter-AP channel. 
+
+B. MMSE Estimation of the Inter-AP Channel 
+
+Following the MMSE estimation principle, the estimate of 
+
+hJ 
+
+> m,i (n)
+
+can be expressed in its general form as 
+
+bhJ 
+
+> m,i (n)
+
+= E
+
+n
+
+hJ
+
+> m,i (n)
+
+o
+
++ Cov 
+
+n
+
+hJ
+
+> m,i (n)
+
+, ydp 
+
+> m,i (n)
+
+o
+
+Cov 
+
+n
+
+ydp 
+
+> m,i (n)
+
+, ydp 
+
+> m,i (n)
+
+o−1
+
+×
+
+
+
+ydp  
+
+> m,i (n)
+
+− E
+
+n
+
+ydp 
+
+> m,i (n)
+
+o 
+
+. (65) From (62), the conditional mean of the effective inter-AP channel is determined by the target-reflected component. Let 
+
+hATA  
+
+> m,i (n)
+
+≜ E
+
+n
+
+hATA 
+
+> m,i (n)
+
+o
+
+. (66) Then, 
+
+E
+
+n
+
+hJ
+
+> m,i (n)
+
+o
+
+= δT hATA 
+
+> m,i (n)
+
+. (67) For compactness, define the MMSE filtering matrix SJ
+
+> m,i (n)
+
+according to the second-order statistics of the effective inter-AP channel and the corresponding pilot observation. The MMSE estimate can then be written as 
+
+bhJ 
+
+> m,i (n)
+
+= δT
+
+
+
+IN − √τdp ρdp SJ
+
+> m,i (n)
+
+
+
+hATA 
+
+> m,i (n)
+
++ SJ
+
+> m,i (n)
+
+ydp 
+
+> m,i (n)
+
+. (68) 
+
+C. Target-Detection-Assisted Channel Estimate 
+
+The true target indicator δT is unknown to the CPU. Consequently, the CPU employs the estimated target indicator 
+
+bδT obtained from the MAPRT detector in Section IV. The practical estimate of the inter-AP channel is therefore defined as 
+
+ˇhJ 
+
+> m,i (n)
+
+= bδT
+
+
+
+IN − √τdp ρdp SJ
+
+> m,i (n)
+
+
+
+hATA 
+
+> m,i (n)
+
++ SJ
+
+> m,i (n)
+
+ydp 
+
+> m,i (n)
+
+. (69) The actual effective inter-AP channel follows 
+
+hJ 
+
+> m,i (n)
+
+∼ CN 
+
+
+
+δT hATA 
+
+> m,i (n)
+
+, RJ
+
+> m,i (n)
+
+
+
+, (70) where RJ 
+
+> m,i (n)
+
+denotes the covariance matrix of the effective inter-AP channel. Correspondingly, the target-detection-assisted channel esti-mate is modeled as 
+
+ˇhJ 
+
+> m,i (n)
+
+∼ CN 
+
+bδT hATA 
+
+> m,i (n)
+
+, ΦJ
+
+> m,i (n)
+
+
+
+, (71) where ΦJ 
+
+> m,i (n)
+
+denotes the covariance matrix of the estimated inter-AP channel. VI. S PECTRAL -E FFICIENCY AND SENSING -SINR ANALYSIS IN THE DATA -T RANSMISSION AND 
+
+TARGET -S ENSING STAGE 
+
+A. Downlink Spectral-Efficiency Analysis 
+
+During the data-transmission and target-sensing stage, the 
+
+MDL DL APs jointly transmit communication signals to the 
+
+KDL DL UEs. When the target is detected, the DL APs also transmit dedicated sensing waveforms to illuminate the target and estimate its motion-related parameters. Hence, communi-cation and sensing are performed simultaneously over the same time-frequency resources through multi-antenna precoding. The transmit signal of DL AP i ∈ M DL is expressed as 
+
+xDL  
+
+> i
+
+= X
+
+> k∈K DL
+
+wcom  
+
+> i,k
+
+sDL  
+
+> k
+
++ bδT wsen  
+
+> i
+
+ssen  
+
+> i
+
+, (72) where wcom  
+
+> i,k
+
+∈ CN ×1 denotes the communication beamform-ing vector employed by DL AP i for DL UE k, and sDL  
+
+> k
+
+is the corresponding unit-power information symbol, i.e., 
+
+E |sDL  
+
+> k
+
+|2 = 1 . (73) Moreover, ssen  
+
+> i
+
+denotes the dedicated sensing symbol trans-mitted by DL AP i, which is statistically independent of the communication data symbols and satisfies 
+
+E |ssen  
+
+> i
+
+|2 = 1 , (74) and 
+
+E {ssen  
+
+> i
+
+(ssen  
+
+> i′
+
+)∗} = 0 , i̸ = i′. (75) The corresponding sensing beamforming vector is denoted by 
+
+wsen  
+
+> i
+
+∈ CN ×1.The binary quantity bδT represents the target indicator ob-tained from the MAPRT-based target-detection stage. There-fore, the sensing transmission is activated only when the target is declared present. 9
+
+Using the channel decomposition introduced in the uplink pilot training stage, 
+
+hUA  
+
+> i,l
+
+= bhUA  
+
+> i,l
+
++ ehUA  
+
+> i,l
+
+, (76) the received signal at DL UE l ∈ K DL can be decomposed as 
+
+yDL  
+
+> l
+
+= X
+
+> i∈M DL
+
+bhUA 
+
+> i,l
+
+H
+
+wcom  
+
+> i,l
+
+sDL 
+
+> l
+
+| {z }
+
+> DDL
+> l
+
++ X 
+
+> k∈K DL
+> k̸=l
+
+X
+
+> i∈M DL
+
+bhUA 
+
+> i,l
+
+H
+
+wcom  
+
+> i,k
+
+sDL 
+
+> k
+
+| {z }
+
+> IMU ,DL
+> l
+
++ X
+
+> k∈K DL
+
+X
+
+> i∈M DL
+
+ehUA 
+
+> i,l
+
+H
+
+wcom  
+
+> i,k
+
+sDL 
+
+> k
+
+| {z }
+
+> ICE ,DL
+> l
+
++ bδT
+
+X
+
+> i∈M DL
+
+ hUA 
+
+> i,l
+
+H wsen  
+
+> i
+
+ssen 
+
+> i
+
+| {z }
+
+> Isen ,DL
+> l
+
++ X
+
+> u∈K UL
+
+√pu hUU  
+
+> u,l
+
+sUL 
+
+> u
+
+| {z }
+
+> ICLI ,DL
+> l
+
++nDL  
+
+> l
+
+, (77) where pu denotes the transmit power of UL UE u, sUL  
+
+> u
+
+is its unit-power UL data symbol, and 
+
+hUU  
+
+> u,l
+
+∈ C (78) denotes the UL-UE-to-DL-UE cross-link channel. The effect of path loss, shadowing, and small-scale fading is directly incorporated into hUU  
+
+> u,l
+
+, so that no separate channel-gain co-efficient is required. The additive receiver noise is modeled as 
+
+nDL  
+
+> l
+
+∼ CN  0, σ 2DL 
+
+ . (79) In (77), DDL  
+
+> l
+
+denotes the desired DL communication signal, whereas IMU ,DL  
+
+> l
+
+, ICE ,DL  
+
+> l
+
+, Isen ,DL  
+
+> l
+
+, and ICLI ,DL  
+
+> l
+
+respectively represent the multi-user DL interference, channel-estimation-error-induced interference, sensing-induced interference, and UL-to-DL cross-link interference. Accordingly, the instantaneous DL SINR of UE l is written as 
+
+ΓDL  
+
+> l
+
+= DDL 
+
+> l
+> 2
+
+IMU ,DL 
+
+> l
+> 2
+
++ ICE ,DL 
+
+> l
+> 2
+
++ Isen ,DL 
+
+> l
+> 2
+
++ ICLI ,DL 
+
+> l
+> 2
+
++ σ2DL 
+
+.
+
+(80) 
+
+B. Uplink Spectral-Efficiency Analysis 
+
+During uplink transmission, the KUL UL UEs simultane-ously transmit their data symbols to the MUL UL APs. Mean-while, the DL APs continue transmitting the joint communi-cation and sensing signals introduced in (72). Consequently, the received signal at UL AP m ∈ M UL is expressed as 
+
+yUL  
+
+> m
+
+= X
+
+> u∈K UL
+
+√pu hUA 
+
+> m,u
+
+sUL  
+
+> u
+
++ X
+
+> i∈M DL
+
+HJ
+
+> m,i
+
+xDL  
+
+> i
+
++ nUL  
+
+> m
+
+, (81) where pu denotes the transmit power of UL UE u, sUL  
+
+> u
+
+is its unit-power information symbol satisfying 
+
+E{| sUL  
+
+> u
+
+|2} = 1 , (82) and hUA  
+
+> m,u
+
+∈ CN ×1 denotes the channel between UL UE u and UL AP m. The receiver noise is modeled as 
+
+nUL  
+
+> m
+
+∼ CN  0, σ 2UL IN
+
+ . (83) The second term in (81) represents the DL-to-UL inter-AP cross-link interference (CLI). Owing to the relatively high DL transmit power and the dense deployment of APs, this inter-ference can severely degrade the UL reception performance if it is not properly suppressed. In the proposed interference-management framework, the CPU has access to both the DL transmit signals and the target-detection-assisted inter-AP channel estimates obtained during the downlink pilot training stage. Specifically, the practical estimate of the effective inter-AP channel is written as 
+
+ˇHJ 
+
+> m,i
+
+=
+
+hˇhJ 
+
+> m,i (1)
+
+· · · ˇhJ 
+
+> m,i (N)
+
+i
+
+, (84) where ˇhJ 
+
+> m,i (n)
+
+was defined in (69). The actual effective inter-AP channel can therefore be decomposed as 
+
+HJ 
+
+> m,i
+
+= ˇHJ 
+
+> m,i
+
++ eHJ
+
+> m,i
+
+, (85) where 
+
+eHJ 
+
+> m,i
+
+≜ HJ 
+
+> m,i
+
+− ˇHJ 
+
+> m,i
+
+(86) denotes the residual inter-AP channel estimation error. Since ˇHJ 
+
+> m,i
+
+and xDL  
+
+> i
+
+are available at the CPU, the recon-structed DL-to-UL interference 
+
+X
+
+> i∈M DL
+
+ˇHJ
+
+> m,i
+
+xDL  
+
+> i
+
+(87) can be subtracted from the received signal. Hence, after inter-AP CLI cancellation, the residual signal at UL AP m becomes 
+
+eyUL  
+
+> m
+
+= X
+
+> u∈K UL
+
+√pu hUA 
+
+> m,u
+
+sUL  
+
+> u
+
++ X
+
+> i∈M DL
+
+eHJ
+
+> m,i
+
+xDL  
+
+> i
+
++ nUL  
+
+> m
+
+. (88) Using the uplink channel decomposition 
+
+hUA  
+
+> m,u
+
+= bhUA  
+
+> m,u
+
++ ehUA 
+
+> m,u
+
+, (89) the CPU detects the data transmitted by UL UE j by combin-ing the signals received at all UL APs. The resulting decision statistic is 
+
+rUL  
+
+> j
+
+= X
+
+> m∈M UL
+
+vHm,j eyUL  
+
+> m
+
+, (90) where vm,j ∈ CN ×1 denotes the receive combining vector associated with UL UE j at UL AP m.Following the considered MRC receiver, the combining vector is selected as 
+
+vm,j = bhUA  
+
+> m,j
+
+. (91) 10 
+
+Substituting (88), (89), and (72) into (90), the detected signal can be decomposed as 
+
+rUL  
+
+> j
+
+= X
+
+> m∈M UL
+
+√pj vHm,j bhUA  
+
+> m,j
+
+sUL 
+
+> j
+
+| {z }
+
+> DUL
+> j
+
++ X
+
+> m∈M UL
+
+vHm,j 
+
+X
+
+> u∈K UL
+> u̸=j
+
+√pu bhUA 
+
+> m,u
+
+sUL 
+
+> u
+
+| {z }
+
+> IMU ,UL
+> j
+
++ X
+
+> m∈M UL
+
+vHm,j 
+
+X
+
+> u∈K UL
+
+√pu ehUA 
+
+> m,u
+
+sUL 
+
+> u
+
+!| {z }
+
+> ICE ,UL
+> j
+
++ X
+
+> m∈M UL
+
+vHm,j 
+
+" X
+
+> i∈M DL
+
+eHJ
+
+> m,i
+
+X
+
+> k∈K DL
+
+wcom  
+
+> i,k
+
+sDL 
+
+> k
+
+!# | {z }
+
+> ICLI ,UL
+> j
+
++ bδT
+
+X
+
+> m∈M UL
+
+vHm,j 
+
+X
+
+> i∈M DL
+
+eHJ
+
+> m,i
+
+wsen  
+
+> i
+
+ssen 
+
+> i
+
+!| {z }
+
+> Isen ,UL
+> j
+
++ X
+
+> m∈M UL
+
+vHm,j nUL 
+
+> m
+
+| {z }
+
+> IN,UL
+> j
+
+. (92) In (92), DUL  
+
+> j
+
+denotes the desired signal component of UL UE j. The term IMU ,UL  
+
+> j
+
+represents the multi-user UL inter-ference generated by the remaining UL UEs, whereas ICE ,UL 
+
+> j
+
+accounts for the interference caused by UL channel-estimation errors. Furthermore, ICLI ,UL  
+
+> j
+
+represents the residual DL-to-UL inter-AP CLI generated by the DL communication signals after interference reconstruction and cancellation, while Isen ,UL 
+
+> j
+
+represents the residual interference associated with the sensing waveform. Finally, IN,UL  
+
+> j
+
+denotes the post-combining receiver-noise component. Accordingly, the instantaneous UL SINR of UL UE j is expressed as 
+
+ΓUL  
+
+> j
+
+= |DUL  
+
+> j
+
+|2
+
+|IMU ,UL  
+
+> j
+
+|2 + |ICE ,UL  
+
+> j
+
+|2 + |ICLI ,UL  
+
+> j
+
+|2 + |Isen ,UL  
+
+> j
+
+|2 + |IN,UL  
+
+> j
+
+|2 .
+
+(93) 
+
+C. Sensing SINR Analysis 
+
+Based on the received signal in (81), the signal observed at UL AP m can be decomposed, from the sensing perspective, as 
+
+yUL  
+
+> m
+
+= DS sen  
+
+> m
+
++ IU,sen  
+
+> m
+
++ ID,sen  
+
+> m
+
++ nUL  
+
+> m
+
+, (94) where the desired target-reflected sensing signal is given by 
+
+DS sen  
+
+> m
+
+= bδT
+
+X
+
+> i∈M DL
+
+HATA  
+
+> m,i
+
+wsen  
+
+> i
+
+ssen  
+
+> i
+
+, (95) while 
+
+IU,sen  
+
+> m
+
+= X
+
+> u∈K UL
+
+√pu hUA 
+
+> m,u
+
+sUL  
+
+> u
+
+(96) and 
+
+ID,sen  
+
+> m
+
+= X
+
+> i∈M DL
+
+HJ
+
+> m,i
+
+X
+
+> k∈K DL
+
+wcom  
+
+> i,k
+
+sDL 
+
+> k
+
+!
+
+(97) represent the interference components caused by the UL and DL communication signals, respectively. These interference components can significantly degrade the sensing perfor-mance. Nevertheless, the proposed interference-management mechanism exploits the available CSI and decoded communi-cation symbols to partially reconstruct and suppress them. For the UL communication interference, the channel hUA 
+
+> m,u
+
+has already been estimated during the uplink pilot training stage. Moreover, after UL data detection, the CPU can obtain an estimate bsUL  
+
+> u
+
+of the transmitted symbol sUL  
+
+> u
+
+. Therefore, the UL communication interference can be reconstructed and subtracted from the received sensing signal. The corresponding residual UL interference is expressed as 
+
+eIU,sen  
+
+> m
+
+= X
+
+> u∈K UL
+
+√pu hUA 
+
+> m,u
+
+esUL  
+
+> u
+
+, (98) where 
+
+esUL  
+
+> u
+
+≜ sUL  
+
+> u
+
+− bsUL  
+
+> u
+
+(99) denotes the UL symbol-detection error. Following the consid-ered error model, it is characterized as 
+
+esUL  
+
+> u
+
+∼ CN 
+
+
+
+0, σ 2
+
+> esUL
+> u
+
+
+
+, (100) where σ2
+
+> esUL
+> u
+
+decreases as the corresponding UL SINR in-creases. Similarly, the CPU can exploit the estimated effective inter-AP channel ˇHJ 
+
+> m,i
+
+together with the known DL communication signals to reconstruct the DL communication interference. Accordingly, after interference reconstruction and cancellation, the residual DL communication interference is given by 
+
+eID,sen  
+
+> m
+
+= X
+
+> i∈M DL
+
+eHJ
+
+> m,i
+
+X
+
+> k∈K DL
+
+wcom  
+
+> i,k
+
+sDL 
+
+> k
+
+!
+
+, (101) where eHJ 
+
+> m,i
+
+≜ HJ 
+
+> m,i
+
+− ˇHJ 
+
+> m,i
+
+(102) denotes the residual inter-AP channel error. After subtracting the reconstructed UL and DL communica-tion interference components, the residual sensing observation at UL AP m can therefore be expressed as 
+
+eysen  
+
+> m
+
+= DS sen  
+
+> m
+
++ eIU,sen  
+
+> m
+
++ eID,sen  
+
+> m
+
++ nUL  
+
+> m
+
+. (103) The sensing observation is subsequently processed using a receive filter um ∈ CN ×1 at UL AP m. The corresponding scalar radar observation is 
+
+rsen  
+
+> m
+
+= uHm eysen  
+
+> m
+
+. (104) Hence, for given communication and sensing precoders, the output sensing SINR at UL AP m is expressed as 
+
+γsen  
+
+> m
+
+= uHmDS sen  
+
+> m
+
+(DS sen  
+
+> m
+
+)H um
+
+uHmQmum
+
+, (105) 11 
+
+where 
+
+Qm ≜
+
+eIU,sen  
+
+> m
+
++ eID,sen  
+
+> m
+
++ nUL 
+
+> m
+
+  eIU,sen  
+
+> m
+
++ eID,sen  
+
+> m
+
++ nUL 
+
+> m
+
+H
+
+(106) denotes the interference-plus-noise covariance matrix. The receive filter um has a direct impact on the achievable sensing SINR. Therefore, for fixed communication and sensing beamformers, it can be designed by maximizing (105), i.e., 
+
+u⋆m = arg max  
+
+> um̸=0
+
+uHmDS sen  
+
+> m
+
+(DS sen  
+
+> m
+
+)H um
+
+uHmQmum
+
+. (107) The above problem has the form of a generalized Rayleigh quotient. Consequently, an optimal receive filter, up to an arbitrary nonzero scaling factor, is given by 
+
+u⋆m = Q−1 
+
+> m
+
+DS sen  
+
+> m
+
+. (108) Substituting (108) into (105), the maximum achievable sensing SINR at UL AP m becomes 
+
+γsen ,⋆ m = ( DS sen  
+
+> m
+
+)H Q−1 
+
+> m
+
+DS sen  
+
+> m
+
+. (109) Accordingly, γsen ,⋆ m is adopted as the sensing performance metric at UL AP m.VII. P RIORITY -B ASED AND JOINT BEAMFORMING 
+
+STRATEGIES 
+
+To characterize the sensing–communication tradeoff of the considered NAFD cell-free ISAC system, we introduce two priority-based beamforming strategies in addition to the pro-posed joint design. The first strategy prioritizes communication and designs the sensing beam such that its interference to the communication links is suppressed. The second strategy prioritizes sensing and subsequently optimizes the commu-nication beamformers without degrading the predetermined sensing beam. For these baseline schemes, the maximum transmit power of DL AP i is divided between communication and sensing according to 
+
+P c 
+
+> i
+
+= ρP max  
+
+> i
+
+, P s 
+
+> i
+
+= (1 − ρ)P max  
+
+> i
+
+, (110) where 0 ≤ ρ ≤ 1 denotes the fraction of the DL AP power allocated to communication. Let bHd =
+
+hbh1 · · · bhKd
+
+i
+
+∈ CNtx ×Kd (111) denote the aggregated estimated DL channel matrix. Furthermore, define 
+
+cj = eHH
+
+> du
+
+vj , j ∈ K u, (112) as the effective residual DL-to-UL interference channel ob-served after the UL receive combiner vj .The combined communication-interference channel matrix is defined as 
+
+C =
+
+h bHd c1 · · · cKu
+
+i
+
+. (113) Finally, let as denote the dominant sensing direction. For the general sensing matrix A, it is selected as 
+
+as = umax (A), (114) where umax (A) denotes the normalized eigenvector associated with the largest eigenvalue of A.
+
+A. Communication-Prioritized Sensing Beamforming 
+
+In the communication-prioritized strategy, the communica-tion beamforming vectors are designed first. The sensing beam is then constructed such that it does not introduce additional interference to either the DL UEs or the UL communication receivers. The communication beamformers may, for example, be obtained using regularized zero forcing (RZF). Define 
+
+ewRZF  
+
+> k
+
+=
+
+ bHd bHH 
+
+> d
+
++ λRI
+
+−1 bhk, (115) where λR > 0 is the regularization factor. The beam directions are normalized according to 
+
+wRZF  
+
+> k
+
+= ewRZF 
+
+> k
+
+ewRZF  
+
+> k2
+
+. (116) To prevent the sensing signal from degrading communica-tion, define the orthogonal projector onto the nullspace of the effective communication channels as 
+
+P⊥ = I − C  CH C† CH . (117) The unnormalized communication-prioritized sensing beam is 
+
+ewCP s = P⊥as. (118) Consequently, 
+
+bhHk ewCP s = 0 , ∀k ∈ K d, (119) and 
+
+vHj eHdu ewCP s = 0 , ∀j ∈ K u. (120) Hence, the sensing beam produces neither direct sensing interference at the DL UEs nor residual DL-to-UL sensing interference after UL combining. To satisfy the sensing-power budget of every DL AP, define 
+
+ξCP = min 
+
+> i∈M d
+
+s P s
+
+> i
+
+( ewCP s )H Di ewCP s
+
+. (121) The final sensing beam is therefore 
+
+wCP s = ξCP ewCP s . (122) This baseline gives communication the highest priority and uses only the remaining spatial degrees of freedom for target illumination. 
+
+B. Sensing-Prioritized Communication Beamforming 
+
+In the sensing-prioritized strategy, the sensing beam is de-signed first without considering the communication channels. The communication beamformers are subsequently optimized while the sensing beam is kept fixed. The unconstrained sensing-optimal direction is as. To sat-isfy all per-AP sensing-power constraints, define 
+
+ξSP = min 
+
+> i∈M d
+
+s
+
+P s
+
+> i
+
+aH 
+
+> s
+
+Dias
+
+. (123) The sensing-prioritized beam is therefore 
+
+wSP s = ξSP as. (124) 12 
+
+For fixed wSP s and fixed UL powers p, the communication beamformers are obtained by solving the max–min DL SINR problem 
+
+PSP : max   
+
+> {wk}, γ
+
+γ (125a) s.t. Γd 
+
+> k
+
+≥ γ, ∀k ∈ K d, (125b) 
+
+Γu 
+
+> j
+
+≥ γu 
+
+> j
+
+, ∀j ∈ K u, (125c) 
+
+X
+
+> k∈K d
+
+wHk Diwk ≤ P c 
+
+> i
+
+, ∀i ∈ M d.
+
+(125d) For a trial value γ, the DL constraint can be converted to an SOC constraint. Define 
+
+ζud  
+
+> k
+
+= X
+
+> j∈K u
+
+pj ηj,k + σ2d,k . (126) After choosing the phase of wk such that 
+
+Im 
+
+nbhHk wk
+
+o
+
+= 0 , (127) the DL SINR requirement is equivalently written as 
+
+r
+
+1 + 1
+
+γ Re 
+
+nbhHk wk
+
+o
+
+≥
+
+bhHk w1
+
+...
+
+bhHk wKd
+
+bhHk wSP sq
+
+ζud 
+
+> k
+
+
+
+> 2
+
+, ∀k. (128) The UL QoS constraint can similarly be expressed as 
+
+
+
+cHj w1
+
+...
+
+cHj wKd
+
+cHj wSP s
+
+
+
+> 22
+
+≤ pj aj,j 
+
+γu
+
+> j
+
+− X
+
+> ℓ∈K u
+> ℓ̸=j
+
+pℓaj,ℓ − σ2u∥vj ∥22. (129) Therefore, the maximum common communication SINR can be obtained by bisection over γ while solving the cor-responding convex feasibility problem. For centralized optimization, use an aggregated combiner u
+
+and define the effective target matrix Ht. The sensing SINR is represented as 
+
+Γs = bδT|uH Htws|2
+
+Is
+
+, (130) with 
+
+Is = X
+
+> k∈K d
+
+|uH eHtwk|2 + X
+
+> j∈K u
+
+pj δj + σ2s . (131) The matrix eHt captures the residual DL communication leakage caused by inter-AP CSI errors, while δj captures the residual UL-to-sensing interference including decoding and channel-estimation errors. VIII. V ECTOR -F ORM JOINT OPTIMIZATION 
+
+The proposed design maximizes sensing performance while jointly optimizing the DL communication beamformers, the sensing beamformer, and the UL powers. The receive combin-ers are treated as fixed during each transmit-variable update and are refreshed using the estimated CSI. The vector-form problem is 
+
+PV : maximize   
+
+> {wk},ws,p
+
+Γs (132a) 
+
+subject to Γd 
+
+> k
+
+≥ γd 
+
+> k
+
+, ∀k ∈ K d, (132b) 
+
+Γu 
+
+> j
+
+≥ γu 
+
+> j
+
+, ∀j ∈ K u, (132c) 
+
+X
+
+> k∈K d
+
+∥wi,k ∥22 + bδT∥wi, s∥22 ≤ P max  
+
+> i
+
+, ∀i ∈ M d,
+
+(132d) 
+
+0 ≤ pj ≤ P max  
+
+> j
+
+, ∀j ∈ K u. (132e) When bδT = 0 , the sensing beam is switched off and the system operates in communication-only mode. When bδT = 1 , the full joint communication-and-sensing design is performed. IX. M ATRIX SDR R EFORMULATION 
+
+Define 
+
+Wk = wkwHk , Ws = wswH 
+
+> s
+
+. (133) Then 
+
+Wk ⪰ 0, rank( Wk) = 1 , (134) 
+
+Ws ⪰ 0, rank( Ws) = 1 . (135) Define 
+
+bHk = bhk bhHk , (136) 
+
+Bj = eHH
+
+> du
+
+vj vHj eHdu , (137) 
+
+A = bδTHH 
+
+> t
+
+uu H Ht, (138) 
+
+AI = eHH 
+
+> t
+
+uu H eHt, (139) 
+
+ηj,k = |gud 
+
+> j,k
+
+|2, (140) 
+
+aj,q = |vHj bgq |2, (141) 
+
+cj,q = vHj Cu 
+
+> q
+
+vj . (142) The DL SINR becomes 
+
+Γd 
+
+> k
+
+= Tr( bHkWk)
+
+Id
+
+> k
+
+, (143) where 
+
+Id 
+
+> k
+
+= X
+
+> ℓ̸=k
+
+Tr( bHkWℓ) + bδT Tr( bHkWs)+ X
+
+> ℓ∈K d
+
+Tr( Cd
+
+> k
+
+Wℓ) + bδT Tr( Cd
+
+> k
+
+Ws)+ X
+
+> j∈K u
+
+pj ηj,k + σ2d,k . (144) The UL SINR becomes 
+
+Γu 
+
+> j
+
+= pj aj,j 
+
+Iu
+
+> j
+
+, (145) 13 
+
+where 
+
+Iu 
+
+> j
+
+= X 
+
+> q̸=j
+
+pq aj,q + X
+
+> q∈K u
+
+pq cj,q 
+
++ X
+
+> k∈K d
+
+Tr( Bj Wk) + bδT Tr( Bj Ws) + σ2u∥vj ∥22.
+
+(146) The sensing SINR is 
+
+Γs = Tr( AW s)
+
+X
+
+> k∈K d
+
+Tr( AIWk) + X
+
+> j∈K u
+
+pj δj + σ2s
+
+. (147) Let Di be the diagonal selection matrix that extracts the antennas of DL AP i. The matrix problem is 
+
+PM : maximize   
+
+> {Wk},Ws,p
+
+Γs (148a) 
+
+subject to Γd 
+
+> k
+
+≥ γd 
+
+> k
+
+, ∀k, (148b) 
+
+Γu 
+
+> j
+
+≥ γu 
+
+> j
+
+, ∀j, (148c) 
+
+X
+
+> k∈K d
+
+Tr( DiWk) + bδT Tr( DiWs) ≤ P max  
+
+> i
+
+, ∀i, 
+
+(148d) 
+
+0 ≤ pj ≤ P max  
+
+> j
+
+, ∀j, (148e) 
+
+Wk ⪰ 0, rank( Wk) = 1 , ∀k, 
+
+(148f) 
+
+Ws ⪰ 0, rank( Ws) = 1 . (148g) The semidefinite relaxation drops the rank-one constraints. X. SDR-B ASED ALTERNATING OPTIMIZATION 
+
+A. Beamforming Update 
+
+For fixed p(t), introduce a trial sensing SINR τ . The sensing constraint is 
+
+Tr( AW s) ≥ τ X
+
+> k∈K d
+
+Tr( AIWk)+ τ
+
+ X
+
+> j∈K u
+
+p(t) 
+
+> j
+
+δj + σ2s
+
+ . (149) The DL QoS constraints become linear in the covariance matrices: 
+
+Tr( bHkWk) ≥ γd
+
+> k
+
+X
+
+> ℓ̸=k
+
+Tr( bHkWℓ)+ γd 
+
+> k
+
+bδT Tr( bHkWs)+ γd
+
+> k
+
+X
+
+> ℓ
+
+Tr( Cd
+
+> k
+
+Wℓ)+ γd 
+
+> k
+
+bδT Tr( Cd
+
+> k
+
+Ws)+ γd
+
+> k
+
+X
+
+> j
+
+p(t) 
+
+> j
+
+ηj,k + σ2d,k 
+
+ . (150) The UL QoS constraints become 
+
+X
+
+> k∈K d
+
+Tr( Bj Wk) + bδT Tr( Bj Ws)
+
+≤ p(t) 
+
+> j
+
+aj,j 
+
+γu
+
+> j
+
+− X 
+
+> q̸=j
+
+p(t) 
+
+> q
+
+aj,q − X
+
+> q
+
+p(t) 
+
+> q
+
+cj,q − σ2u∥vj ∥22. (151) For fixed τ , these constraints, the per-AP power constraints, and the PSD constraints form an SDP feasibility problem. Bisection on τ gives the beamforming update. 
+
+B. UL Power Update 
+
+For fixed covariance matrices, maximizing the sensing SINR is equivalent to minimizing the residual UL-to-sensing inter-ference: 
+
+minimize 
+
+> p
+
+X
+
+> j∈K u
+
+δj pj (152a) 
+
+subject to X
+
+> j∈K u
+
+pj ηj,k ≤ ζk, ∀k, (152b) 
+
+pj aj,j − γu
+
+> j
+
+X 
+
+> q̸=j
+
+pq aj,q − γu
+
+> j
+
+X
+
+> q
+
+pq cj,q ≥ γu 
+
+> j
+
+ξj , ∀j, 
+
+(152c) 
+
+0 ≤ pj ≤ P max  
+
+> j
+
+, ∀j, (152d) where 
+
+ζk = Tr( bHkWk)
+
+γd
+
+> k
+
+− X
+
+> ℓ̸=k
+
+Tr( bHkWℓ)
+
+− bδT Tr( bHkWs) − X
+
+> ℓ
+
+Tr( Cd
+
+> k
+
+Wℓ)
+
+− bδT Tr( Cd
+
+> k
+
+Ws) − σ2d,k , (153) 
+
+ξj = X
+
+> k∈K d
+
+Tr( Bj Wk) + bδT Tr( Bj Ws) + σ2u∥vj ∥22. (154) The power update is a linear program. XI. R EMARKS ON THE PROPOSED FORMULATION 
+
+The channel-estimation and target-detection stages follow the four-stage interference-management structure. The direct interference cancellation in the UL and sensing receivers uses the estimated inter-AP CSI. The SDR-based optimization is an extension for jointly optimizing the DL communication beams, the sensing beam, and the UL powers; it is not the deep-learning solver used in the reference interference-management paper. The explicit channel-error covariance terms make the QoS constraints conservative with respect to imperfect CSI, while bδT switches the sensing function on or off according to the detector output. XII. N UMERICAL RESULTS 
+
+In this section, the performance of the proposed NAFD cell-free ISAC framework is evaluated through numerical simulations. The proposed alternating-optimization (AO) pro-cedure is implemented in MATLAB, where the beamforming subproblem is solved through semidefinite relaxation (SDR). In addition, the MAPRT detector is employed during the target-detection stage to determine the presence of the sensing target. 14 
+
+Algorithm 1 Target-Aware SDR Alternating Optimization 
+
+Require: Pilot observations, sensing observations, QoS thresholds, power budgets, tolerances ϵAO and ϵbis 
+
+Ensure: {w⋆k}, w⋆ 
+
+> s
+
+, and p⋆ 
+
+> 1:
+
+Estimate UE–AP channels  
+
+> 2:
+
+Compute bδT using the MAPRT  
+
+> 3:
+
+Estimate inter-AP channels  
+
+> 4:
+
+Form channel-error covariances and residual channel eHdu  
+
+> 5:
+
+if bδT = 0 then  
+
+> 6:
+
+Set Ws = 0 
+
+> 7:
+
+end if  
+
+> 8:
+
+Initialize a feasible p(0) and set t = 0  
+
+> 9:
+
+repeat  
+
+> 10:
+
+Update UL communication combiners {vj } from the estimated UL CSI  
+
+> 11:
+
+Update sensing combiner u using (108)  
+
+> 12:
+
+Fix p = p(t) 
+
+> 13:
+
+Choose bisection bounds τL and τU 
+
+> 14:
+
+while τU − τL > ϵ bis do  
+
+> 15:
+
+τ ← (τL + τU)/2 
+
+> 16:
+
+Solve the SDP feasibility problem defined by (149)– (151)  
+
+> 17:
+
+if the SDP is feasible then  
+
+> 18:
+
+τL ← τ and store the covariance matrices  
+
+> 19:
+
+else  
+
+> 20:
+
+τU ← τ 
+
+> 21:
+
+end if  
+
+> 22:
+
+end while  
+
+> 23:
+
+Set the stored solution to {W(t+1)  
+
+> k
+
+} and W(t+1) s 
+
+> 24:
+
+Solve (152) and obtain p(t+1)  
+
+> 25:
+
+Evaluate Γ(t+1) s 
+
+> 26:
+
+t ← t + 1  
+
+> 27:
+
+until |Γ(t)s − Γ(t−1) s | ≤ ϵAO  
+
+> 28:
+
+Recover rank-one beamformers by principal-eigenvector extraction; use Gaussian randomization if required  
+
+> 29:
+
+return {w⋆k}, w⋆ 
+
+> s
+
+, and p⋆
+
+A. Simulation Setup 
+
+We consider an NAFD cell-free ISAC network consisting of 
+
+M = 10 distributed APs, among which MDL = 5 APs operate in the downlink mode and MUL = 5 APs operate in the uplink mode. Each AP is equipped with Nt = Nr = 4 antennas. The network simultaneously serves KDL = 4 downlink UEs and KUL = 4 uplink UEs. Therefore, the dimensions of the aggregated downlink transmit and uplink receive arrays are 
+
+Ntx = MDL Nt = 20 , Nrx = MUL Nr = 20 . (155) The APs and UEs are distributed over a square service region with side length 200 m. A minimum AP–UE separation of 10 m is considered. The path-loss exponents associated with the AP–UE, UE–UE, and AP–AP links are set to 3.2, 3.8, and 
+
+2.6, respectively. The coherence interval consists of τc = 200 symbols. The uplink pilot length is τp = 8, while the default sensing duration is τs = 10 symbols. For studying the target-detection performance, the sensing duration is varied over 
+
+τs ∈ { 5, 8, 10 , 12 , 16 , 20 , 24 , 32 }. (156) The inter-AP pilot length is selected according to 
+
+τDP = MDL Nt = 20 . (157) The maximum transmit power of each DL AP is PAP =3 W, whereas the maximum UL UE transmit power is PUE =0.1 W. The UL pilot power and the inter-AP pilot power are set to 0.1 W and 3 W, respectively. The receiver noise power is fixed at −83 dBm. The original minimum communication SINR requirements are set to 
+
+γDL  
+
+> k
+
+= γUL  
+
+> j
+
+= 0 dB , ∀k, j. (158) In the DL-SINR refinement stage, the optimized sensing solution is retained while a secondary max–min DL-SINR optimization is performed. In the considered realization, this procedure results in a refined common DL SINR target of approximately 2.1 dB. For the AO algorithm, the maximum number of iterations is set to 15 , and the convergence tolerance is ϵAO = 10 −3.The bisection tolerance used in the SDR optimization is 10 −3
+
+with a maximum of 20 bisection iterations. For target detection, the desired false-alarm probability of the MAPRT detector is selected as 
+
+P des FA = 0 .05 . (159) The detector threshold is calibrated from 300 target-absent realizations, and the detection probabilities are evaluated using 
+
+300 Monte Carlo trials for each sensing duration. The target-reflection scaling coefficient used in the simulation is 10 −3.
+
+B. Network Realization and Interference Structure 
+
+Fig. 3 illustrates one realization of the considered NAFD cell-free ISAC network. The five DL APs and five UL APs are geographically distributed over the service area together with four DL UEs, four UL UEs, and one sensing target. The target is located close to the center of the considered sensing region. The illustrated links represent the simultaneous com-munication, sensing, and cross-link interference paths included in the system model. 
+
+1) Impact of the Communication–Sensing Power Alloca-tion: Fig. 4 investigates the communication–sensing trade-off as a function of the communication power ratio ρ. For the priority-based schemes, a fraction ρ of the available AP transmit power is assigned to communication, whereas the remaining fraction 1 − ρ is reserved for sensing. The communication-prioritized sensing (CPS) scheme first con-structs the communication beamformers and subsequently de-signs the sensing beam in the null space of the communication-related channels. In contrast, the sensing-prioritized commu-nication (SPC) scheme first determines the sensing beam and then optimizes the communication beamformers using the remaining communication power. As shown in the upper subplot of Fig. 4, the minimum DL SINR achieved by SPC increases considerably with ρ,15 
+
+Fig. 3: Example realization of the considered NAFD cell-free ISAC network and the associated communication, sensing, and interference links. from approximately 1.5 dB at ρ = 0 .1 to more than 20 dB at ρ = 0.9. This behavior is expected because increasing 
+
+ρ directly increases the power available for communication beamforming. The CPS scheme exhibits a different behavior, maintaining a minimum DL SINR of approximately 9.5–
+
+9.7 dB over the considered range of ρ. This indicates that, for the investigated realization, the communication-oriented beam directions and the corresponding QoS constraints rather than the available transmit power constitute the dominant limitation of the CPS solution. The lower subplot demonstrates the complementary sensing behavior. The sensing SINR of both priority-based approaches decreases as ρ increases, since a progressively smaller fraction of the AP power remains available for sensing. In particular, the CPS sensing SINR decreases from approximately 21 dB at ρ = 0.1 to approximately 2–3 dB at ρ = 0.9, while the SPC sensing SINR decreases from approximately 17 dB to below 0 dB. Consequently, the priority-based approaches exhibit the expected explicit trade-off between communication and sensing: allocating additional power to communication improves, or preserves, the communication performance at the expense of sensing performance. In contrast, the proposed SDR-AO solution is not con-strained by a predefined communication–sensing power split. Instead, the communication beamformers, sensing covariance matrix, and UL transmit powers are jointly optimized under the AP power and communication QoS constraints. Therefore, its curve is independent of ρ in this comparison and should be interpreted as a joint-power-allocation benchmark rather than as another fixed-split solution. The proposed method achieves a sensing SINR of approximately 44 dB over the entire range, substantially exceeding both priority-based approaches. This large gain shows the benefit of exploiting the available spatial and power degrees of freedom jointly rather than reserving predetermined portions of the transmit power for communica-tion and sensing. The corresponding communication QoS is maintained by the constraints of the proposed optimization problem. Hence, the results demonstrate that the proposed SDR-AO design can strongly enhance sensing performance without relying on an externally selected communication– 
+
+Fig. 4: Communication and sensing performance versus the communication power ratio ρ for CPS, SPC, and the proposed SDR-AO scheme. sensing power-allocation ratio. 
+
+2) Performance with Individual Communication QoS Con-straints: To further evaluate the ability of the proposed design to balance sensing and communication, Fig. 5 considers indi-vidual DL QoS requirements derived from the communication-prioritized sensing (CPS) solution. Specifically, for each net-work geometry, the DL SINRs achieved by CPS are used as reference communication requirements for the proposed SDR-AO optimization. The target-to-closest-DL-UE distance is then varied from 5 m to 50 m while the AP and UE locations are kept unchanged within each realization. This experiment therefore examines whether the proposed method can exploit the spatial degrees of freedom created by different target– UE geometries while maintaining communication performance comparable to the communication-prioritized reference. The upper subplot of Fig. 5 shows that the proposed SDR-AO solution closely follows the CPS communication perfor-mance over most of the considered distances. For example, at target–UE distances of approximately 5, 10 , 20 , and 30 m, the mean DL SINRs obtained by the proposed solution are nearly identical to those of CPS. At 40 m, CPS achieves a higher mean SINR, approximately 16 dB compared with approxi-mately 13 dB for the proposed design. This difference does not contradict the optimization objective because the proposed method is not designed to maximize the communication SINR beyond the imposed QoS requirements. Once the required communication performance is satisfied, the remaining spatial and power resources can instead be exploited to improve the sensing objective. The SPC approach generally provides lower communication SINR, particularly for small and intermediate target–UE separations, since sensing is prioritized before the communication beamforming stage. The benefit of this resource allocation is evident in the lower subplot. The proposed SDR-AO scheme maintains a sensing SINR of approximately 50 –54 dB throughout the complete target-distance range. By comparison, CPS achieves approximately 8–13 dB, while SPC provides approximately 
+
+5–9 dB. Thus, although the proposed solution is constrained 16 
+
+Fig. 5: Communication and sensing performance versus the target–closest-DL-UE distance under individual CPS-matched QoS requirements. to preserve the individual communication QoS levels derived from the communication-prioritized reference, it provides a very substantial sensing gain. Another important observation is that the sensing perfor-mance of the proposed method remains relatively insensitive to the target–UE separation. The sensing SINR varies only by a few decibels as the distance changes from 5 m to 50 m. This indicates that the joint SDR-AO design can adapt the communication and sensing covariance matrices to changes in the spatial relationship between the sensing target and communication users. In contrast, the priority-based schemes possess fewer degrees of freedom because one function is designed first and the other is subsequently accommodated using the remaining spatial or power resources. Overall, Fig. 5 demonstrates the central advantage of the proposed formulation: the communication QoS constraints do not require the optimizer to maximize communication SINR unnecessarily. Instead, once the individual DL requirements are fulfilled, the optimization can exploit the remaining de-grees of freedom to maximize sensing performance. This explains why the proposed SDR-AO solution can provide communication performance close to the CPS reference while simultaneously achieving a substantially larger sensing SINR. 
+
+C. Convergence of the Proposed SDR–AO Algorithm 
+
+Fig. 6 presents the evolution of the optimized sensing SINR over the AO iterations. The sensing SINR starts at approximately 36 .1 dB and rapidly increases to about 43 .2 dB after the second iteration. It further increases to approximately 
+
+48 .7 dB by the fifth iteration. The sensing SINR subsequently varies within approximately 
+
+45 .6–51 .5 dB. The highest value in the illustrated realization is obtained around the ninth iteration, where the sensing SINR reaches approximately 51 .5 dB. The final value after 
+
+12 recorded iterations is approximately 48 .9 dB. It is worth noting that the objective sequence is not strictly monotonic in this realization. This behavior results from 
+
+Fig. 6: Evolution of the sensing SINR over the iterations of the proposed SDR–AO algorithm. alternating between the SDR beamforming update, UL power-allocation update, and the additional DL-SINR refinement step. Therefore, the value produced by one block is not necessarily preserved after the subsequent block update. 
+
+D. Communication SINR Performance 
+
+The achieved DL and UL communication SINRs are shown in Fig. 7. The four DL UEs achieve approximately the same SINR of 2.1 dB. Hence, all DL users satisfy both the original 
+
+0 dB QoS requirement and the refined common DL target. The achieved UL SINRs are considerably different among users. In the illustrated realization, the UL SINRs are ap-proximately 18 .9, 2.8, 18 .8, and 25 .0 dB for UL UEs 1–4,respectively. All UL UEs therefore satisfy the original 0 dB minimum SINR requirement. The nearly identical DL SINRs are a consequence of the secondary max–min DL refinement. In contrast, the UL powers are optimized primarily to satisfy the communication constraints while controlling their contribution to the sensing interference. Consequently, the UL SINRs are not explicitly forced toward a common value. 
+
+E. UL Power-Allocation Evolution 
+
+Fig. 8 illustrates the UL transmit-power evolution during the AO procedure. All optimized UL powers remain significantly below the maximum available UL transmit power of 0.1 W. For example, the power of UL UE 1 decreases from approxi-mately 3.5×10 −3 W during the first iteration to approximately 
+
+4 × 10 −4 W at the final iteration. The power allocated to UL UE 2 also decreases considerably over the AO iterations, although a temporary increase is observed at iteration 11 . UL UE 3 requires only a very small transmit power throughout the optimization, whereas UL UE 4 operates at an intermediate power level. 17 
+
+Fig. 7: Achieved DL and UL communication SINRs for the considered network realization. 
+
+Fig. 8: Evolution of the optimized UL UE transmit powers over the AO iterations. These results demonstrate that the UL communication con-straints can be satisfied without requiring the UEs to operate close to their maximum available transmit powers for the considered channel realization. 
+
+F. Per-AP Transmit-Power Utilization 
+
+Fig. 9 shows the total optimized transmit power of each DL AP. All five DL APs operate approximately at their maximum allowed power, 
+
+P DL  
+
+> m
+
+≃ 3 W , m = 1 , . . . , 5. (160) The dashed horizontal line in Fig. 9 denotes the 3 W per-AP power constraint. 
+
+Fig. 9: Optimized total transmit power of the DL APs and the corresponding per-AP power constraint. The active power constraints are consistent with the sensing-SINR maximization objective, since additional feasible DL transmit power can contribute to target illumination while the communication and interference constraints remain satisfied. 
+
+G. MAPRT Target-Detection Performance 
+
+Fig. 10 presents the target-detection performance of the MAPRT detector as a function of the sensing duration τs.The three quantities shown are the probability of detection Pd,probability of false alarm Pf a , and probability of misdetection 
+
+Pmd = 1 − Pd. (161) At τs = 5 , the obtained detection probability is approx-imately 0.71 , corresponding to a misdetection probability of approximately 0.29 . Increasing the sensing duration to 
+
+τs = 8 significantly improves the detection probability to approximately 0.98 .For τs ≥ 8, the detector maintains a high detection probability. The obtained values of Pd remain approximately within the range 0.95 –0.98 , while Pmd remains approximately within 0.02 –0.05 . At the default value τs = 10 , the detection probability is approximately 0.97 .The empirical false-alarm probability fluctuates around the desired value of 0.05 . Across the considered sensing durations, 
+
+Pf a lies approximately between 0.04 and 0.08 , with the observed variation resulting partly from the finite number of Monte Carlo realizations. The results indicate that the largest detection improvement occurs when increasing τs from 5 to 8. Beyond this point, increasing the sensing duration provides relatively limited ad-ditional detection improvement for the considered simulation setting. 18 
+
+Fig. 10: MAPRT target-detection performance versus the sens-ing duration τs.
+
+Fig. 11: Empirical distributions of the MAPRT log-likelihood-ratio statistic under H0 and H1 for τs = 10 .
+
+H. Separation of the MAPRT Test Statistic 
+
+To further examine the behavior of the detector, Fig. 11 presents the empirical distributions of the log-likelihood-ratio statistic under hypotheses H0 and H1 at τs = 10 .Under H0, the MAPRT statistic is concentrated mainly at negative values, with its distribution centered approximately around −6. In contrast, under H1, the statistic is shifted considerably toward positive values and is concentrated mainly around 4–8. The calibrated decision threshold is located ap-proximately at −1.3.Only a relatively small overlap exists between the two distributions around the decision boundary. This separation is consistent with the high value of Pd and the relatively small 
+
+Fig. 12: Normalized aggregate sensing beampattern corre-sponding to the optimized transmit covariance matrices. 
+
+Pf a obtained at τs = 10 in Fig. 10. 
+
+I. Optimized Sensing Beampattern 
+
+Fig. 12 shows the normalized aggregate sensing beampattern obtained from the optimized transmit covariance matrices. The pattern exhibits two pronounced attenuation regions around approximately −26 ◦ and 19 ◦, where the normalized gains decrease to approximately −9.5 and −10 dB, respectively. The normalized gain approaches 0 dB toward the outer angular regions, while a local level of approximately −3 dB is observed around broadside. Since the considered cell-free architecture consists of ge-ographically distributed APs rather than a single co-located antenna array, Fig. 12 should be interpreted as an aggregate angular representation of the optimized covariance solution rather than the conventional beampattern of a single ULA. “‘ XIII. C ONCLUSION 
+
+This paper studied priority-based beamforming for an NAFD cell-free ISAC network supporting simultaneous DL communication, UL communication, and distributed target sensing. Channel estimation and MAPRT-based target detec-tion were explicitly incorporated into the transmission protocol before target-aware beamforming was performed. Two com-plementary beamforming strategies were considered. In the communication-prioritized sensing design, the sensing beam was constructed in the nullspace of the effective commu-nication channels, thereby protecting the DL UEs and UL receivers from additional sensing-induced interference. In the sensing-prioritized communication design, the sensing beam was selected first according to the target direction, and the communication beamformers were then optimized using a max–min SINR formulation under the NAFD interference and per-AP power constraints. These two schemes provide 19 
+
+useful benchmark operating points for studying the sensing– communication tradeoff. The numerical results showed that reliable target detection and communication QoS can be simultaneously maintained in the considered NAFD cell-free deployment. In particular, the MAPRT detector achieved approximately Pd = 0.97 at τs = 10 with a false-alarm probability close to 0.05 . The results also illustrate how the choice of priority directly affects the available spatial degrees of freedom, communication interference, and target illumina-tion. Future work may extend these priority-based designs to dynamic AP-mode selection, multi-target sensing, robust beamforming under channel and target-location uncertainty, and adaptive selection of the communication–sensing priority according to network conditions REFERENCES [1] F. Liu, Y.-F. Liu, A. Li, C. Masouros, and Y. C. Eldar, “Integrated sensing and communications: Toward dual-functional wireless networks for 6G and beyond,” IEEE J. Sel. Areas Commun. , vol. 40, no. 6, pp. 1728– 1767, Jun. 2022. [2] F. Liu, C. Masouros, A. P. Petropulu, H. Griffiths, and L. Hanzo, “Joint radar and communication design: Applications, state-of-the-art, and the road ahead,” IEEE Trans. Commun. , vol. 68, no. 6, pp. 3834–3862, Jun. 2020. [3] C. Sturm and W. Wiesbeck, “Waveform design and signal processing aspects for fusion of wireless communications and radar sensing,” Proc. IEEE , vol. 99, no. 7, pp. 1236–1259, Jul. 2011. [4] B. Paul, A. R. Chiriyath, and D. W. Bliss, “Survey of RF communi-cations and sensing convergence research,” IEEE Access , vol. 5, pp. 252–270, 2017. [5] A. R. Chiriyath, B. Paul, and D. W. Bliss, “Radar-communications convergence: Coexistence, cooperation, and co-design,” IEEE Trans. Cogn. Commun. Netw. , vol. 3, no. 1, pp. 1–12, Mar. 2017. [6] H. Wymeersch, J. Lien, and M. Z. Win, “Cooperative localization in wireless networks,” Proc. IEEE , vol. 97, no. 2, pp. 427–450, Feb. 2009. [7] F. Liu, C. Masouros, A. Li, H. Sun, and L. Hanzo, “MU-MIMO commu-nications with MIMO radar: From co-existence to joint transmission,” 
+
+IEEE Trans. Wireless Commun. , vol. 17, no. 4, pp. 2755–2770, Apr. 2018. [8] H. Q. Ngo, A. Ashikhmin, H. Yang, E. G. Larsson, and T. L. Marzetta, “Cell-free massive MIMO versus small cells,” IEEE Trans. Wireless Commun. , vol. 16, no. 3, pp. 1834–1850, Mar. 2017. [9] E. Nayebi, A. Ashikhmin, T. L. Marzetta, and H. Yang, “Precoding and power optimization in cell-free massive MIMO systems,” IEEE Trans. Wireless Commun. , vol. 16, no. 7, pp. 4445–4459, Jul. 2017. [10] H. Q. Ngo, L.-N. Tran, T. Q. Duong, M. Matthaiou, and E. G. Larsson, “On the total energy efficiency of cell-free massive MIMO,” IEEE Trans. Green Commun. Netw. , vol. 2, no. 1, pp. 25–39, Mar. 2018. [11] E. Bj¨ ornson and L. Sanguinetti, “Making cell-free massive MIMO competitive with MMSE processing and centralized implementation,” 
+
+IEEE Trans. Wireless Commun. , vol. 19, no. 1, pp. 77–90, Jan. 2020. [12] Z. H. Shaik, E. Bj¨ ornson, and E. G. Larsson, “Cell-free massive MIMO with radio stripes and sequential uplink processing,” in Proc. IEEE ICC Workshops , 2020. [13] ¨O. T. Demir, E. Bj¨ ornson, and L. Sanguinetti, Foundations of User-Centric Cell-Free Massive MIMO . Foundations and Trends in Signal Processing, vol. 14, nos. 3–4, pp. 162–472, 2021. [14] S. Elhoushy, M. Ibrahim, and W. Hamouda, “Cell-free massive MIMO: A survey,” IEEE Commun. Surveys Tuts. , vol. 24, no. 1, pp. 492–523, 2022. [15] H. A. Ammar, R. Adve, S. Shahbazpanahi, G. Boudreau, and K. V. Srinivas, “User-centric cell-free massive MIMO networks: A survey of opportunities, challenges and solutions,” IEEE Commun. Surveys Tuts. ,vol. 24, no. 1, pp. 611–652, 2022. [16] D. Bharadia, E. McMilin, and S. Katti, “Full duplex radios,” in Proc. ACM SIGCOMM , 2013, pp. 375–386. [17] A. Sabharwal et al. , “In-band full-duplex wireless: Challenges and opportunities,” IEEE J. Sel. Areas Commun. , vol. 32, no. 9, pp. 1637– 1652, Sep. 2014. [18] Z. Zhang, X. Chai, K. Long, A. V. Vasilakos, and L. Hanzo, “Full duplex techniques for 5G networks: Self-interference cancellation, protocol design, and relay selection,” IEEE Commun. Mag. , vol. 53, no. 5, pp. 128–137, May 2015. [19] D. Wang, M. Wang, P. Zhu, J. Li, J. Wang, and X. You, “Performance of network-assisted full-duplex for cell-free massive MIMO,” in Proc. IEEE ICC , 2020. [20] M. Mohammadi, T. T. Vu, H. Q. Ngo, and M. Matthaiou, “Network-assisted full-duplex cell-free massive MIMO: Spectral and energy effi-ciencies,” IEEE J. Sel. Areas Commun. , 2023/2024. [21] J. Li, Q. Fan, Y. Zhang, P. Zhu, D. Wang, H. Wu, and X. You, “Network-assisted full-duplex cell-free mmWave massive MIMO systems with DAC quantization and fronthaul compression,” 2023. [22] K. Okui, K. Ando, G. Abreu, and K. Ishibashi, “Scalable network-assisted full-duplex cell-free massive MIMO with limited fronthaul capacity,” in Proc. IEEE VTC-Fall , 2023. [23] “Cell-free ISAC massive MIMO systems with capacity-constrained fronthaul links,” Digital Signal Processing , vol. 145, Art. no. 104341, Feb. 2024. [24] A. M. Elbir, K. V. Mishra, A. Celik, and A. Eltawil, “Cell-free integrated sensing and communication with hybrid beamforming,” in Proc. IEEE SPAWC , 2024. [25] N. T. Nguyen, T. Fang, H. Q. Ngo, and M. Juntti, “Multi-static cell-free massive MIMO ISAC: Performance analysis and power allocation,” 2024. [26] W. Yan, O. A. Topal, Z. Behdad, ¨ O. T. Demir, and C. Cavdar, “Com-municate or sense AP mode selection in mmWave cell-free massive MIMO-ISAC,” 2024. [27] Z. Ren, J. Xu, L. Qiu, and D. W. K. Ng, “Secure cell-free integrated sensing and communication in the presence of information and sensing eavesdroppers,” IEEE J. Sel. Areas Commun. , 2024. [28] “Joint users’ secrecy rate and target’s sensing SNR maximization for a secure cell-free ISAC system,” IEEE Commun. Lett. , vol. 28, no. 7, pp. 1549–1553, Jul. 2024. [29] M. Masood, “Efficient beamforming design for cell-free integrated sensing and communication systems,” in Proc. IEEE ICICSP , 2024, pp. 1153–1157. [30] A. Tang, X. Wang, and J. A. Zhang, “Interference management for full-duplex ISAC in B5G/6G networks: Architectures, challenges, and solutions,” 2024. [31] T. Jiang, M. Jin, Q. Guo, Y. Liu, and Y. Li, “Full-duplex ISAC-enabled D2D underlaid cellular networks: Joint transceiver beamforming and power allocation,” 2024. [32] D. Galappaththige and C. Tellambura, Cell-Free Integrated Sensing and Communication . Foundations and Trends in Networking, vol. 16, nos. 1–2, pp. 1–170, 2025. [33] S. Singh, A. Nakkeeran, P. Singh, E. Sharma, and J. Bapat, “Target detection for OTFS-aided cell-free MIMO ISAC system,” IEEE Trans. Veh. Technol. , vol. 74, no. 7, pp. 11568–11573, 2025. [34] M. Elfiatoure, M. Mohammadi, H. Q. Ngo, H. Shin, and M. Matthaiou, “Multiple-target detection in cell-free massive MIMO-assisted ISAC,” 
+
+IEEE Trans. Wireless Commun. , vol. 24, no. 5, pp. 4283–4298, 2025. [35] R. Liu, M. Li, and Q. Liu, “Joint space-time adaptive processing and beamforming design for cell-free ISAC systems,” in Proc. IEEE ICASSP ,2025. [36] M. Elrashidy, M. Masood, and A. A. Nasir, “Unsupervised learning approach for distributed beamforming in cell-free integrated sensing and communication with dynamic balancing method,” Physical Communica-tion , vol. 69, Art. no. 102591, 2025. [37] “Graph learning for cooperative cell-free ISAC systems: From optimiza-tion to estimation,” IEEE , 2026. [38] Z.-Q. Luo, W.-K. Ma, A. M.-C. So, Y. Ye, and S. Zhang, “Semidefinite relaxation of quadratic optimization problems,” IEEE Signal Process. Mag. , vol. 27, no. 3, pp. 20–34, May 2010.

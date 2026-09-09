@@ -1,0 +1,2042 @@
+Title: Variational Bayesian Data Detection for Multiuser MIMO Systems Corrupted by Phase Noises
+
+URL Source: https://arxiv.org/pdf/2609.08252v1
+
+Published Time: Wed, 09 Sep 2026 03:20:56 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Variational Bayesian Data Detection for Multiuser MIMO Systems Corrupted by Phase Noises 
+
+Toan-Van Nguyen and Duy H. N. Nguyen 
+
+Abstract —Phase noise (PN), arising from imperfect local os-cillators, introduces multiplicative distortions that degrade the performance of communication systems. In uplink multiuser multiple-input multiple-output (MIMO) systems, this impairment is further compounded by the presence of independent oscillators at each transmit and receive antenna, each contributing an uncor-related noise component. Existing PN compensation algorithms at the receiver either rely on linearization approximations that lose accuracy under severe PN conditions, or incur computational complexity that scales prohibitively with the number of antennas. To address these limitations, we propose a variational Bayes (VB) framework for joint PN estimation and data detection in uplink MIMO systems. We develop VB-based detectors that treat noise statistics as latent variables, and reformulate the inference problem by absorbing the transmitter PN into the transmitted signal, treating the resulting composite variable as the inference target. Under von Mises priors, this reformulation yields exact closed-form conjugate posterior updates, from which we derive an improved detector achieving superior performance at low complexity. Simulation results demonstrate that the proposed VB algorithm achieves lower symbol error rates than the Self-Interference Whitening (SIW) algorithm and conventional phase-noise-unaware detectors across a wide range of channel con-ditions, modulation orders, and PN severities, while remaining computationally scalable to large MIMO deployments. 
+
+Index Terms —Data detection, MIMO, phase noise, variational Bayes. 
+
+I. I NTRODUCTION 
+
+The imperfect local oscillators at the transmitter and receiver introduce phase noise (PN), a major hardware impairment in multiuser multiple-input multiple-output (MIMO) systems [1]. The demand for higher spectral efficiency drives communica-tion systems toward high-order constellations. However, even moderate PN can induce severe rotational distortion in high-order received signal constellations, resulting in pronounced error floors at high signal-to-noise ratio (SNR) [2]. This problem becomes severe at millimeter-wave (mmWave) and terahertz frequencies, where oscillator instability is higher, as well as in geostationary satellite links, where large phase drifts caused by the Doppler effect exacerbate the distortion [3]. In massive MIMO uplink systems, the challenge is further compounded because each user and each receive antenna may be driven by an independent oscillator, resulting in a multiplicative, high-dimensional PN process that is tightly coupled with inter-user interference and the non-Gaussian discrete symbol prior, rendering exact maximum-likelihood (ML) detection computationally intractable [4]. Addressing 
+
+The authors are with the Department of Electrical and Computer Engineering, San Diego State University, San Diego, CA 92182 USA (emails: {tnguyen58, duy.nguyen }@sdsu.edu). 
+
+this challenge requires advanced signal processing methods that can achieve accurate, scalable, and amenable to closed-form computation. Early PN mitigation methods relied on linearization of the exponential PN term via first-order Taylor expansion. The Extended Kalman Filter-Smoother (EKFS) [5]–[7] and the Expectation Maximization (EM) algorithm [8], [9] were proposed, where EKFS applied Kalman filtering on the re-sulting linear-Gaussian model, while EM alternated between PN estimation and symbol likelihood maximization, both achieving accuracy under mild PN and coded MIMO systems. A variational Bayesian (VB) framework in [10] generalized EM by maintaining a full phase posterior rather than a point estimate, and handled dynamic PN via an Extended Kalman Smoother. However, all linearization-based methods share a common limitation: the Taylor approximation becomes in-creasingly inaccurate when the PN variance increases, leading to performance degradation in the high-PN regimes encoun-tered at high carrier frequencies. To handle strong PN without linearization, factor-graph methods operating on the full probabilistic model have been proposed. Tikhonov (also known as von Mises) parametriza-tion within the sum-product algorithm (SPA) was proposed to enable accurate PN tracking for additive white Gaussian noise (AWGN) and optical channels [11], [12], while expectation propagation (EP)-based variants reduced pilot overhead on intersymbol interference (ISI) channels [13]. Hybrid receivers combining belief propagation (BP), mean-field, and EP have extended this to coded ISI and multiuser MIMO settings [14], [15], though their complexity scales cubically with the channel memory length. Variational message passing [16], [17] and SPA-based factor-graph detectors [18] offered complementary approaches by restricting all message updates to closed-form exponential family distributions, thereby handling the nonlin-ear PN observation model without linearization. Approximate ML and Bayesian methods offer more scalable alternatives. In [19], the self-interference whitening (SIW) approach approximated the ML likelihood by pre-whitening the PN-induced self-interference, which reduced detection to a minimum Euclidean distance problem solvable by sphere decoding. The SIW avoids the PN tracking process, but its first-order PN approximation becomes inaccurate at large PN variance. The sphere-decoding in SIW also incurs complexity that grows cubically with the number of antennas [20], making the SIW impractical for large MIMO systems. The generalized expectation-consistent signal recovery (GEC-SR) framework in [21] replaced sphere decoding with an iterative message-passing procedure whose per-iteration cost was dominated arXiv:2609.08252v1 [cs.IT] 8 Sep 2026 2
+
+by matrix-vector products, significantly reducing complexity [22]. However, GEC-SR relies on approximating all involved distributions as Gaussian, which might lose validity at high PN variance and cause performance degradation when the antenna array increases. For PN-free MIMO systems, VB inference has been shown to offer an attractive balance between detection accuracy and computational efficiency. Particularly, the VB inference was developed for data detection in [ ?], [23], [24] and joint data detection and channel estimation in [25]. The goal of VB is to find an approximation for the true posterior distribution of latent variables, for example, data symbols, PNs, and noise variance in this work, given the observed data [26]. VB has also been used in the context of joint channel estimation and data detection in massive MIMO [25] and DoA estimation [27]. 
+
+A. Motivations and Contributions 
+
+These aforementioned works reveal a trade-off between accuracy and tractability. Linearization-based methods are ef-ficient but fail under strong PN [5]–[7]. Factor-graph methods are more accurate but impose high complexity, especially in MIMO with several independent oscillators [11]–[13]. Ap-proximate ML and Bayesian approaches reduce complexity but introduce posterior mismatches that widen the perfor-mance gap at high SNR [19]. In this paper, we develop VB algorithms for joint PN estimation and data detection in multiuser MIMO systems. Different from [10], [13], [14], which mainly focus on AWGN channels and incur high computational complexity, our VB framework yields closed-form expressions for the posterior distributions of the PNs and data symbols, with per-iteration cost that scales linearly in the number of users, receive antennas, and constellation size. Conventional separation-based approaches treat the transmitter PN as an independent latent variable estimated alongside the data symbols. However, the data symbol and the transmitter PN are coupled through the composite transmit signal and cannot be accurately approximated as independent, so this sep-aration introduces a posterior mismatch that degrades detection performance. In this paper, we resolve this by absorbing the transmitter PN directly into the transmitted signal and treating the resulting composite variable as the inference target. The main contributions of this paper are as follows:  
+
+> •
+
+We develop a matched-filter variational Bayes (MF-VB) algorithm for joint PN estimation and data detection in uplink multiuser MIMO systems, adopting von Mises priors for transmitter and receiver PNs and treating noise precision as a latent variable. Closed-form posterior up-dates are derived via coordinate-ascent variational infer-ence (CAVI).  
+
+> •
+
+We further develop an LMMSE-VB detector that gen-eralizes MF-VB by modeling the full noise covariance matrix as the inference target, capturing residual inter-user interference structure and improving robustness un-der correlated fading and mmWave channels.  
+
+> •
+
+We resolve a posterior mismatch in separation-based approaches by absorbing the transmitter PN into the transmitted signal, treating the composite variable as the inference target. Under a von Mises prior, this yields an exact closed-form conjugate posterior as a finite mixture of von Mises distributions. The resulting improved MF-VB detector eliminates separate PN tracking variables, achieving superior detection and PN estimation perfor-mance at the same complexity as MF-VB.  
+
+> •
+
+We provide a complexity analysis showing that MF-VB and improved MF-VB scale linearly in the number of users, receive antennas, constellation size, and iterations, contrasting with the exponential scaling of ML and SIW detectors. Simulations confirm that the improved MF-VB achieves superior detection performance, particularly in the high-SNR regime. The rest of the paper is organized as follows. Section II introduces the signal model for the PN estimation problem and preliminary results. Section III analyzes the VB framework for data detection with PNs and the scalar and full noise covariance models, leading to the MF-VB and LMMSE-VB algorithms, respectively. Section IV proposes the reformu-lated signal model that absorbs the transmitter PN into the composite transmit variable, and derives the improved MF-VB algorithm along with a computational complexity analysis of all proposed detectors. Simulation results are provided in Section V, where the proposed algorithms are evaluated under i.i.d. and correlated Rayleigh fading channels, mmWave propagation environments. Section VI concludes the paper. 
+
+Notation : Boldface lowercase and boldface uppercase vari-ables denote vectors and matrices, respectively. The L2-norm and the absolute value are indicated by ‖·‖ and |·| , respectively. Real and imaginary parts are denoted by ℜ{·} and ℑ{·} ,respectively, with j = √−1. The distribution of a complex multivariate Gaussian x with mean μ and covariance matrix 
+
+Σ is denoted by CN (x; μ, Σ). and is also written as x ∼CN (μ, Σ). Similarly, the distribution of a von Mises random variable x with natural parameter η is denoted by VM (x; η),and is also written as x ∼ VM (η). The identity matrix is denoted by I, the trace operator by Tr (·), and the expectation operator by E{·} . The transpose, complex conjugate, and complex conjugate transpose operators are denoted by (·)T ,
+
+(·)∗, and (·)H , respectively. The symbols ∝ and ∼ stand for “is proportional to” and “distributed according to”, respectively. The bracket 〈·〉 represents expectation with respect to all latent variables except the one under consideration. II. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+A. System Description 
+
+We consider an uplink MIMO system consisting of K
+
+single-antenna users and a BS equipped with M antennas, as shown in Fig. 1. We denote si as the transmitted symbol, drawn from a discrete constellation A, e.g. , quadrature am-plitude modulation (QAM) or phase-shift keying (PSK). Each symbol is zero-mean with normalized power, i.e., E[si] = 0 
+
+and E[|si|2] = 1 . The prior distribution of si is given by 
+
+p(si) = ∑
+
+> a∈S
+
+paδ(si − a), (1) where pa is the known prior probability of the constellation point a and δ(si − a) indicates the point mass function at 3
+
+s1 ×
+
+ejθ1
+
+s2 ×
+
+ejθ2
+
+sK ×
+
+ejθK
+
+...
+
+H
+
+×
+
+ejφ1
+
++
+
+n1
+
+y1
+
+×
+
+ejφ2
+
++
+
+n2
+
+y2
+
+×
+
+ejφM
+
++
+
+nM
+
+yM
+
+...          
+
+> Fig. 1. Diagram of a MIMO system with Ktransmit antennas and Mreceive antennas. The transmitted signal at user-iis corrupted by the phase noise factor
+> ejθi, whereas the received signal at antenna-mis corrupted by the phase noise factor ejθmand the background noise nm.
+
+a. Each transmitted symbol si is perturbed by a phase noise component θi, such that the phase-noise-corrupted transmit signal from user-i is given by 
+
+xi = si ejθi . (2) Define the transmit PN matrix as Θ = diag (ejθ1 , . . . , ejθK
+
+)
+
+and let x = Θs be the PN-corrupted transmit vector, the received signal vector at the BS can be expressed as 
+
+y = ΦHΘs + n = ΦHx + n, (3) where Φ = diag (ejφ1 , . . . , ejφM
+
+) captures the phase noises at the BS, the uplink channel matrix H = [ h1, . . . , hK ] ∈
+
+CM×K is known at the BS, and n is the Gaussian noise vector comprising of i.i.d. CN (0 , N 0) random variables. Unless otherwise stated, we assume the channel vector hi ∈
+
+CM×1 associated with user i follows a Gaussian distribution, 
+
+p(hi) = CN (hi; 0; Ri), where Ri = E[hihHi ] denotes the channel covariance matrix. Note that Ri is generally not a scaled identity matrix; rather, it is typically modeled to capture the spatial correlation and large-scale fading between user i
+
+and the BS. Denoting φ = [ φ1, . . . , φ M ] and θ = [ θ1, . . . , θ K ],the marginal conditional distribution p(y | s, H) is given by 
+
+p(y | s; H) = 
+
+∫
+
+> φ
+
+∫
+
+> θ
+
+p(y, φ, θ | s; H)d θdφ
+
+= Eφ,θ
+
+[p(y | s, φ, θ; H)]. (4) Assuming a uniform input distribution on s, the optimal detection performance can be attained by maximizing the likelihood function p(y | s; H), i.e., 
+
+s⋆ = arg max 
+
+> s∈A K
+
+p(y | s; H)= arg max 
+
+> s∈A K
+
+ln Eφ,θ
+
+[
+
+e−N −10 ‖y−ΦHΘs ‖2 ]
+
+. (5) However, the expectation in (5) can not be obtained in closed-form since it involves a high-dimensional integration over the PN variables. It requires computing an integral over 
+
+K + M dimensions, which becomes extremely difficult for high dimensions in massive MIMO. Furthermore, the search space |A| K grows prohibitively large with both the modulation size |A| and the number of users K, resulting in excessive detection complexity. 
+
+Remark 1: If all antennas at the BS share the same oscillator, the BS will be affected by a single source of phase noise, i.e, 
+
+φ , φ1 = . . . = φM . This presents a simplified model of the system model in (3), with fewer parameters to estimate. Our proposed VB frameworks can be adopted for this common-oscillator scenario. 
+
+B. Preliminaries 
+
+To support the upcoming discussion, we provide some pre-liminary results from real analysis and probability, presented without proofs:  
+
+> •
+
+For a complex number z,
+
+ℜ{ jz} = −ℑ{ z} = ℑ{ z∗}. 
+
+> •
+
+For a von Mises RV x ∼ VM (η), μ , ∠ η is the mean direction and κ , |η| is trob he concentration of x,analogous to the inverse of the variance. The PDF of 
+
+x is 
+
+VM (x; η) = exp (κ cos( x − μ))
+
+2πI 0(κ) ∝ exp (ℜ{ η∗ejx}).
+
+The expectation and variance of ejnx are 
+
+E[ejnx ] = I|n|(κ)
+
+I0(κ) ejnμ , Var [ejnx ] = 1 −
+
+( I|n|(κ)
+
+I0(κ)
+
+)2
+
+,
+
+where Ii(κ) is the modified Bessel function of the first kind of order i. For large value of κ and specific order 
+
+n = 1 , one can have I1(κ) 
+
+> I0(κ)
+
+≈ 1 − 12κ . 
+
+> •
+
+Let x and y be two independent RVs with means ˆx and 
+
+ˆy and variances σ2 
+
+> x
+
+and σ2 
+
+> y
+
+, respectively. Then 
+
+Var [xy ] = (|ˆx|2 + σ2
+
+> x
+
+)( |ˆy|2 + σ2
+
+> y
+
+) − | ˆx|2|ˆy|2,
+
+and 
+
+Var [ejnx y] = Var [ejnx ]|ˆy|2 + σ2 
+
+> y
+
+. 
+
+> •
+
+Let x ∈ Cn×1 and y ∈ Cn×1 be independent RVs w.r.t. distribution qx,y(x, y) = q(x)q(y). Denote ˆx and Σx
+
+(respectively, ˆy and Σy) the variational mean and co-variance of x (respectively, y). For an arbitrary Hermitian matrix B, let 〈(y−Ax )H B(y−Ax )〉 be the expectation of (y − Ax )H B(y − Ax ) w.r.t. qx,y(x, y), then 
+
+〈(y − Ax )H B(y − Ax )〉 = (ˆy − Aˆx)H B(ˆy − Aˆx)
+
++ Tr {BΣ y} + Tr {ΣxAH BA }. (6) III. V ARIATIONAL BAYES FOR MIMO D ETECTION WITH 
+
+PHASE NOISES 
+
+In this section, we develop VB methods to jointly infer the transmitted symbols s, phase noises θ and φ, from the observation y, assuming a known channel H. In practice, the noise variance/covariance is not known a priori and needs to be estimated. To this end, we estimate the input signal 
+
+x considering two scenarios of postulated noise models: The postulated noise variance N post 0 and covariance Cpost .4
+
+A. MF-VB Algorithm 
+
+We assume a Gamma distribution p(γ) = Gamma( α, β ),as a conjugate prior for the precision parameter γ, where α
+
+and β are the shape and rate parameters, respectively. Con-sidering the precision γ as a random variable, the conditional probability of observation y and latent variables s, φ, and θ
+
+can be factorized as 
+
+p(y, s, θ, φ, γ ) = p(y | s, θ, φ, γ )p(s)p(θ)p(φ)p(γ), (7) where p(y | s, φ, θ, γ ) = CN (ΦH y; HΘs , γ −1IM
+
+). We ap-proximate the posterior using a mean-field factorization as 
+
+p(s, θ, φ, γ | y; H) ≈ q(s, θ, φ, γ )=
+
+[ K∏
+
+> i=1
+
+q(si)q(θi)
+
+] M∏
+
+> m=1
+
+q(φm)q(γ). (8) The variational factors are obtained by minimizing the Kullback-Leibler divergence to the true posterior. For the variational distribution of a random variable of interest x, the coordinate ascent update for the variational is given by 
+
+q⋆(x) ∝ exp 
+
+{〈ln p(y, s, θ, φ, γ )〉
+
+> −x
+
+}
+
+, (9) where the expectation is taken with respect to all variables except x. To enable tractable updates, we assume von Mises priors for θi and φm, given by 1
+
+p(θi) = VM (θi; εt,i ), p(φm) = VM (φm; εr,m ).
+
+For a current estimate of the variational distributions q(s),
+
+q(θ), q(φ), and q(γ), we will obtain the corresponding varia-tional means ˆs, ˆθ, ˆφ, and ˆγ, respectively; and likewise ˆΘ and 
+
+ˆΦ. For ease of presentation and computational complexity, we define a residual term r = ˆΦH y − H ˆΘˆs using these current 
+
+corresponding estimates and use it for updating the variational distributions in the following iteration. 
+
+1) Update φm: Taking the expectation of the conditional in (7) w.r.t. all latent variables except φm, the variational distribution q(φm) can be derived as 
+
+q(φm) ∝ p(φm) exp 
+
+{
+
+− ˆγ〈|e−jφm ym − Hm, :Θs |2〉
+
+> −φm
+
+}
+
+∝ p(φm) exp 
+
+{
+
+ˆγ〈2ℜ{ ejφm y∗
+
+> m
+
+Hm, :Θs }〉
+
+> −φm
+
+}
+
+∝ p(φm) exp (ℜ{ η∗
+
+> r,m
+
+ejφm }), (10) where ηr,m = 2ˆ γy m
+
+(Hm, : ˆΘˆs)∗.Since the prior p(φm) is assumed to be von Mises 
+
+VM (εr,m ), q(φm) is also von Mises with mean ˆφm =
+
+∠(εr,m + ηr,m ) and concentration κr,m = |εr,m + ηr,m |.Thus, we have 〈e±jφm
+
+〉 = dr,m e±j ˆφm , where dr,m =
+
+I1(κr,m )/I 0(κr,m ). As a result, ηr,m can be rewritten as 
+
+ηr,m = 2ˆ γy m
+
+(〈 e−jφm 〉ym − rm
+
+)∗
+
+= 2ˆ γ(|ym|2dr,m ej ˆφm − ymr∗
+
+> m
+
+). (11)        
+
+> 1Phase noise (increment) is typically modeled as Gaussian N(0 , γ −1).For small innovation variance γ−1, the phase noise (increment) can be indistinguishably modeled as von Mises VM (γ).
+
+2) Update θi: Taking the expectation of the conditional in (7) w.r.t. all latent variables except θi, the variational distribution q(θi) can be derived as 
+
+q(θi) ∝ p(θi) exp 
+
+{
+
+− ˆγ〈‖ΦH y − HΘs ‖2〉
+
+> −θi
+
+}
+
+∝ p(θi) exp 
+
+{
+
+2ˆ γℜ
+
+{( 
+
+ˆΦH y−
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθj 〉ˆsj
+
+)H
+
+hi ˆsiejθi
+
+}} 
+
+∝ p(θi) exp (ℜ{ η∗
+
+> t,i
+
+ejθi }), (12) where ηt,i = 2ˆ γhHi
+
+( ˆΦH y − ∑Kj6 =i hj
+
+〈ejθj
+
+〉ˆsj
+
+)
+
+ˆs∗ 
+
+> i
+
+.
+
+If the prior p(θi) is assumed to be von Mises VM (εt,i ),then the variational density q(θi) is also von Mises with mean 
+
+ˆθi = ∠(εt,i + ηt,i ) and concentration κt,i = |εt,i + ηt,i |. Thus, we have 〈e±jθi 〉 = dt,i e±jˆθi , where dt,i = I1(κt,i )/I 0(κt,i ).The term ηt,i can be simplified as 
+
+ηt,i = 2ˆ γhHi
+
+(r + hi
+
+〈ejθi 〉ˆsi
+
+) ˆs∗
+
+> i
+
+= 2ˆ γ(‖hi‖2|ˆsi|2dt,i ejˆθi + hHi rˆs∗
+
+> i
+
+). (13) 
+
+3) Update si: Taking the expectation of the conditional in (7) w.r.t. all latent variables except si, the variational distribution q(si) can be derived as (14), where 
+
+zi = hHi
+
+‖hi‖2
+
+(
+
+ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθi 〉ˆsj
+
+)〈e−jθi 〉
+
+= hHi
+
+‖hi‖2
+
+(r + hi
+
+〈ejθi 〉ˆsi
+
+) 〈 e−jθi 〉
+
+= d2t,i ˆsi + dt,i e−jˆθi hHi r
+
+‖hi‖2 . (15) The variational mean ˆsi and variance τsi are calculated as 
+
+ˆsi = Fs
+
+(zi, ˆγ‖hi‖2) , E[si | zi = si + CN (0, 1/(ˆ γ‖hi‖2))] 
+
+and τsi = Gs
+
+(zi, ˆγ‖hi‖2) , Var [si | zi = si +
+
+CN (0, 1/(ˆ γ‖hi‖2))] , respectively, where Fs(·) and Gs(·) are given in the Appendix B of [28]. 
+
+4) Update γ: Taking the expectation of the conditional in (7) w.r.t. all latent variables except γ, the variational distribution 
+
+q(γ) can be obtained as 
+
+q(γ) ∝ p(γ) exp {ln p(y | s, φ, θ, γ )}∝ exp {M ln γ − γ〈‖ΦH y − HΘs ‖2
+
++ ( aγ − 1) ln γ − bγ γ〉} . (16) The variational distribution q(γ) is thus Gamma with mean 
+
+ˆγ = M + aγ
+
+bγ + 〈‖ΦH y − HΘs ‖2〉 . (17) Since the von Mises prior is used for θi, 〈‖ΦH y − HΘs ‖2〉
+
+can be further derived as 
+
+〈‖ΦH y − HΘs ‖2〉
+
+= ‖r‖2 +
+
+> M
+
+∑
+
+> m=1
+
+Var [ejθm ym
+
+] +
+
+> K
+
+∑
+
+> i=1
+
+‖hi‖2Var[e jθi si]= ‖r‖2 +
+
+> N
+
+∑
+
+> m=1
+
+|ym|2(1 − d2r,m )+
+
+> K
+
+∑
+
+> i=1
+
+‖hi‖2(τsi + (1 − d2t,i )|ˆsi|2). (18) 5
+
+q(si) ∝ p(si) exp 
+
+{
+
+− ˆγ
+
+〈∥ ∥∥∥ΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ejθj sj − hiejθi si
+
+∥∥∥∥
+
+> 2
+
+〉
+
+> −si
+
+}
+
+∝ p(si) exp 
+
+{
+
+− ˆγ
+
+[
+
+‖hi‖2|si|2 − 2ℜ
+
+{( 
+
+ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθi 〉ˆsj
+
+)H
+
+hi
+
+〈ejθi 〉si
+
+}]} 
+
+∝ p(si) exp { − ˆγ‖hi‖2|si − zi|2}, (14) 
+
+Algorithm 1 – MF-VB algorithm with postulated noise variance and von Mises prior 
+
+1: Input: y, H, and priors {p(si)}, {p(θi)}, {p(φm)}
+
+2: Output: ˆs, ˆθ, and ˆφ
+
+3: Initialize ˆs1 
+
+> i
+
+= 0 , τsi = Var p(si )[si], ∀i; and r = y
+
+4: Initialize ˆθ1 
+
+> i
+
+= 0 and d1t,i = I1(|εt,i |)/I 0(|εt,i |), ∀i
+
+5: Initialize ˆφ1 
+
+> m
+
+= 0 , and d1r,m = I1(|εr,m |)/I 0(|εr,m |), ∀m
+
+6: for ℓ = 1 , 2, . . . , T do 
+
+7: ˆγ ← M/ (‖r‖2 + ∑Mm=1 |ym|2(1 − (dℓ
+
+> r,m
+
+)2)
+
++ ∑Ki=1 ‖hi‖2 [τ ℓsi + |ˆsℓi |2(1 − (dℓ
+
+> t,i
+
+)2)] ) 
+
+8: for i = 1 , 2, . . . , K do 
+
+9: zi ← (dℓ
+
+> t,i
+
+)2 ˆsℓi + dℓ
+
+> t,i
+
+e−jˆθℓi hHi r/‖hi ‖2
+
+10: ˆsℓ+1  
+
+> i
+
+← E[si | zi = si + CN (0, 1/(ˆ γ‖hi‖2))] 
+
+11: τ ℓ+1  
+
+> si
+
+← Var [si | zi = si + CN (0, 1/(ˆ γ‖hi‖2))] 
+
+12: r ← r + hidℓ
+
+> t,i
+
+ejˆθℓi (ˆ sℓi − ˆsℓ+1  
+
+> i
+
+)
+
+13: ηt,i ← 2ˆ γ(‖hi‖2|ˆsℓ+1  
+
+> i
+
+|2dℓ
+
+> t,i
+
+ejˆθℓi + hHi r(ˆ sℓ+1  
+
+> i
+
+)∗)
+
+14: ˆθℓ+1  
+
+> i
+
+← ∠(εt,i + ηt,i )
+
+15: κℓ+1 t,i ← | εt,i + ηt,i |
+
+16: dℓ+1 t,i ← I1(κℓ+1 t,i )/I 0(κℓ+1 t,i )
+
+17: r ← r + hi ˆsℓ+1 
+
+> i
+
+(dℓ
+
+> t,i
+
+ejˆθℓi − dℓ+1 t,i ejˆθℓ+1 
+
+> i
+
+)
+
+18: end for 
+
+19: ηr ← 2ˆ γ(y ⊙ y∗ ⊙ dℓ 
+
+> r
+
+⊙ ej ˆφℓ
+
+− y ⊙ r∗)
+
+20: ˆφℓ+1 ← ∠(εr + ηr)
+
+21: κℓ+1 r ← | εr + ηr|
+
+22: dℓ+1 r ← I1(κℓ+1 r )./I 0(κℓ+1 r )
+
+23: r ← r − y ⊙ (dℓ 
+
+> r
+
+⊙ e−j ˆφℓ
+
+− dℓ+1 r ⊙ e−j ˆφℓ+1 )
+
+24: end for 
+
+25: ∀i : ˆ si ← arg max a∈A paCN (zi; a, 1/(ˆ γ‖hi‖2))
+
+The MF-VB algorithm with von Mises priors for θi’s and 
+
+φm’s is summarized in Algorithm 1. The iteration index is only included in the superscripts of the estimated variables if the old (iteration ℓ) and the new (iteration ℓ + 1 ) estimated values are needed later in the algorithm. In the VB framework, the estimation of a latent variable requires the latest updates of the other latent variables. These updates are reflected in the resid-ual vector r. Instead of updating the whole vector r, which induces high complexity, we only update the contribution of the latent variable that has been most recently updated. 
+
+Remark 2: For the case of a single phase noise source φ at the BS, the variational distribution of φ at iteration-ℓ can be found as 
+
+q(φℓ+1 ) ∝ p(φℓ+1 ) exp (ℜ{ η∗ 
+
+> r
+
+ejφℓ+1 
+
+})
+
+= VM (φℓ+1 ; εr + ηr
+
+), (19) where ηr = 2ˆ γ yT (H ˆΘˆs)∗ = 2ˆ γ(‖y‖2dℓ 
+
+> r
+
+ej ˆφℓ
+
+− rH y) with 
+
+dℓ 
+
+> r
+
+and ˆφℓ obtained from q(φℓ) at the previous iteration. The update of ˆγ in Step 7 is also modified by replacing ∑Mm=1 |ym|2(1 − (dℓ
+
+> r,m
+
+)2) with (1 − (dℓ 
+
+> r
+
+)2)‖y‖2.
+
+B. LMMSE-VB Algorithm 
+
+The noise precision matrix Γ = ( Cpost )−1 is floated as a random matrix. The joint distribution is given by 
+
+p(y, s, θ, φ, Γ) = p(y | s, θ, φ, Γ)p(s)p(θ)p(φ)p(Γ), (20) where p(y | s, φ, θ, Γ) = CN (ΦH y; HΘs , Γ−1). We approx-imate the posterior distribution using a mean-field factorization 
+
+p(s, θ, φ, Γ | y; H) ≈ q(s, θ, φ, Γ)=
+
+[ K∏
+
+> i=1
+
+q(si)q(θi)
+
+] M∏
+
+> m=1
+
+q(φm)q(Γ).
+
+(21) 
+
+1) Update φm: Taking the expectation of the conditional in (20) w.r.t. all latent variables except φm, the variational distribution q(φm) can be derived as 
+
+q(φm)
+
+∝ p(φm) exp 
+
+{
+
+−〈(ΦH y−HΘs )H Γ(ΦH y−HΘs )〉
+
+> −φm
+
+}
+
+∝ p(φm) exp 
+
+{
+
+2 ℜ{ejφm y∗
+
+> m
+
+[ˆΓ]
+
+> mm
+
+Hm, : ˆΘˆs}
+
+− 2
+
+> M
+
+∑
+
+> n6=m
+
+ℜ{ejφm y∗
+
+> m
+
+[ˆΓ]
+
+> mn
+
+(〈 e−jθn 〉yn − Hn, : ˆΘˆs)} }
+
+∝ p(φm) exp {ℜ{η∗
+
+> r,m
+
+ejφm }} , (22) where we define 
+
+ηr,m = 2 ym
+
+([ˆΓ]
+
+> mm
+
+Hm, : ˆΘˆs
+
+−
+
+> M
+
+∑
+
+> n6=m
+
+[ˆΓ]
+
+> mn
+
+(〈 e−jθn 〉yn − Hn, : ˆΘˆs))∗
+
+= 2 ym
+
+([ˆΓ]
+
+> mm
+
+〈e−jφm 〉ym
+
+−
+
+> M
+
+∑
+
+> n=1
+
+[ˆΓ]
+
+> mn
+
+(〈 e−jθn 〉yn − Hn, : ˆΘˆs))∗
+
+= 2 ym
+
+([ ˆΓ]
+
+> mm
+
+dr,m e−j ˆφm ym − [ˆΓ]H
+
+> :,m
+
+r)∗
+
+= 2 [ˆΓ]
+
+> mm
+
+|ym|2dr,m ej ˆφm − 2ymrH [ˆΓ]:,m . (23) If the prior is von Mises VM (εr,m ), q(φm) is also von Mises with mean ˆφn = ∠(εr,m + ηr,m ) and concentration 
+
+κr,m = |νr,m + ηr,m |.6
+
+q(θi) ∝ p(θi) exp 
+
+{
+
+− 〈( ΦH y − HΘs )Γ(ΦH y − HΘs )〉 
+
+> −θi
+
+}
+
+∝ p(θi) exp 
+
+{
+
+−
+
+〈( 
+
+ΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ejθj sj − hiejθi si
+
+)H
+
+Γ
+
+(
+
+ΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ejθj sj − hiejθi si
+
+)〉 
+
+> −θi
+
+}
+
+∝ p(θi) exp 
+
+{
+
+2ℜ
+
+{( 
+
+ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθj 〉ˆsj
+
+)H
+
+ˆΓh i ˆsiejθi
+
+}} 
+
+∝ p(θi) exp {ℜ{ η∗
+
+> t,i
+
+ejθi }}, (24) 
+
+q(si) ∝ p(si) exp 
+
+{
+
+− 〈( ΦH y − HΘs )Γ(ΦH y − HΘs )〉 
+
+> −si
+
+}
+
+∝ p(si) exp 
+
+{
+
+−
+
+〈( 
+
+ΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ejθj sj − hiejθi si
+
+)H
+
+Γ
+
+(
+
+ΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ejθj sj − hiejθi si
+
+)〉 
+
+> −si
+
+}
+
+∝ p(si) exp 
+
+{
+
+− hHi ˆΓh i|si|2 + 2 ℜ
+
+{( 
+
+ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθj 〉ˆsj
+
+)H
+
+ˆΓh i
+
+〈ejθi 〉si
+
+}} 
+
+∝ p(si) exp { − hHi ˆΓh i
+
+(|si|2 + 2 ℜ{ z∗ 
+
+> i
+
+si})} 
+
+∝ p(si) exp { − hHi ˆΓh i|si − zi|2}, (25) 
+
+2) Update θi: The variational distribution q(θi) can be derived as in (24), where 
+
+ηt,i = 2 hHi ˆΓ
+
+ ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθj 〉ˆsj
+
+ ˆs∗ 
+
+> i
+
+. (26) If the prior p(θi) is von Mises VM (εt,i ), then the vari-ational density q(θi) is also von Mises with mean ˆθi =
+
+∠(εt,i + ηt,i ) and concentration κt,i = |εt,i + ηt,i |. The term 
+
+ηt,i can be simplified as 
+
+ηt,i = 2 hHi ˆΓ
+
+(
+
+ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj
+
+〈ejθj 〉ˆsj
+
+)
+
+ˆs∗
+
+> i
+
+= 2 hHi ˆΓ (r + hi
+
+〈ejθi 〉ˆsi
+
+) ˆs∗
+
+> i
+
+= 2 (hHi ˆΓh i|ˆsi|2dt,i ejˆθi + hHi ˆΓr ˆs∗
+
+> i
+
+). (27) 
+
+3) Update si: Taking the expectation of the conditional in (20) w.r.t. all latent variables except si, the variational distribution q(si) can be derived as in (25), where 
+
+zi =
+
+hHi ˆΓ
+
+( ˆΦH y − ∑Kj6 =i hj
+
+〈ejθj
+
+〉ˆsj
+
+)〈e−jθi
+
+〉
+
+hHi ˆΓh i
+
+= hHi ˆΓ(r + hi
+
+〈ejθi
+
+〉ˆsi
+
+)〈 e−jθi
+
+〉
+
+hHi ˆΓh i
+
+= d2t,i ˆsi + dt,i e−jˆθi hHi ˆΓr hHi ˆΓh i
+
+. (28) 
+
+4) Update Γ: The variational distribution q(Γ) can be derived as 
+
+q(Γ) ∝ p(Γ) exp {ln p(y | s, θ, φ, Γ)}∝ p(Γ) exp { ln |Γ|− 〈(ΦH y − HΘs )H Γ(ΦH y − HΘs )〉} . (29) Applying Lemma 1 in [28] with deterministic of H, we have 
+
+〈(ΦH y − HΘs )H Γ(ΦH y − HΘs )〉
+
+= ( ˆΦH y − H ˆΘˆs)H Γ( ˆΦH y − H ˆΘˆs)+ Tr {ΣΦH yΓ} + Tr {HΣ Θs HH Γ}
+
+= Tr {( rr H + ΣΦH y + HΣ Θs HH )Γ}, (30) where 
+
+ΣΦH y = diag (Var[e −jφ1 y1], . . . , Var[e −jφM yM ])
+
+= diag (|y1|2(1 − d2r,1), . . . , |yM |2(1 − d2r,M )), (31) and 
+
+ΣΘs = diag (Var[e jθ1 s1], . . . , Var[e jθK sK ])
+
+= diag (τs1 +(1 − d2t,1)|ˆs1|2, . . . , τ sK +(1 − d2t,K )|ˆsK |2).
+
+(32) Due to the rank deficiency of 〈(ΦH y − HΘs )H Γ(ΦH y −
+
+HΘs )〉, and following [28], we propose the estimator for ˆΓ
+
+as 
+
+ˆΓ =
+
+( ‖r‖2
+
+M IM + ΣΦH y + HΣ Θs HH
+
+)−1
+
+. (33) The LMMSE-VB process with von Mises prior is summarized in Algorithm 2. 
+
+Remark 3: For the case of one phase noise source φ at the BS, the variational distribution of φ at iteration-ℓ can be found as in (19), where ηr = 2 yT ˆΓ(H ˆΘˆs)∗ = 2 (yH ˆΓy dℓ 
+
+> r
+
+ej ˆφℓ
+
+−
+
+rH ˆΓy ) with dℓ 
+
+> r
+
+and ˆφℓ obtained from q(φℓ) at the previous iteration. The update of ˆΓ at iteration-ℓ is also modified by assigning ˆΣℓ  
+
+> ΦHy
+
+= (1 − (dℓ 
+
+> r
+
+)2)yy H .7
+
+Algorithm 2 – LMMSE-VB algorithm with postulated noise covariance and von Mises prior 
+
+1: Input: y, H, and priors {p(si)}, {p(θi)}, {p(φm)}
+
+2: Output: ˆs, ˆθ, and ˆφ
+
+3: Initialize ˆs1 
+
+> i
+
+= 0 , τsi = Var p(si )[si], ∀i; and r = y
+
+4: Initialize ˆθ1 
+
+> i
+
+= 0 and d1t,i = I1(|εt,i |)/I 0(|εt,i |), ∀i
+
+5: Initialize ˆφ1 
+
+> m
+
+= 0 , and d1r,m = I1(|εr,m |)/I 0(|εr,m |), ∀m
+
+6: for ℓ = 1 , 2, . . . do 
+
+7: Σℓ  
+
+> ΦHy
+
+← diag (|y1|2(1 − (dℓ
+
+> r,1
+
+)2), . . . , |yM |2(1 − (dℓ 
+
+> r,M
+
+)2))
+
+8: Σℓ 
+
+> Θs
+
+← diag (τ ℓs1 +|ˆsℓ
+
+> 1
+
+|2(1 −(dℓ
+
+> t,1
+
+)2), . . . , τ ℓsK +|ˆsℓK |2(1 −
+
+(dℓ 
+
+> t,K
+
+)2))
+
+9: ˆΓ ←
+
+( ‖r‖2
+
+M IM + Σℓ  
+
+> ΦHy
+
++ HΣ ℓ
+
+> Θs
+
+HH
+
+)−1
+
+10: for i = 1 , 2, . . . , K do 
+
+11: zi ← (dℓ
+
+> t,i
+
+)2 ˆsi + dℓ
+
+> t,i
+
+e−jˆθi hHi ˆΓr /hHi ˆΓh i
+
+12: ˆsℓ+1  
+
+> i
+
+← E[si | zi = si + CN (0, 1/hHi ˆΓh i
+
+)] 
+
+13: τ ℓ+1  
+
+> si
+
+← Var [si | zi = si + CN (0, 1/hHi ˆΓh i
+
+)] 
+
+14: r ← r + hidℓ
+
+> t,i
+
+ejˆθℓi (ˆ sℓi − ˆsℓ+1  
+
+> i
+
+)
+
+15: ηt,i ← 2(hHi ˆΓh i|ˆsℓ+1  
+
+> i
+
+|2dℓ
+
+> t,i
+
+ejˆθℓi + hHi ˆΓr (ˆ sℓ+1  
+
+> i
+
+)∗)
+
+16: ˆθℓ+1  
+
+> i
+
+← ∠(εt,i + ηt,i )
+
+17: κℓ+1 t,i ← | εt,i + ηt,i |
+
+18: dℓ+1 t,i ← I1(κℓ+1 t,i )/I 0(κℓ+1 t,i )
+
+19: r ← r + hi ˆst+1 
+
+> i
+
+(dℓ
+
+> t,i
+
+ejˆθℓi − dℓ+1 t,i ejˆθℓ+1 
+
+> i
+
+)
+
+20: end for 
+
+21: for m = 1 , 2, . . . , M do 
+
+22: ηr,m ← 2[ˆΓ]
+
+> mm
+
+|ym|2dℓ
+
+> r,m
+
+ej ˆφℓm − 2ymrH [ˆΓ]:,m 
+
+23: ˆφℓ+1  
+
+> n
+
+← ∠(εr,m + ηr,m )
+
+24: κℓ+1 r,m ← | εr,m + ηr,m |
+
+25: dℓ+1 r,m ← I1(κℓ+1 r,m )/I 0(κℓ+1 r,m )
+
+26: rm ← rm − ym
+
+(dℓ
+
+> r,m
+
+e−j ˆφℓm − dℓ+1 r,m e−j ˆφℓ+1 
+
+> m
+
+)
+
+27: end for 
+
+28: end for 
+
+29: ∀i : ˆ si ← arg max a∈A paCN (zi; a, 1/hHi ˆΓh i
+
+)
+
+IV. V ARIATIONAL BAYES FOR INFERRING x
+
+In Section III, VB algorithms have been developed to jointly estimate the transmitted symbols s and the phase noises θ and 
+
+φ. However, the multiplicative coupling between s and θ in the posterior updates introduces nontrivial dependencies that may reduce the detection performance. To address this issue, we propose an alternative formulation in which the transmitter phase noise is absorbed directly into the transmitted signal, defining the composite variable xi as shown in (2). Rather than estimating si and θi separately, the VB framework is applied directly to infer xi. As established in Theorem 1 and Corollary 1, this reformulation admits a tractable closed-form posterior, enabling efficient variational inference with reduced posterior mismatch and improved detection performance. 
+
+Theorem 1 (Posteriors of s, θ, and x given z): Let 
+
+s ∈ S = {s1, . . . , s N } ⊂ C be a discrete RV with prior prob-abilities pk = P (s = sk). Let θ ∼ VM (ε) be a phase noise RV with PDF p(θ; ε) ∝ exp (ℜ{ ε∗ejθ }). The variables s and 
+
+θ are mutually independent. Let z be a noisy observation of 
+
+x , s ejθ , i.e., 
+
+z = x + n = s e jθ + n, n ∼ CN (0 , γ −1), (34) where n is independent of s and θ. For each k ∈ { 1, . . . , N },define the posterior natural parameter 
+
+ηk , ε + 2 γ z s ∗
+
+> k
+
+. (35) The following results hold: (I) Signal prior p(x):
+
+p(x) = 
+
+> N
+
+∑
+
+> k=1
+
+pk · exp (ℜ{ ε∗ej(∠x−∠sk )})
+
+2π|sk|I0(|ε|) · δ(|x| − | sk|). (I) (II) Symbol posterior p(sk | z):
+
+αk , P (s = sk | z) ∝ pk · exp (−γ |sk|2) · I0(|ηk|), (II) normalized so that ∑Nk=1 αk = 1 .(III) Phase posterior p(θ | z):
+
+p(θ | z) = 
+
+> N
+
+∑
+
+> k=1
+
+αk · VM (θ; ηk), θ ∈ [−π, π ), (III) a finite mixture of von Mises distributions with a conditional mean 
+
+E[θ | z] = ∠
+
+( N∑
+
+> k=1
+
+αk · I1(|ηk|)
+
+I0(|ηk|) · ej∠ηk
+
+)
+
+. (36) (IV) Signal posterior p(x | z):
+
+p(x | z) = 
+
+> N
+
+∑
+
+> k=1
+
+αk · exp (ℜ{η∗
+
+> k
+
+ej(∠x−∠sk )}) 
+
+2π |sk| I0(|ηk |) · δ(|x| − | sk|),
+
+(IV) a finite mixture of von Mises distributions on concentric circles of radii {| sk|} .
+
+Proof: The proof proceeds in five steps. 
+
+Step 1: Prior of x. Conditioned on s = sk, |x| = |sk| and its phase ∠x = ∠sk + θ. Thus, ∠x is von Mises distributed with PDF p(∠x | sk ) = VM (∠x; ε ej∠sk ). Hence, the PDF p(x | sk )
+
+is given by 
+
+p(x | sk) = exp (ℜ{ ε∗ej(∠x−∠sk )})
+
+2π|sk|I0(|ε|) · δ(|x| − | sk|). (37) By the law of total probability, the marginal p(x) =∑Nk=1 p(x | sk ) p(sk) yields (I). 
+
+Step 2: Conjugate posterior of θ given z and sk. Since n ∼CN (0 , γ −1), we have 
+
+p(z | θ, s k) ∝ exp ( − γ|z − skejθ |2). (38) Combining with the von Mises prior, p(θ), with θ and s being independent, we have 
+
+p(θ | z, s k) ∝ p(z | θ, s k)p(θ)
+
+∝ exp ( − γ|z − skejθ |2) exp (ℜ{ε∗ejθ }) 
+
+∝ exp (2γℜ{z∗skejθ }) exp (ℜ{ε∗ejθ }) 
+
+∝ exp (ℜ{η∗
+
+> k
+
+ejθ }) , (39) which is VM (θ; ηk ), where ηk is the posterior natural param-eter defined in (35). 8
+
+Step 3: Marginal likelihood and symbol posterior. Using ∫ π 
+
+> −π
+
+eℜ{ η∗ ejθ } dθ = 2 π I 0(|η|):
+
+p(z | sk)=
+
+∫ π
+
+> −π
+
+p(z | θ, s k) p(θ) d θ
+
+∝
+
+∫ π
+
+> −π
+
+exp (−γ[|sk|2 − 2ℜ{z∗skejθ}]) exp (ℜ{ε∗ejθ }) dθ
+
+∝ e−γ|sk|2
+
+∫ π
+
+> −π
+
+exp (ℜ{η∗
+
+> k
+
+ejθ }) dθ
+
+∝ e−γ|sk|2
+
+I0(|ηk|). (40) Applying Bayes’ rule p(sk | z) ∝ p(z | sk)p(sk) with prior pk
+
+and normalizing then gives (II). 
+
+Step 4: Phase posterior. By the law of total probability: 
+
+p(θ | z) = 
+
+> N
+
+∑
+
+> k=1
+
+p(θ | z, s k) p(sk | z) = 
+
+> N
+
+∑
+
+> k=1
+
+αk VM (θ; ηk ), (41) giving (III). 
+
+Step 5: Signal posterior. Since p(θ | z, s k) is obtained as von Mises as given in (39) and x = s ejθ , it follows that given z and 
+
+s = sk, one has |x| = |sk| and ∠x as von Mises distributed with the PDF VM (∠x; ηk ej∠sk ). Thus, the PDF p(x|z, s k) is given by 
+
+p(x | z, s k) = exp (ℜ{η∗
+
+> k
+
+ej(∠x−∠sk )}) 
+
+2π |sk| I0(|ηk |) · δ(|x| − | sk|), (42) By the law of total probability, 
+
+p(x | z) = ∑Nk=1 p(x | z, s k) p(sk | z) gives (IV). 
+
+Remark 4: The posterior natural parameter ηk = ε + 2 γ z s ∗
+
+> k
+
+decomposes cleanly: the prior ε encodes baseline phase un-certainty with mean ∠ε and concentration |ε|, while 2γ z s ∗
+
+> k
+
+is the matched filter output — the correlation of observation 
+
+z against template sk, scaled by twice the noise precision. Since ∠(z s ∗
+
+> k
+
+) = ∠z − ∠sk, the likelihood steers the posterior mean toward ∠z −∠sk as γ increases, which is the maximum-likelihood phase estimate for symbol sk. The posterior con-centration |ηk| ≥ | ε| always exceeds the prior, confirming that the observation can only sharpen the phase estimate. 
+
+Corollary 1 (Posterior Mean and Variance of x): Let 
+
+dk , I1(|ηk |)/I 0(|ηk|) be the mean resultant length of the 
+
+k-th component, and define the per-component posterior mean 
+
+E[x | z, s k] = sk dk ej∠ηk . (43) (i) Posterior mean: 
+
+¯x = E[x | z] = 
+
+> N
+
+∑
+
+> k=1
+
+αk sk dk ej∠ηk . (44) Each symbol contributes its amplitude |sk|, shrunk by the mean resultant length dk ∈ [0 , 1) and rotated to the posterior mean phase ∠sk + ∠ηk.(ii) Posterior variance: 
+
+Var[ x | z] = 
+
+> N
+
+∑
+
+> k=1
+
+αk|sk|2 − | ¯x|2. (45) 
+
+Proof: Since ∠x | z, s k ∼ VM (ηk ej∠sk ), one has 
+
+E[x | z, s k] = |sk| E[ej∠x | z, s k
+
+]
+
+= |sk| dk ej(∠ηk +∠sk ) = sk dk ej∠ηk , (46) giving (43) and (44) by linearity. The variance is given by 
+
+Var[ x | z] = E[|x|2 | z] − ∣∣E[x | z]∣∣2
+
+=
+
+> N
+
+∑
+
+> k=1
+
+E[|x|2 | z, s k] p(sk | z) − | ¯x|2. (47) Since |x|2 = |sk|2 given s = sk, this gives the results in (45). 
+
+A. Improved MF-VB Algorithm 
+
+We assume a Gamma distribution p(γ) = Gamma( α, β ),as a conjugate prior for the noise precision γ. The joint distribution over observation y and latent variables x and φ
+
+can be factorized as 
+
+p(y, x, φ, γ ) = p(y | x, φ, γ )p(x)p(φ)p(γ), (48) where p(y | x, φ, γ ) = CN (ΦH y; Hx , γ −1IM
+
+). We approxi-mate the posterior distribution using a mean-field factorization 
+
+p(x, φ, γ |y; H) ≈ q(x, φ, γ ) = 
+
+> K
+
+∏
+
+> i=1
+
+q(xi)
+
+> M
+
+∏
+
+> m=1
+
+q(φm)q(γ).
+
+(49) 
+
+1) Update φm: Taking the expectation of the conditional in (48) w.r.t. all latent variables except φm, the variational distribution q(φm) can be derived as 
+
+q(φm) ∝ p(φm) exp (ℜ{ η∗
+
+> r,m
+
+ejφm }),
+
+where ηr,m is now defined as 
+
+ηr,m = 2ˆ γy m
+
+(Hm, : ˆx)∗
+
+= 2ˆ γ(|ym|2dr,m ej ˆφm − ymr∗
+
+> m
+
+). (50) 
+
+2) Update xi: The variational distribution q(xi) can be derived as 
+
+q(xi) ∝ p(xi) exp (−ˆγ‖hi‖2|xi − zi|2)
+
+∝ p(xi) CN (zi; xi, 1/(ˆ γ‖hi‖2)). (51) Thus, q(xi) = p(xi | zi = xi + CN (0, 1/(ˆ γ‖hi‖2)). The variational mean ˆxi and variance τxi of xi can be obtained from Corollary 1. Here, the matched-filter output is 
+
+zi = hHi
+
+‖hi‖2
+
+ ˆΦH y −
+
+> K
+
+∑ 
+
+> j6=i
+
+hj ˆxj
+
+
+
+= ˆ xi + hHi r/‖hi‖2. (52) 
+
+3) Update γ: The variational distribution q(γ) can be obtained as 
+
+q(γ) ∝ p(γ) exp {ln p(y|x, φ, γ )}∝ exp {M ln γ − γ〈‖ΦH y − Hx ‖2
+
++ ( aγ − 1) ln γ − bγ γ〉} . (53) 9
+
+Algorithm 3 – Improved MF-VB Algorithm for Inferring x 
+
+> 1:
+
+Input: y, H, and priors {p(si)}, {p(θi)}, {p(φm)} 
+
+> 2:
+
+Output: ˆs, ˆθ, and ˆφ 
+
+> 3:
+
+Initialize ˆx1 
+
+> i
+
+= 0 , τxi = Var p(si)[si], ∀i; and r = y 
+
+> 4:
+
+Initialize ˆφ1 
+
+> m
+
+= 0 , and d1r,m = I1(|εr,m |)/I 0(|εr,m |), ∀m 
+
+> 5:
+
+for ℓ = 1 , 2, . . . , T do  
+
+> 6:
+
+ˆγ ← M/ 
+
+(
+
+‖r‖2 + N∑
+
+> m=1
+
+|ym|2(1 − (dℓ
+
+> r,m
+
+)2) + K∑
+
+> i=1
+
+‖hi‖2τ ℓxi
+
+) 
+
+> 7:
+
+for i = 1 , 2, . . . , K do  
+
+> 8:
+
+zi ← ˆxℓi + hHi r/‖hi ‖2 
+
+> 9:
+
+ˆxℓ+1  
+
+> i
+
+← E[xi | zi = xi + CN (0, 1/(ˆ γ‖hi‖2))]  
+
+> 10:
+
+τ ℓ+1  
+
+> xi
+
+← Var [xi | zi = xi + CN (0, 1/(ˆ γ‖hi‖2))]  
+
+> 11:
+
+r ← r + hi(ˆ xℓi − ˆxℓ+1  
+
+> i
+
+) 
+
+> 12:
+
+end for  
+
+> 13:
+
+Similar to Steps (19) – (23) of Algorithm 1.  
+
+> 14:
+
+end for  
+
+> 15:
+
+∀i : ˆ si ← arg max a∈A p(a | zi) using (II) of Theorem 1  
+
+> 16:
+
+∀i : ˆθi ← E[θi | zi] using (III) of Theorem 1                                  
+
+> TABLE I ALGORITHM COMPUTATIONAL COMPLEXITY
+> Algorithm Complexity
+> Naive ML O(M|S| K)
+> Naive LMMSE-VB [26] O(M3T+KT |S| )
+> SIW in [19] O(M3+M|S| K)
+> MF-VB (Algorithm 1) O(KT (M+|S|))
+> LMMSE-VB (Algorithm 2) O(M3T+KT (M2+|S| ))
+> Improved MF-VB (Algorithm 3) O(KT (M+|S| ))
+
+Thus, q(γ) is Gamma with mean 
+
+ˆγ = M + aγ
+
+bγ + 〈‖ΦH y − Hx ‖2〉 . (54) where 
+
+〈‖ΦH y − Hx ‖2〉
+
+= ‖r‖2 +
+
+> M
+
+∑
+
+> m=1
+
+Var[e jφm ym] + 
+
+> K
+
+∑
+
+> i=1
+
+‖hi‖2Var[ xi]= ‖r‖2 +
+
+> M
+
+∑
+
+> m=1
+
+|ym|2(1 − d2r,m ) + 
+
+> K
+
+∑
+
+> i=1
+
+‖hi‖2τxi . (55) The improved MF-VB algorithm using the prior of xi
+
+is summarized in Algorithm 3. A key structural advantage over Algorithms 1 and 2 is that the update of xi in Step 9 does not require phase-noise tracking variables dt,i, ˆθi;instead, these are encoded within the composite posterior of xi.Consequently, the residual vector update in Step 11 simplifies to r ← r + hi(ˆ xℓi − ˆxℓ+1  
+
+> i
+
+), reducing per-iteration overhead compared with Algorithm 1. Final symbol and phase decisions are recovered from the posteriors in parts (II) and (III) of Theorem 1, respectively. 
+
+B. Computational Complexity Analysis 
+
+We end this section with a complexity analysis of the MF-VB, LMMSE-VB, and improved MF-VB algorithms, as shown in Table I. The naive ML detector performs an exhaustive search over all |S| K candidate vectors, computing the residual ‖y − Hx ‖2
+
+for each candidate, yielding complexity O(M |S| K ). The naive LMMSE-VB detector requires computing the K × K Gram matrix HH H and its inverse, yielding O(M 3T + KT |S| ),where T is the maximum number of iterations. The SIW detector [19] avoids explicit PN tracking but constructs an approximate likelihood by whitening the PN-induced self-interference covariance, followed by two rounds of nearest-neighbor detection via exhaustive search. This incurs a com-plexity of O(M 3 + M |S| K ), where the M 3 term comes from the Cholesky decomposition of the whitening matrix and the M |S| K term reflects the exhaustive search over all |S| K
+
+candidate vectors, making SIW computationally intractable for large MIMO systems with high-order modulations. The MF-VB algorithm (Algorithm 1) performs, for each user, matched-filter projections hHi r in steps 9 and 13 with cost O(M ),residual updates in steps 12 and 17 with cost O(M ), scalar von Mises updates in steps 14, 15, and 16 with cost O(1) , and posterior table lookups over |S| constellation points in steps 10 and 11. Summing over K users and T iterations, the dominant complexity is O(KT (M +|S|)) . In the proposed LMMSE-VB algorithm (Algorithm 2), the invert of the resulting M × M
+
+effective noise covariance matrix ˆΓ with complexity O(M 3),which dominates the computation of HΣ ℓ
+
+> Θs
+
+HH , whose com-plexity is O(KM 2). The LMMSE-weighted projection hHi ˆΓr 
+
+in step 11 has complexity O(KM 2). The inner loop in steps 10 → 20 has complexity O(KM 2 + K|S| ) per iteration. Therefore, the total complexity over T iterations is O(M 3T +
+
+KT (M 2 + |S| )) . The improved MF-VB algorithm (Algorithm 3) absorbs the transmitter PN into xi, eliminating the separate estimation steps for θi in Algorithm 1. For each user, step 8 incurs complexity O(M ), while steps 9 and 10 evaluate over 
+
+|S| constellation points, resulting in complexity O(|S| ). The residual update simplifies to r ← r + hi(ˆ xℓi − ˆxℓ+1  
+
+> i
+
+) with cost 
+
+O(M ), removing two von Mises update steps per user per iteration relative to Algorithm 1. The dominant complexity of Algorithm 3 remains O(KT (M +|S| )) . However, Algorithm 3 exhibits longer runtime than Algorithm 1 in simulations, since computing the posterior of the composite variable xi incurs a higher constant factor than computing the posteriors of si and 
+
+θi separately. V. S IMULATION RESULTS 
+
+We consider a massive MIMO system where the BS is equipped with M = 24 antennas and K = 8 users with 16-QAM signaling. We implement all the iterative algorithms with a maximum of 100 iterations and consider scenarios with 100 
+
+transmitted data symbols. The noise variance N0 is set based on the SNR, which is defined as 
+
+SNR = E[‖ΦHx ‖2]
+
+E[‖n‖2] =
+
+∑Ki=1 Tr {Ri}
+
+M N 0
+
+= KM N 0
+
+. (56) We consider two-channel models for the channel matrix H.The first assumes i.i.d. Gaussian entries, i.e., Ri = (1 /M )IM ,which corresponds to i.i.d. Rayleigh fading. The second considers correlated Gaussian coefficients, corresponding to correlated Rayleigh fading, where each column of H follows 10                  
+
+> 0510 15 20 25 30 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Fig. 2. Convergence of the proposed iterative algorithms assuming i.i.d. Rayleigh fading channels with M=16 ,K=8,16 -QAM, γ−1/2t,i =
+> γ−1/2r,m = 5 ◦. The plots are obtained by averaging over 1000 trials.
+
+an exponential spatial correlation model. In this case, the covariance matrix Ri is given by 
+
+[Ri]kℓ =
+
+{
+
+(1 /M )αk−ℓ, if k ≥ ℓ, 
+
+(1 /M ) (αℓ−k)∗ , if k < ℓ, (57) where α denotes the (complex) correlation coefficient between neighboring receive antennas. In all simulations involving correlated channels, we set α = 0 .4 + 0 .4 j. The PNs are assumed to be Gaussian with zero mean and variance γ−1t,i 
+
+for user i and γ−1r,m for receive antenna m at the BS. We compare the proposed VB algorithms with the following baseline algorithms:  
+
+> •
+
+Naive ML: The ML detector without considering phase noise.  
+
+> •
+
+Naive LMMSE-VB: The LMMSE-VB in [26] without considering phase noise.  
+
+> •
+
+The SIW algorithm in [19]. We first study the convergence of all iterative algorithms, such as Algorithms 1, 2, and 3, with standard deviations of PN γ−1/2t,i = γ−1/2r,m = 5 ◦, as shown in Fig. 2. All three VB algorithms are observed to converge reliably within fewer than 20 iterations, confirming the practical effectiveness of the coordinate ascent variational inference updates employed in the proposed VB framework. Fig. 3 compares the SER performance of all considered algorithms under i.i.d. Rayleigh fading channels. The naive ML and naive LMMSE-VB algorithms exhibit the worst per-formance and quickly reach an error floor around 10 −2 at high SNR, indicating their inability to mitigate PN distortion. In contrast, the proposed VB-based algorithms achieve significant performance improvements by accounting for PN uncertainty. Among them, LMMSE-VB outperforms MF-VB because it employs the full postulated noise covariance matrix Cpost 
+
+rather than a scalar noise variance, thereby better capturing the residual interference structure. The improved MF-VB                 
+
+> Fig. 3. SER vs. SNR, assuming i.i.d. Rayleigh fading channels with M= 24 ,
+> K= 8 ,16 -QAM signaling, γ−1/2t,i =γ−1/2r,m = 6 ◦.Fig. 4. SER vs. SNR, assuming i.i.d. Rayleigh fading channels with M= 24 ,
+> K= 8 ,64 -QAM signaling, γ−1/2t,i =γ−1/2r,m = 6 ◦.
+
+algorithm achieves the best SER performance, attaining SERs on the order of 10 −3 at high-SNRs. This is because the reformulation of the transmitter phase noise directly into the composite transmit signal xi, which eliminates the multiplica-tive coupling between si and θi in the VB updates and yields a conjugate posterior under the von Mises prior, as derived in Theorem 1. The SIW algorithm, achieving similar SER to the improved MF-VB at SNR < 20 dB, suffers an increasing performance gap relative to the improved MF-VB at high SNR due to its reliance on a first-order approximation of the PN. In Fig. 4, we evaluate the SER performance of all algo-rithms with a higher-order modulation of 64-QAM under i.i.d. Rayleigh fading. The higher constellation density renders the system more susceptible to phase noise, as the reduced inter-symbol distances make the received signal more sensitive to phase rotations. The naive ML and naive LMMSE-VB detectors again saturate at error floors well above those of 11          
+
+> Fig. 5. SER vs. SNR, assuming correlated Rayleigh fading channels with
+> M= 24 ,K= 8 , QPSK and 16 -QAM signaling, γ−1/2t,i =γ−1/2r,m = 6 ◦.
+
+the phase-noise-aware methods, confirming that phase noise awareness is indispensable for high-order modulation schemes. The improved MF-VB achieves the lowest SER at high SNRs, followed by SIW, LMMSE-VB, and MF-VB. The performance advantage of the improved MF-VB over the SIW detector becomes even more pronounced under 64 -QAM, highlighting the importance of an accurate posterior model for the transmit signal when higher-order constellations are employed. This result highlights the scalability of the proposed approach to scenarios with high spectral efficiency requirements. Fig. 5 examines the SER performance under correlated Rayleigh fading channels with α = 0 .4 + j0.4. For QPSK, thanks to the high PN tolerance of low-order constellations whose decision regions occupy large phase angles, the SER of all algorithms is nearly identical. For 16-QAM, the improved MF-VB and SIW remain the top-performing detectors, with improved MF-VB achieving superior SER at high SNR. The LMMSE-VB algorithm, which accounts for the full noise covariance structure, exhibits noteworthy gains over MF-VB under correlated fading, since the off-diagonal terms of the residual interference matrix become significant when the channel vectors are correlated. These results confirm that the proposed VB framework is robust to realistic spatial channel correlation models. Fig. 6 extends the correlated fading evaluation to 64 -QAM under the same system configuration as Fig. 5. The combination of spatial correlation and high-order modulation amplifies the performance differences between algorithms ac-cordingly. The naive ML and naive LMMSE-VB detectors exhibit pronounced error floors. The SIW algorithm experi-ences significant degradation since its approximate likelihood formulation is less effective under correlated channels. In contrast, the improved MF-VB detector maintains a substantial performance advantage, owing to its principled VB treatment of the composite transmit signal and its joint estimation of the noise precision parameter γ, which adapts to the effective interference level. These results highlight the robustness of the                     
+
+> Fig. 6. SER vs. SNR, assuming correlated Rayleigh fading channels with
+> M= 24 ,K= 8 ,64 -QAM signaling, γ−1/2t,i =γ−1/2r,m = 6 ◦.Fig. 7. SER vs. SNR, assuming few-path mmWave channels with M= 24 ,
+> K= 8 ,16 -QAM and 64 -QAM signalings, and γ−1/2t,i =γ−1/2r,m = 6 ◦.
+
+proposed approach to both high-order modulation and spatially correlated propagation environments. Since the PN is pronounced at mmWave frequencies due to the increased oscillator instability at high carrier frequencies, we also evaluate the proposed VB algorithms under a sparse mmWave propagation environment to assess their practical relevance in this regime. We consider a few-path mmWave propagation environment based on the Saleh-Valenzuela model [?]. The channel model is similar to Section II-A of [ ?], where we set the width of the angular sector as 80 ◦, with the angle of arrival drawn uniformly from the interval [−40 ◦, 40 ◦], the number of paths as 16 , and the antenna spacing as 1/2.Fig. 7 evaluates the proposed algorithms under sparse mmWave propagation for 16-QAM and 64-QAM. The im-proved MF-VB maintains the lowest SER across the entire SNR range in both cases, confirming that its principled VB treatment of the composite transmit signal xi, and adaptive noise precision estimation remain effective under the spa-12            
+
+> Fig. 8. SER vs. Standard deviation of PN assuming i.i.d. Rayleigh fading channels with γ−1/2t,i =γ−1/2r,m ,M= 24 ,K= 8 , SNR = 30 dB, and 16-QAM signaling.
+
+tial characteristics of mmWave channels. Compared to the i.i.d. Rayleigh case, LMMSE-VB narrows its gap with the improved MF-VB, since the low-rank interference structure of the sparse mmWave channels allows the full covariance estimate ˆΓ to better capture the dominant interference di-rections. Conversely, SIW suffers more degradation than in the i.i.d. case, since its approximate likelihood derived under a flat-frequency interference assumption is poorly matched to the spatially concentrated interference of sparse channel geometries. This effect is further amplified under 64-QAM. These results confirm that the advantages of the proposed VB framework are not confined to rich-scattering environments but extend robustly to the sparse, directional channels expected in practical mmWave deployments. Fig. 8 illustrates the impact of phase noise severity on the detection performance of all considered algorithms, with the PN standard deviation γ−1/2t,i = γ−1/2r,m varied jointly from 4◦
+
+to 10 ◦ under i.i.d. Rayleigh fading channels. As expected, increasing PN variance degrades the detection accuracy of all methods, since larger phase excursions introduce more severe rotational distortions of the received constellation. The naive ML and naive LMMSE-VB detectors are the most sensitive to increasing PN standard deviation. The improved MF-VB maintains the lowest SER across the entire range of PN standard deviations, demonstrating strong robustness to oscillator quality variations. The reason is that the conjugate structure of the von Mises posterior over xi continuously adapts the inferred posterior concentration κt,i in proportion to the observed evidence, and thereby absorbs varying degrees of phase uncertainty without degrading the tightness of the posterior distribution. The SIW algorithm performs close to the improved MF-VB at low PN variance but experiences a widen-ing gap as PN severity increases, consistent with the increase in inaccuracy of its first-order phase noise approximation at larger variance values. These results confirm that the proposed improved MF-VB is well-suited to systems operating at high                    
+
+> Fig. 9. SER vs. Massuming i.i.d. Rayleigh fading channels with γ−1/2t,i =
+> γ−1/2r,m = 6 ◦,K= 6 , SNR = 30 dB, 16-QAM signaling. Fig. 10. MSE performance of the phase noise estimation assuming i.i.d. Rayleigh fading channels with M= 24 ,K= 8 ,16 -QAM signaling, and
+> γ−1/2t,i =γ−1/2r,m = 6 ◦.
+
+carrier frequencies, such as mmWave and terahertz bands, where oscillator phase noise tends to be more pronounced. Fig. 9 shows the SER as a function of the number of receive antennas M . When M increases from 12 to 60 , all algo-rithms benefit from the enhanced spatial diversity and MIMO degrees-of-freedom (DoF). The naive ML and naive LMMSE-VB detectors improve only marginally with increasing M ,while the improved MF-VB achieves the lowest SER across all antenna settings and maintains its performance advantage over SIW and LMMSE-VB as M grows. This behavior highlights its ability to exploit the additional spatial DoF for enhanced phase-noise mitigation. The observed scalability is promising for massive MIMO deployments. Fig. 10 complements the SER analysis by reporting the MSE of the transmitter PN θ and receiver PN φ as afunction of SNR. The improved MF-VB algorithm achieves the lowest MSE for both components across the entire SNR range, with estimation error continuing to decrease steadily at high SNR, as a result of Theorem 1, where the posterior 13 
+
+concentration sharpens proportionally with the noise precision 
+
+ˆγ. The MF-VB detector saturates at a low MSE level for both PN components, reflecting the estimation penalty of the multiplicative coupling between si and θi in its variational updates, while LMMSE-VB partially mitigates this through its full covariance estimate ˆΓ. The SIW [19] achieves competitive data detection performance, but it is not designed for PN estimation. As stated in [19], SIW adopted a modular receiver architecture in which the PN was treated as an unknown parameter and marginalized out to construct the approximate marginal likelihood. The PN was entered into the algorithm only through the self-interference covariance matrix, and no PN estimate was produced during detection. Furthermore, the first-order linearization of PN underlying the SIW approxima-tion introduces an inherent bias in the PN model. In contrast, the proposed VB algorithms maintain and iteratively refine a variational posterior over PN jointly with the data symbols, making them the appropriate framework for joint detection and PN estimation. VI. C ONCLUSIONS 
+
+In this paper, we have developed a VB framework for joint phase noise estimation and data detection in uplink multiuser MIMO systems. By treating the PN-corrupted transmit signal as a single composite variable, we bypassed the multiplicative coupling inherent in separation-based approaches and obtained exact conjugate closed-form posteriors under the von Mises prior. Building on this, we developed three detectors: MF-VB, LMMSE-VB, and the improved MF-VB, with increas-ing detection performance. Simulation results confirmed that the improved MF-VB achieved the lowest SER across i.i.d. Rayleigh fading, correlated Rayleigh fading, and mmWave channels, with the performance advantage becoming more pronounced at high SNR, high-order modulations, and stronger phase noise. All proposed algorithms converged reliably within 
+
+20 iterations and scaled well with the number of antennas. Fu-ture work will explore extensions to joint channel estimation, Wiener phase noise temporal modeling, and hardware-efficient implementations for massive MIMO receivers. REFERENCES [1] Z. Chang, Y. Xu, J. Chen, N. Xie, Y. He, and H. Li, “Modeling, estimation, and applications of phase noise in wireless communications: A survey,” IEEE Commun. Surv. Tutor. , vol. 27, no. 2, pp. 912–940, Apr. 2024. [2] A. Pitarokoilis, S. K. Mohammed, and E. G. Larsson, “Uplink perfor-mance of time-reversal MRC in massive MIMO systems subject to phase noise,” IEEE Trans. Wireless Commun. , vol. 14, no. 2, pp. 711–723, Feb. 2014. [3] L. M. Marrero, J. C. M. Duncan, J. L. Gonz´ alez, J. Krivochiza, S. Chatzinotas, B. Ottersten, and A. Camps, “Accurate phase synchro-nization for precoding-enabled GEO multibeam satellite systems,” IEEE Open J. Commun. Soc. , vol. 5, pp. 712–729, Dec. 2023. [4] M. E. Rasekh, M. Abdelghany, U. Madhow, and M. Rodwell, “Phase noise in modular millimeter wave massive MIMO,” IEEE Trans. Wireless Commun. , vol. 20, no. 10, pp. 6522–6535, Oct. 2021. [5] A. A. Nasir, H. Mehrpouyan, R. Schober, and Y. Hua, “Phase noise in MIMO systems: Bayesian Cram´ er–Rao bounds and soft-input esti-mation,” IEEE Trans. Signal Process. , vol. 61, no. 10, pp. 2675–2692, May 2013. [6] L. Reggiani, L. Dossi, L. Barletta, and A. Spalvieri, “Extended Kalman filter for MIMO phase noise channels with independent oscillators,” 
+
+IEEE Commun. Lett. , vol. 22, no. 6, pp. 1200–1203, Jun. 2018. [7] T. S. Shehata and M. El-Tanany, “Joint iterative detection and phase noise estimation algorithms using Kalman filtering,” in 2009 11th Canadian Workshop on Inf. Theory . IEEE, 2009, pp. 165–168. [8] A. O. Isikman, H. Mehrpouyan, A. A. Nasir, A. G. Amat, and R. A. Kennedy, “Joint phase noise estimation and data detection in coded multi-input–multi-output systems,” IET Commun. , vol. 8, no. 7, pp. 981– 989, May 2014. [9] A. Tarable, G. Montorsi, S. Benedetto, and S. Chinnici, “An EM-based phase-noise estimator for MIMO systems,” in Proc. IEEE Int. Conf. Commun. IEEE, 2013, pp. 3215–3219. [10] M. Nissila and S. Pasupathy, “Adaptive iterative detectors for phase-uncertain channels via variational bounding,” IEEE Trans. Commun. ,vol. 57, no. 3, pp. 716–725, Mar. 2009. [11] G. Colavolpe, A. Barbieri, and G. Caire, “Algorithms for iterative decoding in the presence of strong phase noise,” IEEE J. Sel. Areas Commun. , vol. 23, no. 9, pp. 1748–1757, Sept. 2005. [12] A. F. Alfredsson, E. Agrell, and H. Wymeersch, “Iterative detection and phase-noise compensation for coded multichannel optical transmission,” 
+
+IEEE Trans. Commun. , vol. 67, no. 8, pp. 5532–5543, Aug. 2019. [13] E. Conti, A. Vannucci, A. Piemontese, and G. Colavolpe, “On the application of expectation propagation to symbol detection in phase noise channels,” IEEE Trans. Commun. , vol. 73, no. 8, pp. 6854–6867, Aug. 2025. [14] W. Wang, Z. Wang, C. Zhang, Q. Guo, P. Sun, and X. Wang, “A BP–MF– EP based iterative receiver for joint phase noise estimation, equalization, and decoding,” IEEE Signal Process. Lett. , vol. 23, no. 10, pp. 1349– 1353, Oct. 2016. [15] X. He, W. Wang, Q. Guo, J. Tong, J. Xi, and Y. Yu, “Auxiliary variable-aided hybrid message passing for joint channel, phase noise estimation and detection for multi-user MIMO systems,” IEEE Open J. Commun. Soc. , vol. 4, pp. 46–55, Dec. 2022. [16] W. Wang, Y. Zhang, Z. Wang, Q. Guo, and J. Xi, “Low complexity message passing-based receiver design for wiener phase-noise channels,” 
+
+IEEE Commun. Lett. , vol. 21, no. 1, pp. 88–91, Jan. 2017. [17] M.-A. Badiu, C. N. Manch´ on, and B. H. Fleury, “Message-passing receiver architecture with reduced-complexity channel estimation,” IEEE Commun. Lett. , vol. 17, no. 7, pp. 1404–1407, Jul. 2013. [18] R. Krishnan, G. Colavolpe, A. G. i Amat, and T. Eriksson, “Algorithms for joint phase estimation and decoding for MIMO systems in the presence of phase noise and quasi-static fading channels,” IEEE Trans. Signal Process. , vol. 63, no. 13, pp. 3360–3375, Jul. 2015. [19] R. Combes and S. Yang, “An approximate ML detector for MIMO channels corrupted by phase noise,” IEEE Trans. Commun. , vol. 66, no. 3, pp. 1176–1189, Mar. 2017. [20] H. Vikalo and B. Hassibi, “On the sphere-decoding algorithm II. gener-alizations, second-order statistics, and applications to communications,” 
+
+IEEE Trans. Signal Process. , vol. 53, no. 8, pp. 2819–2834, Aug. 2005. [21] H. He, C.-K. Wen, and S. Jin, “Generalized expectation consistent signal recovery for nonlinear measurements,” in 2017 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2017, pp. 2333–2337. [22] X. Yang, S. Jin, and C.-K. Wen, “Symbol detection of phase noise-impaired massive MIMO using approximate Bayesian inference,” IEEE Signal Process. Lett. , vol. 26, no. 4, pp. 607–611, Apr. 2019. [23] T.-V. Nguyen, S. Nassirpour, I. Atzeni, A. T¨ olli, A. L. Swindlehurst, and D. H. N. Nguyen, “Optimal detection in MIMO systems using spatial Sigma-Delta ADCs,” in Proc. Asilomar Conf. Signals, Systems, and Comp. IEEE, 2024, pp. 1625–1629. [24] N. M. H. Do, S. Nassirpour, T.-V. Nguyen, D. B. da Costa, and D. H. N. Nguyen, “A variational Bayes-driven deep unfolding network for effi-cient MIMO detection,” in 2025 IEEE Middle East Conf. Commun. and Networking (MECOM) . IEEE, 2025, pp. 1–6. [25] S. Nassirpour, T.-V. Nguyen, H. Q. Ngo, L.-N. Tran, T. Ratnarajah, and D. H. N. Nguyen, “Variational Bayesian channel estimation and data detection for cell-free massive MIMO with low-resolution quantized fronthaul links,” IEEE J. Sel. Topics in Signal Process. , vol. 19, no. 6, pp. 1187 – 1202, Sept. 2025. [26] D. H. N. Nguyen, I. Atzeni, A. T¨ olli, and A. L. Swindlehurst, “A variational Bayesian perspective on massive MIMO detection,” arXiv preprint arXiv:2205.11649 , 2022. [27] T.-V. Nguyen, A. L. Swindlehurst, and D. H. N. Nguyen, “Gridless variational Bayesian DoA estimation with few-bit ADCs,” in Proc. Asilomar Conf. Signals, Systems, and Comp. IEEE, 2025, pp. 1238– 1242. [28] L. V. Nguyen, A. L. Swindlehurst, and D. H. N. Nguyen, “Variational Bayes for joint channel estimation and data detection in few-bit massive MIMO systems,” IEEE Trans. Signal Process. , vol. 72, pp. 3408–3423, Jul. 2024.

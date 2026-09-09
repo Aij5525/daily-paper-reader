@@ -1,0 +1,551 @@
+Title: Brain-Inspired User Positioning for mmWave Beam Management
+
+URL Source: https://arxiv.org/pdf/2609.06252v1
+
+Published Time: Wed, 09 Sep 2026 01:12:00 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Brain-Inspired User Positioning for mmWave Beam Management 
+
+Aris Karampelas Timotijevic, Evangelos Koutsonas, Vasileios Kouvakis, Stylianos E. Trevlakis, Alexandros-Apostolos A. Boulogeorgos, and Theodoros A. Tsiftsis 
+
+Abstract—Wireless positioning is a key enabling function-ality of high-frequency, highly directional wireless systems. Supporting beam tracking depends on accurately translating channel state information (CSI) estimations into position predictions. However, as urban propagation environments are inherently highly complex, determining the process that con-nects the CSI with the mobile user position is a difficult task. Motivated by this observation, a great amount of effort was put on designing user positioning schemes that employ conventional machine learning approaches, such as k-nearest neighbors ( k-NN), and convolutional neural networks (CNNs). However, conventional models achieve low energy efficiency (EE). To counterbalance this disadvantage, brain-inspired neu-ral processing units (NPUs) has recently been introduced. For their optimum operation, NPUs require the execution of a new type of neural models, namely spiking neural networks (SNNs). Inspired by this, in this paper, we present a wireless network architecture that enables CSI acquisition, translation into mobile user position information, and beamforming adap-tation through novel convolutional SNN (CSNN) models. To train and assess the models’ performance, we created datasets based on realistic ray-tracing-based simulations. We applied the CSNN architecture and compared its performance against fingerprinting k-NNs, and CNNs in terms of both computing-and communication-tailored performance metrics. The results highlight a trade-off between EE and user positioning accuracy. Index Terms—Convolutional spiking neural networks (CSNNs), energy efficiency, machine learning (ML), position-ing, ray-tracing, spiking neural networks (SNNs). 
+
+I. INTRODUCTION 
+
+# POSITIONING is a fundamental functionality in mod-ern wireless systems [1]. Accurate knowledge of user locations enables beamforming optimization; thereby, im-proving the system’s reliability [2] and energy efficiency [3]. In addition, positioning plays a key role in several killer applications, including autonomous transportation 
+
+This work was supported by the research project NEURONAS. The research project NEURONAS is implemented in the framework of H.F.R.I. call “3rd Call for H.F.R.I.’s Research Projects to Support Faculty Members & Researchers” (H.F.R.I. Project Number: 25726). A. Karampelas Timotijevic and T. A. Tsiftsis are with the Depart-ment of Informatics and Telecommunications, University of Thessaly, Lamia 35100, Greece (e-mail: {akarampel, tsiftsis}@uth.gr) . E. Koutsonas is with the Department of Electrical and Computer Engineering, University of Western Macedonia, 50100 Kozani, Greece (email: dece00106@uowm.gr). V. Kouvakis and S. E. Trevlakis are with the Department of Research and Development, InnoCube P.C., 55534 Thessaloniki, Greece (e-mail: {kouvakis, trevlakis} @innocube.org). A.-A. A. Boulogeorgos is with the Department of Electrical and Computer Engineering, Democritus University of Thrace, Xanthi, Greece (e-mail: abouloge@ee.duth.gr). 
+
+[4], environment-aware networking [5], search-and-rescue (SAR) operations [6], smart factories [7], and extended reality [8]. Conventional wireless positioning methods commonly rely on temporal, angular, or power-related characteristics of the received signal [9]. Time-of-arrival (ToA) techniques estimate propagation delays between transmitted and received signals to infer distances, while angle-of-arrival (AoA) techniques determine the direction from which signals impinge on an antenna array. Another widely used approach exploits the received signal strength indicator (RSSI), where signal attenuation serves as a basis for coarse distance estimation [10]. In indoor environments, RSSI-based fingerprinting methods utilize pre-measured radio maps to estimate user positions from observed channel conditions [11], [12]. High-frequency systems that operate in the millimeter-wave (mmWave) or the terahertz (THz) bands, provide new opportunities for high-precision positioning [13], [14]. Compared to conventional sub-6 GHz systems, high-frequency systems employ considerably larger bandwidths and highly directional beams, enabling improved spatial and temporal resolution. These characteristics allow posi-tioning accuracy enhancements. On the other hand, high-frequency communications suffer from severe propagation losses, and sensitivity to blockage. Under such rapidly varying channel conditions, the additional signaling over-head associated with conventional positioning procedures may become impractical. To address the highly nonlinear relationship between wireless channel characteristics and user position, machine learning (ML) and deep learning (DL) methods have recently emerged as promising solutions [15]–[18]. These methods utilize input features such as RSSI, channel state information (CSI), AoA, and ToA to learn complex mappings between observed channel conditions and spatial coordinates. In particular, CSI-based learning approaches have demonstrated strong positioning performance due to the rich propagation information embedded within CSI measurements. In more detail, the authors of [15] established an exper-imental indoor setup by using conventional transmitters and receivers. Such approaches are more feasible for indoor positioning systems due to the lower complexity of the propagation environment. Raw CSI data [18], [19] or even RSSI measurements [10] can be fed directly to DL models, enabling the models to arXiv:2609.06252v1 [eess.SP] 5 Sep 2026 2
+
+approximate the nonlinear relationship between CSI and user coordinates. An alternative approach is the use of ray-tracing models. CSI generation through simulations based on realistic ray-tracing channel models has gained significant traction in recent years [20]. Most datasets include several channel and propagation characteristics, thus allowing for evaluation of positioning systems under conditions in real-world setups. Early deployment of ML and DL models primarily relied on cloud-based inference, where data were up-loaded to centralized servers for processing [21]. This approach introduced significant communication overhead and inference latency, making it unsuitable for latency-sensitive wireless applications. Consequently, inference has progressively shifted toward edge devices, giving rise to the concept of edge artificial intelligence (AI) [22]–[25]. Edge AI enables low-latency processing closer to the data source but simultaneously introduces strict constraints on computational complexity, energy consumption, and hardware efficiency. These challenges have motivated the development of AI-gnostic lightweight and energy-efficient brain-inspired computer architectures [26]. Brain-inspired architectures, such as neuromorphic units, provide an event-driven and energy-efficient com-puting paradigm. In contrast to conventional digital hard-ware, which relies on continuous signal processing and repeated memory-access operations, neuromorphic sys-tems exchange information through discrete spike events among computational units. As a result, computation and communication are activated only when meaningful events occur, which can substantially reduce energy consumption. The machine learning implementation is typically real-ized through SNNs, which model information processing using spike-based neurons, such as integrate-and-fire (IF) and leaky integrate-and-fire (LIF) models. By organizing such neurons into multilayer architec-tures, SNNs can perform inference on complex tasks, including classification [27], [28] and regression [29]–[31]. SNNs have been applied to integrated sensing and communications, where a single neuromorphic receiver can simultaneously perform wireless data decoding and radar target detection using impulse-radio signals, improving energy efficiency and supporting low-latency operation for future IoT and 6G networks [32]. In non-terrestrial networks (NTNs), SNNs are applicable to onboard in-ference for airborne and spaceborne payloads. In [33], an interference detection and identification brain-inspired model is proposed. Through experimental evaluation, the energy efficiency advantage of SNNs over a conventional CNN is demonstrated. Positioning using SNNs has been implemented using conventional mobile devices. By lever-aging orientation and velocity measurements from sensors found on mobile devices, an SNN model can infer the user’s position using regression [31]. To the best of our knowledge, CSNN models for CSI-based positioning have not been investigated. Although existing works leverage CSNN models for image-based object recognition, no prior work has applied the CSNN model in telecommunications. As such, the application of a CSNN to CSI data, derived from ray-traced channel simulations, constitutes the main novelty of this work. Motivated by this, we propose a brain-inspired posi-tioning sub-system for a mmWave system using a CSNN. Through our work, we study the highly non-linear rela-tionship between CSI and user coordinates. In more detail, the technical contribution of this paper can be summarized as:  
+
+> •
+
+We design and apply CSNN models that estimate the wireless user equipment (UE) position through CSI data acquired at the uplink (UL).  
+
+> •
+
+We provide a comprehensive comparison of distinct neural models under a unified evaluation framework. Specifically, a unified benchmark evaluated under a single framework spanning both ML and communica-tion metrics on identical data and hardware.  
+
+> •
+
+We explicitly quantify the accuracy-energy trade off for neuromorphic evaluated positioning. The latter shows that CSNN occupies an intermediate accuracy position, while achieving the lowest estimated per-inference neuromorphic energy. The rest of the paper is organized as follows. The system model is presented in section II. In section III, we present the proposed positioning model, and benchmarks, with the performance metrics presented in the subsequent section IV. Section V outlines the simulation parameters and reports our findings. Finally, section VI presents the conclusions of our work. Notation: Boldface (lower case) x represents vectors, (upper case) X denotes matrices, and scalars are in-dicated by letters, both upper and lower case. Let 
+
+XT , XH , diag( X), and tr( X) represent the transpose, her-mitian, diagonalization, and trace of X, respectively. Xi,j 
+
+denotes the (i, j )-th entry of matrix X, while xi denotes the i-th entry of vector x. Calligraphic (uppercase) X
+
+represent sets. For a set X , |X | denotes the cardinality. II. SYSTEM MODEL & COMMUNICATION PROTOCOL This section provides the construction of the system model, its technical characteristics, and the employed beamforming techniques. In addition, it presents a com-prehensive communication protocol alongside the channel model. A. System Model As illustrated in Fig. 1, we consider an urban simulta-neous transmit and receive scenario, in which K UEs com-municate with a BS using orthogonal frequency division modulation (OFDM). The channel is expected to experi-ence multipath fading, which can be accurately modeled through ray-tracing techniques. The BS is equipped with an uniform rectangular planar array (URPA) that consist of NBS = NA × NB antenna elements, while each UE is equipped with a single antenna. To enable massive connectivity, while maintaining low-complexity, the BS 3
+
+employs a hybrid beamforming (HBF) with NRF radio frequency (RF) chains, as described in [34]. At the BS, one RF chain is dedicated for sensing, whereas the remaining RF chains ( KDL ) are used for communication. The sensing RF chain is connected to 
+
+NRX = N xRX × N yRX antenna elements, where N xRX 
+
+and N yRX stand for the horizontal and vertical elements, respectively. In the UL, the BS operates as a receiver, so the combining vector can be defined as 
+
+ϕ = [ ϕ1, ϕ 2, . . . , ϕ NRX ]T (1) where ϕi = ejϕ Si represents the phase shift associated with the i-th receiving antenna element, and ϕSi denotes the corresponding beam steering phase angle. Similarly, in the downlink, the BS operates in transmitter mode; thus, the combining diagonal matrix can be defined as 
+
+FDL = ΨDL BDL (2) where Ψ = diag [Ψ 1, Ψ2, . . . , ΨNTX ] represents the diago-nal phase shifter matrix associated with the transmitting antenna elements. Ψi = ejθ Si denotes the phase shift associated with the i-th transmitting antenna element, where θSi denotes the corresponding beam steering phase angle. Furthermore, B = diag [ b1, b2, . . . , bNTX ] de-notes the on/off state of the corresponding phase shifter with bi representing an all-one column vector. The BS location is fixed and known a priori known to the K
+
+UEs, whereas the UEs move randomly; thus, the UE locations are unknown to the BS. The UEs are as-sumed to be located and moving within a predefined two-dimensional Cartesian coordinate region, defined as 
+
+A ≜ {(x, y ) ∈ R2 | 0 ≤ x ≤ X, 0 ≤ y ≤ Y }.B. Communication Protocolol The communication cycle is divided into three phases. During the first phase, once specific radio resources are allocated by the BS, an initial access signal is broadcast over the entire considered area. In the second phase, the UEs transmit an initial access request message to the BS. Then, the BS selects the UE to serve based on predefined precedence and performs UE position prediction. In the third and final phase, the BS establishes communication through a highly directional downlink beam. To maintain alignment, the BS continues identifies the position of the UE through the wide directional UL connection. During the UL transmission phase, each UE periodically communicates with the BS. The communication duration is set to ∆t. The link employs OFDM comprising N sub-carriers at a central frequency fc and subcarrier spacing (SCS) ∆f . Thus, the signal received at the BS from the 
+
+kth UE can be written as 
+
+yk = FH 
+
+> UL
+
+hk + no (3) where no represents a zero-mean additive white Gaussian noise (AWGN) with variance σ2 
+
+> RT
+
+, and hk represents  
+
+> Fig. 1. System model.
+
+the channel frequency response (CFR) of the ray-tracing channel given by [35] 
+
+hk =
+
+√( λc
+
+4 π
+
+)2
+
+Gt GrM∑
+
+> m=1
+
+am e−j2πf τ mpd (t) (4) where λc denotes the wavelength corresponding to the central frequency of the system, c0 represents the speed of light, and Gt and Gr denote the transmitter and receiver antenna gains, respectively. Furthermore, M represents the number of propagation paths, and τmpd is the propa-gation delay of the m-th path. Additionally, 
+
+am = CHRX (θm, ϕ m)Tm CTX (θm, ϕ m) (5) where, θm and ϕm are the angles of departure (AoD) and arrivals (AoA) of the m-th path, respectively, Tm denotes the polarimetric transmission matrix of the m-th path, while CRX (·) and CTX (·) return the receive and transmit antenna patterns, respectively. III. PROPOSED POSITIONING MODELS In this section, we present two neural network ar-chitectures for the wireless user positioning problem in the considered mmWave system. We also report a ML model as a baseline. We further analyze the computational complexity of each model and define the performance metrics used to assess their effectiveness. A. Data Processing for the Input Layer As illustrated in Fig. 1, we define an antenna-centric coordinate system. The antenna is placed at pBS =[0 , 0, z ]T , where z is the antenna elevation. All the position estimates, ˆp, and the ground-truth positions, p, belong to this coordinate system. We also apply a transformation to the CSI tensor. Each CSI tensor element is complex-valued. ANNs are 4     
+
+> Fig. 2. Proposed feature extractor. The CSI measurements are fed to the feature extractor as two-channel images, with the channels being the ℜ{·} and ℑ{·} of the measurement. The conventional architecture uses ReLU layers between the convolutions, while the brain-inspired uses LIF layers. The final ReLU/LIF layer passes the features to an Adaptive Average Pooling (AAP) layer to reduce the dimensionality of the features.
+
+not suited to processing complex-value inputs, so real-valued representation is required [36]. To achieve this, we separate the real and imaginary parts of each CSI entry. Consequently, we extend the tensor with an additional dimension of size 2. The new dimension contains the real and imaginary parts for each CSI entry. The elements now belong to the real domain, and the shape of each tensor fed to the input layer is [NRX , N, 2] .To avoid feeding an extremely large number of features and increasing the input layer size excessively, we follow the approach provided in [15]. Specifically, we average adjacent subcarriers. We split the CSI tensor along the second dimension into chunks of size N/p , where p is the chunk size. For each chunk, we compute the mean across that chunk, and then we stack all chunks into a tensor. This reduces the size of the input layer by a factor p.B. Benchmark Models In this section, we present the benchmark models. 1) k-NN: A fingerprint is a CSI measurement paired with the position it was taken. With the aggregation of enough measurements a radio map can be constructed. To position a new measurement, the k-nearest neighbours (k-NN) regression selects the k-stored fingerprints whose fingerprint most resembles the new measurement, and pre-dicts a weighted average of their positions. Consequently, the radio map serves as an extensive look-up table (LUT), 
+
+{(hi, pi)}. The new measurement is represented by a query CSI measurement, hq . Considering the Euclidean norm as the distance metric the position estimation is calculated as 
+
+ˆp =
+
+∑ 
+
+> i∈Nk
+
+wipi
+
+∑ 
+
+> i∈Nk
+
+wi
+
+, (6) where Nk is the number of nearest fingerprints, wi = 1 /d i
+
+is the fingerprint weight, and di = || hq − hi|| 2 the Euclidean norm between the CSI query and the i-th nearest fingerprint. 2) CNN: CNNs are mainly used when the input data are multi-dimensional. An indicative example of multi-dimensional data is an image. CNNs rely on convolution to extract useful features from the multi-dimensional data. As it is widely known, convolution is basically a filter operation, where certain characteristics of an input tensor are extracted. A typical CNN architecture consists of two parts. The first part is called convolutional segment, and is tasked with approximating the convolution kernels required for a desired output. Between the convolution layers, there are several other layers, such as batch normalization layers (BatchNorm) and pooling layers, that contribute to the network training. Batch normalization layers enable the model’s convergence, while pooling layers allow for spatial dimensions reduction. The output of the convolutional segment is called a feature map. The feature map is flattened and fed into a linear segment, which is basically an fully-connected network, and used for either regression or classification tasks. In Fig. 2 the architecture of the convolutional layers for feature extraction is presented. The input tensor is first rearranged into a channel-first representation before being processed by three successive convolutional layers with increasing channel depth, Cin . Each convolutional block employs a MK × MK kernel followed by a ReLU activation function to extract hierarchical spatial fea-tures from the input measurements. An adaptive average pooling layer reduces the spatial dimensionality to afixed MF × MF representation, enabling stable feature aggregation independent of the original input dimensions. The extracted feature maps are subsequently flattened and passed through a fully-connected regression head that estimates the final (x, y ) position coordinates. The regressor head employs a single hidden layer with Nn
+
+neurons. C. Proposed Model SNNs process information through discrete spike events rathen than continuous-valued activations. A spiking neu-ron integrates its inputs in a membrane potential and emits a spike when this potential reaches a threshold. In this work, we employ the leaky integrate-and-fire (LIF) neuron model [27], whose spike generation is described by 
+
+s(l) 
+
+> t,i
+
+= Θ 
+
+(
+
+u(l) 
+
+> t,i
+
+− uth 
+
+)
+
+, (7) where u(l) 
+
+> t,i
+
+is the membrane potential at timestep t, for the 
+
+i-th neuron of the l-th layer of the SNN, and Θ ( ·) is the Heaviside step function. The corresponding discrete-time membrane dynamics are 
+
+u(l) 
+
+> t,i
+
+= βu (l) 
+
+> t−1,i
+
++ ∑
+
+> j
+
+W (l) 
+
+> i,j
+
+s(l−1)  
+
+> t−1,j
+
+− urst s(l) 
+
+> t,i
+
+, (8) 5
+
+where W (l) 
+
+> i,j
+
+is the weight connecting pre-synaptic neuron 
+
+j to post-synaptic neuron i, β is the membrane-potential decay rate, and urst is the value subtracted from the membrane potential when a spike occurs. The LIF model can be adapted to obtain the neuron dynamics required for different stages of the proposed SNN. Following [27], the decay rate is related to the time constant τ by 
+
+β = 1 − 1
+
+τ . (9) In regression tasks, the output layer typically consists from leaky integrators (LIs) neuron to accumulate in-coming spikes without generating output spikes. This is achieved by disabling the reset mechanism and setting the firing threshold sufficiently high to prevent spike genera-tion. The LI output therefore provides a continuous-valued representation, which is appropriate for the positioning regression task [18], [29], [31]. Fully connected SNN architectures require multi-dimensional input tensors to be flattened prior to process-ing; thereby, destroying their inherent spatial structure. However, tensors derived from CSI measurements exhibit meaningful local spatial correlations between neighboring elements. In CSI data, adjacent tensor elements corre-spond to nearby antenna elements experiencing similar propagation conditions, while distant URPA sub-sectors are typically less correlated. Consequently, flattening elim-inates informative spatial relationships that are beneficial for network convergence and localization accuracy. CSNNs address this limitation by preserving the spatial structure of the input tensors during processing. CSNNs are constructed similarly to CNNs. They consist of components, namely convolutional and linear com-ponents. The convolutional component behaves exactly like its analogous counterpart, with the only difference being that instead of ReLU layers, the CSNN uses LIF layers [37]. Additionally, batch normalization layers are not required as the internal representation of the CSNN is binary. The output of the ReLU layer and the firing rate of the output spikes of an LIF neuron are proportional to the input. In other words, CSNN can be seen as a modified CNN [38]. Fig. 2 presents the architecture of the proposed CSNN. The input tensor is first transformed into a channel-first format and subsequently processed through 3 convolu-tional layers integrated with LIF neurons. Each convo-lutional stage extracts progressively higher-level spatial representations while maintaining temporal membrane dynamics across multiple inference time steps. An adaptive average pooling layer compresses the spatial dimensions into a compact representation, which is then flattened and passed through a spiking regressor head, with a single 
+
+Nn-neuron layer. The output layers is comprised by LI neurons, to effectively produce the coordinate estimates. D. Computational and Storage Complexity Computational complexity is defined by the number of 32-bit floating-point operations (FLOPs), required for a single inference. A FLOP can either be an accumulation (AC) or a multiplication-and-accumulation (MAC). The number of FLOPs is proportional to the size of the model architecture. For a conventional, linear dense network, i.e., a regressor head, with Nl layers, the number of FLOPs required is 
+
+ODense =
+
+> Nl
+
+∑
+
+> l=1
+
+N (l)in N (l)out . (10) Similarly, for a convolutional segment with Nl convolu-tional layers, the number of FLOPs is defined as 
+
+OConv =
+
+> Nl
+
+∑
+
+> l=1
+
+H(l)out W (l)out 
+
+(
+
+M (l)K
+
+)2
+
+C(l)in C(l)out , (11) where H(l)out and W (l)out are the height of the input at layer l,respectively. Consequently, when an architecture contains convolutional and dense segments, the total number of FLOPs is the summation of the respective number of FLOPs in each segment, i.e., ODense + OConv .For spiking models, their computational complexity is proportional to the firing rate [39]; defined as 
+
+ζ(l) = O(l)spike 
+
+O(l)neuron 
+
+, (12) where O(l)spike is the total number of spikes generated in layer l for all timesteps T , and O(l)neuron is the total number of neurons in layer l. Each spike generation in layer l
+
+is followed by an accumulation in layer l + 1 , therefore the number of accumulations, OAC is proportional to the number of spikes [39]. For an Nl-layered fully-connected SNN, the total number of FLOPs is 
+
+OSNN =
+
+> Nl
+
+∑
+
+> l=1
+
+ζ(l)N (l)in N (l)out . (13) Similarly, the total number of FLOPs for an Nl-layered CSNN is 
+
+OCSNN =
+
+> Nl
+
+∑
+
+> l=1
+
+ζ(l)H(l)out W (l)out 
+
+(
+
+M (l)K
+
+)2
+
+C(l)in C(l)out . (14) Although, as seen in (8), a weighted spike mathemati-cally involves the product W (l) 
+
+> i,j
+
+s(l−1)  
+
+> t−1,j
+
+, for binary spikes an event-driven implementation can realize this operation as a conditional accumulation of the corresponding weight. Therefore, the computational cost is commonly modeled in terms of AC, instead of MAC operations. Storage complexity is defined by the number of pa-rameters, i.e. weights and biases. A model with Np
+
+parameters requires O (Np) memory. For example, in a 32-bit computational system, a model with Np parameters, requires 4 × Np bytes of memory space. For the k-NN baseline, each query requires an exhaus-tive distance computation against the entire fingerprint database, so its cost is Ok-NN = Ndb D MACs, where 
+
+Ndb is the number of stored fingerprints and D their dimensionality. Since the radio map itself constitutes the model, the storage requirement is 4Ndb D bytes rather than 4Np.6
+
+IV. PERFORMANCE METRICS The performance of the proposed neural models is evaluated on the test dataset using metrics that assess both positioning accuracy and the resulting communica-tion performance. Specifically, we consider the absolute positioning error (APE), mean positioning error (MPE), root mean squared error (RMSE), and 90th-percentile circular error (CE90). In addition, the impact of the predicted UE position on the communication system is evaluated in terms of the achievable signal-to-noise ratio (SNR) and EE. The definitions of these metrics are provided in the following subsections. A. Absolute Positioning Error The neural network models return an estimated wireless user position ˆp ∈ R2. The absolute positioning error (APE) is calculated as the Euclidean norm between the estimated and the ground-truth position p
+
+d = || ˆp − p|| 2 =
+
+√
+
+(ˆ x − x)2 + (ˆ y − y)2. (15) The geometric interpretation of APE is a circle around the true position. B. Mean Positionning Error The mean positioning error (MPE) over Nd samples is defined as 
+
+¯d = 1
+
+Nd
+
+∑
+
+> i
+
+di. (16) The MPE provides a single measure of the average positioning accuracy over the evaluated samples. C. Root Mean Square Error The root mean squared error (RMSE) represents the errors in the same measuring units as the original data. Mathematically, RMSE measures the standard deviation of the error and is defined as: 
+
+RMSE = √MSE = 
+
+√√√√ 1
+
+NdNd∑
+
+> i=1
+
+di2. (17) D. 90 th Percentile Circular Error Mean-based metrics such as the MPE and the RMSE summarize the central tendency of the error distribution, but they are insensitive to its upper tail [40]. In beam management the tail is the quantity of operational inter-est; a small fraction of large positioning errors produces beam misalignment and a corresponding loss of received power, whereas the average error over all users does not by itself characterize link reliability. Percentile-based circular error metrics are therefore the accepted way of specifying positioning accuracy in both geospatial standards and cellular positioning requirements. Let d denote the APE defined in (15), regarded as a non-negative random variable with CDF 
+
+Fd(x) = P (d < x ) , x ≥ 0, (18) where x is an arbitrary reference distance. The circular error (CE) at probability level p, denoted 
+
+CE p, is the p-th quantile of Fd,
+
+CE p = Fd−1(p) = inf {x ≥ 0 : Fd(x) ≥ p}, (19) that is, the radius of the circle centered on the true position that contains a fraction p of the position estimates. Setting 
+
+p = 0 .9 yields the 90 th percentile circular error, 
+
+P (d ≤ CE 90 ) = 0 .9. (20) 
+
+Fd is not available in closed form for a learned estimator, so CE p is obtained from the empirical distribution of the 
+
+Nd evaluated samples. E. Telecommunications Metrics To check the effectiveness of the system model, we use the average SNR and the EE as telecommunication met-rics. The downlink beam is steered towards the estimated position ˆp by the analog phase-shifter network defined in (2). For a single served UE with all phase shifters active, the precoding vector w(ˆ p) ∈ CNT X has entries 
+
+wi(ˆ p) = 1
+
+√NT X 
+
+ejθ Si , θSi = 2πλc
+
+uTi ˆk(ˆ p), (21) where ui ∈ R3 is the position of the i-th array element relative to the array phase centre and 
+
+ˆk(ˆ p) = ˆp − pBS 
+
+∥ˆp − pBS ∥2
+
+(22) is the unit vector from the BS position towards the estimated UE position. The effective single-input channel observed by the UE is then the beamformed combination 
+
+˜hk(ˆ p) = wH (ˆ p) hk, (23) with hk ∈ CNT X denoting the per-element CFR of (4) evaluated per subcarrier. The achievable SNR at the estimated position follows as 
+
+SNR dB (ˆ p) = 10 log 10 
+
+(
+
+1
+
+N
+
+> N
+
+∑
+
+> n=1
+
+∣∣∣˜hk(ˆ p)
+
+∣∣∣2
+
+)
+
+− Pnoise , (24) where Pnoise is the receiver noise power. Setting ˆp =
+
+p in (21) yields the genie-aided reference SNR genie =SNR dB (p), against which every model is compared. Additionally, we define the link-level EE, as the spectral efficiency (SE) of the downlink divided by the total power consumed to deliver it. 
+
+EE = SE 
+
+Ptot 
+
+, (25) with SE and Etot defined as 
+
+SE = W log 2
+
+(
+
+1 + 10 SNR dB (ˆ p)10 
+
+)
+
+, (26) 
+
+Etot = Pt
+
+PA e
+
++ Pco + Kdl Pchain + NTX PPS + Pinf , (27) respectively. The W represents the operational bandwidth, Pt the transmission power, PA e the power amplifier efficiency 7
+
+of the transmitter, Pco the baseline control power of the circuitry, Pchain and PPS the RF chain power and phase shifter power consumption, respectively. Finally, 
+
+Pinf represents the power consumption introduced by the position estimator. For a single user updating once, 
+
+Einf is of order 10 −4J against a link power of tens of watts. In this scenario, the saving is negligible. The energy efficiency benefits become material only when the positioning subsystem runs continuously for many users. Therefore, Pinf scales with the number of served UES, K,and the beam-update interval time, ∆t, as 
+
+Pinf = KE inf 
+
+∆t . (28) V. SIMULATION RESULTS & DISCUSSIONS A. Simulation Scenario Ray-tracing channels are generated according to (4) using the NVIDIA Sionna-RT © simulator [20]. In the BS, we assume NBS = 1056 , NRX = 32 with N xRX = 8
+
+and N yRX = 4 , NT X = 1024 and NRF = 2 RF chains. The OFDM signal comprises N = 1024 subcarriers, fc =30 GHz and ∆f = 2 μ ·15 kHz with μ ∈ N∗ representing the OFDM numerology parameter and ∆f ≥ 0.9/τ DS where 
+
+τDS represents the RMS of the delay spread, whether 
+
+σRT = 0 .0032 dBm and μ0 = 0 . In terms of telecommu-nication metrics, we denote Nav = 4 , W = 122 .88 MHz ,
+
+Pnoise = −114 dB , Pt = 1 W , PA e = 0 .3, Pco = 10 W ,
+
+Pchain = 0 .250 W and PPS = 0 .030 W .Three datasets are generated, each containing 30 , 800 
+
+samples. The datasets differ by a positioning offset of 
+
+0.08 m . The number of samples B corresponds to the number of user positions on the considered grid. The simulation is not inherently a time-series problem. Instead, the user moves across discrete positions on the grid, stops at each position, and transmits a pilot OFDM sequence towards the BS’s receiver. Subsequently, the BS receives the signal and estimates the CSI using least-squares (LS) channel estimation for OFDM MIMO systems. The estimated CSI values are collected and stored into tensors. Each CSI tensor has dimensions [B, 32 , 32] . At the end of the final preprocessing step, each CSI tensor has dimensions [B, 32 , 32 , 2] . The channel first illustration of a tensor can be seen in Fig. 2. The evaluation subset is offset from the training grid by only 0.08 m , so every query lies close to a stored fin-gerprint; a nearest-neighbor estimator therefore operates under favorable conditions. The number of neighbors was swept over k ∈ { 1, 3, 5, 7, 9, 15 } on a held-out partition of the fingerprint database, and the reported configuration 
+
+k = 9 is the best of the sweep. All neural models were trained on 61 , 600 samples using hyperparameters selected through empirical experimenta-tion. The antenna is positioned at (133 , 204) . Therefore the dataset translation is applied for dx = 133 and 
+
+dy = 204 .The neural network models were trained using model-specific batch sizes, and numbers of training epochs. Train-ing was performed sequentially with multiple batch sizes to 00 0 0 0 0 0       
+
+>   
+> 000 00 00 00
+>    0 0 
+
+(a) 9-NN model 00 0 0 0 0 0       
+
+>    
+> 000 000 00 000 00 000 00 000
+>     0   0  
+
+(b) CNN model 00 0 0 0 0 0       
+
+>   
+> 00 00 0 000 0 00 0
+>    0 0 
+
+(c) CSNN (T = 20) model 
+
+Fig. 3. Distribution of errors for the ANN, CNN, and CSNN (T=20) models. 
+
+capture patterns at different levels of granularity [15], [41]. The CNN model was trained for 250 epochs with increas-ing batch size every 50 epochs {32 , 64 , 256 , 1024 , 4096 }.The CSNN model was trained for 400 epochs, with increasing batch size every 100 epochs, drawn from the set {32 , 64 , 256 , 1024 }.All models were trained using the MSE loss function, defined as 
+
+L = 12B
+
+> B
+
+∑
+
+> i=1
+
+[
+
+( ˆ xi − xi)2 + ( ˆ yi − yi)2]
+
+. (29) For the brain-inspired models, the surrogate gradi-ents chosen were; the default, arctan( πu t), and the fast sigmoid ut/ (1 + ku t), respectively. In the fast sigmoid, 
+
+k is defined as the slope and defaults to 25 . As for the reset mechanism, we opted for a ‘zero’ reset, where 
+
+urst = βu (l) 
+
+> t−1,i
+
++∑ 
+
+> j
+
+W (l) 
+
+> i,j
+
+s(l−1)  
+
+> t−1,j
+
+, thus driving the membrane potential back to 0 upon firing a spike. The number of neurons in the regressor head is 256 
+
+in both the CNN and CSNN. Both convolutional models define Cin = 32 , MK = 3 , and MF = 4 . The CSNN was trained three times with T ∈ { 5, 10 , 15 }. The learning rate was kept at its default value of 10 −3 for both models. Furthermore, both models have Nout = 2 . The models were additionally validated on previously unseen data extracted from the same simulation environment as the training dataset. 8                                 
+
+> TABLE I Positioning accuracy of the evaluated schemes on the held-out evaluation subset. All values in metres. Scheme CE50 CE90 CE95 MPE RMSE CNN 0.048 0.118 0.162 0.064 0.094 CSNN ( T= 20 )0.115 0.229 0.271 0.130 0.154 CSNN ( T= 10 )0.135 0.277 0.334 0.154 0.182 CSNN ( T= 5 )0.123 0.244 0.295 0.139 0.166
+> 9-NN 0.225 0.635 0.836 0.311 0.646
+
+B. Positioning Error Distribution The models are first assessed through the distribution of the absolute positioning error defined in (15). Fig. 3 depicts the error histograms of the three schemes, and Table I summarizes the corresponding percentile and moment-based statistics. The CNN attains the lowest error of the three models, with CE 90 = 0 .118 m . The proposed CSNN follows at 
+
+CE 90 = 0 .229 m , i.e. a factor of 1.9 higher, while the 9-NN fingerprinting baseline reaches CE 90 = 0 .635 m . The ordering is preserved across every reported statistic, so no scheme is favored by the choice of metric. The 9-NN result merits particular attention, because it bounds what can be achieved by interpolation over the radio map alone. Even so, 9-NN remains 5.4 times less accurate than the CNN and 2.8 times less accurate than the CSNN. The learned models therefore extract structure from the CSI that weighted averaging neigh-boring fingerprints does not recover, which is consistent with the wavelength scale at 30 GHz : with λc = 1 cm ,the channel de-correlates over distances far shorter than the grid spacing, so spatially adjacent fingerprints are not necessarily similar in the CSI domain. Comparing the two learned models, the accuracy gap between CNN and the CSNN is the direct cost of the spik-ing representation. Both share an identical layer structure, differing only in that the ReLU activations of the CNN are replaced by LIF neurons and that the network is unrolled over T time steps. The internal representation of the CSNN is consequently binary, and the information carried by a real-valued activation must instead be encoded in the number and timing of spikes emitted within the available time steps. The resulting loss of representational precision accounts for the increase in positioning error, and is quantified as a function of T in Section V-C. The spatial distribution of the error is illustrated in Fig. 5, obtained by interpolating the per-position errors onto a dense grid. All three schemes eschibit their largest errors in the region closest to the BS and near the boundaries of the surveyed area. C. Effect of Number of Time Steps The number of time steps T governs both the tem-poral resolution available to the LIF dynamics, and the number of synaptic operations executed per inference. To characterise this trade-off, the CSNN was trained at 1                             
+
+> −
+> 1
+> −
+> 1
+> −1
+> 1
+> 
+> 1
+> 1
+>   
+>      1
+>        
+>  ! "# $  
+> Fig. 4. Positioning error CDF curves. TABLE II Effect of the number of time steps Ton CSNN positioning accuracy, spiking activity and estimated inference energy.
+> T= 5 T= 10 T= 20
+> CE90 [m] 0.2443 0.2767 0.2293 Mean firing rate ¯r0.0722 0.0373 0.0398 Spikes per neuron ζ= ¯ rT 0.3609 0.3729 0.7957 Energy per inference [mJ] 0.0475 0.0525 0.1122
+
+T ∈ { 5, 10 , 20 } under an otherwise identical configuration, and the per-layer firing rates were measured over the evaluation subset. Table II reports the results. Positioning accuracy does not improve monotonically with T , with CE 90 = 0 .244 mat T = 5 to 0.277 m at T = 10 , and down to CE 90 =0.229 m at T = 20 . Decreasing by 13 .5% from T = 5 
+
+to T = 10 , and increasing by 17 .3% from T = 10 to 
+
+T = 20 . The ordering is not consistent with a simple dependence on temporal resolution; we therefore attribute part of it to run-to-run variation between independently trained networks rather than to T alone. The energy, by contrast, varies monotonically and more strongly, growing from 0.0475 mJ at T = 5 to 0.1122 mJ at 
+
+T = 20 . The growth is nevertheless sub-linear in T , and the firing statistics of Table III explain why. Between T = 5 
+
+and T = 10 the mean per-time-step firing rate ¯r falls from 
+
+0.072 to 0.037 , approximately 1/T , so that the spike count per neuron per inference ζ = ¯ rT is essentially unchanged (0.361 against 0.373 ). Over this range the trained network converges to an approximately fixed spike budget, and T
+
+determines only how finely that budget is distributed in time. Since the synaptic operation count in (14) scales with ζ rather than with T directly, doubling the number of time steps increases the energy by only 11% .This compensation does not persist at T = 20 , where 
+
+¯r rises slightly to 0.040 and ζ consequently doubles to 
+
+0.796 . The additional time steps are no longer absorbed by a proportional reduction in firing rate, and the energy grows accordingly. The effect is concentrated in two layers. The first convolutional layer, which receives the constant input current at every time step, exhibits ζ(1) increasing form 1.088 at T = 5 to 3.346 at T = 20 . The spiking regressor head reaches ζ(4) = 4.432 , approaching the 9
+
+(a) k-NN model (b) CNN model (c) CSNN (T=20) model  
+
+> Fig. 5. Distribution of APEs in space for the ANN, CNN, and CSNN (T=20).
+
+break-even value EMAC /E AC ≈ 5.11 above which an accumulation-based layer would cease to be advantageous over its multiply–accumulate counterpart. The two inter-mediate convolutional layers remain sparse throughout, with ζ(2) ≤ 0.774 and ζ(3) ≤ 0.163 .Taken together, these results indicate that the accuracy attainable by the CSNN is only weakly dependent on T
+
+over the swept range, whereas the inference energy is not. We adopt T = 20 in the remainder of this section because it achieves the best measured accuracy, and note that 
+
+T = 5 offers a 42% reduction in inference energy for a 6.5% 
+
+increase in CE 90 , which is the configuration a deployment constrained by energy rather than accuracy would select. D. Energy Consumption The preceding results establish the positioning accuracy attainable by each model. Accuracy alone, however, does not determine suitability for deployment at a neuromor-phic edge unit, where the inference cost per position estimate is the binding constraint. We therefore turn to the computational energy, first examining how it varies with the number of time steps of the proposed CSNN, and then comparing all models under a common analytical model. Fig. 6 shows the CE90 and the estimated energy per inference of the CSNN as a function of T . The two quantities are not in simple opposition. The energy grows monotonically with T , attaining its maximum at T = 20 ,                                              
+
+> TABLE III Per-layer spiking activity of the CSNN measured over the evaluation subset. ¯r(l)is the fraction of neurons firing per time step and ζ(l)= ¯ r(l)Tthe number of spikes per neuron per inference. Values are reported with three decimals precision.
+> T= 5 T= 10 T= 20
+> Layer ¯r(l)ζ(l)¯r(l)ζ(l)¯r(l)ζ(l)
+> LIF 1 (conv) 0.218 1.088 0.127 1.266 0.167 3.346 LIF 2 (conv) 0.077 0.385 0.042 0.415 0.039 0.774 LIF 3 (conv) 0.033 0.163 0.012 0.125 0.008 0.162 LIF 4 (FC) 0.477 2.385 0.253 2.530 0.222 4.432 Overall 0.072 0.361 0.0373 0.373 0.040 0.796
+
+whereas the accuracy varies weakly and non-monotonically and is best at that same value. The origin of the sub-linear energy growth is the spike budget reported in Table III: the synaptic operation count is governed by ζ rather than by T directly, and ζ is approximately preserved between 
+
+T = 5 and T = 10 before doubling at T = 20 . The number of time steps therefore trades accuracy against energy far less steeply than the factor T would suggest. The computational energy consumption can be mea-sured according to the number of ACs and MACs. For computational chips designed in 45 nm technology, the energy consumption of ACs and MACs is specified to be 10        
+
+> Fig. 6. Positioning accuracy (CE90, left axis) and estimated energy per inference (right axis) of the proposed CSNN as a function of the number of time steps T. Energy is computed analytically from the measured per-layer firing rates at 45 nm, and includes all Ttime steps of a single position estimate.
+
+0.9 pJ and 4.6 pJ respectively [42]. Hence, the consumption of a spiking model can be estimated by measuring spiking activity [43]. Since our spiking models use continuous inputs, their input layer outputs are counted as MACs. The remaining layers exchange exclusively spikes, hence their outputs are considered ACs. We report analytical estimates for all models rather than measured GPU energy. Per-inference energy mea-sured on a general-purpose GPU is dominated by static power and framework overhead at unit batch size, and is therefore not a property of the model; moreover, a compar-ison in which conventional models are measured on a GPU while spiking models are evaluated under a neuromorphic operation model is not meaningful. Applying (11) and (14) with the measured firing rates of Table III places every model on a common basis. The CNN executes 95 .49 M MAC operations per in-ference, corresponding to 0.4392 mJ , of which the con-volutional stages account for 99 .4% . The proposed CSNN performs 0.59 M MAC operations in its input layer, which is evaluated once because the input is constant across time steps, together with 121 .69 M accumulations distributed over the T = 20 time steps, giving 0.1122 mJ . The CSNN therefore requires 3.9× less energy than the CNN of identical layer structure, at a positioning accuracy cost of CE 90 = 0 .229 m against 0.118 m .This reduction is bounded by the ratio EMAC /E AC ≈
+
+5.11 : a spiking layer consumes less energy than its multiply–accumulate counterpart only while ζ(l) < 5.11 .The measured values in Table III satisfy this condition in every layer at every swept T , with an aggregate ζ = 0 .796 ,so the CSNN operates well inside the favourable regime. The margin is smallest at the spiking regressor head preceding the readout, for which ζ(4) = 4 .432 , and at the first convolutional layer, for which ζ(1) = 3 .346 . Both approach the break-even value, and the readout stage in particular is the component that would limit any further increase in T .For reference, the k-NN fingerprinting baseline requires 
+
+126 .2 M operations per query and 504 .6 MB of stored fingerprints, since the radio map itself constitutes the model. The energy per query was estimated at 0.5803 mJ. The proposed model therefore requires 5.2 times less energy and 200 times less storage, while being 2.8 times more accurate. We note that these figures account for arithmetic operations only. Memory access, which at 45 nm costs approximately 5 pJ per 32 -bit cache read, is excluded. For the conventional models this contributes of order 1% 
+
+of the arithmetic energy, whereas for the spiking models the membrane state of every neuron must be read and written at each time step, scaling as O(Nneurons T ) and reducing the reported advantage by roughfly a factor of two under a conservative cache assumption. On dedicated neuromorphic hardware, where membrane state is co-located with the computing element, this penalty is sub-stantially smaller. The reported values should accordingly be interpreted as an arithmetic lower bound. E. Performance Evaluation of the Communication Link To assess the impact of positioning errors on the communication performance, we evaluate the signal-to-noise ratio (SNR) and energy efficiency (EE) of the downlink transmission. For each UE position, the proposed positioning models are used to estimate the UE location at the BS. The estimated position is then used to determine the downlink transmission beamforming direction. The resulting SNR and EE are compared with the correspond-ing values obtained under perfect knowledge of the UE position. For a given neural network model X , where X ∈{C, CS , K}, the symbols C, CS , and K denote the CNN, CSNN, and k-NN models, respectively. The absolute SNR error is defined as |∆SNR | =
+
+|SNR genie − SNR X |, where SNR genie denotes the SNR obtained when the BS has perfect knowledge of the UE position, while SNR X denotes the SNR obtained when the UE position is estimated using model X .Similarly, the absolute EE error is defined as 
+
+|∆EE | = |EE genie − EE X |, (30) where EE genie is the EE obtained under perfect position knowledge and EE X is the EE obtained using the position predicted by model X . The genie in both metrics is a reference, and not an upper bound. As such it does not facilitate as “optimal beamforming”. Measuring both SNR and EE against perfect position knowledge means that everything else (path loss, multipath, noise realization) cancels. The differential is therefore attributable to beam misalignment alone. As illustrated in Fig. 7, both learned models outperform the k-NN model, especially near the BS, before the 3 meters. After this region, the gap between the models narrows. At the far-region, all models exhibit negligible 11 
+
+> Fig. 7. Effect of beam misalignment on optimal receive SNR. The fig-ure measures the difference bewtween the genie-aided beamforming and the beamforming based on each model. Significant degradation is observed near the antenna, before the 3 meters mark. Degradation becomes insignificant the further away the receiver is.
+
+difference in quality degradation, with differences in the order of 10 −1 dB. This is expected, as LoS users often experience less degradation due to beam misalignment, even in high-frequency scenarios [44].                                           
+
+> TABLE IV Link-level energy efficiency at K= 100 users, ∆t= 10 ms .Scheme SNR [dB] Pinf [W] EE w/o Pinf EE w/ Pinf
+> Genie 32 .57 0.000 3.002 ×10 7—CNN 32 .66 4.392 3.010 ×10 72.738 ×10 7
+> CSNN 32 .63 1.122 3.007 ×10 72.932 ×10 7
+> 9-NN 32 .51 5.803 2.997 ×10 72.649 ×10 7
+
+For the EE we assumed a scenario of K = 100 users and a beam-update interval of 10 ms. As calculated from our simulation parameters, the link power budget is divided as 
+
+7.5% to the Pt/PA e ratio, 22 .6% is the Pco , the RF chains amass just a 0.6% , while the phase shifters account for the 69 .3% of the total consumed energy, excluding the inference consumption. The 1024 phase shifters consume more than twice the baseline circuit power and nine times the amplified transmit power. This is a direct consequence of the large array that mmWave beamforming requires, and it sets the scale against which Pinf must be judged. In Table IV we can observe that the positioning accu-racy barely affects the link. The mean SNR spans 0.15 
+
+dB across schemes whose CE 90 differs by a factor of 5.4.Consequently, the EE computed without the inference contribution varies by only 0.4% . At the ranges covered by this deployment, the beam footprint is wide relative to the positioning error for the great majority of positions, so even a 0.635 m error costs almost nothing in received power. The exception is the near-BS region, which is the subject of Fig. 7.       
+
+> Fig. 8. Isolated scaling behavior of inference power for constant update interval ∆t.
+> Fig. 9. Average link energy efficiency over increasing beam-update rates. The simulation is run for K= 100 UEs, to produce non-negligible power differentials.
+
+Including the inference power consumption, the spread widens to 10% and the ordering inverts; the CSNN attains the highest EE despite having the second-worst positioning accuracy, because its inference costs 3.9 times less than the CNN’s and its SNR penality is 0.03 dB. The CSNN loses only 2.5% of the genie-aided EE, against 
+
+9.0% for the CNN and 11 .6% for the k-NN. As such, the accuracy that the CNN “buys” is not worth its energy in our deployment, as the number of users scales. The power scaling of each model is illustrated in Fig. 8. Setting Pinf = Pco at ∆t = 10 ms leads to a number of UEs, K, equal to 172 , 228 , and 891 , for the 9-NN, CNN, and CSNN, respectively. The CSNN sustains roughly four times as many users before its positioning subsystem reaches the baseline circuit power, meaning that it consumes equal energy with the baseline control circuitry. As such, we can conclude that inference is not necessarily an important power component at small K, but its importance grows linearly with the number of served users Fig. 9 illustrates the EE against the beam-update rate, 12 
+
+i.e., the frequency at which a new inference is invoked. The CSNN is above the CNN at every rate, converging only as 1/∆t → 0 where Pinf vanishes for all schemes. Increasing the update rate increases the inference power because the positioning model is executed more frequently. Consequently, the energy efficiency decreases with update rate. The degradation is much smaller for CSNN because its inference energy per prediction is substantially lower than that of CNN and k-NN. There is no crossing point between the curves. The reason is that the CSNN’s SNR deficit is far too small to offset its energy advantage at any positive update rate. This means that the choice of model is not a trade-off in this operating regime, and the cheaper model is preferable throughout. VI. CONCLUSION In this paper, we developed an CSNN-based positioning subsystem for a mmWave system. The system leverages CSI obtained from UL transmissions to estimate user positions for downlink beam steering. The proposed CSNN demonstrated positioning performance comparable to that of a conventional CNN while requiring significantly less energy per inference. In particular, the CSNN achieved the lowest energy-per-inference measurement among all mod-els evaluated in this study. From a positioning accuracy perspective, its performance ranked in the middle of the tested models, indicating a trade-off between accuracy and energy efficiency. Moreover, in scatterer poor environment and LoS regions near the BS, small positioning errors produce disproportionately large SNR and EE penalties under narrow-beam DL, whereas rich scattering partially compensates for larger positioning errors. Consequently, the proposed CSNN is well suited to edge-deployed, low-power inference applications where moderate positioning accuracy is acceptable. Future works based on the end-to-end ray-traced urban dataset and generation pipeline for CSI-based positioning at mmWave band may explore al-ternative network architectures, layer configurations, and hyperparameter settings, as well as evaluate performance across additional communication scenarios. References 
+
+[1] L. Italiano, B. Camajori Tedeschini, M. Brambilla, H. Huang, M. Nicoli, and H. Wymeersch, “A tutorial on 5G positioning,” IEEE Commun. Surveys Tuts., vol. 27, no. 3, pp. 1488–1535, 2025. [2] T. Kallehauge, M. Voigt Vejling, P. Ramírez-Espinosa, K. Kansanen, H. Wymeersch, and P. Popovski, “On the statis-tical relation of ultra-reliable wireless and location estimation,” IEEE Trans. Wireless Commun., vol. 23, no. 8, pp. 10 044– 10 057, 2024. [3] M. Koivisto, A. Hakkarainen, M. Costa, P. Kela, K. Leppa-nen, and M. Valkama, “High-efficiency device positioning and location-aware communications in dense 5G networks,” IEEE Commun. Mag., vol. 55, no. 8, pp. 188–195, 2017. [4] A. Mahmoud, A. Noureldin, and H. S. Hassanein, “Integrated positioning for connected vehicles,” IEEE Trans. Intell. Transp. Syst., vol. 21, no. 1, pp. 397–409, 2020. [5] H. Si, X. Guo, N. Ansari, C. Chen, L. Duan, and J. Huang, “Environment-aware positioning by leveraging unlabeled crowd-sourcing data,” IEEE Internet Things J., vol. 11, no. 9, pp. 16 436–16 449, 2024. [6] S.-Y. Huang and R.-B. Wu, “Positioning for search and rescue in GPS-denied area by distributed wifi RSS-based doa modules,” IEEE Access, vol. 10, pp. 76 105–76 113, 2022. [7] L. Xiao, P. Ghafoorpoor Yazdi, and S. Thiede, “A zone-based wi-fi fingerprinting indoor positioning system for factory noise mapping,” J. Intell. Manuf., Aug. 2025. [8] T. Ma, Y. Xiao, X. Lei, and M. Xiao, “Integrated sensing and communication for wireless extended reality (XR) with reconfigurable intelligent surface,” IEEE J. Sel. Top. Signal Process., vol. 17, no. 5, pp. 980–994, 2023. [9] A. Bensky, Wireless Positioning Technologies and Applications, Second Edition. Artech, 2016. [10] H. Shibata, O. Takyu, and D. Asano, “Proposal of position-ing method considering received signal strength indication for indoor positioning using zigbee terminals,” in IEEE WiSNeT, 2026, pp. 44–47. [11] R. Kawecki, S. Hausman, and P. Korbel, “Performance of fingerprinting-based indoor positioning with measured and sim-ulated rssi reference maps,” Remote Sens., vol. 14, no. 9, 2022. [12] X. Li, H. Li, H. K.-H. Chan, H. Lu, and C. S. Jensen, “Data imputation for sparse radio maps in indoor positioning,” in IEEE ICDE, 2023, pp. 2235–2248. [13] O. Kanhere and T. S. Rappaport, “Position locationing for millimeter wave systems,” in IEEE GLOBECOM, 2018, pp. 206–212. [14] M. Adnan, A. Silva, L. Krzymien, and R. Dinis, “A survey on po-sitioning for mmWave distributed MIMO systems: Challenges, solution techniques, and applications,” IEEE Access, vol. 13, pp. 205 882–205 914, 2025. [15] F. Euchner, M. Gauger, S. Dörner, and S. ten Brink, “A Distributed Massive MIMO Channel Sounder for “Big CSI Data”-driven Machine Learning,” in ITG WSA, 2021. [16] A. H. Ismail, Y. Jusman, M. S. Muhamad Azmi, S. S. Saidi, M. S. Mohamad Hashim, and S. N. Aqmariah Mohd Kanafiah, “Analysis of wireless positioning system using artificial neural network with unfiltered raw Wi-Fi RSS,” in ICE3IS, 2024, pp. 356–361. [17] I. B. K. Y. Utama, M. K. S. Umam, and Y. M. Jang, “An end-to-end deep learning model based on channel impulse response measurement for 2d indoor positioning,” in ICUFN, 2024, pp. 153–157. [18] M. A. K. Respati and B. M. Lee, “CSI-based beamforming and localization for massive mimo using deep learning,” J. Commun. Netw., vol. 28, no. 2, pp. 250–263, 2026. [19] Z. Uykan, H. Al-Tous, O. Tirkkonen, and R. Jäntti, “Finger-printing localization based on super resolution CSI features,” IEEE Access, vol. 14, pp. 49 750–49 767, 2026. [20] J. Hoydis, S. Cammerer, F. Ait Aoudia, M. Nimier-David, L. Maggi, G. Marcus, A. Vem, and A. Keller, “Sionna,” 2022, https://nvlabs.github.io/sionna/. [21] E. Li, L. Zeng, Z. Zhou, and X. Chen, “Edge AI: On-demand accelerating deep neural network inference via edge computing,” IEEE Trans. Wireless Commun., vol. 19, pp. 447–457, 2019. [22] M. H. Shuvo, S. K. Islam, J. Cheng, and B. Morshed, “Efficient acceleration of deep learning inference on resource-constrained edge devices: A review,” Proc. IEEE, vol. 111, pp. 42–91, 2023. [23] X. Wang, Z. Tang, J. Guo, T. Meng, C. Wang, T. Wang, and W. Jia, “Empowering edge intelligence: A comprehensive survey on on-device AI models,” ACM Comput. Surv., vol. 57, pp. 1 – 39, 2025. [24] D. Ngo, H.-C. Park, and B. Kang, “Edge intelligence: Areview of deep neural network inference in resource-limited environments,” Electronics, 2025. [25] N. Quadar, A. Chehri, and B. Debaque, “TinyML datasets as enablers of 6G edge intelligence: Key insights and research gaps,” IEEE Wireless Commun., vol. 33, no. 2, pp. 40–49, 2026. [26] J. Lin, L. Zhu, W.-M. Chen, W.-C. Wang, and S. Han, “Tiny machine learning: Progress and futures [feature],” IEEE Circuits Syst. Mag., vol. 23, no. 3, pp. 8–34, 2023. [27] J. K. Eshraghian, M. Ward, E. Neftci, X. Wang, G. Lenz, G. Dwivedi, M. Bennamoun, D. S. Jeong, and W. D. Lu, “Training spiking neural networks using lessons from deep learning,” Proc. IEEE, vol. 111, no. 9, pp. 1016–1054, 2023. [28] L. Hu, Y. Wang, X. Fu, H. Huang, S. Shi, L. Guo, Y. Lin, and G. Gui, “Enhanced wireless technology recognition method using energy-efficient spiking neural networks,” in NGDN, 2024, pp. 183–187. 13 
+
+[29] A. Henkes, J. K. Eshraghian, and H. Wessels, “Spiking neural networks for nonlinear regression,” R. Soc. Open Sci., vol. 11, no. 5, 2024. [30] L. Happek, J.-T. Huang, A. G. Gener, R. Leupers, and M. Gali-cia, “Spiking neural networks for signal classification with digital and analog neuromorphic systems: A comparative study,” in IJCNN, 2024, pp. 1–7. [31] Z. Huang, Y. Zeng, S. Poslad, and F. Gu, “Spikepr: Position regression with deep spiking neural network,” IEEE Sens. J., vol. 25, no. 3, pp. 4350–4359, 2025. [32] J. Chen, N. Skatchkovsky, and O. Simeone, “Neuromorphic inte-grated sensing and communications,” IEEE Wireless Commun. Lett., vol. 12, no. 3, pp. 476–480, 2023. [33] G. Eappen, S. Daoud, N. Skatchkovsky, F. Ortiz, E. Lagunas, W. A. Martins, and S. Chatzinotas, “Neuromorphic models for energy-efficient onboard interference detection in satellite systems,” IEEE Trans. Aerosp. Electron. Syst., vol. 61, no. 6, pp. 17 682–17 702, 2025. [34] B. Ning, Z. Tian, W. Mei, Z. Chen, C. Han, S. Li, J. Yuan, and R. Zhang, “Beamforming technologies for ultra-massive mimo in terahertz communications,” IEEE Open J. Commun. Soc., vol. 4, pp. 614–658, 2023. [35] T. Fugen, J. Maurer, T. Kayser, and W. Wiesbeck, “Capability of 3-D ray tracing for defining parameter sets for the specifi-cation of future mobile communications systems,” IEEE Trans. Antennas Propag., vol. 54, no. 11, pp. 3125–3137, 2006. [36] G. Paryanti and D. Sadot, “Real-valued neural networks for complex-valued impairment compensation using digital up-conversion,” IEEE Transactions on Communications, vol. 68, no. 12, pp. 7511–7520, 2020. [37] B. Rueckauer, I.-A. Lungu, Y. Hu, M. Pfeiffer, and S.-C. Liu, “Conversion of continuous-valued deep networks to efficient event-driven networks for image classification,” Front. Neu-rosci., vol. Volume 11 - 2017, 2017. [38] P. U. Diehl, D. Neil, J. Binas, M. Cook, S.-C. Liu, and M. Pfeiffer, “Fast-classifying, high-accuracy spiking deep net-works through weight and threshold balancing,” in IJCNN, 2015, pp. 1–8. [39] S. Kundu, G. Datta, M. Pedram, and P. A. Beerel, “Spike-thrift: Towards energy-efficient deep spiking neural networks by limiting spiking activity via attention-guided compression,” in WACV, 2021, pp. 3952–3961. [40] P. A. Zandbergen, “Positional accuracy of spatial data: Non-normal distributions and a critique of the national standard for spatial data accuracy,” Transactions in GIS, vol. 12, no. 1, pp. 103–130, 2008. [41] S. L. Smith, P.-J. Kindermans, C. Ying, and Q. V. Le, “Don’t decay the learning rate, increase the batch size,” 2018. [Online]. Available: https://arxiv.org/abs/1711.00489 [42] M. Horowitz, “1.1 computing’s energy problem (and what we can do about it),” in IEEE ISSCC, 2014, pp. 10–14. [43] G. Chen, P. Peng, G. Li, and Y. Tian, “Training full spike neural networks via auxiliary accumulation pathway,” arXiv preprint arXiv:2301.11929, 2023. [44] M. S. Zia, D. M. Blough, and M. A. Weitnauer, “Effects of snr-dependent beam alignment errors on millimeter-wave cellular networks,” IEEE Transactions on Vehicular Technology, vol. 71, no. 5, pp. 5216–5230, 2022.

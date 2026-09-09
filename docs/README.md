@@ -41,17 +41,17 @@
 <section class="dpr-home-dashboard-card dpr-home-report-card">
   <div class="dpr-home-dashboard-header">
     <div>
-      <span class="dpr-home-dashboard-kicker">2026-09-08</span>
+      <span class="dpr-home-dashboard-kicker">2026-09-09</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 2 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 22 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
     <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>1</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>11</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>11</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-09-08 22:00:47 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-09-09 21:32:19 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -62,7 +62,10 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日精读1篇、速读1篇，共梳理2篇前沿研究；其中DFT-P-OCDM同延迟-多普勒单元内多径超高分辨率方法（9.0分）最值得关注。该方法为提升多径分辨能力提供了新思路，适合通信信号处理方向读者深入探究。下一步可结合近场均匀圆形阵列的波束训练研究，对比不同场景下的实用化价值。</p>
+<p>今日共生成 22 篇推荐（精读 11 篇，速读 11 篇）</p>
+<p>精读：《A Graph Foundation Model for Large-Scale MIMO Detection》（10.0/10）, 《Pinching Antenna Assisted Integrated Sensing and Communication Using Quadrature RSMA》（9.0/10）</p>
+<p>速读：《How Much Training is Needed with a Digital Twin?》（8.0/10）, 《WIP: Energy-Efficient LLM-Based Serving Cluster Formulation in Cell-Free Massive MIMO》（8.0/10）, 《SESO-ISAC: Service-Aware End-to-End Sensing Orchestration for 6G ISAC》（8.0/10）</p>
+<p>这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -71,12 +74,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">11 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM">Ultra-High Resolution Method for Multipath Within a Co-Delay-Doppler Bin in DFT-P-OCDM</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="A Graph Foundation Model for Large-Scale MIMO Detection">A Graph Foundation Model for Large-Scale MIMO Detection</span></li><li><span class="dpr-home-dashboard-paper-title" title="Pinching Antenna Assisted Integrated Sensing and Communication Using Quadrature RSMA">Pinching Antenna Assisted Integrated Sensing and Communication Using Quadrature RSMA</span></li><li><span class="dpr-home-dashboard-paper-title" title="Scalability of Graph Neural Network Policies in Wireless Communication Networks">Scalability of Graph Neural Network Policies in Wireless Communication Networks</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>11</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -84,12 +87,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">11 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays">Hierarchical Codebook Design and Low-Overhead Beam Training for Near-Field Communications With Uniform Circular Arrays</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="How Much Training is Needed with a Digital Twin?">How Much Training is Needed with a Digital Twin?</span></li><li><span class="dpr-home-dashboard-paper-title" title="WIP: Energy-Efficient LLM-Based Serving Cluster Formulation in Cell-Free Massive MIMO">WIP: Energy-Efficient LLM-Based Serving Cluster Formulation in Cell-Free Massive MIMO</span></li><li><span class="dpr-home-dashboard-paper-title" title="SESO-ISAC: Service-Aware End-to-End Sensing Orchestration for 6G ISAC">SESO-ISAC: Service-Aware End-to-End Sensing Orchestration for 6G ISAC</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">wireless-llm <strong>11</strong></span></div>
 </section>
 </div>
 
