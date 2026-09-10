@@ -1,0 +1,647 @@
+Title: Second-Order Fade Statistics in Underwater Optical Wireless Communications in Air-Bubble and Turbidity-Impaired Environments
+
+URL Source: https://arxiv.org/pdf/2609.07955v1
+
+Published Time: Wed, 09 Sep 2026 02:47:01 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible.
+
+# Second-Order Fade Statistics in Underwater Optical Wireless Communications in Air-Bubble and Turbidity-Impaired Environments 
+
+Pedro Salcedo-Serrano, Mohammad-Ali Khalighi, Rub´ en Boluda-Ruiz, Jos´ e Mar´ ıa Garrido-Balsells, Antonio Garc´ ıa-Zambrana 
+
+Abstract —The propagation of underwater optical signals through air-bubble-impaired channels induces irradiance fluctu-ations and partial line-of-sight blockages that degrade the perfor-mance of underwater optical wireless communication (UOWC) systems. Although the first-order fading statistics of such chan-nels have been extensively investigated, their second-order statis-tics, namely the level crossing rate (LCR) and average fade duration (AFD), remain rather unexplored. This paper presents a theoretical and experimental characterization of the LCR and AFD in bubble-impaired UOWC channels under different bubble sizes and water turbidity conditions. Two analytical approaches are developed based on Rice’s formula and on the cumulative distribution function (CDF) together with the bivariate CDF of the sampled irradiance, and are validated experimentally. The results show that water turbidity has a negligible effect on fade statistics under small-bubble conditions. In contrast, for large bubbles, turbid water leads to shorter but more frequent fades than tap water, as particle-induced beam spreading reduces the likelihood of deep fades and prolonged blockage events. Finally, the derived second-order statistics are applied to evaluate the packet outage probability (POP) performance using a two-state Markov channel model, demonstrating that the higher fade rate in the turbid water case results in a larger POP despite the shorter fade durations. 
+
+Index Terms —Underwater Optical Wireless Communications; Air Bubbles; Fading Statistics; Average Fade Duration; Level Crossing Rate; Packet Error Rate; Packet Outage Probability. 
+
+I. I NTRODUCTION 
+
+# THE rapid growth of emerging applications, such as real-time video transmission for underwater autonomous systems and environmental ocean monitoring, is driving the demand for high-capacity underwater communication net-works [1], [2]. Among existing communication technologies, acoustic links suffer from extremely limited bandwidth and high latency, while radio-frequency (RF) links experience severe attenuation in seawater due to its high conductivity. Magnetic induction systems, on the other hand, offer low data rates and remain relatively immature from a technological standpoint [3], [4]. Consequently, underwater optical wire-less communications (UOWC) have emerged as a promis-ing solution for supporting bandwidth-intensive and delay-sensitive applications, including remote offshore infrastructure         
+
+> P. Salcedo-Serrano and M.-A. Khalighi are with Aix-Marseille Univer-sity, CNRS, Centrale M´ ed, Fresnel Institute, Marseille, France (e-mail: psalserr@gmail.com; Ali.Khalighi@fresnel.fr). P. Salcedo-Serrano, R. Boluda-Ruiz, J. M. Garrido-Balsells, and A. Garc´ ıa-Zambrana are also with the University Institute of Telecommunication Re-search (TELMA), University of M´ alaga, CEI Andaluc´ ıa Tech., M´ alaga E-29071, Spain (e-mail: psalserr@gmail.com; rbr@uma.es; jmgb@ic.uma.es; agz@ic.uma.es). P. Salcedo-Serrano, J. M. Garrido-Balsells, and A. Garc´ ıa-Zambrana are also with the Wireless Optical Communications Lab., TELMA.
+
+inspection and maintenance, as well as underwater surveillance missions [5]. However, the performance of UOWC links is impaired by several factors, including absorption and scattering caused by water molecules and dissolved or suspended particles, partic-ularly, in relatively high-turbidity waters; beam misalignment; oceanic turbulence induced, for instance, by temperature and salinity gradients; beam blockage due to obstacles such as fish schools; and scattering effects caused by air bubbles [6]– [16]. Here, we focus on the latter impairment and quantify the performance degradation induced by air bubbles through accurate statistical modeling of their effect under various bubble sizes and water turbidity conditions. 
+
+A. Literature Review on UOWC Channel Modeling Under Air Bubble Effects 
+
+From an optical propagation perspective, a cluster of air bubbles can be viewed as a collection of randomly moving local water–air interfaces, owing to both the stochastic nature of bubble generation and the irregular bubble motion induced by ocean currents. Over the last decade, several studies have statistically characterized and analyzed the impact of air bubbles on UOWC system performance. For instance, [17] experimentally investigated received signal intensity fluctua-tions under various air bubble densities and sizes, showing that the best-fitting statistical distribution depends on the spe-cific bubble conditions. In [18], a simulation-based statistical model was developed to characterize air bubble-induced beam obstruction and power loss, and subsequently integrated with a Gamma–Gamma turbulence model. In [19] and [20], mixture distributions, such as Expo-nential–generalized Gamma and Weibull–generalized Gamma were proposed to capture the combined impact of air bubble obstruction and oceanic turbulence. In [21], an experimental statistical characterization of UOWC channels affected by air bubbles in different water types highlighted the key role of wa-ter turbidity in mitigating air bubbles-induced light blockage. Specifically, particle-induced scattering was shown to reduce the scintillation index by enabling the collection of scattered photons, thereby alleviating the effective obstruction caused by large-bubbles or clusters of small-bubbles. Expanding upon these findings, [22] evaluated UOWC system performance within the proposed empirical statistical framework and con-firmed that higher turbidity levels can enhance the overall link bit-error-rate (BER) and outage probability performance by reducing bubble-induced light blockage. In [23], a combined experimental and theoretical analysis considered a UOWC arXiv:2609.07955v1 [eess.SP] 7 Sep 2026 2
+
+channel under the joint effects of air bubbles, turbulence, and suspended particles, leading to the development of a composite channel model capturing their combined impact. The results revealed that turbulence-induced scintillation and path distortion are further exacerbated by air bubbles and particle-induced scattering. More recently, [16] characterized the water-to-air optical channel by incorporating the effects of wind-generated sea-surface bubbles. Using a Monte Carlo ray-tracing algorithm, the authors evaluated the bubbles’ impact on optical propagation based on the Hall-Novarini model and Mie scattering theory. 
+
+B. Need for Second-Order Channel Statistics 
+
+As outlined in the previous subsection, extensive statistical analyses of UOWC channels affected by air bubbles have been conducted under a wide range of conditions, primarily relying on first order statistics, such as probability density functions (PDFs) and outage probability. However, significant gaps re-main in the characterization of second-order statistics, notably the level crossing rate (LCR) and average fade duration (AFD), which provide critical insight into the temporal dynamics of fading channels. These metrics are particularly important for the design and optimization of adaptive communication systems, as they directly impact burst error performance and influence the selection of key system parameters, such as the symbol rate, packet and interleaver size [24]. To the best of authors’ knowledge, in the UOWC literature, only [21] briefly introduced AFD as a performance metric based on experimental measurements, yet without providing a theoretical framework. This limited body of work contrasts sharply with the maturity of second-order statistical analysis in atmospheric free-space optical (FSO) channels, where the LCR and AFD have been extensively investigated [25]–[30]. Nev-ertheless, these results cannot be directly extended to UOWC systems, as the physical mechanisms governing irradiance fluctuations induced by air bubbles differ fundamentally from those associated with atmospheric turbulence. Consequently, a rigorous characterization of the LCR and AFD in UOWC channels is essential for understanding the interplay between water turbidity and air bubble dynamics and its impact on system performance. 
+
+C. Paper Contributions 
+
+This paper presents an experimental and theoretical analysis of the LCR and AFD in UOWC systems under different bubble sizes and water turbidity conditions. Experimental results are compared with theoretical predictions based on the generalized Gamma and mixture generalized Gamma distributions, for small- and large-bubbles-induced fluctuations, respectively. This work extends the statistical characterization and per-formance analysis reported in [21], [22], by moving beyond first-order channel fading statistics to second-order statistics, namely the LCR and AFD, thereby characterizing the temporal dynamics of bubble-induced fading and the impact of particle-induced scattering. Furthermore, as a direct application of the derived second-order statistics, this work develops analytical expressions for the packet outage probability for the consid-ered UOWC scenarios. By accurately capturing the stochastic behavior of air-bubble-induced fading in waters with varying turbidity levels, the presented study provides valuable insights into the temporal dynamics of bubble-induced fading and es-tablishes a framework for the design and optimization of error-control protocols in challenging underwater environments. In summary, the key contributions of this paper are as follows:  
+
+> •
+
+Experimental and theoretical characterization of the LCR and AFD in bubble-impaired UOWC channels under different bubble sizes and turbidity conditions;  
+
+> •
+
+Derivation and experimental validation of analytical ex-pressions for the LCR and AFD based on the generalized Gamma and mixture generalized Gamma fading models;  
+
+> •
+
+Development of a packet outage probability analysis based on a two-state Markov channel model, demonstrat-ing the importance of second-order statistics for packet-level performance evaluation. The remainder of this paper is organized as follows. Sec-tion II introduces the UOWC channel model for small- and large-bubble-induced fading. Section III presents two analyti-cal approaches for evaluating the LCR and AFD. Section IV describes the experimental setup and the statistical character-ization of the considered channels. Section V validates the proposed LCR and AFD expressions against experimental results and evaluates the packet outage probability using a two-state Markov channel model. Finally, Section VII concludes the paper and discusses future research directions. II. UOWC C HANNEL MODEL 
+
+In a recent work [21], we proposed an UOWC channel model that distinguishes between small and large air bubbles, defined relative to the transmitted beam width, as they give rise to distinct fading mechanisms. Small air bubbles induce small-scale irradiance fluctuations and occasional line-of-sight (LoS) blockage due to bubble clusters. These effects are modeled using a generalized Gamma distribution, given by 
+
+fIS (I) = padΓ( d/p ) Id−1 e−(I/a )p
+
+, (1) where I is the normalized received irradiance, Γ( ·) is the Gamma function, and a, d, and p are the positive scale and shape parameters of the distribution. The corresponding cumulative distribution function (CDF) is given by [22]: 
+
+FIS (I) = 1 − Γ( dp , (I/a )p)Γ
+
+ dp
+
+ . (2) In contrast, large air bubbles cause frequent LoS blockage events due to their size, an effect hereafter denoted by IB ,while also inducing small-scale irradiance fluctuations, an ef-fect hereafter denoted by IF , through the generation of smaller bubbles resulting from bubble fragmentation, a process driven by natural instabilities or turbulence generated by external propellers.This dual behavior motivates the use of a mixture 3
+
+model composed of two generalized Gamma distributions, as follows 
+
+fIL (IB , I F ) = W p1
+
+ad1 
+
+> 1
+
+Γ( d1/p 1) IB d1−11 e(−IB /a 1)p1
+
++(1 − W ) p2
+
+ad2 
+
+> 2
+
+Γ( d2/p 2) IF d2−1 e−(IF /a 2)p2
+
+,
+
+(3) where W ∈ [0 , 1] is the mixture weight controlling the relative contribution of each component. As described in [21], the first term, modeling IB behavior, captures blockage-dominated fading, whereas the second, modeling IF behavior, accounts for fading dominated by small-scale optical power fluctuations. The corresponding CDF is given by [22] 
+
+FIL (IB , I F ) = W F IS (IB ) + (1 − W ) FIS (IF ). (4) III. S ECOND -O RDER STATISTICS : LCR AND AFD As outlined in the introduction, second-order statistics char-acterize the temporal evolution of fading beyond its instan-taneous amplitude distribution. Here, to investigate UOWC channels affected by air bubbles, we consider the metrics of LCR and AFD. The LCR, denoted here by NI (Ith ), is defined as the average rate at which the received optical signal crosses a certain threshold, Ith , in the positive direction. Also, the AFD, denoted by AI (Ith ), is defined as the average time interval during which the received signal remains below a threshold Ith :
+
+AI (Ith ) = FI (Ith )
+
+NI (Ith ) , (5) where FI is the CDF of the received irradiance. In this work, we investigate two approaches for the esti-mation of LCR and AFD and validate the derived analytical results through experimental measurements obtained from a UOWC link under various air bubble scenarios and water turbidity conditions. 
+
+A. Approach 1 (A1): Rice model 
+
+In this rather conventional approach, LCR is calculated using the Rice formula, given by [31] 
+
+NI (Ith ) = 
+
+Z +∞
+
+> 0
+
+˙I f I, ˙I (Ith , ˙I) d ˙I, (6) where fI, ˙I (Ith , ˙I) denotes the joint PDF of the received irradiance I and its time derivative ˙I. This approach has been widely adopted in second-order statistical analysis of FSO channels based on the statistics of atmospheric turbulence and its time derivative [25]–[30], and a closed-form expression has been derived for fI, ˙I (Ith , ˙I) relying on the specific spatial and temporal statistics of atmospheric turbulence [34, Eq. (11.38)]. However, deriving the corresponding joint PDF analytically is challenging for the case of air bubble-induced fading in UOWC channels. In fact, to the best of the authors’ knowledge, the statistical characterization of air bubble-induced fading in UOWC links has been restricted to the amplitude statistics of the received irradiance, as no theoretical framework currently exists that describes its temporal spectral behavior. Conse-quently, the LCR approximation derived here relies solely on irradiance amplitude measurements, which represents the most tractable and comprehensive statistical description currently available in the literature. Motivated by this, here, the LCR approximation is derived under two standard assumptions widely used in wireless fading analysis: (i) the received irradiance I and its time derivative 
+
+˙I are statistically independent [35]–[37], and (ii) ˙I follows a zero-mean Gaussian distribution [25]–[27], [30], [34]. Accord-ingly, we have 
+
+fI, ˙I (I, ˙I) = fI (I)f ˙I ( ˙I), (7) 
+
+f ˙I ( ˙I) = 1
+
+q
+
+2πσ 2˙I
+
+exp − ˙I2
+
+2σ2˙I
+
+!
+
+, (8) where σ2˙I is the variance of the time derivative of the received irradiance. Then, from (6), the LCR can be approximated as 
+
+NI,A 1(Ith ) ≈ fI (Ith )
+
+Z +∞
+
+> 0
+
+˙I f ˙I ( ˙I) d ˙I, (9) where NI,A 1(Ith ) denotes the LCR based on Approach 1. Substituting (8) into (9), 
+
+Z +∞
+
+> 0
+
+˙I f ˙I ( ˙I) d ˙I = 1
+
+q
+
+2πσ 2˙I
+
+Z +∞
+
+> 0
+
+˙I e 
+
+ − ˙I22σ2˙I
+
+
+
+d ˙I = σ ˙I
+
+√2π .
+
+(10) Therefore, 
+
+NI,A 1(Ith ) ≈ fI (Ith ) σ ˙I
+
+√2π . (11) In terrestrial FSO links, σ2˙I is related to the quasi-frequency 
+
+ν0, which quantifies the spectral width of the normalized irradiance power spectrum [34, Eq. (11.38)]. However, the normalized irradiance power spectrum of bubble-impaired UOWC channels remains unknown. Therefore, we estimate 
+
+σ2˙I directly from the empirical autocorrelation of the irradiance fluctuation, BI (τ ), as follows [38, Eq. (6.6-20)] 
+
+σ2˙I = B ˙I (0) = −B′′  
+
+> I
+
+(0) , (12) where B′′  
+
+> I
+
+(τ ) represents the second-order time derivative of 
+
+BI (τ ). This relationship holds under the assumption that 
+
+E[ ˙I] = 0 (E[.] denoting the expected value), which is valid for a stationary process. Using the Wiener-Khinchin theorem together with the relationship between the power spectral density (PSD) of a stationary random process and its derivative [38, Eq. (6.6-28)], B′′  
+
+> I
+
+(0) can be obtained as [38, Eq. (6.6-29)] 
+
+−B′′  
+
+> I
+
+(0) = 12π
+
+Z
+
+ω2SI (ω)dω, (13) where ω is the angular frequency and SI (ω) is the PSD of the empirical measurement. Given NI,A 1(Ith ), the AFD is then calculated by substituting (11) into (5) as follows 
+
+AI,A 1(Ith ) ≈ √2π FI (Ith )
+
+fI (Ith )σ ˙I
+
+. (14) 4
+
+B. Approach 2 (A2): Sampled Fading Channels 
+
+An alternative method for estimating the LCR of sampled fading processes was proposed in [32]. This approach yields a closed-form LCR expression that inherently accounts for the discrete-time nature of sampled fading measurements [33]. Specifically, the LCR is expressed in terms of the CDF and bivariate CDF of the sampled envelope, evaluated at the threshold Ith , as follows: 
+
+NI,A 2(Ith ) = FI (Ith ) − FI1,I 2 (Ith , I th )
+
+TS
+
+, (15) where TS is the sampling period, I1 ≜ I(t), I2 ≜ I(t + TS ),and FI1,I 2 denotes the bivariate CDF [32]. Given (5), the AFD is expressed as 
+
+AI,A 2(Ith ) = TS
+
+
+
+1 − FI1,I 2 (Ith , I th )
+
+FI (Ith )
+
+−1
+
+. (16) IV. E MPIRICAL UOWC C HANNEL CHARACTERIZATION 
+
+A. Experimental Setup 
+
+The block diagram and a photograph of the experimental setup are shown in Fig. 1. The setup is based on that used in our recent work [21], with two key modifications intro-duced to improve measurement accuracy and better emulate natural underwater scattering conditions. First, water turbidity is reproduced using a mixture of Mg(OH) 2 and Al(OH) 3
+
+antacids, whose volume scattering function closely matches that of natural water constituents [39], unlike the commercial Maalox suspension used in [21]. Second, a higher-power laser diode ( 115 mW output power) is employed to improve the receiver signal-to-noise ratio (SNR), thereby enabling more accurate statistical measurements. 1
+
+After propagating through the UOWC channel, the optical signal is collected by a silicon PIN photodiode receiver (Thor-labs PDA10A2) equipped with a 25 .4 mm diameter, 125 mm focal-length lens (Thorlabs LA1986-A). The photodiode out-put is digitized using a Red Pitaya STEMlab at a sampling frequency of fs = 2 .5 MHz, yielding 6 × 10 8 samples (240 seconds) that are transferred via IP to an external computer for offline processing. A low-pass filter (LPF) is applied to the sampled data in order to restrict the statistical analysis to the bandwidth of the optical fluctuations, thereby reducing the contribution of external noise sources. Since the channel coherence time associated with air bubbles is typically on the order of a few milliseconds [21], the LPF cut-off frequency 
+
+fc should be on the order of several kHz. Here, we select 
+
+fc = 5 kHz to preserve fine spectral components that, despite their low energy, have a non-negligible impact on LCR and AFD. The underwater channel emulator consists of a 1.5×0.2×0.3
+
+m3 glass tank filled with 55 L of water. Ocean currents are emulated by three brushless DC motors driving propellers with                                        
+
+> 1The transmitter uses a TO-can green laser diode (Thorlabs L520A2) operating at 520 nm with an output power of 115 mW. The LD is mounted on a temperature-controlled mount (Thorlabs LDM56/M) maintained at 20°C by a temperature controller (Thorlabs TED200C) and an integrated temperature transducer (Analog Devices AD592). The laser output power in [21] was 15 mW. TABLE I MEAN RECEIVED OPTICAL POWER Prx ,ESTIMATED PATH LOSS L,AND SCINTILLATION INDEX σ2
+> I,FOR SMALL -AND LARGE -BUBBLE SCENARIOS UNDER CLEAR (TAP )AND TURBID WATER CONDITIONS .
+> Scenario Antacid level Prx (mW) L(dB) σ2
+> I
+> Small-bubbles 0 mg 8.99 -11.11 0.164 Small-bubbles 200 mg 47.94 ×10 −3-33.84 0.165 Large-bubbles 0 mg 10.56 -10.41 0.168 Large-bubbles 200 mg 47.93 ×10 −3-33.84 0.137
+
+adjustable speed and configurable flow pattern. A broadband dielectric mirror (Thorlabs BBDSQ-E02) is placed at one end of the tank to fold the optical path, extending the UOWC link length to 3 m. Air bubbles are generated by an external air pump connected to four porous stones distributed along the tank, providing a constant airflow rate of 16 L/min. The bubble size regime is controlled by the porous stones: small-bubbles are generated with the stones in place, whereas large-bubbles are produced after their removal, as described in [21]. The porous stones were arranged to produce comparable path loss and scintillation index values for both bubble-size scenarios. Two water turbidity conditions are considered: a clear-water baseline using untreated tap water and a turbid-water condition obtained by dissolving 100 mg each of Mg(OH) 2 and Al(OH) 3
+
+antacids (total of 200 mg) in the tank. 
+
+B. Path Loss and Scintillation Index 
+
+We investigate four transmission scenarios corresponding to different combinations of water turbidity and air bubble conditions. The mean path loss and normalized irradiance variance (i.e., the scintillation index) measured for each scenario are reported in Table I. As can be observed, the measured path loss differs only slightly between the small-and large-bubble scenarios in tap water (less than 1 dB). After the introduction of the antacid, the received optical power decreases significantly due to particle-induced absorption and scattering, increasing the path loss to approximately −34 dB. In fact, as particle-induced scattering dominates the channel attenuation, the path loss is nearly the same for the small- and large-bubble scenarios. On the other hand, a marked difference is observed between the two bubble regimes when turbidity is introduced regarding the scintillation index. For large-bubbles, the scintillation index decreases from 0.168 to 0.137 after adding the antacid, in agreement with the findings of [21]. In contrast, the scintillation index remains virtually unchanged in the small-bubble scenario. This behavior can be explained by the fact that small-bubbles rarely form clusters large enough to produce significant LoS blockage. Consequently, since the probability of LoS blockage is already negligible, the additional particle-induced scattering does not produce any measurable reduction in irradiance fluctuations. 
+
+C. PDF and CDF Characterization 
+
+Using the two approaches of A1 and A2 presented in Section III, we estimate the empirical histogram and CDF of the normalized received optical power, with E[I] = 1 . This 5
+
+(a) 
+
+(b)  
+
+> Fig. 1. Experimental setup for UOWC channel measurements. (a) Schematic of the setup; PD: photodiode, LD: laser diode, TC: temperature controller, CC: current controller, AP: air pump, PC: personal computer, RP: Red Pitaya STEMLab. (b) Snapshot of the setup, showing the water tank (left), and the transmitter/receiver components (right).
+
+normalization allows a fair comparison of the fading second order statistics between tap water and turbid water scenarios. In the case of the Rice Approach (A1), the distribution parameters of fI (·) are estimated by minimizing the mean squared error (MSE) with respect to the empirical PDF, given by [40] 
+
+ϵMSE ,A1 (λ) ≜ 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+ ˆfI (xk) − fI (xk; λ)
+
+2
+
+, (17) where ˆfI (·) is the empirical PDF, fI (·) is the fitted PDF, K
+
+is the number of points at which the histogram is estimated, 
+
+xk denotes the abscissa of the k-th histogram point, and 
+
+λ is the set of estimated distribution parameters. Specif-ically, λ = {a, d, p } for the small-bubble scenario, and 
+
+λ = {W, a 1, d 1, p 1, a 2, d 2, p 2} for the large-bubble scenario, see (1) and (3). The resulting fitted parameters and the corresponding MSE values are listed in Table II. In the case of Approach 2, the parameters of the fitted distribution FI (·) and FI1,I 2 (·, ·) are obtained by minimizing the MSE with respect to the empirical CDF, given by 
+
+ϵMSE ,A2 (λ) ≜ 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+ ˆFI (xk) − FI (xk; λ)
+
+2
+
+. (18) It is worth noting that the full characterization of FI1,I 2
+
+is not necessary, since the joint CDF evaluated at equal arguments, Ith , reduces to the CDF of IM ≜ max {I1, I 2} [32]. The realization of IM is directly obtained from the exper-imental measurements by forming consecutive sample pairs 
+
+(I1[n], I 2[n]) = ( r[n], r [n + 1]) , and retaining, for each pair, the larger of the two values, i.e., IM [n] = max( I1[n], I 2[n]) .Then, the parameters of FIM (·; λ) are obtained in a similar way by fitting a generalized Gamma distribution to the em-pirical CDF of IM . It should be noted that IM is fitted using a generalized Gamma distribution for small air bubbles, as described in (1), and a mixture of two generalized Gamma distributions for large air bubbles, as described in (3). The resulting fitted parameters and the corresponding MSE values for both I and IM are reported in Table III. Figures 2 and 3 show the empirical PDF alongside the fitted distributions following (17) for all considered scenarios, evaluated at the parameter sets λ listed in Table II for the cases of small and large air bubbles, respectively. The fitted PDFs closely match the empirical PDFs in all cases (as evidenced by the low MSE values reported in Table II) confirming the suitability of the proposed models. As expected, the PDF for the small-bubble case in Fig. 2 is unimodal and centered around the mean received power, consistent with small-scale irradiance fluctuations and negligible LoS blockage. In con-trast, the histogram for the large-bubble scenario in Fig. 3 exhibits a clear bimodal distribution, reflecting the two fading 6
+
+TABLE II ESTIMATED PARAMETERS OF THE GENERALIZED GAMMA DISTRIBUTION AND MIXTURE MODEL FOR APPROACH 1 IN SMALL AND LARGE -BUBBLES SCENARIOS , RESPECTIVELY , UNDER TAP WATER (0 MG ) AND TURBID WATER (200 MG ) CONDITIONS .
+
+Scenario Antacid level W d (d1/d2) a (a1/a2) p (p1/p2) ϵMSE ,A 1 [Eq. (17)] Small-bubbles 0 mg — 2.2504 1.3553 3.8333 3.2975 × 10 −4
+
+Small-bubbles 200 mg — 2.8119 1.0772 2.5867 3.1279 × 10 −3
+
+Large-bubbles 0 mg 0.1177 2.8823 / 3.6184 1.4130 × 10 −6 / 1.4074 0.2270 / 7.8569 2.1335 × 10 −3
+
+Large-bubbles 200 mg 0.0901 30 .9787 / 3.9165 2.6335 × 10 −18 / 1.3479 0.1401 / 8.8568 5.8969 × 10 −3
+
+TABLE III ESTIMATED PARAMETERS OF THE GENERALIZED GAMMA DISTRIBUTION AND MIXTURE MODEL FOR APPROACH 2 IN SMALL AND LARGE -BUBBLES SCENARIOS , RESPECTIVELY , UNDER TAP WATER (0 MG ) AND TURBID WATER (200 MG ) CONDITIONS .
+
+Scenario Antacid level W d (d1/d2) a (a1/a2) p (p1/p2) ϵMSE ,A 2 [Eq. (18)] 
+
+I
+
+Small-bubbles 0 mg — 2.2928 1.3326 3.5938 2.8076 × 10 −6
+
+Small-bubbles 200 mg — 2.8506 1.0569 2.5115 2.4350 × 10 −6
+
+Large-bubbles 0 mg 0.1185 2.9927 / 3.0733 6.0401 × 10 −7 / 1.4775 0.2196 / 12 .5673 2.2122 × 10 −6
+
+Large-bubbles 200 mg 0.0976 10 .9144 / 3.7887 2.1986 × 10 −6 / 1.3716 0.3162 / 8.7508 5.1867 × 10 −6
+
+IM
+
+Small-bubbles 0 mg — 2.2929 1.3326 3.5938 2.8074 × 10 −6
+
+Small-bubbles 200 mg — 2.8507 1.0569 2.5115 2.4349 × 10 −6
+
+Large-bubbles 0 mg 0.1185 2.9937 / 3.0733 6.0005 × 10 −7 / 1.4775 0.2195 / 12 .5680 2.2147 × 10 −6
+
+Large-bubbles 200 mg 0.0976 10 .9038 / 3.7887 2.2488 × 10 −6 / 1.3717 0.3167 / 8.7515 5.1890 × 10 −6
+
+mechanisms captured by the proposed mixture model. Here, the lower peak corresponds to blockage-dominated events, in which large-bubbles obstruct the LoS, whereas the higher peak represents irradiance fluctuations around the mean received power, where the channel behaves similarly to the small-bubbles case. Notably, in the turbid water case, the lower peak becomes less pronounced and shifts toward the mean, indicating that turbidity mitigates the severity of blockage events, consistent with the observations reported in [21]. Note that the histogram for the turbid-water case exhibits higher “noise” due to the lower received signal-to-noise ratio. However, this does not affect the distribution shape or the quality of the parametric fit. Also, for the large-bubble case in Fig. 3, the fitted scale parameter a1 is extremely small under both water conditions, indicating that blockage events reduce the received irradiance to nearly zero, as represented by the first component of the proposed mixture model. Similarly, Fig. 4 compares the empirical CDFs with the distributions fitted using (18) for the small-bubble scenario under tap-water conditions, based on the parameter set λ
+
+reported in Table III. The fitted distributions closely match the empirical CDFs for both I and IM (as evidenced by the low MSE values reported in Table III). For conciseness, only this representative case is shown, as the remaining scenarios exhibit comparable fitting accuracy and provide no additional insight into the goodness of fit. Moreover, although not readily discernible from the figure, the condition FIM (·) ≤ FI (·)
+
+holds over the entire range of interest considered in this work, thereby preventing physically meaningless negative LCR val-ues in (15). 0 0.5 1 1.5 2 2.5 300.25 0.50.75 1Normalized received power PDF Empirical Fitted PDF Eq. (1) Antacid = 0 mg 
+
+(a) 0 0.5 1 1.5 2 2.5 300.25 0.50.75 1Normalized received power PDF Empirical Fitted PDF Eq. (1) Antacid = 200 mg 
+
+(b) 
+
+Fig. 2. Comparison of the empirical and fitted probability density function of the small-bubbles for (a) tap water and (b) turbid water ( 200 mg antacid) conditions. 70 0.25 0.5 0.75 1 1.25 1.5 1.75 200.25 0.50.75 11.25 1.5Normalized received power PDF Empirical Fitted PDF Eq. (3) Antacid = 0 mg 
+
+(a) 0 0.25 0.5 0.75 1 1.25 1.5 1.75 200.25 0.50.75 11.25 1.5Normalized received power PDF Empirical Fitted PDF Eq. (3) Antacid = 200 mg 
+
+(b)     
+
+> Fig. 3. Comparison of the empirical and fitted probability density function of the large-bubbles for (a) tap water and (b) turbid water ( 200 mg antacid) conditions.
+
+V. S TATISTICAL CHARACTERIZATION OF FADING 
+
+In this section, we present numerical results based on the derived PDFs to analyze the LCR and AFD characteristics of UOWC channels in the presence of small and large air bubbles under different levels of water turbidity. To that end, the empirical LCR and AFD are computed from each normalized irradiance measurement after LPF filtering over a wide range of thresholds spanning the dynamic range of the normalized received signal. Mathematically, the empirical LCR at thresh-old Ith in the positive-going direction is estimated as 
+
+bNI (Ith ) = 1
+
+Tobs  
+
+> N−1
+
+X
+
+> n=1
+
+1 {I[n] ≤ Ith , I [n + 1] > I th } , (19) where Tobs is the observation period (i.e., the measurement duration), N is the total number of samples, and 1{·} denotes the indicator function, which equals unity when the signal is at or below Ith at sample n and exceeds Ith at sample n + 1 , and zero otherwise. To assess the consistency of the experimental results and quantify the variability of the estimated LCR and AFD, the 6 × 10 8 samples were partitioned into 120 
+
+contiguous, non-overlapping blocks of 5 × 10 6 samples ( 2 s) each, and bNI (Ith ) was estimated for each block. The block duration was chosen to be much longer than the channel coherence time, which is at most on the order of 1 ms for all considered scenarios [21]. For each threshold, the standard deviations of the blockwise LCR and AFD estimates were then 0 0.25 0.5 0.75 1 1.25 1.5 1.75 200.25 0.50.75 1Normalized received power, I
+
+> CDF Empirical Fitted CDF Small bubbles Antacid = 0 mg
+
+(a) 0 0.25 0.5 0.75 1 1.25 1.5 1.75 200.25 0.50.75 1Normalized received power, IM
+
+> CDF Empirical Fitted CDF Small bubbles Antacid = 0 mg
+
+(b)     
+
+> Fig. 4. Comparison of the empirical and fitted cumulative density functions under small-bubble conditions for tap water ( 0mg of antacid): (a) I, and (b)
+> IM.
+
+computed, providing threshold-dependent measures of their statistical variability over the observation period. In addition, we compare the empirical results with the an-alytical predictions obtained from the two approaches derived in (11) and (15). 
+
+A. Level Crossing Rate Analysis 
+
+The LCR for small- and large-bubble scenarios is plotted as a function of Ith in Figs. 5 and 6, respectively, where both tap water and turbid water conditions are considered. 
+
+1) Experimental LCR results: The mean experimental LCR across blocks closely agrees with the estimate obtained from the full measurement, supporting the approximate ergodicity of the signal over the observation period. The vertical error bars at each experimental point represent the standard deviation across blocks. As observed, the variability increases markedly at low threshold levels, where crossing events become rare (as evidenced by the PDFs in Figs. 2 and 3), resulting in greater statistical uncertainty in the LCR estimate. Consider first the small-bubble scenario. According to Fig. 5, the analytical LCR closely matches the experimental results for both water conditions, confirming the validity of the proposed models. The observed LCR behavior is also consistent with previous studies reported in the literature 8−20 −16 −12 −8 −4 0 410 −2  
+
+> 10 −1
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> NI (Ith ) [crosses/s] Experimental Approach 1 Approach 2
+
+(a) −10 −8 −6 −4 −2 0 2 410 −2  
+
+> 10 −1
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> NI (Ith ) [crosses/s] Experimental Approach 1 Approach 2
+
+(b)      
+
+> Fig. 5. Average LCR versus a threshold Ith for (a) tap water and (b) turbid water ( 200 mg of antacid) in the presence of small air bubbles .
+
+[25]–[30]. The LCR reaches its maximum at approximately 
+
+Ith = 0 dB, corresponding to the mean normalized irradi-ance, where threshold crossings occur most frequently. As 
+
+Ith decreases below 0 dB, the LCR decreases because deep fades occur less frequently. Likewise, for thresholds above 
+
+0 dB, the LCR also decreases, since the received irradiance rarely exceeds the mean by a large margin. However, it is worth noting that the LCR curve is markedly asymmetric, in contrast to the nearly symmetric behavior typically reported for FSO channels under atmospheric turbulence [27]. Specif-ically, the LCR decays more gradually for Ith < 0 dB than for Ith > 0 dB. This asymmetry is attributed to the behavior of small-bubble-induced fading. On one hand, bubble clusters can produce deep fades, increasing the number of crossings at low thresholds. On the other hand, these fades evolve more rapidly than positive irradiance excursions, further increasing the crossing rate. Consequently, small-bubbles generate short, consecutive deep fades, whereas high-irradiance states persist for longer durations in the absence of partial LoS blockage. Additionally, as expected, both water turbidity conditions exhibit similar LCR trends and comparable values over the common threshold range, with approximately 100 crossings/s at Ith = 0 dB, and 10 crossings/s near Ith = −6 dB. Since small bubbles primarily induce small-scale irradiance fluctua-tions with negligible LoS blockage, the additional scattering-induced beam spreading the turbid-water scenario has little impact on the LCR behavior. Some differences arise for 
+
+Ith < −7.5 dB, where lower LCR values are observed in the turbid-water case. However, these differences are likely attributable to the scarcity of crossing events at such low threshold levels, which makes the estimator subject to greater statistical uncertainty, as reflected by the large standard-deviation bars in this region for both water conditions. Now consider the large-bubble scenario. As seen in Fig. 6, the LCR here exhibits a markedly different behavior depending on the water condition. For the tap-water case, the experi-mental LCR displays a single well-defined peak near 0 dB, followed by a gradual monotonic decay toward lower thresh-olds. No secondary peak is discernible in the experimental data in this region, where the large standard-deviation bars also indicate increased statistical uncertainty at low thresholds. In contrast, under turbid-water conditions, the experimental LCR exhibits a clear bimodal profile, with a primary peak near 1 dB and a secondary peak near −9 dB, consistent with the PDF behavior observed in Fig. 3. The secondary peak arises from scattered photons partially compensating for LoS blockage during deep fading events, thereby raising the irradiance floor and concentrating level crossings around this threshold. Moreover, the turbid-water case consistently exhibits higher LCR values across the considered threshold range. This behavior interestingly contrasts with the small-bubble scenario, for which both water conditions yield comparable LCR values. The increased LCR under large-bubble conditions can be attributed to two concurrent effects. First, particle scattering is hypothesized to shorten bubble-induced fades by partially restoring the received irradiance during LoS blockage, thereby increasing the threshold crossing rate and decreasing the scintillation index, as shown in Table I. This interpretation is supported by the AFD results presented in the next subsection. Second, the higher path loss in turbid water reduces the received SNR, potentially introducing additional noise-induced crossings, specially in low-threshold scenarios. This hypothesis, however, could not be verified experimentally because the transmitter laser was already operating at its maximum output power. Further measurements under matched-SNR conditions are required to distinguish between these two contributions. 
+
+2) Analytical LCR results: Regarding the analytical results, some differences can be observed between both approaches presented in Section III with respect to the experimental results. Approach 1 consistently overestimates the LCR rel-ative to the measurements at low threshold values, whereas Approach 2, by explicitly accounting for the sampling period, provides a closer match to the experimental results over the entire threshold range. As discussed in [41], [42], the Rice approach neglects the finite sampling period and therefore counts all threshold crossings. Furthermore, under the experimental conditions considered here, this overestimation is more pronounced at low thresholds, where fades are shorter and missed crossings due to finite sampling become more frequent (as shown later 9−20 −18 −16 −14 −12 −10 −8 −6 −4 −2 0 210 −1  
+
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> NI (Ith ) [crosses/s] Experimental Approach 1 Approach 2
+
+(a) −12 −10 −8 −6 −4 −2 0 210 −1  
+
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> NI (Ith ) [crosses/s] Experimental Approach 1 Approach 2
+
+(b)      
+
+> Fig. 6. Average LCR versus a threshold Ith for (a) tap water and (b) turbid water ( 200 mg of antacid) in the presence of large air bubbles .
+
+in Figs. 7 and 8). Additionally, the estimation of σ2˙I from the measured signal introduces a further source of overestimation in Approach 1. As shown in (13), the integrand is weighted by ω2, which increasingly amplifies the contribution of high-frequency components to the estimate of σ2˙I . Since bubble-induced irradiance fluctuations are predominantly concentrated at low frequencies, the high-frequency region of the estimated PSD is mainly dominated by residual high-frequency noise. Consequently, the ω2 weighting disproportionately amplifies this noise contribution, resulting in an overestimation of σ2˙I
+
+and, consequently, of the LCR. Approach 1 is also affected by errors arising from the parametric fitting of the analytical PDF. These deviations are most pronounced at low thresholds, where rare deep-fade events are less accurately represented by the fitted PDF under the MSE fitting criterion. A more detailed analysis of this effect is provided in [40]. The discrepancies between Approach 2 and the measure-ments mainly arise from its dependence on the fitted parame-ters (requiring the fitted CDF and bivariate CDF). Estimation errors due to numerical fitting inaccuracies are amplified because, as TS → 0, both the numerator and denominator in (15) approach zero, making the LCR highly sensitive to small fitting errors. However, Approach 2 remains within the ex-perimental variability bands across the entire threshold range, −20 −16 −12 −8 −4 0 410 −5  
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> AI (Ith ) [s] Experimental Approach 1 Approach 2
+
+(a) −10 −8 −6 −4 −2 0 2 410 −5  
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> 10 1
+> 10 2
+> Threshold Ith [dB]
+> AI (Ith ) [s] Experimental Approach 1 Approach 2
+
+(b)      
+
+> Fig. 7. Average AFD (in seconds) versus threshold Ith for (a) tap water and (b) turbid water ( 200 mg of antacid) in the presence of small air bubbles .
+
+indicating good agreement between the model predictions and the measurements within the observed experimental variability. 
+
+B. Average Fade Duration Analysis 
+
+Figures 7 and 8 present the AFD for the small- and large-bubble scenarios, respectively. Since the AFD is inversely proportional to the LCR for a given threshold from (5), it exhibits the complementary trends discussed previously for LCR. For small-bubbles, both analytical approaches accurately reproduce the quasi-exponential increase in the AFD with Ith ,while for large-bubbles they also capture the local minima induced by the bimodal irradiance distribution. Moreover, the AFD results in the large-bubble case support the hypothesis that increased turbidity reduces the duration of bubble-induced fades through particle scattering when LoS blockage is not negligible. For example, at Ith = −10 dB in the large-bubble scenario, the AFD decreases from approximately 10 ms in tap water to 1 ms in turbid water. Consistent with the LCR results, Approach 1 underesti-mates the AFD at low thresholds because it overestimates the crossing rate, whereas Approach 2 remains accurate over a wider threshold range. Note, similar discrepancies between theoretical and experimental AFD have also been reported for 10 −20 −18 −16 −14 −12 −10 −8 −6 −4 −2 0 2 410 −4  
+
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Threshold Ith [dB]
+> AI (Ith ) [s] Experimental Approach 1 Approach 2
+
+(a) −12 −10 −8 −6 −4 −2 0 210 −6  
+
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Threshold Ith [dB]
+> AI (Ith ) [s] Experimental Approach 1 Approach 2
+
+(b)     
+
+> Fig. 8. Average AFD (in seconds) versus a threshold Ith for (a) tap water and (b) turbid water ( 200 mg of antacid) in the presence of large air bubbles .
+
+RF shadowed fading channels using parameters estimated by nonlinear least-squares fitting [37]. VI. P ACKET OUTAGE PROBABILITY ANALYSIS 
+
+To illustrate the usefulness of the derived second-order statistics, we evaluate the performance metric of packet-outage-probability (POP) of the UOWC link, which cannot be predicted from first-order statistics alone. Since the coherence time of air-bubble-induced fading is much longer than the symbol period at data rates above a few Mb/s, transmission errors occur in bursts spanning entire packets. Consequently, the average BER reported in [22] does not fully characterize the overall link performance. Following [43], we model the channel as a two-state Markov process, where the channel is considered to be in the “good” state ( G) when I > I th and in the “bad” state ( B) other-wise. The threshold Ith is defined as the minimum received irradiance required to maintain the instantaneous BER below the forward error correction (FEC) target of 3.8 × 10 −3.Hence, considering a threshold-based packet error probability, a packet of duration Tp is received successfully if the channel remains in the G state throughout the entire packet. As a result, the probability of successful packet reception, i.e., the complement of the POP, equals the probability that the channel starts in state G and no G → B transition occurs during Tp.The stationary probability of state G is given by 
+
+PG = 1 − FI (Ith ). (20) Assuming that the durations of the G-state periods follow an exponential distribution, the corresponding survival probability over Tp is [43, Eq. (57)] 
+
+SG = exp 
+
+
+
+− NI (Ith ) Tp
+
+PG
+
+
+
+, (21) where NI (Ith )/P G is the transition rate from G to B under the Markov assumption. To assess the validity of this assumption, the empirical survival function of the G-state durations was estimated directly from the experimental measurements. For a fixed threshold Ith , the irradiance record was converted into a binary sequence Xn ∈ { G, B }, as described above. All consecutive sojourns in state G were then identified, and their durations were used to compute the empirical survival function 
+
+cSG(t). Figures 9 and 10 compare cSG(t) with the exponential model in (21) for both tap- and turbid-water conditions under small- and large-bubble scenarios, respectively. As observed, the empirical survival functions generally follow the expo-nential prediction across the considered range of durations, supporting the memoryless assumption and, consequently, the use of a two-state continuous-time Markov model to charac-terize the G-state statistics under the considered experimental conditions. Therefore, combining the survival probability of the G state with the probability of being in state G yields 
+
+POP ( Ith , T p) = 1 − PG exp 
+
+
+
+− NI (Ith ) Tp
+
+PG
+
+
+
+. (22) To assess the validity of (22), the POP is also estimated directly from the experimental measurements. Specifically, the empirical POP is computed as the fraction of sliding windows of duration Tp containing at least one instance in which the irradiance falls below Ith , as follows: 
+
+[POP( Ith , T p) = 1 − 1
+
+N − m + 1 
+
+× 
+
+> N−m+1
+
+X
+
+> n=1
+
+1
+
+
+
+min  
+
+> 0≤k<m
+
+I[n + k] > I th 
+
+
+
+,
+
+(23) where m = ⌊Tp/T s⌋ is the number of samples corresponding to a packet of duration Tp and 1{·} is the indicator function. Figure 11 presents the POP as a function of the packet du-ration Tp for the small- and large-bubble scenarios under both water turbidity conditions using (23) and for the analytical Approach 2, which was shown to provide closer agreement with the experimental LCR across the entire threshold range. Also, Table IV summarizes the corresponding SNR values, the decision threshold required to achieve the target BER of 
+
+3.8 × 10 −3, together with NI (Ith ) and AI (Ith ).As expected, the POP increases monotonically with Tp. In the limit of Tp → 0, the POP reduces to the outage probability, 
+
+FI (Ith ), since an infinitesimally short packet is lost only if it starts during a fade. As Tp increases, the probability of a G → B transition during packet reception also increases, 11 0 0.1 0.2 0.3 0.400.20.40.60.81
+
+t [s] 
+
+> SG(t)
+
+Experimental Eq. (21) 
+
+(a) 0 0.1 0.2 0.300.20.40.60.81
+
+t [s] 
+
+> SG(t)
+
+Experimental Eq. (21) 
+
+(b)                                                    
+
+> Fig. 9. Survival function for (a) tap water and (b) turbid water ( 200 mg of antacid) in the presence of small air bubbles .TABLE IV SNR AND INTENSITY THRESHOLDS FOR BER = 3 .8×10 −3,LEVEL CROSSING RATE AND AVERAGE FADE DURATION FOR SMALL -AND LARGE -BUBBLE SCENARIOS UNDER TAP AND TURBID WATER (200 MG ANTACID ).
+> Small bubbles Large bubbles
+> 0 mg 200 mg 0 mg 200 mg
+> SNR th 13 .99 dB 12 .28 dB 33 .34 dB 8.35 dB
+> Ith −4.24 dB −3.38 dB −13 .91 dB −1.42 dB
+> NI(Ith )21 .133 .14.28 24 .5
+> AI(Ith )2.84 ×10 −32.43 ×10 −38.31 ×10 −37.68 ×10 −3
+
+resulting in a higher POP. Consequently, channels with the same outage probability but different crossing rates exhibit different packet-level performances, highlighting again the importance of accounting for second-order statistics. In the tap-water case (blue curves), the analytical POP closely matches the empirical results over the entire range of packet durations considered. Under turbid-water conditions (orange curves), good agreement is maintained up to Tp ≈
+
+2 × 10 −3 s, beyond which the analytical model progressively overestimates the empirical POP. This slight discrepancy can be attributed to deviations of the G -state survival function from the exponential distribution assumed by the Markov model under turbid-water conditions, for both small- and large-bubble scenarios. Nevertheless, the analytical expression accu-rately captures the overall dependence of the POP on packet 0 0.4 0.8 1.2 1.6 200.20.40.60.81
+
+t [s] 
+
+> SG(t)
+
+Experimental Eq. (21) 
+
+(a) 0 0.1 0.2 0.3 0.4 0.5 0.600.20.40.60.81
+
+t [s] 
+
+> SG(t)
+
+Experimental Eq. (21) 
+
+(b)     
+
+> Fig. 10. Survival function for (a) tap water and (b) turbid water ( 200 mg of antacid) under large-bubble conditions.
+
+duration and, importantly, reproduces the consistently higher POP observed in turbid water compared with tap water across the considered packet-duration range for both bubble scenar-ios. Furthermore, the analytical model correctly identifies the knee point, i.e., the maximum packet duration below which the POP remains approximately constant and close to the outage probability FI (Ith ), beyond which it increases markedly with 
+
+Tp. Lastly, although turbidity reduces the AFD, the lower received SNR increases the probability of G →B transitions through additional noise-induced threshold crossings, resulting in a higher POP. This again highlights the importance of considering second-order statistics: despite the lower BER and SNR required to achieve the FEC limit as reported in [22], the higher transition rate degrades packet-level performance. Therefore, link-layer metrics such as POP provide a more comprehensive characterization of the channel than physical-layer metrics based solely on first-order statistics. VII. C ONCLUSIONS 
+
+In this work, the LCR and AFD of bubble-impaired UOWC channels were characterized under different air bubble sizes and water turbidity conditions, using two analytical approaches that were both experimentally validated. For the considered fitting parameters, Approach 1, based on Rice’s formula, tends to overestimate the LCR and, consequently, underestimate the AFD. This discrepancy is particularly pronounced at low 12 10 −6 10 −5 10 −4 10 −3 10 −2 10 −1   
+
+> 10 −1
+> 10 0
+> Packet length Tp[s] Packet outage probability, POP( Tp)0 mg 200 mg Experimental Eq. (22) Small bubbles
+
+(a) 10 −6 10 −5 10 −4 10 −3 10 −2 10 −1   
+
+> 10 −1
+> 10 0
+> Packet length Tp[s] Packet outage probability, POP( Tp)0 mg 200 mg Experimental Eq. (22) Large bubbles
+
+(b) 
+
+Fig. 11. Packet outage probability versus packet duration Tp under (a) small-and (b) large-bubble conditions for tap water and turbid water ( 0 and 200 mg of antacid, respectively). 
+
+threshold levels. In contrast, Approach 2 defines the LCR for sampled fading channels in terms of the fading-envelope CDF and its bivariate CDF, thereby more explicitly accounting for sampling effects and achieving closer agreement for LCR and AFD with the experimental results. Both approaches show that water turbidity has a negligible effect on the fade statistics under small-bubble conditions, whereas in large-bubble scenarios, the turbid water scenarios exhibit higher LCR and lower AFD values than the corresponding tap water cases, i.e., shorter but more frequent deep fades. This behavior may result from the combined effects of particle-induced scat-tering, which mitigates LoS blockage through additional beam spreading, and the increased relative contribution of measure-ment noise associated with the lower received power. Further measurements under matched-SNR conditions are required to isolate the respective contributions of these two effects. The derived second-order statistics were then applied to evaluate the POP using a two-state Markov channel model. Despite the shorter fade durations observed in turbid water, the increased fade rate results in a higher POP than in tap water. These findings demonstrate that packet-level performance metrics can diverge significantly from bit-level metrics such as BER, underscoring the importance of second-order statistics for the design and evaluation of UOWC link-layer protocols. Future work will extend the proposed two-state Markov model to higher-order channel models that more accurately capture the temporal dynamics of bubble-impaired UOWC channels. Such models could support the development of adap-tive link-layer mechanisms, including coding and interleaving, coding and retransmission strategies, to mitigate the impact of bubble-induced fading. REFERENCES [1] Y. Li, Y. Zhang, W. Li, and T. Jiang, “Marine wireless big data: effi-cient transmission, related applications, and challenges,” IEEE Wireless Commun. , vol. 25, no. 1, pp. 19–25, Feb. 2018. [2] M. Jahanbakht, W. Xiang, L. Hanzo, and M. Rahimi Azghadi, “Internet of underwater things and big marine data analytics—A comprehensive survey,” IEEE Commun. Surveys Tuts. , vol. 23, no. 2, pp. 904–956, 2021. [3] M. Stojanovic and J. Preisig, “Underwater acoustic communication chan-nels: propagation models and statistical characterization,” IEEE Commun. Mag. , vol. 47, no. 1, pp. 84–89, Jan. 2009. [4] Y. Li, S. Wang, C. Jin, Y. Zhang, and T. Jiang, “A survey of underwater magnetic induction communications: fundamental issues, recent advances, and challenges,” IEEE Commun. Surveys Tuts. , vol. 21, no. 3, pp. 2466– 2487, 2019. [5] Z. Zeng, S. Fu, H. Zhang, Y. Dong, and J. Cheng, “A survey of underwater optical wireless communications,” IEEE Commun. Surveys Tuts. , vol. 19, no. 1, pp. 204–238, 2017. [6] C. Mobley, The Oceanic Optics Book , C. Mobley, Ed. International Ocean Colour Coordinating Group (IOCCG), 2022. [7] C. Gabriel, M.-A. Khalighi, S. Bourennane, P. L´ eon, and V. Rigaud, “Monte-Carlo-based channel characterization for underwater optical com-munication systems,” J. Opt. Commun. Netw. , vol. 5, no. 1, pp. 1–12, Dec. 2012. [8] B. Cochenour, L. Mullen, and J. Muth, “Temporal response of the under-water optical channel for high-bandwidth wireless laser communications,” 
+
+IEEE J. Ocean. Eng. , vol. 38, no. 4, pp. 730–742, Oct. 2013. [9] M. A. Khalighi, C. J. Gabriel, L. M. Pessoa, and B. Silva, Visible Light Communications: Theory And Applications . CRC-Press, 2017, Ch. Underwater visible light communications, channel modeling and system design, pp. 337–372. [10] R. Boluda-Ruiz, P. Rico-Pinazo, B. Castillo-Vazquez, A. Garcia-Zambrana, and K. Qaraqe, “Impulse response modeling of underwater optical scattering channels for wireless communication,” IEEE Photon. J. , vol. 12, no. 4, pp. 1–14, Aug. 2020. [11] R. Boluda-Ruiz, P. Salcedo-Serrano, B. Castillo-V´ azquez, A. Garc´ ıa-Zambrana, and J. M. Garrido-Balsells, “Capacity of underwater optical wireless communication systems over salinity-induced oceanic turbulence channels with ISI,” Opt. Exp. , vol. 29, no. 15, pp. 23 142–23 158, Jul. 2021. [12] I. C. Ijeh, M. A. Khalighi, M. Elamassie, S. Hranilovic, and M. Uysal, “Outage probability analysis of a vertical underwater wireless optical link subject to oceanic turbulence and pointing errors,” J. Opt. Commun. Netw. ,vol. 14, no. 6, pp. 439–453, Jun. 2022. [13] Y. Ata and K. Kiasaleh, “Analysis of optical wireless communication links in turbulent underwater channels with wide range of water param-eters,” IEEE Trans. Veh. Technol. , vol. 72, no. 5, pp. 6363–6374, May 2023. [14] S. A. Thorpe and P. N. Humphries, “Bubbles and breaking waves,” 
+
+Nature , vol. 283, no. 5746, pp. 463–465, Jan. 1980. [15] S. Vahaji, L. Chen, S. C. Cheung, and J. Tu, “Numerical investigation on bubble size distribution around an underwater vehicle,” Appl. Ocean Res. , vol. 78, pp. 254–266, Sep. 2018. [16] M. Nennouche, M. A. Khalighi, A. A. Dowhuszko, and D. Merad, “End-to-end optical propagation modeling for water-to-air channels under sea surface and UAV effects,” IEEE Photon. J. , vol. 18, no. 3, p. 7301222, 2026. [17] D. Chen, J. Wang, S. Li, and Z. Xu, “Effects of air bubbles on underwater optical wireless communication [invited],” Chin. Opt. Lett. , vol. 17, no. 10, p. 100008, 2019. [18] M. Shin, K.-H. Park, and M.-S. Alouini, “Statistical modeling of the impact of underwater bubbles on an optical wireless channel,” IEEE Open J. Commun. Soc. , vol. 1, pp. 808–818, 2020. 13 
+
+[19] E. Zedini, H. M. Oubei, A. Kammoun, M. Hamdi, B. S. Ooi, and M.-S. Alouini, “Unified statistical channel model for turbulence-induced fading in underwater wireless optical communication systems,” IEEE Trans. Commun. , vol. 67, no. 4, pp. 2893–2907, Apr. 2019. [20] H. Qiu, Z. Huang, J. Xu, W. Zhai, Y. Gao, and Y. Ji, “Unified statistical thermocline channel model for underwater wireless optical communication,” Opt. Lett. , vol. 48, no. 3, p. 636, Feb. 2023. [21] P. Salcedo-Serrano, C. G´ omez-Garc´ ıa, J. Iamaguti-Debessa, R. Boluda-Ruiz, J. Mar´ ıa Garrido-Balsells, B. Castillo-V´ azquez, A. Puerta-Notario, and A. Garc´ ıa-Zambrana, “On the effect of air bubbles-induced scattering on turbid waters: an experimental UOWC channel modeling approach,” 
+
+IEEE Access , vol. 12, pp. 75 888–75 898, 2024. [22] P. Salcedo-Serrano, R. Boluda-Ruiz, J. M. Garrido-Balsells, B. Castillo-V´ azquez, A. Puerta-Notario, and A. Garc´ ıa-Zambrana, “Performance evaluation of UOWC systems from an empirical channel model approach for air bubble-induced scattering,” Sensors , vol. 24, no. 16, p. 5232, Aug. 2024. [23] L. Kou, S. Yan, J. Liu, J. Zhang, J. Leng, J. Wang, and R. An, “The investigation of underwater wireless optical communication channel fading in multisize particles, bubbles, and turbulence,” IEEE IoT J. ,vol. 12, no. 24, pp. 52 293–52 307, Dec. 2025. [24] M. K. Simon and M.-S. Alouini, Digital Communication Over Fading Channels , 2nd ed., ser. Wiley Series In Telecommunications And Signal Processing. Hoboken, N.J: Wiley-Interscience, 2005. [25] F. S. Vetelino, C. Young, and L. Andrews, “Fade statistics and aperture averaging for Gaussian beam waves in moderate-to-strong turbulence,” 
+
+Appl. Opt. , vol. 46, no. 18, p. 3780, Jun. 2007. [26] A. Jurado-Navas, J. M. Garrido-Balsells, M. Castillo-V´ azquez, A. Puerta-Notario, I. Tafur Monroy, and J. J. Vegas Olmos, “Fade statistics of M-turbulent optical links,” EURASIP J. Wireless Commun. Netw. , vol. 2017, no. 1, p. 112, Dec. 2017. [27] C. B. Issaid and M.-S. Alouini, “Level crossing rate and average outage duration of free space optical links,” IEEE Trans. Commun. , vol. 67, no. 9, pp. 6234–6242, Sep. 2019. [28] H. D. Le, V. V. Mai, C. T. Nguyen, and A. T. Pham, “Design and analysis of sliding window ARQ protocols with rate adaptation for burst transmission over FSO turbulence channels,” IEEE/OSA J. Opt. Commun. Netw. , vol. 11, no. 5, p. 151, May 2019. [29] C. Stefanovi´ c, S. Pani´ c, D. Djosi´ c, D. Mili´ c, and M. Stefanovi´ c, “On the second order statistics of N-hop FSO communications over N-gamma-gamma turbulence induced fading channels,” Phys. Commun. , vol. 45, p. 101289, Apr. 2021. [30] H. D. Le and A. T. Pham, “Level crossing rate and average fade duration of satellite-to-UAV FSO channels,” IEEE Photon. J. , vol. 13, no. 1, pp. 1–14, Feb. 2021. [31] S. O. Rice, “Statistical properties of a sine wave plus random noise,” 
+
+Bell Syst. Tech. J. , vol. 27, no. 1, pp. 109–157, Jan. 1948. [32] F. J. L´ opez-Mart´ ınez, E. Martos-Naya, J. F. Paris, and U. Fern´ andez-Plazaola, “Higher order statistics of sampled fading channels with appli-cations,” IEEE Trans. Veh. Technol. , vol. 61, no. 7, pp. 3342–3346, Sep. 2012. [33] F. J. Lopez-Martinez, D. Morales-Jimenez, E. Martos-Naya, and J. F. Paris, “On the bivariate Nakagami-m cumulative distribution function: closed-form expression and applications,” IEEE Trans. Commun. , vol. 61, no. 4, pp. 1404–1414, Apr. 2013. [34] L. C. Andrews and R. L. Phillips, Laser Beam Propagation Through Random Media . 1000 20th Street, Bellingham, WA 98227-0010 USA: SPIE, Sep. 2005. [35] A. Olutayo, H. Ma, J. Cheng, and J. F. Holzman, “Level crossing rate and average fade duration for the Beaulieu-Xie fading model,” IEEE Wireless Commun. Lett. , vol. 6, no. 3, pp. 326–329, Jun. 2017. [36] Z. Hadzi-Velkov, “Level crossing rate and average fade duration of EGC systems with cochannel interference in Rayleigh fading,” IEEE Trans. Commun. , vol. 55, no. 11, pp. 2104–2113, Nov. 2007. [37] S. L. Cotton, “Second-order statistics of κ-μ shadowed fading channels,” 
+
+IEEE Trans. Veh. Technol. , vol. 65, no. 10, pp. 8715–8720, Oct. 2016. [38] P. Beckmann, Probability In Communication Engineering . New York: Harcourt, Brace & World, 1967. [39] L. Mullen, D. Alley, and B. Cochenour, “Investigation of the effect of scattering agent and scattering albedo on modulated light propagation in water,” Appl. Opt. , vol. 50, no. 10, p. 1396, Apr. 2011. [40] S. Fern´ andez, J. David Vega-S´ anchez, J. E. Galeote-Cazorla, and F. J. L´ opez-Mart´ ınez, “How should one fit channel measurements to fading distributions for performance analysis?” IEEE Commun. Lett. , vol. 29, no. 10, pp. 2331–2335, Oct. 2025. [41] P. Ramirez-Espinosa, F. J. Lopez-Martinez, J. F. Paris, M. D. Yacoub, and E. Martos-Naya, “An extension of the κ-μ shadowed fading model: statistical characterization and applications,” IEEE Trans. Veh. Technol. ,vol. 67, no. 5, pp. 3826–3837, May 2018. [42] F. J. Lopez-Martinez, E. Kurniawan, R. Islam, and A. Goldsmith, “Average fade duration for amplify-and-forward relay networks in fading channels,” IEEE Trans. Wireless Commun. , vol. 14, no. 10, pp. 5454– 5467, Oct. 2015. [43] K. Fukawa, H. Suzuki, and Y. Tateishi, “Packet-error-rate analysis using Markov models of the signal-to-interference ratio for mobile packet systems,” IEEE Trans. Veh. Technol. , vol. 61, no. 6, pp. 2517–2530, Jul. 2012.

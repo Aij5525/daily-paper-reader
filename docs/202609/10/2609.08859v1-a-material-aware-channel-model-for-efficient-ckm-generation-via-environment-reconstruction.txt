@@ -1,0 +1,875 @@
+Title: A Material-Aware Channel Model for Efficient CKM Generation via Environment Reconstruction
+
+URL Source: https://arxiv.org/pdf/2609.08859v1
+
+Published Time: Wed, 09 Sep 2026 03:46:02 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# A Material-Aware Channel Model for Efficient CKM Generation via Environment Reconstruction 
+
+Xuancheng Zhu ∗† , Zhenjun Dong †, Yong Zeng ∗† , Cheng-Xiang Wang ∗† ∗National Mobile Communications Research Laboratory, Southeast University, Nanjing 210096, China 
+
+†Purple Mountain Laboratories, Nanjing 211111, China Email: 230268975@seu.edu.cn, dongzhenjun@pmlabs.com.cn, {yong zeng,chxwang }@seu.edu.cn 
+
+Abstract —Channel knowledge map (CKM) is a promising tech-nology for environment-aware wireless communication, sensing, and localization in 6G networks. Accurate CKM generation requires precise reconstruction of the environment, including 3D geometries and scatterer materials, typically from multi-modal sensory observations such as LiDAR point clouds and sparse channel measurements. While the former is relatively easy to acquire, materials remain difficult to obtain directly from sparse channel measurements due to the lack of an explicit channel model linking them. To fill this gap, this paper proposes amaterial-aware channel model that explicitly characterizes the influence of scatterer materials on the wireless channel. Based on this model, an iterative gradient descent based material reconstruction algorithm is proposed. Full wave simulation re-sults validate the developed model and the proposed algorithm, demonstrating their potentials for efficient CKM generation via environment reconstruction. 
+
+I. I NTRODUCTION 
+
+Sixth-generation (6G) networks target Tbps level data rates, sub-ms latency, 10 8 devices/km 2 connectivity density, and centimeter-level positioning accuracy [1]. To this end, higher frequency bands, XL-MIMO [2], and integrated sensing and communication (ISAC) [3] have been developed. However, the resulting complexity in XL-MIMO channel estimation, ISAC sensing, and extra high data rate of mmWave/THz systems limits their deployment [4]. Recently, environment-aware systems based on channel knowledge maps (CKMs) [5] or channel digital twins [6] have emerged as promising 6G paradigms by exploiting the intrinsic environment and channel relationship. Overall, CKM generation methods fall into two categories, including direct end-to-end generation from multi-modal observations via mathematical interpolation [7], matrix completion [8], or deep learning, which requires abundant measurements, and environment reconstruction based genera-tion, which first reconstructs 3D geometry and materials, then applies diffusion models [9], flow matching [10], or ray tracing [11] to generate channel knowledge. This approach offers ex-plainability, generalizability, and improved data efficiency , but material acquisition remains challenging despite the already availability of 3D geometry LiDAR point clouds. In fact, inferring materials from sparse channel measure-ments for CKM generation is more promising than recognizing from visuals [12] or ISAC [13], as it captures how material impacts on the channel. However, this method requires a model explicitly linking material properties to the channel response. While statistical models [14] omit materials; the unified channel model [15], geometry-based stochastic model (GBSM), and pervasive models [16] incorporate materials only implicitly via radar cross section (RCS), which depends on material, directions, and frequency; deterministic models [17] rely on numerical computation, this paper develops a material-aware channel model based on electromagnetic (EM) theory that explicitly characterizes scatterer materials via their relative permittivities and conductivities , and proposes an iter-ative gradient descent based material reconstruction algorithm. Finally, numerical results based on full wave simulation are provided to validate the effectiveness of the proposed models, demonstrating their potentials for effective CKM generation. II. S YSTEM MODEL 
+
+As illustrated in Fig. 1, we consider a target environment with S scatterers of uniform materials in a 3D Cartesian co-ordinate, where material of scatterer s is denoted by {εs, σ s}.The transmitter and receiver locate at qT, qR ∈ R3×1, and they are equipped with a single isotropic antenna. After clutter cancellation [18], channel impulse response (CIR) is given by: 
+
+h(qT, qR, τ ) = 
+
+> S
+
+X
+
+> s=1
+
+hs(qT, qR)δ(τ − τs), (1) where hs(qT, qR) ∈ C denotes the component governed by the scatterer s ∈ { 1, 2, · · · , S }; τs denotes corresponding delay. The material reconstruction problem is formulated by inferring materials of S uniform scatterers denoted by m ∈ R2S×1:
+
+m = [ ε1, σ 1, ε 2, σ 2, · · · , ε S , σ S ]T , (2) from N spatially sparse channel measurements denoted by: 
+
+H = {h(qT, q1, τ ), h (qT, q2, τ ), · · · , h (qT, qN , τ )} , (3) where qn ∈ R3×1, n ∈ {1, 2, · · · , N } denotes channel measuring positions. 
+
+Remark 1: Expressing hs(qT, qR) in (1) as an explicit function of {εs, σ s} establishes a direct link between materials and the channel, which enables the reconstruction of m from 
+
+H with precise geometries of S scatterers as priori knowledge. 
+
+III. M ATERIAL -AWARE CHANNEL MODEL 
+
+A. Channel response relative to materials 
+
+The channel component hs(qT, qR) in (1) governed by the scatterer s is expressed by the far-field radar equation [19]: 
+
+hs(qT, qR) = 
+
+r PR,s 
+
+PT
+
+ejφ s = λpΞs(qT, qR)ejφ s
+
+√4π(4 π|| ∆˘ qs|| · || ∆˜ qs|| ) , (4) arXiv:2609.08859v1 [eess.SP] 8 Sep 2026 2Tx  Rx R( )Sh q                        
+
+> scatterer S
+> scatterer 1 R1()hqscatterer 2 R2()hqRq
+> 11,
+> 
+> ,SS
+> 
+> 22,
+> 
+> partitioned into SMfacets
+> Fig. 1. A multi-path wireless channel with Sscatterers, and the sscatterer is partitioned into Msrectangular facets.
+
+where φs ∈ (−π, π ] denotes the complex phase of hs(qT, qR);
+
+PR,s /P T denotes the ratio of received and emitted power; λ = 
+
+> cfc
+
+is the wavelength and c denotes the light speed; ∆˘ qs ∈
+
+R3×1 points from transmitter towards scatterer s, and ∆˜ qs =
+
+qR − ∆˘ qs − qT ∈ R3×1; Ξs(qT, qR) denotes the far-field bistatic RCS of the scatterer s. Intuitively, the delay τs =(|| ∆˘ qs|| + || ∆˜ qs|| )/c . In the following sections, we derive an explicit expression of Ξs(qT, qR) w.r.t. {εs, σ s} by meshing the surface of scatterer s into Ms rectangular facets, and each is uniquely characterized by the parameter set: 
+
+Pms = {qms , η ms , ϑ ms , ξ ms , L H,m s , L V,m s , ε s, σ s} , (5) where ms ∈ { 1, 2, · · · , M s}; qms ∈ R3×1 denotes the center position vector; ηms , ϑ ms , ξ ms are yaw, pitch, and roll angles, respectively; LH,m s , L V,m s describe the size of facet ms. Thus, by defining ∆˘ qs = 1
+
+> Ms
+
+P 
+
+> ms
+
+qms − qT, Ξ( qT, qR) is given by [20]: 
+
+Ξs(qT, qR) = 
+
+> Ms
+
+X
+
+> ms=1
+
+pS(Pms , aI, aR)e−j 2πλ|| ∆˘ qs|| ∆˘ qTs ˆnms 
+
+> 2
+
+,
+
+(6) where ˆnms ∈ R3×1 denotes the norm vector of facet ms
+
+pointing from interior to outside; aI, aR ∈ R3×1 denote the unit incident and observation direction; S (Pms , aI, aR) denotes the bistatic RCS of facet ms with parameter set Pms .
+
+B. The closed-form expression of facet’s RCS 
+
+As illustrated in Fig. 2, we start from a simple scat-terer with only 1 facet located at the origin of a 3D Cartesian coordinate system, with the parameter set P =
+
+{03×1, 0, 0, 0, L H, L V, ε, σ }. l = [0 , l y , l z ]T ∈ R3×1 denotes a point on the facet. Let incidence and observation directions be 
+
+aI = ∆˘ q/|| ∆˘ q|| = [ − sin θI cos ϕI, − sin θI sin ϕI, − cos θI]T
+
+and aR = ∆˜ q/|| ∆˜ q|| = [cos ϕR sin θR, sin ϕR sin θR, cos θR]T ,where ϕI, ϕ R, θ I, θ R are effective azimuth and zenith angles of incidence and observation; dR = || ∆˜ q|| denotes observation distance; γ ∈ [0 , π 
+
+> 2
+
+] denotes the polarization angle. 
+
+Remark 2: In this paper, the reference directions of an az-imuth angle ϕ and a zenith angle θ are defined by the positive 
+
+x-axis and z-axis with counterclockwise direction as positive direction, thereby ϕI, ϕ R ∈ − π 
+
+> 2
+
+, π
+
+> 2
+
+ and θI, θ R ∈ [0 , π ).
+
+The material properties are captured by the reflection coef-ficients given by: 
+
+Lemma 1: The vertical and parallel polarization reflection coefficients are given by [19]: 
+
+Γ⊥(ε, σ ) = cos ρ −
+
+q
+
+χ(ε, σ ) − sin 2 ρ
+
+cos ρ +
+
+q
+
+χ(ε, σ ) − sin 2 ρ
+
+∈ C, (7) xyzI
+
+> IaR
+
+RaHLOI
+
+> R
+> VL
+
+                  
+
+> 3 1 HV, 0, 0, 0, ,,,LL
+>  
+> =0Rd,[0, ]Tyzll=lI
+> ⊥
+> EIEs
+> 
+> Es
+> 
+> EsE
+> Fig. 2. An illustration of a facets with size LH×LV, whose relative permittivity and conductivity are denoted by εand σ, respectively.
+
+Γ∥(ε, σ ) = 
+
+q
+
+χ(ε, σ ) − sin 2 ρ − χ(ε, σ ) cos ρ
+
+q
+
+χ(ε, σ ) − sin 2 ρ + χ(ε, σ ) cos ρ
+
+∈ C, (8) where χ(ε, σ ) = ε − j σωε 0 with ε0 ≈ 8.8542 × 10 −12 F/m and 
+
+ω = 2 πf c; ρ = arccos(cos ϕI sin θI).
+
+Proof: Please refer to Appendix A The wireless signal is modeled as the plane EM wave, and the incident electric field phasor at l is given by: 
+
+EI(aI, l) = EIe−j 2πλ aT 
+
+> Il
+
+(sin γ ˆE⊥ + cos γ ˆE∥), (9) where EI ∈ C; ˆE⊥, ˆE∥ ∈ R3×1 are given by: 
+
+ˆE⊥ = ˆx × aI
+
+|| ˆx × aI|| = cos θI ˆy − sin ϕI sin θIˆz
+
+|| ˆx × aI|| , (10) 
+
+ˆE∥ = ( aI × ˆE⊥)/|| aI × ˆE⊥|| . (11) 
+
+Theorem 1: After interacting with the facet, the induced surface current J(l) ∈ C3×1 at l is given by: 
+
+J(l) = 
+
+"
+
+sin γ cos ϕI sin θI(1 − Γ⊥)
+
+|| aI × ˆE⊥|| (cos θI ˆy − sin ϕI sin θIˆz)+ cos γ(Γ ∥ − 1) 
+
+|| aI × ˆx|| (cos θIˆz + sin ϕI sin θI ˆy)
+
+ EIe−j 2πλ aT 
+
+> Il
+
+Z0
+
+,
+
+(12) where Γ⊥ = Γ ⊥(ε, σ ), Γ∥ = Γ ∥(ε, σ ) are given in Lemma 1. 
+
+Proof: Please refer to Appendix B. Let LH and LV be chosen such that || ∆˘ q|| and || ∆˜ q|| 
+
+exceed the Rayleigh distance. Thus, the scattered wave phasor is partitioned into two orthogonal components given by: 
+
+Es(aR) ≈ Eϕ 
+
+> s
+
+(aR) ˆEϕ 
+
+> s
+
++ Eθ 
+
+> s
+
+(aR) ˆEθ 
+
+> s
+
+, (13) where Es(aR) ∈ C3×1; Eϕ 
+
+> s
+
+(aR), E θ 
+
+> s
+
+(aR) ∈ C denote scat-tering wave phasors; ˆEϕ 
+
+> s
+
+= − sin ϕˆx + cos ϕˆy ∈ R3×1 and 
+
+ˆEθ 
+
+> s
+
+= cos ϕ cos θˆx + sin ϕ cos θˆy − sin θˆz ∈ R3×1 denote azimuth and polar directions. 
+
+Theorem 2: Based on the far-field approximated Stratton-Chu equation [19], the scattering wave phasors 
+
+Eϕ 
+
+> s
+
+(aR), E θ 
+
+> s
+
+(aR) in (13) are given by: 
+
+Eϕ 
+
+> s
+
+(aR) ≃ − je −j 2πλ dR
+
+2dRλ EI [sin γΥ( ε, σ )Φ ⊥(aI, aR)+ cos γΨ( ε, σ )Φ ∥(aI, aR) I(aI, aR),
+
+(14) 
+
+Eθ 
+
+> s
+
+(aR) ≃ − je −j 2πλ dR
+
+2dRλ EI [sin γΥ( ε, σ )Θ ⊥(aI, aR)+ cos γΨ( ε, σ )Θ ∥(aI, aR) I(aI, aR),
+
+(15) 3xyzTx antenna 1x1y1zRq                
+
+> q1x1y1zxyz
+> 1x
+> Rx antenna 
+> 1y1z
+> x
+> yz
+> HV,,,,,,,LL
+>      =qqTq
+> Δ෭ 𝐪
+> Fig. 3. A facets with arbitrary position with P, where || q|| and || ∆q|| satisfy the far-field constraints in Lemma 2.
+
+where: 
+
+I(aI, aR) = LHLVsinc 
+
+ LH
+
+λ ζ(aI, aR)
+
+
+
+sinc 
+
+ LV
+
+λ κ(aI, aR)
+
+
+
+,
+
+(16) 
+
+Φ⊥(aI, aR) = cos ϕI sin θI cos θI cos ϕR/|| aI × ˆE⊥|| , (17) 
+
+Φ∥(aI, aR) = sin ϕI sin θI cos ϕR/|| ˆx × aI|| , (18) 
+
+Θ⊥(aI, aR) = cos ϕI sin θI
+
+|| aI × ˆE⊥|| (cos θI sin ϕR cos θR
+
++ sin θI sin ϕI sin θR),
+
+(19) 
+
+Θ∥(aI, aR) = − cos θI sin θR + sin ϕI sin θI sin ϕR cos θR
+
+|| ˆx × aI|| ,
+
+(20) with ζ(aI, aR) = sin ϕI sin θI + sin ϕR sin θR; κ(aI, aR) =cos θI+cos θR; Υ( ε, σ ) = 1 −Γ⊥(ε, σ ); Ψ( ε, σ ) = Γ ∥(ε, σ )−1.
+
+Proof: Please refer to Appendix C. Based on EI in (9) and Es in (13), the facet RCS in (6) is defined by: 
+
+S(P, aI, aR) = lim  
+
+> dR→∞
+
+4πd 2
+
+> R
+
+|Es|2
+
+|EI|2(a)
+
+= lim  
+
+> dR→∞
+
+4πd 2
+
+> R
+
+|Eϕ 
+
+> s
+
+|2 + |Eθ 
+
+> s
+
+|2
+
+|EI|2 ,
+
+(21) 
+
+where (a)
+
+= holds from the orthogonality in (13). 
+
+Corollary 1: The RCS of facet with P, incident direction 
+
+aI and observation direction aR is given by: S(P, aI, aR) = πλ2
+
+sin 2 γ(Φ 2 
+
+> ⊥
+
++ Θ 2
+
+> ⊥
+
+)|Υ( ε, σ )|2 + sin(2 γ)
+
+×(Φ ⊥Φ∥ + Θ ⊥Θ∥)ℜ(Υ( ε, σ )Ψ ∗(ε, σ )) + cos 2 γ(Φ 2 
+
+> ∥
+
++ Θ 2
+
+> ∥
+
+)|Ψ( ε, σ )|2i
+
+|I(aI, aR)|2 ,
+
+(22) where Φ⊥, Φ∥, Θ⊥, Θ∥ denote (17)-(20), respectively. 
+
+Proof: Substituting equations in Theorem 2 into (21) directly yields (22). 
+
+Remark 3: Once the geometries of the target environment are determined, the RCSs in (6) and (22) only depend explicitly on the material properties m through Υ( ε, σ ) and Ψ( ε, σ ),which enables the inference of m from H via (4) .
+
+Furthermore, as illustrated in Fig. 3, we consider the facet locates with arbitrary P = {q, η, ϑ, ξ, L H, L V, ε, σ }. The effective incident and observation vectors are given by: 
+
+aI(P, qT) = −RT (η, ϑ, ξ )∆˘ q/|| ∆˘ q|| , (23) 
+
+aR(P, qT, qR) = RT (η, ϑ, ξ )∆˜ q/|| ∆˜ q|| , (24) where R(η, ϑ, ξ ) ∈ R3×3 denotes the unitary rotation matrix given in (31) that satisfies RR T = I3. Thus, the incident and observation angles are given by: 
+
+θI(P, qT) = arccos  −aT 
+
+> I
+
+(P)ˆ z , (25) 
+
+θR(P, qT, qR) = arccos( aT 
+
+> R
+
+(P, qT, qR)ˆ z), (26) 
+
+ϕI(P, qT) = arcsin  −aT 
+
+> I
+
+(P)ˆ y/sin( θI(P))  , (27) 
+
+ϕR(P, qT, qR) = arcsin 
+
+ aT 
+
+> R
+
+(P, qT, qR)ˆ y
+
+sin( θR(P, qT, qR)) 
+
+
+
+. (28) Besides, to ensure the facet locates at the far-field region defined by Rayleigh distance, the link distances || ∆˘ q|| and 
+
+|| ∆˜ q|| should satisfy: 
+
+Lemma 2: To locates at the far-field region, LH, L V of facet and || ∆˘ q|| , || ∆˜ q|| should be jointly considered: 
+
+min {|| ∆˘ q|| , || ∆˜ q||} ≥ 2( L2 
+
+> H
+
++ L2
+
+> V
+
+)/λ − λ/ 32 . (29) 
+
+Proof: The Rayleigh distance dRayl is defined as the minimum link distance under normal incidence with (ϕI, θ I) = (0 , π 
+
+> 2
+
+), for which the phase error ∆φ(dRayl ) ≤ π/ 8:
+
+∆φ(dRayl ) = 2πλ
+
+r
+
+d2 
+
+> Rayl
+
++ L2 
+
+> H
+
++ L2
+
+> V
+
+4 − dRayl 
+
+!
+
+≤ π
+
+8 . (30) Therefore, we have min {|| ∆˘ q|| , || ∆˜ q||} ≥ min dRayl in (29). The RCS of the facet in Fig. 3 is obtained by substituting 
+
+ϕI(P, qT), θ I(P, qT), ϕ R(P, qT, qR), θ R(P, qT, qR) from (25)-(28) into Υ( ε, σ ), Ψ( ε, σ ), Φ⊥, Φ∥, Θ⊥, Θ∥ in (17)-(20), and then into (22). Substituting S(Pms , aI, aR) for all ms ∈{1, . . . , M s} into (6) yields Ξ( qT, qR) for all s ∈ { 1, . . . , S }.Moreover, φs ≃ 2πλ (|| ∆˘ qs|| + || ∆˜ qs|| ) for practical simula-tion such as ray tracing [11], since || ∆˘ qs|| , || ∆˜ qs|| ≫ λ from 
+
+Lemma 2. In the following sections, an iterative algorithm is proposed to infer m from H and its performance is verified. IV. M ATERIAL RECONSTRUCTION 
+
+In this section, an iterative gradient descent-based algorithm is proposed to solve the material reconstruction problem. 
+
+A. Evaluation metric and loss function 
+
+To comprehensively evaluate the difference between the channel ˆh(t)(qT, qn, τ ) induced by material m(t) ∈ R2S×1
+
+based on (1) and (4) at iteration t ∈ { 1, 2, · · · , T max } and the measurements h(qT, qn, τ ) ∈ H via path gain and delay, the metric root mean square (RMS) delay spread is given by: 
+
+τRMS (h(qT, qR, τ )) = 
+
+vuutPSs=1 |hs(qT, qR)|2(τs − ¯τ )2
+
+PSs=1 |hs(qT, qR)|2 ,
+
+(32) where ¯τ = PSs=1 |hs(qT, qR)|2τs/ PSs=1 |hs(qT, qR)|2. The mean absolute square error (MASE) is given by: 
+
+M(x, ˆx) = |x − ˆx|2/|x|2. (33) Thus, the weighted loss function is given by: 
+
+L(H, m(t)) = 
+
+PNn=1 wnM(τRMS (ˆh(t)), τ RMS (h)) 
+
+PNn=1 wn
+
+, (34) where ˆh(t) and h denote ˆh(t)(qT, qR, τ ) and h(qT, qR, τ ); the weight wn ∈ R+ is given by: 
+
+wn = exp( M(τRMS (h(qT, qn, τ ), τ RMS (ˆh(t)(qT, qn, τ )))) ,
+
+(35) which aims to optimize the position with large deviation. 4
+
+R(η, ϑ, ξ ) = 
+
+cos η − sin η 0sin η cos η 00 0 1
+
+ ×
+
+
+
+cos ϑ 0 sin ϑ
+
+0 1 0
+
+− sin ϑ 0 cos ϑ
+
+ ×
+
+
+
+1 0 00 cos ξ − sin ξ
+
+0 sin ξ cos ξ
+
+ (31) 
+
+B. Optimization problem and the proposed algorithm 
+
+The material reconstruction problem can be formulated as minimizing the MASE across N samples by adjusting m:
+
+min  
+
+> m
+
+L(H, m)
+
+s.t. εs ≥ 1, s ∈ { 1, 2, · · · , S }
+
+σs > 0, s ∈ { 1, 2, · · · , S }.
+
+(36) Due to the complex expressions in (4), (6), (22), Lemma 1, and the extra complicity from the square root and complex domain [21], closed-form solutions are difficult to be obstained. We thus propose an iterative gradient descent algorithm to approx-imately solve (36) with tolerable complexity. The gradient of loss function L(H, m(t)) relative to material m is given by: 
+
+∇mL(H, m(t)) = 
+
+ ∂L ∂ε 1
+
+, ∂L ∂σ 1
+
+, · · · , ∂L ∂ε S
+
+, ∂L ∂σ S
+
+T
+
+∈ R2S×1,
+
+(37) which can be easily obtained via auto gradient algorithms. Thus, the gradient descent based update is formulated by: 
+
+m(t+1) = U(m(t) − μ(t)∇mL(H, m(t))) , (38) where μ(t) = U
+
+ L(H,m(t))
+
+> L(H,m(0) )
+
+
+
+μ(0) ∈ [μmin , μ max ] denotes learning rate; U (·) and U(·) are the step utility function that restricts μ(t) and m. Finally, based on previous sections, the material reconstruction algorithm is given in Algorithm 1. 
+
+Algorithm 1 Material reconstruction via gradient descent. 
+
+1: Input: S, Ms for ∀s, H, μ(0) , μmin , μmax , Tmax , qT;
+
+2: Initialize m(0) ∈ R2S×1 and t = 0 ;
+
+3: while t < T max do 
+
+4: Calculate ˆh(t)(qT, qn, τ ), n ∈ { 1, · · · , N } based on 
+
+m(t) with (4); 
+
+5: Calculate L(H, m(t)) based on (34); 
+
+6: Calculate μ(t) based on L(H, m(t)) and L(H, m(0) );
+
+7: Calculate ∇mL(H, m(t)) in (37) via auto gradient; 
+
+8: Update materials m(t+1) via (38); 
+
+9: Update iteration t = t + 1 ;
+
+10: end while 
+
+11: Obtain optimized materials mTmax ;
+
+12: Obtain final loss function L(H, mTmax );
+
+13: Output: mTmax , L (H, mTmax );
+
+C. Quantitative metric for CKM generation 
+
+CKM accuracy is quantitatively evaluated via the achievable rate R(H) of an M × K MIMO system, where H denotes the ground truth channel matrix and ˆHITU , ˆHR are obtained by Sionna ray tracing [11] using default ITU materials and reconstructed materials, respectively. Capacity of H with noise power N0 is given by: 
+
+C(H) = log 2
+
+
+
+IM ×M + 1
+
+N0
+
+HVQ (H)VH HH
+
+
+
+, (39) Observation azimuth angle ? in degree                  
+
+> -80 -60 -40 -20 020 40 60 80
+> RCS in dBsm
+> -60 -50 -40 -30 -20 -10 010 20
+> SPO (P;aI;aR) PO method SMoM (P;aI;aR) MoM method S( P;aI;aR) in (22)
+
+Fig. 4. Comparison of the proposed RCS model with the full wave numerical results via PO and MoM with zenith observation angle θR = 120 ◦.
+
+where H = UΣV H denotes singular value decomposi-tion (SVD); Q ∈ RK×K denote the diagonal water-filling power allocation matrix, where [Q](k,k ) = max( SNR N0/r +Prn=1 N0/rs 2 
+
+> n
+
+− N0/s 2
+
+> n
+
+, 0) , r = rank (Σ), sn is the nth sin-gular value of Σ. Achievable rate with imperfect ˆH generated by CKM at the transmitter side is given by [22]: 
+
+R(H) = log 2
+
+
+
+IM ×M + 1
+
+N0
+
+H ˆVQ ( ˆH) ˆVH HH
+
+
+
+, (40) where ˆH = ˆU ˆΣ ˆVH . The percentage error is given by: 
+
+err (H, ˆH) = ( C(H) − R( ˆH)) /C (H). (41) Since C(H) ≥ R( ˆH), we have err (H, ˆH) ∈ [0 , 1) , and that of 
+
+Nsam samples are averaged to validate the accuracy of CKM. V. S IMULATION RESULTS 
+
+The scatterer RCS in (22) is evaluated using the simulation parameters given by fc = 3 .5 GHz, LH × LV = 0 .39 m ×
+
+0.39 m, q = [10 m, 10 m, 0] T , η = ϑ = ξ = 0 , {ε, σ } =
+
+{1.5, 10 }, || ∆˘ q|| = dR = 10 √2 m, polarization γ = π/ 2, and 
+
+(ϕI, θ I) = ( −45 ◦, 60 ◦), by comparing S (P, aI, aR) with full wave physical optics (PO) and method of moments (MoM) results S PO (P, aI, aR) and S MoM (P, aI, aR) [23]. As shown in Fig. 4, the proposed model agrees well with full wave simulations, achieving a MASE of −13 .88 dB relative to PO. The material reconstruction is evaluated in the 3D environ-ment shown as the background in Fig. 5, where the the ground truth materials of S = 6 scatterers follow ITU specifications [24], with fc = 3 .5 GHz, N = 5 , μ(0) = 0 .04 , Tmax = 500 ,
+
+qT = [0 , 0, 0] T , M ×K = 8 ×8, Nsam = 1 , 000 , and SNR = 90 
+
+dB. Comparing err (H, ˆHITU ) for brick buildings and concrete ground with err (H, ˆHR) for reconstructed materials in Fig. 5, the average percentage error decreases from 11 .66% to 4.39% ,and the median position-wise MASE of HR and H is −16 .34 
+
+dB, reveling effectiveness of the proposed algorithm. VI. C ONCLUSION 
+
+This paper presents a material-aware channel model that explicitly links material properties to the channel response, and proposes an iterative gradient descent material reconstruction algorithm validated by numerical simulations for efficient CKM generation. 5-100 -50 0 50 100 X [m] -50 -25 025 50 Y [m]     
+
+> building_1 (glass) height:21.85 m building_6 (wood) height:50.97 m building_5 (glass) height:29.13 m building_4 (marble) height:50.97 m building_3 (marble) height:29.13 m building_2 (brick) height:21.85 m
+> Rate loss with ITU materials
+> Average percentage loss = 11.66% -100 -50 050 100 X [m] Y [m]
+> building_1 (glass) height:21.85 m building_6 (wood) height:50.97 m building_5 (glass) height:29.13 m building_4 (marble) height:50.97 m building_3 (marble) height:29.13 m building_2 (brick) height:21.85 m
+> Rate loss with material reconstruction
+> Average percentage loss = 4.39%
+> 0.0 0.1 0.2 0.3 0.4 err = (C - R) / C
+
+Fig. 5. A Comparison between err (H, ˆHITU ) and err (H, ˆHR).
+
+APPENDIX APROOF OF LEMMA 1Let ρ denotes the angle between direction aI and ˆx, which is independent of polarization angle γ and is given by: 
+
+ρ = arccos  |ˆxT ai(ϕi, θ i)| = arccos(cos ϕI sin θI). (42) Based on the Snell’s law [19], we have: 
+
+Γ⊥(ε, σ ) = Z0 cos ρ/ pχ(ε, σ ) − Z0 cos ρt
+
+Z0 cos ρ/ pχ(ε, σ ) + Z0 cos ρt
+
+, (43) 
+
+Γ∥(ε, σ ) = −Z0 cos ρ + Z0 cos ρt/pχ(ε, σ )
+
+Z0 cos ρ + Z0 cos ρt/pχ(ε, σ ) , (44) where sin ρt = p1/χ (ε, σ ) sin ρ; Z0 ≈ 377 Ω denotes the vacuum wave impedance. (43) and (44) can direcly yield (7) and (8). Thus, the proof of Lemma 1 is completed. APPENDIX BPROOF OF THEOREM 1The induced surface current at l is given by: 
+
+J(l) = J⊥(l) + J∥(l) (a)
+
+= ˆ x ×
+
+
+
+H⊥
+
+I + H⊥
+
+r + H∥
+
+I + H∥
+
+r
+
+
+
+,
+
+(45) where (a)
+
+= holds from PO [19]; H⊥
+
+I , H⊥
+
+r , H∥
+
+I , H∥
+
+r ∈ C3×1 are magnetic phasors for incident and reflected signal with vertical or parallel polarizations. After interacting, the reflected electric wave phasor at l E r(l) ∈ C3×1 is given by Snell’s law [19]: 
+
+Er(l) = EIe−j 2πλ aT 
+
+> I
+
+l(Γ ⊥(ε, σ ) sin γ ˆE⊥
+
+r
+
+| {z }
+
+E⊥ 
+
+> r
+
+∈C3×1
+
++ Γ ∥(ε, σ ) cos γ ˆE∥
+
+r
+
+| {z }
+
+E∥ 
+
+> r
+
+∈C3×1
+
+),
+
+(46) where ˆE⊥
+
+r = ˆE⊥ ∈ R3×1. Thus, we have [19]: 
+
+H⊥
+
+I = EI sin γe −j 2πλ aT 
+
+> I
+
+l(aI × ˆE⊥)/Z 0|| aI × ˆE⊥|| , (47) 
+
+H⊥
+
+r = EIΓ⊥ sin γe −j 2πλ aT 
+
+> I
+
+l(˜ aI × ˆE⊥
+
+r )/Z 0|| ˜aI × ˆE⊥
+
+r || , (48) 
+
+H∥
+
+I = EI cos γe −j 2πλ aT 
+
+> I
+
+l(aI × ˆx)/Z 0|| aI × ˆx|| , (49) 
+
+H∥
+
+r = −EIΓ∥ cos γe −j 2πλ aT 
+
+> I
+
+l(aI × ˆx)/Z 0|| aI × ˆx|| , (50) where ˜aI = aI ⊙ [−1, 1, 1] T . Substituting (47)-(50) into (45) directly yields (12). APPENDIX CPROOF OF THEOREM 2Based on the far-field approximated Stratton-Chu equation [19], the scattering wave phasors in (13) are given by: 
+
+Eϕ
+
+s (aI, aR) ≃ − j kZ 0e−jkd R
+
+4πd R
+
+Z Z 
+
+S
+
+JT (l) ˆEϕ
+
+s ejk aT 
+
+> r
+
+l ds, (51) and Eθ
+
+s (aI, aR) is obtained by substituting ˆEϕ
+
+s by ˆEθ
+
+s in (51). Substituting (12) into (51) yields: 
+
+I(aI, aR) = 
+
+Z LV
+
+> 2
+
+− LV
+
+> 2
+
+Z LH
+
+> 2
+
+− LH
+
+> 2
+
+ej 2πλ (aR−aI)T l dly dlz , (52) which yields (16). Thus, the proof of Theorem 2 is completed. REFERENCES [1] C.-X. Wang, X. You, X. Gao et al. , “On the Road to 6G: Visions, Requirements, Key Technologies, and Testbeds,” IEEE Commun. Surv. Tutorials , vol. 25, no. 2, pp. 905–974, 2023. [2] X. Zhu, Z. Zhou, Z. Dong, and Y. Zeng, “Cost-Effective XL-MIMO Communication With Cylinder Directly Connected Antenna Array,” 
+
+IEEE Trans. Wireless Commun. , vol. 25, pp. 17 559–17 575, 2026. [3] Q. Dai, Y. Zeng, H. Wang et al. , “A Tutorial on MIMO-OFDM ISAC: From Far-Field to Near-Field,” IEEE Commun. Surv. Tutorials , vol. 28, pp. 4319–4358, 2026. [4] Z. Wang, J. Zhang, H. Du et al. , “A Tutorial on Extremely Large-Scale MIMO for 6G: Fundamentals, Signal Processing, and Applications,” 
+
+IEEE Commun. Surv. Tutorials , vol. 26, no. 3, pp. 1560–1605, 2024. [5] Y. Zeng, J. Chen, J. Xu et al. , “A Tutorial on Environment-Aware Communications via Channel Knowledge Map for 6G,” IEEE Commun. Surv. Tutorials , vol. 26, no. 3, pp. 1478–1519, 2024. [6] J. Wang, J. Zhang, Y. Zhang et al. , “Radio Environment Knowledge Pool for 6G Digital Twin Channel,” IEEE Commun. Mag. , vol. 63, no. 5, pp. 158–164, 2025. [7] E. Dall’Anese, S.-J. Kim, and G. B. Giannakis, “Channel Gain Map Tracking via Distributed Kriging,” IEEE Trans. Veh. Technol. , vol. 60, no. 3, pp. 1205–1211, 2011. [8] S. Chouvardas, S. Valentin, M. Draief, and M. Leconte, “A method to reconstruct coverage loss maps based on matrix completion and adaptive sampling,” in 2016 IEEE ICASSP , 2016, pp. 6390–6394. [9] S. Fu, Y. Zeng, Z. Wu et al. , “CKMDiff: A generative diffusion model for CKM construction via inverse problems with learned priors,” npj Wireless Technology , vol. 2, no. 35, 2026. [10] Z. Huang, Y. Zeng, S. Fu et al. , “Channel Knowledge Map Construction via Guided Flow Matching,” IEEE Wireless Commun. Lett. , vol. 15, pp. 3159–3163, 2026. [11] J. Hoydis, S. Cammerer, F. Ait Aoudia et al. , “Sionna,” 2022. [12] G. Schwartz and K. Nishino, “Recognizing Material Properties from Images,” 2018. [Online]. Available: https://arxiv.org/abs/1801.03127 [13] Y. Jiang, F. Gao, and S. Jin, “Electromagnetic Property Sensing: A New Paradigm of Integrated Sensing and Communication,” IEEE Trans. Wireless Commun. , vol. 23, no. 10, pp. 13 471–13 483, 2024. [14] 3rd Generation Partnership Project (3GPP), 5G; Study on Channel Model for Frequencies from 0.5 to 100 GHz document 38.901, Version 19.1.0, Technical Report (TR) . 3GPP, Sep. 2025. [15] H. Gong, J. Zhang et al. , “New Characteristics and Modeling of 6G Channels: Toward a Unified Channel Model for Standardization,” IEEE Veh. Technol. Mag. , vol. 20, no. 3, pp. 68–77, 2025. [16] C. X. Wang et al. , “An enhanced 6G pervasive channel model towards standardization,” Sci. China Inf. Sci. , vol. 68, 2025. [17] C.-X. Wang et al. , “A Survey of 5G Channel Measurements and Models,” IEEE Commun. Surv. Tutorials , vol. 20, no. 4, pp. 3142–3168, 2018. [18] Z. Xu, Z. Zhou, D. Wu et al. , “CKM-Enabled Joint Spatial–Doppler Do-main Clutter Suppression for Low-Altitude UAV ISAC,” IEEE Internet Things J. , vol. 13, no. 14, pp. 31 752–31 767, 2026. [19] C. A. Balanis, Advanced Engineering Electromagnetics , 2nd ed. John Wiley & Sons, 2012. [20] W. Gordon, “Near field calculations with far field formulas,” in IEEE Antennas and Propagation Society International Symposium. 1996 Di-gest , vol. 2, 1996, pp. 950–953 vol.2. [21] S. Boyd and L. Vandenberghe, Convex Optimization . Cambridge University Press, 2004. [22] E. Bj¨ ornson and ¨ O. T. Demir, Introduction to Multiple Antenna Commu-nications and Reconfigurable Surfaces . Boston-Delft: Now Publishers, 2024. [Online]. Available: https://doi.org/10.1561/9781638283157 [23] S. Rao, D. Wilton, and A. Glisson, “Electromagnetic scattering by surfaces of arbitrary shape,” IEEE Transactions on Antennas and Prop-agation , vol. 30, no. 3, pp. 409–418, 1982. [24] ITU-R, “Effects of building materials and structures on radiowave propagation above about 100 MHz,” International Telecommunication Union, Recommendation ITU-R P.2040-2, 2021.
